@@ -30,6 +30,11 @@ previewed live at screen resolution, exported once at print resolution. Then
 *Done when:* an A3 sheet of objects from all three apps exports as a print file,
 and one object has a URL you can send.
 
+Each milestone after M1 should also leave **one link** behind, since the
+catalogue of links is the only real measure of whether this is a suite:
+M2 `grid → vault: dithered sequence`, M3 `ckt → gamepad: brush family`,
+M4 `any → composition: place on a sheet`.
+
 **M5 — 3D, the fourth process.** The test of whether this architecture was worth
 building: a new app should cost a folder, a schema and three functions, and the
 `model` and `material` types should slot in without touching the envelope.

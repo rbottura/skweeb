@@ -12,6 +12,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `rng.js` | seeded random, the only random in the suite | new, ~30 lines |
 | `vault.js` | save / load / list / publish; the client for `server.js` | `imageStore.js` + `galleryPublisher.js`, merged and widened |
 | `thumb.js` | one thumbnailer per object type | new |
+| `links.js` | the named one-way links between apps | new, see below |
 | `export.js` | deterministic frame and video export | new, see below |
 | `stage/` | clip, player, transport, recorder, stage | gamepad `core/sequence*.js`, moved intact |
 | `input.js` | gamepad + keyboard mapping | `core/inputManager.js` |
@@ -141,6 +142,49 @@ export is one pass, not a loop to sit through.
 **The rule.** p5.capture for drafts, `export.js` for anything that becomes an
 object. The vault's promise is that an object can be rebuilt; a screen recording
 cannot keep that promise.
+
+## links.js — apps that know about each other, one way at a time
+
+A shared vault makes every object reachable from every app. That is necessary
+and it is not sufficient: **reachable is not useful.** Dropping 58 letterforms
+into the vault still leaves you to work out by hand that the gamepad wants them
+at a consistent size, on transparent ground, in order, registered as a family.
+
+A **link** is that knowledge, named and pointed one way.
+
+```js
+registerLink({
+  from: "ckt",
+  to:   "gamepad",
+  label: "produce a brush family",
+  produces: { type: "set", role: "brush-family" },
+  async run(state, { emit }) { }
+});
+```
+
+Declared by the app that produces, never by the one that consumes. Links are not
+inferred and never symmetric: `ckt → gamepad: brush family` says nothing about
+whether `gamepad → ckt` exists, and if it does it is a different link, with a
+different name, a different shape and different work behind it. Two apps may be
+joined by one link, by five, or by none.
+
+What a link buys over a generic save:
+
+- in ckt, a **Send to** menu listing exactly what ckt can make for other apps —
+  the app states its capabilities instead of the user guessing them,
+- one action in place of an export, a rename, a folder and a manifest regen,
+- the output keeps `refs` back to its source, so it re-runs when the source
+  moves rather than quietly going stale.
+
+**The catalogue of links is the map of the suite.** A vault is a drawer; the
+list of links is what makes this a cluster rather than three apps sharing
+storage. It is also the honest measure of progress, because each one is a
+sentence you can say out loud: *ckt produces a gamepad brush family.* At M1
+there are none.
+
+The frozen case is already on disk: `gamepad_sprites/GaramondI/Garam_blue` is
+this exact link's output, produced by hand years before the link existed. See
+*Sets* in `docs/object-model.md`.
 
 ## Writing an app against core
 

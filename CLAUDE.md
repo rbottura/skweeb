@@ -35,6 +35,12 @@ placed by reference rather than copied. Edit the definition and every placement
 follows. `parents` records what something was made from; `refs` records what it
 still depends on. The two are not interchangeable.
 
+And the objects are only half of it. What makes this a suite rather than three
+apps sharing a drawer is the **links**: named, one-way capabilities one app
+offers another — *ckt produces a gamepad brush family*. Declared by the producer,
+never symmetric, never inferred. The catalogue of links is the map of the suite.
+→ `docs/core-api.md`
+
 `docs/object-model.md` is the contract. Do not invent fields.
 
 ## Rules

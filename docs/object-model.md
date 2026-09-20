@@ -174,13 +174,14 @@ contact sheet, which doubles as the thumbnail. Members stay ordinary objects
 with their own lineage — a set is a view over them, not a container that owns
 them.
 
-**This is not hypothetical.** `gamepad_sprites/GaramondI/Garam_blue` and
-`Minipax/minipax_white` are letterforms generated in ColorKineType with a
-pattern applied, exported by hand and imported into the gamepad as a folder.
-The chain skweeb exists to make live has already been run once, manually, and
-the result is frozen in those folders. A `set` is what that chain produces when
-it is not frozen: the same family, still pointing at the ckt dataset and
-parameters that made it, still re-renderable when those change.
+**This is not hypothetical, and the set is only half of what it shows.**
+`gamepad_sprites/GaramondI/Garam_blue` and `Minipax/minipax_white` are
+letterforms generated in ColorKineType with a pattern applied, exported by hand
+and imported into the gamepad as a folder. A `set` is the shape of that output.
+The more useful reading is the direction: ckt has a capability, *produce a
+gamepad brush family*, that knows what the gamepad expects. That is a **link**,
+it points one way, and it is specified in `docs/core-api.md`. The folders on
+disk are its output, run by hand before it existed.
 
 ## The recipe contract
 
