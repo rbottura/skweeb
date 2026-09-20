@@ -1,0 +1,200 @@
+/**
+ * gallery.css — published gallery page.
+ * Shares the HUD palette so it reads as part of GamepadDraw.
+ */
+
+:root {
+  --hud-cyan:    #00f5ff;
+  --hud-magenta: #ff2079;
+  --hud-text:    #dde6f0;
+  --hud-subtle:  rgba(255, 255, 255, 0.35);
+  --hud-border:  rgba(0, 245, 255, 0.25);
+  --hud-glass:   rgba(255, 255, 255, 0.04);
+  --hud-font:    'Space Mono', monospace;
+  --hud-font-ui: 'Outfit', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding-bottom: 4rem;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(0, 245, 255, 0.07), transparent 55%),
+    radial-gradient(circle at 85% 20%, rgba(255, 32, 121, 0.07), transparent 50%),
+    #06060e;
+  color: var(--hud-text);
+  font-family: var(--hud-font-ui), system-ui, sans-serif;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.g-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem clamp(1rem, 4vw, 3rem);
+  background: rgba(6, 6, 14, 0.82);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid var(--hud-border);
+}
+
+.g-back {
+  font-family: var(--hud-font), monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--hud-subtle);
+  text-decoration: none;
+  transition: color 160ms;
+}
+.g-back:hover { color: var(--hud-cyan); }
+
+.g-title {
+  margin: 0;
+  flex: 1;
+  font-family: var(--hud-font), monospace;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  color: var(--hud-cyan);
+  text-shadow: 0 0 24px rgba(0, 245, 255, 0.35);
+}
+
+.g-count {
+  font-family: var(--hud-font), monospace;
+  font-size: 0.75rem;
+  color: var(--hud-subtle);
+  white-space: nowrap;
+}
+
+/* ── Grid ───────────────────────────────────────────────────────────────── */
+
+.g-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  padding: clamp(1rem, 4vw, 3rem);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.g-card {
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: var(--hud-glass);
+  overflow: hidden;
+  cursor: zoom-in;
+  transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+}
+
+.g-card:hover,
+.g-card:focus-visible {
+  border-color: var(--hud-border);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--hud-border);
+  outline: none;
+}
+
+.g-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 100%;
+  object-fit: contain;
+  background: #fff;
+}
+
+.g-card figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.g-card__title { color: var(--hud-text); }
+
+.g-card__date {
+  font-family: var(--hud-font), monospace;
+  font-size: 0.7rem;
+  color: var(--hud-subtle);
+  white-space: nowrap;
+}
+
+.g-card__note {
+  padding: 0 0.9rem 0.8rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--hud-subtle);
+}
+
+.g-empty {
+  grid-column: 1 / -1;
+  padding: 4rem 1rem;
+  text-align: center;
+  font-family: var(--hud-font), monospace;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--hud-subtle);
+}
+
+/* ── Lightbox ───────────────────────────────────────────────────────────── */
+
+.g-lightbox[hidden] {
+  display: none;
+}
+
+.g-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(3, 3, 8, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: zoom-out;
+}
+
+.g-lightbox__img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+.g-lightbox__caption {
+  font-family: var(--hud-font), monospace;
+  font-size: 0.8rem;
+  color: var(--hud-subtle);
+  text-align: center;
+}
+
+.g-lightbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--hud-border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--hud-cyan);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 160ms;
+}
+.g-lightbox__close:hover { background: rgba(255, 32, 121, 0.15); }

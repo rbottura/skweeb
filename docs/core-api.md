@@ -1,0 +1,158 @@
+# core — the shared kit
+
+Extracted from `sketch-2-print/gamepad`, which already had the right shapes.
+Most of this is a move plus a rename, not new code. Status per module:
+
+| module | what it does | where it comes from |
+|---|---|---|
+| `bus.js` | DOM CustomEvents on `document`, namespaced | gamepad, already works |
+| `registry.js` | manifest-driven asset loading, families of sprites | `core/brushRegistry.js` |
+| `panel.js` | base class: show/hide, focus, gamepad + keyboard nav | generalised from `BrushPanel` / `ParamPanel` / `GalleryPanel` |
+| `params.js` | **the param schema** — see below | new, the one real invention |
+| `rng.js` | seeded random, the only random in the suite | new, ~30 lines |
+| `vault.js` | save / load / list / publish; the client for `server.js` | `imageStore.js` + `galleryPublisher.js`, merged and widened |
+| `thumb.js` | one thumbnailer per object type | new |
+| `export.js` | deterministic frame and video export | new, see below |
+| `stage/` | clip, player, transport, recorder, stage | gamepad `core/sequence*.js`, moved intact |
+| `input.js` | gamepad + keyboard mapping | `core/inputManager.js` |
+| `libs/` | one p5, shared by every app | today 1.5.0, 1.5.0 and 1.9.0 across three repos. Pick one. |
+
+## params.js — parameters are data
+
+The single decision that makes this suite cheap to extend. An app declares its
+parameters once; the panel UI, the saved recipe, the gallery filters, the
+gamepad bindings and the undo stack are all generated from that declaration.
+
+```js
+export const params = defineParams("grid", {
+  cell:    { type: "range",  min: 4, max: 64, step: 1, default: 12, label: "cell size" },
+  mode:    { type: "enum",   options: ["dither", "tile", "threshold"], default: "dither" },
+  source:  { type: "object", accepts: ["still", "sequence"], label: "image" },
+  palette: { type: "color[]", default: ["#000", "#fff"] },
+  invert:  { type: "bool",   default: false, bind: "Y" },
+});
+```
+
+What those five lines buy:
+
+- a `ParamPanel` that renders itself, with the right widget per type,
+- `params.values` becomes `object.recipe`, and `restore()` comes free,
+- `type: "object"` renders a vault picker filtered to `accepts`, and records the
+  chosen object in `parents` automatically — **this is how cross-app loading
+  works**; an app never writes lineage code,
+- `bind` wires a gamepad button,
+- the gallery can filter on any declared param.
+
+Adding a control is one entry here. Never HTML, never CSS, never a serializer.
+If a control cannot be expressed as a schema entry, extend `params.js` with a
+new widget type — once, for everyone.
+
+## bus.js — event names
+
+`namespace:verb`, past tense, always on `document`:
+
+```
+vault:saved        { id, type }        vault:published  { id }
+vault:removed      { id }              params:changed   { app, key, value }
+app:ready          { app }             stage:recorded   { clipId }
+```
+
+An app listens for what it needs and never reaches into another app. The gallery
+listens to `vault:*` and nothing else.
+
+## vault.js — the client
+
+```js
+await Vault.save({ type, render, recipe, parents, title, tags });   // returns id
+await Vault.load(id);                    // { object, blob, url }
+await Vault.list({ type, app, tag });    // index rows, no blobs
+await Vault.publish(id);
+Vault.available                          // false when served without the write API
+```
+
+`list()` reads `index.json` only — it never opens object folders, so the gallery
+stays fast with thousands of objects. When `available` is false (a plain static
+server, no node), the apps still run and saving falls back to a download. That
+fallback is required, not optional: rule 7 in `CLAUDE.md`.
+
+## rng.js — seeded random
+
+```js
+const rng = makeRng(seed);   // rng() in [0,1), rng.int(n), rng.pick(arr)
+```
+
+p5's `random()` and `Math.random()` are banned in app code. A render that cannot
+be reproduced cannot be re-printed, and `object.seed` is the promise that it can.
+Lint for it before it spreads.
+
+## stage/ — sequences
+
+Moved from the gamepad unchanged: recorder to clip to player to stage to
+transport, with one clock deriving every layer's position rather than each
+accumulating its own. The reasoning is written up in the `sequence-stage` skill
+— **read that skill rather than re-deriving it**, and in particular before
+touching `createGraphics`, `tint`, canvas filters, or anything exporting frames.
+
+## export.js — two exporters, different jobs
+
+**p5.capture stays.** It is already in grid and ckt, it costs nothing, and it is
+the right tool for the draft button: hit record, do the thing, get a file. Its
+limit is structural, not a bug — it captures the *live* canvas at its *display*
+size, driven by the live `draw()` loop. Its zip formats are frame-locked; its
+webm goes through MediaRecorder and is realtime, so it drops and duplicates
+frames under load. It cannot give you frame 437 at 7000 px without first running
+frames 0 to 436 on screen at that size.
+
+**`core/export.js` is the other one.** Given `render()`, it is a bare loop with
+no clock in it:
+
+```js
+for (let frame = 0; frame < frames; frame++) {
+  App.render(recipe, { width, height, frame, rng: makeRng(seed), load });
+  await encoder.add(canvas);
+}
+```
+
+Same recipe and seed, same bytes, every time, at any size. Most of the hard part
+already exists: the gamepad's transport derives every position from one master
+tick rather than accumulating, and `SequencePlayer.step()` already refuses to
+read a clock. That discipline is exactly what this needs — see the
+`sequence-stage` skill.
+
+| | p5.capture | `core/export.js` |
+|---|---|---|
+| captures | the live canvas | `render()` in a loop |
+| size | whatever is on screen | anything, 7000 px included |
+| determinism | none in webm, partial in zip | exact |
+| cost | zero, already there | about 60 lines |
+| for | drafts, screen recordings | anything entering the vault or going to print |
+
+**Encoders.** PNG frames to zip for the lossless path — that is what grid eats.
+For video, WebCodecs `VideoEncoder` plus a muxer, not ffmpeg.wasm and not
+MediaRecorder: it is frame-accurate, fast, and has no realtime constraint.
+Chrome-only, which is fine for a local tool and needs a fallback the day the
+gallery exports anything.
+
+**Resolution.** Export is the only place print scale appears. The live loop
+stays at screen size with `density` as a parameter; `export.js` re-runs
+`render()` once at the scale asked for, for the frames asked for. A print
+export is one pass, not a loop to sit through.
+
+**The rule.** p5.capture for drafts, `export.js` for anything that becomes an
+object. The vault's promise is that an object can be rebuilt; a screen recording
+cannot keep that promise.
+
+## Writing an app against core
+
+```
+apps/<name>/
+  index.html      loads core, then main.js. Opens and works on its own.
+  main.js         defineParams, registerApp, the sketch
+  params.js       the schema, if it earns its own file
+  manifest.json   generated: assets, never a runtime directory scan
+  STATUS.md
+```
+
+Then the three functions from `docs/object-model.md`: `serialize`, `restore`,
+`render`. That is the whole integration. Everything else — panels, vault,
+gallery, lineage, thumbnails, publishing — is inherited.

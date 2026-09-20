@@ -1,0 +1,301 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   timeline.css — the stage as a stack of layers, along the bottom of the screen
+   Shares the HUD tokens from hud.css.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.tl {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  max-height: 58vh;
+  background: var(--hud-bg);
+  border-top: 1px solid var(--hud-border);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.7);
+  font-family: var(--hud-font-ui);
+  color: var(--hud-text);
+  transform: translateY(100%);
+  transition: transform var(--hud-slide) var(--hud-anim);
+}
+
+.tl--visible { transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tl { transition: none; }
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+
+.tl-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.tl-transport { display: flex; gap: 6px; }
+
+.tl-btn {
+  min-width: 30px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--hud-border);
+  border-radius: 6px;
+  background: var(--hud-glass);
+  color: var(--hud-text);
+  font-family: var(--hud-font);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 120ms var(--hud-anim), color 120ms var(--hud-anim);
+}
+
+.tl-btn:hover { background: rgba(0, 245, 255, 0.12); color: var(--hud-cyan); }
+
+.tl--live .tl-btn--play { color: var(--hud-lime); border-color: rgba(170, 255, 0, 0.45); }
+.tl-btn--stop:hover     { color: var(--hud-magenta); background: rgba(255, 32, 121, 0.12); }
+.tl-btn--close          { margin-left: auto; }
+
+.tl-clock {
+  min-width: 96px;
+  font-family: var(--hud-font);
+  font-size: 12px;
+  color: var(--hud-cyan);
+  letter-spacing: 0.04em;
+}
+
+.tl-title {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hud-subtle);
+}
+
+.tl-warn {
+  font-family: var(--hud-font);
+  font-size: 11px;
+  color: var(--hud-amber);
+}
+
+/* ── Rows ───────────────────────────────────────────────────────────────────── */
+
+.tl-rows {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 10px 10px;
+}
+
+.tl-empty {
+  padding: 22px 10px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--hud-subtle);
+}
+
+.tl-row {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: rgba(255, 255, 255, 0.025);
+  transition: background 120ms var(--hud-anim), opacity 120ms var(--hud-anim);
+}
+
+.tl-row:hover        { background: rgba(255, 255, 255, 0.05); }
+.tl-row--open        { background: rgba(0, 245, 255, 0.06); border-color: var(--hud-border); }
+.tl-row--hidden      { opacity: 0.4; }
+.tl-row--solo        { border-color: rgba(255, 179, 0, 0.55); }
+.tl-row--dragging    { opacity: 0.35; }
+.tl-row--over-top    { box-shadow: inset 0 2px 0 0 var(--hud-cyan); }
+.tl-row--over-bottom { box-shadow: inset 0 -2px 0 0 var(--hud-cyan); }
+
+.tl-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.tl-grip {
+  cursor: grab;
+  color: var(--hud-subtle);
+  font-size: 14px;
+  line-height: 1;
+  user-select: none;
+}
+.tl-grip:active { cursor: grabbing; }
+
+.tl-eye, .tl-solo, .tl-chev, .tl-trash {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: none;
+  color: var(--hud-subtle);
+  font-family: var(--hud-font);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 120ms var(--hud-anim), background 120ms var(--hud-anim);
+}
+
+.tl-eye:hover, .tl-solo:hover, .tl-chev:hover { color: var(--hud-cyan); background: rgba(0, 245, 255, 0.1); }
+.tl-trash:hover { color: var(--hud-magenta); background: rgba(255, 32, 121, 0.12); }
+
+.tl-row:not(.tl-row--hidden) .tl-eye { color: var(--hud-cyan); }
+.tl-row--solo .tl-solo { color: var(--hud-amber); border-color: rgba(255, 179, 0, 0.5); }
+
+.tl-chev { transition: transform 150ms var(--hud-anim); }
+.tl-row--open .tl-chev { transform: rotate(90deg); color: var(--hud-cyan); }
+
+.tl-name {
+  min-width: 90px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-meta {
+  min-width: 150px;
+  font-family: var(--hud-font);
+  font-size: 10.5px;
+  color: var(--hud-subtle);
+  white-space: nowrap;
+}
+
+/* ── Track ──────────────────────────────────────────────────────────────────── */
+
+.tl-track {
+  flex: 1;
+  min-width: 80px;
+  height: 14px;
+  border: 1px solid rgba(0, 245, 255, 0.18);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+/* The fill's right edge IS the playhead. One transform per frame, no reflow. */
+.tl-fill {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(0, 245, 255, 0.18), rgba(0, 245, 255, 0.5));
+  border-right: 1px solid var(--hud-cyan);
+}
+
+.tl-row--solo .tl-fill {
+  background: linear-gradient(90deg, rgba(255, 179, 0, 0.18), rgba(255, 179, 0, 0.5));
+  border-right-color: var(--hud-amber);
+}
+
+/* ── Drawer ─────────────────────────────────────────────────────────────────── */
+
+.tl-drawer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px 16px;
+  padding: 4px 12px 12px 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tl-ctl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.tl-ctl--inert { opacity: 0.4; }
+
+.tl-ctl__label {
+  min-width: 56px;
+  color: var(--hud-subtle);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.tl-ctl__input {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid var(--hud-border);
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--hud-text);
+  font-family: var(--hud-font);
+  font-size: 11px;
+}
+
+.tl-ctl__input:focus { outline: 1px solid var(--hud-cyan); }
+
+.tl-ctl__range { padding: 0; accent-color: var(--hud-cyan); }
+
+.tl-ctl__out {
+  min-width: 74px;
+  font-family: var(--hud-font);
+  font-size: 10.5px;
+  color: var(--hud-cyan);
+  text-align: right;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
+
+.tl-foot {
+  padding: 5px 14px 7px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tl-hint {
+  font-family: var(--hud-font);
+  font-size: 10px;
+  color: rgba(0, 245, 255, 0.4);
+  letter-spacing: 0.05em;
+}
+
+/* The timeline covers the bottom strip, so the strip steps out of its way. */
+body.tl-open .status-bar { opacity: 0; pointer-events: none; }
+
+/* Prose note in the help overlay, where the timeline needs sentences more than
+   it needs a keyboard table. */
+.help-note {
+  margin: 6px 0 2px;
+  max-width: 62ch;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--hud-subtle);
+}
+
+/* ── Drawer groups ─────────────────────────────────────────────────────────── */
+
+.tl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.tl-group__title {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(0, 245, 255, 0.55);
+}
+
+.tl-ctl--readout       { cursor: help; }
+.tl-ctl__out--wide     { min-width: 108px; }
+.tl-ctl__out--warn     { color: var(--hud-amber); }
+.tl-ctl__out--idle     { color: var(--hud-subtle); }

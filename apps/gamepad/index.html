@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GamepadDraw — Draw with a gamepad using brush sprites and symmetry patterns.">
+  <title>GamepadDraw</title>
+
+  <link rel="stylesheet" href="./style.css">
+
+  <!--
+    Load p5 and p5.joystick as globals BEFORE the ES module,
+    so 'window.p5' is available when gamepadSketch.js runs.
+  -->
+  <script src="libs/p5.min.js"></script>
+  <script src="libs/p5.joystick.min.js"></script>
+</head>
+
+<body>
+  <!-- Loading screen (dismissed by p5 after preload completes) -->
+  <div id="loading-screen">
+    <div class="loading-title">GamepadDraw</div>
+    <div class="loading-bar-wrap">
+      <div class="loading-bar"></div>
+    </div>
+    <div class="loading-sub">Loading brush sprites…</div>
+  </div>
+
+  <!-- Gamepad connection indicator -->
+  <div class="gamepad-indicator" id="gamepad-indicator">Gamepad connected</div>
+
+  <!-- No-gamepad notice (non-blocking, dismissible) -->
+  <div class="gp-nopad" id="gp-nopad" role="status">
+    <span class="gp-nopad__text">No gamepad detected &mdash; connect one and press any button</span>
+    <a class="gp-nopad__link" href="gallery/" target="_blank" rel="noopener">Browse gallery &#8599;</a>
+    <button class="gp-nopad__close" id="gp-nopad-close" type="button" aria-label="Dismiss notice">&#10005;</button>
+  </div>
+
+  <!-- p5 sketch mounts here -->
+  <div id="sketch-container"></div>
+
+  <!--
+    Bootstrap module — imports all core/ and ui/ modules.
+    Must come AFTER p5 script tags.
+  -->
+  <script type="module" src="app.js"></script>
+
+  <!-- Dismiss loading screen once p5 setup() has run -->
+  <script type="module">
+    // p5 dispatches no built-in ready event, so we poll the canvas briefly.
+    const loading = document.getElementById('loading-screen');
+    const indicator = document.getElementById('gamepad-indicator');
+
+    const checkReady = setInterval(() => {
+      if (document.querySelector('#sketch-container canvas')) {
+        clearInterval(checkReady);
+        loading.classList.add('done');
+      }
+    }, 200);
+
+    // ── Gamepad presence ─────────────────────────────────────────────────
+    // Browsers hide an already-plugged-in pad, and fire no gamepadconnected,
+    // until the user presses a button — so poll as well as listen.
+    const banner      = document.getElementById('gp-nopad');
+    const bannerClose = document.getElementById('gp-nopad-close');
+
+    let padSeen   = false;
+    let dismissed = false;
+
+    const hasPad = () => {
+      for (const pad of navigator.getGamepads?.() ?? []) if (pad) return true;
+      return false;
+    };
+
+    // Once a pad has been seen the top-centre pill takes over reporting,
+    // so the banner never returns on a mid-session disconnect.
+    const syncBanner = () => {
+      if (hasPad()) padSeen = true;
+      banner.classList.toggle('gp-nopad--visible', !padSeen && !dismissed);
+    };
+
+    bannerClose.addEventListener('click', () => { dismissed = true; syncBanner(); });
+
+    const padPoll = setInterval(() => {
+      syncBanner();
+      if (padSeen || dismissed) clearInterval(padPoll);
+    }, 500);
+    syncBanner();
+
+    const flashIndicator = (text, color, border, ms) => {
+      indicator.textContent      = text;
+      indicator.style.color      = color;
+      indicator.style.borderColor = border;
+      indicator.classList.add('gamepad-indicator--active');
+      setTimeout(() => indicator.classList.remove('gamepad-indicator--active'), ms);
+    };
+
+    window.addEventListener('gamepadconnected', () => {
+      padSeen = true;
+      syncBanner();
+      flashIndicator('Gamepad connected', '#aaff00', 'rgba(170,255,0,0.4)', 3000);
+    });
+    window.addEventListener('gamepaddisconnected', () => {
+      flashIndicator('Gamepad disconnected', '#ff2079', 'rgba(255,32,121,0.4)', 2000);
+    });
+  </script>
+</body>
+</html>

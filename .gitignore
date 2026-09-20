@@ -1,0 +1,22 @@
+# The vault is real files on disk and must never enter git.
+vault/
+
+# Sprite families: 579 files, 140 MB, every one referenced by the manifest.
+# `brushes` and `timbre` are committed so a clone can boot and draw; the type
+# families stay out until they are recompressed. They live in sketch-2-print
+# and the manifest regenerates from whatever is present.
+apps/*/gamepad_sprites/*
+!apps/*/gamepad_sprites/brushes/
+!apps/*/gamepad_sprites/timbre/
+
+# Published output belongs in gallery/, not beside the app.
+apps/*/gallery/images/*
+!apps/*/gallery/images/.gitkeep
+
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Published objects live in gallery/ and ARE committed. Compress first:
+#   oxipng -o4 --strip safe gallery/objects/**/*.png

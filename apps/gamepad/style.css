@@ -1,0 +1,313 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — GamepadDraw main app theme
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap');
+@import './ui/hud.css';
+@import './ui/bsel.css';
+@import './ui/timeline.css';
+
+/* ── Reset & base ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #05050e;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  color: #dde6f0;
+  position: relative;
+}
+
+/* ── Canvas container ───────────────────────────────────────────────────────── */
+#sketch-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* p5 canvas fills the container */
+#sketch-container canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Status bar ──────────────────────────────────────────────────────────────── */
+.status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(5, 5, 14, 0.75);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0, 245, 255, 0.12);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.sb-item { color: #a0b8cc; letter-spacing: 0.05em; }
+.sb-dim  { color: rgba(160, 184, 204, 0.5); }
+.sb-sep  { color: rgba(0, 245, 255, 0.3); }
+.sb-spacer { flex: 1; }
+.sb-link {
+  pointer-events: auto;
+  color: rgba(0, 245, 255, 0.7);
+  text-decoration: none;
+  transition: color 160ms;
+}
+.sb-link:hover { color: var(--hud-cyan, #00f5ff); }
+
+/* ── Help overlay ────────────────────────────────────────────────────────────── */
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(5, 5, 14, 0.7);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 200ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.help-card {
+  background: rgba(8, 8, 22, 0.95);
+  border: 1px solid rgba(0, 245, 255, 0.25);
+  border-radius: 20px;
+  padding: 32px 40px;
+  max-width: 560px;
+  width: 90vw;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+}
+
+.help-card h2 {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  color: #00f5ff;
+  text-shadow: 0 0 12px #00f5ff;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+
+.help-card h3 {
+  margin: 20px 0 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(0, 245, 255, 0.55);
+}
+
+.help-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.help-table th {
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  padding: 0 10px 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.help-table td {
+  padding: 7px 10px 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: #bbd0e0;
+  vertical-align: top;
+}
+
+.help-table td:first-child { color: #aaff00; font-family: 'Space Mono', monospace; font-size: 12px; }
+.help-table td:nth-child(2) { color: rgba(255,255,255,0.4); font-size: 11px; }
+
+.help-close-hint {
+  margin-top: 20px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── Gamepad connection indicator ─────────────────────────────────────────────
+   Shown by app.js when navigator.getGamepads() is active */
+.gamepad-indicator {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(8,8,18,0.8);
+  border: 1px solid rgba(170, 255, 0, 0.4);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #aaff00;
+  opacity: 0;
+  transition: opacity 400ms;
+  pointer-events: none;
+}
+.gamepad-indicator--active { opacity: 1; }
+.gamepad-indicator::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #aaff00;
+  box-shadow: 0 0 8px #aaff00;
+  animation: blink 1.4s ease-in-out infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Loading overlay while p5 preloads sprites */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: #05050e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  transition: opacity 600ms ease, visibility 600ms ease;
+}
+#loading-screen.done {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loading-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.25em;
+  color: #00f5ff;
+  text-shadow: 0 0 14px #00f5ff;
+  text-transform: uppercase;
+}
+
+.loading-bar-wrap {
+  width: 220px;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loading-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00f5ff, #aaff00);
+  border-radius: 2px;
+  animation: loading-sweep 1.8s ease-in-out infinite;
+}
+
+@keyframes loading-sweep {
+  0%   { width: 0%;   margin-left: 0%; }
+  50%  { width: 60%;  margin-left: 20%; }
+  100% { width: 0%;   margin-left: 100%; }
+}
+
+.loading-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.1em;
+}
+
+/* ── No-gamepad banner ────────────────────────────────────────────────────────
+   Non-blocking notice shown until a pad is first seen. Hidden via the
+   --visible class (not the [hidden] attribute) to match the HUD panels. */
+.gp-nopad {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 4500;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: calc(100vw - 32px);
+  padding: 8px 10px 8px 16px;
+  background: rgba(8, 8, 18, 0.88);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 179, 0, 0.45);
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--hud-amber, #ffb300);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-8px);
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 300ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gp-nopad--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.gp-nopad__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gp-nopad__link {
+  flex: none;
+  color: var(--hud-cyan, #00f5ff);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(0, 245, 255, 0.35);
+  transition: color 160ms, border-color 160ms;
+}
+.gp-nopad__link:hover { color: #fff; border-bottom-color: #fff; }
+.gp-nopad__close {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 160ms, border-color 160ms;
+}
+.gp-nopad__close:hover { color: #fff; border-color: rgba(255, 255, 255, 0.5); }
+
+@media (max-width: 600px) {
+  .gp-nopad { gap: 8px; font-size: 10px; flex-wrap: wrap; }
+  .gp-nopad__text { white-space: normal; }
+}

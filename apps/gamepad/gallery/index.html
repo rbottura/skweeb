@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GamepadDraw gallery — drawings made with a gamepad.">
+  <title>GamepadDraw — Gallery</title>
+  <link rel="stylesheet" href="./gallery.css">
+</head>
+
+<body>
+  <header class="g-header">
+    <a class="g-back" href="../">← Draw</a>
+    <h1 class="g-title">GALLERY</h1>
+    <span class="g-count" id="g-count"></span>
+  </header>
+
+  <main class="g-grid" id="g-grid">
+    <p class="g-empty" id="g-status">Loading…</p>
+  </main>
+
+  <!-- Fullscreen lightbox -->
+  <div class="g-lightbox" id="g-lightbox" hidden>
+    <button class="g-lightbox__close" id="g-close" aria-label="Close">✕</button>
+    <img class="g-lightbox__img" id="g-lightbox-img" alt="">
+    <div class="g-lightbox__caption" id="g-lightbox-caption"></div>
+  </div>
+
+  <script type="module" src="./gallery.js"></script>
+</body>
+</html>
