@@ -9,9 +9,11 @@ apps/*/gamepad_sprites/*
 !apps/*/gamepad_sprites/brushes/
 !apps/*/gamepad_sprites/timbre/
 
-# Published output belongs in gallery/, not beside the app.
+# Published output belongs in gallery/, not beside the app. The manifest is
+# generated from those images, so it is generated state too.
 apps/*/gallery/images/*
 !apps/*/gallery/images/.gitkeep
+apps/*/gallery/manifest.json
 
 node_modules/
 .DS_Store
