@@ -18,8 +18,10 @@ _last touched: 2026-09-21_
   to travel with the files.
 - Six sprite families (135 MB: Destra, GaramondI, Minipax, PeaceSans, Raleway,
   fleurs) are on disk but gitignored. A clone boots with `brushes` and
-  `timbre` only. They need recompressing before they can be committed —
-  `pngquant` should take that 140 MB to somewhere near 40.
+  `timbre` only. Quantization is measured and waiting on a look: q80 takes
+  Garam_blue from 19.03 MB to 5.56 MB at ~2/255 mean error on visible pixels.
+  `brushes` stays lossless by decision. Test output and the A/B page are in the
+  session scratchpad, `quant/out/compare.html`.
 - `apps/gamepad/gallery/` is the old per-app gallery, superseded by the shared
   one. It stays until `core/` extraction, then goes.
 
