@@ -21,7 +21,7 @@ const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
 
-const GALLERY_DIR = path.join(__dirname, '..', 'gamepad', 'gallery');
+const GALLERY_DIR = path.join(__dirname, '..', 'apps', 'gamepad', 'gallery');
 const IMAGES_DIR  = path.join(GALLERY_DIR, 'images');
 const OUTPUT_FILE = path.join(GALLERY_DIR, 'manifest.json');
 const IMAGE_EXTS  = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif']);

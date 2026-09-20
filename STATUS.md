@@ -2,23 +2,31 @@
 _last touched: 2026-09-21_
 
 ## Works right now
-- Nothing runs yet. The repo holds its own contract: `CLAUDE.md`, five docs,
-  two skills, and `assets/fonts/` with eight verified open-licence faces.
-- `sketch-2-print` is clean: the sequence/timeline system and the three new
-  brushes are committed on branch `gamepad-sequences` (6823f56, 820cd2d).
-  `main` is still one fast-forward behind them.
+- `node scripts/dev-server.js` serves `apps/gamepad/` and answers the gallery
+  write API. Index, ES modules, manifest, p5.joystick, sprites and the gallery
+  page all return 200. **Not yet confirmed in a browser with a gamepad** —
+  files are served, drawing is untested.
+- The contract: `CLAUDE.md`, five docs, two skills, and `assets/fonts/` with
+  eight verified open-licence faces.
+- `sketch-2-print` is clean and `main` carries the sequence/timeline work
+  (6823f56, 820cd2d). The two gamepads have now forked.
 
 ## Broken / half-done
 - Everything in `docs/` describes code that does not exist. The docs are the
   spec for M1, not a description of a working system.
 - `assets/fonts/` is missing each family's `OFL.txt`, which the licence asks
   to travel with the files.
+- Six sprite families (135 MB: Destra, GaramondI, Minipax, PeaceSans, Raleway,
+  fleurs) are on disk but gitignored. A clone boots with `brushes` and
+  `timbre` only. They need recompressing before they can be committed —
+  `pngquant` should take that 140 MB to somewhere near 40.
+- `apps/gamepad/gallery/` is the old per-app gallery, superseded by the shared
+  one. It stays until `core/` extraction, then goes.
 
 ## Next single step
-- Fast-forward `sketch-2-print` main onto `gamepad-sequences`, then copy
-  `sketch-2-print/gamepad/` into `skweeb/apps/gamepad/` — files only, no git
-  history, since that history is 253 MB and carries nothing this repo needs.
-  That copy is M1's starting point and the moment the two gamepads fork.
+- Open `http://127.0.0.1:3000/` with the gamepad plugged in, draw, record one
+  sequence, and save it. That confirms the copy before `core/` extraction
+  starts pulling it apart.
 
 ## Parked decisions
 - Name is **skweeb**, `.skw` for the smart object.

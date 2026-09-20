@@ -139,6 +139,14 @@ from the server root, so it breaks the moment it is served under a subpath.
 `.git` is 674 MB despite a "removing big images" commit: the history still holds
 them. Do not import that history.
 
+**Sprite weight** — `gamepad_sprites/` is 579 PNGs and 140 MB, every one of
+them referenced by `brush-manifest.json`, so there is nothing dead to delete.
+Only five files exceed 1200 px; the bulk is ~500 letterform sprites at roughly
+240 KB each, RGBA and badly compressed. `pngquant --quality 65-85` on flat
+letterforms typically takes 60 to 80 percent off, which would make the whole
+set committable. Until then the six heavy families are gitignored and live in
+`sketch-2-print`.
+
 **p5 versions across the three:** 1.5.0, 1.5.0, 1.9.0. The suite picks one and
 every app uses instance mode against it.
 

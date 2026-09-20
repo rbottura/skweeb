@@ -12,8 +12,8 @@
 const fs   = require('fs');
 const path = require('path');
 
-const SPRITES_ROOT  = path.join(__dirname, '..', 'gamepad', 'gamepad_sprites');
-const OUTPUT_FILE   = path.join(__dirname, '..', 'gamepad', 'brush-manifest.json');
+const SPRITES_ROOT  = path.join(__dirname, '..', 'apps', 'gamepad', 'gamepad_sprites');
+const OUTPUT_FILE   = path.join(__dirname, '..', 'apps', 'gamepad', 'brush-manifest.json');
 const IMAGE_EXTS    = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif']);
 
 // ─── Walk directory tree ──────────────────────────────────────────────────────

@@ -25,7 +25,7 @@ const crypto = require('crypto');
 
 const { buildManifest, listImages, IMAGES_DIR, IMAGE_EXTS } = require('./generate-gallery.js');
 
-const ROOT       = path.join(__dirname, '..', 'gamepad');
+const ROOT       = path.join(__dirname, '..', 'apps', 'gamepad');
 const MAX_UPLOAD = 32 * 1024 * 1024;
 const PNG_MAGIC  = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
