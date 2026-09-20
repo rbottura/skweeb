@@ -74,6 +74,7 @@ gallery/                      ← in git, deployed
 | `skw` | preview webm/png | **yes, versioned** | all | all |
 | `dataset` | json, `[char][point][x,y]` | yes | ckt | ckt |
 | `shape` | png with alpha | maybe | gamepad | gamepad, ckt, grid |
+| `set` | contact sheet | yes, an ordered member list | all | gamepad as a brush family, ckt as a sprite library |
 | `font` | otf/ttf in `source/` | no | imported | ckt, grid |
 | `params` | none, the recipe *is* the object | yes | all | its own app |
 | `composition` | png/pdf, rendered at export scale | yes | the page app, M4 | all |
@@ -155,6 +156,31 @@ The rasterize command, and the way out when a chain gets too clever.
 
 **Cycles.** A `.skw` may place another `.skw`. `Vault.save` walks the ref graph
 and refuses a cycle. One check, saves an infinite loop later.
+
+## Sets — the unit the gamepad actually thinks in
+
+A `shape` is one image. The gamepad does not load shapes, it loads **families**:
+an ordered folder of sprites picked through with the D-pad. So a set is its own
+object, not a tag over loose ones.
+
+```json
+{ "type": "set",
+  "recipe": { "members": ["ckt_…a1", "ckt_…a2", "ckt_…a3"], "role": "brush-family" },
+  "parents": ["ckt_…dataset7"] }
+```
+
+Order is the recipe, because order is what the D-pad walks. `render` is a
+contact sheet, which doubles as the thumbnail. Members stay ordinary objects
+with their own lineage — a set is a view over them, not a container that owns
+them.
+
+**This is not hypothetical.** `gamepad_sprites/GaramondI/Garam_blue` and
+`Minipax/minipax_white` are letterforms generated in ColorKineType with a
+pattern applied, exported by hand and imported into the gamepad as a folder.
+The chain skweeb exists to make live has already been run once, manually, and
+the result is frozen in those folders. A `set` is what that chain produces when
+it is not frozen: the same family, still pointing at the ckt dataset and
+parameters that made it, still re-renderable when those change.
 
 ## The recipe contract
 

@@ -18,7 +18,11 @@ the source recorded as its parent.
 **M3 — ckt v3.** Text, grid, dots, sprites, motion. No Matter. Ships with the 9
 existing datasets; new ones come from a script, so the 8 MB `opencv.js` leaves
 the browser.
-*Done when:* a shape from the gamepad can be the sprite on a ckt dot field.
+*Done when:* a shape from the gamepad can be the sprite on a ckt dot field —
+and, the stronger test, when ckt can **regenerate a family like `Garam_blue`**:
+letterforms with a pattern on them, emitted as a `set` the gamepad loads as a
+brush family. Those folders are that exact chain, run by hand and frozen. M3 is
+done when it runs itself and keeps its lineage.
 
 **M4 — compose, export, publish.** The page: many objects placed on a sheet,
 previewed live at screen resolution, exported once at print resolution. Then
@@ -142,10 +146,17 @@ them. Do not import that history.
 **Sprite weight** — `gamepad_sprites/` is 579 PNGs and 140 MB, every one of
 them referenced by `brush-manifest.json`, so there is nothing dead to delete.
 Only five files exceed 1200 px; the bulk is ~500 letterform sprites at roughly
-240 KB each, RGBA and badly compressed. `pngquant --quality 65-85` on flat
-letterforms typically takes 60 to 80 percent off, which would make the whole
-set committable. Until then the six heavy families are gitignored and live in
-`sketch-2-print`.
+240 KB each, RGBA and badly compressed. Measured on `Garam_blue` (58 files, 19.03 MB)
+with libimagequant via sharp: **q80 gives 5.56 MB, 71% off**, for a mean error
+of about 2/255 across visible pixels, 1.4 to 2.2 percent of subpixels differing
+by more than 8, and alpha essentially untouched. q65 gives 4.41 MB at roughly
+1.4x that error. A *lossless* re-encode makes them 11% **bigger** — these PNGs
+are already well packed as RGBA, so palette quantization is the only real win.
+Extrapolated, 140 MB lands near 40 MB.
+
+`brushes` stays lossless by decision — those 64 sprites are drawing tools and
+are committed as they are. Until the type families are converted they are
+gitignored and live in `sketch-2-print`.
 
 **p5 versions across the three:** 1.5.0, 1.5.0, 1.9.0. The suite picks one and
 every app uses instance mode against it.
