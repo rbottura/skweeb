@@ -2,10 +2,13 @@
 _last touched: 2026-09-21_
 
 ## Works right now
-- `node scripts/dev-server.js` serves `apps/gamepad/` and answers the gallery
-  write API. Index, ES modules, manifest, p5.joystick, sprites and the gallery
-  page all return 200. **Not yet confirmed in a browser with a gamepad** —
-  files are served, drawing is untested.
+- The copy is confirmed working: drawing, the gallery panel, image upload and
+  save all behave, in the browser with the controller. `node
+  scripts/dev-server.js` serves it.
+- The gamepad's drawing is already deterministic — the only `random()` calls in
+  it are id generation in `imageStore` and `sequenceRecorder`. Recipes will
+  reproduce without any seeding work here, though `rng.js` still matters for
+  ckt and grid.
 - The contract: `CLAUDE.md`, five docs, two skills, and `assets/fonts/` with
   eight verified open-licence faces.
 - `sketch-2-print` is clean and `main` carries the sequence/timeline work
@@ -24,11 +27,22 @@ _last touched: 2026-09-21_
   session scratchpad, `quant/out/compare.html`.
 - `apps/gamepad/gallery/` is the old per-app gallery, superseded by the shared
   one. It stays until `core/` extraction, then goes.
+- The timeline can make sequences but cannot keep them: there is no export
+  anywhere in `TimelinePanel.js` or `core/sequence*`, so a composition
+  evaporates on reload. Everything an exporter needs is in place — `step()`
+  refuses the clock, the player takes a scale, a loop knows its tick count.
 
 ## Next single step
-- Open `http://127.0.0.1:3000/` with the gamepad plugged in, draw, record one
-  sequence, and save it. That confirms the copy before `core/` extraction
-  starts pulling it apart.
+- The vault spine: generalise the dev server's write API from gallery images to
+  vault objects, and write `core/vault.js` against it. Done when the gamepad's
+  save writes `vault/objects/<id>/` with `object.json`, `render.png` and
+  `thumb.webp`, and `index.json` picks it up.
+
+Then, in order: `core/export.js` plus an export control on the timeline, which
+is what lets a loop become an object and closes M1's acceptance test; the
+mechanical moves into `core/` (`stage/`, `input.js`, `registry.js`, `libs/`)
+with the import rewrite; and `core/params.js`, which is what grid v2 gets
+written against at M2.
 
 ## Parked decisions
 - Name is **skweeb**, `.skw` for the smart object.
