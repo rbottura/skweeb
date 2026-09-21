@@ -89,6 +89,13 @@ const TYPES = {
   },
 };
 
+/**
+ * The types a schema may declare. Exported so tests/params.mjs can hold this
+ * list and core/ParamPanel.js's widget list against each other: a type with no
+ * widget is a control that silently never appears in any panel.
+ */
+export const PARAM_TYPES = Object.keys(TYPES);
+
 const num = (value, fallback) => {
   const n = typeof value === 'number' ? value : parseFloat(value);
   return Number.isFinite(n) ? n : fallback;

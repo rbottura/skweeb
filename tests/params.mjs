@@ -170,5 +170,36 @@ try {
 } catch (err) { threw = err.message; }
 ok('an undeclared widget type is refused at definition', /unknown type quaternion/.test(threw), true);
 
+// ── The schema and the panel must agree ──────────────────────────────
+// The bargain in ParamPanel.js is that a control is one schema entry and never
+// bespoke HTML. That only holds while every declared type has a widget, and the
+// failure is silent both ways: a type with no widget is a control that never
+// draws, a widget with no type is dead code nothing can reach.
+// Writing this check found `int` already declared and undrawable.
+
+const { PARAM_TYPES }  = await import('../core/params.js');
+const { WIDGET_TYPES } = await import('../core/ParamPanel.js');
+
+ok('every declared type has a widget',
+   PARAM_TYPES.filter(t => !WIDGET_TYPES.includes(t)), []);
+ok('every widget has a declared type',
+   WIDGET_TYPES.filter(t => !PARAM_TYPES.includes(t)), []);
+
+// And one of each really defines, which comparing two lists would not show.
+const every = defineParams('every', {
+  a: { type: 'range', min: 0, max: 10, default: 5 },
+  b: { type: 'int', min: 0, max: 10, default: 3 },
+  c: { type: 'bool', default: true },
+  d: { type: 'enum', options: ['x', 'y'], default: 'y' },
+  e: { type: 'color', default: '#112233' },
+  f: { type: 'color[]', default: ['#000', '#fff'] },
+  g: { type: 'text', default: 'hello' },
+  h: { type: 'object', accepts: ['still'] },
+});
+ok('a schema using every type defines cleanly', every.keys.length, PARAM_TYPES.length);
+ok('and its values round trip', JSON.parse(JSON.stringify(every.values)), every.values);
+every.set('b', 2.7);
+ok('int rounds rather than snapping', every.get('b'), 3);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

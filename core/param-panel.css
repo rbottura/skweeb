@@ -1,0 +1,220 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   param-panel.css — the controls, drawn from the schema.
+
+   A drawer down one side rather than an overlay: parameters are adjusted while
+   watching the canvas, so covering it would defeat the point. The vault picker
+   an `object` row opens is the overlay, and it sits above this.
+
+   Same contract as vault-panel.css — every token falls back, so an app with no
+   --hud-* set still gets a panel that looks like the suite. Rule 7.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.pp {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1200;
+  width: 288px;
+  display: flex;
+  flex-direction: column;
+  background: var(--hud-bg, rgba(8, 8, 18, 0.88));
+  backdrop-filter: var(--hud-blur, blur(24px) saturate(180%));
+  -webkit-backdrop-filter: var(--hud-blur, blur(24px) saturate(180%));
+  border-left: 1px solid var(--hud-border, rgba(0, 245, 255, 0.25));
+  color: var(--hud-text, #dde6f0);
+  font-family: var(--hud-font-ui, 'Outfit', sans-serif);
+  font-size: 13px;
+  transform: translateX(100%);
+  transition: transform 240ms var(--hud-anim, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.pp--visible { transform: translateX(0); }
+
+@media (prefers-reduced-motion: reduce) { .pp { transition: none; } }
+
+@media (max-width: 720px) {
+  .pp { width: 100%; }
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+
+.pp-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.pp-title {
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hud-cyan, #00f5ff);
+}
+
+.pp-spacer { flex: 1; }
+
+.pp-btn {
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--hud-border, rgba(0, 245, 255, 0.25));
+  border-radius: 6px;
+  background: var(--hud-glass, rgba(255, 255, 255, 0.04));
+  color: var(--hud-text, #dde6f0);
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+
+.pp-btn:hover { background: rgba(0, 245, 255, 0.12); color: var(--hud-cyan, #00f5ff); }
+
+/* ── Rows ───────────────────────────────────────────────────────────────────── */
+
+.pp-body { flex: 1; overflow: auto; padding: 6px 14px 20px; }
+
+.pp-row { padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.pp-row:last-child { border-bottom: 0; }
+
+.pp-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pp-name { flex: 1; }
+
+.pp-value {
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 11px;
+  color: var(--hud-cyan, #00f5ff);
+}
+
+.pp-bind {
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--hud-subtle, rgba(255, 255, 255, 0.35));
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────────── */
+
+.pp-range {
+  width: 100%;
+  accent-color: var(--hud-cyan, #00f5ff);
+  cursor: pointer;
+}
+
+.pp-select,
+.pp-text {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--hud-text, #dde6f0);
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 12px;
+}
+
+.pp-select:focus,
+.pp-text:focus { outline: 1px solid var(--hud-cyan, #00f5ff); }
+
+/* A switch rather than a checkbox: readable at a glance across the room. */
+.pp-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pp-switch input { position: absolute; opacity: 0; pointer-events: none; }
+
+.pp-track {
+  width: 34px;
+  height: 18px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  position: relative;
+  transition: background 140ms;
+}
+
+.pp-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--hud-text, #dde6f0);
+  transition: transform 140ms;
+}
+
+.pp-switch input:checked + .pp-track { background: rgba(0, 245, 255, 0.4); }
+.pp-switch input:checked + .pp-track::after { transform: translateX(16px); }
+.pp-switch input:focus-visible + .pp-track { outline: 2px solid var(--hud-cyan, #00f5ff); outline-offset: 2px; }
+
+.pp-color {
+  width: 34px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pp-colors { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+/* ── The object row — a vault object as a parameter ─────────────────────────── */
+
+.pp-object {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pp-object-thumb {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 6px;
+  object-fit: contain;
+  background-color: #14141c;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.05) 75%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 6px 6px;
+}
+
+.pp-object-meta { flex: 1; min-width: 0; }
+
+.pp-object-name {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pp-object-sub {
+  margin-top: 2px;
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 10px;
+  color: var(--hud-subtle, rgba(255, 255, 255, 0.35));
+}
+
+.pp-object-actions { display: flex; gap: 5px; margin-top: 8px; }
+
+.pp-empty { color: var(--hud-subtle, rgba(255, 255, 255, 0.35)); font-style: italic; }

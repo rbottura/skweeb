@@ -35,11 +35,17 @@ export class VaultPanel {
   /**
    * @param {object} [opts]
    * @param {{type?:string, app?:string, tag?:string}} [opts.filter]  fixed filter
+   * @param {string[]} [opts.accepts]  several types, as a param's `accepts` has
    * @param {(row:object)=>void} [opts.onPick]   makes the cards a picker
    * @param {string} [opts.pickLabel]
    */
   constructor(opts = {}) {
     this._filter    = opts.filter || {};
+    // Vault.list() filters on one type because index.json is a flat list and
+    // that is the cheap query. A param declares `accepts: [...]`, so the
+    // several-types case is narrowed here instead.
+    this._accepts   = Array.isArray(opts.accepts) && opts.accepts.length
+      ? opts.accepts.slice() : null;
     this._onPick    = opts.onPick || null;
     this._pickLabel = opts.pickLabel || 'Use this';
 
@@ -75,7 +81,8 @@ export class VaultPanel {
   /** Ask the server again, then repaint. */
   async refresh() {
     await Vault.refresh();
-    this._rows = await Vault.list(this._filter);
+    const rows = await Vault.list(this._filter);
+    this._rows = this._accepts ? rows.filter(r => this._accepts.includes(r.type)) : rows;
     this._paint();
   }
 
