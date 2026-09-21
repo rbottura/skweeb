@@ -46,6 +46,7 @@ let _joyImg;      // JoyImage cursor
 let _rotVal = 0;
 let _scaleVal = 1;
 let _referenceImg = null;
+let _baseImage = null;   // url of an image loaded under the ink, or null
 let _sk;                  // the p5 instance, for building players later
 let _stage;               // SequenceStage — owns the layers and places them
 let _transport;           // SequenceTransport — owns the clock for every layer
@@ -96,6 +97,7 @@ export function createSketch(container) {
       // Every stamp path funnels through JoyImage.stamp(), so one hook here
       // catches marks from the gamepad, the keyboard and p5.joystick alike.
       _joyImg.onStamp = _recordStamp;
+      SequenceRecorder.resetBuffer(sketch.width, sketch.height);
 
       _sk        = sketch;
       _stage     = new SequenceStage();
@@ -232,6 +234,9 @@ export function createSketch(container) {
         _overlay.clear();
         _overlay.imageMode(sketch.CORNER);
         _overlay.image(img, 0, 0);
+        // Marks no longer describe the canvas: there are pixels under them now.
+        SequenceRecorder.resetBuffer(sketch.width, sketch.height);
+        _baseImage = e.detail.url;
       });
     });
 
@@ -457,11 +462,11 @@ function _announceStage() {
 
 /**
  * Offer a just-drawn stamp to the sequence recorder, tagged with the brush
- * identity JoyImage does not carry. Ignored unless recording is armed.
+ * identity JoyImage does not carry. Always buffered — recording only decides
+ * which range of the buffer becomes a sequence.
  * @param {JoyImage} joy
  */
 function _recordStamp(joy) {
-  if (!SequenceRecorder.recording) return;
   SequenceRecorder.capture({
     x:           joy.x,
     y:           joy.y,
@@ -482,7 +487,24 @@ function _syncBrush() {
 function _clearOverlay() {
   if (!_overlay || !_p5) return;
   _overlay.clear();
+  // The buffered marks described what was on the ink layer. It is gone, so
+  // they describe nothing now.
+  SequenceRecorder.resetBuffer(_p5.width, _p5.height);
+  _baseImage = null;
 }
+
+/**
+ * Whether the ink layer is made of marks alone.
+ *
+ * Load an image onto the canvas and it is not: the pixels underneath came from
+ * somewhere the buffer knows nothing about, so a replay of the marks would not
+ * reproduce what is on screen. A still saved in that state is a leaf, and says
+ * so by carrying no recipe rather than a recipe that lies.
+ */
+export function canvasIsReproducible() { return _baseImage === null; }
+
+/** The url an image was loaded from, while one underlies the ink layer. */
+export function baseImageUrl() { return _baseImage; }
 
 function _saveImage() {
   if (!_overlay || !_p5) return;

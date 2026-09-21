@@ -73,8 +73,12 @@ never symmetric, never inferred. The catalogue of links is the map of the suite.
 ## Running
 
 ```sh
-node server.js            # http://127.0.0.1:3000 — apps, gallery, vault API
+node server.js            # http://127.0.0.1:3000/apps/gamepad/
+node tests/recorder.mjs   # no runner, no dependencies — see tests/
 ```
+
+The server serves the repo root, so an app is at `/apps/<name>/`, the kit at
+`/core/` and the objects at `/vault/`.
 
 ## Ending a session
 

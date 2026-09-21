@@ -10,6 +10,10 @@ _last touched: 2026-09-21_
 - Saving in the gamepad now writes both tiers: ImageStore as before (browser
   scratchpad) and a vault object with its recipe attached. The status bar shows
   the vault count.
+- Marks are buffered whether or not a sequence is armed, so a still carries the
+  marks that made it. Recording still toggles — it now sets the in and out
+  points of a range over that buffer. `node tests/recorder.mjs` covers the
+  semantics, 19 checks, no runner.
 - The copy is confirmed working: drawing, the gallery panel, image upload and
   save all behave, in the browser with the controller.
 - The gamepad's drawing is already deterministic — the only `random()` calls in
@@ -37,6 +41,14 @@ _last touched: 2026-09-21_
   work if run directly; they go at `core/` extraction.
 - Nothing reads the vault back yet — no gallery, no picker. Objects go in and
   sit there until `Vault.list()` has a panel in front of it.
+- A still's recipe now holds everything needed to redraw it, but nothing
+  redraws it: the gamepad has no `render()` yet. The data is complete, the
+  replay is not written. Both arrive with `core/export.js`, since replaying
+  marks at a given scale is exactly what the exporter does.
+- Load an image onto the canvas and marks no longer account for it, so the
+  still saves as a leaf — `recipe: null`, tagged `leaf`. Correct, but it means
+  a drawing made on top of a loaded image cannot be re-rendered. Lineage
+  through `parents` would fix it once the loaded image is itself an object.
 - The timeline can make sequences but cannot keep them: there is no export
   anywhere in `TimelinePanel.js` or `core/sequence*`, so a composition
   evaporates on reload. Everything an exporter needs is in place — `step()`

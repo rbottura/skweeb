@@ -34,7 +34,19 @@ const MIN_SCALE_RATIO  = 0.01;   // 1% of the previous scale
 
 const _sequences = [];
 
-let _active    = null;   // the sequence being built, or null when disarmed
+/**
+ * Every mark since the canvas was last cleared, captured whether or not a
+ * recording is armed. The ink layer is cumulative, so this buffer is the
+ * canvas expressed as instructions — which is what lets a still carry the
+ * marks that made it and re-render at any size.
+ *
+ * Recording does not switch capture on, then. It marks the in and out points
+ * of a range over this buffer, which is what a record button means in an
+ * editing application anyway.
+ */
+let _buffer = { w: null, h: null, startedAt: Date.now(), events: [] };
+
+let _active    = null;   // the range being delimited, or null when disarmed
 let _lastEvent = null;   // previous captured event, for the distinctness test
 
 export const SequenceRecorder = {
@@ -47,7 +59,32 @@ export const SequenceRecorder = {
   get count() { return _sequences.length; },
 
   /** Marks captured so far in the in-progress sequence. */
-  get liveCount() { return _active ? _active.events.length : 0; },
+  get liveCount() { return _active ? _buffer.events.length - _active.from : 0; },
+
+  /** Every mark since the canvas was last cleared (read-only view). */
+  get marks() { return _buffer.events; },
+
+  get markCount() { return _buffer.events.length; },
+
+  /**
+   * The canvas as instructions: everything drawn since the last clear.
+   * This is what a still puts in its recipe.
+   * @returns {{w:number|null, h:number|null, events:Array}}
+   */
+  snapshot() {
+    return { w: _buffer.w, h: _buffer.h, events: _buffer.events.map(e => ({ ...e })) };
+  },
+
+  /**
+   * Start a fresh buffer. Called when the ink layer is wiped, because the
+   * marks no longer describe what is on screen.
+   */
+  resetBuffer(w, h) {
+    _buffer = { w: w ?? _buffer.w, h: h ?? _buffer.h, startedAt: Date.now(), events: [] };
+    _lastEvent = null;
+    if (_active) _active.from = 0;
+    _dispatch('sequence:bufferReset', {});
+  },
 
   /**
    * Arm the recorder.
@@ -57,14 +94,14 @@ export const SequenceRecorder = {
    */
   start(w, h) {
     if (_active) return _active;
+    if (_buffer.w == null) { _buffer.w = w; _buffer.h = h; }
     _active = {
       id:        `seq_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       createdAt: Date.now(),
       w,
       h,
-      events:    [],
+      from:      _buffer.events.length,   // in point, as an index into the buffer
     };
-    _lastEvent = null;
     _dispatch('sequence:started', {});
     return _active;
   },
@@ -77,8 +114,14 @@ export const SequenceRecorder = {
     if (!_active) return null;
 
     const seq = _active;
-    _active    = null;
-    _lastEvent = null;
+    _active = null;
+
+    // The clip is the range of the buffer between the in and out points, with
+    // t re-based so a sequence still starts at zero.
+    const slice = _buffer.events.slice(seq.from);
+    const t0 = slice.length ? slice[0].t : 0;
+    seq.events = slice.map(e => ({ ...e, t: e.t - t0 }));
+    delete seq.from;
 
     if (seq.events.length === 0) {
       _dispatch('sequence:discarded', {});
@@ -104,16 +147,16 @@ export const SequenceRecorder = {
   },
 
   /**
-   * Offer a stamp to the recorder. Ignored when disarmed, or when the brush
-   * has not moved, turned or resized since the previous mark.
+   * Offer a stamp to the recorder. Always buffered; ignored only when the
+   * brush has not moved, turned or resized since the previous mark.
    * @param {Object} state  { x, y, rotation, scale, familyId, spriteIndex, pattern }
    * @returns {boolean} true if the mark was recorded
    */
   capture(state) {
-    if (!_active || !_isDistinct(state)) return false;
+    if (!_isDistinct(state)) return false;
 
     const event = {
-      t:           Date.now() - _active.createdAt,
+      t:           Date.now() - _buffer.startedAt,
       x:           state.x,
       y:           state.y,
       rotation:    state.rotation,
@@ -123,9 +166,9 @@ export const SequenceRecorder = {
       pattern:     state.pattern,
     };
 
-    _active.events.push(event);
+    _buffer.events.push(event);
     _lastEvent = event;
-    _dispatch('sequence:captured', { count: _active.events.length });
+    if (_active) _dispatch('sequence:captured', { count: _buffer.events.length - _active.from });
     return true;
   },
 
