@@ -1,0 +1,37 @@
+{
+ "generated": "2026-09-21T14:50:10.221Z",
+ "ramps": [
+  {
+   "id": "tiles",
+   "label": "Tiles",
+   "count": 10,
+   "files": [
+    "materials/tiles/tile1.png",
+    "materials/tiles/tile2.png",
+    "materials/tiles/tile3.png",
+    "materials/tiles/tile4.png",
+    "materials/tiles/tile5.png",
+    "materials/tiles/tile6.png",
+    "materials/tiles/tile7.png",
+    "materials/tiles/tile8.png",
+    "materials/tiles/tile9.png",
+    "materials/tiles/tile10.png"
+   ]
+  },
+  {
+   "id": "trames",
+   "label": "Trames",
+   "count": 8,
+   "files": [
+    "materials/trames/trame1.png",
+    "materials/trames/trame2.png",
+    "materials/trames/trame3.png",
+    "materials/trames/trame4.png",
+    "materials/trames/trame5.png",
+    "materials/trames/trame6.png",
+    "materials/trames/trame7.png",
+    "materials/trames/trame8.png"
+   ]
+  }
+ ]
+}

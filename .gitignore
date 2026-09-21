@@ -9,6 +9,14 @@ apps/*/gamepad_sprites/*
 !apps/*/gamepad_sprites/brushes/
 !apps/*/gamepad_sprites/timbre/
 
+# Grid's material ramps, same bargain as the sprite families above: `trames`
+# and `tiles` are 136 KB together and are enough to dither with, so they are
+# committed. The heavy ones stay in grid_sketch until they are recompressed --
+# stones alone is 4.9 MB, and all seven come to 8.8 MB.
+apps/grid/materials/*
+!apps/grid/materials/trames/
+!apps/grid/materials/tiles/
+
 # Published output belongs in gallery/, not beside the app. The manifest is
 # generated from those images, so it is generated state too.
 apps/*/gallery/images/*
