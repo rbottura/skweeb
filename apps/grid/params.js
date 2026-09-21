@@ -6,10 +6,18 @@
  * found on disk. That keeps rule 3 intact: the app reads a generated list, and
  * nothing walks a directory at runtime.
  *
- * What is NOT here is as deliberate as what is. The original carried
- * `listPlayers`, a webcam capture, a 226-frame clip loader, letters from a
- * text blob and four debug colours, all at file scope and all dead or
- * commented out. None of it is a parameter, so none of it is here.
+ * What is NOT here is as deliberate as what is. The webcam capture, the
+ * 226-frame clip loader, the letters from a text blob and the four debug
+ * colours were all at file scope and all abandoned; none of them is a
+ * parameter, so none of them is here.
+ *
+ * `listPlayers` is a different case and was wrongly lumped in with those on
+ * first reading. A Player is an agent on the grid — it holds a current cell,
+ * knows its four neighbours, moves in bounds, and carries a verb set that acts
+ * on cells: paint, resize, rotate, change image, swap with another cell. Its
+ * `index` already separates player 1 from player 2. That is a bot framework
+ * half-built, not leftovers, and the intent is several of them wandering the
+ * grid under programmed behaviours. Deferred, not dropped — see STATUS.md.
  *
  * On seeds: grid has none, and `seed: null` is the honest envelope value.
  * A luminance dither is a pure function of its source and its ramp — there is
