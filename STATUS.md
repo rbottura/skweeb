@@ -35,7 +35,9 @@ _last touched: 2026-09-21_
   `node tests/clip.mjs` covers the window rules and which frame becomes a
   sequence's still, 25 checks — including the three walk diagrams in
   `sequenceClip.js`, pinned character for character so comment and code cannot
-  drift apart.
+  drift apart. `node tests/vault.mjs` covers the write API end to end, 59
+  checks: it spawns `server.js` on a free port against a throwaway vault in the
+  temp directory and removes both afterwards, so it never touches yours.
 - The gamepad's drawing is already deterministic — the only `random()` calls in
   it are id generation. Recipes reproduce without seeding work here, though
   `rng.js` still matters for ckt and grid.
@@ -59,12 +61,6 @@ _last touched: 2026-09-21_
   `gri_` for grid. Two of four are wrong. Nothing breaks — `safeId()` accepts
   both — so this is a contract divergence to settle, not a bug to chase. Decide
   which is right and make the other follow.
-- **`tests/` has no vault coverage**, although the list under "works right now"
-  reads as though it does. Those checks have twice been written ad hoc in a
-  scratchpad and thrown away. A `tests/vault.mjs` that spawns the server on its
-  own port, runs the envelope round trip and the URLs `VaultPanel` builds, and
-  tears down, would make the claim repeatable — the two suites that exist are
-  the model.
 - `assets/fonts/` is missing each family's `OFL.txt`, which the licence asks to
   travel with the files.
 - Six sprite families (135 MB: Destra, GaramondI, Minipax, PeaceSans, Raleway,
@@ -97,22 +93,15 @@ _last touched: 2026-09-21_
   492, `core/sequencePlayer.js` 407. The `core/` extraction is when they split.
 
 ## Next single step
-- Write `tests/vault.mjs`. The vault API claims above have now been checked ad
-  hoc twice, in a scratchpad, and thrown away both times. It should spawn
-  `server.js` on its own port against a temporary vault, run the envelope round
-  trip (create, dedup on bytes-and-recipe, a new object for the same bytes with
-  a different recipe, magic-byte and traversal refusals), check the URLs
-  `VaultPanel` builds resolve, and tear down. `tests/clip.mjs` is the model: no
-  runner, no dependencies.
+- Start the `core/` extraction with the piece that has no dependents:
+  `core/rng.js`, the seeded random described in `docs/core-api.md`, about
+  thirty lines plus a suite. The gamepad does not need it — it draws exactly
+  what you drew — but grid and ckt cannot be written without it, and writing it
+  first means `core/` gains a module without anything having to move yet.
 
-  One thing to solve on the way: `server.js` hardcodes `VAULT_DIR` to
-  `<root>/vault`, so a test cannot point it somewhere disposable without either
-  a flag or an env var. A flag is the smaller change and makes the test honest.
-
-Then: the
-mechanical moves into `core/` (`stage/`, `input.js`, `registry.js`, `libs/`)
-with the import rewrite; then `core/params.js`, which is what grid v2 gets
-written against at M2.
+Then: the mechanical moves into `core/` (`stage/`, `input.js`, `registry.js`,
+`libs/`) with the import rewrite; then `core/params.js`, which is what grid v2
+gets written against at M2.
 
 ## Parked decisions
 - Name is **skweeb**, `.skw` for the smart object.

@@ -2,7 +2,7 @@
 /**
  * server.js — serves skweeb and owns the vault on disk.
  *
- *   node server.js [--port 3000] [--host 127.0.0.1]
+ *   node server.js [--port 3000] [--host 127.0.0.1] [--vault ./vault]
  *
  * Static files come from the repo root, so an app lives at /apps/<name>/ and
  * reaches the shared kit at /core/ and its own objects at /vault/.
@@ -25,8 +25,17 @@ const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
 
+const argv  = process.argv.slice(2);
+const argOf = (name, fallback) => {
+  const i = argv.indexOf(name);
+  return i !== -1 && argv[i + 1] ? argv[i + 1] : fallback;
+};
+
 const ROOT        = __dirname;
-const VAULT_DIR   = path.join(ROOT, 'vault');
+// --vault moves the objects off the repo, which is what lets tests/vault.mjs
+// run against a disposable one instead of yours. /vault/ URLs follow it, so an
+// app reads its renders and thumbs from wherever the vault actually is.
+const VAULT_DIR   = path.resolve(argOf('--vault', path.join(ROOT, 'vault')));
 const OBJECTS_DIR = path.join(VAULT_DIR, 'objects');
 const INDEX_FILE  = path.join(VAULT_DIR, 'index.json');
 const MAX_UPLOAD  = 64 * 1024 * 1024;
@@ -63,11 +72,6 @@ const MAGIC = {
   '.json': null,
 };
 
-const argv  = process.argv.slice(2);
-const argOf = (name, fallback) => {
-  const i = argv.indexOf(name);
-  return i !== -1 && argv[i + 1] ? argv[i + 1] : fallback;
-};
 const PORT = Number(argOf('--port', process.env.PORT || 3000));
 const HOST = argOf('--host', '127.0.0.1');
 
@@ -90,9 +94,12 @@ function sendText(res, code, msg) {
 }
 
 /**
- * Map a URL path to a file inside ROOT, or null if it escapes.
- * Resolved first and re-checked afterwards, so encoded traversal and absolute
- * paths cannot reach outside the served tree.
+ * Map a URL path to a file on disk, or null if it escapes.
+ *
+ * `/vault/...` resolves inside VAULT_DIR, which --vault may have moved off the
+ * repo entirely; everything else comes from ROOT. Whichever base is picked, the
+ * path is resolved first and re-checked against that base afterwards, so
+ * encoded traversal and absolute paths cannot reach outside it.
  */
 function resolveStatic(urlPath) {
   let decoded;
@@ -100,8 +107,12 @@ function resolveStatic(urlPath) {
   if (decoded.indexOf('\0') !== -1) return null;
   // [u005c] is a backslash; written as an escape so the source has no literal one.
   const normalised = path.posix.normalize('/' + decoded.replace(/[\u005c]/g, '/'));
-  const full = path.resolve(ROOT, '.' + normalised);
-  const rel  = path.relative(ROOT, full);
+  const inVault = normalised === '/vault' || normalised.startsWith('/vault/');
+  const base    = inVault ? VAULT_DIR : ROOT;
+  const within  = inVault ? (normalised.slice('/vault'.length) || '/') : normalised;
+
+  const full = path.resolve(base, '.' + within);
+  const rel  = path.relative(base, full);
   if (rel !== '' && (rel.startsWith('..') || path.isAbsolute(rel))) return null;
   return full;
 }
