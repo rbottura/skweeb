@@ -8,6 +8,14 @@ _last touched: 2026-09-21_
   475×926, `render.png` + `thumb.webp` + a 59 KB envelope holding all 266 marks
   with their family, sprite, rotation, scale and pattern. That was the one part
   the previous session could not check itself. It is checked.
+- **A sequence plays back, confirmed in the browser.** Press V, open a
+  sequence, hit ▶. `core/rebuild.js` replays it from the recipe — there is no
+  file to play, the loop having only ever existed as marks — and
+  `core/SequenceViewer.js` drives the playhead. It works in `/apps/grid/` too,
+  which is the part that matters: that page has no p5 of its own, and
+  `rebuild.js` loads and owns one so no app has to.
+- **Grid draws, confirmed in the browser**, from a dropped file and from a
+  vault object. Saving from grid has *not* been exercised yet.
 - **The stage and the registry live in `core/`.** `core/stage/` holds `clip`,
   `player`, `recorder`, `stage`, `transport` and `bounds`; `core/registry.js`
   and `core/stamp.js` came with them. The gamepad imports them from there and
@@ -101,19 +109,18 @@ _last touched: 2026-09-21_
   338.
 
 ## Next single step
-- **`core/rebuild.js`** — replay a `sequence` object into frames, from its
-  recipe. The stage is in `core/` now, so everything it needs is reachable;
-  what it has to own is the p5 instance, because `SequencePlayer` wants one and
-  grid deliberately has none. That is the seam: an app asks core to rebuild a
-  parent and gets frames back, which `docs/core-api.md` already names as the
-  one exception to `render()` touching nothing.
-  It unblocks both of the things that looked like separate jobs — grid
-  dithering a loop frame by frame, and a viewer that can actually play a
-  sequence back in the vault.
+- **Grid dithers a sequence frame by frame**, which is M2's link:
+  `grid → vault: dithered sequence`. Everything it needs now exists —
+  `openSequence()` gives the frames, `renderGrid()` already dithers one image,
+  and `core/export.js` already runs a clockless frame loop. What has to be
+  decided rather than assembled is what comes out: a `sequence` object whose
+  render is one frame and whose `parents` is the loop it was made from, which
+  means grid's save path grows a second shape.
 
-Then: grid consumes it (M2's link, `grid → vault: dithered sequence`), and a
-sequence viewer in `VaultPanel`. `input.js` and `libs/` are still unmoved but
-block nothing. The webm muxer stays an open decision — staged, not scheduled.
+Then M2 is done and the catalogue has its first link — the honest measure of
+whether this is a suite rather than apps sharing a drawer. `input.js` is still
+unmoved but blocks nothing. The webm muxer stays an open decision: staged, not
+scheduled, and nothing built since has needed it.
 
 ## Parked decisions
 - Name is **skweeb**, `.skw` for the smart object.
