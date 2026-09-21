@@ -24,10 +24,10 @@ import {
   playStage, pauseStage, stopStage,
 } from '../sketch/gamepadSketch.js';
 
-import { WINDOW_RULES, RULE_NAMES, BAND_STEPS, bandWidth } from '../core/sequenceClip.js';
-import { FILTER_PRESETS, BLEND_MODES, layerScale } from '../core/sequenceStage.js';
-import { SPEED_MULTIPLIERS, tickRateAt } from '../core/sequenceTransport.js';
-import { SequenceRecorder } from '../core/sequenceRecorder.js';
+import { WINDOW_RULES, RULE_NAMES, BAND_STEPS, bandWidth } from '../../../core/stage/clip.js';
+import { FILTER_PRESETS, BLEND_MODES, layerScale } from '../../../core/stage/stage.js';
+import { SPEED_MULTIPLIERS, tickRateAt } from '../../../core/stage/transport.js';
+import { SequenceRecorder } from '../../../core/stage/recorder.js';
 import { exportLayerToVault } from '../core/exportSequence.js';
 
 /** Phase steps offered, as fractions of a loop. */

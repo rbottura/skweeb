@@ -15,7 +15,7 @@
  */
 
 const { WINDOW_RULES, bandWidth, createClip, totalTicks, representativeTick } =
-  await import('../apps/gamepad/core/sequenceClip.js');
+  await import('../core/stage/clip.js');
 
 let fails = 0;
 const ok = (label, got, want) => {

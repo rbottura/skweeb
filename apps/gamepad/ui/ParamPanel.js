@@ -22,7 +22,7 @@
 import { InputManager, MODE } from '../core/inputManager.js';
 import { params }             from '../sketch/gamepadSketch.js';
 import { PATTERNS, PATTERN_LABELS } from '../core/joyImage.js';
-import { SequenceRecorder }   from '../core/sequenceRecorder.js';
+import { SequenceRecorder }   from '../../../core/stage/recorder.js';
 
 /** Numeric controls, keyed by the field they drive on `params`. */
 const SLIDERS = {

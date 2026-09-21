@@ -3,20 +3,37 @@
 Extracted from `sketch-2-print/gamepad`, which already had the right shapes.
 Most of this is a move plus a rename, not new code. Status per module:
 
-| module | what it does | where it comes from |
+| module | what it does | state |
 |---|---|---|
-| `bus.js` | DOM CustomEvents on `document`, namespaced | gamepad, already works |
-| `registry.js` | manifest-driven asset loading, families of sprites | `core/brushRegistry.js` |
-| `panel.js` | base class: show/hide, focus, gamepad + keyboard nav | generalised from `BrushPanel` / `ParamPanel` / `GalleryPanel` |
-| `params.js` | **the param schema** — see below | new, the one real invention |
-| `rng.js` | seeded random, the only random in the suite | new, ~30 lines |
-| `vault.js` | save / load / list / publish; the client for `server.js` | `imageStore.js` + `galleryPublisher.js`, merged and widened |
-| `thumb.js` | one thumbnailer per object type | new |
-| `links.js` | the named one-way links between apps | new, see below |
-| `export.js` | deterministic frame and video export | new, see below |
-| `stage/` | clip, player, transport, recorder, stage | gamepad `core/sequence*.js`, moved intact |
-| `input.js` | gamepad + keyboard mapping | `core/inputManager.js` |
-| `libs/` | one p5, shared by every app | today 1.5.0, 1.5.0 and 1.9.0 across three repos. Pick one. |
+| `vault.js` | save / load / list; the client for `server.js` | **in** |
+| `thumb.js` | one thumbnailer per object type | **in** |
+| `export.js` | deterministic frame export | **in**, no video yet |
+| `rng.js` | seeded random, the only random in the suite | **in**, 32 checks |
+| `params.js` | **the param schema** — see below | **in**, 43 checks |
+| `registry.js` | manifest-driven asset loading, families of sprites | **in**, was `gamepad/core/brushRegistry.js` |
+| `stage/` | `clip` `player` `transport` `recorder` `stage` `bounds` | **in**, was `gamepad/core/sequence*.js` |
+| `stamp.js` | where a pattern puts its stamps | **in**, split out of `joyImage.js` |
+| `VaultPanel.js` | the window onto the objects on disk | **in** |
+| `ParamPanel.js` | a widget per schema type; the `object` row is the picker | **in** |
+| `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |
+| `panel.js` | base class: show/hide, focus, gamepad + keyboard nav | not yet; two concrete panels exist instead |
+| `links.js` | the named one-way links between apps | not yet, see below |
+| `input.js` | gamepad + keyboard mapping | not yet; `gamepad/core/inputManager.js` |
+| `libs/` | one p5, shared by every app | not yet; 1.5.0 sits in `apps/gamepad/libs/`. Grid uses none. |
+
+The stage moved on 2026-09-21, which is what M1 promised and what lets a
+sequence be replayed by something other than the gamepad. Two files came *out*
+of that move rather than going in unchanged. `bounds.js`, because measuring a
+clip against the registry is a question about a clip and not about the
+player's state — and it took `player.js` back under the 400-line cap. And
+`stamp.js`, because the live brush and the player must expand the same
+patterns from the same code, which `joyImage.js` stated in a comment while
+keeping both halves in one file.
+
+`registry.js` now takes a manifest URL. It used to `fetch('brush-manifest.json')`
+with no path at all, which resolves against the *page* — invisible while the
+only page was the gamepad's, and wrong the moment a second app wants those
+sprites. Family paths now resolve against wherever the manifest was found.
 
 ## params.js — parameters are data
 

@@ -8,6 +8,12 @@ _last touched: 2026-09-21_
   475×926, `render.png` + `thumb.webp` + a 59 KB envelope holding all 266 marks
   with their family, sprite, rotation, scale and pattern. That was the one part
   the previous session could not check itself. It is checked.
+- **The stage and the registry live in `core/`.** `core/stage/` holds `clip`,
+  `player`, `recorder`, `stage`, `transport` and `bounds`; `core/registry.js`
+  and `core/stamp.js` came with them. The gamepad imports them from there and
+  still boots — its whole module graph, 30 files, was checked against the
+  running server. That is what M1 meant by "core + gamepad moved in", and it
+  is what makes a sequence replayable by something that is not the gamepad.
 - **The vault has a read path, confirmed in the browser.** `core/VaultPanel.js`
   — press **V** in the gamepad, or click the count in the status bar. Grid of cards from
   `index.json` alone; clicking one opens a drawer that calls `Vault.load()` for
@@ -88,20 +94,26 @@ _last touched: 2026-09-21_
   still saves as a leaf — `recipe: null`, tagged `leaf`. Correct, but a drawing
   made on top of a loaded image cannot be re-rendered. Lineage through
   `parents` would fix it once the loaded image is itself an object.
-- Five files are over the 400-line cap, all inherited: `ui/hud.css` 724,
-  `ui/TimelinePanel.js` 539, `sketch/gamepadSketch.js` 531, `ui/ParamPanel.js`
-  492, `core/sequencePlayer.js` 407. The `core/` extraction is when they split.
+- Four files are over the 400-line cap, all inherited and all still in the
+  gamepad: `ui/hud.css` 724, `ui/TimelinePanel.js` 539,
+  `sketch/gamepadSketch.js` 531, `ui/ParamPanel.js` 492. `sequencePlayer.js`
+  came off the list at the move — extracting `bounds.js` took it from 407 to
+  338.
 
 ## Next single step
-- Start the `core/` extraction with the piece that has no dependents:
-  `core/rng.js`, the seeded random described in `docs/core-api.md`, about
-  thirty lines plus a suite. The gamepad does not need it — it draws exactly
-  what you drew — but grid and ckt cannot be written without it, and writing it
-  first means `core/` gains a module without anything having to move yet.
+- **`core/rebuild.js`** — replay a `sequence` object into frames, from its
+  recipe. The stage is in `core/` now, so everything it needs is reachable;
+  what it has to own is the p5 instance, because `SequencePlayer` wants one and
+  grid deliberately has none. That is the seam: an app asks core to rebuild a
+  parent and gets frames back, which `docs/core-api.md` already names as the
+  one exception to `render()` touching nothing.
+  It unblocks both of the things that looked like separate jobs — grid
+  dithering a loop frame by frame, and a viewer that can actually play a
+  sequence back in the vault.
 
-Then: the mechanical moves into `core/` (`stage/`, `input.js`, `registry.js`,
-`libs/`) with the import rewrite; then `core/params.js`, which is what grid v2
-gets written against at M2.
+Then: grid consumes it (M2's link, `grid → vault: dithered sequence`), and a
+sequence viewer in `VaultPanel`. `input.js` and `libs/` are still unmoved but
+block nothing. The webm muxer stays an open decision — staged, not scheduled.
 
 ## Parked decisions
 - Name is **skweeb**, `.skw` for the smart object.

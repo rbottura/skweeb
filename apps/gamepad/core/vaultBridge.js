@@ -22,9 +22,9 @@
 
 import { Vault }         from '../../../core/vault.js';
 import { thumbFromBlob } from '../../../core/thumb.js';
-import * as BrushRegistry from './brushRegistry.js';
+import * as BrushRegistry from '../../../core/registry.js';
 import { ImageStore }       from './imageStore.js';
-import { SequenceRecorder } from './sequenceRecorder.js';
+import { SequenceRecorder } from '../../../core/stage/recorder.js';
 
 const APP = { app: 'gamepad', version: '1.0.0' };
 

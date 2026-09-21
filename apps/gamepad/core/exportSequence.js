@@ -14,8 +14,8 @@
  * representativeTick(). It is not the last one.
  */
 
-import { SequencePlayer } from './sequencePlayer.js';
-import { representativeTick } from './sequenceClip.js';
+import { SequencePlayer } from '../../../core/stage/player.js';
+import { representativeTick } from '../../../core/stage/clip.js';
 import { p5Instance }     from '../sketch/gamepadSketch.js';
 import { captureFrames, zipStore, frameName, download } from '../../../core/export.js';
 import { Vault }          from '../../../core/vault.js';

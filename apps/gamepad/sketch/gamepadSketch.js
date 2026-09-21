@@ -4,15 +4,15 @@
  * Exported as createSketch(container) → returns the p5 instance.
  */
 
-import * as BrushRegistry from '../core/brushRegistry.js';
+import * as BrushRegistry from '../../../core/registry.js';
 import { JoyImage, PATTERNS }    from '../core/joyImage.js';
 import { InputManager, MODE }    from '../core/inputManager.js';
 import { ImageStore }            from '../core/imageStore.js';
-import { SequenceRecorder }      from '../core/sequenceRecorder.js';
-import { SequencePlayer }        from '../core/sequencePlayer.js';
-import { createClip }            from '../core/sequenceClip.js';
-import { SequenceStage }         from '../core/sequenceStage.js';
-import { SequenceTransport }     from '../core/sequenceTransport.js';
+import { SequenceRecorder }      from '../../../core/stage/recorder.js';
+import { SequencePlayer }        from '../../../core/stage/player.js';
+import { createClip }            from '../../../core/stage/clip.js';
+import { SequenceStage }         from '../../../core/stage/stage.js';
+import { SequenceTransport }     from '../../../core/stage/transport.js';
 
 /** Movement speed (px/frame at full stick deflection). Tweakable from ParamPanel. */
 export const params = {

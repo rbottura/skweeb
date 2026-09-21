@@ -20,6 +20,7 @@
 // ─── Internal state ───────────────────────────────────────────────────────────
 
 let _manifest      = null;        // full manifest JSON
+let _base          = '';          // directory the manifest came from
 let _selected      = [];          // family meta objects chosen by the user
 let _sprites       = new Map();   // familyId → p5.Image[]
 let _loaded        = false;
@@ -27,15 +28,30 @@ let _loaded        = false;
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
- * Fetch the manifest from the server.
+ * Fetch a manifest.
+ *
+ * The URL is a parameter because this module is shared now. It used to fetch
+ * `brush-manifest.json` with no path at all, which resolves against the *page*
+ * — invisible while the only page was the gamepad's, and wrong the moment
+ * anything else asks for the same sprites. Family paths inside the manifest
+ * are relative to the manifest, so they are resolved against where it was
+ * found rather than against whoever is asking.
+ *
+ * @param {string} [url]
  * @returns {Promise<Object>} the full manifest JSON
  */
-export async function loadManifest() {
+export async function loadManifest(url = 'brush-manifest.json') {
   if (_manifest) return _manifest;
-  const res = await fetch('brush-manifest.json');
-  if (!res.ok) throw new Error(`Failed to load brush-manifest.json: ${res.status}`);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
   _manifest = await res.json();
+  _base = url.slice(0, url.lastIndexOf('/') + 1);
   return _manifest;
+}
+
+/** Where a family's files actually live, relative to the manifest. */
+function fileUrl(fam, fileIndex) {
+  return `${_base}${fam.path}/${fam.files[fileIndex]}`;
 }
 
 /** Return all family entries from the manifest (for the selector UI). */
@@ -62,8 +78,8 @@ export function setSelectedFamilies(ids) {
 export function preloadSelected(p) {
   for (const fam of _selected) {
     const imgs = [];
-    for (const file of fam.files) {
-      imgs.push(p.loadImage(`${fam.path}/${file}`));
+    for (let i = 0; i < fam.files.length; i++) {
+      imgs.push(p.loadImage(fileUrl(fam, i)));
     }
     _sprites.set(fam.id, imgs);
   }
@@ -84,7 +100,7 @@ export function getSpriteUrl(familyId, fileIndex) {
   const fam = _selected.find(f => f.id === familyId) ??
               _manifest?.families.find(f => f.id === familyId);
   if (!fam || fileIndex < 0 || fileIndex >= fam.files.length) return '';
-  return `${fam.path}/${fam.files[fileIndex]}`;
+  return fileUrl(fam, fileIndex);
 }
 
 /** Get URL using the family's index position in _selected (for legacy callers). */

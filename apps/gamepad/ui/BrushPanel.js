@@ -17,7 +17,7 @@
  * B / Escape       → cancel & close
  */
 
-import * as BrushRegistry from '../core/brushRegistry.js';
+import * as BrushRegistry from '../../../core/registry.js';
 import { InputManager, MODE } from '../core/inputManager.js';
 
 const VISIBLE_SPRITES = 7; // how many sprites show at once in the row

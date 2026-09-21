@@ -7,7 +7,7 @@
  *   3. this file             (module)
  */
 
-import * as BrushRegistry from './core/brushRegistry.js';
+import * as BrushRegistry from '../../core/registry.js';
 import { InputManager, MODE } from './core/inputManager.js';
 import { ImageStore }          from './core/imageStore.js';
 import { BrushPanel }          from './ui/BrushPanel.js';

@@ -13,7 +13,7 @@
 globalThis.document = { dispatchEvent() {} };
 globalThis.CustomEvent = class { constructor(name, init) { Object.assign(this, init); } };
 
-const { SequenceRecorder: R } = await import('../apps/gamepad/core/sequenceRecorder.js');
+const { SequenceRecorder: R } = await import('../core/stage/recorder.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
