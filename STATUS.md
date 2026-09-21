@@ -115,7 +115,20 @@ _last touched: 2026-09-21_
   and `core/export.js` already runs a clockless frame loop. What has to be
   decided rather than assembled is what comes out: a `sequence` object whose
   render is one frame and whose `parents` is the loop it was made from, which
-  means grid's save path grows a second shape.
+  means grid's save path grows a second shape — and it will have to pick its
+  own representative frame, the way the gamepad's exporter had to learn to.
+
+  Two questions to settle before writing it, neither of which the code answers:
+
+  1. **Re-dither every frame, or dither once and replay?** Per-frame is the
+     correct reading and it is slow — 1060 frames at 295×148 cells. Dithering
+     only the representative frame is fast and is a different artwork, not a
+     cheaper version of the same one.
+  2. **Whose recipe does the output carry?** Grid's, with the source in
+     `parents`, is the answer the object model implies. But that means
+     re-rendering it later re-runs the whole rebuild chain — source sequence,
+     sprites, dither — which is exactly what `parents` is supposed to allow
+     and has never once been tried.
 
 Then M2 is done and the catalogue has its first link — the honest measure of
 whether this is a suite rather than apps sharing a drawer. `input.js` is still
