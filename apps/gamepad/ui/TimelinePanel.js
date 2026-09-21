@@ -28,6 +28,7 @@ import { WINDOW_RULES, RULE_NAMES, BAND_STEPS, bandWidth } from '../core/sequenc
 import { FILTER_PRESETS, BLEND_MODES, layerScale } from '../core/sequenceStage.js';
 import { SPEED_MULTIPLIERS, tickRateAt } from '../core/sequenceTransport.js';
 import { SequenceRecorder } from '../core/sequenceRecorder.js';
+import { exportLayerToVault } from '../core/exportSequence.js';
 
 /** Phase steps offered, as fractions of a loop. */
 const PHASE_STEPS = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875];
@@ -186,8 +187,9 @@ export class TimelinePanel {
         <span class="tl-name">${layer.name}</span>
         <span class="tl-meta">${marks} marks · ${length}t · ${secs}s</span>
         <div class="tl-track"><div class="tl-fill"></div></div>
-        <button class="tl-chev"  type="button" title="Parameters">▸</button>
-        <button class="tl-trash" type="button" title="Delete layer">✕</button>
+        <button class="tl-chev"   type="button" title="Parameters">▸</button>
+        <button class="tl-export" type="button" title="Export to the vault (⇧ also downloads the frames)">⤓</button>
+        <button class="tl-trash"  type="button" title="Delete layer">✕</button>
       </div>
     `;
 
@@ -208,6 +210,35 @@ export class TimelinePanel {
         layer.solo = !only;
       }
       this.refresh();
+    });
+
+    row.querySelector('.tl-export').addEventListener('click', async e => {
+      const btn = e.currentTarget;
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.dataset.busy = '1';
+
+      // Ticks per second as the transport is actually running this layer, so
+      // the exported frame rate matches what is on screen.
+      const fps = Math.max(1, Math.round(layer.rate.ratio * getTransport().rate));
+      try {
+        const { object, frames } = await exportLayerToVault(layer, {
+          fps,
+          keepFrames: e.shiftKey,
+          onProgress: (done, total) => { btn.textContent = Math.round((done / total) * 100) + '%'; },
+        });
+        btn.textContent = object ? '✓' : '⤓';
+        console.log('[export]', frames, 'frames', object ? '→ ' + object.id : '→ downloaded (no vault)');
+      } catch (err) {
+        btn.textContent = '!';
+        console.error('[export] failed:', err);
+      } finally {
+        setTimeout(() => {
+          btn.textContent = '⤓';
+          delete btn.dataset.busy;
+          btn.disabled = false;
+        }, 1600);
+      }
     });
 
     row.querySelector('.tl-chev').addEventListener('click', () => {

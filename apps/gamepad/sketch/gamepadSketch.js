@@ -503,6 +503,9 @@ function _clearOverlay() {
  */
 export function canvasIsReproducible() { return _baseImage === null; }
 
+/** The p5 instance, for anything that needs to build its own buffers. */
+export function p5Instance() { return _p5; }
+
 /** The url an image was loaded from, while one underlies the ink layer. */
 export function baseImageUrl() { return _baseImage; }
 

@@ -129,7 +129,7 @@
 }
 .tl-grip:active { cursor: grabbing; }
 
-.tl-eye, .tl-solo, .tl-chev, .tl-trash {
+.tl-eye, .tl-solo, .tl-chev, .tl-trash, .tl-export {
   width: 22px;
   height: 22px;
   flex: none;
@@ -144,7 +144,9 @@
   transition: color 120ms var(--hud-anim), background 120ms var(--hud-anim);
 }
 
-.tl-eye:hover, .tl-solo:hover, .tl-chev:hover { color: var(--hud-cyan); background: rgba(0, 245, 255, 0.1); }
+.tl-eye:hover, .tl-solo:hover, .tl-chev:hover, .tl-export:hover { color: var(--hud-cyan); background: rgba(0, 245, 255, 0.1); }
+.tl-export[data-busy] { color: var(--hud-cyan); font-size: 9px; width: 34px; }
+.tl-export[disabled] { opacity: 0.5; cursor: default; }
 .tl-trash:hover { color: var(--hud-magenta); background: rgba(255, 32, 121, 0.12); }
 
 .tl-row:not(.tl-row--hidden) .tl-eye { color: var(--hud-cyan); }

@@ -128,11 +128,19 @@ read a clock. That discipline is exactly what this needs — see the
 | cost | zero, already there | about 60 lines |
 | for | drafts, screen recordings | anything entering the vault or going to print |
 
-**Encoders.** PNG frames to zip for the lossless path — that is what grid eats.
-For video, WebCodecs `VideoEncoder` plus a muxer, not ffmpeg.wasm and not
-MediaRecorder: it is frame-accurate, fast, and has no realtime constraint.
-Chrome-only, which is fine for a local tool and needs a fallback the day the
-gallery exports anything.
+**What exists.** `captureFrames({count, draw, onProgress})` runs the loop and
+collects PNG blobs; `zipStore(entries)` packs them into a store-only zip —
+PNGs are already deflated, so compressing again costs time and saves nothing,
+and store-only is forty lines rather than a dependency; `frameName(i, total)`
+pads so an alphabetical sort is a numeric one; `download(blob, name)` hands it
+to the browser. `tests/export.mjs` covers the loop indexing and the zip.
+
+**What does not exist: video.** A sequence object's render is currently its
+last frame as a PNG, and the frames come out as a zip on request. Writing a
+webm needs a muxer — WebCodecs encodes frames but does not container them —
+which means either vendoring one or writing one, and that is a decision rather
+than an afternoon. MediaRecorder is not the answer: it is realtime and drops
+frames, which is the whole thing this file exists to avoid.
 
 **Resolution.** Export is the only place print scale appears. The live loop
 stays at screen size with `density` as a parameter; `export.js` re-runs
