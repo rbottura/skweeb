@@ -9,9 +9,13 @@
  * The frame loop is the one the player was written for. reset() renders tick
  * zero, step() advances and renders — so frame zero is captured before the
  * first step, not after it.
+ *
+ * Which frame is kept as the still is a real decision, not a detail — see
+ * representativeTick(). It is not the last one.
  */
 
 import { SequencePlayer } from './sequencePlayer.js';
+import { representativeTick } from './sequenceClip.js';
 import { p5Instance }     from '../sketch/gamepadSketch.js';
 import { captureFrames, zipStore, frameName, download } from '../../../core/export.js';
 import { Vault }          from '../../../core/vault.js';
@@ -51,8 +55,8 @@ export async function exportLayerToVault(layer, opts = {}) {
       onProgress,
     });
 
-    const last  = frames[frames.length - 1];
-    const thumb = await thumbFromBlob(last);
+    const still = frames[Math.min(representativeTick(clip), frames.length - 1)];
+    const thumb = await thumbFromBlob(still);
     const buf   = player.buffer;
 
     const object = await Vault.save({
@@ -78,7 +82,7 @@ export async function exportLayerToVault(layer, opts = {}) {
         scale,
       },
       render: {
-        blob: last, ext: 'png',
+        blob: still, ext: 'png',
         w: buf.width, h: buf.height, density: scale,
         frames: count, fps, loop: !!clip.timing.loop,
       },

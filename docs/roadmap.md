@@ -119,8 +119,9 @@ is "run it in a worker", not a redesign.
 2. **The online skweeboteque.** Wanted, not now — it needs a server, and it is
    also what turns sandboxing from theory into work. Nothing in the local design
    blocks it; the vault interface is the seam it would go behind.
-3. **Video output.** A sequence object has no playable file: its render is the
-   last frame, and the frames come out as a zip on request. Writing webm needs
+3. **Video output.** A sequence object has no playable file: its render is a
+   single frame — the fullest one the window rule ever shows, see
+   `representativeTick()` — and the frames come out as a zip on request. Writing webm needs
    a muxer, vendored or hand-written, since WebCodecs encodes frames but does
    not container them. MediaRecorder is not the answer — realtime, drops
    frames. Until this is decided the gallery cannot play anything back. The

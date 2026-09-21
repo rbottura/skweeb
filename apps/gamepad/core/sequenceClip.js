@@ -169,3 +169,40 @@ export function totalTicks(clip) {
   }
   return total;
 }
+
+/**
+ * The tick showing the most marks — the frame that stands for the whole clip.
+ *
+ * Emphatically not the last one, which is what an export kept until
+ * 2026-09-21. Every rule ends deliberately: `sweep` and `build` finish on a
+ * blank tick, and `bounce` turns round and finishes on its first two marks.
+ * Keeping the final frame therefore kept a fully transparent PNG for two rules
+ * out of four, and a two-marks-out-of-266 one for a third — which is exactly
+ * what the sequence cards in the vault showed.
+ *
+ * A rule already answers "which marks are up at tick k", so ask it rather than
+ * inspecting pixels: this is arithmetic over the window, no canvas anywhere.
+ *
+ * `slide` is a travelling band and never shows everything at once. Its ticks
+ * are all one width, so this returns the first — which is what slide looks
+ * like, and the honest answer for a rule with no fullest moment.
+ *
+ * @returns {number} a global tick index, comparable with an export frame index
+ */
+export function representativeTick(clip) {
+  const n    = clip.sequence.events.length;
+  const rule = ruleOf(clip);
+  const opts = clip.window;
+
+  let best = 0, bestMarks = -1, base = 0;
+  for (let pass = 0; pass < rule.passCount(n, opts); pass++) {
+    const ticks = rule.tickCount(pass, n, opts);
+    for (let tick = 0; tick < ticks; tick++) {
+      const range = rule.range(pass, tick, n, opts);
+      const marks = range ? range[1] - range[0] + 1 : 0;
+      if (marks > bestMarks) { bestMarks = marks; best = base + tick; }
+    }
+    base += ticks;
+  }
+  return best;
+}

@@ -135,8 +135,12 @@ and store-only is forty lines rather than a dependency; `frameName(i, total)`
 pads so an alphabetical sort is a numeric one; `download(blob, name)` hands it
 to the browser. `tests/export.mjs` covers the loop indexing and the zip.
 
-**What does not exist: video.** A sequence object's render is currently its
-last frame as a PNG, and the frames come out as a zip on request. Writing a
+**What does not exist: video.** A sequence object's render is currently a
+single PNG, and the frames come out as a zip on request. Which frame is a
+decision, not a detail: `representativeTick()` in `sequenceClip.js` asks the
+window rule which tick shows the most marks. It is never the last one — `sweep`
+and `build` end on a blank tick by design and `bounce` ends on its first two
+marks, so keeping frame N-1 kept a transparent PNG for half the rules. Writing a
 webm needs a muxer — WebCodecs encodes frames but does not container them —
 which means either vendoring one or writing one, and that is a decision rather
 than an afternoon. MediaRecorder is not the answer: it is realtime and drops
