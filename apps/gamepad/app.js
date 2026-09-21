@@ -14,12 +14,16 @@ import { BrushPanel }          from './ui/BrushPanel.js';
 import { ParamPanel }          from './ui/ParamPanel.js';
 import { GalleryPanel }        from './ui/GalleryPanel.js';
 import { TimelinePanel }       from './ui/TimelinePanel.js';
+import { VaultPanel }          from '../../core/VaultPanel.js';
 import { createSketch,
          setFamilyIndex, setSpriteIndex, setPatternIndex,
          familyIndex, spriteIndex, patternIndex }
        from './sketch/gamepadSketch.js';
 
 import { BrushSelector }       from './ui/BrushSelector.js';
+
+/** Built during boot; the keyboard handler at the bottom reaches it. */
+let vaultPanel = null;
 
 // Saving also writes a vault object, with the recipe attached.
 import './core/vaultBridge.js';
@@ -50,6 +54,10 @@ async function boot() {
     // Built after the sketch, so its getStage()/getTransport() have something
     // to return. It stays hidden until the first recording lands.
     const timelinePanel = new TimelinePanel();
+
+    // The read side of the vault. Unlike the GALLERY panel, which shows this
+    // browser's scratchpad, this one shows what is on disk with its recipes.
+    vaultPanel = new VaultPanel();
 
     // 6. Restore previously saved images from IndexedDB
     await ImageStore.ready;
@@ -124,6 +132,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 't' || e.key === 'T') {
     document.dispatchEvent(new CustomEvent('ui:toggleTimeline'));
   }
+  if (e.key === 'v' || e.key === 'V') vaultPanel?.toggle();
 });
 
 function _buildStatusBar() {
@@ -141,9 +150,16 @@ function _buildStatusBar() {
     <span class="sb-spacer"></span>
     <a class="sb-item sb-link" href="gallery/" target="_blank" rel="noopener">Gallery &#8599;</a>
     <span class="sb-sep">·</span>
-    <span class="sb-item sb-dim">T = timeline &nbsp;·&nbsp; H = help</span>
+    <span class="sb-item sb-dim">V = vault &nbsp;·&nbsp; T = timeline &nbsp;·&nbsp; H = help</span>
   `;
   document.body.appendChild(bar);
+
+  // The count was already here; clicking it is the discoverable way in.
+  const vaultField = bar.querySelector('#sb-vault');
+  vaultField.style.cursor = 'pointer';
+  vaultField.title = 'Open the vault [V]';
+  vaultField.addEventListener('click', () => vaultPanel?.toggle());
+
   return bar;
 }
 
@@ -174,6 +190,7 @@ function _toggleHelp() {
           <tr><td>L3</td><td>—</td><td>Reset brush to centre</td></tr>
           <tr><td>Select</td><td>—</td><td>Open Gallery</td></tr>
           <tr><td>—</td><td>T</td><td>Open / close Timeline</td></tr>
+          <tr><td>—</td><td>V</td><td>Open / close the Vault</td></tr>
         </tbody>
       </table>
       <h3>In the Timeline</h3>

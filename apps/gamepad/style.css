@@ -6,6 +6,7 @@
 @import './ui/hud.css';
 @import './ui/bsel.css';
 @import './ui/timeline.css';
+@import '../../core/vault-panel.css';
 
 /* ── Reset & base ───────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
