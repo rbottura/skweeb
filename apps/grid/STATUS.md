@@ -36,12 +36,12 @@ luminance picking a member of an ordered ramp of tiles. Ported from
   has no id, so a save is a leaf: `recipe: null`, tagged `leaf`, exactly as the
   gamepad does for a drawing over a loaded image. Lineage would need the file
   to become an object first.
-- **No export at scale yet.** `renderGrid()` takes a width and scales the cell
-  with it, so the path is there and untested above screen size. Nothing calls
-  it with a print width.
-- `width` is a parameter but the canvas is not resizable by dragging, and the
-  preview never scales past 1:1 — a dither shown enlarged lies about how fine
-  it is.
+- **No export at scale yet.** `scale` is a live parameter and `renderGrid()`
+  takes an override for it, so the path exists — but nothing drives it from an
+  exporter, and nothing has rendered above screen size.
+- The preview is capped to the pane and never shown above 1:1, so at a high
+  `scale` you are looking at a downscaled picture of a large render. The
+  readout gives the true pixel size; there is no zoom control.
 
 ## Next single step
 - Open `http://127.0.0.1:3000/apps/grid/`, drop an image on it, and see whether

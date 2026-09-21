@@ -4,7 +4,7 @@
  * map.js decides which ramp member each cell gets; this puts them on a
  * surface. Between them they are the whole app, and `renderGrid()` is what
  * `render()` in main.js calls — the same function for the live preview and for
- * a print-scale export, differing only in the width it is handed.
+ * a print-scale export, differing only in the scale it is handed.
  *
  * ── On p5 ───────────────────────────────────────────────────────────────────
  *
@@ -44,9 +44,9 @@ export function surface(w, h) {
 /**
  * Resample a source down to one pixel per cell, and read those pixels.
  *
- * This is the step that decides how much of the source survives: at 6px cells
- * on a 518px canvas an image becomes 86 columns, and everything finer than
- * that is gone before a tile is drawn. Smoothing is on and set to high so a
+ * This is the step that decides how much of the source survives: a 1772px-wide
+ * source at 6px cells becomes 295 columns, and everything finer than that is
+ * gone before a tile is drawn. Smoothing is on and set to high so a
  * cell averages the area it covers rather than sampling one arbitrary pixel
  * out of it — nearest-neighbour here makes a dither that crawls with noise.
  *
@@ -101,41 +101,47 @@ export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0,
  * arrives already decoded. That is what keeps it usable from an exporter, a
  * worker, or a live preview without three different code paths.
  *
+ * The grid is counted in the SOURCE's pixels and drawn in the output's. That
+ * is the whole of what `scale` means: how many cells there are depends on the
+ * source and `cell` alone, so turning scale up draws the same picture with
+ * bigger tiles rather than a finer grid with small ones. Counting in output
+ * space instead would make the cell count drift by one at some scales, as the
+ * rounding of the canvas and of the cell disagree.
+ *
  * @param {object} args
  * @param {object} args.recipe          params.values
  * @param {CanvasImageSource} args.source  the decoded source image
  * @param {CanvasImageSource[]} args.tiles the ramp, light to dark
- * @param {number} [args.width]         overrides recipe.width, for export scale
- * @returns {{canvas: HTMLCanvasElement|OffscreenCanvas, cols, rows, cell, indices, drawn}}
+ * @param {number} [args.scale]         overrides recipe.scale, for export
+ * @returns {{canvas, cols, rows, cell, indices, drawn, scale}}
  */
-export function renderGrid({ recipe, source, tiles, width }) {
-  const targetWidth = Math.max(1, Math.round(width || recipe.width));
+export function renderGrid({ recipe, source, tiles, scale }) {
+  const zoom = Math.max(0.01, scale || recipe.scale || 1);
 
-  // The page is the shape of what it is dithering. A source with no
-  // dimensions would divide by zero, so it falls back to square.
   const srcW = source && (source.width || source.naturalWidth) || 1;
   const srcH = source && (source.height || source.naturalHeight) || 1;
-  const targetHeight = Math.max(1, Math.round(targetWidth * (srcH / srcW)));
 
-  // Cell size scales with the render, or a print export would be the same
-  // grid drawn with tiny tiles instead of the same picture larger.
-  const scale = targetWidth / Math.max(1, recipe.width);
-  const cell = Math.max(1, Math.round(recipe.cell * scale));
+  // Counted in source pixels, so the answer does not move with `scale`.
+  const grid = gridSize({ width: srcW, height: srcH, cell: recipe.cell });
 
-  const grid = gridSize({ width: targetWidth, height: targetHeight, cell });
+  const cellPx = Math.max(1, Math.round(recipe.cell * zoom));
+  const outW = Math.max(1, Math.round(srcW * zoom));
+  const outH = Math.max(1, Math.round(srcH * zoom));
 
-  const canvas = surface(targetWidth, targetHeight);
+  const canvas = surface(outW, outH);
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
   if (recipe.background) {
     ctx.fillStyle = recipe.background;
-    ctx.fillRect(0, 0, targetWidth, targetHeight);
+    ctx.fillRect(0, 0, outW, outH);
   }
 
-  if (!grid.cols || !grid.rows || !source) {
-    return { canvas, ...grid, indices: new Int16Array(0), drawn: 0 };
+  const out = { canvas, cols: grid.cols, rows: grid.rows, cell: cellPx, scale: zoom };
+
+  if (!grid.cols || !grid.rows || !source || !tiles.length) {
+    return { ...out, indices: new Int16Array(0), drawn: 0 };
   }
 
   const pixels = samplePixels(source, grid.cols, grid.rows);
@@ -146,17 +152,17 @@ export function renderGrid({ recipe, source, tiles, width }) {
     weighting: recipe.weighting,
   });
 
-  // Whole cells only, so the leftover is split either side and the grid sits
+  // Whole cells only, so the leftover is split either side and the field sits
   // centred rather than pinned to the top left with a gap at the end.
   const drawn = paintField(ctx, {
     indices,
     cols: grid.cols,
     rows: grid.rows,
-    cell: grid.cell,
+    cell: cellPx,
     tiles,
-    offsetX: Math.floor(grid.marginX / 2),
-    offsetY: Math.floor(grid.marginY / 2),
+    offsetX: Math.round((outW - grid.cols * cellPx) / 2),
+    offsetY: Math.round((outH - grid.rows * cellPx) / 2),
   });
 
-  return { canvas, ...grid, indices, drawn };
+  return { ...out, indices, drawn };
 }

@@ -27,8 +27,8 @@
 
 import { defineParams } from '../../core/params.js';
 
-/** The width, in pixels, the live canvas renders at. Export re-runs at scale. */
-const DEFAULT_WIDTH = 518;
+/** 1x is the source's own size. Export re-runs render() at a larger one. */
+const DEFAULT_SCALE = 1;
 
 /**
  * @param {{ramps: Array<{id: string, count: number}>}} manifest
@@ -63,10 +63,11 @@ export function gridParams(manifest) {
     },
 
     /**
-     * Cell size in pixels. With `width`, this decides how many cells there
-     * are, and so how much of the source survives: at 6px on a 518px canvas
-     * the source is resampled to 86 columns, and everything finer than that
-     * is gone before a single tile is drawn.
+     * Cell size, measured in the SOURCE's pixels. This alone decides how many
+     * cells there are — `scale` only changes how big they are drawn — so it is
+     * the parameter that says how much of the source survives: a 1772px-wide
+     * image at 6 becomes 295 columns, and everything finer than that is gone
+     * before a single tile is drawn.
      */
     cell: {
       type: 'int',
@@ -77,20 +78,24 @@ export function gridParams(manifest) {
     },
 
     /**
-     * Live render width. Height follows the source's aspect, so the grid is
-     * the shape of what it is dithering rather than of the browser window —
-     * which is the change the sketch had already made for itself by the end,
-     * with a fixed 1728x2160 page at 0.3.
+     * Output size as a multiple of the source's own. 1x renders at exactly
+     * the source's dimensions, which is the only width that means anything
+     * without asking what is being dithered — the old absolute `width` was
+     * inherited from a fixed 1728x2160 page at 0.3 and said nothing about the
+     * image it was applied to.
      *
-     * Resolution is otherwise an export concern: render() takes its width
-     * from the exporter and this is only what the screen shows.
+     * Scale does not change what the picture is, only how large it is drawn:
+     * the cell count comes from the source and `cell` alone, and the tiles are
+     * drawn bigger. That is what makes this the `density` of
+     * docs/roadmap.md — live at 1, export re-running once at 4 or more.
      */
-    width: {
-      type: 'int',
-      min: 128,
-      max: 4096,
-      default: DEFAULT_WIDTH,
-      label: 'width',
+    scale: {
+      type: 'range',
+      min: 0.1,
+      max: 8,
+      step: 0.1,
+      default: DEFAULT_SCALE,
+      label: 'scale',
     },
 
     /** Swap which end of the ramp the shadows land on. */

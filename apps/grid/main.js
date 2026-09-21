@@ -7,7 +7,7 @@
  * `source` param, and the vault write path is core's.
  *
  * The live preview and an export call the same `renderGrid()`, differing only
- * in the width handed to it. There is deliberately no second drawing path:
+ * in the scale handed to it. There is deliberately no second drawing path:
  * the moment a preview and an export are different code, they start
  * disagreeing about something small.
  */
@@ -136,7 +136,8 @@ function paint() {
 
   const usage = rampUsage(last.indices, tiles.length);
   say(`${last.cols}×${last.rows} cells · ${last.drawn} drawn · `
-    + `${usage.empty} empty · ${usage.used}/${tiles.length} of the ramp used`);
+    + `${usage.empty} empty · ${usage.used}/${tiles.length} of the ramp used · `
+    + `${canvas.width}×${canvas.height} at ${last.scale}×`);
 }
 
 const say = text => { document.getElementById('readout').textContent = text; };
