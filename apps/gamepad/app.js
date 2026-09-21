@@ -21,6 +21,9 @@ import { createSketch,
 
 import { BrushSelector }       from './ui/BrushSelector.js';
 
+// Saving also writes a vault object, with the recipe attached.
+import './core/vaultBridge.js';
+
 // ── Boot sequence ────────────────────────────────────────────────────────────
 
 async function boot() {
@@ -133,6 +136,8 @@ function _buildStatusBar() {
     <span class="sb-item sb-dim" id="sb-sprite">—</span>
     <span class="sb-sep">·</span>
     <span class="sb-item sb-dim" id="sb-count">0 saved</span>
+    <span class="sb-sep">·</span>
+    <span class="sb-item sb-dim" id="sb-vault">vault…</span>
     <span class="sb-spacer"></span>
     <a class="sb-item sb-link" href="gallery/" target="_blank" rel="noopener">Gallery &#8599;</a>
     <span class="sb-sep">·</span>

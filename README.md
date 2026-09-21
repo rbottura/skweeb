@@ -24,8 +24,11 @@ folder in `apps/`, a param schema, and three functions. See
 ## Running
 
 ```sh
-node server.js      # http://127.0.0.1:3000
+node server.js      # http://127.0.0.1:3000/apps/gamepad/
 ```
+
+The server serves the repo root, so apps sit at `/apps/<name>/`, the shared kit
+at `/core/` and your objects at `/vault/`.
 
 ## Status
 

@@ -58,7 +58,7 @@ gallery/                      ← in git, deployed
 | `tags` | free. The gallery filters on these plus `type` and `origin.app`. |
 | `origin.version` | the app version that wrote the recipe. An old recipe in a newer app is a migration, not a crash. |
 | `recipe` | app-specific, JSON-serializable, complete. Anything not in here is lost. |
-| `seed` | the integer every `rng()` in that render was drawn from. No seed, no re-render. |
+| `seed` | the integer every `rng()` in that render was drawn from. No seed, no re-render. `null` is correct only when the render used no randomness at all — true of the gamepad, which draws exactly what you drew. |
 | `parents` | **made from.** Historical, frozen, for lineage. |
 | `refs` | **depends on.** Live, for invalidation. See *Smart objects*. |
 | `render.density` | the scale this render was made at. 1 is screen. Export writes a second render at 4 or more; the object keeps both. |

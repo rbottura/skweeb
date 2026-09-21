@@ -2,9 +2,16 @@
 _last touched: 2026-09-21_
 
 ## Works right now
+- **The vault spine works.** `node server.js` serves the repo root and owns
+  `vault/`. `GET/POST /api/vault` and `GET /api/vault/<id>` are exercised and
+  pass: create, dedup on same-bytes-and-same-recipe, a new object for the same
+  bytes with a *different* recipe, magic-byte rejection, missing-type
+  rejection, id traversal refused, and renders served byte-exact.
+- Saving in the gamepad now writes both tiers: ImageStore as before (browser
+  scratchpad) and a vault object with its recipe attached. The status bar shows
+  the vault count.
 - The copy is confirmed working: drawing, the gallery panel, image upload and
-  save all behave, in the browser with the controller. `node
-  scripts/dev-server.js` serves it.
+  save all behave, in the browser with the controller.
 - The gamepad's drawing is already deterministic — the only `random()` calls in
   it are id generation in `imageStore` and `sequenceRecorder`. Recipes will
   reproduce without any seeding work here, though `rng.js` still matters for
@@ -25,24 +32,25 @@ _last touched: 2026-09-21_
   Garam_blue from 19.03 MB to 5.56 MB at ~2/255 mean error on visible pixels.
   `brushes` stays lossless by decision. Test output and the A/B page are in the
   session scratchpad, `quant/out/compare.html`.
-- `apps/gamepad/gallery/` is the old per-app gallery, superseded by the shared
-  one. It stays until `core/` extraction, then goes.
+- `apps/gamepad/gallery/` and `scripts/dev-server.js` are the old per-app
+  gallery and its server, superseded by `server.js` and the vault. They still
+  work if run directly; they go at `core/` extraction.
+- Nothing reads the vault back yet — no gallery, no picker. Objects go in and
+  sit there until `Vault.list()` has a panel in front of it.
 - The timeline can make sequences but cannot keep them: there is no export
   anywhere in `TimelinePanel.js` or `core/sequence*`, so a composition
   evaporates on reload. Everything an exporter needs is in place — `step()`
   refuses the clock, the player takes a scale, a loop knows its tick count.
 
 ## Next single step
-- The vault spine: generalise the dev server's write API from gallery images to
-  vault objects, and write `core/vault.js` against it. Done when the gamepad's
-  save writes `vault/objects/<id>/` with `object.json`, `render.png` and
-  `thumb.webp`, and `index.json` picks it up.
+- `core/export.js` plus an export control on the timeline: advance the
+  transport tick in a bare loop over one complete cycle, writing a webm and a
+  PNG sequence. That is what lets a loop become an object, and it closes M1's
+  acceptance test.
 
-Then, in order: `core/export.js` plus an export control on the timeline, which
-is what lets a loop become an object and closes M1's acceptance test; the
-mechanical moves into `core/` (`stage/`, `input.js`, `registry.js`, `libs/`)
-with the import rewrite; and `core/params.js`, which is what grid v2 gets
-written against at M2.
+Then: the mechanical moves into `core/` (`stage/`, `input.js`, `registry.js`,
+`libs/`) with the import rewrite; then `core/params.js`, which is what grid v2
+gets written against at M2.
 
 ## Parked decisions
 - Name is **skweeb**, `.skw` for the smart object.
