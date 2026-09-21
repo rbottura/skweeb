@@ -30,6 +30,48 @@ node server.js      # http://127.0.0.1:3000/apps/gamepad/
 The server serves the repo root, so apps sit at `/apps/<name>/`, the shared kit
 at `/core/` and your objects at `/vault/`.
 
+## On another machine
+
+Clone it, run `node server.js`, open `/apps/gamepad/`. Everything needed to run
+is in the repo, with two deliberate exceptions — both stay on the machine that
+made them:
+
+- **`vault/`** — your objects. Not in git by design: unbounded, holds video,
+  and it is yours. Nothing saved on one machine appears on another. Copy the
+  folder across if you need it, or publish the keepers into `gallery/`.
+- **Six sprite families** — Destra, GaramondI, Minipax, PeaceSans, Raleway and
+  fleurs, 135 MB between them, gitignored until they are recompressed
+  (`docs/roadmap.md` has the measurements). The originals live in
+  `sketch-2-print`. The app boots without them on `brushes` and `timbre`.
+
+`brush-manifest.json` is committed and still lists all eleven families, so a
+fresh clone offers six that are not there. Regenerate it from what is actually
+on disk before working:
+
+```sh
+node scripts/generate-manifest.js
+```
+
+## Licence
+
+**The code is MIT** — see `LICENSE`. That covers what was written for this
+project: `core/`, `server.js`, the sources under `apps/`, `scripts/`, `tests/`.
+
+It does not cover everything in the repository, and the difference matters:
+
+- **The visual work is not MIT.** The sprites under `gamepad_sprites/`, and
+  anything drawn with this suite, are copyright Raphael Bottura, all rights
+  reserved. Ask if you want to use them.
+- **The fonts in `assets/fonts/` are third-party**, each under the SIL Open
+  Font License 1.1 with its own copyright holder. Their licence travels with
+  the files and is not replaced by this one — `docs/fonts.md` has the audit,
+  including the six fonts that were pulled for having no licence at all.
+- **`apps/gamepad/libs/` is vendored and keeps its own terms.** p5.js is
+  LGPL-2.1 and stays LGPL-2.1. `p5.joystick.min.js` carries no licence header,
+  no author and no attribution — its provenance is unverified, which puts it
+  in the same position as the pulled fonts. It should be traced or replaced
+  before anything depends on it being redistributable.
+
 ## Status
 
 Milestone 1. See `STATUS.md` for where it actually is today, and

@@ -1,0 +1,24 @@
+# Line endings are decided here rather than by whatever each machine happens to
+# be configured for. This project moves between devices; a checkout should not
+# produce a diff.
+* text=auto eol=lf
+
+# Binary: never normalised, never diffed.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.webp   binary
+*.gif    binary
+*.webm   binary
+*.mp4    binary
+*.zip    binary
+*.otf    binary
+*.ttf    binary
+*.woff   binary
+*.woff2  binary
+
+# Vendored. Not ours, not normalised, and kept out of GitHub's language stats
+# so the project is not reported as mostly somebody else's p5.
+apps/*/libs/**  -text -diff linguist-vendored
+core/libs/**    -text -diff linguist-vendored
+assets/fonts/** linguist-vendored
