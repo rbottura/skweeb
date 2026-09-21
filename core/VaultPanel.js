@@ -222,7 +222,14 @@ export class VaultPanel {
 
   // ── The drawer ─────────────────────────────────────────────────────────────
 
+  /** A viewer holds a player and a buffer; leaving one running leaks both. */
+  _disposeViewer() {
+    if (this._viewer) this._viewer.dispose();
+    this._viewer = null;
+  }
+
   async _openDetail(id) {
+    this._disposeViewer();
     this._current = id;
     this._markCurrent();
     this._detail.classList.add('vp-detail--open');
@@ -242,6 +249,7 @@ export class VaultPanel {
   }
 
   _closeDetail() {
+    this._disposeViewer();
     this._current = null;
     this._detail.classList.remove('vp-detail--open');
     this._markCurrent();
@@ -256,6 +264,31 @@ export class VaultPanel {
     preview.alt = o.title || o.id;
     preview.src = renderUrl;
     body.append(preview);
+
+    // A sequence's render is one frame of it. The loop itself has no file, so
+    // playing it means rebuilding it from the recipe — imported only when
+    // asked, because that is what pulls p5 into a page that may not want it.
+    if (o.type === 'sequence' && o.recipe) {
+      const play = el('button', 'vp-btn', '▶ Play the loop');
+      play.addEventListener('click', async () => {
+        play.disabled = true;
+        play.textContent = 'rebuilding…';
+        try {
+          const { SequenceViewer } = await import('./SequenceViewer.js');
+          const viewer = new SequenceViewer(o);
+          preview.replaceWith(viewer.node);
+          play.remove();
+          this._disposeViewer();
+          this._viewer = viewer;
+          await viewer.start();
+        } catch (err) {
+          play.disabled = false;
+          play.textContent = '▶ Play the loop';
+          console.error('[vault] could not rebuild', o.id, err);
+        }
+      });
+      body.append(play);
+    }
 
     body.append(el('div', 'vp-name', o.title || '(untitled)'));
 

@@ -1,0 +1,74 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   sequence-viewer.css — a sequence playing back.
+
+   Its own file because the viewer is its own component: it appears in the
+   vault drawer today and belongs anywhere a loop needs watching. Same token
+   contract as the other core panels — every value falls back.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.sv { display: block; }
+
+/* The checkerboard reads through, because a sequence is ink on nothing. */
+.sv-canvas {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  background-color: #14141c;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.045) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.045) 75%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.045) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.045) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+.sv-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sv-btn {
+  width: 30px;
+  height: 24px;
+  flex: none;
+  border: 1px solid var(--hud-border, rgba(0, 245, 255, 0.25));
+  border-radius: 6px;
+  background: var(--hud-glass, rgba(255, 255, 255, 0.04));
+  color: var(--hud-text, #dde6f0);
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+
+.sv-btn:hover { background: rgba(0, 245, 255, 0.12); color: var(--hud-cyan, #00f5ff); }
+
+.sv-scrub {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--hud-cyan, #00f5ff);
+  cursor: pointer;
+}
+
+.sv-scrub:disabled { opacity: 0.4; cursor: default; }
+
+.sv-count {
+  flex: none;
+  min-width: 8ch;
+  text-align: right;
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 10px;
+  color: var(--hud-subtle, rgba(255, 255, 255, 0.35));
+}
+
+.sv-note {
+  margin-top: 6px;
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--hud-subtle, rgba(255, 255, 255, 0.35));
+}
+
+.sv-note--bad { color: var(--hud-amber, #ffb300); }

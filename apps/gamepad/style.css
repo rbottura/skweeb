@@ -7,6 +7,7 @@
 @import './ui/bsel.css';
 @import './ui/timeline.css';
 @import '../../core/vault-panel.css';
+@import '../../core/sequence-viewer.css';
 
 /* ── Reset & base ───────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

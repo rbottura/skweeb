@@ -20,6 +20,7 @@
 // ─── Internal state ───────────────────────────────────────────────────────────
 
 let _manifest      = null;        // full manifest JSON
+let _manifestUrl   = null;        // which one, so a second URL is not ignored
 let _base          = '';          // directory the manifest came from
 let _selected      = [];          // family meta objects chosen by the user
 let _sprites       = new Map();   // familyId → p5.Image[]
@@ -41,10 +42,14 @@ let _loaded        = false;
  * @returns {Promise<Object>} the full manifest JSON
  */
 export async function loadManifest(url = 'brush-manifest.json') {
-  if (_manifest) return _manifest;
+  // Keyed by URL, not just "have we loaded one" — with a second app asking for
+  // another app's sprites, returning the first manifest for every later call
+  // would hand back the wrong families and look like a missing sprite.
+  if (_manifest && _manifestUrl === url) return _manifest;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
   _manifest = await res.json();
+  _manifestUrl = url;
   _base = url.slice(0, url.lastIndexOf('/') + 1);
   return _manifest;
 }
@@ -86,6 +91,32 @@ export function preloadSelected(p) {
   // p5 preload tracks async calls automatically; mark as loaded at draw-time
   // (we can't synchronously know when all loadImage calls resolved here)
   _loaded = true;
+}
+
+/**
+ * Load the selected families and resolve when they are actually decoded.
+ *
+ * preloadSelected() above is the p5 `preload()` path: it fires loadImage and
+ * lets p5's own preload counter do the waiting, which only works inside that
+ * phase. Anything outside it — rebuilding a sequence in an app that is not
+ * mid-setup — needs to know when the pixels are really there, so this uses
+ * the callback form and awaits them.
+ *
+ * A sprite that fails to decode stays in the array as null rather than being
+ * filtered out: the index is the sprite number a recorded mark refers to, and
+ * closing the gap would silently draw the wrong brush.
+ *
+ * @param {p5} p
+ */
+export async function loadSelected(p) {
+  for (const fam of _selected) {
+    _sprites.set(fam.id, await Promise.all(
+      fam.files.map((_, i) => new Promise(resolve => {
+        p.loadImage(fileUrl(fam, i), img => resolve(img), () => resolve(null));
+      }))));
+  }
+  _loaded = true;
+  return _sprites;
 }
 
 export function isLoaded() { return _loaded; }

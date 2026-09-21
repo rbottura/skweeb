@@ -9,6 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600&display=swap');
 @import '../../core/vault-panel.css';
 @import '../../core/param-panel.css';
+@import '../../core/sequence-viewer.css';
 
 :root {
   --hud-cyan:    #00f5ff;
