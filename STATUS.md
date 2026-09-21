@@ -41,10 +41,13 @@ _last touched: 2026-09-21_
   work if run directly; they go at `core/` extraction.
 - Nothing reads the vault back yet — no gallery, no picker. Objects go in and
   sit there until `Vault.list()` has a panel in front of it.
-- A still's recipe now holds everything needed to redraw it, but nothing
-  redraws it: the gamepad has no `render()` yet. The data is complete, the
-  replay is not written. Both arrive with `core/export.js`, since replaying
-  marks at a given scale is exactly what the exporter does.
+- A still's recipe holds everything needed to redraw it, but nothing redraws
+  it yet: the exporter drives `SequencePlayer`, which replays a *clip*, and
+  there is no equivalent path for a plain still. The data is complete, the
+  still replay is not written.
+- A sequence object has no playable file. Its render is the last frame as a
+  PNG and the frames come out as a zip on request. Video needs a muxer — see
+  `docs/roadmap.md`.
 - Load an image onto the canvas and marks no longer account for it, so the
   still saves as a leaf — `recipe: null`, tagged `leaf`. Correct, but it means
   a drawing made on top of a loaded image cannot be re-rendered. Lineage
@@ -55,10 +58,11 @@ _last touched: 2026-09-21_
   refuses the clock, the player takes a scale, a loop knows its tick count.
 
 ## Next single step
-- `core/export.js` plus an export control on the timeline: advance the
-  transport tick in a bare loop over one complete cycle, writing a webm and a
-  PNG sequence. That is what lets a loop become an object, and it closes M1's
-  acceptance test.
+- Verify the export in the browser: record a sequence, open the timeline with
+  T, and press ⤓ on the layer. It should count a percentage up and land a
+  `sequence` object in the vault; shift-click also downloads the frames as a
+  zip. That closes M1's acceptance test, and it is the one part of this I
+  cannot check myself.
 
 Then: the mechanical moves into `core/` (`stage/`, `input.js`, `registry.js`,
 `libs/`) with the import rewrite; then `core/params.js`, which is what grid v2
