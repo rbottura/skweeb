@@ -130,16 +130,30 @@ JavaScript to someone else's browser.
 ```json
 {
   "ref": "skw_1789012345678_aa71bc",
-  "at": "latest",
+  "version": "latest",
   "transform": { "x": 0, "y": 0, "scale": 1, "rot": 0 },
-  "overrides": { "cell": 8 }
+  "overrides": { "cell": 8 },
+  "at": 0,
+  "length": null
 }
 ```
 
-- `at: "latest"` — live. Editing the definition updates this placement.
-- `at: 4` — pinned to version 4. An old composition keeps looking as it did.
+- `version: "latest"` — live. Editing the definition updates this placement.
+- `version: 4` — pinned. An old composition keeps looking as it did.
 - `overrides` — per-placement param values, so two placements of one definition
   can differ. Free, because params are data.
+- `at` — **when**, in frames, measured from the composition's own start.
+  `0` for something that is simply there.
+- `length` — how many frames it runs for. `null` means its natural length: one
+  frame for a still, the loop's own length for a sequence.
+
+**Why `version` and not `at` for the pin.** This block said `at` for the
+version until 2026-09-22, which worked only while nothing in a placement had a
+time. A composition holds sequences, so a placement needs to say *when* as well
+as *which* — and `at: 4` cannot mean both "version 4" and "starts at frame 4".
+Renamed while it was still only a document and nothing had been written to
+disk in the old shape. The lesson is cheap here and would not have been later:
+a field with two plausible readings has one reading too many.
 
 **Versions.** Editing a `.skw` appends `versions/vN.json` and bumps
 `object.version`. Past versions are immutable, so a pin is a real promise.

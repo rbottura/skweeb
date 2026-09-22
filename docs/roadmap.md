@@ -24,16 +24,45 @@ letterforms with a pattern on them, emitted as a `set` the gamepad loads as a
 brush family. Those folders are that exact chain, run by hand and frozen. M3 is
 done when it runs itself and keeps its lineage.
 
-**M4 — compose, export, publish.** The page: many objects placed on a sheet,
-previewed live at screen resolution, exported once at print resolution. Then
-`gallery/` deploys.
-*Done when:* an A3 sheet of objects from all three apps exports as a print file,
-and one object has a URL you can send.
+**M4 — compose: the fourth app, and the master render.** Not a page and not a
+mode bolted onto the others — an app, `apps/compose/`, where objects from all
+three processes are placed, timed, previewed live and rendered out. A small
+image and video editor whose material is the vault: stills, sequences and
+`.skw` smart objects, mixed on one surface.
+
+The part that changes the other three: **compose becomes where a finished
+output is made.** Export in the gamepad, grid and ckt stays, but its job is
+demoted from "how you make work" to **a shortcut for producing an asset** —
+you export from grid because you want a dithered sequence in the vault, not
+because it is the last step. Anything with more than one element in it goes
+through compose. That is what makes it the master rendering environment rather
+than a fourth way to save a PNG.
+
+*Done when:* a sheet carrying objects from all three apps — at least one of
+them moving — previews live, renders at print scale, and one object has a URL
+you can send.
+
+Three consequences, recorded here because each of them is work:
+
+1. **Video output is frames plus ffmpeg, not a muxer.** Settled 2026-09-22 —
+   see *Decided since* below. A composition renders a numbered PNG sequence
+   into a zip exactly as the gamepad and grid already do, and `scripts/` turns
+   that into a file. Nothing is blocked and nothing has to be written in
+   JavaScript that a mature C program does better.
+2. **Placement needs a time axis — done, in the document.** The `place[]`
+   entry used `at` to pin a `.skw` *version*, and a composition of sequences
+   also needs *when* each element starts. `at: 4` cannot mean both. The pin is
+   now `version`; `at` and `length` are time, in frames. Renamed on 2026-09-22
+   while it was still only a document — see `docs/object-model.md`.
+3. **`render()` finally has to be real.** It is the one moment the roadmap
+   already named, and compose is that moment: A3 at 300dpi is about
+   3500 x 4960 and every placed object has to redraw itself at that size.
 
 Each milestone after M1 should also leave **one link** behind, since the
 catalogue of links is the only real measure of whether this is a suite:
-M2 `grid → vault: dithered sequence`, M3 `ckt → gamepad: brush family`,
-M4 `any → composition: place on a sheet`.
+M2 `grid → vault: dithered sequence` — **done, 2026-09-22**, and the first
+entry in the catalogue. M3 `ckt → gamepad: brush family`.
+M4 `any → compose: place on a sheet or a timeline`.
 
 **M5 — 3D, the fourth process.** The test of whether this architecture was worth
 building: a new app should cost a folder, a schema and three functions, and the
@@ -55,8 +84,10 @@ because placement is already specified for `.skw`:
   "recipe": {
     "page": { "format": "A3", "mm": [297, 420], "bleed": 3 },
     "place": [
-      { "ref": "gmp_…k3f9", "at": "latest", "transform": { "x": 20, "y": 30, "scale": 1 } },
-      { "ref": "grd_…88f0", "at": 4, "transform": { "x": 120, "y": 30, "scale": 0.5 } }
+      { "ref": "gmp_…k3f9", "version": "latest", "at": 0,  "length": null,
+        "transform": { "x": 20, "y": 30, "scale": 1 } },
+      { "ref": "grd_…88f0", "version": 4, "at": 60, "length": 240,
+        "transform": { "x": 120, "y": 30, "scale": 0.5 } }
     ]
   }
 }
@@ -112,6 +143,69 @@ receives `{ width, height, frame, rng, load }` and returns pixels, and never
 touches `Vault`, the DOM or the network itself. Keep that and sandboxing later
 is "run it in a worker", not a redesign.
 
+## Decided since, 2026-09-22
+
+**Video is frames plus ffmpeg, and the muxer is cancelled.** A sequence's
+frames already come out as a numbered PNG zip, which is a good archival format
+and a lossless one. `scripts/frames-to-video.mjs` turns that into a file with
+ffmpeg on the command line. No WebCodecs, no vendored container writer, no
+MediaRecorder.
+
+The reasoning, so nobody reopens it: a browser muxer would be several hundred
+lines of bit-packing to reimplement, badly, a thing ffmpeg does correctly, with
+every codec, and that the person running this already has. The only argument
+for it was that a `.webm` inside the vault would let the gallery play a loop —
+and that argument died when `core/rebuild.js` and `core/playback.js` made any
+object replayable from its recipe, with no file to play. The envelope still
+allows `render.webm`; nothing stops a rendered file being brought back in as an
+object later.
+
+What this costs, stated plainly: producing a video is two steps and one of them
+is a terminal. That is accepted. The zip is the deliverable the app owes; the
+video is a conversion.
+
+**M2 is done.** Grid loads a vault object, dithers it, and saves the result
+with the source in `parents`. Per-frame was chosen over dithering once and
+replaying: the dither follows the motion, and the cost lands on export because
+the preview only ever dithers the frame under the playhead. The output carries
+**grid's** recipe with the source named inside it, so re-rendering re-runs the
+whole chain — which is the first time anything actually walked `parents`.
+
+**Replay is a dispatch, and it is what M4 stands on.** `core/rebuild.js` used
+to mean one thing: replay a recording of marks. It now recognises that a recipe
+it does not understand belongs to the app that wrote it, and loads
+`/apps/<app>/rebuild.js` by convention to ask. Core never learns what dithering
+is; grid answers for its own objects, and a grid sequence replays by rebuilding
+its parent and re-running the dither over every frame.
+
+That is exactly the capability a composition needs — *give me frame N of this
+object, whatever made it* — so M4 does not have to invent it, and M5's fourth
+process gets it for a file rather than an edit to core.
+
+**Framing is one idea, in core.** `core/frame.js` and `core/formats.js`: a
+parameter group an app spreads into its own schema — `format`, `width`,
+`height`, `link`, `bleed`, `zoom` — plus a table of named shapes carrying
+either a ratio, exact pixels, or millimetres. Content is placed at 1:1 and
+allowed to overflow; there is no automatic fit and no automatic crop, because
+letterboxing is "a bigger canvas" and cropping is "a smaller one" and neither
+needs a policy that would be wrong half the time.
+
+The field names are `format`, `mm` and `bleed` on purpose, so **M4's page is a
+user of this table rather than a second copy of it**. The `page` block
+specified above is already written in its vocabulary.
+
+Print support is that table plus `dpiOf()`, and deliberately nothing else. The
+workflow was already reachable — replay a sequence at density 4 and the still
+is print quality — and what was missing was being able to see whether it had.
+Grid's readout now says `312 dpi on A3, print`.
+
+**Trim is measured, not derived.** `contentBounds()` bounds each sprite by half
+its diagonal, which is safe and generous; `core/trim.js` scans for the pixels
+actually painted. The gamepad's still now crops to its ink, which sequences
+have always done, and the crop goes into the recipe — the marks are in canvas
+coordinates and the render is a window onto them, so a replay without it would
+redraw the whole canvas and believe it matched.
+
 ## Still open
 
 1. **`destra.otf` and `GPDestra-Light.otf`** carry no copyright and no licence.
@@ -119,13 +213,11 @@ is "run it in a worker", not a redesign.
 2. **The online skweeboteque.** Wanted, not now — it needs a server, and it is
    also what turns sandboxing from theory into work. Nothing in the local design
    blocks it; the vault interface is the seam it would go behind.
-3. **Video output.** A sequence object has no playable file: its render is a
-   single frame — the fullest one the window rule ever shows, see
-   `representativeTick()` — and the frames come out as a zip on request. Writing webm needs
-   a muxer, vendored or hand-written, since WebCodecs encodes frames but does
-   not container them. MediaRecorder is not the answer — realtime, drops
-   frames. Until this is decided the gallery cannot play anything back. The
-   envelope already allows `render.webm`, so nothing structural is blocked.
+3. ~~**Video output.**~~ **Closed 2026-09-22** — the answer is frames plus
+   ffmpeg. See *Decided since* below. It was open for three sessions on the
+   assumption that a sequence object needed a playable file inside the browser;
+   it does not, and the muxer that would have provided one is now work that
+   will not be done.
 
 ## Migration facts
 

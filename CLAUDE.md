@@ -18,6 +18,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | static server + the vault write API | — |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. | — |
 | `docs/roadmap.md` | milestones, open decisions, migration facts | when planning |
 
 ## The one idea
@@ -78,8 +79,9 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-node tests/recorder.mjs && node tests/clip.mjs &&
-  node tests/export.mjs && node tests/vault.mjs
+for t in recorder clip export vault grid-map params rng playback frame joyimage; do
+  node tests/$t.mjs || break
+done
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at
