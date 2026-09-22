@@ -35,8 +35,24 @@ async function boot() {
     // 1. Load manifest
     const manifest = await BrushRegistry.loadManifest();
 
-    // 2. Prompt user to select libraries
-    const selector = new BrushSelector(manifest);
+    // 1b. Find out which of its families are actually on this machine. The
+    //     heavy ones are gitignored by decision, so a clone has two of eleven
+    //     and the rest would 404 once per sprite — 517 times — and then draw
+    //     nothing when you cycled onto them. One HEAD each, before anything
+    //     is offered.
+    await BrushRegistry.probeFamilies();
+    const missing = BrushRegistry.unavailableManifestFamilies();
+    if (missing.length) {
+      console.warn(`[registry] ${missing.length} sprite families are in the manifest `
+        + `but not on this machine, and are not offered: `
+        + missing.map(f => f.id).join(', '));
+    }
+
+    // 2. Prompt user to select libraries — only from what can actually draw.
+    const selector = new BrushSelector({
+      ...manifest,
+      families: BrushRegistry.availableManifestFamilies(),
+    });
     const selectedIds = await selector.prompt();
 
     // 3. Configure registry

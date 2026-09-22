@@ -87,6 +87,9 @@ export function createSketch(container) {
 
     // ── preload ───────────────────────────────────────────────────────────────
     sketch.preload = () => {
+      // Probed in app.js before the selector ran, so a family that is not on
+      // this machine is already out of the selection and no doomed loadImage
+      // is fired here.
       BrushRegistry.preloadSelected(sketch);
     };
 

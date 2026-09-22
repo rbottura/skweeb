@@ -64,6 +64,65 @@ export function allManifestFamilies() {
   return _manifest?.families ?? [];
 }
 
+// ─── Availability ─────────────────────────────────────────────────────────────
+
+/**
+ * Which families are actually on this machine.
+ *
+ * The manifest is the contract and stays the contract — rule 3, nothing walks
+ * a directory. But a manifest describes the *project*, and a checkout may hold
+ * less of it than the project has: the heavy sprite families are gitignored by
+ * decision (CLAUDE.md rule 6), so a clone boots with two of eleven and the
+ * other nine 404 once per sprite, 517 times, before drawing nothing.
+ *
+ * So the manifest is still believed about what exists and asked about what is
+ * present. One HEAD per family instead of one GET per sprite, cached, and the
+ * answer is a fact about this machine rather than a correction to the file.
+ *
+ * This is also the path a published object hits when it names families the
+ * viewer has never had, which is the first thing `gallery/` will need.
+ */
+const _available = new Map();   // familyId → bool
+
+/**
+ * Probe every family in the manifest, or the ones named.
+ *
+ * @param {string[]} [ids]  default: all of them
+ * @returns {Promise<Map<string, boolean>>}
+ */
+export async function probeFamilies(ids) {
+  const families = (_manifest?.families ?? [])
+    .filter(f => !ids || ids.includes(f.id))
+    .filter(f => !_available.has(f.id));
+
+  await Promise.all(families.map(async fam => {
+    if (!fam.files || !fam.files.length) { _available.set(fam.id, false); return; }
+    try {
+      const res = await fetch(fileUrl(fam, 0), { method: 'HEAD' });
+      _available.set(fam.id, res.ok);
+    } catch {
+      _available.set(fam.id, false);
+    }
+  }));
+
+  return _available;
+}
+
+/** Unprobed counts as present: never hide a family because nobody asked yet. */
+export function isFamilyAvailable(id) {
+  return _available.get(id) !== false;
+}
+
+/** The families a picker should offer. */
+export function availableManifestFamilies() {
+  return allManifestFamilies().filter(f => isFamilyAvailable(f.id));
+}
+
+/** The ones that are named but not here, for a readout that says so. */
+export function unavailableManifestFamilies() {
+  return allManifestFamilies().filter(f => !isFamilyAvailable(f.id));
+}
+
 /**
  * Set which families to load. Call BEFORE preloadSelected().
  * @param {string[]} ids  — family id strings (from manifest)
@@ -109,7 +168,19 @@ export function preloadSelected(p) {
  * @param {p5} p
  */
 export async function loadSelected(p) {
+  // Probe first, so a family that is not on this machine costs one HEAD rather
+  // than one failed GET per sprite. Garam_blue alone is 58 of them.
+  await probeFamilies(_selected.map(f => f.id));
+
   for (const fam of _selected) {
+    if (!isFamilyAvailable(fam.id)) {
+      // Nulls, not an empty array, and not a missing key: a mark records the
+      // sprite index it used, so the array has to stay the right length or a
+      // later index would silently resolve to a different brush.
+      _sprites.set(fam.id, fam.files.map(() => null));
+      continue;
+    }
+
     _sprites.set(fam.id, await Promise.all(
       fam.files.map((_, i) => new Promise(resolve => {
         p.loadImage(fileUrl(fam, i), img => resolve(img), () => resolve(null));
