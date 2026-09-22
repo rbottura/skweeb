@@ -6,17 +6,21 @@
  * playhead, which is possible at all because the stage moved into `core/`.
  *
  * It is not a video player and does not pretend to be: there is no file to
- * play. Every frame is drawn on demand by replaying marks, so scrubbing
- * backwards costs a rebuild of that window and a long loop is not seekable for
- * free. `docs/roadmap.md` still has webm as an open decision, and this is what
- * the gallery uses until that is settled.
+ * play. Every frame is drawn on demand, so scrubbing backwards costs a rebuild
+ * of that window and a long loop is not seekable for free. `docs/roadmap.md`
+ * still has webm as an open decision, and this is what the gallery uses until
+ * that is settled.
  *
- * Timing is accumulated against the clock rather than one frame per animation
- * frame: a 60fps loop on a 120Hz screen would otherwise play at double speed,
- * and a 12fps one would play five times too fast.
+ * What it plays is whatever `openSequence()` hands back, which is no longer
+ * only a recording of marks: a grid sequence rebuilds its parent and re-runs
+ * the dither over every frame. Nothing here changes for that, which is the
+ * point of the handle being one shape.
+ *
+ * Timing lives in core/playback.js, shared with grid rather than written twice.
  */
 
 import { openSequence } from './rebuild.js';
+import { Playhead }     from './playback.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -35,11 +39,11 @@ export class SequenceViewer {
     this._object = object;
     this._autoplay = opts.autoplay !== false;
     this._seq = null;
-    this._tick = 0;
-    this._playing = false;
-    this._raf = 0;
-    this._last = 0;
-    this._carry = 0;
+
+    this._playhead = new Playhead({
+      onShow: tick => this._show(tick),
+      onState: () => { this._playBtn.textContent = this._playhead.playing ? '❙❙' : '▶'; },
+    });
 
     this._build();
   }
@@ -67,8 +71,8 @@ export class SequenceViewer {
     this._scrub.value = 0;
     this._scrub.disabled = true;
     this._scrub.addEventListener('input', () => {
-      this.pause();
-      this._show(Number(this._scrub.value));
+      this._playhead.pause();
+      this._playhead.show(Number(this._scrub.value));
     });
 
     this._count = el('span', 'sv-count', '…');
@@ -93,6 +97,12 @@ export class SequenceViewer {
     this._canvas.width = this._seq.width;
     this._canvas.height = this._seq.height;
 
+    this._playhead.configure({
+      fps: this._seq.fps,
+      length: this._seq.length,
+      loop: this._seq.loop,
+    });
+
     this._scrub.max = Math.max(0, this._seq.length - 1);
     this._scrub.disabled = false;
 
@@ -106,56 +116,18 @@ export class SequenceViewer {
       this._note.remove();
     }
 
-    this._show(0);
+    this._playhead.show(0);
     if (this._autoplay) this.play();
     return this._seq;
   }
 
   // ── Transport ──────────────────────────────────────────────────────────────
 
-  play() {
-    if (this._playing || !this._seq || !this._seq.length) return;
-    this._playing = true;
-    this._playBtn.textContent = '❙❙';
-    this._last = performance.now();
-    this._carry = 0;
-    this._raf = requestAnimationFrame(t => this._advance(t));
-  }
-
-  pause() {
-    this._playing = false;
-    this._playBtn.textContent = '▶';
-    if (this._raf) cancelAnimationFrame(this._raf);
-    this._raf = 0;
-  }
-
-  toggle() { this._playing ? this.pause() : this.play(); }
-
-  _advance(now) {
-    if (!this._playing) return;
-
-    // Whole ticks only, with the remainder carried, so playback keeps the
-    // object's own frame rate whatever the display is running at.
-    const elapsed = now - this._last;
-    this._last = now;
-    this._carry += (elapsed / 1000) * this._seq.fps;
-
-    const steps = Math.floor(this._carry);
-    if (steps > 0) {
-      this._carry -= steps;
-      const next = this._tick + steps;
-      if (!this._seq.loop && next >= this._seq.length) {
-        this._show(this._seq.length - 1);
-        return this.pause();
-      }
-      this._show(next % this._seq.length);
-    }
-
-    this._raf = requestAnimationFrame(t => this._advance(t));
-  }
+  play()   { this._playhead.play(); }
+  pause()  { this._playhead.pause(); }
+  toggle() { this._playhead.toggle(); }
 
   _show(tick) {
-    this._tick = tick;
     this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
     this._seq.drawInto(this._ctx, tick, this._canvas.width, this._canvas.height);
     this._scrub.value = tick;
@@ -163,7 +135,7 @@ export class SequenceViewer {
   }
 
   dispose() {
-    this.pause();
+    this._playhead.dispose();
     if (this._seq) this._seq.dispose();
     this._seq = null;
     this._root.remove();
