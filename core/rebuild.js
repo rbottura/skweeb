@@ -4,12 +4,26 @@
  * A `sequence` object's render is one PNG, and its frames are "a cache, not an
  * archive" (docs/object-model.md). So anything that wants the loop — a viewer
  * in the vault, grid dithering it frame by frame — has to rebuild it from the
- * recipe, which carries every mark.
+ * recipe.
  *
  * That was not possible until the stage moved into `core/`, and it is the
  * reason the move happened. `docs/core-api.md` names this as the one exception
  * to `render()` touching nothing: an app asks the core to rebuild a parent, and
  * gets frames back.
+ *
+ * ── Two kinds of recipe, and why this dispatches ────────────────────────────
+ *
+ * A gamepad sequence carries its marks, and replaying it is the code below. A
+ * grid sequence carries no marks at all: it holds grid's parameters and the id
+ * of the loop it was dithered from. Replaying *that* means rebuilding its
+ * parent and re-running the dither over every frame — the chain the object
+ * model promised and nothing had ever walked.
+ *
+ * Core does not know how to dither and must not learn. So an object whose
+ * recipe it does not recognise is handed to its own app: `/apps/<app>/rebuild.js`,
+ * imported on demand, exporting `openObject()` and returning the same handle.
+ * That is the same convention `manifestFor()` below already uses, and it means
+ * a fourth app at M5 costs a file rather than an edit here.
  *
  * ── Why this owns a p5 ──────────────────────────────────────────────────────
  *
@@ -96,18 +110,97 @@ function manifestFor(object) {
 }
 
 /**
+ * Draw one rebuilt frame into a box, letterboxed.
+ *
+ * Exported because every handle needs it and the arithmetic is the kind that
+ * two callers get wrong in two different ways. The subtlety it hides: a
+ * rebuilt buffer may cover only *part* of the frame it belongs to — the
+ * gamepad's is cropped to the marks — so a frame is a canvas plus the rect of
+ * the frame that canvas occupies. Pass the whole frame as the box when the
+ * canvas is the whole frame, as grid's is.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasImageSource} canvas    the rebuilt buffer
+ * @param {{x,y,w,h}} box               where that buffer sits in frame space
+ * @param {{width,height}} frame        the frame's own coordinate space
+ * @param {number} w                    the box to fit into
+ * @param {number} h
+ */
+export function drawFrameInto(ctx, canvas, box, frame, w, h) {
+  const fit = Math.min(w / frame.width, h / frame.height);
+  const offsetX = (w - frame.width * fit) / 2;
+  const offsetY = (h - frame.height * fit) / 2;
+  ctx.drawImage(canvas,
+    offsetX + box.x * fit,
+    offsetY + box.y * fit,
+    box.w * fit,
+    box.h * fit);
+}
+
+/**
+ * The maximum depth of a rebuild chain.
+ *
+ * A cycle cannot happen — a parent is always an object that already existed,
+ * and objects are immutable — so this is not a cycle guard. It is there so a
+ * chain that is somehow deeper than anyone intended fails saying what it was
+ * doing, instead of as a stack overflow inside a dither.
+ */
+const MAX_DEPTH = 8;
+
+/**
+ * Replay any object into frames, whatever made it.
+ *
  * @param {object} object      a vault envelope of type `sequence`
  * @param {object} [opts]
  * @param {string} [opts.manifestUrl]
  * @param {number} [opts.renderScale=1]  buffer pixels per sequence pixel
+ * @param {number} [opts.depth=0]        how many rebuilds deep this already is
  * @returns {Promise<Rebuilt>}
  */
-export async function openSequence(object, { manifestUrl, renderScale = 1 } = {}) {
+export async function openSequence(object, opts = {}) {
   const recipe = object && object.recipe;
-  if (!recipe || !recipe.sequence || !Array.isArray(recipe.sequence.events)) {
-    throw new Error('rebuild: that object carries no sequence to replay');
+  if (!recipe) throw new Error('rebuild: that object carries no recipe to replay');
+
+  if ((opts.depth || 0) > MAX_DEPTH) {
+    throw new Error('rebuild: chain deeper than ' + MAX_DEPTH + ' objects, stopping');
   }
 
+  // Marks: this file replays them itself. Anything else belongs to its app.
+  if (recipe.sequence && Array.isArray(recipe.sequence.events)) {
+    return openMarks(object, opts);
+  }
+  return openViaApp(object, opts);
+}
+
+/**
+ * Hand an object to the app that made it.
+ *
+ * The failure worth a clear message is the ordinary one: the object was made
+ * by an app this checkout does not have, which is what will happen the first
+ * time a published object opens somewhere else.
+ */
+async function openViaApp(object, opts) {
+  const app = object.origin && object.origin.app;
+  if (!app) throw new Error('rebuild: that object does not say which app made it');
+
+  let module;
+  try {
+    module = await import(/* @vite-ignore */ '/apps/' + app + '/rebuild.js');
+  } catch (err) {
+    throw new Error(`rebuild: nothing here knows how to replay a "${app}" object — `
+      + `/apps/${app}/rebuild.js did not load (${err.message})`);
+  }
+
+  if (typeof module.openObject !== 'function') {
+    throw new Error(`rebuild: /apps/${app}/rebuild.js does not export openObject()`);
+  }
+
+  return module.openObject(object, { ...opts, depth: (opts.depth || 0) + 1 });
+}
+
+/** A recording of marks, replayed through the stage. */
+async function openMarks(object, { manifestUrl, renderScale = 1 } = {}) {
+  const recipe = object.recipe;
   const p = await ensureInstance();
 
   await Registry.loadManifest(manifestUrl || manifestFor(object));
@@ -154,24 +247,12 @@ export async function openSequence(object, { manifestUrl, renderScale = 1 } = {}
 
     /**
      * Draw tick `i` into a context, fitted to `w`x`h` as the sequence's own
-     * frame rather than as the buffer's.
-     *
-     * Worth having in one place: the buffer is sized to the marks, not to the
-     * canvas they were drawn on, so putting it at 0,0 silently shifts and
-     * rescales the whole loop. Every consumer would otherwise re-derive this,
-     * and two of them would get it wrong differently.
+     * frame rather than as the buffer's. The buffer is sized to the marks, not
+     * to the canvas they were drawn on, so putting it at 0,0 would silently
+     * shift and rescale the whole loop — which is what `bounds` is for.
      */
     drawInto(ctx, i, w, h) {
-      const canvas = this.frame(i);
-      const fit = Math.min(w / this.width, h / this.height);
-      const offsetX = (w - this.width * fit) / 2;
-      const offsetY = (h - this.height * fit) / 2;
-      ctx.drawImage(
-        canvas,
-        offsetX + this.bounds.x * fit,
-        offsetY + this.bounds.y * fit,
-        this.bounds.w * fit,
-        this.bounds.h * fit);
+      drawFrameInto(ctx, this.frame(i), player.bounds, this, w, h);
     },
 
     dispose() { player.dispose(); },

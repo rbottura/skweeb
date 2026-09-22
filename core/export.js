@@ -16,6 +16,35 @@
  */
 
 /**
+ * Run a clockless frame loop.
+ *
+ * Split out from captureFrames() because collecting PNGs is one thing a frame
+ * loop may be asked to do, not what a frame loop is. Grid dithering a sequence
+ * runs every frame and keeps one of them; making it encode 1060 blobs in order
+ * to throw 1059 away would cost hundreds of megabytes for nothing.
+ *
+ * @param {object} opts
+ * @param {number} opts.count
+ * @param {(i:number)=>any} opts.frame   called with the index, in order. May be
+ *        async; must not read the clock.
+ * @param {(done:number,total:number)=>void} [opts.onProgress]
+ * @param {AbortSignal} [opts.signal]
+ * @returns {Promise<void>}
+ */
+export async function runFrames({ count, frame, onProgress, signal }) {
+  for (let i = 0; i < count; i++) {
+    if (signal && signal.aborted) throw new DOMException('export cancelled', 'AbortError');
+
+    await frame(i);
+    if (onProgress) onProgress(i + 1, count);
+
+    // Yield to the event loop so a long export does not freeze the page and
+    // the progress readout can actually paint.
+    if ((i & 3) === 3) await new Promise(r => setTimeout(r, 0));
+  }
+}
+
+/**
  * Run a frame loop and collect the results as PNG blobs.
  *
  * @param {object} opts
@@ -29,24 +58,31 @@
  */
 export async function captureFrames({ count, draw, onProgress, signal }) {
   const frames = [];
-  for (let i = 0; i < count; i++) {
-    if (signal && signal.aborted) throw new DOMException('export cancelled', 'AbortError');
-
-    const drawn = draw(i);
-    const canvas = drawn && drawn.canvas ? drawn.canvas : drawn;
-    if (!canvas) throw new Error('export: frame ' + i + ' produced no canvas');
-
-    frames.push(await toPng(canvas));
-    if (onProgress) onProgress(i + 1, count);
-
-    // Yield to the event loop so a long export does not freeze the page and
-    // the progress readout can actually paint.
-    if ((i & 3) === 3) await new Promise(r => setTimeout(r, 0));
-  }
+  await runFrames({
+    count,
+    async frame(i) {
+      const drawn = draw(i);
+      const canvas = drawn && drawn.canvas ? drawn.canvas : drawn;
+      if (!canvas) throw new Error('export: frame ' + i + ' produced no canvas');
+      frames.push(await toPng(canvas));
+    },
+    onProgress,
+    signal,
+  });
   return frames;
 }
 
-function toPng(canvas) {
+/**
+ * A canvas to a PNG blob, whichever kind of canvas it is.
+ *
+ * An OffscreenCanvas has `convertToBlob` and no `toBlob`, and every surface
+ * grid makes is one — see apps/grid/grid.js. Getting this wrong is a
+ * TypeError at frame zero of an export and nowhere else.
+ */
+export function toPng(canvas) {
+  if (typeof canvas.convertToBlob === 'function') {
+    return canvas.convertToBlob({ type: 'image/png' });
+  }
   return new Promise((resolve, reject) => {
     canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob returned null'))), 'image/png');
   });
