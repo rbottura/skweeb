@@ -128,6 +128,56 @@
 .pp-select:focus,
 .pp-text:focus { outline: 1px solid var(--hud-cyan, #00f5ff); }
 
+/* An enum as chips. For a list you pick from constantly and want to compare
+   all of at once — a dropdown would hide fifteen formats out of sixteen. */
+.pp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+}
+
+.pp-chip {
+  height: 22px;
+  padding: 0 7px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--hud-subtle, #8a97a8);
+  font-family: var(--hud-font, 'Space Mono', monospace);
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 120ms, color 120ms, border-color 120ms;
+}
+
+.pp-chip:hover {
+  color: var(--hud-text, #dde6f0);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.pp-chip--on {
+  background: rgba(0, 245, 255, 0.14);
+  border-color: var(--hud-cyan, #00f5ff);
+  color: var(--hud-cyan, #00f5ff);
+}
+
+/* A hairline before the first chip of each run, so ratios, pixel sizes and
+   paper do not read as one undifferentiated wall. */
+.pp-chip[data-group] { position: relative; }
+
+.pp-chip[data-group]:not(:first-child) { margin-left: 9px; }
+
+.pp-chip[data-group]:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 3px;
+  bottom: 3px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
 /* A switch rather than a checkbox: readable at a glance across the room. */
 .pp-switch {
   display: inline-flex;

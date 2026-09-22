@@ -174,17 +174,17 @@ const WIDGETS = {
     return { node: wrap, sync(v) { input.checked = v; } };
   },
 
-  enum: ({ spec, value, set }) => {
-    const select = el('select', 'pp-select');
-    for (const option of spec.options || []) {
-      const o = el('option', null, option);
-      o.value = option;
-      select.append(o);
-    }
-    select.value = value;
-    select.addEventListener('change', () => set(select.value));
-    return { node: select, sync(v) { select.value = v; } };
-  },
+  /**
+   * A choice. A dropdown by default; a row of chips when the schema says
+   * `display: 'chips'`.
+   *
+   * Chips are worth the extra widget for a list you pick from constantly and
+   * want to compare — the output formats, where seeing all of them at once is
+   * the point and a dropdown hides fifteen of sixteen. `spec.labels` maps an
+   * option to what the chip says, since `ig-portrait` is an id and `1080×1350`
+   * is what you are actually choosing.
+   */
+  enum: ctx => (ctx.spec.display === 'chips' ? chipEnum(ctx) : selectEnum(ctx)),
 
   color: ({ value, set, readout }) => {
     const input = el('input', 'pp-color');
@@ -288,6 +288,48 @@ const WIDGETS = {
     return { node: wrap, sync };
   },
 };
+
+// ── The two faces of an enum ─────────────────────────────────────────────────
+
+function selectEnum({ spec, value, set }) {
+  const select = el('select', 'pp-select');
+  for (const option of spec.options || []) {
+    const o = el('option', null, labelFor(spec, option));
+    o.value = option;
+    select.append(o);
+  }
+  select.value = value;
+  select.addEventListener('change', () => set(select.value));
+  return { node: select, sync(v) { select.value = v; } };
+}
+
+function chipEnum({ spec, value, set }) {
+  const wrap = el('div', 'pp-chips');
+  const chips = new Map();
+
+  for (const option of spec.options || []) {
+    const chip = el('button', 'pp-chip', labelFor(spec, option));
+    chip.type = 'button';
+    chip.title = option;
+    // A group puts a hairline before the first chip of each run, so ratios,
+    // pixel sizes and paper do not read as one undifferentiated wall.
+    const group = spec.groups && spec.groups[option];
+    if (group) chip.dataset.group = group;
+    chip.addEventListener('click', () => set(option));
+    chips.set(option, chip);
+    wrap.append(chip);
+  }
+
+  const sync = v => {
+    for (const [option, chip] of chips) chip.classList.toggle('pp-chip--on', option === v);
+  };
+
+  sync(value);
+  return { node: wrap, sync };
+}
+
+const labelFor = (spec, option) =>
+  (spec.labels && spec.labels[option]) || option;
 
 /** The types this panel can draw. Held against params.js's PARAM_TYPES. */
 export const WIDGET_TYPES = Object.keys(WIDGETS);
