@@ -50,12 +50,26 @@ export function surface(w, h) {
  * cell averages the area it covers rather than sampling one arbitrary pixel
  * out of it — nearest-neighbour here makes a dither that crawls with noise.
  *
+ * `from` and `to` are the frame: which part of the source to read, and where
+ * it lands on the canvas — both in canvas pixels, scaled here into cell space.
+ * Sampling straight into the cell buffer is what avoids building a full-size
+ * canvas per frame just to throw it away; a 1920x945 intermediate is 7 MB of
+ * churn a thousand times over, for a picture nothing ever looks at.
+ *
+ * Anything the source does not cover stays transparent, so it maps to an empty
+ * cell and the ground shows through. That is the bleed, and it costs no code.
+ *
  * @param {CanvasImageSource} source
  * @param {number} cols
  * @param {number} rows
+ * @param {object} place
+ * @param {{x,y,w,h}} place.from    the rect to read out of the source
+ * @param {{x,y,w,h}} place.to      where it goes, in canvas pixels
+ * @param {number} place.width      the canvas, so `to` can be scaled to cells
+ * @param {number} place.height
  * @returns {Uint8ClampedArray} RGBA, cols*rows pixels
  */
-export function samplePixels(source, cols, rows) {
+export function samplePixels(source, cols, rows, place) {
   if (cols < 1 || rows < 1) return new Uint8ClampedArray(0);
 
   const canvas = surface(cols, rows);
@@ -63,7 +77,17 @@ export function samplePixels(source, cols, rows) {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.clearRect(0, 0, cols, rows);
-  ctx.drawImage(source, 0, 0, cols, rows);
+
+  if (place) {
+    const sx = cols / place.width;
+    const sy = rows / place.height;
+    ctx.drawImage(source,
+      place.from.x, place.from.y, place.from.w, place.from.h,
+      place.to.x * sx, place.to.y * sy, place.to.w * sx, place.to.h * sy);
+  } else {
+    ctx.drawImage(source, 0, 0, cols, rows);
+  }
+
   return ctx.getImageData(0, 0, cols, rows).data;
 }
 
@@ -101,32 +125,35 @@ export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0,
  * arrives already decoded. That is what keeps it usable from an exporter, a
  * worker, or a live preview without three different code paths.
  *
- * The grid is counted in the SOURCE's pixels and drawn in the output's. That
- * is the whole of what `scale` means: how many cells there are depends on the
- * source and `cell` alone, so turning scale up draws the same picture with
+ * The grid is counted in the FRAME's pixels and drawn in the output's. That is
+ * the whole of what `scale` means: how many cells there are depends on the
+ * frame and `cell` alone, so turning scale up draws the same picture with
  * bigger tiles rather than a finer grid with small ones. Counting in output
  * space instead would make the cell count drift by one at some scales, as the
  * rounding of the canvas and of the cell disagree.
+ *
+ * The frame is where framing enters the drawing rather than wrapping it. A
+ * bleed is extra cells, not a border painted afterwards, so it lands on the
+ * grid instead of fighting it — and changing the frame changes the cell count,
+ * which is to say it changes the artwork. That is the intended reading.
  *
  * @param {object} args
  * @param {object} args.recipe          params.values
  * @param {CanvasImageSource} args.source  the decoded source image
  * @param {CanvasImageSource[]} args.tiles the ramp, light to dark
+ * @param {object} args.frame           from core/frame.js resolveFrame()
  * @param {number} [args.scale]         overrides recipe.scale, for export
- * @returns {{canvas, cols, rows, cell, indices, drawn, scale}}
+ * @returns {{canvas, cols, rows, cell, indices, drawn, scale, frame}}
  */
-export function renderGrid({ recipe, source, tiles, scale }) {
+export function renderGrid({ recipe, source, tiles, frame, scale }) {
   const zoom = Math.max(0.01, scale || recipe.scale || 1);
 
-  const srcW = source && (source.width || source.naturalWidth) || 1;
-  const srcH = source && (source.height || source.naturalHeight) || 1;
-
-  // Counted in source pixels, so the answer does not move with `scale`.
-  const grid = gridSize({ width: srcW, height: srcH, cell: recipe.cell });
+  // Counted in frame pixels, so the answer does not move with `scale`.
+  const grid = gridSize({ width: frame.width, height: frame.height, cell: recipe.cell });
 
   const cellPx = Math.max(1, Math.round(recipe.cell * zoom));
-  const outW = Math.max(1, Math.round(srcW * zoom));
-  const outH = Math.max(1, Math.round(srcH * zoom));
+  const outW = Math.max(1, Math.round(frame.width * zoom));
+  const outH = Math.max(1, Math.round(frame.height * zoom));
 
   const canvas = surface(outW, outH);
   const ctx = canvas.getContext('2d');
@@ -138,13 +165,21 @@ export function renderGrid({ recipe, source, tiles, scale }) {
     ctx.fillRect(0, 0, outW, outH);
   }
 
-  const out = { canvas, cols: grid.cols, rows: grid.rows, cell: cellPx, scale: zoom };
+  const out = {
+    canvas, cols: grid.cols, rows: grid.rows, cell: cellPx, scale: zoom, frame,
+  };
 
   if (!grid.cols || !grid.rows || !source || !tiles.length) {
     return { ...out, indices: new Int16Array(0), drawn: 0 };
   }
 
-  const pixels = samplePixels(source, grid.cols, grid.rows);
+  const pixels = samplePixels(source, grid.cols, grid.rows, {
+    from: frame.from,
+    to: frame.to,
+    width: frame.width,
+    height: frame.height,
+  });
+
   const indices = mapPixels(pixels, {
     steps: tiles.length,
     invert: recipe.invert,

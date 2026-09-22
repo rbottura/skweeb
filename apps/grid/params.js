@@ -26,6 +26,7 @@
  */
 
 import { defineParams } from '../../core/params.js';
+import { frameParams } from '../../core/frame.js';
 
 /** 1x is the source's own size. Export re-runs render() at a larger one. */
 const DEFAULT_SCALE = 1;
@@ -54,6 +55,18 @@ export function gridParams(manifest) {
       label: 'source',
     },
 
+    /**
+     * The frame: format, width, height, link, bleed, zoom. Spread from core
+     * so the gamepad and ckt mean the same thing by them, and so M4's page —
+     * `{ format: "A3", mm: […], bleed: 3 }` in docs/roadmap.md — is a user of
+     * this vocabulary rather than a second copy of it.
+     *
+     * `content` is the default because grid's usual source is a gamepad loop,
+     * and those are ink on a mostly empty 1920x945 canvas. Dithering the empty
+     * part is thousands of cells spent on nothing.
+     */
+    ...frameParams({ format: 'content' }),
+
     /** Which ordered run of tiles the luminance is mapped onto. */
     ramp: {
       type: 'enum',
@@ -63,11 +76,11 @@ export function gridParams(manifest) {
     },
 
     /**
-     * Cell size, measured in the SOURCE's pixels. This alone decides how many
-     * cells there are — `scale` only changes how big they are drawn — so it is
-     * the parameter that says how much of the source survives: a 1772px-wide
-     * image at 6 becomes 295 columns, and everything finer than that is gone
-     * before a single tile is drawn.
+     * Cell size, measured in the FRAME's pixels. This and the frame decide how
+     * many cells there are — `scale` only changes how big they are drawn — so
+     * it is the parameter that says how much of the source survives: a
+     * 1772px-wide frame at 6 becomes 295 columns, and everything finer than
+     * that is gone before a single tile is drawn.
      */
     cell: {
       type: 'int',
@@ -78,16 +91,16 @@ export function gridParams(manifest) {
     },
 
     /**
-     * Output size as a multiple of the source's own. 1x renders at exactly
-     * the source's dimensions, which is the only width that means anything
-     * without asking what is being dithered — the old absolute `width` was
-     * inherited from a fixed 1728x2160 page at 0.3 and said nothing about the
-     * image it was applied to.
+     * Output size as a multiple of the frame's own. Density, not shape: the
+     * frame says how big the picture is and what proportions it has, and this
+     * says how many pixels that is rendered into.
      *
-     * Scale does not change what the picture is, only how large it is drawn:
-     * the cell count comes from the source and `cell` alone, and the tiles are
-     * drawn bigger. That is what makes this the `density` of
-     * docs/roadmap.md — live at 1, export re-running once at 4 or more.
+     * Keeping the two apart is what lets `width` and `height` exist at all
+     * without undoing the decision in e7d1e61 — that an absolute width
+     * inherited from a fixed 1728x2160 page said nothing about the image it
+     * was applied to. Now the width is the frame's and means something, and
+     * this is still the `density` of docs/roadmap.md: live at 1, export
+     * re-running once at 4 or more.
      */
     scale: {
       type: 'range',

@@ -100,3 +100,18 @@ html, body {
 }
 
 .bar-btn:hover { background: rgba(0, 245, 255, 0.12); color: var(--hud-cyan); }
+
+/* `display: inline-flex` above beats the user agent's `[hidden]` rule, so a
+   hidden button stays visible unless this says otherwise. */
+.bar-btn[hidden] { display: none; }
+
+/* The playhead. Wide, because scrubbing a 1060-frame loop through 80px is
+   nine frames a pixel and you cannot land on the one you want. */
+.bar-scrub {
+  width: 260px;
+  height: 24px;
+  accent-color: var(--hud-cyan);
+  cursor: pointer;
+}
+
+.bar-scrub[hidden] { display: none; }

@@ -23,13 +23,23 @@
     <span class="bar-sep">·</span>
     <span class="bar-dim" id="readout">loading…</span>
     <span class="bar-spacer"></span>
+    <!--
+      The transport is chrome, not parameters. It says which frame you are
+      looking at; it says nothing about the artwork, and a save dithers every
+      frame regardless of where it sits. Putting it in the schema would write
+      it into the recipe, where it would mean nothing.
+    -->
+    <button class="bar-btn" id="play" title="Play / pause [space]" hidden>▶</button>
+    <input class="bar-scrub" id="playhead" type="range" min="0" max="0" step="1" value="0"
+           title="Frame [← →]" hidden>
     <label class="bar-btn" for="file">Open a file</label>
     <input id="file" type="file" accept="image/*" hidden>
     <button class="bar-btn" id="save" title="Save to the vault [S]">Save</button>
+    <button class="bar-btn" id="frames" title="Save, and download the frames as a zip" hidden>Save + frames</button>
     <span class="bar-sep">·</span>
     <span class="bar-dim" id="vault-state">vault…</span>
     <span class="bar-sep">·</span>
-    <span class="bar-dim">V = vault &nbsp;·&nbsp; S = save &nbsp;·&nbsp; drop an image</span>
+    <span class="bar-dim">V = vault &nbsp;·&nbsp; S = save &nbsp;·&nbsp; space = play &nbsp;·&nbsp; drop an image</span>
   </div>
 
   <script type="module" src="./main.js"></script>
