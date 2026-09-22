@@ -13,6 +13,7 @@ import { SequencePlayer }        from '../../../core/stage/player.js';
 import { createClip }            from '../../../core/stage/clip.js';
 import { SequenceStage }         from '../../../core/stage/stage.js';
 import { SequenceTransport }     from '../../../core/stage/transport.js';
+import * as StillFrame           from '../core/stillFrame.js';
 
 /** Movement speed (px/frame at full stick deflection). Tweakable from ParamPanel. */
 export const params = {
@@ -22,6 +23,19 @@ export const params = {
   scaleMin:       0.05,
   scaleMax:       8,
   refOpacity:     0.5,
+
+  /**
+   * How a saved still is framed. Same vocabulary as core/frame.js, which grid
+   * takes as a full parameter group — the gamepad gets the two that matter
+   * until its params move onto core/params.js and it can have the rest.
+   *
+   * `content` is the default because a gamepad drawing is a few marks on a
+   * canvas the size of your window, and saving the window was saving mostly
+   * nothing: a 1920x945 still holding a drawing 996x822 across. Set `source`
+   * to get the old behaviour back.
+   */
+  frameFormat:    'content',
+  frameBleed:     0,
 };
 
 /** Opacity of the live brush cursor drawn over the ink layer. */
@@ -511,13 +525,14 @@ export function baseImageUrl() { return _baseImage; }
 
 function _saveImage() {
   if (!_overlay || !_p5) return;
-  // Create a temporary graphics with a white background so saved image isn't transparent
-  const temp = _p5.createGraphics(_overlay.width, _overlay.height);
-  temp.background(255);
-  temp.image(_overlay, 0, 0);
-  ImageStore.save(temp.canvas, BrushRegistry.familyMetaByIndex(familyIndex)?.label)
+
+  // The frame used is remembered by stillFrame.js, not here: vaultBridge needs
+  // it for the recipe, and it is save state rather than sketch state.
+  const { graphics } = StillFrame.composite(_p5, _overlay, params);
+
+  ImageStore.save(graphics.canvas, BrushRegistry.familyMetaByIndex(familyIndex)?.label)
             .catch(err => console.error('[sketch] Save failed:', err));
-  temp.remove();
+  graphics.remove();
 }
 
 function _getActiveGamepad() {

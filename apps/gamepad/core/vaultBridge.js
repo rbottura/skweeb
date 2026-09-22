@@ -24,6 +24,7 @@ import { Vault }         from '../../../core/vault.js';
 import { thumbFromBlob } from '../../../core/thumb.js';
 import * as BrushRegistry from '../../../core/registry.js';
 import { ImageStore }       from './imageStore.js';
+import * as StillFrame      from './stillFrame.js';
 import { SequenceRecorder } from '../../../core/stage/recorder.js';
 
 const APP = { app: 'gamepad', version: '1.0.0' };
@@ -34,13 +35,26 @@ function recipeNow(sketch, entry) {
 
   const family = BrushRegistry.familyMetaByIndex(sketch.familyIndex);
   const shot   = SequenceRecorder.snapshot();
+  const frame  = StillFrame.lastFrame();
+
   return {
+    /**
+     * The surface the marks were drawn on — NOT the size of the render, which
+     * since the still learned to crop is a window onto it. `entry.width` is
+     * the cropped size, so it is no longer a usable fallback here.
+     */
     canvas: {
-      w: shot.w || entry.width,
-      h: shot.h || entry.height,
+      w: shot.w,
+      h: shot.h,
       // _saveImage() composites the ink layer over white before saving.
       background: '#ffffff',
     },
+
+    /**
+     * Which part of that canvas the render shows, and where it sits. Without
+     * it a replay would redraw the whole canvas and believe it matched.
+     */
+    frame: frame ? { from: frame.from, to: frame.to, w: frame.width, h: frame.height } : null,
     brush: {
       familyId:     family ? family.id : null,
       familyIndex:  sketch.familyIndex,

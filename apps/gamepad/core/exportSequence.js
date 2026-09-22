@@ -97,6 +97,21 @@ export async function exportLayerToVault(layer, opts = {}) {
           bytes: new Uint8Array(await frames[i].arrayBuffer()),
         });
       }
+
+      // The rate travels with the frames, so scripts/frames-to-video.mjs needs
+      // no flags. A zip of PNGs is otherwise silent about how fast it should
+      // run, and guessing 30 for a 60fps loop halves it.
+      entries.push({
+        name: 'meta.json',
+        bytes: new TextEncoder().encode(JSON.stringify({
+          id: object ? object.id : null,
+          app: APP.app,
+          frames: count,
+          fps,
+          loop: !!clip.timing.loop,
+        }, null, 1)),
+      });
+
       download(zipStore(entries), (object ? object.id : 'sequence') + '_frames.zip');
     }
 
