@@ -8,9 +8,16 @@
  * is only the live cursor.
  */
 
-import { stampPoints } from '../../../core/stamp.js';
+// Imported AND re-exported, and the two lines are not redundant. A bare
+// `export … from` forwards a name to importers without binding it in this
+// module, so the class below — which reads PATTERNS three times — would throw
+// ReferenceError the moment one was constructed. It did: the patterns moved to
+// core/stamp.js in 45ca7be and the local uses were left pointing at nothing.
+// Nothing caught it because the module still *loads* perfectly; it only fails
+// once a brush is selected and a JoyImage is built.
+import { PATTERNS, PATTERN_LABELS, stampPoints } from '../../../core/stamp.js';
 
-export { PATTERNS, PATTERN_LABELS, stampPoints } from '../../../core/stamp.js';
+export { PATTERNS, PATTERN_LABELS, stampPoints };
 
 
 export class JoyImage {
