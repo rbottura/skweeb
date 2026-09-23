@@ -4,8 +4,12 @@
  *
  * The right half of the vault panel, split out of VaultPanel.js when that file
  * reached the 400-line cap (rule 4). It builds DOM and holds no state: the
- * panel owns which object is open and any player running in it.
+ * panel owns which object is open and any player running in it. The one write
+ * it makes is a set's switches — where it is offered (core/uses.js).
  */
+
+import { Vault } from './vault.js';
+import { USES, usesOf, retagFor, hasUseTags } from './uses.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -83,8 +87,13 @@ export function paintDetail(body, o, urls, hooks) {
   if (r.frames > 1) facts.push(['frames', r.frames + (r.fps ? ' @ ' + r.fps + 'fps' : '') + (r.loop ? ', loops' : '')]);
   facts.push(['file', r.file + '  ' + kb(r.bytes)]);
   facts.push(['seed', o.seed == null ? 'null — nothing random in it' : String(o.seed)]);
-  if (o.tags && o.tags.length) facts.push(['tags', o.tags.join(', ')]);
+  facts.push(['tags', (o.tags || []).join(', ') || '—']);
   body.append(table(facts));
+
+  if (o.type === 'set') body.append(usesSection(o, tags => {
+    const cell = body.querySelector('.vp-facts td[data-key="tags"]');
+    if (cell) cell.textContent = tags.join(', ') || '—';
+  }));
 
   // Lineage. parents is frozen history, refs a live dependency — the panel
   // names the difference rather than merging them.
@@ -106,6 +115,56 @@ export function paintDetail(body, o, urls, hooks) {
   }
 
   body.append(actions(o, urls, hooks));
+}
+
+/**
+ * Where a set is offered: one switch per use in core/uses.js. Flipping one
+ * writes the set's `use:` tags; everything else about it stays as saved.
+ */
+function usesSection(o, onTags) {
+  const box = el('div', 'vp-uses');
+  box.append(el('div', 'vp-section', 'Offered as'));
+  const note = el('div', 'vp-sub');
+  const inputs = new Map();
+
+  const sync = () => {
+    const on = usesOf(o);
+    for (const [id, input] of inputs) input.checked = on.has(id);
+    note.textContent = hasUseTags(o)
+      ? (on.size ? '' : 'offered nowhere — every app leaves it out')
+      : 'as it was made' + (o.recipe && o.recipe.role ? ' (' + o.recipe.role + ')' : '')
+        + ' — nothing switched yet';
+  };
+
+  for (const use of USES) {
+    const row = el('label', 'vp-use-row');
+    const input = el('input');
+    input.type = 'checkbox';
+    input.addEventListener('change', async () => {
+      // Unknown ids in the tags ride along: a use a later app adds is kept.
+      const want = new Set(usesOf(o));
+      if (input.checked) want.add(use.id); else want.delete(use.id);
+      for (const i of inputs.values()) i.disabled = true;
+      try {
+        const updated = await Vault.retag(o.id, retagFor(o, want));
+        o.tags = updated.tags;
+        onTags(o.tags);
+      } catch (err) {
+        note.textContent = 'could not change it: ' + err.message;
+        input.checked = !input.checked;
+        for (const i of inputs.values()) i.disabled = false;
+        return;
+      }
+      for (const i of inputs.values()) i.disabled = false;
+      sync();
+    });
+    inputs.set(use.id, input);
+    row.append(input, el('span', null, use.label));
+    box.append(row);
+  }
+  box.append(note);
+  sync();
+  return box;
 }
 
 function idLink(prefix, id, open) {
@@ -167,7 +226,9 @@ function table(rows) {
   const t = el('table', 'vp-facts');
   for (const [key, value] of rows) {
     const tr = el('tr');
-    tr.append(el('th', null, key), el('td', null, value));
+    const td = el('td', null, value);
+    td.dataset.key = key;
+    tr.append(el('th', null, key), td);
     t.append(tr);
   }
   return t;

@@ -44,7 +44,10 @@ import { Vault }      from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { runFrames, toPng, zipStore, frameName, download } from '../../core/export.js';
 
-const APP = { app: 'grid', version: '1.0.0' };
+export const APP = { app: 'grid', version: '1.0.0' };
+
+/** What the tiles are, for a title and a tag: a shipped ramp by its id, a vault material by name. */
+const tileTag = recipe => (recipe.material ? 'material' : recipe.ramp);
 
 /**
  * One dithered image.
@@ -53,15 +56,16 @@ const APP = { app: 'grid', version: '1.0.0' };
  * @param {object} args.params    the app's Params
  * @param {object} args.render    the renderGrid() result on screen
  * @param {?string} args.sourceId null when the source came off disk
+ * @param {string} [args.name]    what the tiles are called; the ramp's id by default
  */
-export async function saveStill({ params, render, sourceId }) {
+export async function saveStill({ params, render, sourceId, name }) {
   const blob = await toPng(render.canvas);
   const thumb = await thumbFromBlob(blob);
 
   return Vault.save({
     type: 'still',
-    title: `${params.get('ramp')} ${render.cols}x${render.rows}`,
-    tags: sourceId ? ['grid', params.get('ramp')] : ['grid', params.get('ramp'), 'leaf'],
+    title: `${name || params.get('ramp')} ${render.cols}x${render.rows}`,
+    tags: sourceId ? ['grid', tileTag(params.values)] : ['grid', tileTag(params.values), 'leaf'],
     origin: APP,
     seed: null,                       // a luminance dither has no random in it
     recipe: sourceId ? params.values : null,
@@ -82,11 +86,12 @@ export async function saveStill({ params, render, sourceId }) {
  * @param {object} args.source            a sequence handle from source.js
  * @param {CanvasImageSource[]} args.tiles
  * @param {boolean} [args.keepFrames]     also hand back a zip of the frames
+ * @param {string} [args.name]            what the tiles are called
  * @param {(text:string)=>void} [args.onStatus]
  * @param {AbortSignal} [args.signal]
  * @returns {Promise<{object:?object, frames:number, still:number, drawn:number}>}
  */
-export async function saveSequence({ params, source, tiles, keepFrames = false,
+export async function saveSequence({ params, source, tiles, keepFrames = false, name,
                                      onStatus = () => {}, signal }) {
   const count = source.frames;
   if (!count) throw new Error('that sequence has no frames');
@@ -125,8 +130,8 @@ export async function saveSequence({ params, source, tiles, keepFrames = false,
 
   const object = await Vault.save({
     type: 'sequence',
-    title: `${recipe.ramp} ${best.cols}x${best.rows} x${count}`,
-    tags: ['grid', 'loop', recipe.ramp],
+    title: `${name || recipe.ramp} ${best.cols}x${best.rows} x${count}`,
+    tags: ['grid', 'loop', tileTag(recipe)],
     origin: APP,
     seed: null,
     recipe,

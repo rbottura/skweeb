@@ -33,6 +33,7 @@ export const folderOf = row => {
 import { Vault }       from './vault.js';
 import { paintDetail } from './vault-detail.js';
 import { reopenUrl }   from './reopen.js';
+import { byUse, offerNote, switchOn } from './vault-offer.js';
 
 /** Files inside an object folder are served straight from the vault. */
 const fileUrl = (id, file) => '/vault/objects/' + id + '/' + file;
@@ -49,6 +50,7 @@ export class VaultPanel {
    * @param {object} [opts]
    * @param {{type?:string, app?:string, tag?:string}} [opts.filter]  fixed filter
    * @param {string[]} [opts.accepts]  several types, as a param's `accepts` has
+   * @param {string} [opts.use]  only sets offered to this use (core/uses.js)
    * @param {(row:object)=>void} [opts.onPick]   makes the cards a picker
    * @param {string} [opts.pickLabel]
    */
@@ -59,6 +61,9 @@ export class VaultPanel {
     // several-types case is narrowed here instead.
     this._accepts   = Array.isArray(opts.accepts) && opts.accepts.length
       ? opts.accepts.slice() : null;
+    this._offeredTo = opts.use || null;
+    this._showAll   = false;     // the use filter set aside (vault-offer.js)
+    this._unoffered = [];
     this._onPick    = opts.onPick || null;
     this._pickLabel = opts.pickLabel || 'Use this';
 
@@ -75,6 +80,8 @@ export class VaultPanel {
     const live = () => { if (this._open) this.refresh(); };
     document.addEventListener('vault:saved', live);
     document.addEventListener('vault:duplicate', live);
+    // A retag can move an object into a folder, or out of what a picker offers.
+    document.addEventListener('vault:retagged', live);
 
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape' || !this._open) return;
@@ -95,8 +102,11 @@ export class VaultPanel {
   /** Ask the server again, then repaint. */
   async refresh() {
     await Vault.refresh();
-    const rows = await Vault.list(this._filter);
-    this._rows = this._accepts ? rows.filter(r => this._accepts.includes(r.type)) : rows;
+    const rows = (await Vault.list(this._filter)).filter(r => !this._accepts || this._accepts.includes(r.type));
+    // A use filter narrows sets only, and says what it left out (vault-offer.js).
+    const { kept, left } = await byUse(rows, this._offeredTo);
+    this._unoffered = left;
+    this._rows = this._showAll ? rows : kept;
     this._paint();
   }
 
@@ -158,11 +168,16 @@ export class VaultPanel {
       'node server.js');
 
     const shown = this._rows.filter(r => !this._type || r.type === this._type);
+    if (this._unoffered.length) this._body.append(offerNote({
+      use: this._offeredTo, left: this._unoffered, showAll: this._showAll,
+      onToggle: () => { this._showAll = !this._showAll; this.refresh(); },
+    }));
 
     if (!shown.length) return this._notice(
-      this._type ? 'Nothing of that type yet.' : 'The vault is empty.',
-      this._type
-        ? 'Every object is still here — only this filter is hiding them.'
+      this._type ? 'Nothing of that type yet.'
+        : this._offeredTo ? 'Nothing here is offered for this yet.' : 'The vault is empty.',
+      this._type ? 'Every object is still here — only this filter is hiding them.'
+        : this._offeredTo ? ' A set is offered in its detail, under Offered as — V opens the vault.'
         : 'Draw something and save it, or record a sequence and export it from the timeline.');
 
     this._count.textContent = shown.length === this._rows.length
@@ -206,9 +221,14 @@ export class VaultPanel {
     return cell;
   }
 
-  /** Hand the chosen object to whoever asked, and get out of the way. */
+  /**
+   * Hand the chosen object to whoever asked, and get out of the way. A set
+   * picked from past the use filter is switched on for that use: using it as
+   * one is offering it as one.
+   */
   async _use(id) {
     const o = this._loaded && this._loaded.id === id ? this._loaded : (await Vault.load(id)).object;
+    o.tags = await switchOn(o, this._offeredTo);
     this._onPick(o);
     this.hide();
   }

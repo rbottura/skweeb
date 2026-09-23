@@ -16,6 +16,7 @@
  *   'vault:saved'    { id, type }
  *   'vault:duplicate'{ id, type }
  *   'vault:offline'  { filename }   — saved to disk by download instead
+ *   'vault:retagged' { id, tags }   — an object's tags changed
  */
 
 const API = '/api/vault';
@@ -123,6 +124,30 @@ export const Vault = {
     dispatch(out.status === 'duplicate' ? 'vault:duplicate' : 'vault:saved',
              { id: object.id, type: object.type });
     if (out.status !== 'duplicate') _index.unshift(object);
+    return object;
+  },
+
+  /**
+   * Change an object's tags — the one thing about it that may change after it
+   * is saved (docs/object-model.md, *Tags change*). An edit, applied by the
+   * server to the tags it has, so a stale page cannot erase another's.
+   *
+   * @param {string} id
+   * @param {{add?: string[], remove?: string[]}} edit
+   * @returns {Promise<object>} the envelope as it now is
+   */
+  async retag(id, { add = [], remove = [] } = {}) {
+    const res = await fetch(API + '/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ add, remove }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || ('vault: HTTP ' + res.status));
+    const object = out.object;
+    const row = _index.find(r => r.id === id);
+    if (row) row.tags = object.tags;
+    dispatch('vault:retagged', { id, tags: object.tags });
     return object;
   },
 };

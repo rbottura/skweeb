@@ -24,6 +24,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |
 | `panel.js` | base class: show/hide, focus, gamepad + keyboard nav | not yet; two concrete panels exist instead |
 | `links.js` | the named one-way links between apps | not yet, see below |
+| `uses.js` | what a set can be used as, and where each set is offered | **in**, 2026-09-23 |
 | `input.js` | gamepad + keyboard mapping | not yet; `gamepad/core/inputManager.js` |
 | `libs/` | one p5, shared by every app | not yet; 1.5.0 sits in `apps/gamepad/libs/`. Grid uses none. |
 
@@ -63,7 +64,10 @@ What those five lines buy:
 - `params.values` becomes `object.recipe`, and `restore()` comes free,
 - `type: "object"` renders a vault picker filtered to `accepts`, and records the
   chosen object in `parents` automatically — **this is how cross-app loading
-  works**; an app never writes lineage code,
+  works**; an app never writes lineage code. `use: "material"` narrows the
+  sets it offers to those switched on for that use (`uses.js`); the picker
+  says how many never-switched sets it left out, shows them on request, and
+  switches one on when it is picked (`vault-offer.js`),
 - `bind` wires a gamepad button,
 - the gallery can filter on any declared param.
 
@@ -141,6 +145,7 @@ listens to `vault:*` and nothing else.
 await Vault.save({ type, render, recipe, parents, title, tags });   // returns id
 await Vault.load(id);                    // { object, blob, url }
 await Vault.list({ type, app, tag });    // index rows, no blobs
+await Vault.retag(id, { add, remove });  // tags are the one thing that changes
 await Vault.publish(id);
 Vault.available                          // false when served without the write API
 ```
@@ -149,6 +154,19 @@ Vault.available                          // false when served without the write 
 stays fast with thousands of objects. When `available` is false (a plain static
 server, no node), the apps still run and saving falls back to a download. That
 fallback is required, not optional: rule 7 in `CLAUDE.md`.
+
+## uses.js — where a set is offered
+
+```js
+USES                  // [{ id: 'brushes', app: 'gamepad', label, role }, …]
+offers(rowOrObject, 'brushes')   // is this set offered to that use?
+retagFor(object, new Set(['material']))  // the Vault.retag() edit for exactly those
+```
+
+The consuming side's half of what a link is on the producing side: *the gamepad
+can eat a set as brushes*. A set with no `use:` tag follows its role; once it
+has one, the tags decide. The vault detail draws a switch per row of `USES`.
+Rules in `docs/object-model.md`, *Uses*.
 
 ## rng.js — seeded random
 

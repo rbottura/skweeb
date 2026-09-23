@@ -8,7 +8,9 @@
  * vault write path is core's.
  *
  * The live preview and an export call the same `renderGrid()`, differing only
- * in which frame they hand it. There is deliberately no second drawing path:
+ * in which frame they hand it. While the material maker is open (maker.js) the
+ * preview dithers with its tray instead, and closing it gives the recipe's
+ * material back. There is deliberately no second drawing path:
  * the moment a preview and an export are different code, they start
  * disagreeing about something small.
  */
@@ -16,7 +18,8 @@
 import { gridParams, GROUPS }      from './params.js';
 import { renderGrid }              from './grid.js';
 import { rampUsage }               from './map.js';
-import { manifest, ramp }          from './materials.js';
+import { manifest, ramp, materialTiles } from './materials.js';
+import { Maker }                   from './maker.js';
 import { fromFile, fromVault }     from './source.js';
 import { saveStill, saveSequence } from './save.js';
 import { ParamPanel }              from '../../core/ParamPanel.js';
@@ -30,6 +33,10 @@ import { requested }               from '../../core/reopen.js';
 
 let params, panel, bar, transport;
 let tiles = [];                    // the loaded ramp, light to dark
+let tilesName = '';                // what they are called, for a save's title
+let previewTiles = null;           // the maker's tray, while it is open
+let maker;
+let labelMake = () => {};          // the maker's button says what it will do
 let source = null;                 // a handle from source.js — still or sequence
 let last = null;                   // the most recent render, for saving
 let busy = false;                  // an export is running; nothing else may start
@@ -63,20 +70,25 @@ async function boot() {
   params.on(onParamChange);
   buildDrawers();
 
-  tiles = await ramp(params.get('ramp'));
+  await loadTiles();
   wireKeys();
   draw();
   await openRequested();
 }
 
 /**
- * `?open=<id>`: one of grid's own dithers, back to work on (core/reopen.js).
- * Its recipe names its source, so restoring it loads that and dithers again.
+ * `?open=<id>`: one of grid's own objects, back to work on (core/reopen.js).
+ * A dither's recipe names its source, so restoring it loads that and dithers
+ * again; a material is chosen and opened in the maker, to be edited.
  */
 async function openRequested() {
   try {
     const opened = await requested('grid');
     if (!opened) return;
+    if (opened.object.type === 'set') {
+      params.set('material', opened.object.id);
+      return await maker.open(opened.object.id);
+    }
     params.restore(opened.object.recipe);
     bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
   } catch (err) {
@@ -96,6 +108,36 @@ function buildDrawers() {
   file.addEventListener('change', () => loadLocalFile(file.files[0]));
   const open = button('Open a file', () => file.click());
   panel.drawer('source').body.append(open, file);
+
+  maker = new Maker({
+    mount: document.getElementById('maker'),
+    ground: () => params.get('background'),
+    onTiles: t => { previewTiles = t; draw(); },
+    onSaved: (set, { replaced, retired } = {}) => {
+      maker.close();
+      params.set('material', set.id);
+      bar.announce(!replaced ? `made ${set.id} — ${set.title}, ${set.recipe.members.length} tiles`
+        : retired ? `saved “${set.title}”, but the earlier version could not be put away: ${retired}`
+        : `saved “${set.title}” — the earlier version is in “earlier materials”; dithers made with it keep it`);
+      refreshVaultState();
+    },
+    onToggle: open => {
+      document.querySelector('.app-main').classList.toggle('app-main--making', open);
+      labelMake();
+    },
+    say: t => bar.announce(t),
+  });
+  const make = button('Make a material…', () => (maker.isOpen ? maker.close() : maker.open(params.get('material'))));
+  make.classList.add('mk-open');
+  labelMake = () => {
+    make.textContent = maker.isOpen ? 'Close the maker'
+      : params.get('material') ? 'Edit the material…' : 'Make a material…';
+  };
+  labelMake();
+  // Under the vault material's row, where a material is chosen — not below
+  // the dither's settings, out of sight.
+  const materialDrawer = panel.drawer('material').body;
+  materialDrawer.insertBefore(make, materialDrawer.children[1] || null);
 
   const player = panel.addDrawer({ id: 'player', title: 'Sequence player', before: 'material' });
   transport = new Transport({ clock, mount: player.body, busy: () => busy });
@@ -129,7 +171,9 @@ function button(label, onClick, primary = false) {
  * it is also needed, since the chain remembers the box it last saw.
  */
 async function onParamChange(key, value) {
-  if (key === 'ramp')   tiles = await ramp(value);
+  if (key === 'material') labelMake();
+  if (key === 'ramp' || key === 'material') await loadTiles();
+  if (key === 'background' && maker) maker.setGround();
   if (key === 'source') await loadSource(value);
 
   applyFrameEdit(params, key, source && source.content);
@@ -137,6 +181,28 @@ async function onParamChange(key, value) {
 }
 
 // ── Assets ───────────────────────────────────────────────────────────────────
+
+/**
+ * The tiles the recipe names: its vault material, or the shipped ramp. A
+ * material that will not load says so and leaves the ramp in its place.
+ */
+async function loadTiles() {
+  const id = params.get('material');
+  if (id) {
+    try {
+      const m = await materialTiles(id);
+      if (params.get('material') !== id) return;       // changed again meanwhile
+      tiles = m.tiles;
+      tilesName = m.title;
+      if (m.missing.length) bar.announce(`${m.missing.length} of that material's tiles are missing`);
+      return;
+    } catch (err) {
+      bar.announce('that material would not load: ' + err.message);
+    }
+  }
+  tiles = await ramp(params.get('ramp'));
+  tilesName = params.get('ramp');
+}
 
 /** Replace whatever is being dithered, disposing what was there. */
 function setSource(next) {
@@ -191,7 +257,8 @@ function draw() {
 function paint() {
   const recipe = params.values;
 
-  if (!source || !tiles.length) {
+  const use = previewTiles || tiles;
+  if (!source || !use.length) {
     canvas.width = 480;
     canvas.height = 300;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -202,17 +269,17 @@ function paint() {
   }
 
   const frame = resolveFrame(recipe, source.content, source);
-  last = renderGrid({ recipe, source: source.frame(clock.tick), tiles, frame });
+  last = renderGrid({ recipe, source: source.frame(clock.tick), tiles: use, frame });
 
   if (canvas.width !== last.canvas.width) canvas.width = last.canvas.width;
   if (canvas.height !== last.canvas.height) canvas.height = last.canvas.height;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(last.canvas, 0, 0);
 
-  const usage = rampUsage(last.indices, tiles.length);
+  const usage = rampUsage(last.indices, use.length);
   bar.output({ width: canvas.width, height: canvas.height, scale: last.scale, format: recipe.format });
   bar.say(`${last.cols}×${last.rows} cells · ${last.drawn} drawn · ${usage.empty} empty · `
-    + `${usage.used}/${tiles.length} of the ramp used`);
+    + `${usage.used}/${use.length} of the ${previewTiles ? 'tray' : 'ramp'} used`);
 }
 
 /** The player and the frames export exist only when there is a loop. */
@@ -233,20 +300,21 @@ function showLoopControls() {
 async function save({ keepFrames = false } = {}) {
   if (busy) return;
   if (!source || !last) return bar.announce('nothing to save yet');
+  if (maker && maker.isOpen) return bar.announce('save the material first, or close the maker — the dither on screen is the tray');
 
   clock.pause();
   busy = true;
   try {
     if (source.kind === 'sequence') {
       const { object, frames, still, drawn } = await saveSequence({
-        params, source, tiles, keepFrames, onStatus: t => bar.say(t),
+        params, source, tiles, keepFrames, name: tilesName, onStatus: t => bar.say(t),
       });
       bar.announce(object
         ? `saved ${object.id} — ${frames} frames, still is frame ${still + 1} at ${drawn} cells`
         : `no vault — ${frames} frames dithered, downloaded instead`);
     } else {
       bar.say('saving…');
-      const object = await saveStill({ params, render: last, sourceId: source.id });
+      const object = await saveStill({ params, render: last, sourceId: source.id, name: tilesName });
       bar.announce(object ? `saved ${object.id}` : 'no vault — downloaded instead');
     }
   } catch (err) {

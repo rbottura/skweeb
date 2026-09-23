@@ -43,6 +43,10 @@ v2 was wrong once and a whole port was built on it.
   60Hz screen, where it used to show a new picture only 15 times a second (4°
   angle buckets against a 2° turn — the stutter). The loop's `fps` is what a
   save plays at; the bar shows the measured paint rate while it plays.
+- **Vault sets as sprite families** (2026-09-24): a set switched on as *ckt
+  sprite family* in the vault (core/uses.js) is in the family list by its
+  title, beside the families on disk, and its members are the sprite grid —
+  a legacy copy of `brushes`, a material made in grid, another ckt family.
 - **Standalone**: on a plain static server it boots, draws, cuts, and saves by
   download.
 

@@ -11,6 +11,8 @@
  *   GET  /api/vault/<id>      -> the envelope
  *   POST /api/vault           <- envelope + base64 render (+ thumb)
  *                             -> { status: 'created' | 'duplicate', object }
+ *   PATCH /api/vault/<id>     <- { add: [tag], remove: [tag] }
+ *                             -> { status: 'updated', object }
  *
  * The server writes files and computes hashes. It does not make thumbnails:
  * the browser already has the pixels and a canvas to downscale them with, so
@@ -179,6 +181,9 @@ function indexRow(o) {
       frames: o.render.frames, bytes: o.render.bytes, sha256: o.render.sha256,
     },
     parents: o.parents, refs: o.refs, published: o.published,
+    // What a set was made as — null for none — so a picker can tell a material
+    // from a brush family without opening every folder (core/uses.js).
+    ...(o.type === 'set' ? { role: o.recipe && typeof o.recipe.role === 'string' ? o.recipe.role : null } : {}),
   };
 }
 
@@ -295,6 +300,45 @@ async function apiCreate(req, res) {
   sendJson(res, 201, { status: 'created', object: envelope });
 }
 
+/**
+ * Tags are the one part of an object that changes after it is saved — the
+ * render, the recipe and the lineage never do (docs/object-model.md, *Tags
+ * change*). An edit rather than a replacement, so two machines on one vault
+ * can each add a tag without the second erasing the first.
+ */
+async function apiRetag(req, res, id) {
+  const safe = safeId(id);
+  const envelope = safe && readEnvelope(safe);
+  if (!envelope) return sendJson(res, 404, { error: 'no such object' });
+
+  let body;
+  try {
+    body = JSON.parse((await readBody(req, 64 * 1024)).toString('utf8'));
+  } catch (err) {
+    return sendJson(res, err.code === 413 ? 413 : 400, { error: err.message });
+  }
+  const list = v => v === undefined ? []
+    : Array.isArray(v) && v.every(t => typeof t === 'string' && t && t.length <= 80) ? v : null;
+  const keys = Object.keys(body && typeof body === 'object' ? body : {});
+  const add = list(body && body.add), remove = list(body && body.remove);
+  if (!keys.length || keys.some(k => k !== 'add' && k !== 'remove') || !add || !remove) {
+    return sendJson(res, 400, { error: 'only tags change: { add: [tag], remove: [tag] }' });
+  }
+
+  const tags = (envelope.tags || []).filter(t => !remove.includes(t));
+  for (const t of add) if (!tags.includes(t)) tags.push(t);
+  if (tags.length > 64) return sendJson(res, 400, { error: 'too many tags' });
+  envelope.tags = tags;
+
+  // Written aside and moved into place: a crash mid-write must not leave an
+  // object.json that no longer parses.
+  const file = path.join(OBJECTS_DIR, safe, 'object.json');
+  fs.writeFileSync(file + '.tmp', JSON.stringify(envelope, null, 1));
+  fs.renameSync(file + '.tmp', file);
+  rebuildIndex();
+  sendJson(res, 200, { status: 'updated', object: envelope });
+}
+
 // -- Static ------------------------------------------------------------------
 
 function serveStatic(req, res, urlPath) {
@@ -330,8 +374,11 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'POST') return await apiCreate(req, res);
       return sendJson(res, 405, { error: 'GET or POST' });
     }
-    if (urlPath.startsWith('/api/vault/') && req.method === 'GET') {
-      return apiGet(res, urlPath.slice('/api/vault/'.length));
+    if (urlPath.startsWith('/api/vault/')) {
+      const id = urlPath.slice('/api/vault/'.length);
+      if (req.method === 'GET')   return apiGet(res, id);
+      if (req.method === 'PATCH') return await apiRetag(req, res, id);
+      return sendJson(res, 405, { error: 'GET or PATCH' });
     }
     if (urlPath.startsWith('/api/')) return sendJson(res, 404, { error: 'no such endpoint' });
     if (req.method !== 'GET' && req.method !== 'HEAD') return sendText(res, 405, 'GET only');

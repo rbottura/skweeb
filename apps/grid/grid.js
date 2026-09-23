@@ -24,6 +24,7 @@
  */
 
 import { gridSize, mapPixels } from './map.js';
+import { fitInCell }           from './tone.js';
 
 /**
  * A drawing surface. OffscreenCanvas where it exists, because that is what
@@ -98,9 +99,21 @@ export function samplePixels(source, cols, rows, place) {
  * through. A ramp member the caller did not supply is also skipped rather than
  * throwing: a manifest can name more steps than are on disk, and a hole in a
  * ramp should cost one cell, not the render.
+ *
+ * A member is fitted whole into its cell and centred (tone.js, fitInCell): a
+ * sprite or a glyph cut to its ink keeps its shape. A square one fills the
+ * cell exactly, so the shipped ramps draw as they always did.
+ *
+ * `size` scales it about the cell's centre — the recipe's `tileScale`, "sprite
+ * size" — and past 1 it spills over its neighbours; cells are painted row by
+ * row, so a later one lies over an earlier. Written so that at 1 the numbers
+ * are the ones this drew before it existed, to the last bit: a dither saved
+ * then replays identically.
  */
-export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0, offsetY = 0 }) {
+export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0, offsetY = 0, size = 1 }) {
   let drawn = 0;
+  const s = size > 0 ? size : 1;
+  const fits = tiles.map(t => t && fitInCell(t.width, t.height));
 
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
@@ -110,7 +123,11 @@ export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0,
       const tile = tiles[index];
       if (!tile) continue;
 
-      ctx.drawImage(tile, offsetX + col * cell, offsetY + row * cell, cell, cell);
+      const f = fits[index];
+      ctx.drawImage(tile,
+        offsetX + (col + f.x + f.w * (1 - s) / 2) * cell,
+        offsetY + (row + f.y + f.h * (1 - s) / 2) * cell,
+        f.w * s * cell, f.h * s * cell);
       drawn++;
     }
   }
@@ -198,6 +215,7 @@ export function renderGrid({ recipe, source, tiles, frame, scale }) {
     tiles,
     offsetX: Math.round((outW - grid.cols * cellPx) / 2),
     offsetY: Math.round((outH - grid.rows * cellPx) / 2),
+    size: recipe.tileScale ?? 1,
   });
 
   return { ...out, indices, drawn };

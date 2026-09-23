@@ -265,6 +265,55 @@ try {
   ok('a missing vault file is 404',
      (await fetch(BASE + '/vault/objects/' + o.id + '/nope.png')).status, 404);
 
+  // ── Tags change, and nothing else does ─────────────────────────────────────
+  const patch = async (id, body) => {
+    const res = await fetch(BASE + '/api/vault/' + id, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    return { code: res.status, out: await res.json().catch(() => ({})) };
+  };
+  const onDisk = id => JSON.parse(fs.readFileSync(path.join(vaultDir, 'objects', id, 'object.json'), 'utf8'));
+
+  const added = await patch(o.id, { add: ['use:material', 'loop'] });
+  ok('a tag edit answers 200', added.code, 200);
+  ok('status is updated', added.out.status, 'updated');
+  ok('an added tag is appended, a present one kept once', added.out.object.tags, ['gamepad', 'loop', 'use:material']);
+  const removed = await patch(o.id, { remove: ['gamepad'] });
+  ok('a removed tag goes, the rest keep their order', removed.out.object.tags, ['loop', 'use:material']);
+  ok('the edit is on disk', onDisk(o.id).tags, ['loop', 'use:material']);
+  ok('the recipe is untouched', onDisk(o.id).recipe, full.recipe);
+  ok('the render is untouched', onDisk(o.id).render, full.render);
+  const relisted = await (await fetch(BASE + '/api/vault')).json();
+  ok('the index follows', relisted.objects.find(r => r.id === o.id).tags, ['loop', 'use:material']);
+
+  ok('anything but tags is refused', (await patch(o.id, { title: 'x' })).code, 400);
+  ok('a whole tag list is refused — it is an edit', (await patch(o.id, { tags: ['a'] })).code, 400);
+  ok('an empty edit is refused', (await patch(o.id, {})).code, 400);
+  ok('a tag that is not a string is refused', (await patch(o.id, { add: [7] })).code, 400);
+  ok('add must be a list', (await patch(o.id, { add: 'use:x' })).code, 400);
+  ok('refusals changed nothing', onDisk(o.id).tags, ['loop', 'use:material']);
+  ok('an unknown object is 404', (await patch('gam_1789999999999_ffffff', { add: ['x'] })).code, 404);
+  ok('a malformed id is 404', (await patch('..%2fnope', { add: ['x'] })).code, 404);
+  ok('POST on an object is refused',
+     (await fetch(BASE + '/api/vault/' + o.id, { method: 'POST' })).status, 405);
+
+  // A set's row carries its role — rows withhold the recipe, and core/uses.js
+  // needs the role to know where an untouched set is offered.
+  const set = await post(sequence({
+    type: 'set', title: 'a family', tags: ['brush-family'],
+    recipe: { members: [o.id], role: 'brush-family' },
+    render: { ext: 'png', w: 3, h: 3, data: png(3, 3).toString('base64') },
+  }));
+  const rows = (await (await fetch(BASE + '/api/vault')).json()).objects;
+  ok('a set row carries its role', rows.find(r => r.id === set.out.object.id).role, 'brush-family');
+  ok('other rows carry none', 'role' in rows.find(r => r.id === o.id), false);
+  const roleless = await post(sequence({
+    type: 'set', title: 'no role', recipe: { members: [o.id] },
+    render: { ext: 'png', w: 5, h: 5, data: png(5, 5).toString('base64') },
+  }));
+  const rows2 = (await (await fetch(BASE + '/api/vault')).json()).objects;
+  ok('a set with no role carries null — not an older index', rows2.find(r => r.id === roleless.out.object.id).role, null);
+
   // ── Method routing ─────────────────────────────────────────────────────────
   ok('PUT on the collection is refused',
      (await fetch(BASE + '/api/vault', { method: 'PUT' })).status, 405);

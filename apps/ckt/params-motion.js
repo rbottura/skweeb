@@ -66,8 +66,10 @@ export function motionParams(datasetManifest, families) {
       display: 'chips', label: 'mark', group: 'mark',
     },
 
+    /** A family on disk, or a vault set switched on as ckt sprites — shown by its title. */
     family: {
       type: 'enum', options: familyIds.length ? familyIds : ['none'],
+      labels: Object.fromEntries(families.map(f => [f.id, f.label || f.id])),
       default: familyIds.includes('brushes') ? 'brushes' : (familyIds[0] || 'none'),
       label: 'family', group: 'mark', when: { mark: 'sprite' },
     },

@@ -179,17 +179,23 @@ export function registerFamily(fam) {
  * set whose members reorder redraws old work wrongly.
  *
  * @param {object} setObject  a vault envelope of type `set`
+ * @param {object[]} [index]   vault index rows, so a member's render is found by
+ *                             its own file — a copied JPEG sprite is render.jpg
  */
-export function familyFromSet(setObject) {
+export function familyFromSet(setObject, index = []) {
   const members = (setObject && setObject.recipe && setObject.recipe.members) || [];
   if (!members.length) return null;
+  const fileOf = id => {
+    const row = index.find(r => r.id === id);
+    return (row && row.render && row.render.file) || 'render.png';
+  };
 
   const sheet = setObject.render && setObject.render.file;
   return {
     id: setObject.id,
     label: setObject.title || setObject.id,
     count: members.length,
-    urls: members.map(id => `/vault/objects/${id}/render.png`),
+    urls: members.map(id => `/vault/objects/${id}/${fileOf(id)}`),
     // The set's own render is its contact sheet — the picker's card image.
     preview: sheet ? `/vault/objects/${setObject.id}/${sheet}` : null,
     fromVault: true,

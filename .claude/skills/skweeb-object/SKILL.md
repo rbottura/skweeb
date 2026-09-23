@@ -33,9 +33,10 @@ const id = await Vault.save({
   what the user looked at. A param of `type: "object"` records itself
   automatically — if lineage is being assembled by hand, that is usually the
   bug.
-- **An object is never edited in place** — except `skw`, which versions. A
-  change to anything else makes a new object whose
-  parent is the old one.
+- **An object is never edited in place** — except `skw`, which versions, and
+  any object's tags, which `Vault.retag(id, { add, remove })` changes (a
+  set's `use:` switches, a folder). A change to anything else makes a new
+  object whose parent is the old one.
 - **`recipe: null` is legal** for something that genuinely cannot be re-rendered.
   Say so explicitly rather than saving an incomplete recipe; a half-recipe fails
   silently three months later.

@@ -13,10 +13,12 @@
   <!--
     The shell from core/theme.css: the viewer, one column of drawers, and the
     bar as a row of its own below them. No p5: grid needs drawImage into a
-    canvas and nothing else — see the note at the top of grid.js.
+    canvas and nothing else — see the note at the top of grid.js. The material
+    maker opens as a column on the left, so the dither stays in sight.
   -->
   <div class="app">
     <main class="app-main">
+      <div class="app-side" id="maker" hidden></div>
       <section class="viewer" aria-label="grid output">
         <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
       </section>

@@ -16,6 +16,7 @@ import { GalleryPanel }        from './ui/GalleryPanel.js';
 import { TimelinePanel }       from './ui/TimelinePanel.js';
 import { VaultPanel }          from '../../core/VaultPanel.js';
 import { Vault }               from '../../core/vault.js';
+import { offers }              from '../../core/uses.js';
 import { createSketch,
          setFamilyIndex, setSpriteIndex, setPatternIndex,
          familyIndex, spriteIndex, patternIndex }
@@ -120,7 +121,12 @@ async function registerVaultFamilies() {
     for (const row of sets) {
       try {
         const { object } = await Vault.load(row.id);
-        const fam = BrushRegistry.familyFromSet(object);
+        // Only the sets offered as brushes: a material, or a family switched off
+        // in the vault, stays out of the picker (core/uses.js). Asked of the
+        // envelope, which always has the role — a row may come from an index an
+        // older server wrote.
+        if (!offers(object, 'brushes')) continue;
+        const fam = BrushRegistry.familyFromSet(object, Vault.index);
         if (fam && BrushRegistry.registerFamily(fam)) added++;
       } catch {
         // One unreadable set costs that set, not the boot.

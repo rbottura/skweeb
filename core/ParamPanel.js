@@ -116,7 +116,7 @@ export class ParamPanel {
   pick(key, spec, onPick) {
     if (!this._pickers) this._pickers = new Map();
     if (!this._pickers.has(key)) {
-      this._pickers.set(key, new VaultPanel({ accepts: spec.accepts, pickLabel: 'Use this', onPick }));
+      this._pickers.set(key, new VaultPanel({ accepts: spec.accepts, use: spec.use, pickLabel: 'Use this', onPick }));
     }
     this._pickers.get(key).show();
   }

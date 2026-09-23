@@ -11,3 +11,76 @@
 @import '../../core/sequence-viewer.css';
 
 .app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+
+/* ── The material maker: a column on the left while it is open ───────────── */
+
+.app-main--making { --app-columns: var(--mk-side, 400px) minmax(0, 1fr) var(--nb-side); }
+.app-side[hidden] { display: none; }
+
+.mk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+  gap: 5px;
+  max-height: 34vh;
+  overflow: auto;
+  margin-top: 8px;
+  padding: 2px 4px 4px 2px;
+}
+
+.mk-item {
+  aspect-ratio: 1;
+  padding: 3px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  background: var(--nb-paper);
+  cursor: pointer;
+}
+.mk-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.mk-item:hover { background: #fff3b0; }
+.mk-item--on { background: var(--nb-accent); box-shadow: 2px 2px 0 var(--nb-ink); }
+
+/* The tray reads like the ramp: left to right, top to bottom, light to dark,
+   each tile on the ground it will be drawn on. */
+.mk-tray { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.mk-tray > .pp-empty { grid-column: 1 / -1; padding: 6px 0; }
+
+.mk-slot {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  background: var(--nb-paper);
+}
+.mk-slot--none {
+  background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 12px 12px;
+}
+.mk-slot img { flex: 1; min-height: 0; width: 100%; object-fit: contain; padding: 6px 4px 2px; }
+
+.mk-order, .mk-tone {
+  position: absolute;
+  top: 2px;
+  padding: 0 3px;
+  background: var(--nb-paper);
+  font: 700 10px var(--nb-mono);
+}
+.mk-order { left: 2px; }
+.mk-tone { right: 2px; font-weight: 400; }
+
+.mk-slot-bar { display: flex; border-top: var(--nb-line-sm) solid var(--nb-ink); background: var(--nb-paper); }
+.mk-slot-bar button {
+  flex: 1;
+  min-height: 20px;
+  border: 0;
+  background: none;
+  font: 700 12px var(--nb-font);
+  cursor: pointer;
+}
+.mk-slot-bar button:hover:not(:disabled) { background: var(--nb-accent); }
+.mk-slot-bar button:disabled { color: var(--nb-muted); cursor: default; }
+
+.mk-row { display: flex; gap: 8px; margin-top: 10px; }
+.mk-note { margin-top: 6px; font: 400 11px var(--nb-mono); color: var(--nb-muted); }
+.mk .pp-text { margin-bottom: 8px; }
+.mk-open { margin: 2px 0 8px; }
+.mk-grid + .nb-btn { width: 100%; margin-top: 8px; }
+.mk-new { margin-top: 8px; }

@@ -7,7 +7,9 @@
  * itself, under the same key so old recipes read unchanged.
  *
  * The material ramps come from the generated manifest, so the list of
- * materials is data (rule 3) and adding one is a folder and a regenerate.
+ * materials is data (rule 3) and adding one is a folder and a regenerate. A
+ * material can also be a vault `set` — made in the maker (maker.js), or any
+ * set switched on as a material in the vault — and then it replaces the ramp.
  */
 
 import { defineParams } from '../../core/params.js';
@@ -36,12 +38,26 @@ export function gridParams(manifest) {
       group: 'source',
     },
 
+    /**
+     * A material from the vault: a set, its members light to dark. While one is
+     * chosen it is the ramp, and the shipped ramps step aside. Only sets offered
+     * as a material are offered here (core/uses.js).
+     */
+    material: {
+      type: 'object',
+      accepts: ['set'],
+      use: 'material',
+      label: 'from the vault',
+      group: 'material',
+    },
+
     ramp: {
       type: 'enum',
       options: ramps,
       default: ramps[0],
       label: 'material',
       group: 'material',
+      when: { material: null },
     },
 
     /** One tile's size, in the frame's own pixels. */
@@ -51,6 +67,22 @@ export function gridParams(manifest) {
       max: 64,
       default: 6,
       label: 'cell size',
+      group: 'material',
+    },
+
+    /**
+     * How big each tile is drawn, against its cell: 1 fills the cell, 3 draws
+     * it three cells wide, centred, over its neighbours. The grid does not
+     * change — how many cells, and which tile each gets — only the picture in
+     * them. Overflow at the edge of the canvas is cut; `bleed` gives it room.
+     */
+    tileScale: {
+      type: 'range',
+      min: 0.1,
+      max: 10,
+      step: 0.05,
+      default: 1,
+      label: 'sprite size',
       group: 'material',
     },
 

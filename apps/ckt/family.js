@@ -30,10 +30,10 @@ import { centre }       from './motion.js';
 import { framing, renderFrame } from './render.js';
 import { glyphOf }      from './datasets.js';
 import { APP }          from './save.js';
-import { surface }      from './surface.js';
 import { Vault }        from '../../core/vault.js';
 import { thumbFromBlob, thumbFromCanvas } from '../../core/thumb.js';
 import { toPng, zipStore, download } from '../../core/export.js';
+import { contactSheet } from '../../core/sheet.js';
 
 /**
  * One glyph as a brush: the recipe on screen, cut out, at the frame on screen.
@@ -103,7 +103,9 @@ export async function emitFamily({ params, data, mark, tick, name, leaf = false,
   }
 
   onStatus('saving the set…');
-  const sheet = await contactSheet(blobs);
+  const bitmaps = await Promise.all(blobs.map(b => createImageBitmap(b)));
+  const sheet = contactSheet(bitmaps);
+  for (const b of bitmaps) if (b.close) b.close();
   const sheetBlob = await toPng(sheet);
 
   const set = await Vault.save({
@@ -119,22 +121,4 @@ export async function emitFamily({ params, data, mark, tick, name, leaf = false,
   });
 
   return { set, members: members.length };
-}
-
-/** The members in a grid, in order: the set's render and its thumbnail. */
-async function contactSheet(blobs, cell = 96) {
-  const cols = Math.ceil(Math.sqrt(blobs.length));
-  const rows = Math.ceil(blobs.length / cols);
-  const sheet = surface(cols * cell, rows * cell);
-  const ctx = sheet.getContext('2d');
-  ctx.imageSmoothingQuality = 'high';
-
-  for (let i = 0; i < blobs.length; i++) {
-    const bmp = await createImageBitmap(blobs[i]);
-    const k = Math.min((cell - 8) / bmp.width, (cell - 8) / bmp.height, 1);
-    const w = bmp.width * k, h = bmp.height * k;
-    ctx.drawImage(bmp, (i % cols) * cell + (cell - w) / 2, Math.floor(i / cols) * cell + (cell - h) / 2, w, h);
-    if (bmp.close) bmp.close();
-  }
-  return sheet;
 }

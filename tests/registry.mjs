@@ -133,6 +133,11 @@ ok('no doomed loads for an absent family',
       '/vault/objects/ckt_x_c/render.png']);
   ok('and it knows its count', fam.count, 3);
 
+  // A member copied from a JPEG family is render.jpg: the index says so.
+  const rows = [{ id: 'ckt_x_b', render: { file: 'render.jpg' } }];
+  ok('a member is found by its own file when the index knows it',
+     R.familyFromSet(setObject, rows).urls[1], '/vault/objects/ckt_x_b/render.jpg');
+  ok('and render.png when it does not', R.familyFromSet(setObject, rows).urls[0], '/vault/objects/ckt_x_a/render.png');
   ok('a set with no members is not a family', R.familyFromSet({ recipe: {} }), null);
   ok('nor is nothing at all', R.familyFromSet(null), null);
 

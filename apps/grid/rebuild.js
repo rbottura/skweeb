@@ -14,7 +14,7 @@
  *     openSequence(the grid object)
  *       -> openSequence(its source, which is a gamepad recording)
  *            -> load that recording's sprite families, replay its marks
- *       -> load the ramp the recipe names
+ *       -> load the ramp the recipe names, or the vault material it names
  *       -> dither each of those frames, on demand
  *
  * That is the thing the object model has promised since it was written and
@@ -36,20 +36,41 @@
  */
 
 import { renderGrid }    from './grid.js';
-import { ramp }          from './materials.js';
+import { ramp, materialTiles } from './materials.js';
+import { roleOf }        from '../../core/uses.js';
 import { fromVault }     from './source.js';
 import { resolveFrame }  from '../../core/frame.js';
 import { drawFrameInto } from '../../core/rebuild.js';
 
 /**
  * Whether `/apps/grid/?open=<id>` brings this object back to work on
- * (core/reopen.js): any whose recipe names its source. A leaf, dithered from a
- * file that was never an object, has nothing to load.
+ * (core/reopen.js): a dither whose recipe names its source, and a material,
+ * which opens in the maker to be edited. A leaf, dithered from a file that was
+ * never an object, has nothing to load.
  *
  * @param {object} object   a vault envelope written by grid
  */
 export function reopens(object) {
+  if (object && object.type === 'set') return roleOf(object) === 'material';
   return !!(object && object.recipe && object.recipe.source);
+}
+
+/**
+ * The tiles a recipe dithers with: its vault material when it names one, the
+ * shipped ramp otherwise. What could not be found is named, never thrown — a
+ * replay with a hole in its ramp still shows the rest.
+ */
+async function tilesFor(recipe) {
+  if (recipe.material) {
+    try {
+      const m = await materialTiles(recipe.material);
+      return { tiles: m.tiles, lost: m.missing.map(id => 'material member ' + id) };
+    } catch {
+      return { tiles: [], lost: ['material ' + recipe.material] };
+    }
+  }
+  const tiles = await ramp(recipe.ramp);
+  return { tiles, lost: tiles.length ? [] : ['material ramp "' + recipe.ramp + '"'] };
 }
 
 /**
@@ -73,11 +94,8 @@ export async function openObject(object, opts = {}) {
   // The parent, whatever it is. A still comes back as a one-frame handle, so a
   // grid `still` replays as a loop of length 1 rather than as a special case.
   const parent = await fromVault(recipe.source, opts);
-  const tiles = await ramp(recipe.ramp);
-
-  const missing = tiles.length
-    ? (parent.missing || [])
-    : [...(parent.missing || []), 'material ramp "' + recipe.ramp + '"'];
+  const { tiles, lost } = await tilesFor(recipe);
+  const missing = [...(parent.missing || []), ...lost];
 
   // The dither writes into a fresh surface per frame — see save.js — so the
   // handle keeps whichever one it made last and nothing else. Frames are

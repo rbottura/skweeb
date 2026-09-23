@@ -55,7 +55,7 @@ gallery/                      ← in git, deployed
 | `id` | `<app3>_<ms>_<rand6>`. Prefixes `gmp_` `grd_` `ckt_` `skw_`. Guessable and greppable on purpose. |
 | `type` | from the registry below. One word, singular. |
 | `title` | what you would call it out loud. Defaults to the app's own naming. |
-| `tags` | free. The gallery filters on these plus `type` and `origin.app`. One convention: `folder:<name>` files the object in a folder of the vault panel — see *Tags that group*. |
+| `tags` | free. The gallery filters on these plus `type` and `origin.app`. Two conventions: `folder:<name>` files the object in a folder of the vault panel — see *Tags that group* — and `use:<id>` says where a set is offered — see *Uses*. **The one field that may change after a save** — see *Tags change*. |
 | `origin.version` | the app version that wrote the recipe. An old recipe in a newer app is a migration, not a crash. |
 | `recipe` | app-specific, JSON-serializable, complete. Anything not in here is lost. |
 | `seed` | the integer every `rng()` in that render was drawn from. No seed, no re-render. `null` is correct only when the render used no randomness at all — true of the gamepad, which draws exactly what you drew. |
@@ -76,6 +76,20 @@ A folder is a view, not a place. Every object still lives at
 `objects/<id>/`, so no URL, parent or ref changes, and an object can leave a
 folder by losing a tag. The objects worth seeing on their own — a still, a
 loop, the `set` itself — carry no folder tag and stay at the top.
+
+## Tags change
+
+Everything about an object is fixed when it is saved — except its tags.
+Decided 2026-09-23, for a set's switches (*Uses*, below): where a family is
+offered is a choice the author keeps making, and making a new object for each
+flip would give the set a new id and orphan every recipe that names it.
+
+So tags are the object's label, not its content. The render, the recipe, the
+seed and the lineage never change; `PATCH /api/vault/<id>` takes
+`{ add: [tag], remove: [tag] }` and nothing else, and `Vault.retag()` is its
+client. An edit, not a replacement, so two machines on one vault cannot erase
+each other's tags. Dedup still compares bytes and recipe only: saving an
+identical object returns the old one with the tags it has now.
 
 ## Types (v1)
 
@@ -111,7 +125,8 @@ changes, I am stale*: the gallery marks it, the next render rebuilds it.
 
 Ordinary objects are **immutable** — a change makes a new object whose parent is
 the old one. `skw` is the single exception, and versioning is how it stays
-honest about it.
+honest about it. (Tags aside — they are a label on the object, not the object;
+see *Tags change*.)
 
 ## Smart objects — the `skw` type
 
@@ -208,6 +223,42 @@ The more useful reading is the direction: ckt has a capability, *produce a
 gamepad brush family*, that knows what the gamepad expects. That is a **link**,
 it points one way, and it is specified in `docs/core-api.md`. The folders on
 disk are its output, run by hand before it existed.
+
+### Uses — where a set is offered
+
+More than one app eats sets: the gamepad as a brush family, grid as a dither
+material, ckt as sprites for its dots. `recipe.role` says what a set was
+*made as* — `brush-family`, `material` — and it is history. Where it is
+*offered* is a tag, `use:<id>`, one per use, switched in the vault detail;
+`core/uses.js` holds the catalogue of uses and the rule:
+
+- a set with **no `use:` tag** is offered to the uses its role is the default
+  for — so a set saved before the switches existed keeps working;
+- a set with **any `use:` tag** is offered to exactly those, and `use:none`
+  means nowhere.
+
+A set's index row carries its `role`, copied out of the recipe, so a picker can
+apply the default without opening every set. A material is a set with
+`role: "material"`, its members ordered light to dark — grid maps the darkest
+pixels to the last member — with `recipe.ground`, the ground that order was
+measured on, and `recipe.name`: the vault dedups on content, so a material
+renamed and nothing else must differ in its recipe to be saved at all.
+
+**Editing a material** makes a new version, never a change in place: every
+dither made with it names it by id and must replay as it was. The new version
+carries the old one's `use:` switches and names it as a parent; the old one is
+put away — `use:none` and `folder:earlier materials` — and stays, since those
+dithers still name it. Edited back to exactly an earlier version, the vault
+hands that one back, and it is brought out again. To the author it is editing.
+
+**Legacy sprites.** A set lists objects, and the gamepad's families on disk are
+files. So a sprite from them becomes an object when something needs it as one
+— a member of a material, or its whole family copied in from grid's maker — as
+a `shape` leaf, titled `<family> <index>`, filed in `folder:legacy <family>`.
+`core/legacy.js` builds that envelope for every path that copies one, so the
+same bytes and the same null recipe dedup to one object however often it is
+copied. A family copied whole is a set in the D-pad's order, switched on as a
+material and as sprites but not as brushes: the gamepad has the original.
 
 ## The recipe contract
 

@@ -252,3 +252,34 @@
 .vp-lineage { margin-top: 6px; font: 400 12px/1.7 var(--nb-mono, monospace); }
 .vp-lineage a { color: var(--nb-ink, #111); text-decoration: underline; text-decoration-thickness: 2px; cursor: pointer; }
 .vp-lineage a:hover { background: var(--nb-accent, #ffd60a); }
+
+/* A set's switches: where it is offered (core/uses.js). */
+.vp-uses { margin-top: 2px; }
+.vp-use-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font: 400 12px var(--nb-mono, monospace);
+  cursor: pointer;
+}
+.vp-use-row input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--nb-ink, #111);
+  cursor: pointer;
+}
+.vp-use-row input:disabled { cursor: progress; }
+
+/* A use filter says what it left out (VaultPanel, _offerNote). */
+.vp-offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border: var(--nb-line-sm, 2px) dashed var(--nb-ink, #111);
+  font: 400 12px var(--nb-mono, monospace);
+}

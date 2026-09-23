@@ -14,13 +14,15 @@
  *
  *   shape    a still or shape from the vault — a gamepad drawing on every dot,
  *            which is M3's first test
- *   sprite   one sprite of a registry family, by index
+ *   sprite   one sprite of a registry family, by index — a family on disk,
+ *            or a vault set switched on as ckt sprites (core/uses.js)
  *   dot      a plain disc in one colour, when there is nothing else — so the
  *            app draws with no vault and no sprites at all (rule 7)
  */
 
 import * as Registry from '../../core/registry.js';
 import { Vault }     from '../../core/vault.js';
+import { offers }    from '../../core/uses.js';
 
 const GAMEPAD_MANIFEST = '/apps/gamepad/brush-manifest.json';
 
@@ -28,23 +30,41 @@ let _families = null;
 const _images = new Map();         // url → Promise<ImageBitmap|null>
 
 /**
- * The families a recipe may name: in the manifest AND on this disk. An empty
- * list when the gamepad's manifest cannot be read — ckt then draws dots.
+ * The families a recipe may name: in the manifest AND on this disk, then the
+ * vault's sets switched on as ckt sprites. An empty list when neither can be
+ * read — ckt then draws dots.
  *
- * @returns {Promise<Array<{id:string, count:number}>>}
+ * @returns {Promise<Array<{id:string, count:number, label:string}>>}
  */
 export async function families() {
   if (_families) return _families;
+  _families = [];
   try {
     await Registry.loadManifest(GAMEPAD_MANIFEST);
     await Registry.probeFamilies();
     _families = Registry.availableManifestFamilies()
-      .map(f => ({ id: f.id, count: (f.files || f.urls || []).length }));
+      .map(f => ({ id: f.id, count: (f.files || f.urls || []).length, label: f.id }));
   } catch (err) {
-    console.warn('[ckt] no sprite families:', err.message);
-    _families = [];
+    console.warn('[ckt] no sprite families on disk:', err.message);
   }
-  return _families;
+  return (_families = [..._families, ...await vaultFamilies()]);
+}
+
+/** Sets offered as ckt sprites, registered as families under their ids. */
+async function vaultFamilies() {
+  if (!(await Vault.refresh())) return [];
+  const out = [];
+  for (const row of Vault.index.filter(r => r.type === 'set')) {
+    try {
+      const { object } = await Vault.load(row.id);
+      if (!offers(object, 'sprites')) continue;   // the envelope: rows may lack the role
+      const fam = Registry.registerFamily(Registry.familyFromSet(object, Vault.index));
+      if (fam) out.push({ id: fam.id, count: fam.count, label: row.title || row.id });
+    } catch (err) {
+      console.warn('[ckt] a sprite set would not load:', row.id, err.message);
+    }
+  }
+  return out;
 }
 
 function image(url) {
