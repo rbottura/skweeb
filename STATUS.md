@@ -22,6 +22,15 @@ _last touched: 2026-09-23_
   - **The page never scrolls.** `.app` holds and clips whatever is positioned
     inside it: `overflow: hidden` on the body does not stop focus scrolling the
     page, and a switch low in a docked panel was throwing the app off-screen.
+  - **`link w/h` works** — it did nothing once the format was `custom`. Either
+    side drags the other and the shape is held exactly, a slider dragged to
+    2 px and back included; a ratio or a paper format stays picked, so A4 at
+    2480 px reads 300 dpi. Width and height run 1–4000; a linked side at the
+    limit makes the typed one give way. A typed box never shows a value the
+    param refused. Seen in grid and ckt.
+  - **Reset resets.** `restore()` put values back silently, so no widget
+    moved; it now announces each change, with `params.restoring` set so the
+    frame chain leaves a recipe as it was saved.
   - **ckt is three columns**: dots left, motion right, the viewer between with
     a dots / motion toggle. Legacy dot-sets in a closed drawer; every dot-set
     made is saved at once into a session folder and listed, one click away,
@@ -58,9 +67,12 @@ _last touched: 2026-09-23_
 
 Thirteen files, no runner, no dependencies — the command in `CLAUDE.md` runs
 all of them, and all pass. New checks this pass: `params` (the `sprite` and
-`ground` types, `when`), `frame` (zoom is the object, never the canvas; the
-format drawer carries `scale`), `ckt-motion` (a loop is one turn in either
-direction; `off`; laps; the pulse floor; a still's crop).
+`ground` types, `when`; a reset announces what it moves), `frame` (zoom is
+the object, never the canvas; the format drawer carries `scale`; the link on a
+real Params — custom, a slider's round trip, shapes that stay picked, the
+4000 limit, a restore left as saved), `ckt-motion` (a loop is one turn in
+either direction; `off`; laps; the pulse floor; a still's crop). Run against
+the old `frame.js`, 15 of the link checks fail.
 
 The browser checks were driven over the Chrome DevTools protocol against a
 throwaway vault, from a script in the session scratchpad — still not in the
@@ -76,8 +88,9 @@ repo. See *Next*.
   exactly**; the numbers above are from the heaviest glyph at large sizes,
   where the old renderer did drop. The bar's fps readout is there so the
   author's own machine can say.
-- **Nothing opens a saved object back in its app.** The `restore()` half of
-  the contract has still never run, in any app.
+- **Nothing opens a saved object back in its app.** `restore()` has run only
+  as Reset. When it does, a recipe wider or taller than 4000 px would come
+  back clamped; none of the seven sized recipes in the vault is.
 - **An identical re-cut does not join the new session folder**: the vault
   de-duplicates same bytes and same recipe, and returns the old object with
   its old tags. Correct by the object model; surprising in the vault panel.
@@ -101,9 +114,9 @@ repo. See *Next*.
 **Open a saved object back in its app** — `/apps/ckt/?open=<id>` restores the
 envelope's recipe into the right stage (a `dataset` into dots; a still, loop
 or brush into motion, the clock at its `tick`), plus an "Open in its app"
-button in the vault panel's detail. Small now that the panels restore
-themselves from params, and it is the first time `restore()` runs anywhere —
-which M4's compose needs for every object it places.
+button in the vault panel's detail. Small now: the panels follow a restore,
+and the frame chain leaves one as it was saved — which M4's compose needs for
+every object it places.
 
 Then **M4 — compose**. Alongside it: move the Chrome DevTools driver into
 `scripts/` so a browser check is a command, and the gamepad onto core params.
