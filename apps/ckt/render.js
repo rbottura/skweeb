@@ -6,7 +6,9 @@
  * same pixels. The live preview, a saved loop, a brush family and a replay in
  * the vault viewer all come through `renderFrame()` — one drawing path, so
  * they cannot drift apart. The preview only asks for it in `draft`: faster
- * smoothing and coarser face angles, the same picture.
+ * smoothing, a degree's face angles, and sprites that turn alike drawn at
+ * their exact angle — the same picture. It is also drawn between the loop's
+ * frames (core/playback.js, `smooth`), so it paints at the screen's rate.
  *
  * ── The world and the frame ─────────────────────────────────────────────────
  *
@@ -34,6 +36,13 @@
  * the viewer shows it (`view`), and a sprite past 160px goes straight through
  * a transform, since at that size filling pixels is the whole cost.
  *
+ * And the stutter (2026-09-23, second pass): the preview's angle cache was 4°
+ * a bucket, so a spin at 2° a frame moved on screen every other frame — 15
+ * changes a second, held unevenly. Now the preview draws the turn exactly and
+ * between frames: 60 changes a second on a 60Hz screen, the same heavy glyph
+ * at every size to 1, a still trail, the attractor moving, `face`. The stamp
+ * cache is stamps.js.
+ *
  * ── Trails ──────────────────────────────────────────────────────────────────
  *
  * `trail` frames drawn under this one, oldest first, fading to nothing — and
@@ -52,14 +61,13 @@ import { place, STRIDE, loopBounds, loopFrames, spinAt, pulseAt } from './motion
 import { phaseOf }      from './attractor.js';
 import { resolveFrame } from '../../core/frame.js';
 import { surface }      from './surface.js';
+import { mipFor, stampFor, freshStamp, blit } from './stamps.js';
 
 /**
  * A disc's diameter at size 1: the size of a typical v2 sprite, 360px, so
  * switching between a sprite and a disc keeps what you see the same size.
  */
 export const DISC = 360;
-
-const TAU = Math.PI * 2;
 
 /** Half a mark's diagonal at size 1 — how far past its dot a mark can reach. */
 export function reachOf(mark) {
@@ -114,81 +122,6 @@ export function trailSamples(recipe, density) {
   return out;
 }
 
-// ── Stamps: a mark drawn once at the size and angle it will appear at ────────
-
-const _mips = new WeakMap();       // image → [its halvings, largest first]
-const _stamps = new Map();         // key → { canvas, cx, cy }
-const STAMP_CAP = 2048;
-
-/** The smallest halving of an image still at least twice `px` wide — clean to shrink from. */
-function mipFor(image, px) {
-  let levels = _mips.get(image);
-  if (!levels) _mips.set(image, levels = [image]);
-  let i = 0;
-  while (true) {
-    const cur = levels[i];
-    if (cur.width / 2 < px * 2 || cur.width < 4) return cur;
-    if (!levels[i + 1]) {
-      const next = surface(Math.ceil(cur.width / 2), Math.ceil(cur.height / 2));
-      const c = next.getContext('2d');
-      c.imageSmoothingQuality = 'high';
-      c.drawImage(cur, 0, 0, next.width, next.height);
-      levels.push(next);
-    }
-    i++;
-  }
-}
-
-let _ids = 0;
-const _imageIds = new WeakMap();
-const idOf = image => {
-  if (!_imageIds.has(image)) _imageIds.set(image, ++_ids);
-  return _imageIds.get(image);
-};
-
-/**
- * A mark at `px` wide, turned `angle`, centred on (cx, cy) of its canvas.
- * Keys are quantised — a quarter pixel, a bucket of angle — so a pulse or a
- * face cache stays bounded; the cache forgets its oldest past a cap.
- */
-function stampFor(mark, color, px, angle, buckets) {
-  const size = Math.max(0.25, Math.round(px * 4) / 4);
-  const b = mark ? ((Math.round((angle / TAU) * buckets) % buckets) + buckets) % buckets : 0;
-  const key = (mark ? 'm' + idOf(mark) : 'd' + color) + '|' + size + '|' + b + '/' + buckets;
-  let stamp = _stamps.get(key);
-  if (stamp) return stamp;
-
-  if (!mark) {
-    const d = Math.max(1, Math.ceil(size) + 2);
-    const canvas = surface(d, d);
-    const c = canvas.getContext('2d');
-    c.fillStyle = color;
-    c.beginPath();
-    c.arc(d / 2, d / 2, size / 2, 0, TAU);
-    c.fill();
-    stamp = { canvas, cx: d / 2, cy: d / 2 };
-  } else {
-    // The rotated sprite's own box, not the square round its diagonal: a
-    // stamp is blitted a thousand times, and every padded pixel is filled.
-    const w = size, h = size * (mark.height / mark.width);
-    const t = (b / buckets) * TAU;
-    const cw = Math.max(1, Math.ceil(Math.abs(w * Math.cos(t)) + Math.abs(h * Math.sin(t))) + 2);
-    const ch = Math.max(1, Math.ceil(Math.abs(w * Math.sin(t)) + Math.abs(h * Math.cos(t))) + 2);
-    const canvas = surface(cw, ch);
-    const c = canvas.getContext('2d');
-    c.imageSmoothingEnabled = true;
-    c.imageSmoothingQuality = 'high';
-    c.translate(cw / 2, ch / 2);
-    c.rotate(t);
-    c.drawImage(mipFor(mark, w), -w / 2, -h / 2, w, h);
-    stamp = { canvas, cx: cw / 2, cy: ch / 2 };
-  }
-
-  if (_stamps.size >= STAMP_CAP) _stamps.delete(_stamps.keys().next().value);
-  _stamps.set(key, stamp);
-  return stamp;
-}
-
 /**
  * Above this many pixels across, a sprite is drawn straight through a
  * transform: the GPU fills exactly the sprite's own quad, where a stamp would
@@ -199,8 +132,9 @@ const DIRECT_PX = 160;
 /** Every dot of one sample, stamped. Returns how many were drawn. */
 function stampAll(ctx, dots, n, recipe, mark, f, draft) {
   const native = mark ? mark.width : DISC;
-  const buckets = draft ? 90 : 1440;
+  const buckets = draft ? 360 : 1440;
   const uniform = recipe.rotate !== 'face';
+  const exact = draft && uniform && !!mark;
   let one = null, drawn = 0;
 
   if (mark && n) {
@@ -217,9 +151,9 @@ function stampAll(ctx, dots, n, recipe, mark, f, draft) {
     const px = native * s * f.sx;
     if (px < 0.25) continue;
 
-    const stamp = uniform ? (one || (one = stampFor(mark, recipe.color, px, angle, buckets)))
-                          : stampFor(mark, recipe.color, px, angle, buckets);
-    ctx.drawImage(stamp.canvas, f.ox + f.sx * dots[o] - stamp.cx, f.oy + f.sy * dots[o + 1] - stamp.cy);
+    const stamp = !uniform ? stampFor(mark, recipe.color, px, angle, buckets)
+      : one || (one = exact ? freshStamp(mark, px, angle) : stampFor(mark, recipe.color, px, angle, buckets));
+    blit(ctx, stamp, f.ox + f.sx * dots[o], f.oy + f.sy * dots[o + 1]);
     drawn++;
   }
   return drawn;
@@ -288,7 +222,7 @@ export function renderFrame({ recipe, anchors, mark, tick, frame, into, draft = 
     if (baked) {
       for (let i = 0; i < n; i++) {
         const o = i * STRIDE;
-        ctx.drawImage(baked.canvas, f.ox + f.sx * placed.dots[o] - baked.cx, f.oy + f.sy * placed.dots[o + 1] - baked.cy);
+        blit(ctx, baked, f.ox + f.sx * placed.dots[o], f.oy + f.sy * placed.dots[o + 1]);
         drawn++;
       }
     }
@@ -319,6 +253,7 @@ let _bake = null;
  * blits per sample.
  */
 function bakeTrail(recipe, mark, f, tick, draft) {
+  if (draft && mark) return bakeTrailExact(recipe, mark, f, tick);
   const native = mark ? mark.width : DISC;
   const buckets = draft ? 90 : 1440;
   const frames = loopFrames(recipe);
@@ -351,5 +286,50 @@ function bakeTrail(recipe, mark, f, tick, draft) {
     c.drawImage(stamp.canvas, mid - stamp.cx, mid - stamp.cy);
   }
   c.globalAlpha = 1;
-  return { canvas: _bake, cx: mid, cy: mid };
+  return { canvas: _bake, cx: mid, cy: mid, w: side, h: side };
+}
+
+/**
+ * The preview's baked trail: each sample drawn straight into the bake through
+ * a transform, at its exact angle — for the reason freshStamp gives, and
+ * because a trail sampled between frames would fill the cache with angles it
+ * never sees again.
+ */
+function bakeTrailExact(recipe, mark, f, tick) {
+  const frames = loopFrames(recipe);
+  const base = (recipe.angle || 0) * Math.PI / 180;
+  const aspect = mark.height / mark.width;
+  const parts = [];
+  let side = 0;
+
+  for (const { age, alpha } of trailSamples(recipe)) {
+    const phase = phaseOf(tick - age, frames);
+    let angle = base + (recipe.rotate === 'spin' ? spinAt(recipe, phase) : 0);
+    let s = (recipe.size ?? 1) * pulseAt(recipe, phase);
+    if (s === 0) continue;
+    if (s < 0) { s = -s; angle += Math.PI; }
+    const w = mark.width * s * f.sx;
+    if (w < 0.25) continue;
+    parts.push({ w, angle, alpha });
+    side = Math.max(side, Math.ceil(Math.hypot(w, w * aspect)) + 2);
+  }
+  if (!parts.length) return null;
+
+  if (!_bake || _bake.width < side || _bake.height < side) _bake = surface(side, side);
+  const c = _bake.getContext('2d');
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.globalAlpha = 1;
+  c.clearRect(0, 0, side, side);
+  c.imageSmoothingEnabled = true;
+  c.imageSmoothingQuality = 'high';
+  const mid = side / 2;
+  for (const { w, angle, alpha } of parts) {
+    const h = w * aspect;
+    c.globalAlpha = alpha;
+    c.setTransform(Math.cos(angle), Math.sin(angle), -Math.sin(angle), Math.cos(angle), mid, mid);
+    c.drawImage(mipFor(mark, w), -w / 2, -h / 2, w, h);
+  }
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.globalAlpha = 1;
+  return { canvas: _bake, cx: mid, cy: mid, w: side, h: side };
 }

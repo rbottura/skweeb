@@ -17,6 +17,14 @@
  * It owns the tick and nothing else. It draws nothing, holds no canvas and
  * knows nothing about what a frame is; `onShow` is called with an index and
  * the caller decides what that means.
+ *
+ * `smooth` is for a caller that can draw between ticks — ckt, whose motion is
+ * closed-form, so tick 12.4 is as exact as tick 12. It is then called on
+ * every animation frame while playing, with the whole tick and the exact
+ * position `at`, fractional; the loop keeps its `fps` and its frame count, and
+ * only the preview gets the screen's own rate. A 30fps loop shown in whole
+ * ticks on a 60Hz screen holds each one for one refresh or two or three, as
+ * the timing falls, and a steady turn reads as a stutter.
  */
 
 export class Playhead {
@@ -27,13 +35,15 @@ export class Playhead {
    * @param {number} [opts.length=0]   ticks in one complete loop
    * @param {boolean} [opts.loop=true] at the end: wrap, or stop on the last
    * @param {()=>void} [opts.onState]  called whenever playing/paused changes
+   * @param {boolean} [opts.smooth=false]  onShow(tick, at) on every animation frame
    */
-  constructor({ onShow, fps = 30, length = 0, loop = true, onState } = {}) {
+  constructor({ onShow, fps = 30, length = 0, loop = true, onState, smooth = false } = {}) {
     this._onShow = onShow || (() => {});
     this._onState = onState || (() => {});
     this._fps = fps;
     this._length = length;
     this._loop = loop;
+    this._smooth = smooth;
 
     this._tick = 0;
     this._playing = false;
@@ -63,9 +73,13 @@ export class Playhead {
   /** Show one tick, clamped into the loop. Does not change play state. */
   show(tick) {
     if (!this._length) return;
+    this._tick = this._wrap(tick);
+    this._onShow(this._tick, this._tick);
+  }
+
+  _wrap(tick) {
     const n = this._length;
-    this._tick = ((Math.round(tick) % n) + n) % n;
-    this._onShow(this._tick);
+    return ((Math.round(tick) % n) + n) % n;
   }
 
   /** Forward or back by whole ticks, wrapping the way the loop does. */
@@ -107,8 +121,11 @@ export class Playhead {
         this.show(this._length - 1);
         return this.pause();
       }
-      this.show(next);
+      if (this._smooth) this._tick = this._wrap(next);
+      else this.show(next);
     }
+    // Every frame, and where the loop really is between its ticks.
+    if (this._smooth) this._onShow(this._tick, this._tick + this._carry);
 
     this._raf = requestAnimationFrame(t => this._advance(t));
   }

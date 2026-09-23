@@ -1,8 +1,25 @@
 # STATUS — skweeb
-_last touched: 2026-09-23_
+_last touched: 2026-09-23, second session_
 
 ## Works right now
 
+- **ckt's rotation no longer stutters**, seen and measured in Chrome against
+  the previous commit. The cause was not the loop's 30 fps: the preview's
+  angle cache was 4° a bucket, so a spin at 2° a frame changed on screen every
+  fourth refresh at 60Hz, held 2, 4 or 6 as the timing fell — 15 pictures a
+  second, unevenly. Now the preview draws sprites that turn alike at their
+  exact angle, and draws *between* the loop's frames (`core/playback.js`,
+  `smooth`): it paints at the screen's own rate. On egypt's heaviest glyph
+  (1275 dots) it holds 60 of 60 at sizes 0.05 to 1, with a still trail, with
+  the attractor moving and in `face`. Saves are untouched — the loop's `fps`
+  and frame count, the quarter-degree cache — so saved objects re-render as
+  they did. The stamp cache moved to `apps/ckt/stamps.js`.
+- **The gamepad's page fits above the timeline.** Open, and more so with a
+  layer's drawer open, it stood over the bottom half of a drawing. Now the
+  whole page is drawn scaled into the space left, on the theme's ground with
+  its edge marked, easing as the timeline opens and closes
+  (`apps/gamepad/sketch/viewFit.js`). A view only: the canvas, the ink, the
+  recorder and saves keep their size, so nothing made while fitted differs.
 - **An object opens back in its app** (`core/reopen.js`), all of it seen in
   Chrome. The vault detail's *Open in ckt ↗* or *Open in grid ↗* opens
   `/apps/<app>/?open=<id>` in a new tab: a ckt still or brush at its exact
@@ -87,18 +104,20 @@ the old `frame.js`, 15 of the link checks fail.
 
 The browser checks were driven over the Chrome DevTools protocol against a
 throwaway vault, from a script in the session scratchpad — still not in the
-repo. See *Next*.
+repo. See *Next*. This pass's also compared against the last commit, served
+from a temporary worktree: paint rate, and how often the screen changes.
+`playback` gained smooth mode's checks.
 
 ## Broken / half-done
 
 - **Moving trails are the one slow case left**: a pass over every dot per
-  trail sample, 13 painted frames a second for 1275 dots and a 10-frame trail.
+  trail sample, 13 painted frames a second for 1275 dots and a 10-frame trail
+  — the same before and after this pass.
   Inherent to drawing them exactly; a faster preview would be an approximation
   (an accumulation buffer), which was tried on paper and rejected for ghosting.
-- **The headless Chrome here never reproduced the author's frame drops
-  exactly**; the numbers above are from the heaviest glyph at large sizes,
-  where the old renderer did drop. The bar's fps readout is there so the
-  author's own machine can say.
+- **ckt's `speed` is degrees a frame**, so a loop saved at 60 fps turns twice
+  as fast as at 30 unless `speed` is halved. The preview is smooth at any
+  `fps` now; which rate saves should default to is the author's call.
 - **The gamepad cannot reopen its recordings**: they replay in core, but
   nothing loads one back into its timeline to go on drawing.
 - **ckt's width and height are two things**: the output canvas, and the world
@@ -116,8 +135,9 @@ repo. See *Next*.
 - **The gamepad's params are still not on `core/params.js`**, so its panels
   are its own; it has the theme, not the drawers.
 - **Files over the 400-line cap**, all the gamepad's: `ui/hud.css`,
-  `sketch/gamepadSketch.js`, `ui/TimelinePanel.js`, `ui/ParamPanel.js` — the
-  last two grew a few lines this pass (the Save Ground row).
+  `sketch/gamepadSketch.js` (572), `ui/TimelinePanel.js` (547),
+  `ui/ParamPanel.js`. The fit to the timeline went into its own file, but
+  wiring it grew the first two by a few lines each.
 - Rule 8 asks for p5 in every app; grid and ckt draw with Canvas 2D alone. Open,
   not decided — the proposal is to keep the rule's point (ES modules, no
   globals, one p5 when an app uses p5) and drop "every app".

@@ -21,7 +21,7 @@
 import {
   getStage, getTransport, isStageActive,
   dropLayer, moveLayer, reshapeLayer, setLayerSpeed, setLayerPhase, setLayerDensity,
-  playStage, pauseStage, stopStage,
+  playStage, pauseStage, stopStage, setViewInset,
 } from '../sketch/gamepadSketch.js';
 
 import { WINDOW_RULES, RULE_NAMES, BAND_STEPS, bandWidth } from '../../../core/stage/clip.js';
@@ -59,7 +59,13 @@ export class TimelinePanel {
     this._build();
     this._wire();
     this.refresh();
+
+    // The page is fitted above whatever height this stands at (viewFit.js),
+    // and a row's drawer opening changes that height.
+    new ResizeObserver(() => this._inset()).observe(this._el);
   }
+
+  _inset() { setViewInset(this._visible ? this._el.offsetHeight : 0); }
 
   // ── Public ──────────────────────────────────────────────────────────────────
 
@@ -68,6 +74,7 @@ export class TimelinePanel {
     this._el.classList.add('tl--visible');
     document.body.classList.add('tl-open');   // the status strip steps aside
     this.refresh();
+    this._inset();
     this._startTicking();
   }
 
@@ -75,6 +82,7 @@ export class TimelinePanel {
     this._visible = false;
     this._el.classList.remove('tl--visible');
     document.body.classList.remove('tl-open');
+    this._inset();
     this._stopTicking();
   }
   toggle() { this._visible ? this.hide() : this.show(); }

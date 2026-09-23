@@ -38,8 +38,11 @@ v2 was wrong once and a whole port was built on it.
   `rebuild.js`).
 - **Speed**: the preview is drawn at the size the viewer shows it, marks are
   pre-rendered at the size and angle they appear, a still trail is one baked
-  stamp. On 1275 moving dots the loop keeps its 30 fps to size 1; the bar
-  shows the measured rate while it plays.
+  stamp. The preview is drawn between the loop's frames at the screen's own
+  rate, at the exact angle: on 1275 moving dots it paints 60 fps to size 1 on a
+  60Hz screen, where it used to show a new picture only 15 times a second (4°
+  angle buckets against a 2° turn — the stutter). The loop's `fps` is what a
+  save plays at; the bar shows the measured paint rate while it plays.
 - **Standalone**: on a plain static server it boots, draws, cuts, and saves by
   download.
 

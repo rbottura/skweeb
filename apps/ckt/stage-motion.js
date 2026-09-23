@@ -57,8 +57,20 @@ export class MotionStage {
     this.pending = false;
     this.loads = { data: 0, mark: 0 };   // newest request wins; older ones land nowhere
 
+    // Smooth: while it plays, the preview is drawn at the screen's rate and
+    // between the loop's frames (`at`), so a turn turns and does not step.
+    // A save, a step and a pause all use the whole tick.
+    this.at = 0;
+    let shown = null;             // the player's count moves with whole ticks only
     this.clock = new Playhead({
-      onShow: tick => { this.transport.show(tick); this.draw(); },
+      smooth: true,
+      onShow: (tick, at) => {
+        if (tick !== shown || !this.clock.playing) this.transport.show(shown = tick);
+        this.at = at;
+        // Playing, this is already an animation frame: paint in it, not the next.
+        if (this.clock.playing) { if (this.active) this.paint(); }
+        else this.draw();
+      },
       onState: () => {
         this.transport.state();
         // A paused loop paints nothing, so the rate would sit on its last value.
@@ -258,7 +270,7 @@ export class MotionStage {
 
   paint() {
     const recipe = this.params.values;
-    const tick = this.clock.tick;
+    const tick = this.clock.playing ? this.at : this.clock.tick;
     const out = renderFrame({
       recipe, anchors: this.anchors, mark: this.mark, tick, frame: this.frame,
       into: this.canvas, draft: true,

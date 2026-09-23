@@ -14,6 +14,9 @@ import { createClip }            from '../../../core/stage/clip.js';
 import { SequenceStage }         from '../../../core/stage/stage.js';
 import { SequenceTransport }     from '../../../core/stage/transport.js';
 import * as StillFrame           from '../core/stillFrame.js';
+import { applyView, drawPageEdge } from './viewFit.js';
+
+export { setViewInset } from './viewFit.js';
 
 /** Movement speed (px/frame at full stick deflection). Tweakable from ParamPanel. */
 export const params = {
@@ -46,6 +49,9 @@ const GHOST_ALPHA = 180 / 255;
 
 /** Quiet period after the last resize event before the buffers are rebuilt. */
 const RESIZE_DEBOUNCE_MS = 150;
+
+/** Round the page while it is fitted above the timeline: the theme's ground. */
+const PAGE_GROUND = '#f4efe3';
 
 // ─── State shared with UI panels (via App) ────────────────────────────────────
 export let familyIndex = 0;
@@ -154,16 +160,33 @@ export function createSketch(container) {
 
     // ── draw ──────────────────────────────────────────────────────────────────
     sketch.draw = () => {
-      sketch.background(255); // Solid white base
+      // The whole page, fitted above the timeline when it is open (viewFit.js).
+      sketch.push();
+      const fitted = applyView(sketch);
+      if (fitted) {
+        sketch.background(PAGE_GROUND);
+        sketch.noStroke();
+        sketch.fill(255);
+        sketch.rect(0, 0, sketch.width, sketch.height);
+      } else {
+        sketch.background(255); // Solid white base
+      }
+      drawPage(sketch);
+      if (fitted) drawPageEdge(sketch);
+      sketch.pop();
 
+      // Poll gamepad
+      const gp = _getActiveGamepad();
+      if (gp) InputManager.update(gp, sketch.deltaTime);
+    };
+
+    /** Everything on the page, in page coordinates. */
+    function drawPage(sketch) {
       // Playback takes over the view rather than stacking on it: the ink layer
       // already holds these same marks, so drawing both reads as a mess.
       if (_stageActive && _stage?.layers.length) {
         if (_transport.playing) _transport.advance(sketch.deltaTime);
         _stage.draw(sketch);
-
-        const pad = _getActiveGamepad();
-        if (pad) InputManager.update(pad, sketch.deltaTime);
         return;
       }
 
@@ -200,11 +223,7 @@ export function createSketch(container) {
         _joyImg.show(sketch);
         sketch.pop();
       }
-
-      // Poll gamepad
-      const gp = _getActiveGamepad();
-      if (gp) InputManager.update(gp, sketch.deltaTime);
-    };
+    }
 
     // ── key shortcuts (fallback without gamepad) ───────────────────────────────
     sketch.keyPressed = (e) => {

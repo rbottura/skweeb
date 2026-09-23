@@ -179,5 +179,44 @@ const make = (opts = {}) => {
   ok('configure takes the new length', head.length, 44);
 }
 
+// -- smooth: every animation frame, and the position between ticks -----------
+
+{
+  // A 30fps loop on a 60Hz screen: a whole tick every other refresh, and in
+  // between the half — the frame ckt draws, so a turn does not step.
+  now = 0;
+  pending.clear();
+  const seen = [];
+  const head = new Playhead({ onShow: (t, at) => seen.push([t, at]), fps: 30, length: 10, smooth: true });
+  head.play();
+  for (let i = 0; i < 4; i++) advance(1000 / 60);
+  head.pause();
+  ok('smooth: called on every frame, not every tick', seen.length, 4);
+  ok('smooth: the whole ticks are the loop\'s', seen.map(s => s[0]), [0, 1, 1, 2]);
+  ok('smooth: at runs between them', seen.map(s => Math.round(s[1] * 100) / 100), [0.5, 1, 1.5, 2]);
+}
+
+{
+  now = 0;
+  pending.clear();
+  const seen = [];
+  const head = new Playhead({ onShow: (t, at) => seen.push(at), fps: 30, length: 4, smooth: true });
+  head.play();
+  for (let i = 0; i < 9; i++) advance(1000 / 60);
+  head.pause();
+  ok('smooth: it wraps like the loop, at staying under length', seen.every(a => a >= 0 && a < 4), true);
+  head.show(2);
+  ok('smooth: show() gives the whole tick as at', seen[seen.length - 1], 2);
+}
+
+{
+  const { head, shown } = make({ fps: 30 });
+  head.play();
+  advance(1000 / 60);
+  advance(1000 / 60);
+  head.pause();
+  ok('not smooth: a tick only when one is due', shown, [1]);
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
