@@ -32,6 +32,7 @@ export const folderOf = row => {
 
 import { Vault }       from './vault.js';
 import { paintDetail } from './vault-detail.js';
+import { reopenUrl }   from './reopen.js';
 
 /** Files inside an object folder are served straight from the vault. */
 const fileUrl = (id, file) => '/vault/objects/' + id + '/' + file;
@@ -187,7 +188,29 @@ export class VaultPanel {
   _cardFor(row) {
     const card = this._card(row);
     this._cards.set(row.id, card);
-    return card;
+    return this._onPick ? this._pickable(row, card) : card;
+  }
+
+  /**
+   * A picker's card carries its own Use button, shown while it is the chosen
+   * one: the choice is made where the eye already is, not at the foot of the
+   * detail across the panel. A double click uses it outright.
+   */
+  _pickable(row, card) {
+    const cell = el('div', 'vp-cell');
+    const use = el('button', 'vp-btn vp-btn--primary vp-use', this._pickLabel);
+    use.type = 'button';
+    use.addEventListener('click', () => this._use(row.id));
+    card.addEventListener('dblclick', () => this._use(row.id));
+    cell.append(card, use);
+    return cell;
+  }
+
+  /** Hand the chosen object to whoever asked, and get out of the way. */
+  async _use(id) {
+    const o = this._loaded && this._loaded.id === id ? this._loaded : (await Vault.load(id)).object;
+    this._onPick(o);
+    this.hide();
   }
 
   /**
@@ -306,8 +329,11 @@ export class VaultPanel {
       return;
     }
     if (this._current !== id) return;         // clicked away while loading
+    const reopen = await reopenUrl(loaded.object);
+    if (this._current !== id) return;
 
-    this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl });
+    this._loaded = loaded.object;
+    this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl, reopen });
     this._markCurrent();
   }
 
@@ -323,7 +349,7 @@ export class VaultPanel {
     paintDetail(this._detailBody, o, urls, {
       open: id => this._openDetail(id),
       playing: viewer => { this._disposeViewer(); this._viewer = viewer; },
-      pick: this._onPick ? picked => { this._onPick(picked); this.hide(); } : null,
+      pick: this._onPick ? picked => this._use(picked.id) : null,
       pickLabel: this._pickLabel,
     });
   }

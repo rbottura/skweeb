@@ -107,6 +107,25 @@
 .vp-card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--nb-ink, #111); }
 .vp-card--on { background: var(--nb-accent, #ffd60a); }
 
+/* A picker's card, and its Use button: on the chosen card only, across the
+   foot of its picture. A margin in % is of the width, and the picture is
+   square, so this lands on the picture whatever size the grid gives the card.
+   The cell is the hover, so moving onto the button does not drop the card. */
+.vp-cell { position: relative; display: flex; }
+.vp-cell > .vp-card { flex: 1; min-width: 0; }
+.vp-cell:hover > .vp-card { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--nb-ink, #111); }
+.vp-use {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 32px;
+  margin-top: calc(100% - 44px);
+}
+.vp-card--on + .vp-use { display: block; }
+.vp-cell:hover > .vp-use { transform: translate(-1px, -1px); }
+
 .vp-thumb {
   aspect-ratio: 1;
   display: block;

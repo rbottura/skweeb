@@ -14,6 +14,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `stage/` | `clip` `player` `transport` `recorder` `stage` `bounds` | **in**, was `gamepad/core/sequence*.js` |
 | `stamp.js` | where a pattern puts its stamps | **in**, split out of `joyImage.js` |
 | `VaultPanel.js` | the window onto the objects on disk; `folder:` tags group | **in**, detail view in `vault-detail.js` |
+| `reopen.js` | an object back in its app: `/apps/<app>/?open=<id>` | **in**, 2026-09-23 |
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
 | `widgets.js` | one widget per param type, split out of ParamPanel | **in** |
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
@@ -279,9 +280,17 @@ apps/<name>/
   main.js         defineParams, registerApp, the sketch
   params.js       the schema, if it earns its own file
   manifest.json   generated: assets, never a runtime directory scan
+  rebuild.js      what core asks about your objects: openObject() replays
+                  one, reopens(object) says which ?open=<id> can bring back
   STATUS.md
 ```
 
 Then the three functions from `docs/object-model.md`: `serialize`, `restore`,
 `render`. That is the whole integration. Everything else — panels, vault,
 gallery, lineage, thumbnails, publishing — is inherited.
+
+An app that can take its objects back reads `requested('<app>')` from
+`core/reopen.js` at boot and restores what it gets; the vault's detail then
+offers *Open in <app> ↗* for every object its `reopens()` accepts. The link,
+`/apps/<app>/?open=<id>`, is the thing to send — to another tab, or to another
+machine serving the same vault.

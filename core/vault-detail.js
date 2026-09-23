@@ -22,7 +22,8 @@ const PICTURE = /^(png|jpe?g|webp|gif|avif|svg|bmp)$/i;
  *
  * @param {HTMLElement} body
  * @param {object} o             the envelope
- * @param {{render:string, thumb:?string}} urls
+ * @param {{render:string, thumb:?string, reopen:?string}} urls
+ *   `reopen` is the link back into the app that made it (core/reopen.js)
  * @param {object} hooks
  * @param {(id:string)=>void} hooks.open         open another object (lineage links)
  * @param {(viewer:object)=>void} hooks.playing  a player started; the panel disposes it later
@@ -104,7 +105,7 @@ export function paintDetail(body, o, urls, hooks) {
       + 'outside — an image loaded under the ink.'));
   }
 
-  body.append(actions(o, renderUrl, hooks));
+  body.append(actions(o, urls, hooks));
 }
 
 function idLink(prefix, id, open) {
@@ -116,8 +117,20 @@ function idLink(prefix, id, open) {
   return line;
 }
 
-function actions(o, renderUrl, hooks) {
+function actions(o, urls, hooks) {
   const row = el('div', 'vp-actions');
+  const renderUrl = urls.render;
+
+  // Back into the app that made it, in a tab of its own, so whatever is open
+  // here stays as it is. A picker's first action is its own, so this one is
+  // only the primary when nothing is being picked.
+  if (urls.reopen) {
+    const reopen = el('button', 'vp-btn' + (hooks.pick ? '' : ' vp-btn--primary'),
+      'Open in ' + o.origin.app + ' ↗');
+    reopen.title = urls.reopen;
+    reopen.addEventListener('click', () => window.open(urls.reopen, '_blank', 'noopener'));
+    row.append(reopen);
+  }
 
   const open = el('button', 'vp-btn', 'Open render ↗');
   open.addEventListener('click', () => window.open(renderUrl, '_blank', 'noopener'));
