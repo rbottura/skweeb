@@ -63,7 +63,13 @@ What those five lines buy:
 
 Adding a control is one entry here. Never HTML, never CSS, never a serializer.
 If a control cannot be expressed as a schema entry, extend `params.js` with a
-new widget type — once, for everyone.
+new widget type — once, for everyone. That is how `text` got `multiline: true`
+(a box rather than a line) when ckt needed v2's text area.
+
+A recipe may carry more than the schema when the render needs it: a ckt still
+records the `tick` it shows, because it is one frame of a loop and the loop's
+params alone would replay frame 0. `restore()` drops such keys — they are the
+object's, not the panel's.
 
 ## bus.js — event names
 

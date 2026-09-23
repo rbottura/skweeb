@@ -16,8 +16,9 @@ gains the most.
 the source recorded as its parent.
 
 **M3 — ckt v3.** Text, grid, dots, sprites, motion. No Matter. Ships with the 9
-existing datasets; new ones come from a script, so the 8 MB `opencv.js` leaves
-the browser.
+existing datasets; new ones are cut in the browser by `apps/ckt/blobs.js`, a
+flood fill with no dependency, so the 8 MB `opencv.js` is gone rather than
+moved. **Done 2026-09-23** — see *Decided since, 2026-09-23*.
 *Done when:* a shape from the gamepad can be the sprite on a ckt dot field —
 and, the stronger test, when ckt can **regenerate a family like `Garam_blue`**:
 letterforms with a pattern on them, emitted as a `set` the gamepad loads as a
@@ -61,7 +62,7 @@ Three consequences, recorded here because each of them is work:
 Each milestone after M1 should also leave **one link** behind, since the
 catalogue of links is the only real measure of whether this is a suite:
 M2 `grid → vault: dithered sequence` — **done, 2026-09-22**, and the first
-entry in the catalogue. M3 `ckt → gamepad: brush family`.
+entry in the catalogue. M3 `ckt → gamepad: brush family` — **done, 2026-09-23**.
 M4 `any → compose: place on a sheet or a timeline`.
 
 **M5 — 3D, the fourth process.** The test of whether this architecture was worth
@@ -206,6 +207,79 @@ have always done, and the crop goes into the recipe — the marks are in canvas
 coordinates and the render is a window onto them, so a replay without it would
 redraw the whole canvas and believe it matched.
 
+## Decided since, 2026-09-23
+
+**M3 is done, and ckt was ported twice.** The first port (2026-09-22) was
+written before v2's folder was on this machine, from this document's
+description of it, and got the mechanism wrong. It was never pushed, and its
+branch was deleted once what it got right had been carried over — the
+datasets, the blob pass, the manifests. The second read `render.js`, `script.js` and
+`p5_opencv.js` end to end. Both of M3's tests pass in a browser: a vault
+shape is the sprite on a dot field, and a glyph range emits as a `set` that
+the gamepad lists, loads and draws with. That is the catalogue's second link,
+`ckt → gamepad: brush family`.
+
+**Two stages, two objects.** Stage one sets type, a range of glyphs or an
+image, rules the white grid over it and saves a `dataset`. Stage two draws a
+dataset — one of the nine, or one stage one made, by id. The vault is the
+handover v2 did inside the page, in a slot that was gone on reload. The grid's
+spacing is the dot pitch: it is what cuts a solid letter into hundreds of
+dots.
+
+**Motion is v2's, in closed form.** v2 eased its attractor a fixed fraction of
+the way to a moving target each frame. That is a first-order filter, and its
+steady state is exactly computable from the frame index, so `attractor.js`
+reproduces `gravCircle` and `fastSquare` to 10⁻⁶ px of v2 replayed for
+thousands of frames (`tests/ckt-motion.mjs`). A tethered dot sits at
+`anchor + L·unit(A − anchor)`. v2's sliders booted at air friction 0.51, so
+its dots sat there rather than swinging. No integrator, no Matter, and frame
+400 costs what frame 1 costs.
+
+**The sprites were already here.** v2's 81 sprites are 69 MB and stay out of
+git. 59 of its 80 distinct files are the gamepad's `brushes` family in the same
+order, and v2's default `sprites[8]` is `brushes` 8. ckt reads the registry.
+
+**A still records its tick.** A ckt still is one frame of a loop. Without the
+frame in its recipe, a replay showed frame 0 and a brush was cropped to the
+whole loop's sway. `tick` goes in the recipe of every still and brush; a
+replay through `core/rebuild.js` is pixel-identical to what was saved.
+
+**Two core fixes ckt found.** `applyFrameEdit` re-entered on its own writes, so
+picking a preset flipped the format to `custom` in every app — including grid,
+whose `ink` then stopped following its source. The test used a stand-in
+Params with no listeners, which is the one thing a real one always has. And
+`snap()` wrote `0.12000000000000001` into recipes.
+
+**The UI pass, from the author's brief.** Decided 2026-09-23, after M3, and
+it comes before M4:
+
+- **One theme, neo-brutalist and light.** Cream ground, black ink, thick
+  borders, hard offset shadows, one yellow accent, no glow or blur. It lives
+  in core and every app takes it; the neon blue HUD is retired. The gamepad
+  keeps its gamepad-first layout and only takes the theme.
+- **The bottom bar is information only.** Output size in pixels, pixel
+  density, a few shortcuts, in larger, higher-contrast type. It is a block in
+  the page layout, never over the canvas or a panel. Actions leave it. There
+  is no header.
+- **Parameter sections are collapsible drawers, built once in core** —
+  Format, Sequence player, Ground, Sprites, Export — and apps compose their
+  panels from them.
+- **ckt:** the dots panel on the left, motion on the right, the viewer between
+  with a dots / motion toggle above it. The nine shipped sets become *legacy
+  dot-sets*, in a drawer closed by default. Every dot-set made is saved at
+  once, and the vault panel groups them in one folder per ckt session — a
+  grouping, not a folder on disk, so every link keeps working. A session list
+  steps with ← →. The attractor drawer is closed by default, with the
+  attractor off and tether 0. The default motion is a rotation 0→360° at a
+  speed, and a loop is exactly one turn, 360 ÷ speed frames. Trails fade and
+  pulses stop flipping. And a performance audit: v2 did not drop frames with
+  large sprites, and ckt does.
+- **grid:** `zoom` scales the object inside a fixed canvas; `scale`
+  multiplies width and height, up to 4x, and moves into the shared Format
+  section so every app has it.
+- **gamepad:** a still saves on a transparent ground by default, with the
+  choice of white when saving.
+
 ## Still open
 
 1. **`destra.otf` and `GPDestra-Light.otf`** carry no copyright and no licence.
@@ -233,13 +307,22 @@ modified, 10 untracked. `.git` is 253 MB. No `.gitignore`. `gallery/images/` is
 **ColorKineType_v2** — `index.html` is 1223 lines with roughly 200 global ids;
 `render.js` about 1000; `script.js` 561; all on globals. Matter.js appears only
 in `render.js`, 25 call sites, zero elsewhere, so removing it is surgery rather
-than archaeology. The chain from dataset to `creaParticules2()` to `showBalls()`
-is the physics render: dropping Matter drops balls, constraints, anchors and
-particle fill. `gravCircle`, `gravEight`, `fastSquare`, `animateMode` and the
-rotation animation are behaviours driven through it and are worth keeping as
-hand-written motion. `node_modules` is committed, 13 files. `.git` is 116 MB.
-Datasets are `[char][point][x,y]`, nine of them, generated by `opencv.js` at
-about 8 MB with its own progress bar.
+than archaeology. `node_modules` is committed, 13 files. `.git` is 116 MB.
+Datasets are `[char][point][x,y]`, nine of them, cut by v2's own stage one —
+type under a white grid, blobbed by `opencv.js` at about 8 MB with its own
+progress bar.
+
+*Corrected 2026-09-23, from the source.* This paragraph used to call
+`gravCircle`, `gravEight` and `fastSquare` "behaviours driven through Matter,
+worth keeping as hand-written motion", and a first port read that as each dot
+running its own little circle. That is not what they do. They move **one
+attractor body** along a path, easing towards a target every frame. Every dot
+is a body tied to its dataset point by a constraint of length `constLength`,
+and leans the attractor's way. Rotation has three modes — spin, **face the
+attractor**, stop — and scale a pulse through zero. `Render.run` is commented
+out, so v2's fill colour, tether lines and anchors never reached the screen:
+it drew sprites on a p5 overlay and nothing else. The source is on disk at
+`J:\codes\ColorKineType_v2`; read it, not this, before touching `apps/ckt/`.
 
 **grid_sketch** — re-measured 2026-09-21, because the first pass had the wrong
 copy. ~870 lines across five files (`functions.js` 338, `world.js` 255,
