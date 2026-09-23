@@ -54,10 +54,25 @@ export async function loadManifest(url = 'brush-manifest.json') {
   return _manifest;
 }
 
-/** Where a family's files actually live, relative to the manifest. */
+/**
+ * Where a family's files actually live.
+ *
+ * Two forms. A manifest family is a path plus an ordered file list, resolved
+ * against where the manifest was found. A family whose sprites are vault
+ * objects carries `urls` instead — that is how a `set` made in ckt becomes a
+ * brush family in the gamepad, which is M3's link.
+ *
+ * The alternative was for the vault to hand the registry a fake manifest with
+ * invented paths. One shape translated into another is better than a lie
+ * about where files are.
+ */
 function fileUrl(fam, fileIndex) {
+  if (fam.urls) return fam.urls[fileIndex] || '';
   return `${_base}${fam.path}/${fam.files[fileIndex]}`;
 }
+
+/** Either form knows how many sprites it has. */
+const fileCount = fam => (fam.urls ? fam.urls.length : (fam.files ? fam.files.length : 0));
 
 /** Return all family entries from the manifest (for the selector UI). */
 export function allManifestFamilies() {
@@ -96,7 +111,7 @@ export async function probeFamilies(ids) {
     .filter(f => !_available.has(f.id));
 
   await Promise.all(families.map(async fam => {
-    if (!fam.files || !fam.files.length) { _available.set(fam.id, false); return; }
+    if (!fileCount(fam)) { _available.set(fam.id, false); return; }
     try {
       const res = await fetch(fileUrl(fam, 0), { method: 'HEAD' });
       _available.set(fam.id, res.ok);
@@ -124,6 +139,64 @@ export function unavailableManifestFamilies() {
 }
 
 /**
+ * Add a family the manifest does not contain.
+ *
+ * **This is the consumer half of M3's link, `ckt → gamepad: brush family`.**
+ * ckt emits a `set` — an ordered list of glyph objects — and this is how one
+ * becomes something the gamepad can draw with, without the vault having to
+ * invent a manifest or the manifest having to know the vault exists.
+ *
+ * Registered families are available by definition: their sprites are vault
+ * renders, which exist because something just saved them.
+ *
+ * @param {{id, label, urls: string[]}} fam
+ */
+export function registerFamily(fam) {
+  if (!_manifest) _manifest = { families: [] };
+  if (!fam || !fam.id || !fam.urls || !fam.urls.length) return null;
+
+  const existing = _manifest.families.findIndex(f => f.id === fam.id);
+
+  // count AFTER the spread, derived from the urls. The other order let a
+  // stale count on the incoming object outlive the list it described, so
+  // re-emitting a family with more glyphs kept the old number.
+  const entry = { ...fam, count: fam.urls.length };
+
+  if (existing >= 0) _manifest.families[existing] = entry;
+  else _manifest.families.push(entry);
+
+  _available.set(fam.id, true);
+  return entry;
+}
+
+/**
+ * A vault `set` as a registry family.
+ *
+ * The translation between the two shapes, and it lives here rather than in
+ * ckt because both halves are core's: a set is an ordered member list in the
+ * object model, a family is an ordered sprite list in the registry, and order
+ * is the contract in both. A recorded mark refers to a sprite by number, so a
+ * set whose members reorder redraws old work wrongly.
+ *
+ * @param {object} setObject  a vault envelope of type `set`
+ */
+export function familyFromSet(setObject) {
+  const members = (setObject && setObject.recipe && setObject.recipe.members) || [];
+  if (!members.length) return null;
+
+  const sheet = setObject.render && setObject.render.file;
+  return {
+    id: setObject.id,
+    label: setObject.title || setObject.id,
+    count: members.length,
+    urls: members.map(id => `/vault/objects/${id}/render.png`),
+    // The set's own render is its contact sheet — the picker's card image.
+    preview: sheet ? `/vault/objects/${setObject.id}/${sheet}` : null,
+    fromVault: true,
+  };
+}
+
+/**
  * Set which families to load. Call BEFORE preloadSelected().
  * @param {string[]} ids  — family id strings (from manifest)
  */
@@ -142,7 +215,7 @@ export function setSelectedFamilies(ids) {
 export function preloadSelected(p) {
   for (const fam of _selected) {
     const imgs = [];
-    for (let i = 0; i < fam.files.length; i++) {
+    for (let i = 0; i < fileCount(fam); i++) {
       imgs.push(p.loadImage(fileUrl(fam, i)));
     }
     _sprites.set(fam.id, imgs);
@@ -177,12 +250,12 @@ export async function loadSelected(p) {
       // Nulls, not an empty array, and not a missing key: a mark records the
       // sprite index it used, so the array has to stay the right length or a
       // later index would silently resolve to a different brush.
-      _sprites.set(fam.id, fam.files.map(() => null));
+      _sprites.set(fam.id, Array.from({ length: fileCount(fam) }, () => null));
       continue;
     }
 
     _sprites.set(fam.id, await Promise.all(
-      fam.files.map((_, i) => new Promise(resolve => {
+      Array.from({ length: fileCount(fam) }, (_, i) => new Promise(resolve => {
         p.loadImage(fileUrl(fam, i), img => resolve(img), () => resolve(null));
       }))));
   }
@@ -201,7 +274,7 @@ export function getSprite(familyId, fileIndex) {
 export function getSpriteUrl(familyId, fileIndex) {
   const fam = _selected.find(f => f.id === familyId) ??
               _manifest?.families.find(f => f.id === familyId);
-  if (!fam || fileIndex < 0 || fileIndex >= fam.files.length) return '';
+  if (!fam || fileIndex < 0 || fileIndex >= fileCount(fam)) return '';
   return fileUrl(fam, fileIndex);
 }
 
@@ -213,7 +286,20 @@ export function getSpriteUrlByIndex(familyIndex, fileIndex) {
 }
 
 export function familyCount()            { return _selected.length; }
-export function spriteCount(familyId)    { return _sprites.get(familyId)?.length ?? _selected.find(f => f.id === familyId)?.count ?? 0; }
+/**
+ * How many sprites a family has: loaded, else selected, else the manifest.
+ *
+ * The manifest fallback matters for a family that has been registered but not
+ * yet chosen — a picker asking how big it is would otherwise be told zero,
+ * which is why BrushSelector had grown its own lookup into `_manifest` to work
+ * around this.
+ */
+export function spriteCount(familyId) {
+  return _sprites.get(familyId)?.length
+      ?? _selected.find(f => f.id === familyId)?.count
+      ?? _manifest?.families.find(f => f.id === familyId)?.count
+      ?? 0;
+}
 export function spriteCountByIndex(i)    { return _selected[i] ? spriteCount(_selected[i].id) : 0; }
 export function familyMeta(familyId)     { return _selected.find(f => f.id === familyId) ?? null; }
 export function familyMetaByIndex(i)     { return _selected[i] ?? null; }

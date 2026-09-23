@@ -110,5 +110,64 @@ ok('including past the end', R.getSprite('gone', 99), null);
 ok('no doomed loads for an absent family',
    requests.filter(r => r.url.includes('sprites/gone')).length, 0);
 
+// -- A vault set as a brush family -------------------------------------------
+//
+// M3's link, ckt -> gamepad: brush family. ckt emits a `set` — an ordered list
+// of glyph objects — and the gamepad draws with it. Order is the contract in
+// both shapes: a recorded mark refers to a sprite by NUMBER, so a set whose
+// members reorder redraws old work wrongly.
+
+{
+  const setObject = {
+    id: 'ckt_1790000000000_aaa111',
+    type: 'set',
+    title: 'cormorantgaramond-bold · 3 glyphs',
+    recipe: { members: ['ckt_x_a', 'ckt_x_b', 'ckt_x_c'] },
+  };
+
+  const fam = R.familyFromSet(setObject);
+  ok('a set becomes a family', fam.id, setObject.id);
+  ok('members become urls, in order', fam.urls,
+     ['/vault/objects/ckt_x_a/render.png',
+      '/vault/objects/ckt_x_b/render.png',
+      '/vault/objects/ckt_x_c/render.png']);
+  ok('and it knows its count', fam.count, 3);
+
+  ok('a set with no members is not a family', R.familyFromSet({ recipe: {} }), null);
+  ok('nor is nothing at all', R.familyFromSet(null), null);
+
+  R.registerFamily(fam);
+  ok('a registered family is offered',
+     ids(R.availableManifestFamilies()).includes(setObject.id), true);
+  ok('and is available without probing — its sprites just got written',
+     R.isFamilyAvailable(setObject.id), true);
+
+  // Registering twice replaces rather than duplicates: re-emitting a family
+  // under the same id should update it, not give the picker two of them.
+  R.registerFamily({ ...fam, urls: [...fam.urls, '/vault/objects/ckt_x_d/render.png'] });
+  ok('re-registering replaces',
+     R.allManifestFamilies().filter(f => f.id === setObject.id).length, 1);
+  ok('with the new members', R.spriteCount(setObject.id), 4);
+}
+
+// It has to be selectable and loadable by the ordinary paths, or it is a
+// family in name only.
+{
+  const id = 'ckt_1790000000000_aaa111';
+  R.setSelectedFamilies([id]);
+  ok('a vault family can be selected', ids(R.allFamilyMetas()), [id]);
+
+  const seen = [];
+  await R.loadSelected({
+    loadImage(url, onLoad) { seen.push(url); onLoad({ url }); },
+  });
+
+  ok('it loads from the vault, not from a manifest path',
+     seen[0], '/vault/objects/ckt_x_a/render.png');
+  ok('all of its members', seen.length, 4);
+  ok('and the sprites come back by index',
+     R.getSprite(id, 2).url, '/vault/objects/ckt_x_c/render.png');
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

@@ -111,7 +111,9 @@ export class BrushSelector {
     card.dataset.id = fam.id;
     card.dataset.index = index;
 
-    const previewUrl = `${fam.path}/${fam.preview}`;
+    // A manifest family's preview sits in its folder. A family from the vault
+    // has no folder: it carries URLs, and its preview is its set's contact sheet.
+    const previewUrl = fam.urls ? (fam.preview || fam.urls[0]) : `${fam.path}/${fam.preview}`;
 
     card.innerHTML = `
       <div class="bsel-card__check">

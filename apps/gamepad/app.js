@@ -15,6 +15,7 @@ import { ParamPanel }          from './ui/ParamPanel.js';
 import { GalleryPanel }        from './ui/GalleryPanel.js';
 import { TimelinePanel }       from './ui/TimelinePanel.js';
 import { VaultPanel }          from '../../core/VaultPanel.js';
+import { Vault }               from '../../core/vault.js';
 import { createSketch,
          setFamilyIndex, setSpriteIndex, setPatternIndex,
          familyIndex, spriteIndex, patternIndex }
@@ -47,6 +48,13 @@ async function boot() {
         + `but not on this machine, and are not offered: `
         + missing.map(f => f.id).join(', '));
     }
+
+    // 1c. Brush families made elsewhere in the suite. A `set` in the vault is
+    //     an ordered list of glyph objects — ckt emits them — and this is the
+    //     consumer half of M3's link, ckt -> gamepad: brush family. They are
+    //     offered beside the ones on disk, because by the time you are picking
+    //     a brush the difference does not matter.
+    await registerVaultFamilies();
 
     // 2. Prompt user to select libraries — only from what can actually draw.
     const selector = new BrushSelector({
@@ -85,6 +93,42 @@ async function boot() {
   } catch (err) {
     console.error('Failed to boot GamepadDraw:', err);
     document.body.innerHTML = `<div style="color:red;padding:20px;font-family:monospace">Fatal Error: ${err.message}</div>`;
+  }
+}
+
+/**
+ * Register every `set` in the vault as a brush family.
+ *
+ * The consumer half of M3's link. A set is an ordered list of glyph objects,
+ * which is a brush family in a different shape — `familyFromSet()` does the
+ * translation and `registerFamily()` makes it selectable. ckt does not have to
+ * be installed, and the gamepad does not have to know ckt exists: it reads the
+ * vault, and a set is a set.
+ *
+ * Failing softly on purpose. No vault, or a vault with nothing in it, is a
+ * normal state — rule 7, every app runs alone — so this adds what it finds and
+ * says nothing when it finds none.
+ */
+async function registerVaultFamilies() {
+  try {
+    if (!(await Vault.refresh())) return;
+
+    const sets = Vault.index.filter(row => row.type === 'set');
+    if (!sets.length) return;
+
+    let added = 0;
+    for (const row of sets) {
+      try {
+        const { object } = await Vault.load(row.id);
+        const fam = BrushRegistry.familyFromSet(object);
+        if (fam && BrushRegistry.registerFamily(fam)) added++;
+      } catch {
+        // One unreadable set costs that set, not the boot.
+      }
+    }
+    if (added) console.log(`[registry] ${added} brush famil${added === 1 ? 'y' : 'ies'} from the vault`);
+  } catch (err) {
+    console.warn('[registry] could not read vault sets:', err);
   }
 }
 
