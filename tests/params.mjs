@@ -69,6 +69,20 @@ p.set('cell', -5);
 ok('range clamps to min', p.get('cell'), 4);
 p.set('cell', 13);
 ok('range snaps to step from min', p.get('cell'), 14);
+
+{
+  // min + k·step in floats: 0.005 + 23·0.005 is 0.12000000000000001, and that
+  // went into recipes and onto readouts. Snapping rounds to the schema's own
+  // precision.
+  const f = defineParams('float', {
+    size: { type: 'range', min: 0.005, max: 2, step: 0.005, default: 0.05 },
+    zoom: { type: 'range', min: 0.05, max: 8, step: 0.05, default: 1 },
+  });
+  f.set({ size: 0.12, zoom: 0.15 });
+  ok('a snapped float is the number you meant', [f.get('size'), f.get('zoom')], [0.12, 0.15]);
+  f.set('size', 0.1234);
+  ok('and still snaps to the step', f.get('size'), 0.125);
+}
 p.set('cell', 'nonsense');
 ok('an unparseable number falls back', p.get('cell'), 12);
 p.set('cell', '22');

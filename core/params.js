@@ -107,10 +107,24 @@ const clamp = (n, spec) => {
   return n;
 };
 
-/** Snap to the declared step, measured from min so the grid starts where it should. */
+/**
+ * Snap to the declared step, measured from min so the grid starts where it
+ * should — and rounded back to the precision the schema was written in.
+ * `min + k·step` in floating point is 0.12000000000000001 for a 0.005 step
+ * and 0.15000000000000002 for 0.05, which lands in every recipe and every
+ * readout that shows it.
+ */
 const snap = (n, spec) => {
   const base = typeof spec.min === 'number' ? spec.min : 0;
-  return base + Math.round((n - base) / spec.step) * spec.step;
+  const k = Math.round((n - base) / spec.step);
+  return Number((base + k * spec.step).toFixed(Math.max(places(base), places(spec.step))));
+};
+
+/** How many decimals a declared number needs: 0.005 is 3, 1e-7 is 7, 4 is 0. */
+const places = x => {
+  let p = 0;
+  while (p < 15 && Math.round(x * 10 ** p) / 10 ** p !== x) p++;
+  return p;
 };
 
 /**

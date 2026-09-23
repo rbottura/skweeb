@@ -116,12 +116,35 @@ function formatGroups() {
  *                            dimension follows to hold the ratio it had
  *   anything else         -> nothing to do
  *
+ * ── Its own writes come back round ──────────────────────────────────────────
+ *
+ * It writes through `params`, and an app calls it from a `params.on`
+ * listener — so every write it makes re-enters it with a new key. Picking
+ * `hd` wrote 1920 into width, came back in as "a dimension was typed", and set
+ * the format to `custom`: the size right, the chip wrong, and `ink` no longer
+ * following its content. The test that should have caught it used a stand-in
+ * Params with no listeners, which is the one thing a real one always has.
+ * So an edit already in progress on the same params ignores the echoes.
+ *
  * @param {object} params   from defineParams()
  * @param {string} key      the param that just changed
  * @param {{x,y,w,h}} [content]  the content rect, for the derived formats
  * @returns {boolean} whether anything else was changed
  */
 export function applyFrameEdit(params, key, content) {
+  if (_editing.has(params)) return false;
+  _editing.add(params);
+  try {
+    return edit(params, key, content);
+  } finally {
+    _editing.delete(params);
+  }
+}
+
+/** The params an applyFrameEdit() is running on right now, to know its echoes. */
+const _editing = new WeakSet();
+
+function edit(params, key, content) {
   if (key === 'format') {
     const next = sizeForFormat(params.get('format'), params, content);
     if (!next) return false;

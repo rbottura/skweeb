@@ -284,5 +284,29 @@ ok('a contained rect changes nothing',
 ok('grow expands on every side', Trim.grow({ x: 5, y: 5, w: 10, h: 10 }, 3),
    { x: 2, y: 2, w: 16, h: 16 });
 
+// -- the chain, with a real Params -------------------------------------------
+//
+// Every app calls applyFrameEdit from a params.on listener, so every write it
+// makes comes back into it. The stand-in above has no listeners and could not
+// see what that did: picking a preset wrote its size and then flipped the
+// format to `custom`, because the size arrived as "a dimension was typed".
+
+{
+  const { defineParams } = await import('../core/params.js');
+  const p = defineParams('chain', { ...Frame.frameParams({ format: 'content' }) });
+  p.on(key => Frame.applyFrameEdit(p, key, content));
+
+  p.set('format', 'hd');
+  ok('a picked preset stays picked', p.get('format'), 'hd');
+  ok('and its size is written', [p.get('width'), p.get('height')], [1920, 1080]);
+
+  p.set('format', 'a4');
+  ok('a paper format stays picked too', p.get('format'), 'a4');
+
+  p.set('width', 1000);
+  ok('typing a width is still custom', p.get('format'), 'custom');
+  ok('and the link still drags the height', p.get('height'), Math.round(1000 * 297 / 210));
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
