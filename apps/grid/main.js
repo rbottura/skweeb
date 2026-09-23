@@ -3,9 +3,9 @@
  *
  * The app's whole job is to keep three things in step: the parameters, the
  * assets they name, and one canvas. Everything else is inherited — the panel
- * draws itself from the schema, the picker and the lineage come with the
- * `source` param, the handle in source.js hides what kind of thing is being
- * dithered, and the vault write path is core's.
+ * and its drawers draw themselves from the schema, the picker and the lineage
+ * come with the `source` param, the bar and the player are core's, and the
+ * vault write path is core's.
  *
  * The live preview and an export call the same `renderGrid()`, differing only
  * in which frame they hand it. There is deliberately no second drawing path:
@@ -13,7 +13,7 @@
  * disagreeing about something small.
  */
 
-import { gridParams }              from './params.js';
+import { gridParams, GROUPS }      from './params.js';
 import { renderGrid }              from './grid.js';
 import { rampUsage }               from './map.js';
 import { manifest, ramp }          from './materials.js';
@@ -21,12 +21,13 @@ import { fromFile, fromVault }     from './source.js';
 import { saveStill, saveSequence } from './save.js';
 import { ParamPanel }              from '../../core/ParamPanel.js';
 import { VaultPanel }              from '../../core/VaultPanel.js';
+import { Transport }               from '../../core/Transport.js';
+import { Bar }                     from '../../core/Bar.js';
 import { Playhead }                from '../../core/playback.js';
 import { Vault }                   from '../../core/vault.js';
 import { resolveFrame, applyFrameEdit } from '../../core/frame.js';
-import { dpiOf }                   from '../../core/formats.js';
 
-let params;
+let params, panel, bar, transport;
 let tiles = [];                    // the loaded ramp, light to dark
 let source = null;                 // a handle from source.js — still or sequence
 let last = null;                   // the most recent render, for saving
@@ -34,43 +35,80 @@ let busy = false;                  // an export is running; nothing else may sta
 
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
-const scrub = document.getElementById('playhead');
-const playBtn = document.getElementById('play');
+const buttons = {};
 
 /**
- * The transport. Grid dithers the frame under it and nothing else, which is
- * what keeps a scrub — and now a playback — one render rather than a thousand.
- *
- * It plays at the source loop's own rate, and when a dither costs more than
- * its share of time it drops ticks instead of slowing down. So a big field
- * plays coarsely rather than in slow motion, which is the honest reading of
- * what the loop is.
+ * The clock. Grid dithers the frame under it and nothing else, so a scrub —
+ * and a playback — is one render rather than a thousand. It plays at the
+ * source loop's own rate and drops ticks when a dither costs more than its
+ * share of time, which is the honest reading of what the loop is.
  */
 const clock = new Playhead({
-  onShow: () => draw(),
-  onState: () => { playBtn.textContent = clock.playing ? '❙❙' : '▶'; },
+  onShow: tick => { if (transport) transport.show(tick); draw(); },
+  onState: () => { if (transport) transport.state(); },
 });
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 
 async function boot() {
   params = gridParams(await manifest());
+  bar = new Bar({
+    app: 'grid',
+    mount: document.querySelector('.app'),
+    keys: 'V vault · S save · space play · drop an image',
+  });
 
-  new ParamPanel(params, { title: 'grid' }).show();
+  panel = new ParamPanel(params, { title: 'grid', mount: document.getElementById('side'), groups: GROUPS });
   params.on(onParamChange);
+  buildDrawers();
 
   tiles = await ramp(params.get('ramp'));
-  wireChrome();
+  wireKeys();
   draw();
+}
+
+/**
+ * The drawers that are not parameters: a file off disk under Source, the
+ * player for a loop, and the saves.
+ */
+function buildDrawers() {
+  const file = document.createElement('input');
+  file.type = 'file';
+  file.accept = 'image/*';
+  file.hidden = true;
+  file.addEventListener('change', () => loadLocalFile(file.files[0]));
+  const open = button('Open a file', () => file.click());
+  panel.drawer('source').body.append(open, file);
+
+  const player = panel.addDrawer({ id: 'player', title: 'Sequence player', before: 'material' });
+  transport = new Transport({ clock, mount: player.body, busy: () => busy });
+
+  const exp = panel.addDrawer({ id: 'export', title: 'Export' });
+  const actions = document.createElement('div');
+  actions.className = 'pp-actions';
+  buttons.save = button('Save to the vault  [S]', () => save(), true);
+  buttons.frames = button('Save + download the frames', () => save({ keepFrames: true }));
+  actions.append(buttons.save, buttons.frames);
+  exp.body.append(actions);
+
+  showLoopControls();
+}
+
+function button(label, onClick, primary = false) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
+  b.textContent = label;
+  b.addEventListener('click', onClick);
+  return b;
 }
 
 /**
  * Only two params need anything fetched; the rest just redraw.
  *
  * `applyFrameEdit` is the chain — picking a format writes width and height,
- * typing a width switches to custom and drags the height along. It writes
- * through params, so it comes back round to here; the guard is that it only
- * ever changes keys other than the one it was called for.
+ * typing a width switches to custom and drags the height along. It ignores
+ * its own echoes, so calling it for every key is safe.
  */
 async function onParamChange(key, value) {
   if (key === 'ramp')   tiles = await ramp(value);
@@ -91,16 +129,13 @@ function setSource(next) {
     fps: next ? next.fps : 0,
     loop: next ? next.loop : true,
   });
-  showTransport();
+  showLoopControls();
 }
 
-/**
- * A vault object. This is where a sequence is rebuilt from its recipe — the
- * slow part of choosing one, and the only place it happens.
- */
+/** A vault object. Where a sequence is rebuilt from its recipe — the slow part of choosing one. */
 async function loadSource(id) {
   if (!id) { setSource(null); return; }
-  say('opening…');
+  bar.say('opening…');
   try {
     setSource(await fromVault(id));
     if (source.missing.length) {
@@ -109,25 +144,17 @@ async function loadSource(id) {
   } catch (err) {
     console.warn('[grid] could not load', id, err);
     setSource(null);
-    say('could not open that object: ' + err.message);
+    bar.announce('could not open that object: ' + err.message);
   }
 }
 
 /**
- * A file off disk, so the app is usable with no vault at all — rule 7. What it
- * cannot do is claim lineage: an image that is not an object has no id, so
- * anything saved from it is a leaf with a null recipe, exactly as the gamepad
- * does when a drawing sits on top of a loaded image.
+ * A file off disk, so the app is usable with no vault at all — rule 7. An
+ * image that is not an object has no id, so anything saved from it is a leaf.
+ * The param is cleared first: clearing it after would dispose this file.
  */
 async function loadLocalFile(file) {
   if (!file || busy) return;
-
-  // Clearing the param first, not after. Setting it to null announces a change
-  // when something was picked, which runs loadSource(null) — so doing it
-  // second disposes the handle made one line earlier and leaves a blank
-  // canvas. Only visible when you drop a file *after* choosing a vault object,
-  // which is why it survived: on a fresh page the param is already null and
-  // setting it announces nothing.
   params.set('source', null);
   setSource(await fromFile(file));
   draw();
@@ -149,108 +176,74 @@ function paint() {
   if (!source || !tiles.length) {
     canvas.width = 480;
     canvas.height = 300;
-    ctx.fillStyle = recipe.background || '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     last = null;
-    say(source ? 'no material ramp loaded' : 'choose a source — V for the vault, or open a file');
+    bar.output({ width: 0, height: 0 });
+    bar.say(source ? 'no material ramp loaded' : 'choose a source — V for the vault, or open a file');
     return;
   }
 
   const frame = resolveFrame(recipe, source.content, source);
   last = renderGrid({ recipe, source: source.frame(clock.tick), tiles, frame });
 
-  canvas.width = last.canvas.width;
-  canvas.height = last.canvas.height;
+  if (canvas.width !== last.canvas.width) canvas.width = last.canvas.width;
+  if (canvas.height !== last.canvas.height) canvas.height = last.canvas.height;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(last.canvas, 0, 0);
-  scrub.value = clock.tick;
 
   const usage = rampUsage(last.indices, tiles.length);
-  const at = source.frames > 1 ? `frame ${clock.tick + 1}/${source.frames} · ` : '';
-  say(`${at}${last.cols}×${last.rows} cells · ${last.drawn} drawn · `
-    + `${usage.empty} empty · ${usage.used}/${tiles.length} of the ramp used · `
-    + `${canvas.width}×${canvas.height} at ${last.scale}×${printNote(recipe, last)}`);
+  bar.output({ width: canvas.width, height: canvas.height, scale: last.scale, format: recipe.format });
+  bar.say(`${last.cols}×${last.rows} cells · ${last.drawn} drawn · ${usage.empty} empty · `
+    + `${usage.used}/${tiles.length} of the ramp used`);
 }
 
-/**
- * What resolution the current output would print at, when a paper format is
- * chosen. The arithmetic is trivial and doing it in your head while deciding a
- * scale is not, so it says the number rather than leaving it implied.
- */
-function printNote(recipe, render) {
-  const dpi = dpiOf(recipe.format, render.canvas.width, render.canvas.height);
-  if (!dpi) return '';
-  const n = Math.round(dpi.min);
-  const verdict = n >= 300 ? 'print' : n >= 150 ? 'large format' : 'screen only';
-  return ` · ${n} dpi on ${recipe.format.toUpperCase()}, ${verdict}`;
-}
-
-const say = text => { document.getElementById('readout').textContent = text; };
-
-/** The transport exists only when there is a loop to run. */
-function showTransport() {
+/** The player and the frames export exist only when there is a loop. */
+function showLoopControls() {
   const many = !!source && source.frames > 1;
-  for (const id of ['play', 'playhead', 'frames']) {
-    document.getElementById(id).hidden = !many;
-  }
-  if (!many) return;
-  scrub.max = source.frames - 1;
-  scrub.value = 0;
+  panel.drawer('player').hidden = !many;
+  if (buttons.frames) buttons.frames.hidden = !many;
+  if (transport) transport.configure();
 }
 
 // ── Saving ───────────────────────────────────────────────────────────────────
 
 /**
- * One button, two shapes. Which one is not a mode anybody picks: a sequence
- * source makes a sequence and a still makes a still, because anything else is
- * the app silently throwing away most of what it was handed.
+ * One button, two shapes: a sequence source makes a sequence and a still makes
+ * a still, because anything else is the app silently throwing away most of
+ * what it was handed.
  */
 async function save({ keepFrames = false } = {}) {
   if (busy) return;
-  if (!source || !last) return say('nothing to save yet');
+  if (!source || !last) return bar.announce('nothing to save yet');
 
   clock.pause();
   busy = true;
   try {
     if (source.kind === 'sequence') {
       const { object, frames, still, drawn } = await saveSequence({
-        params, source, tiles, keepFrames, onStatus: say,
+        params, source, tiles, keepFrames, onStatus: t => bar.say(t),
       });
-      say(object
+      bar.announce(object
         ? `saved ${object.id} — ${frames} frames, still is frame ${still + 1} at ${drawn} cells`
         : `no vault — ${frames} frames dithered, downloaded instead`);
     } else {
-      say('saving…');
+      bar.say('saving…');
       const object = await saveStill({ params, render: last, sourceId: source.id });
-      say(object ? `saved ${object.id}` : 'no vault — downloaded instead');
+      bar.announce(object ? `saved ${object.id}` : 'no vault — downloaded instead');
     }
   } catch (err) {
     console.error('[grid] save failed:', err);
-    say('save failed: ' + err.message);
+    bar.announce('save failed: ' + err.message);
   } finally {
     busy = false;
     refreshVaultState();
   }
 }
 
-// ── Chrome ───────────────────────────────────────────────────────────────────
+// ── Keys and drops ───────────────────────────────────────────────────────────
 
-function wireChrome() {
+function wireKeys() {
   const vault = new VaultPanel();
-
-  document.getElementById('save').addEventListener('click', () => save());
-  document.getElementById('frames').addEventListener('click', () => save({ keepFrames: true }));
-  document.getElementById('file').addEventListener('change', e => loadLocalFile(e.target.files[0]));
-  playBtn.addEventListener('click', () => { if (!busy) clock.toggle(); });
-
-  // Scrubbing mid-export is not corrupting — source.frame() is read
-  // synchronously by the dither before the loop yields — but it is wasted work
-  // and it makes the readout lie about which frame you are looking at.
-  scrub.addEventListener('input', () => {
-    if (busy) { scrub.value = clock.tick; return; }
-    clock.pause();
-    clock.show(Number(scrub.value));
-  });
 
   document.addEventListener('keydown', e => {
     const t = e.target;
@@ -276,13 +269,10 @@ function wireChrome() {
 }
 
 function refreshVaultState() {
-  Vault.refresh().then(ok => {
-    document.getElementById('vault-state').textContent = ok
-      ? `${Vault.index.length} in vault` : 'no vault';
-  });
+  Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
 }
 
 boot().catch(err => {
   console.error('[grid] failed to boot:', err);
-  say('failed to boot: ' + err.message);
+  if (bar) bar.announce('failed to boot: ' + err.message);
 });

@@ -1,117 +1,13 @@
 /* ──────────────────────────────────────────────────────────────────────────────
    style.css — grid
 
-   The HUD tokens the core panels look for, defined once here. They have
-   fallbacks baked in on the other side too, so this file is what makes grid
-   look like the suite rather than what makes the panels work.
+   Everything that looks like the suite comes from core. All grid says is its
+   layout: the viewer, then one column of drawers.
    ────────────────────────────────────────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600&display=swap');
-@import '../../core/vault-panel.css';
+@import '../../core/theme.css';
 @import '../../core/param-panel.css';
+@import '../../core/vault-panel.css';
 @import '../../core/sequence-viewer.css';
 
-:root {
-  --hud-cyan:    #00f5ff;
-  --hud-lime:    #aaff00;
-  --hud-amber:   #ffb300;
-  --hud-bg:      rgba(8, 8, 18, 0.88);
-  --hud-border:  rgba(0, 245, 255, 0.25);
-  --hud-glass:   rgba(255, 255, 255, 0.04);
-  --hud-text:    #dde6f0;
-  --hud-subtle:  rgba(255, 255, 255, 0.35);
-  --hud-font:    'Space Mono', monospace;
-  --hud-font-ui: 'Outfit', sans-serif;
-  --hud-blur:    blur(24px) saturate(180%);
-  --hud-anim:    cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  height: 100%;
-  background: #0b0b12;
-  color: var(--hud-text);
-  font-family: var(--hud-font-ui);
-  overflow: hidden;
-}
-
-/* The canvas is the work, so it gets the room: centred, never cropped, and
-   never scaled up past its own pixels — a dither viewed above 1:1 is a lie
-   about how fine it is. */
-.stage-wrap {
-  position: absolute;
-  inset: 0 288px 38px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-@media (max-width: 720px) {
-  .stage-wrap { inset: 0 0 38px 0; }
-}
-
-#stage {
-  max-width: 100%;
-  max-height: 100%;
-  image-rendering: auto;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
-}
-
-/* ── Status bar ─────────────────────────────────────────────────────────────── */
-
-.bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 38px;
-  z-index: 1300;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-  background: rgba(5, 5, 14, 0.94);
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  font-family: var(--hud-font);
-  font-size: 11px;
-}
-
-.bar-name    { color: var(--hud-cyan); letter-spacing: 0.16em; }
-.bar-sep     { color: rgba(255, 255, 255, 0.2); }
-.bar-dim     { color: var(--hud-subtle); }
-.bar-spacer  { flex: 1; }
-
-.bar-btn {
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 10px;
-  border: 1px solid var(--hud-border);
-  border-radius: 6px;
-  background: var(--hud-glass);
-  color: var(--hud-text);
-  font-family: var(--hud-font);
-  font-size: 11px;
-  cursor: pointer;
-  transition: background 120ms, color 120ms;
-}
-
-.bar-btn:hover { background: rgba(0, 245, 255, 0.12); color: var(--hud-cyan); }
-
-/* `display: inline-flex` above beats the user agent's `[hidden]` rule, so a
-   hidden button stays visible unless this says otherwise. */
-.bar-btn[hidden] { display: none; }
-
-/* The playhead. Wide, because scrubbing a 1060-frame loop through 80px is
-   nine frames a pixel and you cannot land on the one you want. */
-.bar-scrub {
-  width: 260px;
-  height: 24px;
-  accent-color: var(--hud-cyan);
-  cursor: pointer;
-}
-
-.bar-scrub[hidden] { display: none; }
+.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }

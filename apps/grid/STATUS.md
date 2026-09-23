@@ -1,77 +1,52 @@
 # STATUS — grid
-_last touched: 2026-09-21_
+_last touched: 2026-09-23_
 
 Grid v2: a source image resized so one pixel is one cell, each cell's
 luminance picking a member of an ordered ramp of tiles. Ported from
 `grid_sketch`, which is ~870 lines of globals — see the migration entry in
 `docs/roadmap.md` for what came across and what did not.
 
-## Works right now
-- **The dither is arithmetic and it is tested.** `map.js` has no canvas in it:
-  `gridSize()`, `luminance()`, `mapPixels()`, `rampUsage()`.
-  `node tests/grid-map.mjs`, 32 checks. It fixes the original's alpha leak and
-  the `- 255` that was hiding it, and pins both so neither returns.
-- **Alpha means something.** Below `alphaFloor` a cell draws nothing instead of
-  reading as black. That is what lets a cut-out gamepad drawing be a source at
-  all rather than a page of the densest tile in the ramp.
-- **Eight parameters, one schema**, built from the material manifest so the
-  ramp list is whatever is on disk. `source` is a `type: "object"` row, which
-  is both the vault picker and the whole of the lineage.
-- **Two ramps committed**, `tiles` (10) and `trames` (8), 136 KB. Regenerate
-  the manifest with `node scripts/generate-grid-manifest.js` — it sorts on the
-  trailing number, because `tile1, tile10, tile2` is alphabetical and is not
-  the ramp.
-- Every URL the app requests was checked against the running server: its own
-  five files, the seven core imports, and all 18 ramp members.
+## Works right now — seen in Chrome
+- **On the suite's UI kit** (2026-09-23): the viewer and one docked column of
+  drawers — Source, Sequence player (only for a loop), Material, Ground,
+  Format, Export — and the information-only bar under them. Light,
+  neo-brutalist, from `core/theme.css`.
+- **The dither follows the motion.** A loop source is rebuilt and dithered
+  frame by frame; a save is a `sequence` with the source as its parent — M2's
+  link, `grid → vault: dithered sequence`. A still source saves a `still`.
+- **Zoom and scale mean one thing each**, from the shared Format drawer:
+  `zoom` scales the source inside the canvas and never changes the canvas;
+  `scale`, 0.25–4, multiplies the canvas — the same dither in more pixels.
+  The bar reads the output size and, on a paper format, its dpi.
+- **The ground can be none**: empty cells stay transparent.
+- **The dither is arithmetic and it is tested.** `map.js` has no canvas in it;
+  `node tests/grid-map.mjs`. Alpha means something: below `alphaFloor` a cell
+  draws nothing, which is what lets a cut-out drawing be a source.
+- **Two ramps committed**, `tiles` (10) and `trames` (8). Regenerate the
+  manifest with `node scripts/generate-grid-manifest.js`.
 
 ## Broken / half-done
-- **Nothing here has been seen in a browser.** The modules parse, the pure core
-  is tested and every path resolves, but no pixel has been drawn. That is the
-  next step and it cannot be done from a terminal.
-- **A `sequence` source only uses its render**, which is one frame — the
-  fullest one, since 2026-09-21. Dithering a loop frame by frame is a different
-  job and is what M2's link (`grid → vault: dithered sequence`) actually means.
-  Today choosing a sequence dithers its still.
-- **A local file cannot be re-rendered.** Drag an image in and it works, but it
-  has no id, so a save is a leaf: `recipe: null`, tagged `leaf`, exactly as the
-  gamepad does for a drawing over a loaded image. Lineage would need the file
-  to become an object first.
-- **No export at scale yet.** `scale` is a live parameter and `renderGrid()`
-  takes an override for it, so the path exists — but nothing drives it from an
-  exporter, and nothing has rendered above screen size.
-- The preview is capped to the pane and never shown above 1:1, so at a high
-  `scale` you are looking at a downscaled picture of a large render. The
-  readout gives the true pixel size; there is no zoom control.
+- **A local file cannot be re-rendered.** Dropped in, it works, but it has no
+  id, so a save is a leaf: `recipe: null`, tagged `leaf`.
+- **Old recipes re-render trimmed.** They carry no `format`, so `restore()`
+  fills `content`; and a derived format with `zoom` ≠ 1 now keeps its canvas
+  where it used to grow it. Two objects exist from before; neither used zoom.
+- **The ramp is an app asset, not a family.** Making a ramp a `set` would let
+  any family — a ckt emit, a gamepad folder — be a dither material. In the
+  review doc as a question.
 
 ## Next single step
-- Open `http://127.0.0.1:3000/apps/grid/`, drop an image on it, and see whether
-  it draws. Then press **V** and pick the `sweep 214 marks` sequence, which is
-  the first time one app eats what another made. Expect the readout to show
-  cells, drawn, empty, and how much of the ramp got used — that last number is
-  the one worth watching, because a ramp with most of its members unused means
-  the step count is wrong for that image.
+- Nothing grid-only. The suite's next step — opening a saved object back in
+  its app — gives grid its `?open=<id>` along with ckt.
 
 ## Parked decisions
-- **No p5 in this app.** Grid needs `drawImage` into a canvas and nothing else;
-  the original used p5 for `createCanvas`, `image()`, `resize()`, `loadPixels()`
-  and `map()`, all of which are Canvas 2D or Math. It also buys something to
-  leave out: `render()` must stay pure so sandboxing is later a worker rather
-  than a redesign, and a worker can hold an `OffscreenCanvas` but not a p5
-  instance. CLAUDE.md rule 8 asks for instance-mode p5 and one version of it —
-  the rule it protects is kept by having none. Reversible: `grid.js` is the
-  only file that would change.
+- **No p5 in this app.** Grid needs `drawImage` into a canvas and nothing else,
+  and a render with no p5 instance can run in a worker, which keeps a
+  standalone `.skw` sandboxable. CLAUDE.md rule 8 asks for p5 in every app;
+  whether that stays the rule is open in the review doc.
 - **Bots on the grid — deferred, not dropped.** `playerOne.js` in the original
-  is an agent, not leftovers: it holds a current cell, knows its four
-  neighbours, moves in bounds, and has a verb set that acts on cells — paint,
-  resize, rotate, change image, swap with another cell — with `index` already
-  separating player 1 from player 2. The intent is several of them wandering
-  the grid under programmed behaviours, as a parameter, later.
-  Two notes for when it lands. It is where `rng()` finally earns its place in
-  grid: today the dither is a pure function of source and ramp and `seed` is
-  honestly `null`, but the moment a bot wanders, the seed is what makes the
-  wander re-renderable. And a bot mutates cells after the mapping, so it is a
-  pass over the field rather than a change to `map.js` — which is why the
-  field comes back out of `renderGrid()` as `indices`.
-- **The ramp is an app asset, not a vault object, for now.** Modelling a ramp
-  as a `set` is the right end state and is what M3 needs anyway; a manifest is
-  what M2 needs today.
+  is an agent: a current cell, four neighbours, verbs that act on cells —
+  paint, resize, rotate, change image, swap — with `index` separating player 1
+  from player 2. When it lands it is where `rng()` earns its place in grid, and
+  it is a pass over the field after the mapping, which is why `renderGrid()`
+  returns `indices`.

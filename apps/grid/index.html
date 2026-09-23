@@ -11,35 +11,17 @@
 
 <body>
   <!--
-    No p5, and no script tags before the module: grid needs drawImage into a
-    canvas and nothing else. See the note at the top of grid.js.
+    The shell from core/theme.css: the viewer, one column of drawers, and the
+    bar as a row of its own below them. No p5: grid needs drawImage into a
+    canvas and nothing else — see the note at the top of grid.js.
   -->
-  <main class="stage-wrap">
-    <canvas id="stage" width="480" height="300"></canvas>
-  </main>
-
-  <div class="bar">
-    <span class="bar-name">grid</span>
-    <span class="bar-sep">·</span>
-    <span class="bar-dim" id="readout">loading…</span>
-    <span class="bar-spacer"></span>
-    <!--
-      The transport is chrome, not parameters. It says which frame you are
-      looking at; it says nothing about the artwork, and a save dithers every
-      frame regardless of where it sits. Putting it in the schema would write
-      it into the recipe, where it would mean nothing.
-    -->
-    <button class="bar-btn" id="play" title="Play / pause [space]" hidden>▶</button>
-    <input class="bar-scrub" id="playhead" type="range" min="0" max="0" step="1" value="0"
-           title="Frame [← →]" hidden>
-    <label class="bar-btn" for="file">Open a file</label>
-    <input id="file" type="file" accept="image/*" hidden>
-    <button class="bar-btn" id="save" title="Save to the vault [S]">Save</button>
-    <button class="bar-btn" id="frames" title="Save, and download the frames as a zip" hidden>Save + frames</button>
-    <span class="bar-sep">·</span>
-    <span class="bar-dim" id="vault-state">vault…</span>
-    <span class="bar-sep">·</span>
-    <span class="bar-dim">V = vault &nbsp;·&nbsp; S = save &nbsp;·&nbsp; space = play &nbsp;·&nbsp; drop an image</span>
+  <div class="app">
+    <main class="app-main">
+      <section class="viewer" aria-label="grid output">
+        <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+      </section>
+      <div class="app-side" id="side"></div>
+    </main>
   </div>
 
   <script type="module" src="./main.js"></script>

@@ -160,7 +160,8 @@ export function renderGrid({ recipe, source, tiles, frame, scale }) {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  if (recipe.background) {
+  // `none` is a transparent ground: empty cells stay empty.
+  if (recipe.background && recipe.background !== 'none') {
     ctx.fillStyle = recipe.background;
     ctx.fillRect(0, 0, outW, outH);
   }
