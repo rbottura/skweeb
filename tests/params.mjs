@@ -130,6 +130,23 @@ t.restore({ cell: 16, threshold: 0.5, palette: ['#000'] });
 ok('a future recipe loads anyway', t.get('cell'), 16);
 ok('and its unknown keys are dropped', Object.keys(t.values).length, 5);
 
+// A reset used to put values back without a word, so the panel's widgets
+// stayed where they were and the app never redrew.
+{
+  const g = gridSchema();
+  g.set({ cell: 40, invert: true });
+  const heard = [];
+  g.on((key, value) => heard.push([key, value, g.restoring, g.get('invert')]));
+  g.reset();
+  ok('a reset announces every key it moves', heard.map(h => h[0]), ['cell', 'invert']);
+  ok('with where it moved to', heard.map(h => h[1]), [12, false]);
+  ok('restoring while it announces', heard.every(h => h[2] === true), true);
+  ok('and all of it in place before the first', heard[0][3], false);
+  ok('restoring over once it is done', g.restoring, false);
+  g.reset();
+  ok('a reset that moves nothing says nothing', heard.length, 2);
+}
+
 // ── consumedObjectIds — the lineage ──────────────────────────────────────────
 
 const lin = defineParams('grid', {

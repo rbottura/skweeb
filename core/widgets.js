@@ -28,8 +28,13 @@ const el = (tag, cls, text) => {
   return node;
 };
 
-/** A typed number beside a slider: sliders are for feel, numbers for exact values. */
-function numberBox(spec, value, set) {
+/**
+ * A typed number beside a slider: sliders are for feel, numbers for exact
+ * values. A number the param refuses or clamps to what it already was changes
+ * nothing, so nothing syncs the box — it puts the real value back itself, or
+ * it would go on showing -50 against a width of 1.
+ */
+function numberBox(spec, value, set, current) {
   const box = el('input', 'pp-num');
   box.type = 'number';
   if (spec.min != null) box.min = spec.min;
@@ -38,13 +43,13 @@ function numberBox(spec, value, set) {
   box.value = value;
   box.addEventListener('change', () => {
     const v = parseFloat(box.value);
-    if (Number.isFinite(v)) set(v);
+    if (!Number.isFinite(v) || !set(v)) box.value = current();
   });
   return box;
 }
 
 export const WIDGETS = {
-  range: ({ spec, value, set, readout }) => {
+  range: ({ key, spec, value, set, readout, panel }) => {
     const input = el('input', 'pp-range');
     input.type = 'range';
     input.min = spec.min ?? 0;
@@ -52,7 +57,7 @@ export const WIDGETS = {
     input.step = spec.step ?? 1;
     input.value = value;
     input.addEventListener('input', () => set(parseFloat(input.value)));
-    const box = numberBox(spec, value, set);
+    const box = numberBox(spec, value, set, () => panel.value(key));
     readout.replaceChildren(box);
     return { node: input, sync(v) { input.value = v; box.value = v; } };
   },

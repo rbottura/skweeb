@@ -199,6 +199,7 @@ export function defineParams(app, schema) {
 
   const values = {};
   const listeners = new Set();
+  let restoring = false;
 
   const defaults = () => {
     const out = {};
@@ -255,12 +256,34 @@ export function defineParams(app, schema) {
      * its default rather than keeping whatever was on screen. Without that, a
      * restore inherits state from whatever was loaded before it, which is the
      * bug where a piece comes back subtly wrong and only sometimes.
+     *
+     * Every key that changed is announced, the ones going back to a default
+     * included — they used to go back silently, so Reset moved no widget and
+     * redrew nothing. All of it is in place before anyone hears, and
+     * `restoring` is true while they do: a recipe arriving is not an edit, and
+     * a listener that chains one value to another (frame.js) must leave it be.
      */
     restore(recipe) {
+      const was = JSON.parse(JSON.stringify(values));
       Object.assign(values, defaults());
-      params.set(recipe || {});
+      const incoming = recipe || {};
+      for (const key of Object.keys(incoming)) {
+        if (!Object.prototype.hasOwnProperty.call(schema, key)) continue;
+        values[key] = TYPES[schema[key].type].coerce(incoming[key], schema[key]);
+      }
+      restoring = true;
+      try {
+        for (const key of keys) {
+          if (JSON.stringify(values[key]) !== JSON.stringify(was[key])) announce(key, values[key]);
+        }
+      } finally {
+        restoring = false;
+      }
       return params;
     },
+
+    /** True while a restore is announcing: a whole recipe, not an edit. */
+    get restoring() { return restoring; },
 
     reset() { return params.restore({}); },
 

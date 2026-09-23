@@ -107,8 +107,9 @@ function button(label, onClick, primary = false) {
  * Only two params need anything fetched; the rest just redraw.
  *
  * `applyFrameEdit` is the chain — picking a format writes width and height,
- * typing a width switches to custom and drags the height along. It ignores
- * its own echoes, so calling it for every key is safe.
+ * and with the link on, typing either side drags the other. It ignores its
+ * own echoes and leaves a restore alone, so calling it for every key is safe;
+ * it is also needed, since the chain remembers the box it last saw.
  */
 async function onParamChange(key, value) {
   if (key === 'ramp')   tiles = await ramp(value);

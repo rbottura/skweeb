@@ -76,6 +76,12 @@ records the `tick` it shows, because it is one frame of a loop and the loop's
 params alone would replay frame 0. `restore()` drops such keys — they are the
 object's, not the panel's.
 
+`restore()` announces every key it changes, the ones going back to a default
+included, with `params.restoring` true while it does. A listener that chains
+one value to another — the frame's link — leaves a restore alone: a recipe
+arriving is not an edit. (Until 2026-09-23 it went back silently, and Reset
+moved no widget.)
+
 ## The UI kit — decided 2026-09-23
 
 One look and one set of pieces for every app. `theme.css` is neo-brutalist
@@ -109,7 +115,11 @@ Three more schema keys, all data:
 Every slider has a typed number beside it. And the frame group changed
 meaning: `zoom` scales the object inside a canvas the format fixes, never the
 canvas; `scale` (0.25–4) multiplies the canvas's width and height, applied by
-the renderer last — resolution, not composition.
+the renderer last — resolution, not composition. Width and height run 1 to
+4000 (`MAX_SIDE`), since resolution past that is `scale`'s. `link w/h` holds
+the box's shape while either side is typed or dragged; a ratio or a paper
+format stays picked, being still that shape at any size, so a sheet's dpi can
+be read while its pixels are set.
 
 ## bus.js — event names
 

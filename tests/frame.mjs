@@ -105,13 +105,15 @@ const content = { x: 540, y: 78, w: 996, h: 822 };
 
 // -- the chain ---------------------------------------------------------------
 //
-// A stand-in for Params with the two methods applyFrameEdit uses. The real one
-// is covered by tests/params.mjs; what matters here is the arithmetic.
+// A stand-in for Params with the methods applyFrameEdit uses; its starting
+// values are its defaults. The real one is covered by tests/params.mjs and at
+// the end of this file; what matters here is the arithmetic.
 
 const fakeParams = init => {
   const v = { ...init };
   return {
     get: k => v[k],
+    spec: k => ({ default: init[k] }),
     set(keyOrValues, maybe) {
       const incoming = typeof keyOrValues === 'string' ? { [keyOrValues]: maybe } : keyOrValues;
       let n = 0;
@@ -163,17 +165,11 @@ const fakeParams = init => {
 }
 
 {
-  const p = fakeParams({ format: '1-1', width: 1000, height: 1000, link: true, bleed: 0, zoom: 1 });
-  Frame.applyFrameEdit(p, 'width', content);
-  ok('typing a width leaves the presets', p.get('format'), 'custom');
-  ok('linked, the height holds the old ratio', p.get('height'), 1000);
-}
-
-{
   const p = fakeParams({ format: '16-9', width: 1600, height: 900, link: true, bleed: 0, zoom: 1 });
   p.set('width', 800);
   Frame.applyFrameEdit(p, 'width', content);
   ok('the chain follows the format that was in force', p.get('height'), 450);
+  ok('and a ratio is still itself at any size', p.get('format'), '16-9');
 }
 
 {
@@ -309,26 +305,92 @@ ok('grow expands on every side', Trim.grow({ x: 5, y: 5, w: 10, h: 10 }, 3),
 
 // -- the chain, with a real Params -------------------------------------------
 //
-// Every app calls applyFrameEdit from a params.on listener, so every write it
-// makes comes back into it. The stand-in above has no listeners and could not
-// see what that did: picking a preset wrote its size and then flipped the
-// format to `custom`, because the size arrived as "a dimension was typed".
+// As the apps have it: its own writes come back into it, and a typed value has
+// landed before it hears it — the two things the stand-in hid. A picked preset
+// flipped to `custom`; the link never moved the other side once it was custom.
+
+const { defineParams } = await import('../core/params.js');
+const chained = (ink = null) => {
+  const p = defineParams('chain', { ...Frame.frameParams({ format: 'content' }) });
+  p.on(key => Frame.applyFrameEdit(p, key, ink));
+  return p;
+};
+const box = p => [p.get('width'), p.get('height')];
 
 {
-  const { defineParams } = await import('../core/params.js');
-  const p = defineParams('chain', { ...Frame.frameParams({ format: 'content' }) });
-  p.on(key => Frame.applyFrameEdit(p, key, content));
-
+  const p = chained(content);              // the ink is 996 x 822
+  p.set('zoom', 2);
+  ok("the ink format's rows show the ink", box(p), [996, 822]);
+  p.set('width', 1992);
+  ok("and the link holds the ink's shape", box(p), [1992, 1644]);
   p.set('format', 'hd');
   ok('a picked preset stays picked', p.get('format'), 'hd');
-  ok('and its size is written', [p.get('width'), p.get('height')], [1920, 1080]);
-
+  ok('and its size is written', box(p), [1920, 1080]);
   p.set('format', 'a4');
   ok('a paper format stays picked too', p.get('format'), 'a4');
+  p.set('width', 2480);
+  ok('and through a linked edit: a sheet at any size', p.get('format'), 'a4');
+  near('so its dpi can be read off', Formats.dpiOf('a4', ...box(p)).min, 300);
+}
 
+{
+  const p = chained();                     // 1080 x 1080, no ink known
+  p.set('link', false);
+  p.set('height', 720);                    // custom and unlinked: 1080 x 720
+  p.set('link', true);                     // 3:2 is held from here
+  p.set('width', 540);
+  ok('custom and linked: a width drags the height', box(p), [540, 360]);
+  p.set('height', 1440);
+  ok('and a height drags the width', box(p), [2160, 1440]);
+  // A slider's drag, down to almost nothing and back: the shape is held, not
+  // read again off each rounded box.
+  for (let w = 2160; w >= 3; w -= 7) p.set('width', w);
+  for (let w = 3; w <= 1080; w += 3) p.set('width', w);
+  ok('dragged down and back, it comes home exact', box(p), [1080, 720]);
+}
+
+{
+  const p = chained();
+  p.set('format', '16-9');
   p.set('width', 1000);
-  ok('typing a width is still custom', p.get('format'), 'custom');
-  ok('and the link still drags the height', p.get('height'), Math.round(1000 * 297 / 210));
+  ok('a ratio holds its exact shape', box(p), [1000, 563]);
+  ok('and stays picked', p.get('format'), '16-9');
+  p.set('format', 'hd');
+  p.set('width', 1280);
+  ok('an exact size typed over is custom', p.get('format'), 'custom');
+  p.set('height', 1080);
+  ok('holding the shape it had', box(p), [1920, 1080]);
+}
+
+{
+  const p = chained();
+  ok('the frame declares 1 to 4000', [Frame.frameParams().width.min, Frame.frameParams().width.max], [1, 4000]);
+  p.set('width', 99999);
+  ok('a side stops at the limit, the other with it', box(p), [4000, 4000]);
+  p.set('height', -50);
+  ok('and neither goes below 1', box(p), [1, 1]);
+  p.set('link', false);
+  p.set({ width: 1080, height: 1080 });
+  p.set('link', true);
+  p.set('format', '9-16');                 // 1080 x 1920
+  p.set('width', 3000);                    // its height would be 5333
+  ok('at the limit, the typed side gives way', box(p), [2250, 4000]);
+  p.set('link', false);
+  p.set('width', 4000);
+  p.set('format', '16-9');
+  ok('a format never grows a box past it', box(p), [4000, 2250]);
+}
+
+{
+  // What `restoring` is for: only the width differs, just as a typed one would.
+  const p = chained();
+  p.set('link', false);
+  p.set('width', 1200);
+  p.set('link', true);
+  p.restore({ format: 'custom', width: 1500, height: 1080, link: true });
+  ok('a restore comes back as saved', box(p), [1500, 1080]);
+  p.set('width', 750);
+  ok('and the link then holds its shape', box(p), [750, 540]);
 }
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');

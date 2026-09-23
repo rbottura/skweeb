@@ -35,6 +35,13 @@ export const DERIVED = ['content', 'source'];
 export const CUSTOM = 'custom';
 
 /**
+ * The longest side a canvas can be given, in pixels. More resolution than
+ * that is `scale`'s job — 4000 at 4× is 16000 px, A1 at over 400 dpi — and a
+ * slider that stops here is still fine enough to set a size by feel.
+ */
+export const MAX_SIDE = 4000;
+
+/**
  * The parameter group, for an app to spread into its schema.
  *
  * ```js
@@ -65,14 +72,15 @@ export function frameParams({ format = 'content', bleed = 0 } = {}) {
     },
 
     /**
-     * The canvas, in pixels. A preset writes into these; typing into them
-     * switches `format` to `custom`. Both directions go through
-     * `applyFrameEdit()` so the two can never disagree.
+     * The canvas, in pixels, 1 to MAX_SIDE. A preset writes into these; typing
+     * into them makes the format `custom` — unless the link is holding a ratio
+     * or a sheet, which are still themselves at any size. Both directions go
+     * through `applyFrameEdit()` so the two can never disagree.
      */
-    width:  { type: 'int', min: 1, max: 16384, default: 1080, label: 'width', group },
-    height: { type: 'int', min: 1, max: 16384, default: 1080, label: 'height', group },
+    width:  { type: 'int', min: 1, max: MAX_SIDE, default: 1080, label: 'width', group },
+    height: { type: 'int', min: 1, max: MAX_SIDE, default: 1080, label: 'height', group },
 
-    /** Keep the ratio while typing — the chain. */
+    /** Hold the shape while typing: either side drags the other — the chain. */
     link: { type: 'bool', default: true, label: 'link w/h', group },
 
     /** Ground on all four sides. Always grows the canvas; 0 for an exact size. */
@@ -120,13 +128,20 @@ function formatGroups() {
 /**
  * Keep `format`, `width` and `height` consistent after one of them is edited.
  *
- * Called from an app's param-change handler, and it is the whole of the chain
- * behaviour. Three cases:
+ * Called from an app's param-change handler for every key, and it is the whole
+ * of the chain behaviour:
  *
- *   a format was picked   -> write its size, or its shape, into width/height
- *   a dimension was typed -> format becomes `custom`; if linked, the other
- *                            dimension follows to hold the ratio it had
- *   anything else         -> nothing to do
+ *   a format was picked   -> write its size, or its shape, into width/height;
+ *                            a derived one keeps writing it as its content moves
+ *   a side was typed      -> unlinked, the format becomes `custom`. Linked, the
+ *                            other side follows to hold the shape the box had:
+ *                            a ratio or a sheet is still itself, so it stays
+ *                            picked, and anything else becomes `custom`
+ *   a restore             -> nothing: a recipe comes back as it was saved
+ *
+ * No side goes below 1 or past MAX_SIDE. A linked side that would stops at
+ * the limit and the typed side gives way: the link holds the shape, not the
+ * number.
  *
  * ── Its own writes come back round ──────────────────────────────────────────
  *
@@ -137,6 +152,16 @@ function formatGroups() {
  * following its content. The test that should have caught it used a stand-in
  * Params with no listeners, which is the one thing a real one always has.
  * So an edit already in progress on the same params ignores the echoes.
+ *
+ * ── The box before the edit ─────────────────────────────────────────────────
+ *
+ * A typed width arrives already written, so the box it replaced survives only
+ * in what the chain last saw (`_last`). Reading the ratio off the box after
+ * the edit was the old bug: it held the new ratio, so once the format was
+ * `custom` the other side never moved. The shape is kept there too rather
+ * than read again off a rounded box, or a slider dragged down and back up
+ * would come home a few pixels off. Both sides moving at once is a set, not a
+ * keystroke, and stands.
  *
  * @param {object} params   from defineParams()
  * @param {string} key      the param that just changed
@@ -156,68 +181,130 @@ export function applyFrameEdit(params, key, content) {
 /** The params an applyFrameEdit() is running on right now, to know its echoes. */
 const _editing = new WeakSet();
 
+/** What the chain last saw, per params: { w, h, shape } — the box and the shape held. */
+const _last = new WeakMap();
+
 function edit(params, key, content) {
-  if (key === 'format') {
-    const next = sizeForFormat(params.get('format'), params, content);
-    if (!next) return false;
-    return params.set({ width: next[0], height: next[1] }) > 0;
-  }
+  const last = _last.get(params) || firstBox(params);
+  const format = params.get('format');
+  let shape = last.shape;
+  let changed = false;
 
-  if (key !== 'width' && key !== 'height') return false;
-
-  const before = params.get('format');
-  let changed = params.set('format', CUSTOM) > 0;
-
-  if (params.get('link')) {
-    // The ratio to hold is the one the frame had a moment ago, which is the
-    // previous format's when there was one and the current box's otherwise.
-    const ratio = ratioOf(before) || currentRatio(params, key);
-    if (ratio) {
-      const [rw, rh] = ratio;
-      changed = (key === 'width'
-        ? params.set('height', Math.max(1, Math.round(params.get('width') * rh / rw)))
-        : params.set('width',  Math.max(1, Math.round(params.get('height') * rw / rh)))) > 0 || changed;
+  if (params.restoring) {
+    shape = null;
+  } else if (key === 'width' || key === 'height') {
+    const movedW = params.get('width') !== last.w;
+    const movedH = params.get('height') !== last.h;
+    const lead = movedW === movedH ? null : movedW ? 'width' : 'height';
+    if (lead && params.get('link')) {
+      shape = shapeOf(format, params, content) || last.shape || [last.w, last.h];
+      const [w, h] = hold(shape, lead, params.get(lead), limits(params));
+      changed = params.set({ width: w, height: h }) > 0;
+      if (!keepsShape(format)) changed = params.set('format', CUSTOM) > 0 || changed;
+    } else if (lead) {
+      changed = params.set('format', CUSTOM) > 0;
+      shape = null;
+    } else if (movedW) {
+      shape = null;                              // both at once: a set, and it stands
     }
+  } else if (key === 'format' || DERIVED.includes(format)) {
+    // A picked format writes its size, and a derived one keeps writing it, so
+    // the rows say what the canvas is when its content or its bleed moves.
+    const next = sizeForFormat(format, params, content);
+    if (next) changed = params.set({ width: next[0], height: next[1] }) > 0;
+    if (key === 'format' || changed) shape = null;
   }
+  if (key === 'link') shape = null;              // locked from here: the box as it is
 
+  const w = params.get('width');
+  const h = params.get('height');
+  _last.set(params, { w, h, shape: shape || shapeOf(params.get('format'), params, content) || [w, h] });
   return changed;
 }
 
 /**
- * The ratio the box had before this edit, reconstructed from the dimension
- * that did *not* change — the one that changed no longer describes it.
+ * Before the chain has seen anything, the box is the one the params began
+ * with: an app hears every change from the start, so a box it has not seen
+ * is still the default.
  */
-function currentRatio(params, key) {
-  const w = params.get('width');
-  const h = params.get('height');
-  if (!(w > 0) || !(h > 0)) return null;
-  return key === 'width' ? [w, h] : [w, h];
+function firstBox(params) {
+  const start = key => specOf(params, key)?.default ?? params.get(key);
+  return { w: start('width'), h: start('height'), shape: null };
+}
+
+const specOf = (params, key) => (typeof params.spec === 'function' ? params.spec(key) : null);
+
+/** Each side's limits, from the schema when there is one: an app may narrow them. */
+function limits(params) {
+  const of = key => [specOf(params, key)?.min ?? 1, specOf(params, key)?.max ?? MAX_SIDE];
+  return { w: of('width'), h: of('height') };
+}
+
+/** The shape a format stands for: its own, or its ink's; `custom` has none. */
+function shapeOf(format, params, content) {
+  return ratioOf(format) || derivedSize(format, params, content);
+}
+
+/** A ratio or a sheet is still itself at any size; an exact size is not. */
+function keepsShape(format) {
+  const f = byId(format);
+  return !!(f && (f.ratio || f.mm));
 }
 
 /**
- * What width and height a format asks for.
+ * One side given, the other follows the shape. A follower that would pass a
+ * limit stops at it, and the given side gives way instead.
+ */
+function hold([rw, rh], lead, value, lim) {
+  const fit = (n, [lo, hi]) => Math.min(hi, Math.max(lo, Math.round(n)));
+  if (lead === 'width') {
+    const w = fit(value, lim.w);
+    const h = fit(w * rh / rw, lim.h);
+    return h === Math.round(w * rh / rw) ? [w, h] : [fit(h * rw / rh, lim.w), h];
+  }
+  const h = fit(value, lim.h);
+  const w = fit(h * rw / rh, lim.w);
+  return w === Math.round(h * rw / rh) ? [w, h] : [w, fit(w * rh / rw, lim.h)];
+}
+
+/** A size brought inside the limits, its proportions kept. */
+function within([w, h], lim) {
+  const k = Math.min(1, lim.w[1] / w, lim.h[1] / h);
+  return [Math.max(lim.w[0], Math.round(w * k)), Math.max(lim.h[0], Math.round(h * k))];
+}
+
+/** What `content` measures, bleed and all; null while the ink is not known. */
+function derivedSize(format, params, content) {
+  if (format !== 'content' || !content) return null;
+  const bleed = params.get('bleed') || 0;
+  return [
+    Math.max(1, Math.round(content.w) + bleed * 2),
+    Math.max(1, Math.round(content.h) + bleed * 2),
+  ];
+}
+
+/**
+ * What width and height a format asks for, inside the limits.
  *
- * `px` formats give it outright. `ratio` and `mm` formats give only a shape,
- * so the current box is grown — never shrunk — until it fits, which keeps a
- * format change from throwing away content that was already framed.
+ * `px` formats give it outright. `ratio` and `mm` formats give only a shape:
+ * a box already that shape keeps its size, and any other is grown — never
+ * shrunk — until it fits, which keeps a format change from throwing away
+ * content that was already framed. Only a box that would grow past the limit
+ * is fitted inside it instead.
  *
  * @returns {[number,number]|null}  null when the format derives its own size
  */
 export function sizeForFormat(format, params, content) {
   if (format === CUSTOM) return null;
+  const lim = limits(params);
 
   if (DERIVED.includes(format)) {
-    const box = format === 'content' && content ? content : null;
-    if (!box) return null;
-    const bleed = params.get('bleed') || 0;
-    return [
-      Math.max(1, Math.round(box.w) + bleed * 2),
-      Math.max(1, Math.round(box.h) + bleed * 2),
-    ];
+    const size = derivedSize(format, params, content);
+    return size && within(size, lim);
   }
 
   const exact = pixelsOf(format);
-  if (exact) return [exact[0], exact[1]];
+  if (exact) return within(exact, lim);
 
   const ratio = ratioOf(format);
   if (!ratio) return null;
@@ -226,10 +313,14 @@ export function sizeForFormat(format, params, content) {
   const w = params.get('width');
   const h = params.get('height');
 
+  // Already that shape, to the pixel whichever way it rounded: a box a linked
+  // edit made is left exactly as it is.
+  if (Math.round(w * rh / rw) === h || Math.round(h * rw / rh) === w) return within([w, h], lim);
+
   // Grow the short side. Shrinking would silently crop something that was
   // framed a moment ago, and a format change should not lose work.
   const byWidth = Math.round(w * rh / rw);
-  return byWidth >= h ? [w, byWidth] : [Math.round(h * rw / rh), h];
+  return within(byWidth >= h ? [w, byWidth] : [Math.round(h * rw / rh), h], lim);
 }
 
 /**

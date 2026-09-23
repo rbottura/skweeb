@@ -72,10 +72,12 @@ export class ParamPanel {
     if (this._mount) this.show();
 
     // An external change — a restore, a key, a drag on the canvas — has to
-    // move the widgets too, or the panel starts lying about the values.
-    params.on((key, value) => {
+    // move the widgets too, or the panel starts lying about the values. The
+    // value as it is now, not as announced: a listener heard before this one
+    // may already have moved it on (the frame chain gives a typed width back).
+    params.on(key => {
       const row = this._rows.get(key);
-      if (row) row.widget.sync(value);
+      if (row) row.widget.sync(this._params.get(key));
       this._refresh();
     });
     this._refresh();
