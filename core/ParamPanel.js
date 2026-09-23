@@ -195,9 +195,11 @@ const WIDGETS = {
     return { node: input, sync(v) { input.value = v; readout.textContent = v; } };
   },
 
-  text: ({ value, set }) => {
-    const input = el('input', 'pp-text');
-    input.type = 'text';
+  /** One line, or a box when the schema says `multiline: true` — ckt sets type in lines. */
+  text: ({ spec, value, set }) => {
+    const input = el(spec.multiline ? 'textarea' : 'input', 'pp-text');
+    if (spec.multiline) input.rows = 3;
+    else input.type = 'text';
     input.value = value;
     input.addEventListener('input', () => set(input.value));
     return { node: input, sync(v) { input.value = v; } };

@@ -125,6 +125,12 @@
   font-size: 12px;
 }
 
+textarea.pp-text {
+  height: auto;
+  padding: 6px 8px;
+  resize: vertical;
+}
+
 .pp-select:focus,
 .pp-text:focus { outline: 1px solid var(--hud-cyan, #00f5ff); }
 
