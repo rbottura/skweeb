@@ -280,6 +280,13 @@ it comes before M4:
 - **gamepad:** a still saves on a transparent ground by default, with the
   choice of white when saving.
 
+**Done the same day**, all of it seen running — STATUS.md has the list and the
+measurements. Two choices the brief left to the build: the vault's session
+folders are a `folder:` tag, a view and not a place on disk
+(`docs/object-model.md`, *Tags that group*); and the gamepad's white-or-none
+is a Save Ground row in its Canvas section and the G key, rather than a
+question asked at every save.
+
 ## Still open
 
 1. **`destra.otf` and `GPDestra-Light.otf`** carry no copyright and no licence.
