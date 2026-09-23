@@ -1,26 +1,29 @@
 /* ──────────────────────────────────────────────────────────────────────────────
    hud.css — GamepadDraw HUD panel styles
-   Dark glassmorphism panels with neon accents, designed for TV-distance reading.
+   Panels in the suite's neo-brutalist theme (core/theme.css), laid out for a
+   controller at TV distance.
    ────────────────────────────────────────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap');
 
 /* ── CSS Custom Properties ─────────────────────────────────────────────────── */
 :root {
-  --hud-cyan:    #00f5ff;
-  --hud-magenta: #ff2079;
-  --hud-lime:    #aaff00;
-  --hud-amber:   #ffb300;
-  --hud-bg:      rgba(8, 8, 18, 0.88);
-  --hud-border:  rgba(0, 245, 255, 0.25);
-  --hud-glass:   rgba(255, 255, 255, 0.04);
-  --hud-text:    #dde6f0;
-  --hud-subtle:  rgba(255, 255, 255, 0.35);
-  --hud-radius:  16px;
-  --hud-font:    'Space Mono', monospace;
-  --hud-font-ui: 'Outfit', sans-serif;
-  --hud-blur:    blur(24px) saturate(180%);
-  --hud-shadow:  0 8px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--hud-border);
+  /* The gamepad's own names, onto core/theme.css — decided 2026-09-23. The
+     layout is the gamepad's, built for a controller across the room; the look
+     is the suite's. */
+  --hud-cyan:    var(--nb-ink);
+  --hud-magenta: var(--nb-alert);
+  --hud-lime:    var(--nb-accent);
+  --hud-amber:   var(--nb-accent);
+  --hud-bg:      var(--nb-paper);
+  --hud-border:  var(--nb-ink);
+  --hud-glass:   var(--nb-paper);
+  --hud-text:    var(--nb-ink);
+  --hud-subtle:  var(--nb-muted);
+  --hud-radius:  0px;
+  --hud-font:    var(--nb-mono);
+  --hud-font-ui: var(--nb-font);
+  --hud-blur:    none;
+  --hud-shadow:  var(--nb-shadow);
   --hud-anim:    cubic-bezier(0.4, 0, 0.2, 1);
   --hud-slide:   300ms;
 }
@@ -33,10 +36,8 @@
   font-size: 14px;
   color: var(--hud-text);
   background: var(--hud-bg);
-  backdrop-filter: var(--hud-blur);
-  -webkit-backdrop-filter: var(--hud-blur);
-  border: 1px solid var(--hud-border);
-  border-radius: var(--hud-radius);
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  border-radius: 0;
   box-shadow: var(--hud-shadow);
   padding: 20px 24px 16px;
   pointer-events: auto;
@@ -71,7 +72,7 @@
   font-size: 13px;
   letter-spacing: 0.2em;
   color: var(--hud-cyan);
-  text-shadow: 0 0 12px var(--hud-cyan);
+  text-shadow: none;
 }
 
 .hud-panel__footer {
@@ -88,7 +89,7 @@
   letter-spacing: 0.1em;
 }
 
-.hud-hint--dpad { color: rgba(0, 245, 255, 0.45); }
+.hud-hint--dpad { color: var(--nb-ink); }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    BRUSH PANEL
@@ -135,8 +136,8 @@
 
 .brush-nav-arrow {
   background: var(--hud-glass);
-  border: 1px solid var(--hud-border);
-  border-radius: 8px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  border-radius: 0;
   color: var(--hud-cyan);
   padding: 6px 14px;
   cursor: pointer;
@@ -144,8 +145,8 @@
   transition: background 150ms, box-shadow 150ms;
 }
 .brush-nav-arrow:hover {
-  background: rgba(0, 245, 255, 0.12);
-  box-shadow: 0 0 12px rgba(0, 245, 255, 0.3);
+  background: rgba(255, 214, 10, 0.12);
+  box-shadow: var(--nb-shadow-sm);
 }
 
 /* Sprite thumbnail row */
@@ -160,7 +161,7 @@
 .bp-sprite-tile {
   width: 72px;
   height: 72px;
-  border-radius: 10px;
+  border-radius: 0;
   border: 2px solid transparent;
   background: var(--hud-glass);
   display: flex;
@@ -177,18 +178,18 @@
   object-fit: contain;
 }
 .bp-sprite-tile:hover {
-  border-color: rgba(0, 245, 255, 0.4);
+  border-color: var(--nb-ink);
 }
 .bp-sprite-tile--active {
   border-color: var(--hud-cyan);
-  box-shadow: 0 0 16px rgba(0, 245, 255, 0.5), inset 0 0 12px rgba(0, 245, 255, 0.08);
+  box-shadow: var(--nb-shadow-sm);
   transform: scale(1.08);
   animation: pulse-ring 1.8s ease-in-out infinite;
 }
 
 @keyframes pulse-ring {
-  0%, 100% { box-shadow: 0 0 16px rgba(0, 245, 255, 0.5), inset 0 0 12px rgba(0, 245, 255, 0.08); }
-  50%       { box-shadow: 0 0 28px rgba(0, 245, 255, 0.8), inset 0 0 18px rgba(0, 245, 255, 0.14); }
+  0%, 100% { box-shadow: var(--nb-shadow-sm); }
+  50%       { box-shadow: var(--nb-shadow-sm); }
 }
 
 /* Large preview */
@@ -202,9 +203,9 @@
 .brush-panel__preview-wrap {
   width: 100px;
   height: 100px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 12px;
-  border: 1px solid var(--hud-border);
+  background: rgba(17, 17, 17, 0.06);
+  border-radius: 0;
+  border: var(--nb-line-sm) solid var(--nb-ink);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,8 +237,6 @@
   transform: translateY(-50%) translateY(18px);
 
   background: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   border: none;
   box-shadow: none;
   padding: 0;
@@ -259,9 +258,9 @@
   align-items: center;
   gap: 16px;
   padding: 8px 18px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--hud-bg);
-  border: 1px solid var(--hud-border);
+  border: var(--nb-line-sm) solid var(--nb-ink);
 }
 
 .param-carousel {
@@ -296,11 +295,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px 18px 18px;
-  border-radius: var(--hud-radius);
+  border-radius: 0;
   background: var(--hud-bg);
-  backdrop-filter: var(--hud-blur);
-  -webkit-backdrop-filter: var(--hud-blur);
-  border: 1px solid var(--hud-border);
+  border: var(--nb-line-sm) solid var(--nb-ink);
   box-shadow: var(--hud-shadow);
 
   opacity: 0.4;
@@ -338,15 +335,15 @@
 
 .param-action-row {
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid rgba(255, 32, 121, 0.25);
   transition: background 150ms, border-color 150ms, box-shadow 150ms;
 }
 .param-action-row:hover,
 .param-action-row.param-row--active {
   background: rgba(255, 32, 121, 0.1);
-  border-color: #ff2079;
-  box-shadow: 0 0 14px rgba(255, 32, 121, 0.3);
+  border-color: var(--nb-alert);
+  box-shadow: var(--nb-shadow-sm);
 }
 
 .param-row {
@@ -355,14 +352,14 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid transparent;
   transition: background 150ms, border-color 150ms;
 }
 
 .param-row--active {
-  background: rgba(0, 245, 255, 0.07);
-  border-color: rgba(0, 245, 255, 0.3);
+  background: rgba(255, 214, 10, 0.07);
+  border-color: var(--nb-ink);
 }
 
 .param-row__icon {
@@ -381,22 +378,22 @@
 .param-row__bar-wrap {
   grid-column: 2;
   height: 4px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
+  background: rgba(17, 17, 17, 0.1);
+  border-radius: 0;
   overflow: hidden;
 }
 
 .param-row__bar {
   height: 100%;
   background: linear-gradient(90deg, var(--hud-cyan), var(--hud-lime));
-  border-radius: 2px;
+  border-radius: 0;
   transition: width 100ms;
 }
 
 .param-row__value {
   font-family: var(--hud-font);
   font-size: 11px;
-  color: var(--hud-lime);
+  color: var(--nb-ink);
   grid-column: 3;
   text-align: right;
   white-space: nowrap;
@@ -409,13 +406,13 @@
   gap: 6px;
   align-items: center;
   padding: 8px 10px;
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid transparent;
   transition: background 150ms, border-color 150ms;
 }
 .param-pattern-row.param-row--active {
-  background: rgba(0, 245, 255, 0.07);
-  border-color: rgba(0, 245, 255, 0.3);
+  background: rgba(255, 214, 10, 0.07);
+  border-color: var(--nb-ink);
 }
 .param-pattern-row .param-row__icon,
 .param-pattern-row .param-row__label {
@@ -426,8 +423,8 @@
 
 .pattern-btn {
   background: var(--hud-glass);
-  border: 1px solid var(--hud-border);
-  border-radius: 6px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  border-radius: 0;
   color: var(--hud-subtle);
   font-size: 11px;
   padding: 4px 8px;
@@ -435,9 +432,9 @@
   font-family: var(--hud-font-ui);
   transition: background 150ms, color 150ms, border-color 150ms;
 }
-.pattern-btn:hover { background: rgba(0,245,255,0.08); }
+.pattern-btn:hover { background: rgba(255, 214, 10, 0.08); }
 .pattern-btn--active {
-  background: rgba(0, 245, 255, 0.15);
+  background: rgba(255, 214, 10, 0.15);
   border-color: var(--hud-cyan);
   color: var(--hud-cyan);
   font-weight: 700;
@@ -447,7 +444,7 @@
   cursor: pointer;
 }
 .param-sequence-row:hover {
-  background: rgba(0, 245, 255, 0.07);
+  background: rgba(255, 214, 10, 0.07);
 }
 
 .param-seq-switch {
@@ -456,8 +453,8 @@
   font-size: 10px;
   letter-spacing: 0.1em;
   padding: 3px 9px;
-  border-radius: 999px;
-  border: 1px solid var(--hud-border);
+  border-radius: 0;
+  border: var(--nb-line-sm) solid var(--nb-ink);
   background: var(--hud-glass);
   color: var(--hud-subtle);
   transition: background 150ms, border-color 150ms, color 150ms;
@@ -485,7 +482,7 @@
   cursor: pointer;
 }
 .param-seq-ctl:hover {
-  background: rgba(0, 245, 255, 0.07);
+  background: rgba(255, 214, 10, 0.07);
 }
 
 /* A control the active window rule does not read. Still reachable, so you can
@@ -498,7 +495,7 @@
 
 .param-seq-ctl--live .param-row__icon,
 .param-seq-ctl--live .param-row__value {
-  color: var(--hud-lime);
+  color: var(--nb-ink);
 }
 
 .param-seq-status {
@@ -509,7 +506,7 @@
   color: var(--hud-subtle);
 }
 .param-seq-status--rec  { color: var(--hud-magenta); }
-.param-seq-status--warn { color: var(--hud-amber); }
+.param-seq-status--warn { color: var(--nb-ink); }
 
 .param-seq-list {
   list-style: none;
@@ -582,8 +579,8 @@
 
 .gallery-arrow {
   background: var(--hud-glass);
-  border: 1px solid var(--hud-border);
-  border-radius: 8px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  border-radius: 0;
   color: var(--hud-cyan);
   padding: 8px 12px;
   cursor: pointer;
@@ -591,14 +588,14 @@
   flex-shrink: 0;
   transition: background 150ms;
 }
-.gallery-arrow:hover { background: rgba(0,245,255,0.1); }
+.gallery-arrow:hover { background: rgba(255, 214, 10, 0.1); }
 
 .gp-thumb {
   position: relative;
   width: 80px;
   height: 80px;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: 0;
   border: 2px solid transparent;
   overflow: hidden;
   cursor: pointer;
@@ -609,10 +606,10 @@
   height: 100%;
   object-fit: cover;
 }
-.gp-thumb:hover { border-color: rgba(0,245,255,0.35); }
+.gp-thumb:hover { border-color: var(--nb-ink); }
 .gp-thumb--active {
   border-color: var(--hud-magenta);
-  box-shadow: 0 0 14px rgba(255, 32, 121, 0.5);
+  box-shadow: var(--nb-shadow-sm);
   transform: scale(1.08);
 }
 
@@ -623,9 +620,9 @@
   justify-content: center;
   max-height: 320px;
   overflow: hidden;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--hud-border);
+  border-radius: 0;
+  background: rgba(17, 17, 17, 0.03);
+  border: var(--nb-line-sm) solid var(--nb-ink);
 }
 .gallery-preview-img {
   max-width: 100%;
@@ -648,14 +645,14 @@
 }
 
 .gp-action-btn--save {
-  border-color: rgba(170, 255, 0, 0.45);
-  color: var(--hud-lime);
+  border-color: var(--nb-ink);
+  color: var(--nb-ink);
 }
 
 .gp-action-btn {
   background: var(--hud-glass);
-  border: 1px solid var(--hud-border);
-  border-radius: 8px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  border-radius: 0;
   color: var(--hud-text);
   padding: 7px 16px;
   cursor: pointer;
@@ -668,7 +665,7 @@
 .gp-action-btn:disabled { opacity: 0.4; cursor: default; }
 .gp-action-btn:disabled:hover { background: var(--hud-glass); color: var(--hud-text); }
 .gp-action-btn--pub:hover:not(:disabled) {
-  background: rgba(0, 245, 255, 0.12);
+  background: rgba(255, 214, 10, 0.12);
   color: var(--hud-cyan);
 }
 
@@ -682,7 +679,7 @@
   font-size: 11px;
   line-height: 1;
   color: var(--hud-cyan);
-  text-shadow: 0 0 4px #000, 0 0 10px var(--hud-cyan);
+  text-shadow: none;
   pointer-events: none;
 }
 
@@ -691,10 +688,10 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: rgba(8, 8, 18, 0.9);
+  background: var(--nb-paper);
   border: 1px solid var(--hud-lime);
-  border-radius: 10px;
-  color: var(--hud-lime);
+  border-radius: 0;
+  color: var(--nb-ink);
   font-family: var(--hud-font);
   font-size: 12px;
   padding: 8px 16px;
@@ -717,7 +714,7 @@
   font-family: var(--hud-font);
   font-size: 10.5px;
   line-height: 1.5;
-  color: var(--hud-amber);
+  color: var(--nb-ink);
   opacity: 0.85;
 }
 

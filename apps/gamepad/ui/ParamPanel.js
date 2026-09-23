@@ -39,6 +39,7 @@ const SLIDERS = {
 const SECTIONS = [
   { label: 'Canvas', rows: [
     { kind: 'action', key: 'clearCanvas', label: 'Clear Canvas', icon: '⌫', color: '#ff2079' },
+    { kind: 'action', key: 'saveGround', label: 'Save Ground', icon: '▦', color: '#111111' },
   ]},
 
   { label: 'Brush', rows: [
@@ -48,7 +49,7 @@ const SECTIONS = [
   ]},
 
   { label: 'Reference', rows: [
-    { kind: 'action', key: 'loadReference', label: 'Load Reference', icon: '🖼️', color: '#00f5ff' },
+    { kind: 'action', key: 'loadReference', label: 'Load Reference', icon: '🖼️', color: '#111111' },
     { kind: 'slider', key: 'refOpacity' },
   ]},
 
@@ -200,6 +201,7 @@ export class ParamPanel {
           <span class="param-row__label" style="color:${row.color}">${row.label}</span>
           <span class="param-row__value" style="color:${row.color};font-size:10px">A = confirm</span>
         `;
+        row.val = el.querySelector('.param-row__value');
         return el;
       }
 
@@ -380,6 +382,10 @@ export class ParamPanel {
   _executeAction(key) {
     if (key === 'clearCanvas')        document.dispatchEvent(new CustomEvent('parampanel:clearCanvas'));
     else if (key === 'loadReference') this._fileInput.click();
+    else if (key === 'saveGround') {
+      params.saveGround = params.saveGround === 'white' ? 'none' : 'white';
+      this._refresh();
+    }
   }
 
   _applyPattern() {
@@ -414,6 +420,8 @@ export class ParamPanel {
         const pct = ((params[row.key] - def.min) / (def.max - def.min)) * 100;
         row.bar.style.width = `${Math.max(2, pct)}%`;
         row.val.textContent = def.format(params[row.key]);
+      } else if (row.key === 'saveGround') {
+        row.val.textContent = (params.saveGround === 'white' ? 'white' : 'transparent') + ' · A to switch';
       } else if (row.kind === 'pattern') {
         row.buttons.forEach((btn, b) =>
           btn.classList.toggle('pattern-btn--active', b === this._patternIndex));

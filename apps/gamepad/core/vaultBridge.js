@@ -46,8 +46,8 @@ function recipeNow(sketch, entry) {
     canvas: {
       w: shot.w,
       h: shot.h,
-      // _saveImage() composites the ink layer over white before saving.
-      background: '#ffffff',
+      // What _saveImage() put under the ink: nothing, or white.
+      background: sketch.params.saveGround === 'white' ? '#ffffff' : 'none',
     },
 
     /**

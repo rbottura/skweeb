@@ -36,6 +36,9 @@ export const params = {
    */
   frameFormat:    'content',
   frameBleed:     0,
+
+  /** Under a saved still: 'none' (transparent, the default since 2026-09-23) or 'white'. */
+  saveGround:     'none',
 };
 
 /** Opacity of the live brush cursor drawn over the ink layer. */
@@ -209,6 +212,7 @@ export function createSketch(container) {
       if (e.key === 'c' || e.key === 'C')     _clearOverlay();
       if (e.key === 'z' || e.key === 'Z')     _clearOverlay();
       if (e.key === 's' || e.key === 'S')     _saveImage();
+      if (e.key === 'g' || e.key === 'G')     params.saveGround = params.saveGround === 'white' ? 'none' : 'white';
       if (e.key === 'p' || e.key === 'P')     _joyImg?.nextPattern();
     };
 

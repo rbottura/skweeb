@@ -51,8 +51,8 @@ export class BrushSelector {
         <header class="bsel-header">
           <div class="bsel-logo">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <circle cx="14" cy="14" r="12" stroke="#00f5ff" stroke-width="1.5"/>
-              <path d="M8 20 Q14 8 20 20" stroke="#00f5ff" stroke-width="1.5" fill="none"/>
+              <circle cx="14" cy="14" r="12" stroke="#111111" stroke-width="1.5"/>
+              <path d="M8 20 Q14 8 20 20" stroke="#111111" stroke-width="1.5" fill="none"/>
               <circle cx="14" cy="13" r="2" fill="#ff2079"/>
             </svg>
             GamepadDraw

@@ -70,11 +70,12 @@ let _last = null;
 export const lastFrame = () => _last;
 
 /**
- * The still itself: the framed region of the overlay, on white.
+ * The still itself: the framed region of the overlay, on its ground.
  *
- * White underneath as it always was — a still with a transparent ground reads
- * as broken everywhere outside this app. The caller owns the graphics and
- * should remove() it.
+ * Transparent by default since 2026-09-23 — a drawing is ink on nothing, and
+ * ink on nothing is what the suite's other apps take in (a sprite in ckt, a
+ * source in grid). `params.saveGround` 'white' puts white under it, as every
+ * save did before. The caller owns the graphics and should remove() it.
  *
  * @returns {{graphics: object, frame: object}}
  */
@@ -83,7 +84,7 @@ export function composite(p5, overlay, params) {
   _last = frame;
 
   const g = p5.createGraphics(frame.width, frame.height);
-  g.background(255);
+  if (params.saveGround === 'white') g.background(255);
   g.drawingContext.drawImage(overlay.canvas,
     frame.from.x, frame.from.y, frame.from.w, frame.from.h,
     frame.to.x, frame.to.y, frame.to.w, frame.to.h);
