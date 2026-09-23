@@ -13,8 +13,7 @@
  * ── What changes per member, and what does not ──────────────────────────────
  *
  * Each member's recipe is the recipe on screen with four keys set: its
- * `glyph`, the `tick` on screen, a transparent ground, and `format:
- * 'content'`. A brush is ink on nothing, cropped to the ink — a glyph on an
+ * `glyph`, the `tick` on screen, `ground: 'none'`, and `format: 'content'`. A brush is ink on nothing, cropped to the ink — a glyph on an
  * opaque rectangle would stamp as a rectangle. Everything else — sprite, size,
  * tether, where the attractor is at the frame you are looking at — is what you
  * chose, so the family looks like the glyph on screen, in every letter. And
@@ -42,7 +41,7 @@ import { toPng, zipStore, download } from '../../core/export.js';
  * `ink` crops it to this frame's dots.
  */
 export function memberRecipe(recipe, glyph, tick) {
-  return { ...recipe, glyph, tick: Math.round(tick), transparent: true, format: 'content' };
+  return { ...recipe, glyph, tick: Math.round(tick), ground: 'none', format: 'content' };
 }
 
 /**
@@ -80,7 +79,9 @@ export async function emitFamily({ params, data, mark, tick, name, leaf = false,
       const object = await Vault.save({
         type: 'shape',
         title: `${name} ${g}`,
-        tags: ['ckt', 'brush', name],
+        // Filed in a folder named for the family: 58 brushes are one entry
+        // in the vault panel, and the set beside them is the thing to open.
+        tags: ['ckt', 'brush', name, 'folder:' + name],
         origin: APP,
         seed: null,
         recipe: leaf ? null : recipe,

@@ -7,7 +7,7 @@
  *             Its render *is* the data, so the vault holds the file and the
  *             recipe beside it can cut it again.
  *   still     one frame of stage two.
- *   sequence  the whole loop — `period` frames at `fps`.
+ *   sequence  the whole loop — one turn, loopFrames() frames at `fps`.
  *
  * ── The vault is the send ───────────────────────────────────────────────────
  *
@@ -25,6 +25,7 @@
  */
 
 import { renderFrame }   from './render.js';
+import { loopFrames }    from './motion.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromCanvas, thumbFromBlob } from '../../core/thumb.js';
 import { runFrames, toPng, zipStore, frameName, download } from '../../core/export.js';
@@ -40,8 +41,9 @@ export const APP = { app: 'ckt', version: '3.0.0' };
  * @param {Array<?string>} args.entries
  * @param {CanvasImageSource} args.preview   what the thumbnail shows
  * @param {boolean} args.fromFile  the image came off disk: no recipe can recut it
+ * @param {string} [args.folder]    the `folder:` tag of this visit's session
  */
-export async function saveDataset({ params, data, entries, preview, fromFile }) {
+export async function saveDataset({ params, data, entries, preview, fromFile, folder }) {
   const recipe = params.values;
   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
   const points = data.reduce((n, g) => n + g.length, 0);
@@ -53,7 +55,7 @@ export async function saveDataset({ params, data, entries, preview, fromFile }) 
   return Vault.save({
     type: 'dataset',
     title: `${what} · ${data.length} × ${points} dots`,
-    tags: ['ckt', 'dataset', recipe.input].concat(fromFile ? ['leaf'] : []),
+    tags: ['ckt', 'dataset', recipe.input].concat(fromFile ? ['leaf'] : [], folder ? [folder] : []),
     origin: APP,
     seed: null,
     recipe: fromFile ? null : recipe,
@@ -127,7 +129,8 @@ export async function saveStill({ params, anchors, mark, tick, madeTitle, leaf =
 export async function saveLoop({ params, anchors, mark, frame, tick, keepFrames = false,
                                  madeTitle, leaf = false, onStatus = () => {} }) {
   const recipe = params.values;
-  const count = Math.max(1, Math.round(recipe.period));
+  // One loop is one turn at `speed` — the recording closes on itself.
+  const count = loopFrames(recipe);
   const blobs = keepFrames ? [] : null;
 
   if (blobs) {

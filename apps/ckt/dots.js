@@ -29,6 +29,7 @@
 
 import { raster }         from './raster.js';
 import { dotsFromPixels } from './blobs.js';
+import { surface }        from './surface.js';
 
 /**
  * The strings a recipe cuts, in order. `null` for the image entry.
@@ -106,4 +107,35 @@ export function plotDots(ctx, points, { color = '#e66465', radius = 2 } = {}) {
   }
   ctx.fill();
   ctx.restore();
+}
+
+/**
+ * A dot-set's first glyph, fitted to a square: the thumbnail for the vault and
+ * for the session list. The whole cut canvas shrunk to a thumbnail is a speck
+ * in a field of white; the dots fitted to it are the set.
+ *
+ * @param {number[][]} points
+ * @param {number} [size=256]
+ */
+export function plotThumb(points, size = 256) {
+  const canvas = surface(size, size);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fffdf6';
+  ctx.fillRect(0, 0, size, size);
+  if (!points || !points.length) return canvas;
+
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const [x, y] of points) {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
+  const pad = size * 0.1;
+  const k = Math.min((size - 2 * pad) / Math.max(1, maxX - minX), (size - 2 * pad) / Math.max(1, maxY - minY));
+  const ox = (size - (maxX - minX) * k) / 2 - minX * k;
+  const oy = (size - (maxY - minY) * k) / 2 - minY * k;
+  plotDots(ctx, points.map(([x, y]) => [ox + x * k, oy + y * k]),
+           { color: '#111111', radius: Math.max(1, size / 110) });
+  return canvas;
 }

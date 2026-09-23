@@ -12,7 +12,7 @@
  * what stage one showed when it was made.
  */
 
-import { centre }        from './motion.js';
+import { centre, loopFrames } from './motion.js';
 import { framing, renderFrame } from './render.js';
 import { datasetFor, glyphOf } from './datasets.js';
 import { markFor }       from './sprites.js';
@@ -41,7 +41,7 @@ export async function openObject(object) {
   // A loop is every tick. Anything else is one frame of one — the tick its
   // recipe records, which is the picture that was kept.
   const loop = object.type === 'sequence';
-  const length = loop ? Math.max(1, Math.round(recipe.period)) : 1;
+  const length = loop ? loopFrames(recipe) : 1;
   const tickOf = i => (loop ? i : (Number.isFinite(recipe.tick) ? recipe.tick : 0));
   const size = { width: frame.frame.width, height: frame.frame.height };
 

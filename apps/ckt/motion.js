@@ -29,20 +29,26 @@
  * loses the settling wobble when a slider moved, and nothing that showed in a
  * running piece.
  *
- * ── Rotation and scale, as v2 had them ──────────────────────────────────────
+ * ── Rotation and scale ──────────────────────────────────────────────────────
  *
  *   spin   every sprite turns together — v2's `gRot += speed` each frame.
- *          Here `turns` whole turns per loop, so the loop closes.
+ *          `speed` is degrees a frame, and one loop is one whole turn at it
+ *          (attractor.js loopFrames), so a recorded loop closes.
  *   face   each sprite points at the attractor, from where the dot actually
  *          is: atan2(A − p) + 0.9π. The 0.9π is v2's own offset, kept.
  *   none   still.
  *
- * `pulse` is v2's `gScale = cos(t) · 0.32`: every sprite grows and shrinks
- * together, through zero, so they flip inside out halfway. Here it multiplies
- * the size rather than replacing it, and runs `pulses` times per loop.
+ * `pulse` is v2's scale animation, smoothed: every sprite swells between full
+ * size and `pulseMin`, `pulses` times a loop. v2's went through zero and
+ * flipped the sprites inside out — `pulseMin` −1 still does.
+ *
+ * Since 2026-09-23 the attractor starts `off` and the tether at 0: a letter at
+ * rest, turning. The attractor is something you turn on.
  */
 
-import { attractorAt, phaseOf } from './attractor.js';
+import { attractorAt, phaseOf, loopFrames } from './attractor.js';
+
+export { loopFrames };
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
@@ -91,37 +97,38 @@ export function centre(points, world) {
  * garbage collector's problem, not the picture's.
  *
  * @param {Float64Array} anchors  from centre()
- * @param {object} recipe  tether, rotate, turns, angle, pulse, pulses, size,
- *                         and what attractorAt() needs
+ * @param {object} recipe  tether, rotate, speed, angle, pulse, pulses, pulseMin,
+ *                         size, and what attractorAt() needs
  * @param {number} tick
  * @param {{width:number, height:number}} world
  * @param {Float64Array} [out]
- * @returns {{dots: Float64Array, attractor: {x, y}}}
+ * @returns {{dots: Float64Array, attractor: ?{x, y}}}
  */
 export function place(anchors, recipe, tick, world, out) {
   const n = anchors.length / 2;
   const dots = out && out.length >= n * STRIDE ? out : new Float64Array(n * STRIDE);
 
-  const A = attractorAt(recipe, tick, world);
-  const phase = phaseOf(tick, recipe.period);
-  const L = recipe.tether;
+  const A = attractorAt(recipe, tick, world);          // null when off
+  const phase = phaseOf(tick, loopFrames(recipe));
+  const L = A ? (recipe.tether || 0) : 0;
 
   const base = (recipe.angle || 0) * DEG;
-  const spin = recipe.rotate === 'spin' ? TAU * (recipe.turns || 0) * phase : 0;
-  const face = recipe.rotate === 'face';
-  const scale = (recipe.size ?? 1) *
-    (recipe.pulse ? Math.cos(TAU * Math.max(1, recipe.pulses || 1) * phase) : 1);
+  const spin = recipe.rotate === 'spin' ? spinAt(recipe, phase) : 0;
+  const face = recipe.rotate === 'face' && !!A;
+  const scale = (recipe.size ?? 1) * pulseAt(recipe, phase);
 
   for (let i = 0; i < n; i++) {
     const ax = anchors[i * 2];
     const ay = anchors[i * 2 + 1];
-    const dx = A.x - ax;
-    const dy = A.y - ay;
-    const d = Math.hypot(dx, dy);
+    let x = ax, y = ay;
 
-    // Dead on its anchor the pull has no direction; the dot stays put.
-    const x = d > 1e-9 ? ax + (L * dx) / d : ax;
-    const y = d > 1e-9 ? ay + (L * dy) / d : ay;
+    if (L) {
+      const dx = A.x - ax;
+      const dy = A.y - ay;
+      const d = Math.hypot(dx, dy);
+      // Dead on its anchor the pull has no direction; the dot stays put.
+      if (d > 1e-9) { x = ax + (L * dx) / d; y = ay + (L * dy) / d; }
+    }
 
     const o = i * STRIDE;
     dots[o] = x;
@@ -131,6 +138,30 @@ export function place(anchors, recipe, tick, world, out) {
   }
 
   return { dots, attractor: A };
+}
+
+/**
+ * The spin at a point in the loop: exactly one turn per loop, in the
+ * direction of `speed` — the rounding of the loop to whole frames is absorbed
+ * here, so the last frame meets the first. Recipes from before `speed` turned
+ * `turns` times per `period`, and still do.
+ */
+export function spinAt(recipe, phase) {
+  if (Number.isFinite(recipe.speed)) return Math.sign(recipe.speed) * TAU * phase;
+  return TAU * (recipe.turns || 0) * phase;
+}
+
+/**
+ * The pulse at a point in the loop, as a multiplier on size: a smooth swell
+ * between 1 and `pulseMin`, `pulses` times a loop. v2's pulse went through
+ * zero and flipped every sprite inside out; that is `pulseMin` −1, and what a
+ * recipe from before `pulseMin` gets.
+ */
+export function pulseAt(recipe, phase) {
+  if (!recipe.pulse) return 1;
+  const min = Number.isFinite(recipe.pulseMin) ? recipe.pulseMin : -1;
+  const beats = Math.max(1, Math.round(recipe.pulses || 1));
+  return min + (1 - min) * (1 + Math.cos(TAU * beats * phase)) / 2;
 }
 
 /**
@@ -156,8 +187,9 @@ export function loopBounds(anchors, recipe, world, reach) {
 
   const still = Number.isFinite(recipe.tick);
   const first = still ? recipe.tick - Math.max(0, Math.round(recipe.trail || 0)) : 0;
-  const last = still ? recipe.tick
-    : (recipe.path === 'point' ? 0 : Math.max(1, Math.round(recipe.period)) - 1);
+  // A still attractor — off or a point — moves no dot, so one frame bounds the loop.
+  const moving = recipe.path && recipe.path !== 'off' && recipe.path !== 'point' && recipe.tether;
+  const last = still ? recipe.tick : (moving ? loopFrames(recipe) - 1 : 0);
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   let buf = null;
 

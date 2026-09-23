@@ -184,6 +184,49 @@ const base = { path: 'circle', period: 120, tether: 100, rotate: 'none', size: 1
   near('no pulse: size as set', M.place(anchors, base, 60, world).dots[3], 1);
 }
 
+// -- the loop is one turn (decided 2026-09-23) ---------------------------------
+
+{
+  ok('a loop is one turn: 2° a frame is 180 frames', A.loopFrames({ speed: 2 }), 180);
+  ok('either way round', A.loopFrames({ speed: -3 }), 120);
+  ok('rounded to whole frames', A.loopFrames({ speed: 7 }), 51);
+  ok('a recipe from before speed keeps its period', A.loopFrames({ period: 150 }), 150);
+
+  const r = { path: 'off', tether: 0, rotate: 'spin', speed: 7, size: 1 };
+  const end = M.place(anchors, r, 51, world).dots[2];
+  near('one whole turn per loop, however the frames round', end, 0, 1e-9);
+  near('half a loop is half a turn', M.place(anchors, r, 25.5, world).dots[2], Math.PI, 1e-9);
+  near('negative speed turns the other way',
+       M.place(anchors, { ...r, speed: -7 }, 25.5, world).dots[2], -Math.PI, 1e-9);
+}
+
+{
+  // The default since 2026-09-23: no attractor, no tether — a letter at rest.
+  const rest = { path: 'off', tether: 100, rotate: 'face', speed: 2, size: 1 };
+  const { dots, attractor } = M.place(anchors, rest, 40, world);
+  ok('off: there is no attractor', attractor, null);
+  ok('off: every dot on its anchor, whatever the tether', [dots[0], dots[1]], [anchors[0], anchors[1]]);
+  near('off: face has nothing to face, so it holds the base angle', dots[2], 0);
+}
+
+{
+  // laps: the attractor runs whole laps inside one loop.
+  const two = { path: 'circle', laps: 2, speed: 2, tether: 50, size: 1 };
+  const a0 = A.attractorAt(two, 0, world), aHalf = A.attractorAt(two, 90, world);
+  near('two laps: half a loop is back at the start', Math.hypot(a0.x - aHalf.x, a0.y - aHalf.y), 0, 1e-9);
+}
+
+{
+  const smooth = { path: 'off', rotate: 'none', speed: 2, size: 1, pulse: true, pulses: 1, pulseMin: 0.4 };
+  near('pulse: full size at the start', M.place(anchors, smooth, 0, world).dots[3], 1);
+  near('pulse: down to its floor at half a loop', M.place(anchors, smooth, 90, world).dots[3], 0.4, 1e-9);
+  let low = Infinity;
+  for (let t = 0; t < 180; t++) low = Math.min(low, M.place(anchors, smooth, t, world).dots[3]);
+  near('and never below it, so nothing flips', low, 0.4, 1e-9);
+  near("pulseMin -1 is v2's flip through zero",
+       M.place(anchors, { ...smooth, pulseMin: -1 }, 90, world).dots[3], -1, 1e-9);
+}
+
 // -- a frame is a function of its index ----------------------------------------
 
 {

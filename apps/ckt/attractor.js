@@ -40,7 +40,8 @@
  *
  * `point` stands for both `mouse` and `stop`. A pointer is not reproducible,
  * but where it was put is: dragging on the canvas writes the point into the
- * recipe, and the attractor stays there.
+ * recipe, and the attractor stays there. `off` is no attractor at all, and the
+ * default: a letter at rest, turning.
  */
 
 const TAU = Math.PI * 2;
@@ -95,6 +96,12 @@ function squareStarts(corners, r) {
  * the recipe, and returns the attractor in world pixels.
  */
 export const PATHS = {
+  /** No attractor: every dot rests on its anchor. The default since 2026-09-23. */
+  off: {
+    label: 'off',
+    at: () => null,
+  },
+
   circle: {
     label: 'circle',
     at(phase, W, H) {
@@ -155,21 +162,39 @@ export const PATH_IDS = Object.keys(PATHS);
 export const PATH_LABELS = Object.fromEntries(
   Object.entries(PATHS).map(([id, p]) => [id, p.label]));
 
-/** Where the loop is at a tick, 0..1. Negative ticks wrap, for trails. */
-export function phaseOf(tick, period) {
-  const n = Math.max(1, Math.round(period));
+/**
+ * How many frames one loop is.
+ *
+ * A loop is one full turn at `speed` degrees a frame — decided 2026-09-23:
+ * the rotation is the clock, so recording one loop records exactly one turn,
+ * and it closes. Everything else that moves fits whole cycles into it: the
+ * attractor runs `laps` laps, a pulse beats `pulses` times. Recipes from before
+ * `speed` carry `period` instead, and keep it.
+ */
+export function loopFrames(recipe) {
+  const speed = recipe.speed;
+  if (Number.isFinite(speed) && speed !== 0) return Math.max(1, Math.round(360 / Math.abs(speed)));
+  if (Number.isFinite(recipe.period)) return Math.max(1, Math.round(recipe.period));
+  return 1;
+}
+
+/** Where the loop is at a tick, 0..1. Negative and fractional ticks work — trails use both. */
+export function phaseOf(tick, frames) {
+  const n = Math.max(1, Math.round(frames));
   return (((tick % n) + n) % n) / n;
 }
 
 /**
- * The attractor at a tick.
+ * The attractor at a tick, or null when it is off.
  *
- * @param {object} recipe  needs path, period, and pointX/pointY for `point`
+ * @param {object} recipe  path, laps, pointX/pointY, and what loopFrames() reads
  * @param {number} tick
  * @param {{width:number, height:number}} world
- * @returns {{x:number, y:number}}
+ * @returns {?{x:number, y:number}}
  */
 export function attractorAt(recipe, tick, world) {
-  const path = PATHS[recipe.path] || PATHS.circle;
-  return path.at(phaseOf(tick, recipe.period), world.width, world.height, recipe);
+  const path = PATHS[recipe.path] || PATHS.off;
+  const laps = Math.max(1, Math.round(recipe.laps || 1));
+  const phase = (phaseOf(tick, loopFrames(recipe)) * laps) % 1;
+  return path.at(phase, world.width, world.height, recipe);
 }
