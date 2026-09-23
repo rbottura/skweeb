@@ -3,6 +3,17 @@ _last touched: 2026-09-23_
 
 ## Works right now
 
+- **An object opens back in its app** (`core/reopen.js`), all of it seen in
+  Chrome. The vault detail's *Open in ckt ↗* or *Open in grid ↗* opens
+  `/apps/<app>/?open=<id>` in a new tab: a ckt still or brush at its exact
+  frame, a loop playing, a dot-set into both stages and this session's list, a
+  grid dither with its source loaded and dithered again. An app says which of
+  its objects it can take back (`reopens()` in its `rebuild.js`); a family set
+  and the gamepad's recordings get no link. A wrong id, or another app's, says
+  so in the bar.
+- **A picker's Use button sits on the chosen card**, across the foot of its
+  picture, and a double click uses it outright. A dot-set's detail shows its
+  thumbnail, its render being JSON.
 - **The UI pass is in, from the author's brief** (`docs/roadmap.md`, *The UI
   pass, from the author's brief*), and every part of it was seen running in
   Chrome:
@@ -88,9 +99,14 @@ repo. See *Next*.
   exactly**; the numbers above are from the heaviest glyph at large sizes,
   where the old renderer did drop. The bar's fps readout is there so the
   author's own machine can say.
-- **Nothing opens a saved object back in its app.** `restore()` has run only
-  as Reset. When it does, a recipe wider or taller than 4000 px would come
-  back clamped; none of the seven sized recipes in the vault is.
+- **The gamepad cannot reopen its recordings**: they replay in core, but
+  nothing loads one back into its timeline to go on drawing.
+- **ckt's width and height are two things**: the output canvas, and the world
+  the glyph is centred in and the attractor's paths are measured against. So
+  with `ink` picked the rows show the world, not the ink, as grid's do.
+  Separating the two is the fix; it changes what an old recipe means.
+- A recipe wider or taller than 4000 px would open clamped; none of the seven
+  sized recipes in the vault is.
 - **An identical re-cut does not join the new session folder**: the vault
   de-duplicates same bytes and same recipe, and returns the old object with
   its old tags. Correct by the object model; surprising in the vault panel.
@@ -102,24 +118,26 @@ repo. See *Next*.
 - **Files over the 400-line cap**, all the gamepad's: `ui/hud.css`,
   `sketch/gamepadSketch.js`, `ui/TimelinePanel.js`, `ui/ParamPanel.js` — the
   last two grew a few lines this pass (the Save Ground row).
-- Rule 8 asks for p5 in every app; grid and ckt draw with Canvas 2D alone. Open
-  in the review doc, not decided.
-- **Nothing can leave this disk**: `Vault.publish` is specified, not built.
+- Rule 8 asks for p5 in every app; grid and ckt draw with Canvas 2D alone. Open,
+  not decided — the proposal is to keep the rule's point (ES modules, no
+  globals, one p5 when an app uses p5) and drop "every app".
+- **Nothing can leave the author's machines**: `Vault.publish` is specified,
+  not built. The tailnet covers the author's own use (*Parked*).
 - As before: old grid recipes re-render trimmed; `grd_` against `gri_` id
   prefixes; `assets/fonts/` lacks its `OFL.txt` files; the gamepad's GALLERY
   panel still shows IndexedDB.
 
 ## Next single step
 
-**Open a saved object back in its app** — `/apps/ckt/?open=<id>` restores the
-envelope's recipe into the right stage (a `dataset` into dots; a still, loop
-or brush into motion, the clock at its `tick`), plus an "Open in its app"
-button in the vault panel's detail. Small now: the panels follow a restore,
-and the frame chain leaves one as it was saved — which M4's compose needs for
-every object it places.
+**M4's first brick: `apps/compose/` boots on the kit and places one object.**
+The shell from `core/theme.css`, a docked panel whose Format drawer is the
+page, one `type: 'object'` param, and that object drawn on the page at a
+transform — frame 0, through `core/rebuild.js`, which already gives frame N
+of anything. Standalone, like every app.
 
-Then **M4 — compose**. Alongside it: move the Chrome DevTools driver into
-`scripts/` so a browser check is a command, and the gamepad onto core params.
+Then the rest of **M4 — compose**. Alongside it: move the Chrome DevTools
+driver into `scripts/` so a browser check is a command, and the gamepad onto
+core params.
 
 ## Parked decisions
 
@@ -143,4 +161,10 @@ Then **M4 — compose**. Alongside it: move the Chrome DevTools driver into
   the closed form is the motion.
 - **A port reads the original's source, never the roadmap's summary of it.**
 - Local disk vault plus a published gallery; the online skweeboteque later.
-- Open: whether `destra.otf` and `GPDestra-Light.otf` are yours to license.
+- **The vault is shared over the author's tailnet**: one machine serves it,
+  work and home open it by link, and the `?open=` link is M4's "URL you can
+  send" for those machines. `server.js` stays on 127.0.0.1 behind
+  `tailscale serve`, or takes `--host` its tailnet address — never `0.0.0.0`.
+  `docs/roadmap.md`.
+- **Destra is free**, from fonderiz.fr, by a friend of the author's. It ships
+  once the licence is named in the files; `docs/fonts.md`.

@@ -43,13 +43,18 @@ the licence requires travelling with the files.
 | Underworld Odd | anything from Velvetyne or Collletttivo | free display foundries, properly licensed, better fit for this work than a shareware face. |
 | iA Writer Duospace | **IBM Plex Mono** | what Duospace was built from. |
 
-## Unknown, and yours to answer
+## Destra — free, from a friend, and not in the repo yet
 
 `destra.otf` ("DESTRA Bold", 12 KB) and `font/destra/GPDestra-Light.otf`
-("GPDestra", 18 KB) carry no copyright, no trademark and no licence at all.
-Both are tiny, which usually means a custom or workshop face. If they are yours,
-say so in the file and in `assets/fonts/README.md` and they are cleared. If they
-came from somewhere else, they are in the same position as the pulled list.
+("GPDestra", 18 KB) carry no copyright, no trademark and no licence in the
+files. The author answered on 2026-09-23: Destra is a free font from
+fonderiz.fr, made by a friend, and open. That settles whether it may be used.
+
+What the rule below still asks before either file enters `assets/fonts/` or
+the vault: the licence *named* — OFL, or whatever the friend states — written
+into the files' name table (IDs 0, 13, 14) and into `assets/fonts/README.md`.
+The legacy `destra` dot-set is dots cut from the face, not the font, and needs
+none of this.
 
 ## The rule
 
