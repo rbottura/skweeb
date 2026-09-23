@@ -21,6 +21,21 @@ import { surface }       from './surface.js';
 import { drawFrameInto } from '../../core/rebuild.js';
 
 /**
+ * Whether `/apps/ckt/?open=<id>` brings this object back to work on
+ * (core/reopen.js): a dot-set always — its dots are its render, recipe or not
+ * — and a still, a loop or a brush while it keeps the motion recipe that drew
+ * it. A family's set holds members, not a recipe to restore.
+ *
+ * @param {object} object   a vault envelope written by ckt
+ */
+export function reopens(object) {
+  if (!object) return false;
+  if (object.type === 'dataset') return true;
+  return ['still', 'sequence', 'shape'].includes(object.type)
+    && !!object.recipe && Number.isFinite(object.recipe.glyph);
+}
+
+/**
  * @param {object} object   a vault envelope written by ckt
  * @returns {Promise<object>} the handle core/rebuild.js documents
  */

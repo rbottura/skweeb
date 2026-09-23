@@ -42,6 +42,17 @@ import { resolveFrame }  from '../../core/frame.js';
 import { drawFrameInto } from '../../core/rebuild.js';
 
 /**
+ * Whether `/apps/grid/?open=<id>` brings this object back to work on
+ * (core/reopen.js): any whose recipe names its source. A leaf, dithered from a
+ * file that was never an object, has nothing to load.
+ *
+ * @param {object} object   a vault envelope written by grid
+ */
+export function reopens(object) {
+  return !!(object && object.recipe && object.recipe.source);
+}
+
+/**
  * Replay a grid object into frames.
  *
  * @param {object} object   a vault envelope written by grid

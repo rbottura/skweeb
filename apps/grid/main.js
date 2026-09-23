@@ -26,6 +26,7 @@ import { Bar }                     from '../../core/Bar.js';
 import { Playhead }                from '../../core/playback.js';
 import { Vault }                   from '../../core/vault.js';
 import { resolveFrame, applyFrameEdit } from '../../core/frame.js';
+import { requested }               from '../../core/reopen.js';
 
 let params, panel, bar, transport;
 let tiles = [];                    // the loaded ramp, light to dark
@@ -65,6 +66,22 @@ async function boot() {
   tiles = await ramp(params.get('ramp'));
   wireKeys();
   draw();
+  await openRequested();
+}
+
+/**
+ * `?open=<id>`: one of grid's own dithers, back to work on (core/reopen.js).
+ * Its recipe names its source, so restoring it loads that and dithers again.
+ */
+async function openRequested() {
+  try {
+    const opened = await requested('grid');
+    if (!opened) return;
+    params.restore(opened.object.recipe);
+    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+  } catch (err) {
+    bar.announce('could not open it: ' + err.message);
+  }
 }
 
 /**

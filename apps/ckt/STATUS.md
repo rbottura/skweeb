@@ -31,6 +31,11 @@ v2 was wrong once and a whole port was built on it.
   loads.
 - **Replays.** `rebuild.js` is core's dispatch target; a still replays
   pixel-identical, a loop frame renders the same twice.
+- **Opens its own objects** (`?open=<id>`, from the vault's *Open in ckt ↗*):
+  a still or a brush comes back paused at the frame it kept, a loop playing, a
+  dot-set into both stages — its cut into dots, its dots into this session's
+  list. A family's set has no recipe to restore, so no link (`reopens()` in
+  `rebuild.js`).
 - **Speed**: the preview is drawn at the size the viewer shows it, marks are
   pre-rendered at the size and angle they appear, a still trail is one baked
   stamp. On 1275 moving dots the loop keeps its 30 fps to size 1; the bar
@@ -59,7 +64,9 @@ once a frame; exports take every sample the recipe asks for.
 
 ## Next single step
 
-**Open a saved ckt object back in ckt.** `/apps/ckt/?open=<id>`: load the
-envelope, `restore()` its recipe into the right stage — a `dataset` into dots,
-anything else into motion with the clock at `recipe.tick` — and an "Open in its
-app" button in the vault panel's detail.
+**Separate the world from the output.** `width` and `height` are both the
+canvas a save makes and the world the glyph is centred in and the attractor's
+paths are measured against — so with `ink` the rows cannot show the ink's
+size, as grid's do, without moving the motion. Give the world its own fixed
+size in the recipe, and let an old recipe without it keep using its width and
+height: a migration, not a change of meaning.

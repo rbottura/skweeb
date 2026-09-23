@@ -3,8 +3,8 @@ _last touched: 2026-09-23_
 
 Grid v2: a source image resized so one pixel is one cell, each cell's
 luminance picking a member of an ordered ramp of tiles. Ported from
-`grid_sketch`, which is ~870 lines of globals — see the migration entry in
-`docs/roadmap.md` for what came across and what did not.
+`grid_sketch`, which is ~870 lines of globals — see its entry in
+`docs/migration.md` for what came across and what did not.
 
 ## Works right now — seen in Chrome
 - **On the suite's UI kit** (2026-09-23): the viewer and one docked column of
@@ -19,6 +19,9 @@ luminance picking a member of an ordered ramp of tiles. Ported from
   `scale`, 0.25–4, multiplies the canvas — the same dither in more pixels.
   The bar reads the output size and, on a paper format, its dpi.
 - **The ground can be none**: empty cells stay transparent.
+- **Opens its own objects** (`?open=<id>`, from the vault's *Open in grid ↗*):
+  the recipe is restored, so its source loads and is dithered again. A leaf
+  names no source and gets no link (`reopens()` in `rebuild.js`).
 - **The dither is arithmetic and it is tested.** `map.js` has no canvas in it;
   `node tests/grid-map.mjs`. Alpha means something: below `alphaFloor` a cell
   draws nothing, which is what lets a cut-out drawing be a source.
@@ -36,8 +39,8 @@ luminance picking a member of an ordered ramp of tiles. Ported from
   review doc as a question.
 
 ## Next single step
-- Nothing grid-only. The suite's next step — opening a saved object back in
-  its app — gives grid its `?open=<id>` along with ckt.
+- Nothing grid-only. The suite's next step is M4's compose, which will place
+  grid's dithers as it places everything else.
 
 ## Parked decisions
 - **No p5 in this app.** Grid needs `drawImage` into a canvas and nothing else,

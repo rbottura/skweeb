@@ -27,6 +27,7 @@ import { ParamPanel }   from '../../core/ParamPanel.js';
 import { VaultPanel }   from '../../core/VaultPanel.js';
 import { Bar }          from '../../core/Bar.js';
 import { Vault }        from '../../core/vault.js';
+import { requested }    from '../../core/reopen.js';
 
 const canvas = document.getElementById('stage');
 const KEYS = '1 2 view · ← → set · ↑ ↓ glyph · space play · , . frame · S save · V vault';
@@ -60,8 +61,44 @@ async function boot() {
 
   motionP.on(key => { if (key === 'path') pointable(); });
   wire();
+  if (await openRequested(dotsP, motionP)) return;
   show('motion');                  // v2 opened on its output, already moving
   motion.clock.play();
+}
+
+/**
+ * `?open=<id>`: one of ckt's own objects, back to work on (core/reopen.js). A
+ * dot-set goes to both stages — its cut into dots, its dots into this
+ * session's list for motion; a still, a loop or a brush restores motion at the
+ * frame it kept, and a loop plays.
+ *
+ * @returns {Promise<boolean>} whether anything was opened
+ */
+async function openRequested(dotsP, motionP) {
+  let opened;
+  try {
+    opened = await requested('ckt');
+    if (!opened) return false;
+  } catch (err) {
+    bar.announce('could not open it: ' + err.message);
+    return false;
+  }
+  const o = opened.object;
+
+  if (o.type === 'dataset') {
+    const data = await (await fetch(opened.url)).json();
+    if (o.recipe) { dotsP.restore(o.recipe); await dots.init(); }
+    await motion.adopt({ object: o, title: o.title, data, thumb: opened.thumbUrl });
+    show(o.recipe ? 'dots' : 'motion');
+  } else {
+    motionP.restore(o.recipe);
+    await motion.init();
+    show('motion');
+    if (o.type === 'sequence') motion.clock.play();
+    else motion.clock.show(o.recipe.tick || 0);
+  }
+  bar.announce(`opened ${o.id} — ${o.title}`);
+  return true;
 }
 
 /** Which stage the viewer shows. The other rests; both panels stay. */
