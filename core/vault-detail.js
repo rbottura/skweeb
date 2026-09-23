@@ -14,24 +14,37 @@ const el = (tag, cls, text) => {
   return node;
 };
 
+/** A render the browser can show as a picture. Anything else is data. */
+const PICTURE = /^(png|jpe?g|webp|gif|avif|svg|bmp)$/i;
+
 /**
  * Fill `body` with an object's detail.
  *
  * @param {HTMLElement} body
  * @param {object} o             the envelope
- * @param {string} renderUrl
+ * @param {{render:string, thumb:?string}} urls
  * @param {object} hooks
  * @param {(id:string)=>void} hooks.open         open another object (lineage links)
  * @param {(viewer:object)=>void} hooks.playing  a player started; the panel disposes it later
  * @param {?(o:object)=>void} [hooks.pick]       present when the panel is a picker
  * @param {string} [hooks.pickLabel]
  */
-export function paintDetail(body, o, renderUrl, hooks) {
+export function paintDetail(body, o, urls, hooks) {
   body.replaceChildren();
+  const renderUrl = urls.render;
+  const r = o.render || {};
 
-  const preview = el('img', 'vp-preview');
-  preview.alt = o.title || o.id;
-  preview.src = renderUrl;
+  // The render itself when it is a picture, and the thumbnail when it is data:
+  // a dot-set's render is its dots as JSON, which an <img> shows as broken.
+  const picture = PICTURE.test(ext(r.file || '')) ? renderUrl : urls.thumb;
+  let preview;
+  if (picture) {
+    preview = el('img', 'vp-preview');
+    preview.alt = o.title || o.id;
+    preview.src = picture;
+  } else {
+    preview = el('div', 'vp-sub', 'No picture of this one.');
+  }
   body.append(preview);
 
   // A sequence's render is one frame of it. The loop has no file, so playing
@@ -60,7 +73,6 @@ export function paintDetail(body, o, renderUrl, hooks) {
 
   body.append(el('div', 'vp-name', o.title || '(untitled)'));
 
-  const r = o.render || {};
   const facts = [
     ['id', o.id],
     ['made by', o.origin ? o.origin.app + ' ' + o.origin.version : '—'],

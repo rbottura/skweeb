@@ -307,7 +307,7 @@ export class VaultPanel {
     }
     if (this._current !== id) return;         // clicked away while loading
 
-    this._paintDetail(loaded.object, loaded.url);
+    this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl });
     this._markCurrent();
   }
 
@@ -318,9 +318,9 @@ export class VaultPanel {
     this._markCurrent();
   }
 
-  _paintDetail(o, renderUrl) {
+  _paintDetail(o, urls) {
     this._detailTitle.textContent = o.type.toUpperCase();
-    paintDetail(this._detailBody, o, renderUrl, {
+    paintDetail(this._detailBody, o, urls, {
       open: id => this._openDetail(id),
       playing: viewer => { this._disposeViewer(); this._viewer = viewer; },
       pick: this._onPick ? picked => { this._onPick(picked); this.hide(); } : null,
