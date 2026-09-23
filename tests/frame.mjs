@@ -284,6 +284,29 @@ ok('a contained rect changes nothing',
 ok('grow expands on every side', Trim.grow({ x: 5, y: 5, w: 10, h: 10 }, 3),
    { x: 2, y: 2, w: 16, h: 16 });
 
+// -- zoom is the object, never the canvas ------------------------------------
+//
+// Decided 2026-09-23: `zoom` scales the content inside a canvas the format
+// fixes, in every format. It used to grow a derived canvas too, which made it
+// a second `scale`.
+
+{
+  const src = { width: 1920, height: 945 };
+  const box = { x: 100, y: 50, w: 800, h: 400 };
+  const ink = Frame.resolveFrame({ format: 'content', bleed: 0, zoom: 2 }, box, src);
+  ok('ink: the canvas is the content, zoom or not', [ink.width, ink.height], [800, 400]);
+  ok('ink: zoom 2 overflows it, centred', ink.to, { x: -400, y: -200, w: 1600, h: 800 });
+
+  const whole = Frame.resolveFrame({ format: 'source', bleed: 0, zoom: 0.5 }, box, src);
+  ok('canvas: the source size, zoom or not', [whole.width, whole.height], [1920, 945]);
+  ok('canvas: zoom 0.5 shrinks the content inside', [whole.to.w, whole.to.h], [400, 200]);
+
+  ok('the frame group carries scale, 0.25 to 4',
+     [Frame.frameParams().scale.min, Frame.frameParams().scale.max], [0.25, 4]);
+  ok('every frame param is in the format drawer',
+     Object.values(Frame.frameParams()).every(spec => spec.group === 'format'), true);
+}
+
 // -- the chain, with a real Params -------------------------------------------
 //
 // Every app calls applyFrameEdit from a params.on listener, so every write it

@@ -1,26 +1,44 @@
 /**
  * ParamPanel.js — the controls, drawn from the schema.
  *
- * This is the half of "parameters are data" you can see. core/params.js holds
- * the declaration and the values; this reads the same declaration and builds a
- * widget per type, so adding a control to an app is one schema entry and never
- * a row of HTML plus a listener plus a line in the serializer.
+ * The half of "parameters are data" you can see. core/params.js holds the
+ * declaration and the values; this reads the same declaration and lays out a
+ * widget per param (core/widgets.js), so adding a control to an app is one
+ * schema entry and never a row of HTML plus a listener plus a serializer line.
  *
- * The rule that keeps it honest: a type this file cannot draw is a type
- * params.js should not accept. If a control cannot be expressed as a schema
- * entry, the fix is a new widget type here — once, for everyone — rather than
- * a bespoke control in an app. That is the whole bargain.
+ * ── Drawers ─────────────────────────────────────────────────────────────────
  *
- * The `object` row is the interesting one. It is a vault picker filtered to
- * the param's `accepts`, and choosing something writes an id into the params —
- * which is also, by itself, the lineage, since Params.consumedObjectIds()
- * reads those ids straight back out. Cross-app loading is this row.
+ * A param may name a `group`; each group is a collapsible drawer
+ * (core/Drawer.js), in the order its first param appears. Some groups are the
+ * suite's, not an app's — `format` is the frame group every app spreads in —
+ * so they are declared here once and look the same everywhere. An app can add
+ * drawers of its own for things that are not parameters: a sequence player,
+ * export actions, a list of sets (`addDrawer`), or put a button into one of
+ * the param drawers (`drawer(id).body`).
  *
- * Reads core/params.js and core/VaultPanel.js. No p5, no app, no HUD.
+ * ── Rows that apply ─────────────────────────────────────────────────────────
+ *
+ * A param's `when` says when its row means anything — point x only for the
+ * `point` attractor. The row hides otherwise, and its value stays in the
+ * recipe (params.js `applies`). A drawer whose every row is hidden hides too.
+ *
+ * ── Docked or floating ──────────────────────────────────────────────────────
+ *
+ * With `mount`, the panel is a column of the page layout and never covers the
+ * canvas. Without it, it floats over the right edge as it always did.
  */
 
 import { VaultPanel } from './VaultPanel.js';
-import { Vault }      from './vault.js';
+import { Drawer }     from './Drawer.js';
+import { applies }    from './params.js';
+import { WIDGETS, WIDGET_TYPES } from './widgets.js';
+
+export { WIDGET_TYPES };
+
+/** Groups every app shares, so a Format section is the same section everywhere. */
+const CORE_GROUPS = {
+  format: { label: 'Format', open: false },
+};
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -33,25 +51,34 @@ const titleCase = key => key.replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '
 
 export class ParamPanel {
   /**
-   * @param {object} params        from defineParams()
+   * @param {object} params             from defineParams()
    * @param {object} [opts]
-   * @param {string} [opts.title]  defaults to the app name
+   * @param {string} [opts.title]       defaults to the app name
+   * @param {HTMLElement} [opts.mount]  dock into this element instead of floating
+   * @param {Object<string,{label:string, open?:boolean}>} [opts.groups]
    */
   constructor(params, opts = {}) {
-    this._params = params;
-    this._title  = opts.title || params.app;
-    this._rows   = new Map();          // key -> { sync(value) }
-    this._open   = false;
+    this._params  = params;
+    this._title   = opts.title || params.app;
+    this._groups  = { ...CORE_GROUPS, ...(opts.groups || {}) };
+    this._mount   = opts.mount || null;
+    this._rows    = new Map();       // key -> { widget, row, spec, group }
+    this._drawers = new Map();       // group id -> Drawer
+    this._extra   = new Set();       // drawers holding more than params
+    this._open    = false;
 
     this._build();
     this._paint();
+    if (this._mount) this.show();
 
-    // An external change — a restore, a gamepad binding, another panel — has
-    // to move the widgets too, or the panel starts lying about the values.
+    // An external change — a restore, a key, a drag on the canvas — has to
+    // move the widgets too, or the panel starts lying about the values.
     params.on((key, value) => {
       const row = this._rows.get(key);
-      if (row) row.sync(value);
+      if (row) row.widget.sync(value);
+      this._refresh();
     });
+    this._refresh();
   }
 
   show()   { this._open = true;  this._root.classList.add('pp--visible'); }
@@ -60,44 +87,87 @@ export class ParamPanel {
 
   get isOpen() { return this._open; }
 
-  // ── Chrome ─────────────────────────────────────────────────────────────────
+  /** A current value, for a widget that depends on another param. */
+  value(key) { return this._params.get(key); }
+
+  /** A drawer by group id or by the id it was added under. */
+  drawer(id) { return this._drawers.get(id) || null; }
+
+  /**
+   * A drawer for something that is not a parameter.
+   *
+   * @param {object} opts  { id, title, open, note, before } — `before` is the
+   *                       id of a drawer to go in front of; the end otherwise
+   * @returns {Drawer}
+   */
+  addDrawer({ id, title, open = true, note = '', before = null }) {
+    const drawer = new Drawer({ title, open, note, id: `${this._params.app}:${id}` });
+    const next = before && this._drawers.get(before);
+    if (next) this._body.insertBefore(drawer.root, next.root);
+    else this._body.append(drawer.root);
+    this._drawers.set(id, drawer);
+    this._extra.add(id);
+    return drawer;
+  }
+
+  /** Open a vault picker for an `object` row: one per row, kept, since it subscribes to the vault. */
+  pick(key, spec, onPick) {
+    if (!this._pickers) this._pickers = new Map();
+    if (!this._pickers.has(key)) {
+      this._pickers.set(key, new VaultPanel({ accepts: spec.accepts, pickLabel: 'Use this', onPick }));
+    }
+    this._pickers.get(key).show();
+  }
+
+  // ── Building ─────────────────────────────────────────────────────────────
 
   _build() {
-    this._root = el('aside', 'pp');
+    this._root = el('aside', this._mount ? 'pp pp--docked' : 'pp');
     this._root.setAttribute('aria-label', this._title + ' parameters');
 
     const head = el('div', 'pp-head');
-    head.append(el('span', 'pp-title', this._title));
-    head.append(el('span', 'pp-spacer'));
-
+    head.append(el('span', 'pp-title', this._title), el('span', 'pp-spacer'));
     const reset = el('button', 'pp-btn', 'Reset');
     reset.title = 'Every parameter back to its default';
     reset.addEventListener('click', () => this._params.reset());
-
-    const close = el('button', 'pp-btn', '✕');
-    close.title = 'Close';
-    close.addEventListener('click', () => this.hide());
-
-    head.append(reset, close);
+    head.append(reset);
+    if (!this._mount) {
+      const close = el('button', 'pp-btn', '✕');
+      close.title = 'Close';
+      close.addEventListener('click', () => this.hide());
+      head.append(close);
+    }
 
     this._body = el('div', 'pp-body');
+    this._loose = el('div', 'pp-loose');          // rows with no group, above the drawers
+    this._body.append(this._loose);
     this._root.append(head, this._body);
-    document.body.append(this._root);
+    (this._mount || document.body).append(this._root);
+  }
+
+  _drawerFor(id) {
+    if (!this._drawers.has(id)) {
+      const g = this._groups[id] || {};
+      const drawer = new Drawer({
+        title: g.label || titleCase(id),
+        open: g.open !== false,
+        id: `${this._params.app}:${id}`,
+      });
+      this._body.append(drawer.root);
+      this._drawers.set(id, drawer);
+    }
+    return this._drawers.get(id);
   }
 
   _paint() {
-    this._body.replaceChildren();
-    this._rows.clear();
-
     for (const key of this._params.keys) {
       const spec = this._params.spec(key);
       const build = WIDGETS[spec.type];
       if (!build) continue;                       // params.js refuses these first
 
-      const row   = el('div', 'pp-row');
+      const row = el('div', 'pp-row');
       const label = el('div', 'pp-label');
       label.append(el('span', 'pp-name', spec.label || titleCase(key)));
-
       const readout = el('span', 'pp-value');
       label.append(readout);
       if (spec.bind) label.append(el('span', 'pp-bind', spec.bind));
@@ -110,228 +180,26 @@ export class ParamPanel {
         readout,
         panel: this,
       });
-
       row.append(widget.node);
-      this._body.append(row);
-      this._rows.set(key, widget);
+
+      const group = spec.group || null;
+      (group ? this._drawerFor(group).body : this._loose).append(row);
+      this._rows.set(key, { widget, row, spec, group });
     }
   }
 
-  /**
-   * Open a vault picker for an `object` row. One panel per row, kept, because
-   * building it also subscribes it to vault events.
-   */
-  _pickerFor(key, spec, onPick) {
-    if (!this._pickers) this._pickers = new Map();
-    if (!this._pickers.has(key)) {
-      this._pickers.set(key, new VaultPanel({
-        accepts: spec.accepts,
-        pickLabel: 'Use this',
-        onPick,
-      }));
+  /** Rows that apply, drawers that have anything to show, widgets that read others. */
+  _refresh() {
+    const values = this._params.values;
+    const shown = new Map();
+    for (const { widget, row, spec, group } of this._rows.values()) {
+      const on = applies(spec, values);
+      row.hidden = !on;
+      if (widget.values) widget.values(values);
+      if (group) shown.set(group, (shown.get(group) || false) || on);
     }
-    this._pickers.get(key).show();
+    for (const [id, drawer] of this._drawers) {
+      if (!this._extra.has(id)) drawer.hidden = !shown.get(id);
+    }
   }
 }
-
-// ── Widgets ──────────────────────────────────────────────────────────────────
-// Each returns { node, sync(value) }. `sync` exists so a restore moves the
-// control; without it the panel and the values drift apart silently.
-//
-// Every key here must exist in params.js's PARAM_TYPES and vice versa. The
-// suites hold the two lists against each other, because the failure mode is
-// quiet: a type with no widget is a declared control that never draws.
-
-const WIDGETS = {
-  range: ({ spec, value, set, readout }) => {
-    const input = el('input', 'pp-range');
-    input.type = 'range';
-    input.min = spec.min ?? 0;
-    input.max = spec.max ?? 100;
-    input.step = spec.step ?? 1;
-    input.value = value;
-    readout.textContent = value;
-    input.addEventListener('input', () => set(parseFloat(input.value)));
-    return {
-      node: input,
-      sync(v) { input.value = v; readout.textContent = v; },
-    };
-  },
-
-  // A whole-number range. Declaring `int` rather than `range` with step 1 says
-  // the value is a count, which a panel shows the same way but a recipe reader
-  // can rely on.
-  int: ctx => WIDGETS.range({ ...ctx, spec: { ...ctx.spec, step: 1 } }),
-
-  bool: ({ value, set }) => {
-    const wrap  = el('label', 'pp-switch');
-    const input = el('input');
-    input.type = 'checkbox';
-    input.checked = value;
-    const track = el('span', 'pp-track');
-    wrap.append(input, track);
-    input.addEventListener('change', () => set(input.checked));
-    return { node: wrap, sync(v) { input.checked = v; } };
-  },
-
-  /**
-   * A choice. A dropdown by default; a row of chips when the schema says
-   * `display: 'chips'`.
-   *
-   * Chips are worth the extra widget for a list you pick from constantly and
-   * want to compare — the output formats, where seeing all of them at once is
-   * the point and a dropdown hides fifteen of sixteen. `spec.labels` maps an
-   * option to what the chip says, since `ig-portrait` is an id and `1080×1350`
-   * is what you are actually choosing.
-   */
-  enum: ctx => (ctx.spec.display === 'chips' ? chipEnum(ctx) : selectEnum(ctx)),
-
-  color: ({ value, set, readout }) => {
-    const input = el('input', 'pp-color');
-    input.type = 'color';
-    input.value = value;
-    readout.textContent = value;
-    input.addEventListener('input', () => set(input.value));
-    return { node: input, sync(v) { input.value = v; readout.textContent = v; } };
-  },
-
-  /** One line, or a box when the schema says `multiline: true` — ckt sets type in lines. */
-  text: ({ spec, value, set }) => {
-    const input = el(spec.multiline ? 'textarea' : 'input', 'pp-text');
-    if (spec.multiline) input.rows = 3;
-    else input.type = 'text';
-    input.value = value;
-    input.addEventListener('input', () => set(input.value));
-    return { node: input, sync(v) { input.value = v; } };
-  },
-
-  'color[]': ({ value, set, readout }) => {
-    const wrap = el('div', 'pp-colors');
-    let colors = Array.from(value || []);
-
-    const repaint = () => {
-      wrap.replaceChildren();
-      readout.textContent = colors.length;
-      colors.forEach((c, i) => {
-        const swatch = el('input', 'pp-color');
-        swatch.type = 'color';
-        swatch.value = c;
-        swatch.addEventListener('input', () => {
-          colors[i] = swatch.value;
-          set(colors.slice());
-        });
-        wrap.append(swatch);
-      });
-      const add = el('button', 'pp-btn', '+');
-      add.title = 'Add a colour';
-      add.addEventListener('click', () => { colors = [...colors, '#ffffff']; set(colors.slice()); });
-      const drop = el('button', 'pp-btn', '−');
-      drop.title = 'Remove the last';
-      drop.addEventListener('click', () => { colors = colors.slice(0, -1); set(colors.slice()); });
-      wrap.append(add, drop);
-    };
-
-    repaint();
-    return { node: wrap, sync(v) { colors = Array.from(v || []); repaint(); } };
-  },
-
-  /**
-   * A vault object as a parameter. The row shows what is chosen; the button
-   * opens the picker, narrowed to `accepts`. Writing the id here is all the
-   * lineage there is — nothing else records a parent.
-   */
-  object: ({ key, spec, value, set, panel }) => {
-    const wrap = el('div');
-    const face = el('div', 'pp-object');
-
-    const thumb = el('img', 'pp-object-thumb');
-    thumb.alt = '';
-    const meta = el('div', 'pp-object-meta');
-    const name = el('div', 'pp-object-name');
-    const sub  = el('div', 'pp-object-sub');
-    meta.append(name, sub);
-    face.append(thumb, meta);
-
-    const actions = el('div', 'pp-object-actions');
-    const choose = el('button', 'pp-btn', 'Choose…');
-    choose.addEventListener('click', () =>
-      panel._pickerFor(key, spec, object => set(object.id)));
-    const clear = el('button', 'pp-btn', 'Clear');
-    clear.addEventListener('click', () => set(null));
-    actions.append(choose, clear);
-
-    wrap.append(face, actions);
-
-    const sync = async id => {
-      if (!id) {
-        thumb.removeAttribute('src');
-        name.className = 'pp-object-name pp-empty';
-        name.textContent = 'nothing chosen';
-        sub.textContent = (spec.accepts || []).join(' or ') || 'any object';
-        return;
-      }
-      name.className = 'pp-object-name';
-      name.textContent = id;
-      sub.textContent = 'reading…';
-      try {
-        const { object, thumbUrl } = await Vault.load(id);
-        name.textContent = object.title || object.id;
-        sub.textContent = object.type
-          + (object.render && object.render.w ? '  ' + object.render.w + '×' + object.render.h : '');
-        if (thumbUrl) thumb.src = thumbUrl;
-      } catch {
-        // The vault may be absent, or the object gone. Say so; do not blank
-        // the value, which is still what the recipe holds.
-        sub.textContent = 'not in this vault';
-      }
-    };
-
-    sync(value);
-    return { node: wrap, sync };
-  },
-};
-
-// ── The two faces of an enum ─────────────────────────────────────────────────
-
-function selectEnum({ spec, value, set }) {
-  const select = el('select', 'pp-select');
-  for (const option of spec.options || []) {
-    const o = el('option', null, labelFor(spec, option));
-    o.value = option;
-    select.append(o);
-  }
-  select.value = value;
-  select.addEventListener('change', () => set(select.value));
-  return { node: select, sync(v) { select.value = v; } };
-}
-
-function chipEnum({ spec, value, set }) {
-  const wrap = el('div', 'pp-chips');
-  const chips = new Map();
-
-  for (const option of spec.options || []) {
-    const chip = el('button', 'pp-chip', labelFor(spec, option));
-    chip.type = 'button';
-    chip.title = option;
-    // A group puts a hairline before the first chip of each run, so ratios,
-    // pixel sizes and paper do not read as one undifferentiated wall.
-    const group = spec.groups && spec.groups[option];
-    if (group) chip.dataset.group = group;
-    chip.addEventListener('click', () => set(option));
-    chips.set(option, chip);
-    wrap.append(chip);
-  }
-
-  const sync = v => {
-    for (const [option, chip] of chips) chip.classList.toggle('pp-chip--on', option === v);
-  };
-
-  sync(value);
-  return { node: wrap, sync };
-}
-
-const labelFor = (spec, option) =>
-  (spec.labels && spec.labels[option]) || option;
-
-/** The types this panel can draw. Held against params.js's PARAM_TYPES. */
-export const WIDGET_TYPES = Object.keys(WIDGETS);

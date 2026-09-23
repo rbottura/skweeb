@@ -10,7 +10,7 @@ it.** Everything below is load-bearing; nothing below is background.
 
 | Path | What it is | Before touching it, read |
 |---|---|---|
-| `core/` | the shared kit — bus, registry, panels, params, rng, stage, vault client | `docs/core-api.md` |
+| `core/` | the shared kit — theme, panels and drawers, params, registry, rng, stage, vault client | `docs/core-api.md` |
 | `apps/gamepad/` | draw with a gamepad, record sequences | — |
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |

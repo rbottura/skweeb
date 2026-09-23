@@ -13,8 +13,13 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `registry.js` | manifest-driven asset loading, families of sprites | **in**, was `gamepad/core/brushRegistry.js` |
 | `stage/` | `clip` `player` `transport` `recorder` `stage` `bounds` | **in**, was `gamepad/core/sequence*.js` |
 | `stamp.js` | where a pattern puts its stamps | **in**, split out of `joyImage.js` |
-| `VaultPanel.js` | the window onto the objects on disk | **in** |
-| `ParamPanel.js` | a widget per schema type; the `object` row is the picker | **in** |
+| `VaultPanel.js` | the window onto the objects on disk; `folder:` tags group | **in**, detail view in `vault-detail.js` |
+| `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
+| `widgets.js` | one widget per param type, split out of ParamPanel | **in** |
+| `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
+| `Bar.js` | the strip under every app: information only | **in**, 2026-09-23 |
+| `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
+| `theme.css` | the suite's look: tokens, the page shell, controls | **in**, 2026-09-23 |
 | `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |
 | `panel.js` | base class: show/hide, focus, gamepad + keyboard nav | not yet; two concrete panels exist instead |
 | `links.js` | the named one-way links between apps | not yet, see below |
@@ -70,6 +75,41 @@ A recipe may carry more than the schema when the render needs it: a ckt still
 records the `tick` it shows, because it is one frame of a loop and the loop's
 params alone would replay frame 0. `restore()` drops such keys — they are the
 object's, not the panel's.
+
+## The UI kit — decided 2026-09-23
+
+One look and one set of pieces for every app. `theme.css` is neo-brutalist
+and light: cream ground, black ink, thick borders, hard shadows, one yellow
+accent — and yellow is a fill, never text. The page is a grid (`.app`): the
+work above, `Bar.js` below as a row of its own, so the bar never covers a
+canvas or a panel. The page itself never scrolls: `.app` holds and clips
+whatever is positioned inside it, because `overflow: hidden` on the body does
+not stop focus from scrolling the page — so a popover that must spill past
+the shell is `position: fixed`. The bar says what an app will make — output
+size, density, a paper format's dpi, the paint rate while a loop plays — and a
+few keys. It holds no buttons.
+
+A panel docks into a layout column (`new ParamPanel(params, { mount })`) and
+is made of drawers. A param's `group` names its drawer; `format` is core's
+own group, so the frame section is the same in every app. Things that are not
+parameters get drawers too: `panel.addDrawer({ id, title })` for the sequence
+player (`Transport.js`) or an app's export actions, `panel.drawer(id).body`
+to put a button into a param drawer.
+
+Three more schema keys, all data:
+
+- `when` — the row shows only when it applies: `{ path: 'point' }`,
+  `{ input: ['text', 'glyphs'] }`, `{ mark: { not: 'dot' } }`. Its value stays
+  in the recipe while hidden (params.js `applies`).
+- `type: 'sprite'` — an index into the family named by `family: '<param>'`,
+  picked from a grid of that family's own images.
+- `type: 'ground'` — a colour or `none`; one value, so a recipe cannot say
+  "white, but transparent".
+
+Every slider has a typed number beside it. And the frame group changed
+meaning: `zoom` scales the object inside a canvas the format fixes, never the
+canvas; `scale` (0.25–4) multiplies the canvas's width and height, applied by
+the renderer last — resolution, not composition.
 
 ## bus.js — event names
 

@@ -87,6 +87,30 @@ const TYPES = {
     default: spec => (typeof spec.default === 'string' ? spec.default : null),
     coerce: value => (typeof value === 'string' && value ? value : null),
   },
+
+  /**
+   * One sprite of a family, held as its index — the number a recorded mark
+   * stores, which is why it is an index and not a URL. `family` names the
+   * param that says which family, so the panel can show that family's sprites
+   * as a grid. Wrapping past the end is the family's business, not this one's.
+   */
+  sprite: {
+    default: spec => Math.max(0, Math.round(num(spec.default, 0))),
+    coerce: (value, spec) => Math.max(0, Math.round(num(value, spec.default ?? 0))),
+  },
+
+  /**
+   * What is under the marks: a colour, or `none` for a transparent ground.
+   * One value instead of a colour and a switch, so a recipe cannot say "white,
+   * but transparent".
+   */
+  ground: {
+    default: spec => (typeof spec.default === 'string' ? spec.default : '#ffffff'),
+    coerce(value, spec) {
+      if (value === 'none') return 'none';
+      return typeof value === 'string' && value.trim() ? value.trim() : this.default(spec);
+    },
+  },
 };
 
 /**
@@ -95,6 +119,34 @@ const TYPES = {
  * widget is a control that silently never appears in any panel.
  */
 export const PARAM_TYPES = Object.keys(TYPES);
+
+/**
+ * Whether a param's row applies, given the other values. `when` is data:
+ *
+ *   { path: 'point' }                 only for that value
+ *   { input: ['text', 'glyphs'] }     for any of these
+ *   { mark: { not: 'dot' } }          for anything but
+ *
+ * Every entry must hold. A row that does not apply is hidden, never cleared —
+ * its value stays in the recipe, so switching back finds it as it was.
+ *
+ * @param {object} spec    the param's declaration
+ * @param {object} values  the current values
+ */
+export function applies(spec, values) {
+  const when = spec && spec.when;
+  if (!when) return true;
+  for (const [key, want] of Object.entries(when)) {
+    const have = values[key];
+    if (want && typeof want === 'object' && !Array.isArray(want) && 'not' in want) {
+      const not = Array.isArray(want.not) ? want.not : [want.not];
+      if (not.includes(have)) return false;
+    } else if (!(Array.isArray(want) ? want : [want]).includes(have)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 const num = (value, fallback) => {
   const n = typeof value === 'number' ? value : parseFloat(value);

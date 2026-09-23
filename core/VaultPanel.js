@@ -15,11 +15,23 @@
  *   of objects and never opens a folder;
  *   the detail drawer calls Vault.load(), which opens exactly one.
  *
- * Reads nothing but core/vault.js — no p5, no gamepad, no HUD. Its stylesheet
- * falls back to its own colours when an app supplies no --hud-* tokens.
+ * Folders: objects that share a `folder:<name>` tag collapse into one card —
+ * how ckt keeps a session's dot-sets from flooding the grid. A folder is a
+ * view, not a place: every object still lives at objects/<id>/, so no link
+ * changes. See docs/object-model.md, *Tags that group*.
+ *
+ * Reads nothing but core/vault.js — no p5, no gamepad. The detail view is
+ * built by vault-detail.js; its stylesheet reads core/theme.css's tokens.
  */
 
-import { Vault } from './vault.js';
+/** The folder a row is filed in, from its `folder:` tag, or null. */
+export const folderOf = row => {
+  const tag = (row.tags || []).find(t => typeof t === 'string' && t.startsWith('folder:'));
+  return tag ? tag.slice('folder:'.length) : null;
+};
+
+import { Vault }       from './vault.js';
+import { paintDetail } from './vault-detail.js';
 
 /** Files inside an object folder are served straight from the vault. */
 const fileUrl = (id, file) => '/vault/objects/' + id + '/' + file;
@@ -54,6 +66,7 @@ export class VaultPanel {
     this._open    = false;
     this._current = null;      // id showing in the drawer
     this._cards   = new Map(); // id -> card element, for the highlight
+    this._openFolders = new Set();
 
     this._build();
 
@@ -155,13 +168,63 @@ export class VaultPanel {
       ? shown.length + ' objects'
       : shown.length + ' of ' + this._rows.length;
 
+    // Rows come newest first, so a folder sits where its newest member would.
     const grid = el('div', 'vp-grid');
+    const folders = new Map();
     for (const row of shown) {
-      const card = this._card(row);
-      this._cards.set(row.id, card);
-      grid.append(card);
+      const name = folderOf(row);
+      if (!name) { grid.append(this._cardFor(row)); continue; }
+      if (!folders.has(name)) {
+        folders.set(name, []);
+        grid.append(this._folder(name, folders.get(name)));
+      }
+      folders.get(name).push(row);
     }
+    for (const [name, rows] of folders) this._folderNote(name, rows.length);
     this._body.append(grid);
+  }
+
+  _cardFor(row) {
+    const card = this._card(row);
+    this._cards.set(row.id, card);
+    return card;
+  }
+
+  /**
+   * One folder: a head that opens it, and its cards, built the first time it
+   * opens. Toggled in place, so opening a folder does not lose the scroll.
+   */
+  _folder(name, rows) {
+    const box = el('div', 'vp-folder');
+    const head = el('button', 'vp-folder-head');
+    head.type = 'button';
+    const count = el('span', 'vp-folder-count', '');
+    head.append(el('span', 'vp-folder-name', name), count);
+    box.append(head);
+    box.dataset.folder = name;
+
+    let inner = null;
+    const fill = () => {
+      if (inner) return;
+      inner = el('div', 'vp-grid');
+      for (const row of rows) inner.append(this._cardFor(row));
+      box.append(inner);
+    };
+    const set = open => {
+      box.classList.toggle('vp-folder--open', open);
+      if (open) { fill(); this._openFolders.add(name); } else this._openFolders.delete(name);
+      if (inner) inner.hidden = !open;
+    };
+    head.addEventListener('click', () => set(!box.classList.contains('vp-folder--open')));
+    // rows is still filling when this runs; open it on the next tick if it was open
+    if (this._openFolders.has(name)) queueMicrotask(() => set(true));
+    return box;
+  }
+
+  _folderNote(name, n) {
+    for (const box of this._body.querySelectorAll('.vp-folder')) {
+      if (box.dataset.folder === name) box.querySelector('.vp-folder-count').textContent = n;
+    }
   }
 
   /** Move the highlight without rebuilding the grid, which would lose scroll. */
@@ -257,138 +320,11 @@ export class VaultPanel {
 
   _paintDetail(o, renderUrl) {
     this._detailTitle.textContent = o.type.toUpperCase();
-    const body = this._detailBody;
-    body.replaceChildren();
-
-    const preview = el('img', 'vp-preview');
-    preview.alt = o.title || o.id;
-    preview.src = renderUrl;
-    body.append(preview);
-
-    // A sequence's render is one frame of it. The loop itself has no file, so
-    // playing it means rebuilding it from the recipe — imported only when
-    // asked, because that is what pulls p5 into a page that may not want it.
-    if (o.type === 'sequence' && o.recipe) {
-      const play = el('button', 'vp-btn', '▶ Play the loop');
-      play.addEventListener('click', async () => {
-        play.disabled = true;
-        play.textContent = 'rebuilding…';
-        try {
-          const { SequenceViewer } = await import('./SequenceViewer.js');
-          const viewer = new SequenceViewer(o);
-          preview.replaceWith(viewer.node);
-          play.remove();
-          this._disposeViewer();
-          this._viewer = viewer;
-          await viewer.start();
-        } catch (err) {
-          play.disabled = false;
-          play.textContent = '▶ Play the loop';
-          console.error('[vault] could not rebuild', o.id, err);
-        }
-      });
-      body.append(play);
-    }
-
-    body.append(el('div', 'vp-name', o.title || '(untitled)'));
-
-    const r = o.render || {};
-    const facts = [
-      ['id', o.id],
-      ['made by', o.origin ? o.origin.app + ' ' + o.origin.version : '—'],
-      ['created', new Date(o.created).toLocaleString()],
-      ['size', r.w ? r.w + ' × ' + r.h + (r.density > 1 ? '  @' + r.density + '×' : '') : '—'],
-    ];
-    if (r.frames > 1) facts.push(['frames', r.frames + (r.fps ? ' @ ' + r.fps + 'fps' : '') + (r.loop ? ', loops' : '')]);
-    facts.push(['file', r.file + '  ' + kb(r.bytes)]);
-    facts.push(['seed', o.seed == null ? 'null — nothing random in it' : String(o.seed)]);
-    if (o.tags && o.tags.length) facts.push(['tags', o.tags.join(', ')]);
-    body.append(table(facts));
-
-    // Lineage. parents is frozen history, refs is a live dependency — the
-    // difference matters enough that the panel names it rather than merging.
-    if ((o.parents && o.parents.length) || (o.refs && o.refs.length)) {
-      body.append(el('div', 'vp-section', 'Lineage'));
-      const lin = el('div', 'vp-lineage');
-      for (const p of o.parents || []) lin.append(this._idLink('made from ', p));
-      for (const f of o.refs || [])    lin.append(this._idLink('depends on ', f));
-      body.append(lin);
-    }
-
-    body.append(el('div', 'vp-section', o.recipe ? 'Recipe' : 'No recipe'));
-    if (o.recipe) {
-      body.append(el('pre', 'vp-json', JSON.stringify(o.recipe, null, 1)));
-    } else {
-      const why = el('div', 'vp-sub vp-leaf');
-      why.textContent = 'A leaf: this one cannot redraw itself. Correct when something '
-                      + 'came from outside — an image loaded under the ink.';
-      body.append(why);
-    }
-
-    body.append(this._actions(o, renderUrl));
-  }
-
-  _idLink(prefix, id) {
-    const line = el('div');
-    line.append(document.createTextNode(prefix));
-    const a = el('a', null, id);
-    a.addEventListener('click', () => this._openDetail(id));
-    line.append(a);
-    return line;
-  }
-
-  _actions(o, renderUrl) {
-    const row = el('div', 'vp-actions');
-
-    const open = el('button', 'vp-btn', 'Open render ↗');
-    open.addEventListener('click', () => window.open(renderUrl, '_blank', 'noopener'));
-
-    const save = el('button', 'vp-btn', 'Download');
-    save.addEventListener('click', () => {
-      const a = el('a');
-      a.href = renderUrl;
-      a.download = (o.title || o.id).replace(/[^a-z0-9]+/gi, '-').toLowerCase()
-                 + '.' + ext((o.render || {}).file || 'png');
-      a.click();
+    paintDetail(this._detailBody, o, renderUrl, {
+      open: id => this._openDetail(id),
+      playing: viewer => { this._disposeViewer(); this._viewer = viewer; },
+      pick: this._onPick ? picked => { this._onPick(picked); this.hide(); } : null,
+      pickLabel: this._pickLabel,
     });
-
-    const copy = el('button', 'vp-btn', 'Copy id');
-    copy.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(o.id);
-        copy.textContent = 'Copied';
-        setTimeout(() => { copy.textContent = 'Copy id'; }, 1200);
-      } catch { copy.textContent = o.id; }
-    });
-
-    row.append(open, save, copy);
-
-    if (this._onPick) {
-      const pick = el('button', 'vp-btn', this._pickLabel);
-      pick.addEventListener('click', () => { this._onPick(o); this.hide(); });
-      row.append(pick);
-    }
-    return row;
   }
-}
-
-// ── Small helpers ────────────────────────────────────────────────────────────
-
-function table(rows) {
-  const t = el('table', 'vp-facts');
-  for (const [key, value] of rows) {
-    const tr = el('tr');
-    tr.append(el('th', null, key), el('td', null, value));
-    t.append(tr);
-  }
-  return t;
-}
-
-const ext = file => String(file).split('.').pop();
-
-function kb(bytes) {
-  if (!bytes) return '';
-  return bytes < 1024 * 1024
-    ? Math.round(bytes / 1024) + ' KB'
-    : (bytes / 1024 / 1024).toFixed(1) + ' MB';
 }

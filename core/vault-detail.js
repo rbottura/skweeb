@@ -1,0 +1,158 @@
+/**
+ * vault-detail.js — one object, opened: what it is, where it came from, what
+ * made it, and what you can do with it.
+ *
+ * The right half of the vault panel, split out of VaultPanel.js when that file
+ * reached the 400-line cap (rule 4). It builds DOM and holds no state: the
+ * panel owns which object is open and any player running in it.
+ */
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;   // never innerHTML: titles are user data
+  return node;
+};
+
+/**
+ * Fill `body` with an object's detail.
+ *
+ * @param {HTMLElement} body
+ * @param {object} o             the envelope
+ * @param {string} renderUrl
+ * @param {object} hooks
+ * @param {(id:string)=>void} hooks.open         open another object (lineage links)
+ * @param {(viewer:object)=>void} hooks.playing  a player started; the panel disposes it later
+ * @param {?(o:object)=>void} [hooks.pick]       present when the panel is a picker
+ * @param {string} [hooks.pickLabel]
+ */
+export function paintDetail(body, o, renderUrl, hooks) {
+  body.replaceChildren();
+
+  const preview = el('img', 'vp-preview');
+  preview.alt = o.title || o.id;
+  preview.src = renderUrl;
+  body.append(preview);
+
+  // A sequence's render is one frame of it. The loop has no file, so playing
+  // it means rebuilding it from the recipe — imported only when asked, since
+  // that is what can pull p5 into a page that may not want it.
+  if (o.type === 'sequence' && o.recipe) {
+    const play = el('button', 'vp-btn', '▶ Play the loop');
+    play.addEventListener('click', async () => {
+      play.disabled = true;
+      play.textContent = 'rebuilding…';
+      try {
+        const { SequenceViewer } = await import('./SequenceViewer.js');
+        const viewer = new SequenceViewer(o);
+        preview.replaceWith(viewer.node);
+        play.remove();
+        hooks.playing(viewer);
+        await viewer.start();
+      } catch (err) {
+        play.disabled = false;
+        play.textContent = '▶ Play the loop';
+        console.error('[vault] could not rebuild', o.id, err);
+      }
+    });
+    body.append(play);
+  }
+
+  body.append(el('div', 'vp-name', o.title || '(untitled)'));
+
+  const r = o.render || {};
+  const facts = [
+    ['id', o.id],
+    ['made by', o.origin ? o.origin.app + ' ' + o.origin.version : '—'],
+    ['created', new Date(o.created).toLocaleString()],
+    ['size', r.w ? r.w + ' × ' + r.h + (r.density > 1 ? '  @' + r.density + '×' : '') : '—'],
+  ];
+  if (r.frames > 1) facts.push(['frames', r.frames + (r.fps ? ' @ ' + r.fps + 'fps' : '') + (r.loop ? ', loops' : '')]);
+  facts.push(['file', r.file + '  ' + kb(r.bytes)]);
+  facts.push(['seed', o.seed == null ? 'null — nothing random in it' : String(o.seed)]);
+  if (o.tags && o.tags.length) facts.push(['tags', o.tags.join(', ')]);
+  body.append(table(facts));
+
+  // Lineage. parents is frozen history, refs a live dependency — the panel
+  // names the difference rather than merging them.
+  if ((o.parents && o.parents.length) || (o.refs && o.refs.length)) {
+    body.append(el('div', 'vp-section', 'Lineage'));
+    const lin = el('div', 'vp-lineage');
+    for (const p of o.parents || []) lin.append(idLink('made from ', p, hooks.open));
+    for (const f of o.refs || [])    lin.append(idLink('depends on ', f, hooks.open));
+    body.append(lin);
+  }
+
+  body.append(el('div', 'vp-section', o.recipe ? 'Recipe' : 'No recipe'));
+  if (o.recipe) {
+    body.append(el('pre', 'vp-json', JSON.stringify(o.recipe, null, 1)));
+  } else {
+    body.append(el('div', 'vp-sub vp-leaf',
+      'A leaf: this one cannot redraw itself. Correct when something came from '
+      + 'outside — an image loaded under the ink.'));
+  }
+
+  body.append(actions(o, renderUrl, hooks));
+}
+
+function idLink(prefix, id, open) {
+  const line = el('div');
+  line.append(document.createTextNode(prefix));
+  const a = el('a', null, id);
+  a.addEventListener('click', () => open(id));
+  line.append(a);
+  return line;
+}
+
+function actions(o, renderUrl, hooks) {
+  const row = el('div', 'vp-actions');
+
+  const open = el('button', 'vp-btn', 'Open render ↗');
+  open.addEventListener('click', () => window.open(renderUrl, '_blank', 'noopener'));
+
+  const save = el('button', 'vp-btn', 'Download');
+  save.addEventListener('click', () => {
+    const a = el('a');
+    a.href = renderUrl;
+    a.download = (o.title || o.id).replace(/[^a-z0-9]+/gi, '-').toLowerCase()
+               + '.' + ext((o.render || {}).file || 'png');
+    a.click();
+  });
+
+  const copy = el('button', 'vp-btn', 'Copy id');
+  copy.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(o.id);
+      copy.textContent = 'Copied';
+      setTimeout(() => { copy.textContent = 'Copy id'; }, 1200);
+    } catch { copy.textContent = o.id; }
+  });
+
+  row.append(open, save, copy);
+
+  if (hooks.pick) {
+    const pick = el('button', 'vp-btn vp-btn--primary', hooks.pickLabel || 'Use this');
+    pick.addEventListener('click', () => hooks.pick(o));
+    row.append(pick);
+  }
+  return row;
+}
+
+function table(rows) {
+  const t = el('table', 'vp-facts');
+  for (const [key, value] of rows) {
+    const tr = el('tr');
+    tr.append(el('th', null, key), el('td', null, value));
+    t.append(tr);
+  }
+  return t;
+}
+
+const ext = file => String(file).split('.').pop();
+
+function kb(bytes) {
+  if (!bytes) return '';
+  return bytes < 1024 * 1024
+    ? Math.round(bytes / 1024) + ' KB'
+    : (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}

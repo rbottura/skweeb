@@ -55,7 +55,7 @@ gallery/                      ← in git, deployed
 | `id` | `<app3>_<ms>_<rand6>`. Prefixes `gmp_` `grd_` `ckt_` `skw_`. Guessable and greppable on purpose. |
 | `type` | from the registry below. One word, singular. |
 | `title` | what you would call it out loud. Defaults to the app's own naming. |
-| `tags` | free. The gallery filters on these plus `type` and `origin.app`. |
+| `tags` | free. The gallery filters on these plus `type` and `origin.app`. One convention: `folder:<name>` files the object in a folder of the vault panel — see *Tags that group*. |
 | `origin.version` | the app version that wrote the recipe. An old recipe in a newer app is a migration, not a crash. |
 | `recipe` | app-specific, JSON-serializable, complete. Anything not in here is lost. |
 | `seed` | the integer every `rng()` in that render was drawn from. No seed, no re-render. `null` is correct only when the render used no randomness at all — true of the gamepad, which draws exactly what you drew. |
@@ -64,6 +64,18 @@ gallery/                      ← in git, deployed
 | `render.density` | the scale this render was made at. 1 is screen. Export writes a second render at 4 or more; the object keeps both. |
 | `render.sha256` | of the bytes of `render.<ext>`. Identity for dedup. |
 | `published` | true once a copy exists under `gallery/`. |
+
+## Tags that group
+
+Some things are made in dozens and looked at as one: the dot-sets of a ckt
+session, the 58 brushes of an emitted family. A tag `folder:<name>` puts every
+object that carries it into one folder of the vault panel, closed until it is
+opened. Decided 2026-09-23.
+
+A folder is a view, not a place. Every object still lives at
+`objects/<id>/`, so no URL, parent or ref changes, and an object can leave a
+folder by losing a tag. The objects worth seeing on their own — a still, a
+loop, the `set` itself — carry no folder tag and stay at the top.
 
 ## Types (v1)
 

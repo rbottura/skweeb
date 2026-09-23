@@ -209,8 +209,35 @@ const every = defineParams('every', {
   f: { type: 'color[]', default: ['#000', '#fff'] },
   g: { type: 'text', default: 'hello' },
   h: { type: 'object', accepts: ['still'] },
+  i: { type: 'sprite', family: 'fam', default: 8 },
+  j: { type: 'ground', default: '#ffffff' },
 });
 ok('a schema using every type defines cleanly', every.keys.length, PARAM_TYPES.length);
+
+// A sprite is an index, whole and never negative: a recorded mark stores it.
+every.set('i', 3.6);
+ok('a sprite index is whole', every.get('i'), 4);
+every.set('i', -2);
+ok('and never negative', every.get('i'), 0);
+
+// A ground is a colour or none — one value, so a recipe cannot say "white,
+// but transparent".
+every.set('j', 'none');
+ok('a ground can be none', every.get('j'), 'none');
+every.set('j', '');
+ok('an empty ground falls back to its default', every.get('j'), '#ffffff');
+
+// `when`: a row that does not apply hides, and its value stays.
+{
+  const { applies } = await import('../core/params.js');
+  ok('no when: always applies', applies({}, { path: 'x' }), true);
+  ok('a value', applies({ when: { path: 'point' } }, { path: 'point' }), true);
+  ok('another value', applies({ when: { path: 'point' } }, { path: 'circle' }), false);
+  ok('any of several', applies({ when: { input: ['text', 'glyphs'] } }, { input: 'glyphs' }), true);
+  ok('anything but', applies({ when: { mark: { not: 'dot' } } }, { mark: 'dot' }), false);
+  ok('every entry must hold',
+     applies({ when: { a: 1, b: 2 } }, { a: 1, b: 3 }), false);
+}
 ok('and its values round trip', JSON.parse(JSON.stringify(every.values)), every.values);
 every.set('b', 2.7);
 ok('int rounds rather than snapping', every.get('b'), 3);

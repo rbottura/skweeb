@@ -1,12 +1,12 @@
 /* ──────────────────────────────────────────────────────────────────────────────
    param-panel.css — the controls, drawn from the schema.
 
-   A drawer down one side rather than an overlay: parameters are adjusted while
-   watching the canvas, so covering it would defeat the point. The vault picker
-   an `object` row opens is the overlay, and it sits above this.
+   Styled with the tokens in core/theme.css. Every token has a fallback, so a
+   page that loads this without the theme still gets a readable panel — rule 7.
 
-   Same contract as vault-panel.css — every token falls back, so an app with no
-   --hud-* set still gets a panel that looks like the suite. Rule 7.
+   Two ways to sit on the page. Docked (`.pp--docked`) the panel is a column of
+   the layout and never covers the canvas: grid and ckt. Floating (`.pp`) it
+   slides over the right edge, for a page with no column to give it.
    ────────────────────────────────────────────────────────────────────────────── */
 
 .pp {
@@ -15,194 +15,235 @@
   right: 0;
   bottom: 0;
   z-index: 1200;
-  width: 288px;
+  width: var(--nb-side, 320px);
   display: flex;
   flex-direction: column;
-  background: var(--hud-bg, rgba(8, 8, 18, 0.88));
-  backdrop-filter: var(--hud-blur, blur(24px) saturate(180%));
-  -webkit-backdrop-filter: var(--hud-blur, blur(24px) saturate(180%));
-  border-left: 1px solid var(--hud-border, rgba(0, 245, 255, 0.25));
-  color: var(--hud-text, #dde6f0);
-  font-family: var(--hud-font-ui, 'Outfit', sans-serif);
-  font-size: 13px;
+  background: var(--nb-ground, #f4efe3);
+  border-left: var(--nb-line, 3px) solid var(--nb-ink, #111);
+  color: var(--nb-ink, #111);
+  font: 500 13px var(--nb-font, system-ui, sans-serif);
   transform: translateX(100%);
-  transition: transform 240ms var(--hud-anim, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: transform 160ms ease;
 }
 
 .pp--visible { transform: translateX(0); }
 
 @media (prefers-reduced-motion: reduce) { .pp { transition: none; } }
 
-@media (max-width: 720px) {
-  .pp { width: 100%; }
+.pp--docked {
+  position: static;
+  z-index: auto;
+  width: auto;
+  flex: 1;
+  min-height: 0;
+  border-left: 0;
+  background: transparent;
+  transform: none;
+  transition: none;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────────── */
+/* ── Head ──────────────────────────────────────────────────────────────────── */
 
 .pp-head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 7px 8px 7px 12px;
+  background: var(--nb-ink, #111);
+  color: var(--nb-paper, #fffdf6);
 }
 
 .pp-title {
-  font-family: var(--hud-font, 'Space Mono', monospace);
-  font-size: 12px;
-  letter-spacing: 0.16em;
+  font: 700 13px var(--nb-font, sans-serif);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--hud-cyan, #00f5ff);
 }
 
 .pp-spacer { flex: 1; }
 
 .pp-btn {
-  height: 24px;
+  min-height: 26px;
   padding: 0 9px;
-  border: 1px solid var(--hud-border, rgba(0, 245, 255, 0.25));
-  border-radius: 6px;
-  background: var(--hud-glass, rgba(255, 255, 255, 0.04));
-  color: var(--hud-text, #dde6f0);
-  font-family: var(--hud-font, 'Space Mono', monospace);
-  font-size: 11px;
-  line-height: 1;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  background: var(--nb-paper, #fffdf6);
+  color: var(--nb-ink, #111);
+  font: 700 12px var(--nb-font, sans-serif);
   cursor: pointer;
-  transition: background 120ms, color 120ms;
 }
 
-.pp-btn:hover { background: rgba(0, 245, 255, 0.12); color: var(--hud-cyan, #00f5ff); }
+.pp-btn:hover { background: var(--nb-accent, #ffd60a); }
+.pp-btn:active { transform: translate(1px, 1px); }
+.pp-head .pp-btn { border-color: var(--nb-paper, #fffdf6); }
 
-/* ── Rows ───────────────────────────────────────────────────────────────────── */
+/* ── Body, rows ────────────────────────────────────────────────────────────── */
 
-.pp-body { flex: 1; overflow: auto; padding: 6px 14px 20px; }
+.pp-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 7px 12px 0;          /* room for the shadows and the scrollbar */
+}
 
-.pp-row { padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-.pp-row:last-child { border-bottom: 0; }
+.pp-loose:not(:empty) {
+  margin-bottom: 12px;
+  padding: 2px 10px 8px;
+  background: var(--nb-paper, #fffdf6);
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 #111);
+}
+
+.pp-row { padding: 8px 0; }
+.pp-row + .pp-row { border-top: 1px dashed var(--nb-muted, #6b665c); }
+.pp-row[hidden] { display: none; }
 
 .pp-label {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  min-height: 24px;
+  margin-bottom: 5px;
 }
 
-.pp-name { flex: 1; }
+.pp-name { flex: 1; font-weight: 700; }
 
 .pp-value {
-  font-family: var(--hud-font, 'Space Mono', monospace);
-  font-size: 11px;
-  color: var(--hud-cyan, #00f5ff);
+  font: 400 12px var(--nb-mono, monospace);
+  color: var(--nb-ink, #111);
 }
 
 .pp-bind {
-  font-family: var(--hud-font, 'Space Mono', monospace);
-  font-size: 10px;
+  font: 700 10px var(--nb-mono, monospace);
   padding: 1px 5px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: var(--hud-subtle, rgba(255, 255, 255, 0.35));
+  border: 1px solid var(--nb-ink, #111);
 }
 
-/* ── Inputs ─────────────────────────────────────────────────────────────────── */
+.pp-empty { color: var(--nb-muted, #6b665c); font-style: italic; }
 
+/* ── Numbers ───────────────────────────────────────────────────────────────── */
+
+/* The slider: a black rail, a square handle. */
 .pp-range {
   width: 100%;
-  accent-color: var(--hud-cyan, #00f5ff);
+  height: 20px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
 }
+
+.pp-range::-webkit-slider-runnable-track {
+  height: 6px;
+  background: var(--nb-paper, #fffdf6);
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+}
+
+.pp-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -7px;
+  background: var(--nb-accent, #ffd60a);
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+}
+
+.pp-range::-moz-range-track {
+  height: 6px;
+  background: var(--nb-paper, #fffdf6);
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+}
+
+.pp-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  background: var(--nb-accent, #ffd60a);
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+}
+
+/* The typed box beside a slider's label. */
+.pp-num {
+  width: 84px;
+  height: 24px;
+  padding: 0 4px;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  border-radius: 0;
+  background: var(--nb-paper, #fffdf6);
+  color: var(--nb-ink, #111);
+  font: 400 12px var(--nb-mono, monospace);
+  text-align: right;
+}
+
+.pp-num:focus,
+.pp-select:focus,
+.pp-text:focus { outline: var(--nb-line-sm, 2px) solid var(--nb-accent, #ffd60a); outline-offset: 0; }
+
+/* ── Choices ───────────────────────────────────────────────────────────────── */
 
 .pp-select,
 .pp-text {
   width: 100%;
-  height: 28px;
-  padding: 0 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.35);
-  color: var(--hud-text, #dde6f0);
-  font-family: var(--hud-font, 'Space Mono', monospace);
-  font-size: 12px;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  border-radius: 0;
+  background: var(--nb-paper, #fffdf6);
+  color: var(--nb-ink, #111);
+  font: 500 13px var(--nb-mono, monospace);
 }
 
-textarea.pp-text {
-  height: auto;
-  padding: 6px 8px;
-  resize: vertical;
-}
+textarea.pp-text { resize: vertical; }
 
-.pp-select:focus,
-.pp-text:focus { outline: 1px solid var(--hud-cyan, #00f5ff); }
-
-/* An enum as chips. For a list you pick from constantly and want to compare
-   all of at once — a dropdown would hide fifteen formats out of sixteen. */
 .pp-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
   width: 100%;
 }
 
 .pp-chip {
-  height: 22px;
-  padding: 0 7px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.35);
-  color: var(--hud-subtle, #8a97a8);
-  font-family: var(--hud-font, 'Space Mono', monospace);
-  font-size: 10px;
-  line-height: 1;
+  min-height: 26px;
+  padding: 0 8px;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  background: var(--nb-paper, #fffdf6);
+  color: var(--nb-ink, #111);
+  font: 500 12px var(--nb-mono, monospace);
   cursor: pointer;
-  transition: background 120ms, color 120ms, border-color 120ms;
 }
 
-.pp-chip:hover {
-  color: var(--hud-text, #dde6f0);
-  border-color: rgba(255, 255, 255, 0.3);
-}
+.pp-chip:hover { background: #fff3b0; }
 
 .pp-chip--on {
-  background: rgba(0, 245, 255, 0.14);
-  border-color: var(--hud-cyan, #00f5ff);
-  color: var(--hud-cyan, #00f5ff);
+  background: var(--nb-accent, #ffd60a);
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--nb-ink, #111);
 }
 
-/* A hairline before the first chip of each run, so ratios, pixel sizes and
-   paper do not read as one undifferentiated wall. */
-.pp-chip[data-group] { position: relative; }
-
-.pp-chip[data-group]:not(:first-child) { margin-left: 9px; }
-
+/* A rule before the first chip of each run: ratios, pixel sizes, paper. */
+.pp-chip[data-group]:not(:first-child) { margin-left: 10px; position: relative; }
 .pp-chip[data-group]:not(:first-child)::before {
   content: '';
   position: absolute;
-  left: -5px;
-  top: 3px;
-  bottom: 3px;
-  width: 1px;
-  background: rgba(255, 255, 255, 0.16);
+  left: -10px;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--nb-ink, #111);
 }
 
-/* A switch rather than a checkbox: readable at a glance across the room. */
-.pp-switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.pp-switch input { position: absolute; opacity: 0; pointer-events: none; }
+/* A switch, square: on is yellow. The real checkbox lies over the track, inside
+   the switch: loose, a docked panel gave it no positioned ancestor, it sat far
+   down the page, and focusing it on a click scrolled the whole page there. */
+.pp-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; user-select: none; }
+.pp-switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; pointer-events: none; }
 
 .pp-track {
-  width: 34px;
-  height: 18px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.14);
   position: relative;
-  transition: background 140ms;
+  width: 40px;
+  height: 22px;
+  background: var(--nb-paper, #fffdf6);
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
 }
 
 .pp-track::after {
@@ -210,67 +251,78 @@ textarea.pp-text {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--hud-text, #dde6f0);
-  transition: transform 140ms;
+  width: 14px;
+  height: 14px;
+  background: var(--nb-ink, #111);
+  transition: transform 90ms;
 }
 
-.pp-switch input:checked + .pp-track { background: rgba(0, 245, 255, 0.4); }
-.pp-switch input:checked + .pp-track::after { transform: translateX(16px); }
-.pp-switch input:focus-visible + .pp-track { outline: 2px solid var(--hud-cyan, #00f5ff); outline-offset: 2px; }
+.pp-switch input:checked + .pp-track { background: var(--nb-accent, #ffd60a); }
+.pp-switch input:checked + .pp-track::after { transform: translateX(18px); }
+.pp-switch input:focus-visible + .pp-track { outline: var(--nb-line-sm, 2px) solid var(--nb-ink, #111); outline-offset: 2px; }
+
+/* ── Colours and ground ────────────────────────────────────────────────────── */
 
 .pp-color {
-  width: 34px;
-  height: 26px;
+  width: 44px;
+  height: 28px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 6px;
-  background: transparent;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  border-radius: 0;
+  background: var(--nb-paper, #fffdf6);
   cursor: pointer;
 }
 
-.pp-colors { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pp-color--off { opacity: 0.35; }
+.pp-colors, .pp-ground { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
-/* ── The object row — a vault object as a parameter ─────────────────────────── */
+/* ── A family's sprites, as a grid ─────────────────────────────────────────── */
 
-.pp-object {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.pp-sprites {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 5px;
+  max-height: 240px;
+  overflow: auto;
+  padding: 2px 4px 4px 2px;
 }
 
+.pp-sprite {
+  aspect-ratio: 1;
+  padding: 3px;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  background: var(--nb-paper, #fffdf6);
+  cursor: pointer;
+}
+
+.pp-sprite img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.pp-sprite:hover { background: #fff3b0; }
+.pp-sprite--on { background: var(--nb-accent, #ffd60a); box-shadow: 2px 2px 0 var(--nb-ink, #111); }
+
+/* ── A vault object as a parameter ─────────────────────────────────────────── */
+
+.pp-object { display: flex; align-items: center; gap: 10px; }
+
 .pp-object-thumb {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   flex: none;
-  border-radius: 6px;
   object-fit: contain;
-  background-color: #14141c;
-  background-image:
-    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.05) 75%),
-    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.05) 75%);
-  background-size: 12px 12px;
-  background-position: 0 0, 6px 6px;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  background: repeating-conic-gradient(var(--nb-check-a, #e9e4d8) 0 25%, var(--nb-check-b, #fffdf6) 0 50%) 0 0 / 10px 10px;
 }
 
 .pp-object-meta { flex: 1; min-width: 0; }
+.pp-object-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-object-sub { margin-top: 2px; font: 400 11px var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
+.pp-object-actions { display: flex; gap: 6px; margin-top: 8px; }
 
-.pp-object-name {
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+/* ── The sequence player (core/Transport.js) ──────────────────────────────── */
 
-.pp-object-sub {
-  margin-top: 2px;
-  font-family: var(--hud-font, 'Space Mono', monospace);
-  font-size: 10px;
-  color: var(--hud-subtle, rgba(255, 255, 255, 0.35));
-}
+.tp { display: flex; align-items: center; gap: 8px; padding: 8px 0 4px; }
+.tp-play { min-width: 40px; }
+.tp-scrub { flex: 1; }
+.tp-count { font: 400 12px var(--nb-mono, monospace); min-width: 70px; text-align: right; }
 
-.pp-object-actions { display: flex; gap: 5px; margin-top: 8px; }
-
-.pp-empty { color: var(--hud-subtle, rgba(255, 255, 255, 0.35)); font-style: italic; }
+/* A column of actions in a drawer: export, make. */
+.pp-actions { display: grid; gap: 8px; padding-top: 6px; }

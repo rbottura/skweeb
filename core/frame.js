@@ -51,6 +51,7 @@ export const CUSTOM = 'custom';
  * @param {string} [defaults.format='content']
  */
 export function frameParams({ format = 'content', bleed = 0 } = {}) {
+  const group = 'format';
   return {
     format: {
       type: 'enum',
@@ -60,6 +61,7 @@ export function frameParams({ format = 'content', bleed = 0 } = {}) {
       display: 'chips',
       labels: formatLabels(),
       groups: formatGroups(),
+      group,
     },
 
     /**
@@ -67,17 +69,27 @@ export function frameParams({ format = 'content', bleed = 0 } = {}) {
      * switches `format` to `custom`. Both directions go through
      * `applyFrameEdit()` so the two can never disagree.
      */
-    width:  { type: 'int', min: 1, max: 16384, default: 1080, label: 'width' },
-    height: { type: 'int', min: 1, max: 16384, default: 1080, label: 'height' },
+    width:  { type: 'int', min: 1, max: 16384, default: 1080, label: 'width', group },
+    height: { type: 'int', min: 1, max: 16384, default: 1080, label: 'height', group },
 
     /** Keep the ratio while typing — the chain. */
-    link: { type: 'bool', default: true, label: 'link w/h' },
+    link: { type: 'bool', default: true, label: 'link w/h', group },
 
     /** Ground on all four sides. Always grows the canvas; 0 for an exact size. */
-    bleed: { type: 'int', min: 0, max: 2048, default: bleed, label: 'bleed' },
+    bleed: { type: 'int', min: 0, max: 2048, default: bleed, label: 'bleed', group },
 
-    /** The content's own scale inside the frame. 1 is its true size. */
-    zoom: { type: 'range', min: 0.05, max: 8, step: 0.05, default: 1, label: 'content zoom' },
+    /**
+     * The object's scale inside the canvas. Never changes the canvas: above 1
+     * the content overflows and is cropped, below 1 the ground shows round it.
+     */
+    zoom: { type: 'range', min: 0.05, max: 8, step: 0.05, default: 1, label: 'zoom', group },
+
+    /**
+     * The canvas's scale: width and height multiplied, and everything on the
+     * canvas with them — the same picture in more pixels. Resolution, never
+     * composition, so it is applied last, by the renderer (see resolveFrame).
+     */
+    scale: { type: 'range', min: 0.25, max: 4, step: 0.25, default: 1, label: 'scale', group },
   };
 }
 
@@ -198,10 +210,9 @@ export function sizeForFormat(format, params, content) {
     const box = format === 'content' && content ? content : null;
     if (!box) return null;
     const bleed = params.get('bleed') || 0;
-    const zoom = params.get('zoom') || 1;
     return [
-      Math.max(1, Math.round(box.w * zoom) + bleed * 2),
-      Math.max(1, Math.round(box.h * zoom) + bleed * 2),
+      Math.max(1, Math.round(box.w) + bleed * 2),
+      Math.max(1, Math.round(box.h) + bleed * 2),
     ];
   }
 
@@ -224,6 +235,10 @@ export function sizeForFormat(format, params, content) {
 /**
  * The frame, resolved: how big the canvas is and where the content lands.
  *
+ * `zoom` moves the content only; the canvas is the format's. `scale` is not
+ * applied here at all — it is resolution, not composition, so a renderer
+ * multiplies the whole result by it last: the same frame, more pixels.
+ *
  * @param {object} spec              { format, width, height, bleed, zoom }
  * @param {{x,y,w,h}} content        the part of the source worth keeping
  * @param {{width,height}} source    the source's full size
@@ -244,12 +259,14 @@ export function resolveFrame(spec = {}, content, source) {
 
   let width, height;
 
+  // The canvas never follows `zoom`: zoom is the object inside it. A derived
+  // canvas is the content's own size, or the source's.
   if (spec.format === 'content') {
-    width = drawnW + bleed * 2;
-    height = drawnH + bleed * 2;
+    width = Math.max(1, Math.round(from.w)) + bleed * 2;
+    height = Math.max(1, Math.round(from.h)) + bleed * 2;
   } else if (spec.format === 'source') {
-    width = Math.max(1, Math.round(source.width * zoom)) + bleed * 2;
-    height = Math.max(1, Math.round(source.height * zoom)) + bleed * 2;
+    width = Math.max(1, Math.round(source.width)) + bleed * 2;
+    height = Math.max(1, Math.round(source.height)) + bleed * 2;
   } else {
     // A named or custom size. Bleed still grows it, so a bleed of 0 is how an
     // exact deliverable stays exact.

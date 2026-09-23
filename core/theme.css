@@ -1,0 +1,254 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   theme.css — the suite's look, once.
+
+   Neo-brutalist and light, decided 2026-09-23: a cream ground, black ink,
+   thick borders, hard offset shadows and one yellow accent. No glow, no blur,
+   no gradients — every edge is a line you can see. Every app takes this file;
+   an app's own stylesheet only says how its columns are laid out.
+
+   Three layers, top to bottom:
+     tokens      the colours, lines, shadows and faces — change the look here
+     the shell   the page grid: side columns, the viewer, the bar below
+     controls    buttons, chips, fields, switches, sliders, drawers, the bar
+
+   The old --hud-* names are mapped onto the tokens at the end, so a stylesheet
+   not yet rewritten (the gamepad's) still reads the new palette.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --nb-ground:   #f4efe3;     /* the page */
+  --nb-paper:    #fffdf6;     /* panels, the viewer, fields */
+  --nb-ink:      #111111;     /* text, lines, shadows */
+  --nb-muted:    #6b665c;     /* secondary text */
+  --nb-accent:   #ffd60a;     /* what is on, what is chosen */
+  --nb-alert:    #ff4d4d;     /* recording, failure */
+  --nb-check-a:  #e9e4d8;     /* the transparency checkerboard */
+  --nb-check-b:  #fffdf6;
+
+  --nb-line:     3px;          /* panels and the viewer */
+  --nb-line-sm:  2px;          /* controls */
+  --nb-shadow:   4px 4px 0 var(--nb-ink);
+  --nb-shadow-sm: 3px 3px 0 var(--nb-ink);
+  --nb-gap:      14px;
+
+  --nb-font:     'Space Grotesk', system-ui, sans-serif;
+  --nb-mono:     'Space Mono', ui-monospace, monospace;
+
+  --nb-side:     320px;        /* a side column */
+  --nb-bar:      34px;         /* the bottom bar */
+}
+
+/* ── The shell ─────────────────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--nb-ground);
+  color: var(--nb-ink);
+  font: 500 14px/1.35 var(--nb-font);
+}
+
+/* The page is a grid: the work above, the bar below as a row of its own, so
+   the bar can never cover the canvas or a panel. It holds and clips whatever
+   is positioned inside it: `overflow: hidden` on the body does not stop focus
+   from scrolling the page, so nothing may ever make the page scrollable.
+   `clip`, not `hidden`, because `hidden` would be a scroller of its own. */
+.app {
+  position: relative;
+  overflow: clip;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) var(--nb-bar);
+}
+
+.app-main {
+  min-height: 0;
+  display: grid;
+  gap: var(--nb-gap);
+  padding: var(--nb-gap);
+  grid-template-columns: var(--app-columns, minmax(0, 1fr) var(--nb-side));
+}
+
+/* A side column holds a docked panel and scrolls on its own. */
+.app-side {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewer {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--nb-paper);
+  border: var(--nb-line) solid var(--nb-ink);
+  box-shadow: var(--nb-shadow);
+}
+
+.viewer-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: var(--nb-line-sm) solid var(--nb-ink);
+}
+
+.viewer-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+/* The canvas sits on a checkerboard, so a transparent ground reads as one. */
+.viewer-stage canvas {
+  max-width: 100%;
+  max-height: 100%;
+  outline: var(--nb-line-sm) solid var(--nb-ink);
+  background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 16px 16px;
+}
+
+@media (max-width: 900px) {
+  .app-main { grid-template-columns: minmax(0, 1fr); overflow: auto; }
+}
+
+/* ── Controls ──────────────────────────────────────────────────────────────── */
+
+.nb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 12px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  background: var(--nb-paper);
+  color: var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+  font: 700 13px var(--nb-font);
+  cursor: pointer;
+  transition: transform 60ms, box-shadow 60ms, background 60ms;
+}
+
+.nb-btn:hover { background: var(--nb-accent); }
+.nb-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--nb-ink); }
+.nb-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; transform: none; }
+.nb-btn[hidden] { display: none; }
+.nb-btn--primary { background: var(--nb-accent); }
+.nb-btn--wide { width: 100%; }
+
+.nb-btn:focus-visible,
+.nb-field:focus-visible {
+  outline: var(--nb-line-sm) solid var(--nb-ink);
+  outline-offset: 2px;
+}
+
+/* Two or more choices side by side, one of them on. */
+.nb-toggle { display: inline-flex; }
+.nb-toggle .nb-btn { box-shadow: none; }
+.nb-toggle .nb-btn + .nb-btn { border-left: 0; }
+.nb-toggle .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+
+.nb-field {
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  border-radius: 0;
+  background: var(--nb-paper);
+  color: var(--nb-ink);
+  font: 500 13px var(--nb-mono);
+}
+
+/* ── Drawers — a collapsible section of a panel ───────────────────────────── */
+
+.dr {
+  flex: none;
+  background: var(--nb-paper);
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+}
+
+.dr + .dr { margin-top: 12px; }
+.dr[hidden] { display: none; }
+
+.dr-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--nb-ink);
+  font: 700 12px var(--nb-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dr-head::before { content: '▸'; width: 10px; }
+.dr--open > .dr-head::before { content: '▾'; }
+.dr--open > .dr-head { border-bottom: var(--nb-line-sm) solid var(--nb-ink); }
+.dr-head:hover { background: var(--nb-accent); }
+.dr-head:focus-visible { outline: var(--nb-line-sm) solid var(--nb-ink); outline-offset: -5px; }
+
+.dr-note {
+  margin-left: auto;
+  font: 400 11px var(--nb-mono);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.dr-body { display: none; padding: 4px 10px 10px; }
+.dr--open > .dr-body { display: block; }
+
+/* ── The bar — information only ────────────────────────────────────────────── */
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 0 14px;
+  background: var(--nb-ink);
+  color: var(--nb-paper);
+  font: 400 13px var(--nb-mono);
+  white-space: nowrap;
+}
+
+.bar-name { font: 700 13px var(--nb-font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--nb-accent); }
+.bar-say { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.bar-say--held { color: var(--nb-accent); }
+.bar-out { font-weight: 700; }
+.bar-dim { color: #b9b4a8; }
+.bar-sep { color: #6b665c; }
+
+@media (max-width: 1000px) { .bar-keys { display: none; } }
+
+/* ── Old names, for stylesheets not yet rewritten ─────────────────────────── */
+
+:root {
+  --hud-cyan:    var(--nb-ink);
+  --hud-lime:    var(--nb-accent);
+  --hud-amber:   var(--nb-accent);
+  --hud-bg:      var(--nb-paper);
+  --hud-border:  var(--nb-ink);
+  --hud-glass:   var(--nb-paper);
+  --hud-text:    var(--nb-ink);
+  --hud-subtle:  var(--nb-muted);
+  --hud-font:    var(--nb-mono);
+  --hud-font-ui: var(--nb-font);
+  --hud-blur:    none;
+  --hud-anim:    ease;
+}
