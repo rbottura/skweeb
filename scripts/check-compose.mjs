@@ -6,7 +6,7 @@
  *
  * Starts server.js on a free port against a copy of ./vault in the OS temp
  * folder, so nothing here can write to yours, and opens compose in headless
- * Chrome (scripts/chrome.mjs). Then, from the page itself:
+ * Chrome (scripts/check-kit.mjs, scripts/chrome.mjs). Then, from the page:
  *
  *   an empty page         A4, 150 dpi, and it says what to do
  *   every kind placed     one object per type and app in the vault, by
@@ -17,6 +17,8 @@
  *   many placements       added with the picker, listed, chosen, moved, a still
  *                         kept while loops play, removed, picked up and dragged
  *                         on the page, sent back
+ *   saved                 the page as a composition in the vault copy: recipe,
+ *                         parents, frames, render, and one object for two saves
  *   no vault at all       the repo served as plain files: it boots, says so
  *
  * and a console with nothing in it but a missing favicon. Screenshots land in
@@ -24,65 +26,12 @@
  * Not in the tests loop: it needs Chrome, and a vault with things in it.
  */
 
-import { spawn }  from 'node:child_process';
-import http       from 'node:http';
-import net        from 'node:net';
-import fs         from 'node:fs';
-import os         from 'node:os';
-import path       from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { launch } from './chrome.mjs';
+import { startCheck } from './check-kit.mjs';
 import { placementMatrix, onPage, pageSize } from '../apps/compose/page.js';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const KEEP = process.argv.includes('--keep');
-const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'skweeb-check-'));
-const SHOTS = path.join(WORK, 'shots');
-
-let fails = 0;
-const ok = (label, pass, detail = '') => {
-  if (!pass) fails++;
-  console.log((pass ? 'ok   ' : 'FAIL ') + label.padEnd(58) + (detail ? ' ' + detail : ''));
-};
-
-const freePort = () => new Promise((resolve, reject) => {
-  const probe = net.createServer();
-  probe.once('error', reject);
-  probe.listen(0, '127.0.0.1', () => { const { port } = probe.address(); probe.close(() => resolve(port)); });
-});
-
-// ── A server on a copy of the vault, and the repo as plain files ────────────
-
-const vaultDir = path.join(WORK, 'vault');
-if (fs.existsSync(path.join(ROOT, 'vault'))) fs.cpSync(path.join(ROOT, 'vault'), vaultDir, { recursive: true });
-else fs.mkdirSync(vaultDir);
-
-const port = await freePort();
-const BASE = 'http://127.0.0.1:' + port;
-const server = spawn(process.execPath, [path.join(ROOT, 'server.js'), '--port', String(port), '--vault', vaultDir],
-  { stdio: 'ignore' });
-
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
-  '.png': 'image/png', '.webp': 'image/webp' };
-const plain = http.createServer((req, res) => {
-  let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-  if (p.startsWith('/api/') || p.startsWith('/vault/')) { res.writeHead(404); return res.end(); }
-  if (p.endsWith('/')) p += 'index.html';
-  fs.readFile(path.join(ROOT, p), (err, body) => {
-    if (err) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'Content-Type': TYPES[path.extname(p)] || 'application/octet-stream' });
-    res.end(body);
-  });
-});
-const plainPort = await freePort();
-await new Promise(r => plain.listen(plainPort, '127.0.0.1', r));
-
-for (let i = 0; i < 100; i++) {
-  try { if ((await fetch(BASE + '/api/vault')).ok) break; } catch { /* not up yet */ }
-  await new Promise(r => setTimeout(r, 100));
-}
-
-const { page, close } = await launch({ port: await freePort(), profile: path.join(WORK, 'profile') });
+const kit = await startCheck({ keep: process.argv.includes('--keep') });
+const { page, ok, go, shot } = kit;
+const BASE = kit.base;
 
 // ── What the page shows ──────────────────────────────────────────────────────
 
@@ -113,13 +62,6 @@ const type = async (side, label, value) => {
 const chip = text => `[...document.querySelectorAll('#page-side .pp-chip')].find(c => c.textContent === ${JSON.stringify(text)})`;
 const settled = `(() => { const t = document.querySelector('.bar-say')?.textContent || '';
   return t.includes(' on the page') || t.includes('could not'); })()`;
-const shot = name => page.screenshot(path.join(SHOTS, name + '.png'));
-
-// The console is heard page by page — goto() starts a fresh log — so what
-// each page said is kept before the next one opens.
-const noise = [];
-const listen = () => noise.push(...page.errors().filter(e => !(e.url || e.text).includes('favicon.ico')));
-const go = async (url, opts) => { listen(); await page.goto(url, opts); };
 
 const SHEET = { width: 1240, height: 1754, bleed: 0 };
 let still = null;
@@ -321,28 +263,41 @@ try {
        JSON.stringify(rows));
     await page.pointer(client([100, 100]));
     ok('a press on bare paper chooses nothing', await page.eval(action('Remove') + '.disabled'));
+
+    // 7. Saved: the two loops left, as a composition in the vault copy.
+    const saved = async () => {
+      await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+      await press('S');
+      await page.until(`/^saved |failed/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 120000 });
+      return (await page.eval(`document.querySelector('.bar-say').textContent`)).match(/^saved (\S+)/);
+    };
+    const m = await saved();
+    ok('S saves the page to the vault', !!m, m ? m[1] : await page.eval(`document.querySelector('.bar-say').textContent`));
+    if (m) {
+      const o = await (await fetch(BASE + '/api/vault/' + m[1])).json();
+      const refs = (o.recipe.place || []).map(b => b.ref);
+      ok('a composition, its recipe the page and the list', o.type === 'composition' && !!o.recipe.page
+         && JSON.stringify(refs) === JSON.stringify([loopB.id, loopA.id]), `${o.type}: ${JSON.stringify(refs)}`);
+      ok('made from what it places, bottom first', JSON.stringify(o.parents) === JSON.stringify(refs));
+      ok('the drag is in its recipe', o.recipe.place[0].transform.x === x1, JSON.stringify(o.recipe.place[0].transform));
+      ok('it moves: its frames are the page\'s', o.render.frames === Math.max(...lengths) && o.render.fps === 60,
+         `${o.render.frames} frames at ${o.render.fps}`);
+      ok('its render is the page, with a thumbnail', o.render.w === 1240 && o.render.h === 1754 && !!o.thumb,
+         `${o.render.w}×${o.render.h}, thumb ${o.thumb}`);
+      const again = await saved();
+      ok('saved again unchanged, it is the same object', !!again && again[1] === m[1], again ? again[1] : 'none');
+    }
   }
-  listen();
+  const noise = kit.quiet();
   ok('the console stayed quiet on every page', !noise.length, JSON.stringify(noise.slice(0, 3)));
 
-  // 5. No vault at all: rule 7.
-  await page.goto(`http://127.0.0.1:${plainPort}/apps/compose/`, { settle: 1500 });
+  // 8. No vault at all: rule 7.
+  await page.goto(kit.plain + '/apps/compose/', { settle: 1500 });
   s = await look();
   ok('with no vault it boots and says so', s.vault === 'no vault' && s.out === '1240 × 1754 px', s.vault);
   await shot('05-no-vault');
 } catch (err) {
-  fails++;
-  console.log('FAIL ' + err.message);
+  ok(err.message, false);
 } finally {
-  await close();
-  server.kill();
-  plain.close();
-  console.log('\nscreenshots: ' + SHOTS);
-  if (!KEEP) {
-    fs.rmSync(vaultDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-    fs.rmSync(path.join(WORK, 'profile'), { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-  }
+  await kit.finish();
 }
-
-console.log(fails ? `\n${fails} FAILED` : '\nall passed');
-process.exit(fails ? 1 : 0);
