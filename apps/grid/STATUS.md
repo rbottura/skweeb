@@ -40,6 +40,33 @@ luminance picking a member of an ordered ramp of tiles. Ported from
     to an earlier version, that one comes back out. A set grid did not make —
     a legacy family, a ckt family — is only a start: its first twelve, saved
     as new.
+- **Grow in and out** (2026-09-24, the Transition drawer, a loop source only):
+  a cell that fills grows its tile from nothing over `growIn` frames; one that
+  empties keeps its last tile and shrinks it away over `growOut`, the curve run
+  backwards from the size it had reached. One curve for both (`growEase`, six
+  on offer — core/easing.js). A tile changing in a filled cell stays full.
+  Stateless: each cell's size is read from its history, counted back, so any
+  frame renders on its own; a loop wraps, so an export closes. Seen in Chrome:
+  a frame replayed cold from an export matched it byte for byte; on a drain,
+  grow-out leaves the just-emptied cells shrinking.
+  - **It is a tracker now** (growth.js): moving on a frame updates each
+    cell's history in one pass — exact, checked against the full look-back on
+    1,908 random frames — and only a jump reads back. The live preview never
+    reads back through the source (a replay of marks walks backwards the long
+    way round the loop): skipped ticks are guessed, and after a jump or a
+    setting that changes the dither it starts settled. Exports and replays are
+    exact; a cold replay of an exported frame matched it byte for byte.
+    The first two versions read back every frame and froze on real
+    recordings (2026-09-24).
+- **The preview fills tile by tile** (draft-paint.js): each tile drawn once at
+  the cell's size and filled as a pattern into every cell that holds it — one
+  fill per tile instead of a drawImage per cell. At 57,600 cells: 353 ms → 16 ms
+  a render, pixel-identical in the check; a dense loop plays at 22–24 paints a
+  second with growth off, 3/3 or 12/12, where it managed about 3 before, the
+  heap flat near 10 MB. Cells mid-growth are drawn on top one by one; a sprite
+  size other than 1 still draws per cell. Saves, exports and replays use the
+  exact per-cell path; a still is re-rendered exactly when saved. The preview
+  reuses one canvas instead of making a full-size one each frame.
 - **Sprite size** (`tileScale`, 0.1–10, in the Material drawer): each tile
   drawn bigger or smaller than its cell, about the cell's centre. The grid
   does not change — cell count and which tile each cell gets — only the

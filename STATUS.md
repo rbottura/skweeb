@@ -36,6 +36,17 @@ _last touched: 2026-09-24_
   (`core/vault-offer.js`), and the gamepad and ckt check envelopes too. A
   filtered picker now says how many never-switched sets it left out, shows
   them on request, and switches one on when it is picked.
+- **Sprites grow in and out, in grid** — a cell that fills grows its tile from
+  nothing, one that empties shrinks its last tile away, each over its own
+  number of frames along one easing curve; any frame still renders on its own
+  (each cell's history is counted back), so scrubbing, exports and replays
+  agree. It took three tries to be usable on real recordings: the history is a
+  tracker now, updated a frame at a time, and the live preview never reads
+  back through the source. And the preview draws a dither with one fill per
+  tile instead of a draw per cell — 22× faster on a dense field, so a 57,600-
+  cell loop plays at 22–24 paints a second, growth on or off
+  (`apps/grid/STATUS.md`). **`core/easing.js`** is the suite's easing
+  asset: thirty-one classic curves, six offered in words by `easeParam()`.
 - **grid has a sprite size** (`tileScale`): tiles drawn up to ten times their
   cell, overlapping, the grid itself unchanged. Size 1 is bit-identical to
   before.
@@ -131,11 +142,13 @@ _last touched: 2026-09-24_
 
 ## Tests
 
-Fifteen files, no runner, no dependencies — the command in `CLAUDE.md` runs
+Seventeen files, no runner, no dependencies — the command in `CLAUDE.md` runs
 all of them, and all pass. New this session: `uses` (the defaults, the
 switches, `use:none`, unknown uses kept) and `grid-material` (tone on a
 ground, a tile in its cell, the tray, the legacy envelopes); `vault` covers the
-tag edit and its refusals, `registry` a member's own file type. New checks this pass: `params` (the `sprite` and
+tag edit and its refusals, `registry` a member's own file type; `easing` (every
+curve lands at 0 and 1, out is in reversed, which ones overshoot) and
+`grid-growth` (ages across a loop's wrap, from a start, the look-back stopping). New checks this pass: `params` (the `sprite` and
 `ground` types, `when`; a reset announces what it moves), `frame` (zoom is
 the object, never the canvas; the format drawer carries `scale`; the link on a
 real Params — custom, a slider's round trip, shapes that stay picked, the
@@ -175,6 +188,12 @@ from a temporary worktree: paint rate, and how often the screen changes.
   renumber `brushes`: recordings store sprites by index.
 - **The gamepad's params are still not on `core/params.js`**, so its panels
   are its own; it has the theme, not the drawers.
+- **grid still stutters now and then while a loop plays** — the author's
+  reading, 2026-09-24, after the grow-in work made it "so much smoother": not
+  the growth, grid itself. The lead: its Playhead drops ticks when a frame's
+  render runs over its share, so an uneven render is an uneven loop, and grid
+  has no paint-rate readout to say so — ckt's bar has one (`bar.rate`).
+  Measure first, as ckt was measured.
 - **A server started before a change to `server.js` keeps its old API** — it
   serves the new pages from disk but answers with old code. That is what hid
   the author's two materials on 2026-09-24 (no `role` on its rows) and what
