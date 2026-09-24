@@ -3,6 +3,31 @@ _last touched: 2026-09-24_
 
 ## Works right now
 
+- **M4 has begun: compose places one object on a page** (`apps/compose/`),
+  all of it seen in Chrome. Three columns, as ckt has: `placed` on the left —
+  the object and its transform — the page between, `page` on the right: core's
+  Format drawer, open, less the derived formats and `zoom`, A4 at 150 dpi to
+  start. Any still, loop or shape in the vault, from any app, placed from the
+  picker or by `?place=<id>`, at frame 0 — all seven kinds in the vault tried,
+  a grid dither of a gamepad loop included. Placed whole: a choice made by hand
+  fits the sheet. `x`, `y` from the page's centre in page pixels, `scale`,
+  `rot` clockwise about its centre (`docs/object-model.md`, *Placement*);
+  bleed with a trim line, a transparent ground, `scale` for the export's
+  pixels. The preview is drawn at the size the viewer shows, and a frame is
+  asked for once per tick, so a slider never re-dithers a grid. Opens with no
+  vault. `apps/compose/STATUS.md` has the five bricks, this the first.
+- **Frame N of anything is `openFrames()`** (`core/rebuild.js`): a sequence
+  replayed as before, and now a still, a shape or a set as its render, one
+  frame long. Last session's STATUS said rebuild.js already did this; it did it
+  for sequences only. An object's size on a page is its ink — a gamepad loop's
+  `bounds`, 1812 × 811, not the 1920 × 945 screen it was drawn on.
+- **A browser check is a command**: `node scripts/check-compose.mjs` starts its
+  own server on a copy of the vault, drives headless Chrome
+  (`scripts/chrome.mjs`, no dependencies) and runs 23 checks — every kind
+  placed, a typed transform landing on the pixels `page.js` computes, the
+  page's formats, no vault at all, a console quiet on every page. It fails
+  when the page throws. Two sessions' drivers were lost in scratchpads; this
+  one is in the repo.
 - **A set says where it is offered** (`core/uses.js`), all of it seen in
   Chrome. A vault set's detail has a switch per use — *gamepad brush family*,
   *grid material*, *ckt sprite family* — and each app lists only the sets
@@ -142,8 +167,13 @@ _last touched: 2026-09-24_
 
 ## Tests
 
-Seventeen files, no runner, no dependencies — the command in `CLAUDE.md` runs
-all of them, and all pass. New this session: `uses` (the defaults, the
+Eighteen files, no runner, no dependencies — the command in `CLAUDE.md` runs
+all of them, and all pass. New: `compose-page` (where a placement lands —
+moved, scaled, turned about its centre, the bleed moving nothing; an object's
+ink; placed whole; a page with no zoom and an A4 box that agrees with its
+chip; a placement as the object model's block and back). And the browser
+check above, outside the loop because it needs Chrome and a vault with
+things in it. Earlier this session: `uses` (the defaults, the
 switches, `use:none`, unknown uses kept) and `grid-material` (tone on a
 ground, a tile in its cell, the tray, the legacy envelopes); `vault` covers the
 tag edit and its refusals, `registry` a member's own file type; `easing` (every
@@ -156,14 +186,17 @@ real Params — custom, a slider's round trip, shapes that stay picked, the
 either direction; `off`; laps; the pulse floor; a still's crop). Run against
 the old `frame.js`, 15 of the link checks fail.
 
-The browser checks were driven over the Chrome DevTools protocol against a
-throwaway vault, from a script in the session scratchpad — still not in the
-repo. See *Next*. This pass's also compared against the last commit, served
-from a temporary worktree: paint rate, and how often the screen changes.
+The earlier browser checks — the UI pass, ckt's paint rate against the last
+commit from a temporary worktree — were driven from scratchpad scripts, now
+gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 `playback` gained smooth mode's checks.
 
 ## Broken / half-done
 
+- **compose is one brick in**: one placement, frame 0, no clock, no save, no
+  export. A placed object is drawn from its saved pixels, so an export `scale`
+  above 1 would upscale them — M4's brick 5, each app drawing its own at size,
+  is the fix. `apps/compose/STATUS.md` has the order.
 - **Moving trails are the one slow case left**: a pass over every dot per
   trail sample, 13 painted frames a second for 1275 dots and a 10-frame trail
   — the same before and after this pass.
@@ -218,18 +251,25 @@ from a temporary worktree: paint rate, and how often the screen changes.
 
 ## Next single step
 
-**M4's first brick: `apps/compose/` boots on the kit and places one object.**
-The shell from `core/theme.css`, a docked panel whose Format drawer is the
-page, one `type: 'object'` param, and that object drawn on the page at a
-transform — frame 0, through `core/rebuild.js`, which already gives frame N
-of anything. Standalone, like every app.
+**M4's second brick: compose's page plays.** A `Playhead` over the placement
+— `at` 0, its own length and fps — with core's `Transport` in a *Sequence
+player* drawer on the page panel, space to play, `frameOf(placed, tick)` in
+`paint()`, and the bar's paint rate (`bar.rate`), as ckt has. Then place a
+grid loop and measure it with `scripts/chrome.mjs`: each of its frames is
+grid's full-size re-dither (`apps/grid/rebuild.js`), not the draft its own
+preview draws, so that is where it will be slow if anywhere.
 
-Then the rest of **M4 — compose**. Alongside it: move the Chrome DevTools
-driver into `scripts/` so a browser check is a command, and the gamepad onto
-core params.
+Then bricks 3 to 5 (`apps/compose/STATUS.md`). Alongside: the gamepad onto
+core params, and the vault detail's *Place in compose ↗* — `?place=<id>` is
+ready for it.
 
 ## Parked decisions
 
+- **compose's first brick settled four things** (2026-09-24,
+  `docs/roadmap.md`): a page and a placement are two schemas, and a
+  placement's panel edits one entry of `place[]`; a transform is page pixels
+  from the page's centre, turning clockwise about the object's; an object's
+  size on a page is its ink; frame N of anything is core's `openFrames()`.
 - **Where a set is offered is tags, declared per consumer** (2026-09-24):
   `use:<id>`, switched in the vault, with `core/uses.js` as the catalogue —
   the consuming half of what a link is on the producing side. Tags are the one
