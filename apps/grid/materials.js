@@ -76,6 +76,24 @@ export async function ramp(id) {
 const _tiles = new Map();         // url → Promise<?ImageBitmap>
 
 /**
+ * The size an image is decoded at as a tile: null to keep its own, or
+ * `[w, h]` scaled to fit TILE_MAX, its shape kept. Numbers in, numbers out —
+ * read off the image *before* it is closed. A closed ImageBitmap is 0 × 0, and
+ * reading it after `close()` resized every tile over TILE_MAX to one pixel: a
+ * face drawn as its average colour, in every cell (fixed 2026-09-24).
+ *
+ * @param {number} width
+ * @param {number} height
+ * @param {number} [max=TILE_MAX]
+ * @returns {?[number, number]}
+ */
+export function tileSize(width, height, max = TILE_MAX) {
+  if (width <= max && height <= max) return null;
+  const k = max / Math.max(width, height);
+  return [Math.max(1, Math.round(width * k)), Math.max(1, Math.round(height * k))];
+}
+
+/**
  * One image as a tile, decoded once per page and never wider or taller than
  * TILE_MAX. Null when it will not load: a hole costs its cells, not the render.
  *
@@ -90,12 +108,12 @@ export function tileFromUrl(url) {
         if (!res.ok) return null;
         const blob = await res.blob();
         const full = await createImageBitmap(blob);
-        if (full.width <= TILE_MAX && full.height <= TILE_MAX) return full;
-        const k = TILE_MAX / Math.max(full.width, full.height);
+        const size = tileSize(full.width, full.height);
+        if (!size) return full;
         full.close();
         return await createImageBitmap(blob, {
-          resizeWidth: Math.max(1, Math.round(full.width * k)),
-          resizeHeight: Math.max(1, Math.round(full.height * k)),
+          resizeWidth: size[0],
+          resizeHeight: size[1],
           resizeQuality: 'high',
         });
       } catch {

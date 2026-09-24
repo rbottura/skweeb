@@ -161,5 +161,16 @@ ok('no size fills the cell', fitInCell(0, 0), { x: 0, y: 0, w: 1, h: 1 });
   ok('and nowhere else until switched', [offers(m, 'brushes'), offers(m, 'sprites')], [false, false]);
 }
 
+// -- A tile's decoded size -------------------------------------------------------
+
+{
+  const { tileSize } = await import('../apps/grid/materials.js');
+  ok('a tile up to 512 keeps its own size', [tileSize(500, 500), tileSize(512, 200)], [null, null]);
+  ok('a face photo fits in 512, its shape kept', tileSize(1080, 1455), [380, 512]);
+  ok('a stone too', tileSize(1000, 1000), [512, 512]);
+  ok('never one pixel for a large image — the bug was 1 x 1', tileSize(2048, 1527), [512, 382]);
+  ok('a sliver keeps a pixel', tileSize(5000, 3), [512, 1]);
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

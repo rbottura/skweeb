@@ -27,6 +27,18 @@ luminance picking a member of an ordered ramp of tiles. Ported from
   them, and *Edit the material…* re-sorts one by measured tone if wanted.
   `sprites` has 13 members, one past the maker's cap of twelve, so editing
   it in the maker would drop one.
+- **A vault tile over 512 px is a tile again, not one pixel** (fixed
+  2026-09-24, found with the faces). `tileFromUrl` closed the full-size
+  bitmap and then read its size for the resize — a closed ImageBitmap is
+  0 × 0 — so every member over 512 px decoded as 1 × 1 and filled its cells
+  with its average colour: myFace came out brown, stones grey. The maker's
+  thumbnails showed the pictures, since they draw the files, but its tone
+  measure used the same 1 × 1 tiles. `tileSize()` now takes the numbers first
+  (tests/grid-material.mjs); the faces decode at 380 × 512 and read as faces
+  from about 24 px cells up. Only the two imported materials were hit, and no
+  saved dither used one, so nothing in the vault replays differently. The
+  myFace saved from the maker was ordered by those one-pixel tones; *Sort by
+  tone* orders it on the faces themselves.
 - **Materials from the vault, and a maker for them** (2026-09-24). A material
   is a vault `set` with `role: 'material'`, members light to dark; the
   Material drawer's *from the vault* picks one (only sets switched on as a
