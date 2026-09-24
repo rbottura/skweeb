@@ -100,5 +100,11 @@ place.restore(Params.fromPlacement({ ref: 'gam_2_def' }));
 ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', x: 0, y: 0, scale: 1, rot: 0 });
 ok('a placement takes what core gives frames of', place.spec('ref').accepts, ['still', 'sequence', 'shape']);
 
+// -- a composition's lineage -------------------------------------------------
+
+const recipe = { page: page.values, place: ['gam_1', 'ckt_2', 'gam_1', null].map(ref => ({ ref })) };
+ok('its parents are what it places, once each, bottom first', Params.parentsOf(recipe), ['gam_1', 'ckt_2']);
+ok('an empty page is made from nothing', Params.parentsOf({ page: page.values, place: [] }), []);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

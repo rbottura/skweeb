@@ -59,6 +59,17 @@ are in.
   per tick, so a dragged slider never re-dithers a grid.
 - **Standalone**: served as plain files with no vault, the page draws, the bar
   says `no vault`, and a `?place=` link says it could not open the object.
+- **A composition saves** (brick 4, its first move; `save.js`, `render.js`).
+  *Save to the vault* in the Export drawer, or S: a `composition` whose recipe
+  is `{ page, place }` — the page's values and every block, bottom first —
+  with every placed object as a parent (`parentsOf`) and no refs, since an
+  ordinary object never changes. Its render is the page at the tick on
+  screen, at the page's scale, drawn again from every object opened
+  **exactly** — never the preview's drafts — and let go after; a page that
+  moves records its frames, rate and loop. A page with an object that would
+  not open is not saved. Seen: a grid dither under a ckt loop turned −12°,
+  saved as `A4 · 2 placed`, 1240 × 1754, 668 frames at 60; saved twice
+  unchanged, one object.
 
 ## Tests
 
@@ -74,19 +85,20 @@ tick asked for once, moving through the stack, the newest load winning, an
 entry taken off before it opened never coming back, a handle nobody holds
 disposed.
 
-`node scripts/check-compose.mjs` runs it all in Chrome: 45 checks.
+`node scripts/check-compose.mjs` runs it all in Chrome: 52 checks, the save
+read back out of the vault copy included.
 
 ## Next — the bricks, in order
 
 1. ~~**One object on a page at a transform, frame 0.**~~
 2. ~~**The page plays.**~~
 3. ~~**Many placements.**~~
-4. **A composition in the vault.** First move: *Save to the vault* in an
-   Export drawer — a `composition` whose recipe is `{ page, place }`
-   (`page.values`, `placements.blocks()`), every placed ref a parent, and the
-   page at its first frame as its render, drawn from **exact** frames, not
-   the preview's drafts. Then a `rebuild.js`, so the vault replays one and
-   another page can place it, and `?open=<id>`.
+4. **A composition in the vault.** ~~Saving~~ is in. Next: compose's own
+   `rebuild.js` — `openObject()` on `openComposition()` (`render.js`), so
+   the vault's player replays a composition and another page can place one
+   (`PLACEABLE` gains `composition`; a page inside a page is the depth guard
+   `core/rebuild.js` already has) — `reopens()`, and `?open=<id>` restoring
+   the page and its list.
 5. **Export at print scale.** Each placement drawn again by its own app at the
    size the page needs, not its saved pixels scaled up — the roadmap's
    "`render()` finally has to be real". A still, or frames and ffmpeg for a

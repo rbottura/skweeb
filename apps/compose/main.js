@@ -20,10 +20,12 @@
  */
 
 import { pageParams, placeParams, toPlacement, fromPlacement, PAGE_GROUPS, PLACE_GROUPS, PLACEABLE } from './params.js';
-import { paintPage, pageSize, fitScale, placementMatrix, onPage } from './page.js';
+import { paintPage, pageSize, fitScale } from './page.js';
+import { viewFactor, trimLine, outline, PaintRate } from './preview.js';
 import { Placements }     from './placements.js';
 import { PlacedList }     from './list.js';
 import { wirePointer }    from './pointer.js';
+import { saveComposition } from './save.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Transport }      from '../../core/Transport.js';
@@ -36,13 +38,13 @@ const canvas = document.getElementById('page');
 const ctx = canvas.getContext('2d');
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
 
-let page, place, bar, player, transport, list, listDrawer, adder, placements;
+let page, place, bar, rate, player, transport, list, listDrawer, adder, placements, saveButton;
 let chosen = null;                 // the placement the `placed` panel edits
 let choosing = false;              // the panel is being shown a placement: not an edit
 let syncing = false;               // an edit is waiting to be carried to the chosen placement
-let painted = null;                // paints counted over the last second, for the bar's rate
 let clockFps = 0;
 let shownView = 1;                 // canvas pixels per page pixel, as last painted
+let busy = false;                  // a save is drawing the page again; the player waits
 
 /**
  * The page's clock. It plays at the page's rate, and drops ticks when a
@@ -58,13 +60,14 @@ const clock = new Playhead({
   },
   onState: () => {
     if (transport) transport.state();
-    if (!clock.playing) { painted = null; bar.rate(null); }
+    if (!clock.playing && rate) rate.stop();
   },
 });
 
 async function boot() {
   bar = new Bar({ app: 'compose', mount: document.querySelector('.app'),
-                  keys: 'drag or ← ↑ → ↓ move · [ ] order · Del remove · space play · , . frame · V vault' });
+                  keys: 'drag or ← ↑ → ↓ move · [ ] order · Del remove · space play · , . frame · S save · V vault' });
+  rate = new PaintRate(bar);
   page = pageParams();
   place = placeParams();
   placements = new Placements({ onChange: refresh, say: t => bar.announce(t) });
@@ -83,7 +86,18 @@ async function boot() {
   player = pagePanel.drawer('player');
   const holder = document.createElement('div');
   player.body.prepend(holder);
-  transport = new Transport({ clock, mount: holder });
+  transport = new Transport({ clock, mount: holder, busy: () => busy });
+
+  const exp = pagePanel.addDrawer({ id: 'export', title: 'Export', before: 'ground' });
+  const actions = document.createElement('div');
+  actions.className = 'pp-actions';
+  saveButton = document.createElement('button');
+  saveButton.type = 'button';
+  saveButton.className = 'nb-btn nb-btn--wide nb-btn--primary';
+  saveButton.textContent = 'Save to the vault  [S]';
+  saveButton.addEventListener('click', save);
+  actions.append(saveButton);
+  exp.body.append(actions);
 
   // The frame chain keeps the format and the box in step (core/frame.js).
   page.on(key => {
@@ -193,6 +207,39 @@ function configureClock() {
   player.note(placements.moving ? `${length} frames · ${(length / fps).toFixed(2)} s` : 'nothing moves');
 }
 
+// ── Saving ───────────────────────────────────────────────────────────────────
+
+/**
+ * The composition, into the vault: the page and every placement as its
+ * recipe, drawn once more from exact frames at the tick on screen (save.js).
+ * The recipe is a snapshot — a drag during the save cannot change what it
+ * says — and a page with an object that would not open is not saved.
+ */
+async function save() {
+  if (busy) return;
+  if (!placements.length) return bar.announce('nothing to save — place something first');
+  const lost = placements.items.find(p => p.error);
+  if (lost) return bar.announce(`${lost.title} could not be opened — take it off the page to save`);
+  if (placements.items.some(p => !p.handle)) return bar.announce('still opening — save once everything is in');
+
+  busy = true;
+  saveButton.disabled = true;
+  clock.pause();
+  bar.say('saving — every object drawn again, exactly…');
+  try {
+    const recipe = JSON.parse(JSON.stringify({ page: page.values, place: placements.blocks() }));
+    const object = await saveComposition(recipe, { tick: clock.tick });
+    bar.announce(object ? `saved ${object.id} — ${object.title}` : 'no vault — the page is downloaded instead');
+  } catch (err) {
+    console.error('[compose] save failed:', err);
+    bar.announce('save failed: ' + err.message);
+  } finally {
+    busy = false;
+    saveButton.disabled = false;
+    refreshVault();
+  }
+}
+
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
 let pending = false;
@@ -206,7 +253,7 @@ function draw() {
 function paint() {
   const v = page.values;
   const size = pageSize(v);
-  const view = viewFactor(size, v.scale);
+  const view = viewFactor(canvas, size, v.scale);
   const w = Math.max(1, Math.round(size.width * view));
   const h = Math.max(1, Math.round(size.height * view));
   if (canvas.width !== w) canvas.width = w;
@@ -214,81 +261,13 @@ function paint() {
 
   paintPage(ctx, v, placements.layers(clock.tick, v.fps), view);
   shownView = view;
-  trimLine(size, view);
-  outline(v, view);
-  if (clock.playing) countPaint();
+  trimLine(ctx, size, view);
+  outline(ctx, chosen, v, view);
+  if (clock.playing) rate.count();
 
   bar.output({ width: Math.round(size.width * v.scale), height: Math.round(size.height * v.scale),
                scale: v.scale, format: v.format });
   bar.say(describe());
-}
-
-/**
- * Canvas pixels per page pixel, for the preview: as many as the viewer shows
- * in device pixels, never more than an export makes — in steps of a
- * twentieth, so a resize does not churn the canvas.
- */
-function viewFactor(size, scale) {
-  const box = canvas.parentElement;
-  const cs = getComputedStyle(box);
-  const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const h = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-  if (!(w > 0) || !(h > 0)) return Math.min(1, scale);
-  const dpr = window.devicePixelRatio || 1;
-  const fit = Math.min((w * dpr) / size.width, (h * dpr) / size.height);
-  return Math.min(scale, Math.ceil(fit * 20) / 20);
-}
-
-/** Where the sheet ends inside its bleed: a line on the preview, never in a render. */
-function trimLine(size, view) {
-  if (!size.bleed) return;
-  ctx.save();
-  ctx.strokeStyle = '#111111';
-  ctx.setLineDash([6, 4]);
-  ctx.strokeRect(Math.round(size.bleed * view) + 0.5, Math.round(size.bleed * view) + 0.5,
-                 Math.round((size.width - size.bleed * 2) * view), Math.round((size.height - size.bleed * 2) * view));
-  ctx.restore();
-}
-
-/**
- * The chosen placement's frame, on the preview only: which one the panel
- * edits. A light line under a dashed dark one, so it reads on any ground.
- */
-function outline(v, view) {
-  if (!chosen || !chosen.size) return;
-  const { width: w, height: h } = chosen.size;
-  const m = placementMatrix(chosen.block.transform, chosen.size, v);
-  ctx.save();
-  ctx.beginPath();
-  [[0, 0], [w, 0], [w, h], [0, h]].forEach((corner, i) => {
-    const [x, y] = onPage(m, corner);
-    if (i) ctx.lineTo(x * view, y * view);
-    else ctx.moveTo(x * view, y * view);
-  });
-  ctx.closePath();
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = '#fffdf6';
-  ctx.stroke();
-  ctx.lineWidth = 1;
-  ctx.setLineDash([5, 4]);
-  ctx.strokeStyle = '#111111';
-  ctx.stroke();
-  ctx.restore();
-}
-
-/**
- * The paint rate, measured: pages painted in the last second while playing,
- * in the bar — so a slow page is a number on the machine that has it.
- */
-function countPaint() {
-  const now = performance.now();
-  if (!painted) painted = { since: now, n: 0 };
-  painted.n++;
-  const span = now - painted.since;
-  if (span >= 1000) {
-    bar.rate((painted.n * 1000) / span);
-    painted = { since: now, n: 0 };
-  }
 }
 
 /** The bar's line: how many are placed, and the chosen one. */
@@ -312,6 +291,8 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
+    if (e.key === 's' || e.key === 'S') save();
+    if (busy) return;
     if (e.key === 'Delete' && chosen) takeOff(chosen);
     if (e.key === ']' && chosen) placements.move(chosen, +1);
     if (e.key === '[' && chosen) placements.move(chosen, -1);
@@ -326,6 +307,10 @@ function wireKeys() {
     if (e.key === ',') { clock.pause(); clock.step(-1); }
     if (e.key === '.') { clock.pause(); clock.step(1); }
   });
+  refreshVault();
+}
+
+function refreshVault() {
   Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
 }
 

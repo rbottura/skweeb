@@ -86,3 +86,12 @@ export function fromPlacement(block) {
   const t = (block && block.transform) || {};
   return { ref: (block && block.ref) || null, x: t.x, y: t.y, scale: t.scale, rot: t.rot };
 }
+
+/**
+ * What a composition is made from — its `parents`: every object placed on
+ * it, once each, bottom first. Read off the recipe, which names them all, so
+ * lineage cannot drift from what the page holds.
+ */
+export function parentsOf(recipe) {
+  return [...new Set(((recipe && recipe.place) || []).map(b => b.ref).filter(Boolean))];
+}
