@@ -3,19 +3,24 @@ _last touched: 2026-09-24_
 
 ## Works right now
 
-- **M4 has begun: compose places one object on a page** (`apps/compose/`),
-  all of it seen in Chrome. Three columns, as ckt has: `placed` on the left —
-  the object and its transform — the page between, `page` on the right: core's
-  Format drawer, open, less the derived formats and `zoom`, A4 at 150 dpi to
-  start. Any still, loop or shape in the vault, from any app, placed from the
-  picker or by `?place=<id>`, at frame 0 — all seven kinds in the vault tried,
-  a grid dither of a gamepad loop included. Placed whole: a choice made by hand
-  fits the sheet. `x`, `y` from the page's centre in page pixels, `scale`,
-  `rot` clockwise about its centre (`docs/object-model.md`, *Placement*);
-  bleed with a trim line, a transparent ground, `scale` for the export's
-  pixels. The preview is drawn at the size the viewer shows, and a frame is
-  asked for once per tick, so a slider never re-dithers a grid. Opens with no
-  vault. `apps/compose/STATUS.md` has the five bricks; two are in.
+- **M4, three bricks of five: compose puts many objects on one page, and it
+  plays** (`apps/compose/`), all of it seen in Chrome. Three columns, as ckt
+  has: `placed` on the left — what is on the page, and the chosen one's
+  object and transform — the page between, `page` on the right: core's Format
+  drawer, open, less the derived formats and `zoom`, A4 at 150 dpi to start.
+  Any still, loop or shape from any app, added with the picker or by
+  `?place=<id>`, placed whole; listed top first, ordered with ↑ ↓ or `[ ]`,
+  removed with Del. A row, or a press on the page, chooses the one the panel
+  edits; a drag moves it, arrows nudge it, and it is outlined on the preview.
+  `x`, `y` from the page's centre in page pixels, `scale`, `rot` clockwise
+  about its centre (`docs/object-model.md`, *Placement*); bleed with a trim
+  line, a transparent ground, `scale` for the export's pixels. Opens with no
+  vault. `apps/compose/STATUS.md` has the five bricks.
+- **Time on a page of many things, decided by the author** (2026-09-24,
+  `docs/object-model.md`): a still is there for the whole page, a loop plays
+  again until the page ends, and the page lasts as long as its longest loop.
+  The object model had said a still lasts one frame, against its own
+  "`at: 0` for something that is simply there".
 - **The page plays** (brick 2): a rate of its own, `fps`, 60 by default, with
   core's player; each loop at its own speed in real time (`time.js`) — a
   30 fps ckt loop holds each tick for two on a 60 fps page. Measured playing:
@@ -32,11 +37,13 @@ _last touched: 2026-09-24_
   `bounds`, 1812 × 811, not the 1920 × 945 screen it was drawn on.
 - **A browser check is a command**: `node scripts/check-compose.mjs` starts its
   own server on a copy of the vault, drives headless Chrome
-  (`scripts/chrome.mjs`, no dependencies) and runs 34 checks — every kind
-  placed, a typed transform landing on the pixels `page.js` computes, the
-  page's formats, every loop played in real time and stepped, no vault at
-  all, a console quiet on every page. It fails when the page throws. Two
-  sessions' drivers were lost in scratchpads; this one is in the repo.
+  (`scripts/chrome.mjs`, no dependencies, a real mouse included) and runs 45
+  checks — every kind placed, a typed transform landing on the pixels
+  `page.js` computes, the page's formats, every loop played in real time and
+  stepped, three placed with the picker, a still kept while loops play, one
+  picked up and dragged on the page, no vault at all, a console quiet on
+  every page. It fails when the page throws. Two sessions' drivers were lost
+  in scratchpads; this one is in the repo.
 - **A set says where it is offered** (`core/uses.js`), all of it seen in
   Chrome. A vault set's detail has a switch per use — *gamepad brush family*,
   *grid material*, *ckt sprite family* — and each app lists only the sets
@@ -176,13 +183,17 @@ _last touched: 2026-09-24_
 
 ## Tests
 
-Nineteen files, no runner, no dependencies — the command in `CLAUDE.md` runs
+Twenty files, no runner, no dependencies — the command in `CLAUDE.md` runs
 all of them, and all pass. New: `compose-page` (where a placement lands —
-moved, scaled, turned about its centre, the bleed moving nothing; an object's
+moved, scaled, turned about its centre, the bleed moving nothing; picking one
+up, the top one where two overlap, a turned one where it stands; an object's
 ink; placed whole; a page with no zoom and an A4 box that agrees with its
-chip; a placement as the object model's block and back) and `compose-time`
-(a loop's ticks on a page at its own rate, twice it, half, a rate that does
-not divide; wrapping and holding; a picture that holds). And the browser
+chip; a placement as the object model's block and back), `compose-time` (a
+loop's ticks on a page at its own rate, twice it, half, a rate that does not
+divide; wrapping and holding; a picture that holds) and `compose-placements`
+(the list with stand-in objects opened in any order: the page's length, a
+still at every tick, the stack, the newest load winning, an entry taken off
+before it opened never coming back, a handle nobody holds disposed). And the browser
 check above, outside the loop because it needs Chrome and a vault with
 things in it. Earlier this session: `uses` (the defaults, the
 switches, `use:none`, unknown uses kept) and `grid-material` (tone on a
@@ -204,10 +215,12 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Broken / half-done
 
-- **compose is two bricks in**: one placement, playing; no save, no export. A
-  placed object is drawn from its saved pixels, so an export `scale` above 1
-  would upscale them — M4's brick 5, each app drawing its own at size, is the
-  fix. `apps/compose/STATUS.md` has the order.
+- **compose is three bricks in**: many placements, playing; no save, no
+  export. A placed object is drawn from its saved pixels, so an export
+  `scale` above 1 would upscale them — M4's brick 5, each app drawing its own
+  at size, is the fix. `at` and `length` ride in every block and nothing
+  honours them yet: everything starts on the first frame. `apps/compose/STATUS.md`
+  has the order.
 - **grid's own player opens its source exact** — one source handle serves
   both its preview and its saves, so it cannot ask for a draft the way
   compose does. Read from the code, not seen: a dither of a grid loop that
@@ -266,20 +279,18 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M4's third brick, its first move: compose holds a list of placements.** A
-*Placed* drawer listing them (a row each, thumbnail and title, as ckt's
-session list), *Add…* opening the picker for a new one, a click choosing
-which one the `placed` panel edits — `place.restore(fromPlacement(block))` in,
-`toPlacement(place.values)` back — and `paint()` drawing every one, bottom
-first. Removing, ordering and dragging come after.
+**M4's fourth brick, its first move: compose saves a composition.** *Save to
+the vault* in an Export drawer on the page panel: a `composition` whose
+recipe is `{ page: page.values, place: placements.blocks() }`, every placed
+ref a parent, and the page at its first frame as its render and thumbnail —
+drawn from each object's **exact** frames, opened without `draft`, never the
+preview's. A test that a saved recipe's `place` is the list, bottom first.
 
-It needs one answer from the author first (see *Parked*): on a page that
-moves, what a still's `length: null` means, and whether a loop shorter than
-the page plays again.
-
-Then bricks 4 and 5 (`apps/compose/STATUS.md`). Alongside: the gamepad onto
-core params, and the vault detail's *Place in compose ↗* — `?place=<id>` is
-ready for it.
+Then compose's own `rebuild.js` — `openObject()` so the vault replays a
+composition and another page can place one, `reopens()` and `?open=<id>` —
+and brick 5 (`apps/compose/STATUS.md`). Alongside: the gamepad onto core
+params, and the vault detail's *Place in compose ↗* — `?place=<id>` is ready
+for it.
 
 ## Parked decisions
 
@@ -289,14 +300,13 @@ ready for it.
   from the page's centre, turning clockwise about the object's; an object's
   size on a page is its ink; frame N of anything is core's `openFrames()`.
   The second, two more: a page has its own `fps` and a loop keeps its own
-  speed, sharing seconds, not ticks; a preview asks for `draft` frames.
-- **Open, for the author — time on a page of many things.** The object model
-  says a placement's `length: null` is "one frame for a still", and that
-  `at: 0` is "something that is simply there"; on a page that moves, a still
-  that vanished after frame 0 would be neither. Proposed: a still with no
-  length is there for the whole page, a loop with no length plays again until
-  the page ends, and the page lasts as long as its longest loop. Brick 3
-  needs this settled before a second placement goes on a page.
+  speed, sharing seconds, not ticks; a preview asks for `draft` frames. The
+  third: a placement is picked up by its box, not its ink.
+- **Time on a page of many things** (the author, 2026-09-24,
+  `docs/object-model.md`): a still with no length is there for the whole
+  page, a loop with no length plays again until the page ends, and the page
+  lasts as long as its longest loop. A hand-set page length, for a post that
+  must be exactly ten seconds, can be a row in the player later.
 - **Where a set is offered is tags, declared per consumer** (2026-09-24):
   `use:<id>`, switched in the vault, with `core/uses.js` as the catalogue —
   the consuming half of what a link is on the producing side. Tags are the one
