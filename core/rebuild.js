@@ -179,9 +179,19 @@ export async function openSequence(object, opts = {}) {
 const PICTURE = /\.(png|webp|jpe?g|gif)$/i;
 
 /**
+ * Whether an object's frames are rebuilt from its recipe rather than read
+ * off its render: a sequence, or anything whose render says it has more than
+ * one frame — a composition that moves. core/vault-detail.js asks the same
+ * question in one line of its own, to stay light.
+ */
+const replayed = object => !!object && !!object.recipe
+  && (object.type === 'sequence' || (!!object.render && object.render.frames > 1));
+
+/**
  * Any object as frames — what compose asks of everything it places.
  *
- * A sequence with a recipe is replayed, as above. Anything else whose render
+ * Anything with a recipe and more than one frame — a sequence, a composition
+ * that moves — is replayed by its app, as above. Anything else whose render
  * is a picture — a still, a shape, a set's contact sheet, a loop saved as a
  * leaf — is that picture, a loop one frame long: its saved pixels, until print
  * scale asks its app to draw it again (docs/roadmap.md, M4). A render that is
@@ -194,7 +204,7 @@ const PICTURE = /\.(png|webp|jpe?g|gif)$/i;
  */
 export async function openFrames(object, opts = {}) {
   const file = object && object.render && object.render.file;
-  if (object.type === 'sequence' && object.recipe) return openSequence(object, opts);
+  if (replayed(object)) return openSequence(object, opts);
   if (file && PICTURE.test(file)) return openPicture(object, opts.url);
   return openSequence(object, opts);
 }

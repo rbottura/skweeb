@@ -52,10 +52,11 @@ export function paintDetail(body, o, urls, hooks) {
   }
   body.append(preview);
 
-  // A sequence's render is one frame of it. The loop has no file, so playing
-  // it means rebuilding it from the recipe — imported only when asked, since
-  // that is what can pull p5 into a page that may not want it.
-  if (o.type === 'sequence' && o.recipe) {
+  // A sequence's render is one frame of it — and so is a composition's that
+  // moves (the same test as core/rebuild.js `replayed`). The loop has no
+  // file, so playing it means rebuilding it from the recipe — imported only
+  // when asked, since that is what can pull p5 into a page that may not want it.
+  if (o.recipe && (o.type === 'sequence' || (o.render && o.render.frames > 1))) {
     const play = el('button', 'vp-btn', '▶ Play the loop');
     play.addEventListener('click', async () => {
       play.disabled = true;
