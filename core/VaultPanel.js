@@ -32,7 +32,7 @@ export const folderOf = row => {
 
 import { Vault }       from './vault.js';
 import { paintDetail } from './vault-detail.js';
-import { reopenUrl }   from './reopen.js';
+import { reopenUrl, placeUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
 
 /** Files inside an object folder are served straight from the vault. */
@@ -349,11 +349,11 @@ export class VaultPanel {
       return;
     }
     if (this._current !== id) return;         // clicked away while loading
-    const reopen = await reopenUrl(loaded.object);
+    const [reopen, place] = await Promise.all([reopenUrl(loaded.object), placeUrl(loaded.object)]);
     if (this._current !== id) return;
 
     this._loaded = loaded.object;
-    this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl, reopen });
+    this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl, reopen, place });
     this._markCurrent();
   }
 

@@ -38,6 +38,26 @@ export async function reopenUrl(object) {
 }
 
 /**
+ * The link that places `object` on a new compose page — M4's link in the
+ * catalogue, `any → compose: place on a sheet` — or null when compose does
+ * not take it. Which objects it takes is compose's to say (`places()` in its
+ * rebuild.js), as which it reopens is each app's.
+ *
+ * @param {object} object   a vault envelope
+ * @returns {Promise<?string>}
+ */
+export async function placeUrl(object) {
+  if (!object || !object.id) return null;
+  try {
+    const module = await import(/* @vite-ignore */ '/apps/compose/rebuild.js');
+    if (typeof module.places !== 'function' || !module.places(object)) return null;
+  } catch {
+    return null;
+  }
+  return '/apps/compose/?place=' + encodeURIComponent(object.id);
+}
+
+/**
  * The object this page was asked to open, loaded — or null when it was not
  * asked. Throws, with a message fit for the bar, when the id is unknown or
  * belongs to another app.

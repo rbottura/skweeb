@@ -132,7 +132,10 @@ const objects = {
 
 // -- which of compose's objects it takes back ---------------------------------
 {
-  const { reopens } = await import('../apps/compose/rebuild.js');
+  const { reopens, places } = await import('../apps/compose/rebuild.js');
+  ok('a page takes any still, loop, shape or page, from any app',
+     ['still', 'sequence', 'shape', 'composition'].map(type => places({ type })), [true, true, true, true]);
+  ok('not a set, a dot-set or a font', ['set', 'dataset', 'font'].map(type => places({ type })), [false, false, false]);
   const page = { page: { width: 1240, height: 1754 }, place: [] };
   ok('a composition comes back to compose', reopens({ type: 'composition', recipe: page }), true);
   ok('one with no list does not', reopens({ type: 'composition', recipe: { page: page.page } }), false);

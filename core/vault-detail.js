@@ -26,8 +26,9 @@ const PICTURE = /^(png|jpe?g|webp|gif|avif|svg|bmp)$/i;
  *
  * @param {HTMLElement} body
  * @param {object} o             the envelope
- * @param {{render:string, thumb:?string, reopen:?string}} urls
- *   `reopen` is the link back into the app that made it (core/reopen.js)
+ * @param {{render:string, thumb:?string, reopen:?string, place:?string}} urls
+ *   `reopen` is the link back into the app that made it, `place` the one
+ *   onto a new compose page (core/reopen.js)
  * @param {object} hooks
  * @param {(id:string)=>void} hooks.open         open another object (lineage links)
  * @param {(viewer:object)=>void} hooks.playing  a player started; the panel disposes it later
@@ -190,6 +191,15 @@ function actions(o, urls, hooks) {
     reopen.title = urls.reopen;
     reopen.addEventListener('click', () => window.open(urls.reopen, '_blank', 'noopener'));
     row.append(reopen);
+  }
+
+  // Onto a page of its own in compose: M4's link, `any → compose`. Not while
+  // picking — a picker is already putting the object somewhere.
+  if (urls.place && !hooks.pick) {
+    const place = el('button', 'vp-btn', 'Place in compose ↗');
+    place.title = urls.place;
+    place.addEventListener('click', () => window.open(urls.place, '_blank', 'noopener'));
+    row.append(place);
   }
 
   const open = el('button', 'vp-btn', 'Open render ↗');

@@ -306,6 +306,8 @@ try {
       await page.until(`[...document.querySelectorAll('.vp-btn')].some(b => b.textContent === '▶ Play the loop')`);
       const link = await page.eval(`[...document.querySelectorAll('.vp-btn')].find(b => b.textContent === 'Open in compose ↗')?.title || ''`);
       ok('the vault offers it back to compose', link === '/apps/compose/?open=' + m[1], link || 'no link');
+      const onto = await page.eval(`[...document.querySelectorAll('.vp-btn')].find(b => b.textContent === 'Place in compose ↗')?.title || ''`);
+      ok('and to be placed on a page of its own — the M4 link', onto === '/apps/compose/?place=' + m[1], onto || 'no link');
       await page.click(`[...document.querySelectorAll('.vp-btn')].find(b => b.textContent === '▶ Play the loop')`);
       await page.until(`Number(document.querySelector('.sv-count')?.textContent.split(' / ')[0]) > 30`, { timeout: 90000 });
       ok('and plays it: a page is a loop the vault can replay', true, await page.eval(`document.querySelector('.sv-count').textContent`));
