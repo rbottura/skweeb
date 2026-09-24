@@ -41,7 +41,8 @@ than a fourth way to save a PNG.
 
 *Done when:* a sheet carrying objects from all three apps — at least one of
 them moving — previews live, renders at print scale, and one object has a URL
-you can send.
+you can send. **Done 2026-09-24**, in five bricks — see *Decided since,
+2026-09-24*.
 
 Three consequences, recorded here because each of them is work:
 
@@ -63,7 +64,8 @@ Each milestone after M1 should also leave **one link** behind, since the
 catalogue of links is the only real measure of whether this is a suite:
 M2 `grid → vault: dithered sequence` — **done, 2026-09-22**, and the first
 entry in the catalogue. M3 `ckt → gamepad: brush family` — **done, 2026-09-23**.
-M4 `any → compose: place on a sheet or a timeline`.
+M4 `any → compose: place on a sheet` — **done, 2026-09-24**: compose's
+picker takes any object, and the vault detail offers *Place in compose ↗*.
 
 **M5 — 3D, the fourth process.** The test of whether this architecture was worth
 building: a new app should cost a folder, a schema and three functions, and the
@@ -166,6 +168,17 @@ from all three apps, one of them moving, previews live — yes; one object has
 a URL you can send — the `?open=` link, on the author's tailnet — yes;
 renders at print scale — the fifth brick. Core replays anything with a
 recipe and more than one frame now, not only a `sequence`.
+
+**The fifth, print scale, finished M4.** An object's size is its render's —
+every handle reports that, whatever it is asked — and `scale` asks for its
+frames at more pixels: a recording's marks at `renderScale`, grid's tiles
+at the cell's size times it, ckt's whole picture, a page's objects each at
+theirs. An app says which of its stills it can draw again (`redraws()`, as
+`reopens()`); a picture no app can draw again stays its pixels, says so
+(`handle.scale`), and the export names it before anyone prints. On a grid
+dither at 2x, drawn again keeps eleven times the fine detail of stretched.
+The export writes a PNG and a frames zip — the author's call, no PDF for
+now — and the zip holds its frames by reference, one frame's bytes at a time.
 
 **Side note, between M4's fourth and fifth bricks: the original grid's
 materials are in the vault.** grid_sketch loaded seven folders as mapping

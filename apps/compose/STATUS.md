@@ -2,8 +2,8 @@
 _last touched: 2026-09-24_
 
 M4's app: objects from every process placed on one page, previewed live and
-rendered out (`docs/roadmap.md`, M4). Built a brick at a time; four of five
-are in.
+rendered out (`docs/roadmap.md`, M4). Built in five bricks, all in: **M4 is
+done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome
 
@@ -81,6 +81,27 @@ are in.
   dispatch, core's depth guard stopping a chain nobody meant. Seen: the list
   back in order with a dragged `x` of 100, the vault playing 360 frames, the
   page placed whole on a new one.
+- **Print scale** (brick 5; `render.js`, `export.js`, core's `openFrames`).
+  Every object is asked for frames at the size it will be drawn — its scale
+  on the page times the page's — and the app that made it draws it again: a
+  recording's marks at `renderScale`, grid's tiles at the cell's size times
+  it, ckt's whole picture, a page's objects each at theirs. Its own size stays
+  its render's at any scale, so a page places it the same way in the preview
+  and in the export. A picture no app can draw again — a gamepad still, a
+  shape — stays its pixels, says so (`handle.scale`), and the bar names it:
+  `stretched from their pixels: brushes`. On a grid dither at 2x, drawn
+  again keeps 11 times the fine detail of stretched; on a ckt still, twice.
+- **Export**: *Download the page (PNG)* — A4 at scale 2 is 2480 × 3508, in
+  about 0.4 to 1.6 s — and, for a page that moves, *Download every frame
+  (zip)*: numbered PNGs and a `meta.json` with the page's rate, which
+  `scripts/frames-to-video.mjs` turns into a video with no flags (seen: 134
+  frames at 12 fps, 35 MB, into a 329 KB MP4). The zip holds each frame's PNG
+  by reference (core/export.js `zipStore`), so a long export keeps one
+  frame's bytes at a time. A save at scale 2 renders at print scale too. The
+  author's call: PNG and frames, no PDF for now.
+- **The link**, `any → compose: place on a sheet`: the vault detail offers
+  *Place in compose ↗* on anything a page takes (`places()` in
+  `rebuild.js`), opening `/apps/compose/?place=<id>`.
 
 ## Tests
 
@@ -96,34 +117,33 @@ tick asked for once, moving through the stack, the newest load winning, an
 entry taken off before it opened never coming back, a handle nobody holds
 disposed.
 
-`node scripts/check-compose.mjs` runs it all in Chrome: 59 checks — the save
-read back out of the vault copy, reopened by link, played in the vault and
-placed on a page included.
+`node scripts/check-compose.mjs` runs it all in Chrome: 60 checks — the save
+read back out of the vault copy, reopened by link, played in the vault, placed
+on a page, and the vault's link to place it included.
+`node scripts/check-compose-export.mjs` holds print scale: 19 checks — every
+kind's own size at scale 1 and 2, drawn again or said to be stretched, the
+detail a dither keeps, the PNG, the frames zip and its `meta.json`, a save
+at scale 2.
 
-## Next — the bricks, in order
+## Next
 
-1. ~~**One object on a page at a transform, frame 0.**~~
-2. ~~**The page plays.**~~
-3. ~~**Many placements.**~~
-4. ~~**A composition in the vault.**~~
-5. **Export at print scale.** Each placement drawn again by its own app at the
-   size the page needs, not its saved pixels scaled up — the roadmap's
-   "`render()` finally has to be real". A still, or frames and ffmpeg for a
-   page that moves. Its first move: `openFrames(object, { scale })` asking
-   the app that made an object for pixels at that scale — the gamepad's
-   replay has `renderScale` already, grid's `renderGrid` a `scale`, ckt's
-   `framing` a view factor — so `render.js` can ask each placement for the
-   page's scale times its own, and a still with a recipe is drawn again
-   rather than stretched. What an export writes — a PNG, frames for ffmpeg,
-   a PDF by way of sketch-2-print's paged.js — is the author's to say.
+The five bricks are in. What would come after them, none of it started:
 
-And the link, `any → compose: place on a sheet`: the vault detail's
-*Place in compose ↗* on anything placeable. `?place=<id>` is ready for it.
+- **A gamepad still drawn again at print scale**, the one kind that still
+  prints stretched: its recipe's `marks` are a recording's events — the same
+  shape — its `canvas` the screen, and `frame.from` its crop, so core can
+  replay them through the stage at `renderScale`, every mark shown, cropped.
+- **A timeline**, if the author wants one: `at` and `length` are in every
+  block and honoured by nothing yet.
+- **A page length set by hand**, for a post that must be exactly ten seconds.
 
 ## Known
 
-- A placed object is drawn from its saved pixels. At an export `scale` above
-  1 they would be upscaled; brick 5 is what fixes it.
+- A gamepad still or a shape prints stretched from its pixels, and the bar
+  says which; the first item under *Next* fixes the gamepad's.
+- A print export draws its page on one canvas. Tried up to A4 at scale 2,
+  2480 × 3508; a browser caps a canvas's area — about 268 million pixels in
+  Chrome — and the largest sheets at scale 4 are past that. Untested there.
 - `at` and `length` are in every block and honoured by nothing yet: every
   placement starts at the page's first frame and runs its natural length.
   A timeline to set them is not one of the five bricks; it is the next thing
@@ -137,9 +157,6 @@ And the link, `any → compose: place on a sheet`: the vault detail's
   turned sprite takes it, not what shows through beneath.
 - The picker lists shapes inside their `folder:` groups, closed, so a legacy
   sprite is two clicks away.
-- A page placed on a page is drawn at its own page pixels and scaled like a
-  picture; brick 5's scale reaches through it too.
-- `main.js` is at 341 lines and `scripts/check-compose.mjs` at 333. Before
-  brick 5 adds to either: the placement editing (`choose`, `sync`, `putOn`,
-  `takeOff`, `fitWhenOpen`) is one concept for a file of its own, and the
-  check splits by what it checks.
+- `main.js` is at 319 lines, the placement editing moved to `editing.js`;
+  `scripts/check-compose.mjs` is at 336, and print scale has a check of its
+  own.

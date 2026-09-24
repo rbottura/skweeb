@@ -16,8 +16,9 @@ _last touched: 2026-09-24_
   onto main after. `apps/grid/STATUS.md` has the detail. The faces then
   showed a grid bug: every vault tile over 512 px was decoded as one pixel,
   so its cells were its average colour — fixed on `grid/tile-size-fix`.
-- **M4, four bricks of five: compose puts many objects on one page, and it
-  plays** (`apps/compose/`), all of it seen in Chrome. Three columns, as ckt
+- **M4 is done** (2026-09-24): compose puts objects from every app on one
+  page, plays them, saves and reopens the page, and exports it at print
+  scale (`apps/compose/`), all of it seen in Chrome. Three columns, as ckt
   has: `placed` on the left — what is on the page, and the chosen one's
   object and transform — the page between, `page` on the right: core's Format
   drawer, open, less the derived formats and `zoom`, A4 at 150 dpi to start.
@@ -37,9 +38,18 @@ _last touched: 2026-09-24_
   `rebuild.js` answers core's dispatch, so the vault's player plays a page
   that moves, the detail offers *Open in compose ↗*, `?open=<id>` puts the
   page and its list back as saved, and a saved page can be placed on another
-  page. **M4's done-when is one clause short**: a sheet of objects from all
-  three apps, moving, previews live, and has a URL to send — `?open=` — and
-  only "renders at print scale" is left, brick 5.
+  page. The URL to send is `?open=`, on the author's tailnet.
+- **Print scale** (brick 5): every placed object is asked for frames at the
+  size it will be printed — its scale on the page times the page's — and the
+  app that made it draws it again (core's `openFrames(…, { scale })`; each
+  app's `redraws()`), its own size staying its render's. A picture no app
+  can draw again stays its pixels and the bar names it. A grid dither at 2x
+  keeps 11 times the fine detail drawn again that it would stretched.
+  *Download the page (PNG)*: A4 at scale 2 is 2480 × 3508. *Download every
+  frame (zip)*: numbered PNGs and the page's rate, which
+  `scripts/frames-to-video.mjs` made into an MP4 with no flags; the zip holds
+  each frame by reference, one frame's bytes at a time. The link,
+  `any → compose: place on a sheet`: the vault detail's *Place in compose ↗*.
 - **Core replays anything with a recipe and more than one frame** — a
   `sequence`, or a composition that moves — in `openFrames()` and in the
   vault detail's player, not only type `sequence`.
@@ -66,13 +76,15 @@ _last touched: 2026-09-24_
   own server on a copy of the vault, drives headless Chrome
   (`scripts/chrome.mjs`, no dependencies, a real mouse included; the server
   and the temp vault in `scripts/check-kit.mjs`, for the next app's check)
-  and runs 59 checks — every kind placed, a typed transform landing on the
+  and runs 60 checks — every kind placed, a typed transform landing on the
   pixels `page.js` computes, the page's formats, every loop played in real
   time and stepped, three placed with the picker, a still kept while loops
   play, one picked up and dragged on the page, a composition saved, read
-  back, reopened by link, played in the vault and placed on a page, no vault
-  at all, a console quiet on every page. It fails when the page throws. Two
-  sessions' drivers were lost in scratchpads; this one is in the repo.
+  back, reopened by link, played in the vault and placed on a page, the
+  vault's link to place one, no vault at all, a console quiet on every page.
+  `node scripts/check-compose-export.mjs` holds print scale in 19 more. They
+  fail when the page throws. Two sessions' drivers were lost in scratchpads;
+  this one is in the repo.
 - **A set says where it is offered** (`core/uses.js`), all of it seen in
   Chrome. A vault set's detail has a switch per use — *gamepad brush family*,
   *grid material*, *ckt sprite family* — and each app lists only the sets
@@ -244,14 +256,12 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Broken / half-done
 
-- **compose is four bricks in; print scale is the fifth.** A placed object is
-  drawn from its saved pixels, so a save at a page `scale` above 1 upscales
-  them — each app drawing its own at size is the fix. `at` and `length` ride
-  in every block and nothing honours them yet: everything starts on the
-  first frame. `apps/compose/STATUS.md` has the order.
-- **compose's `main.js` is at 341 lines and its check at 333.** The
-  placement editing — `choose`, `sync`, `putOn`, `takeOff`, `fitWhenOpen` —
-  wants a file of its own before brick 5 adds anything.
+- **Two kinds still print stretched from their pixels**: a gamepad still and a
+  shape, and the export names them. The gamepad's is fixable (*Next*); a
+  shape is a leaf, pixels by definition. `at` and `length` ride in every
+  placement and nothing honours them yet: everything starts on the page's
+  first frame. A print export draws its page on one canvas, tried up to
+  2480 × 3508; the largest sheets at scale 4 are past a browser's canvas cap.
 - **grid's own player opens its source exact** — one source handle serves
   both its preview and its saves, so it cannot ask for a draft the way
   compose does. Read from the code, not seen: a dither of a grid loop that
@@ -310,21 +320,16 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**Make room, then M4's fifth brick.** First, a file: compose's placement
-editing out of `main.js` into `apps/compose/editing.js` (`choose`, `sync`,
-`putOn`, `takeOff`, `fitWhenOpen`), with `check-compose.mjs` still at 59.
+**A gamepad still drawn again at print scale** — the last kind M4 prints
+stretched. A still's recipe carries `marks`, the same shape as a recording's
+events, its `canvas`, and `frame.from`, its crop. In `core/rebuild.js`,
+replay them through the stage at `renderScale` with every mark shown and the
+crop applied, return that as the still's handle when `openFrames` is asked
+for a scale above 1, and add it to `scripts/check-compose-export.mjs`: the
+gamepad still's row there should then say *drawn again*.
 
-Then brick 5's first move: `openFrames(object, { scale })` asking the app
-that made an object for pixels at that scale — the gamepad's replay has
-`renderScale` already, grid's `renderGrid` a `scale`, ckt's `framing` a view
-factor — so `apps/compose/render.js` asks each placement for the page's
-scale times its own, and a still with a recipe is drawn again rather than
-stretched. Proven on one placed gamepad recording: sharp at 2×, where the
-saved pixels scaled up are not.
-
-Before an export writes anything, the author says what it writes (*Parked*).
-Alongside: the gamepad onto core params, and the vault detail's
-*Place in compose ↗* — `?place=<id>` is ready for it.
+Then M5, once the author has said what it is (*Parked*). Alongside: the
+gamepad onto core params.
 
 ## Parked decisions
 
@@ -335,13 +340,15 @@ Alongside: the gamepad onto core params, and the vault detail's
   size on a page is its ink; frame N of anything is core's `openFrames()`.
   The second, two more: a page has its own `fps` and a loop keeps its own
   speed, sharing seconds, not ticks; a preview asks for `draft` frames. The
-  third: a placement is picked up by its box, not its ink.
-- **Open, for the author — what an export of a page writes.** A still page
-  as a PNG at scale is the obvious one; a page that moves as a frames zip
-  for `scripts/frames-to-video.mjs`, as grid and ckt already do; and the
-  roadmap names sketch-2-print's paged.js and PDF export as the way print
-  could rejoin. Which of these, and whether a PDF is wanted at all, decides
-  brick 5's second half.
+  third: a placement is picked up by its box, not its ink. The fifth: an
+  object's size is its render's at any scale, and an app says which of its
+  stills it can draw again (`redraws()`).
+- **An export of a page writes a PNG and a frames zip** (the author,
+  2026-09-24). No PDF for now; sketch-2-print's paged.js stays where it is.
+- **Open, for the author — what M5 is.** The roadmap's M5 is 3D, "the fourth
+  process", and the test of the architecture: a new app should cost a
+  folder, a schema and three functions. What it draws, and whether it is a
+  port of an existing sketch as grid and ckt were, is the author's to say.
 - **Time on a page of many things** (the author, 2026-09-24,
   `docs/object-model.md`): a still with no length is there for the whole
   page, a loop with no length plays again until the page ends, and the page
