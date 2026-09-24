@@ -25,6 +25,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `panel.js` | base class: show/hide, focus, gamepad + keyboard nav | not yet; two concrete panels exist instead |
 | `links.js` | the named one-way links between apps | not yet, see below |
 | `uses.js` | what a set can be used as, and where each set is offered | **in**, 2026-09-23 |
+| `easing.js` | the suite's easing curves, and the param that offers one | **in**, 2026-09-24 |
 | `input.js` | gamepad + keyboard mapping | not yet; `gamepad/core/inputManager.js` |
 | `libs/` | one p5, shared by every app | not yet; 1.5.0 sits in `apps/gamepad/libs/`. Grid uses none. |
 
@@ -167,6 +168,23 @@ The consuming side's half of what a link is on the producing side: *the gamepad
 can eat a set as brushes*. A set with no `use:` tag follows its role; once it
 has one, the tags decide. The vault detail draws a switch per row of `USES`.
 Rules in `docs/object-model.md`, *Uses*.
+
+## easing.js — how a change runs from start to end
+
+```js
+growEase: easeParam({ group: 'motion' })   // in a schema: the six BASIC curves, in words
+easeParam({}, { all: true })               // …or all thirty-one
+const ease = easing(recipe.growEase);      // (t in [0,1]) → progress, clamped
+ease(0) === 0; ease(1) === 1               // every curve lands where it was going
+```
+
+The classic set — linear, and sine, quad, cubic, quart, quint, expo, circ,
+back, elastic and bounce, each `in`, `out` and `inOut` — thirty-one curves. A
+recipe stores the name; an unknown name is linear. A picker offers six by
+default — linear, ease in, ease out, ease in-out, overshoot, bounce — and the
+rest stay here for whoever needs them. `back` and `elastic` leave
+[0, 1] on the way, which a scale may want. First used by grid's grow-in; any
+animation in the suite takes its curves from here.
 
 ## rng.js — seeded random
 
