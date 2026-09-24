@@ -154,6 +154,9 @@ const MAX_DEPTH = 8;
  * @param {object} [opts]
  * @param {string} [opts.manifestUrl]
  * @param {number} [opts.renderScale=1]  buffer pixels per sequence pixel
+ * @param {boolean} [opts.draft]  a live preview's frames: the app that made the
+ *                               object may take its faster, near-exact path, as
+ *                               grid's growth does. Never for anything saved.
  * @param {number} [opts.depth=0]        how many rebuilds deep this already is
  * @returns {Promise<Rebuilt>}
  */

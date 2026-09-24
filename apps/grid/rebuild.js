@@ -35,7 +35,7 @@
  * before the other calls it.
  */
 
-import { renderGrid }    from './grid.js';
+import { renderGrid, surface } from './grid.js';
 import { Growth }        from './growth.js';
 import { ramp, materialTiles } from './materials.js';
 import { roleOf }        from '../../core/uses.js';
@@ -79,7 +79,8 @@ async function tilesFor(recipe) {
  *
  * @param {object} object   a vault envelope written by grid
  * @param {object} [opts]
- * @param {number} [opts.depth]  how many rebuilds deep this already is
+ * @param {number} [opts.depth]   how many rebuilds deep this already is
+ * @param {boolean} [opts.draft]  a live preview's frames (core/rebuild.js)
  * @returns {Promise<object>}    the same handle core/rebuild.js returns
  */
 export async function openObject(object, opts = {}) {
@@ -98,19 +99,26 @@ export async function openObject(object, opts = {}) {
   const { tiles, lost } = await tilesFor(recipe);
   const missing = [...(parent.missing || []), ...lost];
 
-  // The dither writes into a fresh surface per frame — see save.js — so the
-  // handle keeps whichever one it made last and nothing else. Frames are
+  // The exact dither writes into a fresh surface per frame — see save.js — so
+  // the handle keeps whichever one it made last and nothing else. Frames are
   // borrowed, exactly as core/rebuild.js's are.
   // Resolved once: the same frame every tick, for the same reason save.js
   // resolves it outside its loop.
   const frame = resolveFrame(recipe, parent.content, parent);
 
+  // A draft is what grid's own preview draws: the growth never reads back
+  // through the source — a jump starts settled — and tiles fill one pattern
+  // at a time, into one reused canvas. Played on a compose page, the exact
+  // look-back cost 459 ms a skipped tick against 37; saves stay exact.
+  const draft = !!opts.draft;
+  const into = draft ? surface(1, 1) : null;
+
   let current = null;
-  const growth = new Growth(parent);        // sprites growing in, looked back for
+  const growth = new Growth(parent, { draft });   // sprites growing in, looked back for
 
   const render = i => {
     const { indices, scales } = growth.at(i, recipe, frame, tiles.length);
-    current = renderGrid({ recipe, tiles, frame, indices, scales });
+    current = renderGrid({ recipe, tiles, frame, indices, scales, draft, into });
     return current.canvas;
   };
 

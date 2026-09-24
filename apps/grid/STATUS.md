@@ -30,6 +30,12 @@ luminance picking a member of an ordered ramp of tiles. Ported from
     nothing new.
   - A dither saved with a vault material replays pixel-identical through
     `rebuild.js` (0 bytes differed in Chrome).
+  - **A replay can be a draft** (2026-09-24): asked with `draft: true`, as
+    compose's page asks for its preview, `rebuild.js` replays with the
+    preview's own growth — never reading back, a jump starting settled —
+    tiles filled one pattern at a time, into one reused canvas. A dither with
+    60 frames of growth played on a compose page at 2 paints a second exact
+    and at 43 as a draft. Without the flag, a replay is exact as before.
   - **Editing** (2026-09-24): with a material chosen the button reads *Edit
     the material…*, and the vault's *Open in grid ↗* on a material opens it
     the same way. The maker starts from its members, its name filled in, and
