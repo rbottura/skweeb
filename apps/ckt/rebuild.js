@@ -36,10 +36,23 @@ export function reopens(object) {
 }
 
 /**
+ * Whether ckt draws this object again at a scale, rather than stretch its
+ * render (core/rebuild.js `openFrames`): anything it reopens but a dot-set,
+ * whose dots are drawn at one size.
+ *
  * @param {object} object   a vault envelope written by ckt
+ */
+export function redraws(object) {
+  return reopens(object) && object.type !== 'dataset';
+}
+
+/**
+ * @param {object} object   a vault envelope written by ckt
+ * @param {object} [opts]
+ * @param {number} [opts.scale]  frames at this many pixels per pixel of its render
  * @returns {Promise<object>} the handle core/rebuild.js documents
  */
-export async function openObject(object) {
+export async function openObject(object, opts = {}) {
   const recipe = object && object.recipe;
   if (object && object.type === 'dataset') return openDataset(object);
   if (!recipe) throw new Error('ckt: that object has no recipe — it is a leaf and cannot replay');
@@ -48,7 +61,11 @@ export async function openObject(object) {
   const mark = await markFor(recipe);
   const world = { width: recipe.width, height: recipe.height };
   const anchors = centre(glyphOf(data, recipe.glyph), world);
-  const frame = framing(recipe, anchors, mark);
+  // Its own size is its render's — the frame at the recipe's scale. Asked for
+  // more, the whole picture is drawn at more; the size it reports stays its own.
+  const k = opts.scale > 0 ? opts.scale : 1;
+  const frame = framing(recipe, anchors, mark, 1, k);
+  const own = k === 1 ? frame : framing(recipe, anchors, mark);
 
   const missing = [];
   if (recipe.mark === 'sprite' && !mark) missing.push(recipe.shape || recipe.family);
@@ -58,7 +75,7 @@ export async function openObject(object) {
   const loop = object.type === 'sequence';
   const length = loop ? loopFrames(recipe) : 1;
   const tickOf = i => (loop ? i : (Number.isFinite(recipe.tick) ? recipe.tick : 0));
-  const size = { width: frame.frame.width, height: frame.frame.height };
+  const size = { width: own.width, height: own.height };
 
   return {
     length,
@@ -69,6 +86,7 @@ export async function openObject(object) {
     bounds: { x: 0, y: 0, w: size.width, h: size.height },
     content: { x: 0, y: 0, w: size.width, h: size.height },
     missing,
+    scale: k,                          // the whole picture drawn again at the size asked
     frame(i) { return renderFrame({ recipe, anchors, mark, tick: tickOf(i), frame }).canvas; },
     drawInto(ctx, i, w, h) { drawFrameInto(ctx, this.frame(i), this.bounds, this, w, h); },
     dispose() {},

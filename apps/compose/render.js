@@ -31,16 +31,25 @@ export function surface(w, h) {
  * A composition opened: every placement's object in exact frames — or, for a
  * page placed live on another page, a preview's (`draft`), as that page asks.
  *
+ * Each object is asked for frames at the size it will be drawn: its scale on
+ * the page times the page's `scale` (core/rebuild.js `openFrames`), so at
+ * print scale its app draws it again rather than its pixels being stretched.
+ * What could only be stretched — a picture with no app to draw it again — is
+ * named in `stretched`.
+ *
  * @param {{page: object, place: object[]}} recipe
  * @param {object} [opts]
  * @param {number} [opts.depth]    how many rebuilds deep this already is (core/rebuild.js)
  * @param {boolean} [opts.draft]   a live preview's frames
+ * @param {number} [opts.scale=1]  output pixels per page pixel
  */
-export async function openComposition(recipe, { depth = 0, draft = false } = {}) {
+export async function openComposition(recipe, { depth = 0, draft = false, scale = 1 } = {}) {
+  const asked = block => (block.transform.scale || 1) * scale;
   const list = new Placements({
-    load: async ref => {
+    load: async (ref, block) => {
       const { object, url, thumbUrl } = await Vault.load(ref);
-      return { object, handle: await openFrames(object, { url, depth, draft }), thumb: thumbUrl };
+      const handle = await openFrames(object, { url, depth, draft, scale: asked(block) });
+      return { object, handle, thumb: thumbUrl };
     },
   });
   for (const block of recipe.place || []) list.add(block);
@@ -55,6 +64,9 @@ export async function openComposition(recipe, { depth = 0, draft = false } = {})
     height: size.height,
     /** What could not be opened, by id: drawn without. */
     missing: list.items.filter(p => p.error).map(p => p.block.ref),
+    /** What is drawn larger than its pixels, having no app to draw it again, by title. */
+    stretched: list.items.filter(p => p.handle && asked(p.block) > 1
+      && (p.handle.scale || 1) < asked(p.block) - 1e-9).map(p => p.title),
     /** The page at one of its ticks, onto a context the page's size times `scale`. */
     draw(ctx, tick, scale) { paintPage(ctx, page, list.layers(tick, page.fps), scale); },
     dispose() { for (const p of [...list.items]) list.remove(p); },
@@ -66,15 +78,15 @@ export async function openComposition(recipe, { depth = 0, draft = false } = {})
  * Refuses a page with an object it could not open: a composition saved
  * without one of its parts would not be the one its recipe describes.
  *
- * @returns {Promise<{canvas, frames: number, fps: number}>}
+ * @returns {Promise<{canvas, frames: number, fps: number, stretched: string[]}>}
  */
 export async function renderComposition(recipe, { tick = 0, scale = recipe.page.scale || 1 } = {}) {
-  const c = await openComposition(recipe);
+  const c = await openComposition(recipe, { scale });
   try {
     if (c.missing.length) throw new Error(`${c.missing.join(', ')} could not be opened`);
     const canvas = surface(c.width * scale, c.height * scale);
     c.draw(canvas.getContext('2d'), tick, scale);
-    return { canvas, frames: c.frames, fps: c.fps };
+    return { canvas, frames: c.frames, fps: c.fps, stretched: c.stretched };
   } finally {
     c.dispose();
   }

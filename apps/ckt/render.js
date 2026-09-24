@@ -84,14 +84,18 @@ export const groundOf = recipe => (recipe.transparent ? 'none' : (recipe.ground 
  * `view` shrinks the canvas for the live preview: the suite draws live at the
  * size it is seen and at full resolution only on export (docs/core-api.md), so
  * a 1920px frame shown 1260px wide is drawn 1260px wide. Saves pass nothing.
+ * `scale` is the other way: another page's print scale, drawing the whole
+ * picture at more pixels — positions, sprites and the mip they are cut from.
  */
-export function framing(recipe, anchors, mark, view = 1) {
+export function framing(recipe, anchors, mark, view = 1, scale = 1) {
   const world = { width: recipe.width, height: recipe.height };
   const content = recipe.format === 'content'
     ? loopBounds(anchors, recipe, world, reachOf(mark) * Math.abs(recipe.size) + 1)
     : { x: 0, y: 0, w: world.width, h: world.height };
   const frame = resolveFrame(recipe, content, world);
-  const k = Math.max(0.01, recipe.scale || 1) * Math.min(1, Math.max(0.05, view));
+  // `view` only ever shrinks — the preview, drawn at the size the viewer shows.
+  // `scale` is an export's, and may grow it: another page's print scale.
+  const k = Math.max(0.01, recipe.scale || 1) * Math.min(1, Math.max(0.05, view)) * Math.max(0.01, scale);
   const sx = (frame.to.w / frame.from.w) * k;
   const sy = (frame.to.h / frame.from.h) * k;
   return {

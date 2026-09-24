@@ -34,8 +34,9 @@ export class Placements {
    * @param {object} opts
    * @param {() => void} opts.onChange     the list, or an object in it, changed
    * @param {(text: string) => void} opts.say   something worth telling
-   * @param {(ref: string) => Promise<{object, handle, thumb}>} [opts.load]
-   *        how an object is opened: the vault, unless a test says otherwise
+   * @param {(ref: string, block: object) => Promise<{object, handle, thumb}>} [opts.load]
+   *        how an object is opened: the vault, unless a test says otherwise;
+   *        given the block too, for the size it will be drawn at
    */
   constructor({ onChange = () => {}, say = () => {}, load = fromVault } = {}) {
     this.items = [];
@@ -108,7 +109,7 @@ export class Placements {
     if (p.handle) p.handle.dispose();
     Object.assign(p, { handle: null, size: null, tick: -1, image: null, error: null });
     try {
-      const { object, handle, thumb } = await this.load(p.block.ref);
+      const { object, handle, thumb } = await this.load(p.block.ref, p.block);
       if (token !== p.loads) { handle.dispose(); return p; }
       if (!handle.length) { handle.dispose(); throw new Error('it rebuilt to no frames'); }
       Object.assign(p, { title: object.title || object.id, type: object.type, thumb,

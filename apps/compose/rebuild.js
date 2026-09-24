@@ -14,6 +14,7 @@
  */
 
 import { openComposition, surface } from './render.js';
+import { PLACEABLE }                from './params.js';
 import { drawFrameInto }            from '../../core/rebuild.js';
 
 /**
@@ -28,32 +29,55 @@ export function reopens(object) {
 }
 
 /**
+ * Whether a compose page takes this object (core/reopen.js `placeUrl`), so
+ * the vault can offer to place it: anything core gives frames of.
+ *
+ * @param {object} object   a vault envelope, from any app
+ */
+export function places(object) {
+  return !!object && PLACEABLE.includes(object.type);
+}
+
+/**
+ * Whether compose draws this object again at a scale, rather than stretch its
+ * render (core/rebuild.js `openFrames`): every composition — each object on it
+ * is asked, in turn, for the size it will be printed at.
+ */
+export const redraws = reopens;
+
+/**
  * @param {object} object   a composition
- * @param {object} [opts]   `depth`, and `draft` for a live preview's frames
+ * @param {object} [opts]   `depth`; `draft` for a live preview's frames; and
+ *                          `scale`, frames at that many pixels per pixel of its render
  * @returns {Promise<object>} the handle core/rebuild.js documents
  */
 export async function openObject(object, opts = {}) {
   if (!reopens(object)) throw new Error('compose: that object carries no page to replay');
-  const c = await openComposition(object.recipe, opts);
 
-  // The page in page pixels, scale 1: a placed page is scaled by its placement,
-  // as any picture is. Drawn again only when the tick moves.
-  const canvas = surface(c.width, c.height);
+  // Its own size is its render's: the page at the page's scale, as a save
+  // draws it. Asked for more, every object on it is drawn at more.
+  const own = object.recipe.page.scale || 1;
+  const k = opts.scale > 0 ? opts.scale : 1;
+  const c = await openComposition(object.recipe, { depth: opts.depth, draft: opts.draft, scale: own * k });
+
+  const size = { width: Math.max(1, Math.round(c.width * own)), height: Math.max(1, Math.round(c.height * own)) };
+  const canvas = surface(size.width * k, size.height * k);
   const ctx = canvas.getContext('2d');
-  const box = { x: 0, y: 0, w: c.width, h: c.height };
+  const box = { x: 0, y: 0, w: size.width, h: size.height };
   let shown = -1;
 
   return {
     length: c.frames,
     fps: c.fps,
     loop: true,
-    width: c.width,
-    height: c.height,
+    width: size.width,
+    height: size.height,
     bounds: box,
     content: box,
     missing: c.missing,
+    scale: k,
     frame(i) {
-      if (i !== shown) { c.draw(ctx, i, 1); shown = i; }
+      if (i !== shown) { c.draw(ctx, i, own * k); shown = i; }
       return canvas;
     },
     drawInto(target, i, w, h) { drawFrameInto(target, this.frame(i), box, this, w, h); },

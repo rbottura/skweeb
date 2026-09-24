@@ -154,6 +154,9 @@ const MAX_DEPTH = 8;
  * @param {object} [opts]
  * @param {string} [opts.manifestUrl]
  * @param {number} [opts.renderScale=1]  buffer pixels per sequence pixel
+ * @param {number} [opts.scale]   pixels per pixel of the object's own size —
+ *                               its render's — for an app to draw its frames at;
+ *                               a recording of marks takes it as its renderScale
  * @param {boolean} [opts.draft]  a live preview's frames: the app that made the
  *                               object may take its faster, near-exact path, as
  *                               grid's growth does. Never for anything saved.
@@ -170,7 +173,7 @@ export async function openSequence(object, opts = {}) {
 
   // Marks: this file replays them itself. Anything else belongs to its app.
   if (recipe.sequence && Array.isArray(recipe.sequence.events)) {
-    return openMarks(object, opts);
+    return openMarks(object, { ...opts, renderScale: opts.renderScale || opts.scale || 1 });
   }
   return openViaApp(object, opts);
 }
@@ -193,10 +196,21 @@ const replayed = object => !!object && !!object.recipe
  * Anything with a recipe and more than one frame — a sequence, a composition
  * that moves — is replayed by its app, as above. Anything else whose render
  * is a picture — a still, a shape, a set's contact sheet, a loop saved as a
- * leaf — is that picture, a loop one frame long: its saved pixels, until print
- * scale asks its app to draw it again (docs/roadmap.md, M4). A render that is
- * data and not a picture, a dot-set's JSON, goes to its app as a sequence
- * does, since only the app knows what it looks like.
+ * leaf — is that picture, a loop one frame long: its saved pixels. A render
+ * that is data and not a picture, a dot-set's JSON, goes to its app as a
+ * sequence does, since only the app knows what it looks like.
+ *
+ * ── At a scale ──────────────────────────────────────────────────────────────
+ *
+ * `scale` asks for frames at that many pixels per pixel of the object's own
+ * size — its render's, which every handle reports as `width` and `height`
+ * whatever it is asked. Print scale is where this matters (docs/roadmap.md,
+ * M4): a picture stretched to 300 dpi is its pixels, blurred. So above 1 a
+ * still is drawn again by its app when the app says it can — `redraws()` in
+ * its rebuild.js, as `reopens()` is — and stays its pixels otherwise. Every
+ * handle says what it did: `handle.scale` is the scale its frames are
+ * really drawn at, 1 for a picture, and a caller that asked for more knows
+ * what it will be stretching.
  *
  * @param {object} object   a vault envelope
  * @param {object} [opts]   as openSequence's, and `url`: where its render is
@@ -205,8 +219,29 @@ const replayed = object => !!object && !!object.recipe
 export async function openFrames(object, opts = {}) {
   const file = object && object.render && object.render.file;
   if (replayed(object)) return openSequence(object, opts);
+  if (opts.scale > 1 && object.recipe && await redrawn(object)) return openSequence(object, opts);
   if (file && PICTURE.test(file)) return openPicture(object, opts.url);
   return openSequence(object, opts);
+}
+
+/**
+ * A recording of marks: core's own to replay, so no app is asked about one —
+ * the gamepad has no rebuild.js, and asking would be a 404 in every console.
+ * The same test as core/reopen.js's, which asks the same question for links.
+ */
+const isMarks = recipe => !!recipe
+  && (Array.isArray(recipe.marks) || !!(recipe.sequence && Array.isArray(recipe.sequence.events)));
+
+/** Whether the app that made an object says it can draw it again at a scale. */
+async function redrawn(object) {
+  const app = object.origin && object.origin.app;
+  if (!app || isMarks(object.recipe)) return false;
+  try {
+    const module = await import(/* @vite-ignore */ '/apps/' + app + '/rebuild.js');
+    return typeof module.redraws === 'function' && !!module.redraws(object);
+  } catch {
+    return false;                      // no rebuild.js: the app draws nothing again
+  }
 }
 
 /** A render that is a picture, as a handle whose every tick is it. */
@@ -224,6 +259,7 @@ async function openPicture(object, url) {
     height: bitmap.height,
     bounds: box,
     missing: [],
+    scale: 1,                          // its pixels, whatever was asked
     frame() { return bitmap; },
     drawInto(ctx, i, w, h) { drawFrameInto(ctx, bitmap, box, this, w, h); },
     dispose() { if (bitmap.close) bitmap.close(); },
@@ -294,6 +330,9 @@ async function openMarks(object, { manifestUrl, renderScale = 1 } = {}) {
 
     /** Families the registry could not resolve; their marks will not draw. */
     missing: player.missingFamilies,
+
+    /** The scale the buffer is drawn at — the marks again, never stretched. */
+    scale: renderScale,
 
     /**
      * The buffer at tick `i`. Reused — draw or read it before the next call.

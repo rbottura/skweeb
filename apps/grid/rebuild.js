@@ -58,6 +58,18 @@ export function reopens(object) {
 }
 
 /**
+ * Whether grid draws this object again at a scale, rather than stretch its
+ * render (core/rebuild.js `openFrames`): a dither whose recipe names its
+ * source. Its tiles are drawn at the cell's size times the scale; the source
+ * is only ever sampled, one pixel a cell, so it needs no more pixels.
+ *
+ * @param {object} object   a vault envelope written by grid
+ */
+export function redraws(object) {
+  return !!(object && object.type !== 'set' && object.recipe && object.recipe.source);
+}
+
+/**
  * The tiles a recipe dithers with: its vault material when it names one, the
  * shipped ramp otherwise. What could not be found is named, never thrown — a
  * replay with a hole in its ramp still shows the rest.
@@ -82,6 +94,7 @@ async function tilesFor(recipe) {
  * @param {object} [opts]
  * @param {number} [opts.depth]   how many rebuilds deep this already is
  * @param {boolean} [opts.draft]  a live preview's frames (core/rebuild.js)
+ * @param {number} [opts.scale]   frames at this many pixels per pixel of its render
  * @returns {Promise<object>}    the same handle core/rebuild.js returns
  */
 export async function openObject(object, opts = {}) {
@@ -96,7 +109,7 @@ export async function openObject(object, opts = {}) {
 
   // The parent, whatever it is. A still comes back as a one-frame handle, so a
   // grid `still` replays as a loop of length 1 rather than as a special case.
-  const parent = await fromVault(recipe.source, opts);
+  const parent = await fromVault(recipe.source, { depth: opts.depth, draft: opts.draft });
   const { tiles, lost } = await tilesFor(recipe);
   const missing = [...(parent.missing || []), ...lost];
 
@@ -117,16 +130,19 @@ export async function openObject(object, opts = {}) {
   let current = null;
   const growth = new Growth(parent, { draft });   // sprites growing in, looked back for
 
+  // Its own size is its render's: the frame at the recipe's scale, as
+  // renderGrid sizes it. Asked for more, the tiles are drawn at more — the
+  // size it reports stays its own, so a page places it the same either way.
+  const k = opts.scale > 0 ? opts.scale : 1;
+  const zoom = Math.max(0.01, recipe.scale || 1);
+  const size = { width: Math.max(1, Math.round(frame.width * zoom)),
+                 height: Math.max(1, Math.round(frame.height * zoom)) };
+
   const render = i => {
     const { indices, scales } = growth.at(i, recipe, frame, tiles.length);
-    current = renderGrid({ recipe, tiles, frame, indices, scales, draft, into });
+    current = renderGrid({ recipe, tiles, frame, indices, scales, draft, into, scale: zoom * k });
     return current.canvas;
   };
-
-  // One frame up front, so the handle can answer `width` and `height` before
-  // anything asks for a tick. A viewer sizes its canvas from those.
-  const first = render(0);
-  const size = { width: first.width, height: first.height };
 
   return {
     length: parent.frames,
@@ -149,6 +165,9 @@ export async function openObject(object, opts = {}) {
     content: { x: 0, y: 0, w: size.width, h: size.height },
 
     missing,
+
+    /** The scale its frames are drawn at: its tiles again, at the size asked. */
+    scale: k,
 
     frame(i) { return render(i); },
 
