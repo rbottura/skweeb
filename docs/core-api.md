@@ -15,6 +15,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `stamp.js` | where a pattern puts its stamps | **in**, split out of `joyImage.js` |
 | `VaultPanel.js` | the window onto the objects on disk; `folder:` tags group | **in**, detail view in `vault-detail.js` |
 | `reopen.js` | an object back in its app: `/apps/<app>/?open=<id>` | **in**, 2026-09-23 |
+| `rebuild.js` | frame N of any object: `openFrames()` — a sequence replayed, a picture as itself — and the dispatch to an app's own `rebuild.js` | **in**; `openFrames` 2026-09-24, for compose |
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
 | `widgets.js` | one widget per param type, split out of ParamPanel | **in** |
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |

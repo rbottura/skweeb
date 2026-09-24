@@ -172,6 +172,51 @@ export async function openSequence(object, opts = {}) {
   return openViaApp(object, opts);
 }
 
+/** The render files a browser decodes into a picture. */
+const PICTURE = /\.(png|webp|jpe?g|gif)$/i;
+
+/**
+ * Any object as frames — what compose asks of everything it places.
+ *
+ * A sequence with a recipe is replayed, as above. Anything else whose render
+ * is a picture — a still, a shape, a set's contact sheet, a loop saved as a
+ * leaf — is that picture, a loop one frame long: its saved pixels, until print
+ * scale asks its app to draw it again (docs/roadmap.md, M4). A render that is
+ * data and not a picture, a dot-set's JSON, goes to its app as a sequence
+ * does, since only the app knows what it looks like.
+ *
+ * @param {object} object   a vault envelope
+ * @param {object} [opts]   as openSequence's, and `url`: where its render is
+ * @returns {Promise<Rebuilt>}
+ */
+export async function openFrames(object, opts = {}) {
+  const file = object && object.render && object.render.file;
+  if (object.type === 'sequence' && object.recipe) return openSequence(object, opts);
+  if (file && PICTURE.test(file)) return openPicture(object, opts.url);
+  return openSequence(object, opts);
+}
+
+/** A render that is a picture, as a handle whose every tick is it. */
+async function openPicture(object, url) {
+  const res = await fetch(url || '/vault/objects/' + object.id + '/' + object.render.file);
+  if (!res.ok) throw new Error(`rebuild: the render of ${object.id} did not load (HTTP ${res.status})`);
+  const bitmap = await createImageBitmap(await res.blob());
+  const box = { x: 0, y: 0, w: bitmap.width, h: bitmap.height };
+
+  return {
+    length: 1,
+    fps: 0,
+    loop: false,
+    width: bitmap.width,
+    height: bitmap.height,
+    bounds: box,
+    missing: [],
+    frame() { return bitmap; },
+    drawInto(ctx, i, w, h) { drawFrameInto(ctx, bitmap, box, this, w, h); },
+    dispose() { if (bitmap.close) bitmap.close(); },
+  };
+}
+
 /**
  * Hand an object to the app that made it.
  *
