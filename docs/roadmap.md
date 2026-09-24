@@ -357,6 +357,15 @@ a URL you can send — the `?open=` link, on the author's tailnet — yes;
 renders at print scale — the fifth brick. Core replays anything with a
 recipe and more than one frame now, not only a `sequence`.
 
+**Side note, between M4's fourth and fifth bricks: the original grid's
+materials are in the vault.** grid_sketch loaded seven folders as mapping
+material — degz, trames, sprites, myFace, shapes, tiles, stones — and only
+tiles and trames had come across, as ramps grid boots with.
+`scripts/import-legacy-grid.mjs` put all seven into the vault as legacy grid
+materials, in the sketch's own order, offered to grid by their role; a dither
+with `tiles (legacy grid)` is pixel-identical to the shipped ramp. Done on a
+side branch, `grid/legacy-materials`, rebased onto main after.
+
 ## Still open
 
 1. ~~**`destra.otf` and `GPDestra-Light.otf`**~~ **Answered 2026-09-23** —

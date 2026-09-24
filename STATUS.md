@@ -3,7 +3,18 @@ _last touched: 2026-09-24_
 
 ## Works right now
 
-- **M4, three bricks of five: compose puts many objects on one page, and it
+- **Side note, between M4's fourth and fifth bricks: the original grid's
+  seven materials are in the vault.** degz, trames, sprites, myFace, shapes,
+  tiles and stones — what grid_sketch loaded as mapping material — as legacy
+  grid materials, `<name> (legacy grid)`: 7 sets and 59 new objects, in the
+  sketch's own order, offered to grid by their role, so the material picker
+  lists them beside the author's own. `node scripts/import-legacy-grid.mjs
+  ../grid_sketch/img` did it and makes nothing new run again; a dither with
+  `tiles (legacy grid)` is pixel-identical to the shipped ramp. Five of the
+  sketch's sprites were already here as the gamepad's `brushes` 8–12, and
+  the set names those. Done on the branch `grid/legacy-materials`, rebased
+  onto main after. `apps/grid/STATUS.md` has the detail.
+- **M4, four bricks of five: compose puts many objects on one page, and it
   plays** (`apps/compose/`), all of it seen in Chrome. Three columns, as ckt
   has: `placed` on the left — what is on the page, and the chosen one's
   object and transform — the page between, `page` on the right: core's Format
@@ -239,6 +250,8 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 - **compose's `main.js` is at 341 lines and its check at 333.** The
   placement editing — `choose`, `sync`, `putOn`, `takeOff`, `fitWhenOpen` —
   wants a file of its own before brick 5 adds anything.
+- **`docs/roadmap.md` is at 395 lines.** The next *Decided since* moves the
+  2026-09-21 to -23 sections into a file of their own, as `migration.md` was.
 - **grid's own player opens its source exact** — one source handle serves
   both its preview and its saves, so it cannot ask for a draft the way
   compose does. Read from the code, not seen: a dither of a grid loop that
