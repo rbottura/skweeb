@@ -16,12 +16,20 @@ _last touched: 2026-09-24_
   about its centre (`docs/object-model.md`, *Placement*); bleed with a trim
   line, a transparent ground, `scale` for the export's pixels. Opens with no
   vault. `apps/compose/STATUS.md` has the five bricks.
-- **A composition saves** (brick 4's first move): S, or *Save to the vault*
-  in the Export drawer, writes a `composition` — recipe `{ page, place }`,
-  every placed object a parent, the page at the tick on screen as its render,
-  drawn again from exact frames (`apps/compose/render.js`), never the
-  preview's drafts. Seen and read back: `A4 · 2 placed`, a grid dither under
-  a turned ckt loop, 1240 × 1754, 668 frames at 60.
+- **A composition saves, and comes back** (brick 4, done). S, or *Save to the
+  vault* in the Export drawer, writes a `composition` — recipe
+  `{ page, place }`, every placed object a parent, the page at the tick on
+  screen as its render, drawn again from exact frames
+  (`apps/compose/render.js`), never the preview's drafts. Compose's own
+  `rebuild.js` answers core's dispatch, so the vault's player plays a page
+  that moves, the detail offers *Open in compose ↗*, `?open=<id>` puts the
+  page and its list back as saved, and a saved page can be placed on another
+  page. **M4's done-when is one clause short**: a sheet of objects from all
+  three apps, moving, previews live, and has a URL to send — `?open=` — and
+  only "renders at print scale" is left, brick 5.
+- **Core replays anything with a recipe and more than one frame** — a
+  `sequence`, or a composition that moves — in `openFrames()` and in the
+  vault detail's player, not only type `sequence`.
 - **Time on a page of many things, decided by the author** (2026-09-24,
   `docs/object-model.md`): a still is there for the whole page, a loop plays
   again until the page ends, and the page lasts as long as its longest loop.
@@ -45,13 +53,13 @@ _last touched: 2026-09-24_
   own server on a copy of the vault, drives headless Chrome
   (`scripts/chrome.mjs`, no dependencies, a real mouse included; the server
   and the temp vault in `scripts/check-kit.mjs`, for the next app's check)
-  and runs 52 checks — every kind placed, a typed transform landing on the
+  and runs 59 checks — every kind placed, a typed transform landing on the
   pixels `page.js` computes, the page's formats, every loop played in real
   time and stepped, three placed with the picker, a still kept while loops
-  play, one picked up and dragged on the page, a composition saved and read
-  back, no vault at all, a console quiet on every page. It fails when the
-  page throws. Two sessions' drivers were lost in scratchpads; this one is in
-  the repo.
+  play, one picked up and dragged on the page, a composition saved, read
+  back, reopened by link, played in the vault and placed on a page, no vault
+  at all, a console quiet on every page. It fails when the page throws. Two
+  sessions' drivers were lost in scratchpads; this one is in the repo.
 - **A set says where it is offered** (`core/uses.js`), all of it seen in
   Chrome. A vault set's detail has a switch per use — *gamepad brush family*,
   *grid material*, *ckt sprite family* — and each app lists only the sets
@@ -223,12 +231,14 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Broken / half-done
 
-- **compose is three bricks in**: many placements, playing; no save, no
-  export. A placed object is drawn from its saved pixels, so an export
-  `scale` above 1 would upscale them — M4's brick 5, each app drawing its own
-  at size, is the fix. `at` and `length` ride in every block and nothing
-  honours them yet: everything starts on the first frame. `apps/compose/STATUS.md`
-  has the order.
+- **compose is four bricks in; print scale is the fifth.** A placed object is
+  drawn from its saved pixels, so a save at a page `scale` above 1 upscales
+  them — each app drawing its own at size is the fix. `at` and `length` ride
+  in every block and nothing honours them yet: everything starts on the
+  first frame. `apps/compose/STATUS.md` has the order.
+- **compose's `main.js` is at 341 lines and its check at 333.** The
+  placement editing — `choose`, `sync`, `putOn`, `takeOff`, `fitWhenOpen` —
+  wants a file of its own before brick 5 adds anything.
 - **grid's own player opens its source exact** — one source handle serves
   both its preview and its saves, so it cannot ask for a draft the way
   compose does. Read from the code, not seen: a dither of a grid loop that
@@ -287,17 +297,21 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M4's fourth brick, its second move: a composition comes back.**
-`apps/compose/rebuild.js` — `openObject()` on `openComposition()`
-(`render.js`), a handle whose `frame(i)` is the page at tick `i`, so the
-vault's player can replay one; `reopens()` true for a composition; and
-`?open=<id>` in compose restoring the page's values and its list —
-`placements.add()` for each block, nothing fitted, the first chosen. The
-vault detail then offers *Open in compose ↗* by itself (`core/reopen.js`).
+**Make room, then M4's fifth brick.** First, a file: compose's placement
+editing out of `main.js` into `apps/compose/editing.js` (`choose`, `sync`,
+`putOn`, `takeOff`, `fitWhenOpen`), with `check-compose.mjs` still at 59.
 
-Then a page placed on a page (`PLACEABLE` gains `composition`), and brick 5
-(`apps/compose/STATUS.md`). Alongside: the gamepad onto core params, and the
-vault detail's *Place in compose ↗* — `?place=<id>` is ready for it.
+Then brick 5's first move: `openFrames(object, { scale })` asking the app
+that made an object for pixels at that scale — the gamepad's replay has
+`renderScale` already, grid's `renderGrid` a `scale`, ckt's `framing` a view
+factor — so `apps/compose/render.js` asks each placement for the page's
+scale times its own, and a still with a recipe is drawn again rather than
+stretched. Proven on one placed gamepad recording: sharp at 2×, where the
+saved pixels scaled up are not.
+
+Before an export writes anything, the author says what it writes (*Parked*).
+Alongside: the gamepad onto core params, and the vault detail's
+*Place in compose ↗* — `?place=<id>` is ready for it.
 
 ## Parked decisions
 
@@ -309,6 +323,12 @@ vault detail's *Place in compose ↗* — `?place=<id>` is ready for it.
   The second, two more: a page has its own `fps` and a loop keeps its own
   speed, sharing seconds, not ticks; a preview asks for `draft` frames. The
   third: a placement is picked up by its box, not its ink.
+- **Open, for the author — what an export of a page writes.** A still page
+  as a PNG at scale is the obvious one; a page that moves as a frames zip
+  for `scripts/frames-to-video.mjs`, as grid and ckt already do; and the
+  roadmap names sketch-2-print's paged.js and PDF export as the way print
+  could rejoin. Which of these, and whether a PDF is wanted at all, decides
+  brick 5's second half.
 - **Time on a page of many things** (the author, 2026-09-24,
   `docs/object-model.md`): a still with no length is there for the whole
   page, a loop with no length plays again until the page ends, and the page
