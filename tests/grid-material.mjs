@@ -5,13 +5,13 @@
  * ground (tone.js), where a tile sits in its cell, the tray that keeps up to
  * twelve in order (tray.js), and the envelopes a legacy sprite and family get
  * in the vault (core/legacy.js) — which must dedup, and must stay out of the
- * gamepad's picker. And where paintField puts a tile at a sprite size, read off
+ * gamepad's picker — and those of the original grid sketch's materials. And where paintField puts a tile at a sprite size, read off
  * a context that only records.
  */
 
 const { toneOfPixels, groundRgb, fitInCell } = await import('../apps/grid/tone.js');
 const { Tray, CAP } = await import('../apps/grid/tray.js');
-const { legacyShape, legacySet } = await import('../core/legacy.js');
+const { legacyShape, legacySet, legacyTile, legacyMaterial } = await import('../core/legacy.js');
 const { offers } = await import('../core/uses.js');
 const { paintField } = await import('../apps/grid/grid.js');
 
@@ -139,6 +139,26 @@ ok('no size fills the cell', fitInCell(0, 0), { x: 0, y: 0, w: 1, h: 1 });
   ok('is offered as a material', offers(s, 'material'), true);
   ok('and as sprites', offers(s, 'sprites'), true);
   ok('but not to the gamepad, which has the family already', offers(s, 'brushes'), false);
+}
+
+// -- The original grid sketch's materials in the vault -------------------------
+
+{
+  const t = legacyTile('tiles', 3);
+  ok('a legacy tile is a shape, grid\'s own', [t.type, t.origin.app], ['shape', 'grid']);
+  ok('titled by the number in its file', t.title, 'tiles 3');
+  ok('filed in its material\'s folder', t.tags.includes('folder:legacy grid tiles'), true);
+  ok('a leaf, the same recipe every time: one object however often copied',
+     [t.recipe, JSON.stringify(legacyTile('tiles', 3))], [null, JSON.stringify(t)]);
+
+  const m = legacyMaterial('tiles', ['t1', 't2', 't3'], { from: 'grid_sketch/img/tiles' });
+  ok('the material is a set with role material', [m.type, m.recipe.role], ['set', 'material']);
+  ok('its tiles light to dark, as the sketch numbered them', m.recipe.members, ['t1', 't2', 't3']);
+  ok('on the black the sketch drew on', m.recipe.ground, '#000000');
+  ok('named in its recipe, as a material is', m.recipe.name, 'tiles (legacy grid)');
+  ok('and says where it came from', m.note.includes('grid_sketch/img/tiles'), true);
+  ok('offered as a grid material, by its role', offers(m, 'material'), true);
+  ok('and nowhere else until switched', [offers(m, 'brushes'), offers(m, 'sprites')], [false, false]);
 }
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');

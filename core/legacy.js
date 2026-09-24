@@ -1,5 +1,6 @@
 /**
- * legacy.js — a sprite from the gamepad's folders, as a vault object.
+ * legacy.js — what the suite was born with, as vault objects: a sprite from
+ * the gamepad's folders, and a material from the original grid sketch's.
  *
  * `apps/gamepad/gamepad_sprites/` holds the families the gamepad was born
  * with: hand-made, ordered by file name, listed in `brush-manifest.json`. They
@@ -9,7 +10,8 @@
  * in a folder named for its family, titled by its place in it.
  *
  * One envelope, built here, for every path that copies one — grid's material
- * maker in the browser and `scripts/import-legacy-family.mjs` from a terminal.
+ * maker in the browser, and `scripts/import-legacy-grid.mjs` for the grid
+ * sketch's materials, through a browser too: a thumbnail needs a canvas.
  * The vault dedups on bytes and recipe, and every copy has the same bytes and a
  * null recipe, so a sprite copied twice, by either path, is one object.
  *
@@ -55,6 +57,63 @@ export function legacySet(family, members) {
     tags: ['legacy', family, 'use:material', 'use:sprites'],
     origin: LEGACY_ORIGIN,
     recipe: { members, role: 'brush-family', family },
+    seed: null,
+    parents: [],
+  };
+}
+
+// ── The original grid sketch's materials ─────────────────────────────────────
+//
+// grid_sketch (docs/migration.md) loaded seven folders "as mapping material",
+// each numbered light to dark: it drew the brightest cells with the first file
+// and the darkest with the last — `map(sum, 0, 765, n - 1, 0)` — which is
+// skweeb's material order already. Copied in, each is what a material is: a
+// `set` with `role: 'material'`, its tiles `shape` leaves in a folder of their
+// own, on the black the sketch drew on. Offered to grid by that role alone;
+// switch one on for ckt in the vault if it should be sprites too.
+
+/** grid's own, since these were its materials before it was grid. */
+export const LEGACY_GRID_ORIGIN = { app: 'grid', version: '1.0.0' };
+
+/** The folder a legacy grid material's tiles are filed in. */
+export const legacyGridFolder = material => 'legacy grid ' + material;
+
+/**
+ * One tile, everything but the render and thumb.
+ *
+ * @param {string} material   the sketch's folder, e.g. 'tiles'
+ * @param {number} n          the number in its file's name: 1 is the lightest
+ */
+export function legacyTile(material, n) {
+  return {
+    type: 'shape',
+    title: `${material} ${n}`,
+    tags: ['legacy', 'grid', 'tile', material, 'folder:' + legacyGridFolder(material)],
+    origin: LEGACY_GRID_ORIGIN,
+    recipe: null,
+    seed: null,
+    parents: [],
+  };
+}
+
+/**
+ * The material: its tiles' ids light to dark, as a set grid offers.
+ *
+ * @param {string} material
+ * @param {string[]} members   the tiles' ids, light to dark
+ * @param {object} [opts]
+ * @param {string} [opts.ground='#000000']  what the sketch drew them on
+ * @param {string} [opts.from]              where they were copied from, for the note
+ */
+export function legacyMaterial(material, members, { ground = '#000000', from = '' } = {}) {
+  const name = `${material} (legacy grid)`;
+  return {
+    type: 'set',
+    title: name,
+    note: from ? `from ${from}, in the order the original grid sketch loaded it` : '',
+    tags: ['legacy', 'grid', 'material', material],
+    origin: LEGACY_GRID_ORIGIN,
+    recipe: { members, role: 'material', ground, name },
     seed: null,
     parents: [],
   };

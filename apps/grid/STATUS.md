@@ -7,6 +7,26 @@ luminance picking a member of an ordered ramp of tiles. Ported from
 `docs/migration.md` for what came across and what did not.
 
 ## Works right now — seen in Chrome
+- **The original sketch's seven materials are in the vault** (2026-09-24, a
+  side note between M4's fourth and fifth bricks). grid_sketch's `preload()`
+  loaded seven folders "as mapping material" — degz 6, trames 8, sprites 13,
+  myFace 8, shapes 6, tiles 10, stones 6 — and only tiles and trames had come
+  across, as the ramps grid boots with, so a grid with a vault material chosen
+  showed neither. `node scripts/import-legacy-grid.mjs ../grid_sketch/img`
+  put all seven in: each tile a `shape` in `folder:legacy grid <name>`, each
+  folder a `set` titled `<name> (legacy grid)` with `role: 'material'`, the
+  sketch's order — it drew the brightest cells with file 1, the darkest with
+  the last — on the black it drew on (core/legacy.js `legacyTile`,
+  `legacyMaterial`; the page half is `legacy-import.js`). The faces are JPEGs
+  named .png and are stored as the JPEGs they are. Five of the sketch's
+  sprites are the gamepad's `brushes` 8–12, already in the vault, so the set
+  names those objects rather than copying them again. A dither with
+  `tiles (legacy grid)` is pixel-identical to the shipped `tiles` ramp; the
+  material picker offers all seven; run twice, nothing new. Only tiles is a
+  measured ramp: degz, stones and the faces keep the order the sketch gave
+  them, and *Edit the material…* re-sorts one by measured tone if wanted.
+  `sprites` has 13 members, one past the maker's cap of twelve, so editing
+  it in the maker would drop one.
 - **Materials from the vault, and a maker for them** (2026-09-24). A material
   is a vault `set` with `role: 'material'`, members light to dark; the
   Material drawer's *from the vault* picks one (only sets switched on as a
