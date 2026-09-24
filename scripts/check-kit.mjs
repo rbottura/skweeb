@@ -76,6 +76,8 @@ export async function startCheck({ keep = false } = {}) {
     base,
     plain: 'http://127.0.0.1:' + plainPort,
     vaultDir,
+    /** A folder of the check's own, in the temp folder: downloads, say. */
+    dir: work,
 
     ok(label, pass, detail = '') {
       if (!pass) fails++;

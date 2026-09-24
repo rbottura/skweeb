@@ -162,6 +162,12 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
         el.dispatchEvent(new Event(${JSON.stringify(event)}, { bubbles: true })); return true; })()`);
     },
 
+    /** Let the page download, into this folder: an export check reads what it wrote. */
+    async downloadsTo(dir) {
+      fs.mkdirSync(dir, { recursive: true });
+      await send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dir });
+    },
+
     async screenshot(file) {
       const r = await send('Page.captureScreenshot', { format: 'png' });
       fs.mkdirSync(path.dirname(file), { recursive: true });

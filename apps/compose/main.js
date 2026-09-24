@@ -27,6 +27,7 @@ import { Editing }        from './editing.js';
 import { PlacedList }     from './list.js';
 import { wirePointer }    from './pointer.js';
 import { saveComposition } from './save.js';
+import { exportPng, exportFrames } from './export.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Transport }      from '../../core/Transport.js';
@@ -40,10 +41,11 @@ const canvas = document.getElementById('page');
 const ctx = canvas.getContext('2d');
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
 
-let page, place, bar, rate, player, transport, list, listDrawer, adder, placements, editing, saveButton;
+let page, place, bar, rate, player, transport, list, listDrawer, adder, placements, editing;
+const buttons = {};                // the Export drawer's: save, png, frames
 let clockFps = 0;
 let shownView = 1;                 // canvas pixels per page pixel, as last painted
-let busy = false;                  // a save is drawing the page again; the player waits
+let busy = false;                  // a save or an export is drawing the page again; the player waits
 
 /**
  * The page's clock. It plays at the page's rate, and drops ticks when a
@@ -92,12 +94,17 @@ async function boot() {
   const exp = pagePanel.addDrawer({ id: 'export', title: 'Export', before: 'ground' });
   const actions = document.createElement('div');
   actions.className = 'pp-actions';
-  saveButton = document.createElement('button');
-  saveButton.type = 'button';
-  saveButton.className = 'nb-btn nb-btn--wide nb-btn--primary';
-  saveButton.textContent = 'Save to the vault  [S]';
-  saveButton.addEventListener('click', save);
-  actions.append(saveButton);
+  const button = (key, label, onClick, primary = false) => {
+    const b = buttons[key] = document.createElement('button');
+    b.type = 'button';
+    b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
+    b.textContent = label;
+    b.addEventListener('click', onClick);
+    actions.append(b);
+  };
+  button('save', 'Save to the vault  [S]', save, true);
+  button('png', 'Download the page (PNG)', png);
+  button('frames', 'Download every frame (zip)', frames);
   exp.body.append(actions);
 
   // The frame chain keeps the format and the box in step (core/frame.js).
@@ -165,39 +172,68 @@ function configureClock() {
     if (was && length > 1) clock.play();
   }
   player.note(placements.moving ? `${length} frames · ${(length / fps).toFixed(2)} s` : 'nothing moves');
+  if (buttons.frames) buttons.frames.hidden = !placements.moving;       // a still page is its PNG
 }
 
-// ── Saving ───────────────────────────────────────────────────────────────────
+// ── Leaving compose: a save, a PNG, the frames ───────────────────────────────
 
 /**
- * The composition, into the vault: the page and every placement as its
- * recipe, drawn once more from exact frames at the tick on screen (save.js).
- * The recipe is a snapshot — a drag during the save cannot change what it
- * says — and a page with an object that would not open is not saved.
+ * One way out, for all three: the page and every placement as a snapshot —
+ * a drag meanwhile cannot change what leaves — drawn again from exact frames
+ * at the page's scale (render.js), with the player held still. A page with
+ * an object that would not open, or one still opening, does not leave.
  */
-async function save() {
+async function leave(doing, action) {
   if (busy) return;
-  if (!placements.length) return bar.announce('nothing to save — place something first');
+  if (!placements.length) return bar.announce(`nothing to ${doing} — place something first`);
   const lost = placements.items.find(p => p.error);
-  if (lost) return bar.announce(`${lost.title} could not be opened — take it off the page to save`);
-  if (placements.items.some(p => !p.handle)) return bar.announce('still opening — save once everything is in');
+  if (lost) return bar.announce(`${lost.title} could not be opened — take it off the page to ${doing}`);
+  if (placements.items.some(p => !p.handle)) return bar.announce(`still opening — ${doing} once everything is in`);
 
   busy = true;
-  saveButton.disabled = true;
+  for (const b of Object.values(buttons)) b.disabled = true;
   clock.pause();
-  bar.say('saving — every object drawn again, exactly…');
   try {
     const recipe = JSON.parse(JSON.stringify({ page: page.values, place: placements.blocks() }));
-    const object = await saveComposition(recipe, { tick: clock.tick });
-    bar.announce(object ? `saved ${object.id} — ${object.title}` : 'no vault — the page is downloaded instead');
+    bar.announce(await action(recipe));
   } catch (err) {
-    console.error('[compose] save failed:', err);
-    bar.announce('save failed: ' + err.message);
+    console.error(`[compose] ${doing} failed:`, err);
+    bar.announce(`${doing} failed: ${err.message}`);
   } finally {
     busy = false;
-    saveButton.disabled = false;
+    for (const b of Object.values(buttons)) b.disabled = false;
     refreshVault();
   }
+}
+
+/** What prints from its own pixels, stretched, since no app can draw it again. */
+const stretchedNote = titles => (titles.length ? ` · stretched from their pixels: ${titles.join(', ')}` : '');
+
+/** The composition, into the vault (save.js), its render the tick on screen. */
+function save() {
+  return leave('save', async recipe => {
+    bar.say('saving — every object drawn again, at its size…');
+    const object = await saveComposition(recipe, { tick: clock.tick });
+    return object ? `saved ${object.id} — ${object.title}` : 'no vault — the page is downloaded instead';
+  });
+}
+
+/** The page at the tick on screen, at its scale, as a PNG (export.js). */
+function png() {
+  return leave('export', async recipe => {
+    bar.say('drawing the page at its scale…');
+    const out = await exportPng(recipe, { tick: clock.tick });
+    return `downloaded ${out.width} × ${out.height} px` + stretchedNote(out.stretched);
+  });
+}
+
+/** Every frame of a page that moves, zipped with its rate (export.js). */
+function frames() {
+  return leave('export', async recipe => {
+    const out = await exportFrames(recipe, { onStatus: t => bar.say(t) });
+    return `downloaded ${out.frames} frames at ${out.fps} fps, ${out.width} × ${out.height} px — `
+      + 'node scripts/frames-to-video.mjs makes the video' + stretchedNote(out.stretched);
+  });
 }
 
 // ── Drawing ──────────────────────────────────────────────────────────────────

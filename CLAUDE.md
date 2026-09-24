@@ -19,7 +19,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | static server + the vault write API | — |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs` is one, as a command. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs` and `check-compose-export.mjs` are two, as commands. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/decisions.md` | what was decided before today, and why, by date | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
@@ -88,6 +88,7 @@ done
 
 # In a real browser: compose in headless Chrome, on a copy of the vault.
 node scripts/check-compose.mjs
+node scripts/check-compose-export.mjs   # print scale: the PNG, the frames, the save
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at
