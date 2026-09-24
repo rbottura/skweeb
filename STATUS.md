@@ -16,6 +16,12 @@ _last touched: 2026-09-24_
   about its centre (`docs/object-model.md`, *Placement*); bleed with a trim
   line, a transparent ground, `scale` for the export's pixels. Opens with no
   vault. `apps/compose/STATUS.md` has the five bricks.
+- **A composition saves** (brick 4's first move): S, or *Save to the vault*
+  in the Export drawer, writes a `composition` — recipe `{ page, place }`,
+  every placed object a parent, the page at the tick on screen as its render,
+  drawn again from exact frames (`apps/compose/render.js`), never the
+  preview's drafts. Seen and read back: `A4 · 2 placed`, a grid dither under
+  a turned ckt loop, 1240 × 1754, 668 frames at 60.
 - **Time on a page of many things, decided by the author** (2026-09-24,
   `docs/object-model.md`): a still is there for the whole page, a loop plays
   again until the page ends, and the page lasts as long as its longest loop.
@@ -37,13 +43,15 @@ _last touched: 2026-09-24_
   `bounds`, 1812 × 811, not the 1920 × 945 screen it was drawn on.
 - **A browser check is a command**: `node scripts/check-compose.mjs` starts its
   own server on a copy of the vault, drives headless Chrome
-  (`scripts/chrome.mjs`, no dependencies, a real mouse included) and runs 45
-  checks — every kind placed, a typed transform landing on the pixels
-  `page.js` computes, the page's formats, every loop played in real time and
-  stepped, three placed with the picker, a still kept while loops play, one
-  picked up and dragged on the page, no vault at all, a console quiet on
-  every page. It fails when the page throws. Two sessions' drivers were lost
-  in scratchpads; this one is in the repo.
+  (`scripts/chrome.mjs`, no dependencies, a real mouse included; the server
+  and the temp vault in `scripts/check-kit.mjs`, for the next app's check)
+  and runs 52 checks — every kind placed, a typed transform landing on the
+  pixels `page.js` computes, the page's formats, every loop played in real
+  time and stepped, three placed with the picker, a still kept while loops
+  play, one picked up and dragged on the page, a composition saved and read
+  back, no vault at all, a console quiet on every page. It fails when the
+  page throws. Two sessions' drivers were lost in scratchpads; this one is in
+  the repo.
 - **A set says where it is offered** (`core/uses.js`), all of it seen in
   Chrome. A vault set's detail has a switch per use — *gamepad brush family*,
   *grid material*, *ckt sprite family* — and each app lists only the sets
@@ -279,18 +287,17 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M4's fourth brick, its first move: compose saves a composition.** *Save to
-the vault* in an Export drawer on the page panel: a `composition` whose
-recipe is `{ page: page.values, place: placements.blocks() }`, every placed
-ref a parent, and the page at its first frame as its render and thumbnail —
-drawn from each object's **exact** frames, opened without `draft`, never the
-preview's. A test that a saved recipe's `place` is the list, bottom first.
+**M4's fourth brick, its second move: a composition comes back.**
+`apps/compose/rebuild.js` — `openObject()` on `openComposition()`
+(`render.js`), a handle whose `frame(i)` is the page at tick `i`, so the
+vault's player can replay one; `reopens()` true for a composition; and
+`?open=<id>` in compose restoring the page's values and its list —
+`placements.add()` for each block, nothing fitted, the first chosen. The
+vault detail then offers *Open in compose ↗* by itself (`core/reopen.js`).
 
-Then compose's own `rebuild.js` — `openObject()` so the vault replays a
-composition and another page can place one, `reopens()` and `?open=<id>` —
-and brick 5 (`apps/compose/STATUS.md`). Alongside: the gamepad onto core
-params, and the vault detail's *Place in compose ↗* — `?place=<id>` is ready
-for it.
+Then a page placed on a page (`PLACEABLE` gains `composition`), and brick 5
+(`apps/compose/STATUS.md`). Alongside: the gamepad onto core params, and the
+vault detail's *Place in compose ↗* — `?place=<id>` is ready for it.
 
 ## Parked decisions
 
