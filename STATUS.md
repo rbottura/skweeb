@@ -150,8 +150,8 @@ _last touched: 2026-09-24_
 - **A picker's Use button sits on the chosen card**, across the foot of its
   picture, and a double click uses it outright. A dot-set's detail shows its
   thumbnail, its render being JSON.
-- **The UI pass is in, from the author's brief** (`docs/roadmap.md`, *The UI
-  pass, from the author's brief*), and every part of it was seen running in
+- **The UI pass is in, from the author's brief** (`docs/decisions.md`, *The
+  UI pass, from the author's brief*), and every part of it was seen running in
   Chrome:
   - **One theme**, neo-brutalist and light, in `core/theme.css`: cream ground,
     black ink, thick borders, hard shadows, one yellow accent that is only
@@ -252,8 +252,6 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 - **compose's `main.js` is at 341 lines and its check at 333.** The
   placement editing — `choose`, `sync`, `putOn`, `takeOff`, `fitWhenOpen` —
   wants a file of its own before brick 5 adds anything.
-- **`docs/roadmap.md` is at 395 lines.** The next *Decided since* moves the
-  2026-09-21 to -23 sections into a file of their own, as `migration.md` was.
 - **grid's own player opens its source exact** — one source handle serves
   both its preview and its saves, so it cannot ask for a draft the way
   compose does. Read from the code, not seen: a dither of a grid loop that
@@ -357,7 +355,7 @@ Alongside: the gamepad onto core params, and the vault detail's
 - Name is **skweeb**, `.skw` for the smart object.
 - **The UI pass's decisions** — theme, bar, drawers, ckt's columns and
   sessions, the rotation loop, grid's zoom and scale, transparent stills — are
-  in `docs/roadmap.md`. The longer review, for the author's notes:
+  in `docs/decisions.md`. The longer review, for the author's notes:
   https://claude.ai/code/artifact/28ad1346-969d-44e7-b058-b6d7abeced8d
 - **M4 is a fourth app, `apps/compose/`, and the master rendering environment.**
 - **Video is frames plus ffmpeg.** No browser muxer, ever.
@@ -378,6 +376,6 @@ Alongside: the gamepad onto core params, and the vault detail's
   work and home open it by link, and the `?open=` link is M4's "URL you can
   send" for those machines. `server.js` stays on 127.0.0.1 behind
   `tailscale serve`, or takes `--host` its tailnet address — never `0.0.0.0`.
-  `docs/roadmap.md`.
+  `docs/decisions.md`.
 - **Destra is free**, from fonderiz.fr, by a friend of the author's. It ships
   once the licence is named in the files; `docs/fonts.md`.

@@ -7,9 +7,9 @@
  *
  * It is not a video player and does not pretend to be: there is no file to
  * play. Every frame is drawn on demand, so scrubbing backwards costs a rebuild
- * of that window and a long loop is not seekable for free. `docs/roadmap.md`
- * still has webm as an open decision, and this is what the gallery uses until
- * that is settled.
+ * of that window and a long loop is not seekable for free. There will be no
+ * webm to play instead: video is frames plus ffmpeg, decided 2026-09-22
+ * (`docs/decisions.md`), so this is what "play the loop" means.
  *
  * What it plays is whatever `openSequence()` hands back, which is no longer
  * only a recording of marks: a grid sequence rebuilds its parent and re-runs

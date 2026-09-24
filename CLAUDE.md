@@ -21,6 +21,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
 | `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs` is one, as a command. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
+| `docs/decisions.md` | what was decided before today, and why, by date | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
 
 ## The one idea

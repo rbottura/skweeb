@@ -24,8 +24,9 @@
  *
  * It is also the expensive path, and honestly so. A tick here costs a replay
  * of the parent plus a full dither, so a viewer that scrubs backwards pays for
- * it. `docs/roadmap.md` still has webm as an open decision; until that lands,
- * this is what "play the loop" means for a dithered sequence.
+ * it. There is no webm to fall back on — video is frames plus ffmpeg
+ * (`docs/decisions.md`, 2026-09-22) — so this is what "play the loop" means
+ * for a dithered sequence; a live preview asks for a draft (`opts.draft`).
  *
  * ── Not an import cycle ─────────────────────────────────────────────────────
  *

@@ -15,7 +15,7 @@
  *
  * It also buys something real to leave out. `render()` is required to stay
  * pure so that sandboxing a standalone `.skw` is later a worker rather than a
- * redesign (docs/roadmap.md), and a worker can hold an OffscreenCanvas but not
+ * redesign (docs/decisions.md), and a worker can hold an OffscreenCanvas but not
  * a p5 instance, which wants a live DOM element. Rule 8 in CLAUDE.md asks for
  * instance-mode p5 and one version of it; the rule it is protecting — no
  * globals across files, no second p5 — is kept here by not having one at all.

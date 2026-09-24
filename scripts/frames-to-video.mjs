@@ -21,7 +21,7 @@
  *
  * So the app's job ends at a numbered PNG zip, which is lossless and a good
  * thing to keep, and this converts it. Decided 2026-09-22; the muxer that was
- * open for three sessions is cancelled. See docs/roadmap.md.
+ * open for three sessions is cancelled. See docs/decisions.md.
  *
  * ── Dependencies ────────────────────────────────────────────────────────────
  *

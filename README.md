@@ -41,7 +41,7 @@ made them:
   folder across if you need it, or publish the keepers into `gallery/`.
 - **Six sprite families** — Destra, GaramondI, Minipax, PeaceSans, Raleway and
   fleurs, 135 MB between them, gitignored until they are recompressed
-  (`docs/roadmap.md` has the measurements). The originals live in
+  (`docs/migration.md` has the measurements). The originals live in
   `sketch-2-print`. The app boots without them on `brushes` and `timbre`.
 
 `brush-manifest.json` is committed and still lists all eleven families, so a
