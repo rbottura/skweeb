@@ -13,7 +13,9 @@ _last touched: 2026-09-24_
   `tiles (legacy grid)` is pixel-identical to the shipped ramp. Five of the
   sketch's sprites were already here as the gamepad's `brushes` 8–12, and
   the set names those. Done on the branch `grid/legacy-materials`, rebased
-  onto main after. `apps/grid/STATUS.md` has the detail.
+  onto main after. `apps/grid/STATUS.md` has the detail. The faces then
+  showed a grid bug: every vault tile over 512 px was decoded as one pixel,
+  so its cells were its average colour — fixed on `grid/tile-size-fix`.
 - **M4, four bricks of five: compose puts many objects on one page, and it
   plays** (`apps/compose/`), all of it seen in Chrome. Three columns, as ckt
   has: `placed` on the left — what is on the page, and the chosen one's
