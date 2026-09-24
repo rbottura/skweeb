@@ -101,7 +101,11 @@ export function frameName(i, total, stem = 'frame') {
  * and saves nothing — and store-only is a few dozen lines instead of a
  * dependency, which is the trade this project keeps making.
  *
- * @param {Array<{name:string, bytes:Uint8Array}>} entries
+ * An entry is its bytes, or a Blob with its CRC and size already counted: a
+ * Blob is placed in the zip by reference, so a long frame export holds one
+ * frame's bytes at a time — to count them — rather than every frame's at once.
+ *
+ * @param {Array<{name:string, bytes:Uint8Array} | {name:string, blob:Blob, crc:number, size:number}>} entries
  * @returns {Blob}
  */
 export function zipStore(entries) {
@@ -111,8 +115,8 @@ export function zipStore(entries) {
 
   for (const entry of entries) {
     const name = new TextEncoder().encode(entry.name);
-    const crc = crc32(entry.bytes);
-    const size = entry.bytes.length;
+    const crc = entry.blob ? entry.crc : crc32(entry.bytes);
+    const size = entry.blob ? entry.size : entry.bytes.length;
 
     const local = new DataView(new ArrayBuffer(30));
     local.setUint32(0, 0x04034b50, true);
@@ -127,7 +131,7 @@ export function zipStore(entries) {
     local.setUint16(26, name.length, true);
     local.setUint16(28, 0, true);
 
-    chunks.push(new Uint8Array(local.buffer), name, entry.bytes);
+    chunks.push(new Uint8Array(local.buffer), name, entry.blob || entry.bytes);
 
     const dir = new DataView(new ArrayBuffer(46));
     dir.setUint32(0, 0x02014b50, true);

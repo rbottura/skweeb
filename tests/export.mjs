@@ -146,5 +146,11 @@ const eocd = zip.length - 22;
 ok('end of central directory', u32(eocd), 0x06054b50);
 ok('entry count in the directory', new DataView(zip.buffer).getUint16(eocd + 10, true), 2);
 
+// An entry can be a Blob with its CRC and size counted, placed by reference:
+// the same zip, byte for byte, without holding every frame's bytes at once.
+const asBlobs = entries.map(e => ({ name: e.name, blob: new Blob([e.bytes]), crc: crc32(e.bytes), size: e.bytes.length }));
+const zipped = new Uint8Array(await zipStore([asBlobs[0], entries[1]]).arrayBuffer());
+ok('a blob entry makes the same zip as its bytes', zipped.length === zip.length && zipped.every((b, i) => b === zip[i]), true);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
