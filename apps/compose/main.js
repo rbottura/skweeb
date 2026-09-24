@@ -19,10 +19,11 @@
  * link into compose, `any → compose: place on a sheet`.
  */
 
-import { pageParams, placeParams, toPlacement, fromPlacement, PAGE_GROUPS, PLACE_GROUPS, PLACEABLE } from './params.js';
-import { paintPage, pageSize, fitScale } from './page.js';
+import { pageParams, placeParams, toPlacement, PAGE_GROUPS, PLACE_GROUPS, PLACEABLE } from './params.js';
+import { paintPage, pageSize } from './page.js';
 import { viewFactor, trimLine, outline, PaintRate } from './preview.js';
 import { Placements }     from './placements.js';
+import { Editing }        from './editing.js';
 import { PlacedList }     from './list.js';
 import { wirePointer }    from './pointer.js';
 import { saveComposition } from './save.js';
@@ -39,10 +40,7 @@ const canvas = document.getElementById('page');
 const ctx = canvas.getContext('2d');
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
 
-let page, place, bar, rate, player, transport, list, listDrawer, adder, placements, saveButton;
-let chosen = null;                 // the placement the `placed` panel edits
-let choosing = false;              // the panel is being shown a placement: not an edit
-let syncing = false;               // an edit is waiting to be carried to the chosen placement
+let page, place, bar, rate, player, transport, list, listDrawer, adder, placements, editing, saveButton;
 let clockFps = 0;
 let shownView = 1;                 // canvas pixels per page pixel, as last painted
 let busy = false;                  // a save is drawing the page again; the player waits
@@ -77,11 +75,13 @@ async function boot() {
   const pagePanel = new ParamPanel(page, { title: 'page', mount: document.getElementById('page-side'), groups: PAGE_GROUPS });
 
   listDrawer = placePanel.addDrawer({ id: 'list', title: 'On the page', before: 'object' });
-  list = new PlacedList({ mount: listDrawer.body, onChoose: choose, onAdd: () => adder.show(),
-                          onRemove: () => chosen && takeOff(chosen),
-                          onMove: by => chosen && placements.move(chosen, by) });
+  editing = new Editing({ placements, place, page, refresh });
+  list = new PlacedList({ mount: listDrawer.body, onAdd: () => adder.show(),
+                          onChoose: p => editing.choose(p),
+                          onRemove: () => editing.chosen && editing.takeOff(editing.chosen),
+                          onMove: by => editing.chosen && placements.move(editing.chosen, by) });
   adder = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'Place this',
-                           onPick: o => putOn(toPlacement({ ref: o.id, ...AT_REST })) });
+                           onPick: o => editing.putOn(toPlacement({ ref: o.id, ...AT_REST })) });
 
   // The player sits above the page's rate, in its drawer, as ckt's does.
   player = pagePanel.drawer('player');
@@ -106,22 +106,18 @@ async function boot() {
     if (key === 'fps') configureClock();
     draw();
   });
-  place.on(() => {
-    if (choosing || syncing) return;
-    syncing = true;
-    queueMicrotask(sync);
-  });
 
   // The preview is drawn at the size the viewer shows it.
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
   wirePointer({ canvas, view: () => shownView, page: () => page.values, placements,
-                chosen: () => chosen, choose, moveTo: (x, y) => place.set({ x, y }) });
+                chosen: () => editing.chosen, choose: p => editing.choose(p),
+                moveTo: (x, y) => place.set({ x, y }) });
   wireKeys();
   refresh();
 
   await openRequested();
   const asked = new URLSearchParams(location.search).get('place');
-  if (asked) putOn(toPlacement({ ref: asked, ...AT_REST }));
+  if (asked) editing.putOn(toPlacement({ ref: asked, ...AT_REST }));
 }
 
 /**
@@ -136,75 +132,18 @@ async function openRequested() {
     const { recipe } = opened.object;
     page.restore(recipe.page);
     for (const block of recipe.place || []) placements.add(block);
-    choose(placements.items[placements.length - 1] || null);
+    editing.choose(placements.items[placements.length - 1] || null);
     bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
 }
 
-// ── Placements ───────────────────────────────────────────────────────────────
-
-/** A new placement, on top and chosen — placed whole once its object is open. */
-function putOn(block) {
-  const p = placements.add(block);
-  choose(p);
-  fitWhenOpen(p);
-}
-
-/** Take a placement off the page, and choose the one that was under it. */
-function takeOff(p) {
-  const i = placements.items.indexOf(p);
-  placements.remove(p);
-  if (chosen === p) choose(placements.items[Math.max(0, i - 1)] || null);
-}
-
-/** Which placement the panel edits. The panel follows it; nothing is edited. */
-function choose(p) {
-  chosen = p;
-  choosing = true;
-  try {
-    place.restore(p ? fromPlacement(p.block) : {});
-  } finally {
-    choosing = false;
-  }
-  refresh();
-}
-
-/**
- * The panel was edited: carry it to the chosen placement. It runs once after
- * a burst — a Reset announces every key — so it sees the panel as it ends up.
- * With nothing chosen, an object picked is a new placement; an object
- * cleared, or a Reset, takes the chosen one off the page; another object
- * picked for it is opened, and placed whole.
- */
-function sync() {
-  syncing = false;
-  const v = place.values;
-  if (!chosen) {
-    if (v.ref) putOn(toPlacement(v));
-    return draw();
-  }
-  if (!v.ref) return takeOff(chosen);
-  const renamed = v.ref !== chosen.block.ref;
-  const { at, length } = chosen.block;
-  placements.update(chosen, toPlacement(v, { at, length }));
-  if (renamed) fitWhenOpen(chosen);
-  refresh();
-}
-
-/** A placement's scale, set to fit the sheet once its object's size is known. */
-async function fitWhenOpen(p) {
-  await p.opening;
-  if (!p.size || !placements.items.includes(p)) return;
-  p.block = { ...p.block, transform: { ...p.block.transform, scale: fitScale(p.size, page.values) } };
-  if (chosen === p) choose(p);
-  else refresh();
-}
+// ── The page's state ─────────────────────────────────────────────────────────
 
 /** The list, the clock and the page, after anything changed. */
 function refresh() {
-  list.render(placements.items, chosen);
+  list.render(placements.items, editing.chosen);
   listDrawer.note(placements.length ? `${placements.length} placed` : '');
   configureClock();
   draw();
@@ -283,7 +222,7 @@ function paint() {
   paintPage(ctx, v, placements.layers(clock.tick, v.fps), view);
   shownView = view;
   trimLine(ctx, size, view);
-  outline(ctx, chosen, v, view);
+  outline(ctx, editing.chosen, v, view);
   if (clock.playing) rate.count();
 
   bar.output({ width: Math.round(size.width * v.scale), height: Math.round(size.height * v.scale),
@@ -294,6 +233,7 @@ function paint() {
 /** The bar's line: how many are placed, and the chosen one. */
 function describe() {
   const n = placements.length;
+  const chosen = editing.chosen;
   if (!n) return 'choose an object to place — Add… under On the page, or V for the vault';
   if (!chosen) return `${n} placed`;
   if (chosen.error) return `${n} placed · ${chosen.title} could not be opened`;
@@ -314,7 +254,8 @@ function wireKeys() {
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (busy) return;
-    if (e.key === 'Delete' && chosen) takeOff(chosen);
+    const chosen = editing.chosen;
+    if (e.key === 'Delete' && chosen) editing.takeOff(chosen);
     if (e.key === ']' && chosen) placements.move(chosen, +1);
     if (e.key === '[' && chosen) placements.move(chosen, -1);
     const nudge = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
