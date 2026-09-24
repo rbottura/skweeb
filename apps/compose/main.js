@@ -4,10 +4,12 @@
  * The fourth app, and where a finished piece will be made: objects from every
  * process placed on one page, previewed live and rendered out
  * (docs/roadmap.md, M4). The page is the suite's Format drawer and a rate;
- * what is on it is a list of placements (placements.js), each an object and a
- * transform, and one of them at a time is chosen for the `placed` panel to
- * edit. An object is anything core gives frames of — a still, a shape, a
- * loop from any app — and a loop plays at its own speed (time.js).
+ * what is on it is a list of placements (placements.js, list.js), each an
+ * object and a transform, and one of them at a time is chosen for the
+ * `placed` panel to edit — from the list, or picked up on the page itself
+ * and dragged (pointer.js). An object is anything core gives frames of — a
+ * still, a shape, a loop from any app — and a loop plays at its own speed
+ * (time.js).
  *
  * Three columns, as ckt has: what is placed on the left, the page between,
  * the page's own settings on the right. Everything else is core's — the
@@ -18,9 +20,10 @@
  */
 
 import { pageParams, placeParams, toPlacement, fromPlacement, PAGE_GROUPS, PLACE_GROUPS, PLACEABLE } from './params.js';
-import { paintPage, pageSize, fitScale } from './page.js';
+import { paintPage, pageSize, fitScale, placementMatrix, onPage } from './page.js';
 import { Placements }     from './placements.js';
 import { PlacedList }     from './list.js';
+import { wirePointer }    from './pointer.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Transport }      from '../../core/Transport.js';
@@ -39,6 +42,7 @@ let choosing = false;              // the panel is being shown a placement: not 
 let syncing = false;               // an edit is waiting to be carried to the chosen placement
 let painted = null;                // paints counted over the last second, for the bar's rate
 let clockFps = 0;
+let shownView = 1;                 // canvas pixels per page pixel, as last painted
 
 /**
  * The page's clock. It plays at the page's rate, and drops ticks when a
@@ -60,7 +64,7 @@ const clock = new Playhead({
 
 async function boot() {
   bar = new Bar({ app: 'compose', mount: document.querySelector('.app'),
-                  keys: 'space play · , . frame · Del remove · V vault' });
+                  keys: 'drag or ← ↑ → ↓ move · [ ] order · Del remove · space play · , . frame · V vault' });
   page = pageParams();
   place = placeParams();
   placements = new Placements({ onChange: refresh, say: t => bar.announce(t) });
@@ -69,8 +73,9 @@ async function boot() {
   const pagePanel = new ParamPanel(page, { title: 'page', mount: document.getElementById('page-side'), groups: PAGE_GROUPS });
 
   listDrawer = placePanel.addDrawer({ id: 'list', title: 'On the page', before: 'object' });
-  list = new PlacedList({ mount: listDrawer.body, onChoose: choose,
-                          onAdd: () => adder.show(), onRemove: () => chosen && takeOff(chosen) });
+  list = new PlacedList({ mount: listDrawer.body, onChoose: choose, onAdd: () => adder.show(),
+                          onRemove: () => chosen && takeOff(chosen),
+                          onMove: by => chosen && placements.move(chosen, by) });
   adder = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'Place this',
                            onPick: o => putOn(toPlacement({ ref: o.id, ...AT_REST })) });
 
@@ -94,6 +99,8 @@ async function boot() {
 
   // The preview is drawn at the size the viewer shows it.
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
+  wirePointer({ canvas, view: () => shownView, page: () => page.values, placements,
+                chosen: () => chosen, choose, moveTo: (x, y) => place.set({ x, y }) });
   wireKeys();
   refresh();
 
@@ -206,7 +213,9 @@ function paint() {
   if (canvas.height !== h) canvas.height = h;
 
   paintPage(ctx, v, placements.layers(clock.tick, v.fps), view);
+  shownView = view;
   trimLine(size, view);
+  outline(v, view);
   if (clock.playing) countPaint();
 
   bar.output({ width: Math.round(size.width * v.scale), height: Math.round(size.height * v.scale),
@@ -238,6 +247,32 @@ function trimLine(size, view) {
   ctx.setLineDash([6, 4]);
   ctx.strokeRect(Math.round(size.bleed * view) + 0.5, Math.round(size.bleed * view) + 0.5,
                  Math.round((size.width - size.bleed * 2) * view), Math.round((size.height - size.bleed * 2) * view));
+  ctx.restore();
+}
+
+/**
+ * The chosen placement's frame, on the preview only: which one the panel
+ * edits. A light line under a dashed dark one, so it reads on any ground.
+ */
+function outline(v, view) {
+  if (!chosen || !chosen.size) return;
+  const { width: w, height: h } = chosen.size;
+  const m = placementMatrix(chosen.block.transform, chosen.size, v);
+  ctx.save();
+  ctx.beginPath();
+  [[0, 0], [w, 0], [w, h], [0, h]].forEach((corner, i) => {
+    const [x, y] = onPage(m, corner);
+    if (i) ctx.lineTo(x * view, y * view);
+    else ctx.moveTo(x * view, y * view);
+  });
+  ctx.closePath();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#fffdf6';
+  ctx.stroke();
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 4]);
+  ctx.strokeStyle = '#111111';
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -278,6 +313,14 @@ function wireKeys() {
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 'Delete' && chosen) takeOff(chosen);
+    if (e.key === ']' && chosen) placements.move(chosen, +1);
+    if (e.key === '[' && chosen) placements.move(chosen, -1);
+    const nudge = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    if (nudge && chosen) {
+      e.preventDefault();
+      const n = e.shiftKey ? 10 : 1;
+      place.set({ x: place.get('x') + nudge[0] * n, y: place.get('y') + nudge[1] * n });
+    }
     if (clock.length < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }
     if (e.key === ',') { clock.pause(); clock.step(-1); }

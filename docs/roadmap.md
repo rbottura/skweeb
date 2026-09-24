@@ -339,6 +339,14 @@ settled four things the specification had left open.
   an export concern", and it was needed at once: grid's exact growth made a
   placed dither paint 2 frames a second, and its draft 43.
 
+**The third, many placements, waited on one answer from the author**, and
+got it the same day: on a page that moves, a still with no length is there
+for the whole page, a loop with no length plays again until the page ends,
+and the page lasts as long as its longest loop (`docs/object-model.md`,
+*Placement*). The object model had said a still lasts one frame, against its
+own "`at: 0` for something that is simply there". And a placement is picked
+up on the page by its box, not its ink, as a sheet of glass would be.
+
 ## Still open
 
 1. ~~**`destra.otf` and `GPDestra-Light.otf`**~~ **Answered 2026-09-23** —

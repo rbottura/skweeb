@@ -42,6 +42,21 @@ ok('turning leaves the centre too', at({ ...still, rot: 37, scale: 3 }, [50, 25]
 ok('bleed moves nothing on the sheet',
    at({ ...still, x: 10 }, [50, 25], { ...sheet, bleed: 20 }), [530, 420]);
 
+// -- picking one up ----------------------------------------------------------
+
+const turned = { x: 30, y: -40, scale: 1.7, rot: 33 };
+const m = Page.placementMatrix(turned, size, sheet);
+ok('off the page undoes on the page', round(Page.offPage(m, Page.onPage(m, [12, 34]))), [12, 34]);
+const layer = (t, s = size) => ({ size: s, transform: t });
+const stack = [layer(still), layer({ ...still, x: 30 })];
+ok('a point on both is the top one\'s', Page.hitTest([520, 400], stack, sheet), 1);
+ok('a point on the lower one alone is its', Page.hitTest([455, 400], stack, sheet), 0);
+ok('a point on neither is nothing', Page.hitTest([100, 100], stack, sheet), -1);
+// A quarter turn: 100 x 50 stands 50 wide and 100 tall about the centre.
+const upright = [layer({ ...still, rot: 90 })];
+ok('turned, it is picked up where it stands', Page.hitTest([500, 440], upright, sheet), 0);
+ok('and not where it lay before it turned', Page.hitTest([540, 400], upright, sheet), -1);
+
 // -- an object's size is its ink ---------------------------------------------
 
 // A recording replays onto the screen it was drawn on; its marks reach part of it.

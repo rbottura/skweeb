@@ -77,6 +77,19 @@ export class Placements {
     this.onChange();
   }
 
+  /**
+   * Move an entry through the stack: `+1` draws it over the one above it,
+   * `-1` under the one below. Stops at the top and the bottom.
+   */
+  move(p, by) {
+    const i = this.items.indexOf(p);
+    const j = Math.max(0, Math.min(this.items.length - 1, i + by));
+    if (i < 0 || i === j) return;
+    this.items.splice(i, 1);
+    this.items.splice(j, 0, p);
+    this.onChange();
+  }
+
   /** An entry's block, changed. Naming another object opens that one. */
   update(p, block) {
     const other = block.ref !== p.block.ref;

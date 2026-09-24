@@ -67,6 +67,32 @@ export function onPage(matrix, [x, y]) {
   return [a * x + c * y + e, b * x + d * y + f];
 }
 
+/** Where a point of the page falls in the object's own pixels: `onPage`, undone. */
+export function offPage([a, b, c, d, e, f], [x, y]) {
+  const det = a * d - b * c;
+  if (!det) return [NaN, NaN];
+  const u = x - e, v = y - f;
+  return [(d * u - c * v) / det, (a * v - b * u) / det];
+}
+
+/**
+ * Which layer is under a point of the page: the topmost whose box holds it,
+ * turned and scaled as it is placed, or -1. Its box and not its ink — a
+ * placement is picked up by its frame, as a sheet of glass would be.
+ *
+ * @param {[number, number]} point              in page pixels
+ * @param {Array<{size, transform}>} layers     bottom first
+ * @param {object} page                         the page's values
+ */
+export function hitTest(point, layers, page) {
+  for (let i = layers.length - 1; i >= 0; i--) {
+    const { size, transform } = layers[i];
+    const [x, y] = offPage(placementMatrix(transform, size, page), point);
+    if (x >= 0 && y >= 0 && x <= size.width && y <= size.height) return i;
+  }
+  return -1;
+}
+
 /**
  * An object's own size on a page: its ink over the whole loop, the `bounds`
  * a handle gives (core/rebuild.js) — all of a still or a dither, and the part

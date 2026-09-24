@@ -12,9 +12,10 @@ const el = (tag, cls, text) => {
   return node;
 };
 
-function button(label, onClick, primary = false) {
+function button(label, onClick, { primary = false, title = '' } = {}) {
   const b = el('button', 'nb-btn' + (primary ? ' nb-btn--primary' : ''), label);
   b.type = 'button';
+  if (title) b.title = title;
   b.addEventListener('click', onClick);
   return b;
 }
@@ -35,14 +36,17 @@ export class PlacedList {
    * @param {(entry: object) => void} opts.onChoose
    * @param {() => void} opts.onAdd
    * @param {() => void} opts.onRemove
+   * @param {(by: number) => void} opts.onMove   +1 forward, -1 backward
    */
-  constructor({ mount, onChoose, onAdd, onRemove }) {
+  constructor({ mount, onChoose, onAdd, onRemove, onMove }) {
     this.onChoose = onChoose;
     this.root = el('div', 'pl');
     this.rows = el('div', 'pl-rows');
     const actions = el('div', 'pl-actions');
-    this.remove = button('Remove', onRemove);
-    actions.append(button('Add…', onAdd, true), this.remove);
+    this.up = button('↑', () => onMove(+1), { title: 'Forward: drawn over the one above it  ]' });
+    this.down = button('↓', () => onMove(-1), { title: 'Backward: drawn under the one below it  [' });
+    this.remove = button('Remove', onRemove, { title: 'Off the page  Del' });
+    actions.append(button('Add…', onAdd, { primary: true }), this.up, this.down, this.remove);
     this.root.append(this.rows, actions);
     mount.append(this.root);
   }
@@ -67,6 +71,9 @@ export class PlacedList {
       row.addEventListener('click', () => this.onChoose(p));
       this.rows.append(row);
     }
-    this.remove.disabled = !chosen;
+    const at = items.indexOf(chosen);
+    this.remove.disabled = at < 0;
+    this.up.disabled = at < 0 || at === items.length - 1;
+    this.down.disabled = at <= 0;
   }
 }

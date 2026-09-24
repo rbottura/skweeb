@@ -54,4 +54,8 @@
 .pl-sub { font: 400 11px var(--nb-mono); color: var(--nb-muted); }
 
 .pl-actions { display: flex; gap: 8px; margin-top: 10px; }
-.pl-actions .nb-btn { flex: 1; }
+.pl-actions .nb-btn { flex: 1; padding: 0 8px; }
+.pl-actions .nb-btn:first-child { flex: 2; }
+
+/* A placement is picked up and moved on the page itself. */
+.viewer-stage canvas.can-move { cursor: move; }

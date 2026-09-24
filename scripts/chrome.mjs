@@ -138,6 +138,23 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
       return page.eval(`(() => { const el = ${element}; if (!el) return false; el.click(); return true; })()`);
     },
 
+    /**
+     * The mouse, as a person moves it: pressed at `from`, moved in steps to
+     * `to`, released — in the page's CSS pixels, from its top left. Chrome
+     * makes real pointer events of it; `pointer(at)` alone is a click.
+     */
+    async pointer(from, to = from, steps = 6) {
+      const at = ([x, y], type, buttons) => send('Input.dispatchMouseEvent',
+        { type, x, y, button: 'left', buttons, clickCount: 1 });
+      await at(from, 'mouseMoved', 0);
+      await at(from, 'mousePressed', 1);
+      for (let i = 1; i <= steps; i++) {
+        await at([from[0] + ((to[0] - from[0]) * i) / steps, from[1] + ((to[1] - from[1]) * i) / steps], 'mouseMoved', 1);
+      }
+      await at(to, 'mouseReleased', 0);
+      await sleep(250);                 // a repaint waits for the next frame
+    },
+
     /** Type into a field as a person would: set it, then fire what its widget listens for. */
     typeInto(element, value, event = 'change') {
       return page.eval(`(() => { const el = ${element}; if (!el) return false;

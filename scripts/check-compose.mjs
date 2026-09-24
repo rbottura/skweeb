@@ -15,7 +15,8 @@
  *   the page              bleed, a transparent ground, A3, scale 2, Reset
  *   the page plays        every loop at its own speed, stepped, and at 30 fps
  *   many placements       added with the picker, listed, chosen, moved, a still
- *                         kept while loops play, removed
+ *                         kept while loops play, removed, picked up and dragged
+ *                         on the page, sent back
  *   no vault at all       the repo served as plain files: it boots, says so
  *
  * and a console with nothing in it but a missing favicon. Screenshots land in
@@ -301,6 +302,25 @@ try {
     rows = await rowsOf();
     ok('Remove takes the chosen one off', rows.length === 2 && !rows.includes(st.title), JSON.stringify(rows));
     ok('and the page no longer draws it', (await page.eval(inStill)) === 0);
+
+    // On the page itself: pick up what is on top, drag it, send it back, let go of everything.
+    const [left, top, width, height] = await page.eval(`(() => { const r = document.getElementById('page')
+      .getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; })()`);
+    const client = ([x, y]) => [left + (x * width) / SHEET.width, top + (y * height) / SHEET.height];
+    const [loopA, loopB] = added;
+    await page.pointer(client([620, 877]));
+    await page.until(`document.querySelector('#place-side .pp-object-name')?.textContent === ${JSON.stringify(loopB.title)}`);
+    ok('a press on the page chooses what is on top there', true, loopB.title);
+    const x0 = Number(await page.eval(row('place-side', 'x from centre') + '.querySelector(".pp-num").value'));
+    await page.pointer(client([620, 877]), client([620 + 100, 877]));
+    const x1 = Number(await page.eval(row('place-side', 'x from centre') + '.querySelector(".pp-num").value'));
+    ok('dragged, it follows the pointer in page pixels', Math.abs(x1 - x0 - 100) <= 2, `x ${x0} → ${x1}`);
+    await page.click(action('↓'));
+    rows = await rowsOf();
+    ok('↓ sends it under the one below', JSON.stringify(rows) === JSON.stringify([loopA.title, loopB.title]),
+       JSON.stringify(rows));
+    await page.pointer(client([100, 100]));
+    ok('a press on bare paper chooses nothing', await page.eval(action('Remove') + '.disabled'));
   }
   listen();
   ok('the console stayed quiet on every page', !noise.length, JSON.stringify(noise.slice(0, 3)));

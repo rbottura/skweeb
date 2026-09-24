@@ -81,6 +81,12 @@ const objects = {
   list.layers(300, 60); list.layers(301, 60);   // 301 is still the 30 fps loop's tick 150
   ok('a tick is asked for once, however often it is drawn', c.handle.asked.length, asked);
   ok('the blocks are the recipe\'s place list', list.blocks().map(b => b.ref), ['still', 'pad', 'ckt']);
+  list.move(a, +1);
+  ok('forward: drawn over the one above it', list.items.map(p => p.block.ref), ['pad', 'still', 'ckt']);
+  list.move(a, +5);
+  ok('and no further than the top', list.items.map(p => p.block.ref), ['pad', 'ckt', 'still']);
+  list.move(a, -9);
+  ok('backward to the bottom, and no further', list.items.map(p => p.block.ref), ['still', 'pad', 'ckt']);
   ok('every change was heard', changes > 0, true);
   ok('nothing needed saying', said, []);
 }
