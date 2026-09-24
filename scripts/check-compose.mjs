@@ -14,6 +14,8 @@
  *   a typed transform     a still lands on the pixels page.js's matrix says
  *   the page              bleed, a transparent ground, A3, scale 2, Reset
  *   the page plays        every loop at its own speed, stepped, and at 30 fps
+ *   many placements       added with the picker, listed, chosen, moved, a still
+ *                         kept while loops play, removed
  *   no vault at all       the repo served as plain files: it boots, says so
  *
  * and a console with nothing in it but a missing favicon. Screenshots land in
@@ -109,7 +111,7 @@ const type = async (side, label, value) => {
 };
 const chip = text => `[...document.querySelectorAll('#page-side .pp-chip')].find(c => c.textContent === ${JSON.stringify(text)})`;
 const settled = `(() => { const t = document.querySelector('.bar-say')?.textContent || '';
-  return t.includes(' on the page') || t.startsWith('could not'); })()`;
+  return t.includes(' on the page') || t.includes('could not'); })()`;
 const shot = name => page.screenshot(path.join(SHOTS, name + '.png'));
 
 // The console is heard page by page — goto() starts a fresh log — so what
@@ -239,6 +241,66 @@ try {
     const frames = Math.round((render.frames * 30) / render.fps);
     ok(`${kind} on a 30 fps page: as long, in fewer frames`, (await playerNote()).startsWith(frames + ' frames'),
        await playerNote());
+  }
+
+  // 6. Many placements: a still under two loops, the loops added with the picker.
+  const three = ['still from gamepad', 'sequence from gamepad', 'sequence from ckt'].map(k => kinds.get(k));
+  if (three.every(Boolean)) {
+    const [st, ...added] = three;
+    const rowsOf = () => page.eval(`[...document.querySelectorAll('#place-side .pl-row .pl-title')].map(t => t.textContent)`);
+    const action = label => `[...document.querySelectorAll('#place-side .pl-actions .nb-btn')].find(b => b.textContent === '${label}')`;
+    await go(BASE + '/apps/compose/?place=' + st.id);
+    await page.until(settled, { timeout: 30000 });
+    for (const [i, r] of added.entries()) {
+      await page.click(action('Add…'));
+      await page.until(`document.querySelectorAll('.vp--visible .vp-use').length > 0`);
+      await page.click(`[...document.querySelectorAll('.vp--visible .vp-cell')].find(c =>
+        c.querySelector('.vp-name')?.textContent === ${JSON.stringify(r.title)}
+        && c.querySelector('.vp-sub')?.textContent.includes(${JSON.stringify(r.render.w + '×' + r.render.h)}))?.querySelector('.vp-use')`);
+      await page.until(`document.querySelectorAll('#place-side .pl-row').length === ${i + 2}
+        && (document.querySelector('.bar-say')?.textContent || '').includes(' on the page')`, { timeout: 90000 });
+    }
+    let rows = await rowsOf();
+    ok('three placed, the top of the page listed first', rows.length === 3 && rows[2] === st.title, JSON.stringify(rows));
+    const lengths = [];
+    for (const r of added) {
+      const { render } = await (await fetch(BASE + '/api/vault/' + r.id)).json();
+      lengths.push(Math.round((render.frames * 60) / render.fps));
+    }
+    ok('the page lasts its longest loop', (await playerNote()).startsWith(Math.max(...lengths) + ' frames'),
+       `${JSON.stringify(lengths)} → ${await playerNote()}`);
+
+    // Choose the still, the bottom row, and move it below both loops.
+    await page.click(`[...document.querySelectorAll('#place-side .pl-row')].at(-1)`);
+    await page.until(`document.querySelector('#place-side .pp-object-name')?.textContent === ${JSON.stringify(st.title)}`);
+    ok('choosing a row puts it in the panel', true, st.title);
+    const before = await pixels();
+    await type('place-side', 'x from centre', -400);
+    await type('place-side', 'y from centre', 600);
+    ok('an edit moves the chosen one', (await pixels()) !== before);
+    await shot('06-three-placed');
+
+    // It is 228 x 501 at scale 1, centred at (220, 1477) on the page: find it after the loops have played.
+    s = await look();
+    const k = s.w / SHEET.width;
+    const inStill = `(() => { const c = document.getElementById('page'), k = ${k};
+      const d = c.getContext('2d').getImageData(Math.round(120 * k), Math.round(1250 * k),
+                                               Math.round(200 * k), Math.round(450 * k)).data;
+      let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i + 3] && (d[i] < 200 || d[i + 1] < 200 || d[i + 2] < 200)) n++;
+      return n; })()`;
+    const inkFirst = await page.eval(inStill);
+    await press(' ');
+    await wait(2000);
+    await press(' ');
+    const inkLater = await page.eval(inStill);
+    ok('a still stays while the loops play', inkFirst > 100 && inkLater === inkFirst,
+       `${inkFirst} ink pixels at frame 1, ${inkLater} at frame ${await count()}`);
+
+    await page.click(action('Remove'));
+    await wait(250);                             // the page repaints on the next frame
+    rows = await rowsOf();
+    ok('Remove takes the chosen one off', rows.length === 2 && !rows.includes(st.title), JSON.stringify(rows));
+    ok('and the page no longer draws it', (await page.eval(inStill)) === 0);
   }
   listen();
   ok('the console stayed quiet on every page', !noise.length, JSON.stringify(noise.slice(0, 3)));

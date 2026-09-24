@@ -171,8 +171,14 @@ JavaScript to someone else's browser.
   can differ. Free, because params are data.
 - `at` — **when**, in frames, measured from the composition's own start.
   `0` for something that is simply there.
-- `length` — how many frames it runs for. `null` means its natural length: one
-  frame for a still, the loop's own length for a sequence.
+- `length` — how many frames it runs for. `null` means its natural length: for
+  a sequence its own loop, played again until the page ends; for a still, the
+  whole page — a still has no time of its own, so it is simply there. A page
+  lasts as long as its longest loop, and one frame when nothing on it moves.
+  Frames are the page's, at its `fps`; a loop keeps its own speed on a page of
+  any rate. Decided by the author 2026-09-24, before a second placement went
+  on a page; until then this read "one frame for a still", which contradicted
+  `at: 0` meaning something simply there.
 - `transform` — in the composition's page pixels, before its `scale`: `x` and
   `y` put the object's centre that far from the page's centre, `scale`
   multiplies the object's own size — its ink over the whole loop — and `rot`
