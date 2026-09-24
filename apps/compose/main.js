@@ -1,16 +1,16 @@
 /**
- * main.js — compose, assembled. M4's first brick.
+ * main.js — compose, assembled. M4, two bricks in.
  *
  * The fourth app, and where a finished piece will be made: objects from every
  * process placed on one page, previewed live and rendered out
- * (docs/roadmap.md, M4). This brick places one object. The page is the
- * suite's Format drawer; the placement is an object and a transform; the
- * object is anything core gives frames of — a still, a shape, a loop from any
- * app — shown at its frame 0.
+ * (docs/roadmap.md, M4). One object so far. The page is the suite's Format
+ * drawer and a rate; the placement is an object and a transform; the object
+ * is anything core gives frames of — a still, a shape, a loop from any app —
+ * and a loop plays on the page at its own speed (time.js).
  *
  * Three columns, as ckt has: what is placed on the left, the page between,
  * the page's own settings on the right. Everything else is core's — the
- * panels and the picker, the bar, the vault, and the frames.
+ * panels and the picker, the player, the bar, the vault, and the frames.
  *
  * `?place=<id>` boots with that object placed: the seam for the vault's
  * link into compose, `any → compose: place on a sheet`.
@@ -18,9 +18,12 @@
 
 import { pageParams, placeParams, PAGE_GROUPS, PLACE_GROUPS } from './params.js';
 import { paintPage, pageSize, fitScale, inkSize } from './page.js';
+import { moves, framesOnPage, tickAt } from './time.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
+import { Transport }      from '../../core/Transport.js';
 import { Bar }            from '../../core/Bar.js';
+import { Playhead }       from '../../core/playback.js';
 import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { openFrames }     from '../../core/rebuild.js';
@@ -28,25 +31,55 @@ import { openFrames }     from '../../core/rebuild.js';
 const canvas = document.getElementById('page');
 const ctx = canvas.getContext('2d');
 
-let page, place, bar;
+let page, place, bar, player, transport;
 let placed = null;                 // the placement's object, opened: { title, type, handle, size, tick, image }
 let loads = 0;                     // the newest load; one that finishes after it is dropped
+let painted = null;                // paints counted over the last second, for the bar's rate
+
+/**
+ * The page's clock. It plays at the page's rate, and drops ticks when a
+ * frame costs more than its share of time — the honest reading of what the
+ * page is. Playing, a tick arrives inside an animation frame and is painted
+ * in it, not in the next.
+ */
+const clock = new Playhead({
+  onShow: tick => {
+    if (transport) transport.show(tick);
+    if (clock.playing) paint();
+    else draw();
+  },
+  onState: () => {
+    if (transport) transport.state();
+    if (!clock.playing) { painted = null; bar.rate(null); }
+  },
+});
 
 async function boot() {
-  bar = new Bar({ app: 'compose', mount: document.querySelector('.app'), keys: 'V vault' });
+  bar = new Bar({ app: 'compose', mount: document.querySelector('.app'), keys: 'space play · , . frame · V vault' });
   page = pageParams();
   place = placeParams();
 
   new ParamPanel(place, { title: 'placed', mount: document.getElementById('place-side'), groups: PLACE_GROUPS });
-  new ParamPanel(page, { title: 'page', mount: document.getElementById('page-side'), groups: PAGE_GROUPS });
+  const pagePanel = new ParamPanel(page, { title: 'page', mount: document.getElementById('page-side'), groups: PAGE_GROUPS });
+
+  // The player sits above the page's rate, in its drawer, as ckt's does.
+  player = pagePanel.drawer('player');
+  const holder = document.createElement('div');
+  player.body.prepend(holder);
+  transport = new Transport({ clock, mount: holder });
 
   // The frame chain keeps the format and the box in step (core/frame.js).
-  page.on(key => { applyFrameEdit(page, key); draw(); });
+  page.on(key => {
+    applyFrameEdit(page, key);
+    if (key === 'fps') configureClock();
+    draw();
+  });
   place.on(key => (key === 'ref' ? open(place.get('ref'), { fit: !place.restoring }) : draw()));
 
   // The preview is drawn at the size the viewer shows it.
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
   wireKeys();
+  configureClock();
   draw();
 
   const asked = new URLSearchParams(location.search).get('place');
@@ -65,16 +98,20 @@ async function open(id, { fit }) {
   const token = ++loads;
   if (placed) placed.handle.dispose();
   placed = null;
+  configureClock();
   if (!id) return draw();
 
   bar.say('opening…');
   try {
     const { object, url } = await Vault.load(id);
-    const handle = await openFrames(object, { url });
+    // A preview's frames: near-exact where an app has a faster way (a grid
+    // dither's growth never reads back). An export will ask for exact ones.
+    const handle = await openFrames(object, { url, draft: true });
     if (token !== loads) return handle.dispose();
     if (!handle.length) { handle.dispose(); throw new Error('it rebuilt to no frames'); }
     const size = inkSize(handle);
     placed = { title: object.title || object.id, type: object.type, handle, size, tick: -1, image: null };
+    configureClock();
     if (fit) place.set('scale', fitScale(size, page.values));
     const missing = handle.missing || [];
     if (missing.length) bar.announce(`drawn without ${missing.join(', ')}: not on this machine`);
@@ -87,10 +124,25 @@ async function open(id, { fit }) {
 }
 
 /**
- * The object at `tick`, asked for once per tick. The frame is borrowed from
- * the handle (core/rebuild.js) and nothing else asks it for another, so it
- * holds until the tick moves — a dragged slider must not re-dither a grid. A
- * tick that fails to draw is said once and left out, not retried every paint.
+ * The page's length is the placed loop's, in time, at the page's rate; a
+ * page with nothing that moves is one frame and does not play. A change of
+ * rate starts the page again, and keeps it playing if it was.
+ */
+function configureClock() {
+  const fps = page.get('fps');
+  const handle = placed && placed.handle;
+  const was = clock.playing;
+  clock.configure({ length: framesOnPage(handle, fps), fps, loop: !handle || handle.loop !== false });
+  transport.configure();
+  player.note(moves(handle) ? `${clock.length} frames · ${(clock.length / fps).toFixed(2)} s` : 'nothing moves');
+  if (was && moves(handle)) clock.play();
+}
+
+/**
+ * The object at its own `tick`, asked for once per tick. The frame is
+ * borrowed from the handle (core/rebuild.js) and nothing else asks it for
+ * another, so it holds until the tick moves — a dragged slider must not
+ * re-dither a grid. A tick that fails to draw is said once and left out.
  */
 function frameOf(p, tick) {
   const t = Math.min(tick, p.handle.length - 1);
@@ -125,9 +177,14 @@ function paint() {
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
 
-  const layers = placed ? [{ image: frameOf(placed, 0), size: placed.size, transform: place.values }] : [];
+  const layers = placed ? [{
+    image: frameOf(placed, tickAt(clock.tick, placed.handle, v.fps)),
+    size: placed.size,
+    transform: place.values,
+  }] : [];
   paintPage(ctx, v, layers, view);
   trimLine(size, view);
+  if (clock.playing) countPaint();
 
   bar.output({ width: Math.round(size.width * v.scale), height: Math.round(size.height * v.scale),
                scale: v.scale, format: v.format });
@@ -163,11 +220,26 @@ function trimLine(size, view) {
   ctx.restore();
 }
 
+/**
+ * The paint rate, measured: pages painted in the last second while playing,
+ * in the bar — so a slow page is a number on the machine that has it.
+ */
+function countPaint() {
+  const now = performance.now();
+  if (!painted) painted = { since: now, n: 0 };
+  painted.n++;
+  const span = now - painted.since;
+  if (span >= 1000) {
+    bar.rate((painted.n * 1000) / span);
+    painted = { since: now, n: 0 };
+  }
+}
+
 function describe(p) {
   const s = place.get('scale');
-  const frames = p.handle.length > 1 ? ` · frame 1 of ${p.handle.length}` : '';
+  const loop = moves(p.handle) ? ` · a ${p.handle.fps} fps loop of ${p.handle.length}` : '';
   return `${p.title} — ${p.type}, ${Math.round(p.size.width * s)} × ${Math.round(p.size.height * s)} `
-    + `on the page${frames}`;
+    + `on the page${loop}`;
 }
 
 // ── Keys ─────────────────────────────────────────────────────────────────────
@@ -178,6 +250,10 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
+    if (clock.length < 2) return;
+    if (e.key === ' ') { e.preventDefault(); clock.toggle(); }
+    if (e.key === ',') { clock.pause(); clock.step(-1); }
+    if (e.key === '.') { clock.pause(); clock.step(1); }
   });
   Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
 }

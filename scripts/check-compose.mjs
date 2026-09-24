@@ -13,6 +13,7 @@
  *                         `?place=`: drawn, whole, as large as fits
  *   a typed transform     a still lands on the pixels page.js's matrix says
  *   the page              bleed, a transparent ground, A3, scale 2, Reset
+ *   the page plays        every loop at its own speed, stepped, and at 30 fps
  *   no vault at all       the repo served as plain files: it boots, says so
  *
  * and a console with nothing in it but a missing favicon. Screenshots land in
@@ -120,6 +121,16 @@ const go = async (url, opts) => { listen(); await page.goto(url, opts); };
 const SHEET = { width: 1240, height: 1754, bleed: 0 };
 let still = null;
 
+// The player: its drawer's note, its count, a key pressed, and a sum of the page's pixels.
+const playerNote = () => page.eval(`[...document.querySelectorAll('#page-side .dr')]
+  .find(d => d.querySelector('.dr-head').textContent.includes('Sequence player')).querySelector('.dr-note').textContent`);
+const count = () => page.eval(`Number(document.querySelector('.tp-count').textContent.split(' / ')[0])`);
+const press = key => page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ${JSON.stringify(key)} }))`);
+const pixels = () => page.eval(`(() => { const c = document.getElementById('page');
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let s = 0; for (let i = 0; i < d.length; i += 97) s = (s * 31 + d[i]) >>> 0; return s; })()`);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
 try {
   // 1. Empty.
   await go(BASE + '/apps/compose/');
@@ -196,6 +207,38 @@ try {
     await new Promise(r => setTimeout(r, 300));
     s = await look();
     ok('Reset takes the object away', s.say.startsWith('choose') && !s.ink);
+    ok('a page with nothing that moves does not play', (await playerNote()) === 'nothing moves');
+  }
+
+  // 5. The page plays: each loop at its own speed, at the page's rate of 60.
+  const loops = [...kinds].filter(([, r]) => r.type === 'sequence');
+  for (const [kind, r] of loops) {
+    await go(BASE + '/apps/compose/?place=' + r.id);
+    await page.until(settled, { timeout: 90000 });
+    const { render } = await (await fetch(BASE + '/api/vault/' + r.id)).json();
+    const frames = Math.round((render.frames * 60) / render.fps);
+    ok(`${kind}: the page lasts the loop, in time`, (await playerNote()).startsWith(frames + ' frames'),
+       `${render.frames} at ${render.fps} fps → ${await playerNote()}`);
+    const first = await pixels();
+    await press(' ');
+    await wait(2500);
+    const rate = await page.eval(`document.querySelector('.bar span:nth-child(3)').textContent`);
+    await press(' ');
+    const at = await count();
+    ok(`${kind}: plays in real time, and moves`, at > 60 && (await pixels()) !== first,
+       `frame ${at} after 2.5 s, painting ${rate || 'nothing'}`);
+    await press('.');
+    ok(`${kind}: paused, a key steps one frame`, (await count()) === (at % frames) + 1);
+  }
+  if (loops.length) {
+    const [kind, r] = loops[0];
+    await go(BASE + '/apps/compose/?place=' + r.id);
+    await page.until(settled, { timeout: 90000 });
+    const { render } = await (await fetch(BASE + '/api/vault/' + r.id)).json();
+    await type('page-side', 'fps', 30);
+    const frames = Math.round((render.frames * 30) / render.fps);
+    ok(`${kind} on a 30 fps page: as long, in fewer frames`, (await playerNote()).startsWith(frames + ' frames'),
+       await playerNote());
   }
   listen();
   ok('the console stayed quiet on every page', !noise.length, JSON.stringify(noise.slice(0, 3)));

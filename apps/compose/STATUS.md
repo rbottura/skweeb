@@ -2,8 +2,8 @@
 _last touched: 2026-09-24_
 
 M4's app: objects from every process placed on one page, previewed live and
-rendered out (`docs/roadmap.md`, M4). Built a brick at a time; this is the
-first.
+rendered out (`docs/roadmap.md`, M4). Built a brick at a time; two of five
+are in.
 
 ## Works now — all of it seen running in Chrome
 
@@ -41,6 +41,23 @@ first.
   (`frameOf`), so dragging a slider over a grid dither never re-dithers it.
 - **Standalone**: served as plain files with no vault, the page draws, the bar
   says `no vault`, and a `?place=` link says it could not open the object.
+- **The page plays** (brick 2). The page has a rate of its own, `fps`, 60 by
+  default, in a *Sequence player* drawer with core's `Transport` above it;
+  space plays, `,` and `.` step. A loop keeps its own speed in real time
+  (`time.js`): what a loop and the page share is seconds, so a 30 fps ckt
+  loop holds each tick for two on a 60 fps page, a 60 fps loop on a 30 fps
+  page shows every other tick, and the page lasts the loop — 273 ticks at 60
+  are 137 frames at 30. The gamepad records at 60 and ckt loops at 30, so at
+  60 every loop in the suite shows every tick. A page with nothing that moves
+  is one frame and does not play. The bar gives the paint rate.
+- **Measured, playing in headless Chrome**: a gamepad loop 60 paints a second,
+  a ckt loop 60, grid's 426 × 653 dither 52–60, and its 1812 × 811 dither
+  with sprites growing over 60 frames 43. That one painted 2 at first: its
+  exact growth reads back up to 60 frames of its source on every skipped
+  tick, 459 ms a tick against 37, and skipping made it skip more. The page
+  now asks for a preview's frames — `openFrames(…, { draft: true })`, which
+  grid's `rebuild.js` answers with its own preview's growth, the one that
+  never reads back. Anything exported will ask for exact ones.
 
 ## Tests
 
@@ -48,19 +65,24 @@ first.
 at rest, moved, scaled and turned about its centre, the bleed moving nothing;
 an object's ink; placed whole; the page's schema (no zoom, no derived format,
 an A4 box that agrees with its chip); a placement as the object model's block,
-and back.
+and back. `tests/compose-time.mjs`: a loop's ticks on a page at its own rate,
+at twice it, at half, at a rate that does not divide; the page lasting the
+loop; wrapping, and holding when it does not loop; a picture that holds.
+
+`node scripts/check-compose.mjs` runs all of the above in Chrome, 34 checks.
 
 ## Next — the bricks, in order
 
 1. ~~**One object on a page at a transform, frame 0.**~~ Done, above.
-2. **The page plays.** A clock over the placement — `at` 0, its own length —
-   with core's `Transport` in a *Sequence player* drawer on the page panel,
-   space to play, and the bar's paint rate. Then measure a grid loop placed:
-   each of its frames is a full-size re-dither (grid's `rebuild.js`), the slow
-   path, where grid's own preview draws a draft.
+2. ~~**The page plays.**~~ Done, above.
 3. **Many placements.** A list of them, one chosen at a time for the `placed`
    panel to edit — `toPlacement` and `fromPlacement` are written for exactly
-   this — add, remove, order, and a placement moved by dragging it.
+   this — add, remove, order, and a placement moved by dragging it. It has a
+   question to settle first: what `length: null` means for a still on a page
+   that moves. The object model says a still's natural length is one frame,
+   and says `at: 0` is "something that is simply there"; a still that
+   vanished after frame 0 would be neither. Likewise whether a loop shorter
+   than the page plays again or stops.
 4. **A composition in the vault.** `{ page, place: [...] }` saved as a
    `composition`, lineage from every placed ref, a `rebuild.js` so the vault
    replays one, and `?open=<id>`.
@@ -74,9 +96,12 @@ And the link, `any → compose: place on a sheet`: the vault detail's
 
 ## Known
 
-- A placed object is drawn from its saved pixels, frame 0. At an export
-  `scale` above 1 those pixels are upscaled; brick 5 is what fixes it.
-- A placed loop shows its frame 0, which need not be its fullest — the
-  vault's thumbnail is the fullest — until brick 2 lets it play.
+- A placed object is drawn from its saved pixels. At an export `scale` above
+  1 those pixels are upscaled; brick 5 is what fixes it.
+- Changing the page's `fps` starts the page again from its first frame, and
+  placing another object stops it — as grid's and ckt's players do.
+- A large grid dither still skips ticks while it plays: 21 ms a frame, most
+  of it the source replayed and sampled, not the drawing (2 to 6 ms). The
+  page keeps real time and shows fewer of its frames.
 - The picker lists shapes inside their `folder:` groups, closed, so a legacy
   sprite is two clicks away.

@@ -16,6 +16,7 @@ import { frameParams, DERIVED, MAX_SIDE } from '../../core/frame.js';
 /** The page panel's drawers. Format is the page, so it starts open. */
 export const PAGE_GROUPS = {
   format: { label: 'Format', open: true },
+  player: { label: 'Sequence player', open: true },
   ground: { label: 'Ground', open: false },
 };
 
@@ -36,6 +37,11 @@ export const PLACEABLE = ['still', 'sequence', 'shape'];
  * source; `zoom` scales the object inside the canvas, and on a page every
  * placement has its own scale. The default is A4 at 150 dpi, that shape to
  * the pixel, so the chip and the box agree from the start and after a Reset.
+ *
+ * `fps` is the page's own rate: what it plays at, and what an export of it
+ * will be. Every loop on it keeps its own speed (time.js). 60 by default,
+ * because the gamepad records at 60 and ckt loops at 30: at 60 every loop in
+ * the suite shows every one of its ticks.
  */
 export function pageParams() {
   const { zoom, ...frame } = frameParams({ format: 'a4' });
@@ -44,6 +50,7 @@ export function pageParams() {
     format: { ...frame.format, options: frame.format.options.filter(o => !DERIVED.includes(o)) },
     width:  { ...frame.width, default: 1240 },
     height: { ...frame.height, default: 1754 },
+    fps:    { type: 'int', min: 1, max: 60, default: 60, label: 'fps', group: 'player' },
     ground: { type: 'ground', default: '#ffffff', label: 'paper', group: 'ground' },
   });
 }

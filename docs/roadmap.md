@@ -326,6 +326,19 @@ settled four things the specification had left open.
   a sequence, and a gamepad still, a shape or a set had no way through it. A
   sequence is replayed, a picture is its render, and data goes to its app.
 
+**The second brick, the page plays, settled two more.**
+
+- **A page has its own rate, and a loop keeps its own speed.** What they
+  share is seconds, not ticks (`apps/compose/time.js`): a placement's `at`
+  and `length` are the page's frames, at the page's `fps`. It is 60 by
+  default because the gamepad records at 60 and ckt loops at 30, so at 60
+  every loop in the suite shows every one of its ticks.
+- **A preview asks for a preview's frames.** `openFrames(…, { draft: true })`
+  lets the app that made an object answer faster and near-exact, as its own
+  preview does; an export will not ask. It is the live half of "resolution is
+  an export concern", and it was needed at once: grid's exact growth made a
+  placed dither paint 2 frames a second, and its draft 43.
+
 ## Still open
 
 1. ~~**`destra.otf` and `GPDestra-Light.otf`**~~ **Answered 2026-09-23** —
