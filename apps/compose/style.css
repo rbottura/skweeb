@@ -1,0 +1,13 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — compose
+
+   Everything that looks like the suite comes from core. compose says only its
+   layout: what is placed, the page, and the page's settings.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+@import '../../core/param-panel.css';
+@import '../../core/vault-panel.css';
+@import '../../core/sequence-viewer.css';
+
+.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }

@@ -173,6 +173,13 @@ JavaScript to someone else's browser.
   `0` for something that is simply there.
 - `length` — how many frames it runs for. `null` means its natural length: one
   frame for a still, the loop's own length for a sequence.
+- `transform` — in the composition's page pixels, before its `scale`: `x` and
+  `y` put the object's centre that far from the page's centre, `scale`
+  multiplies the object's own size — its ink over the whole loop — and `rot`
+  turns it about its centre, in degrees, clockwise. Centre and not corner, so
+  that scaling or turning an object leaves it where it is, and a page that
+  changes size keeps centred what was centred on it. Decided 2026-09-24 with
+  compose's first brick (`apps/compose/page.js`).
 
 **Why `version` and not `at` for the pin.** This block said `at` for the
 version until 2026-09-22, which worked only while nothing in a placement had a

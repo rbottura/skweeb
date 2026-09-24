@@ -302,6 +302,30 @@ serving machine puts it behind `tailscale serve`, or passes `--host` its
 tailnet address — never `0.0.0.0`, which opens the write API to the local
 network as well.
 
+## Decided since, 2026-09-24
+
+**M4 has begun: `apps/compose/` places one object on a page.** The first
+brick of five — the rest, in order, are in `apps/compose/STATUS.md`: the page
+plays, many placements, a composition in the vault, export at print scale. It
+settled four things the specification had left open.
+
+- **Two schemas, a page and a placement.** The page is core's frame group,
+  less the derived formats — a page has no one source to take its size from —
+  and less `zoom`, since every placement has its own scale. A placement is an
+  object and a transform, and its panel edits one entry of `place[]`: the list
+  is values, and no param type had to be invented for it.
+- **A transform is in page pixels from the page's centre**, before the page's
+  `scale`, turning clockwise about the object's centre
+  (`docs/object-model.md`, *Placement*). Pixels and not millimetres because the
+  page's size is pixels; millimetres are the dpi readout's business.
+- **An object's size on a page is its ink** — the bounds its loop reaches. A
+  gamepad loop replays onto the whole screen it was drawn on; placed by that,
+  it was centred and fitted by empty space.
+- **Frame N of anything is `openFrames()`**, in `core/rebuild.js`. The last
+  STATUS said rebuild.js already gave frame N of anything; it gave frame N of
+  a sequence, and a gamepad still, a shape or a set had no way through it. A
+  sequence is replayed, a picture is its render, and data goes to its app.
+
 ## Still open
 
 1. ~~**`destra.otf` and `GPDestra-Light.otf`**~~ **Answered 2026-09-23** —

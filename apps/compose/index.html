@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="compose — objects from every skweeb process, placed on one page.">
+  <title>compose — skweeb</title>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!--
+    Three columns, as ckt has: what is placed on the left, the page between,
+    the page's own settings on the right. The bar under all three is core's,
+    information only. No p5: a page is drawImage at a transform, and a loop
+    that needs p5 to replay gets it from core/rebuild.js, hidden.
+  -->
+  <div class="app">
+    <main class="app-main">
+      <div class="app-side" id="place-side"></div>
+
+      <section class="viewer" aria-label="the page">
+        <div class="viewer-stage"><canvas id="page" width="480" height="300"></canvas></div>
+      </section>
+
+      <div class="app-side" id="page-side"></div>
+    </main>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
