@@ -14,11 +14,13 @@
 
 import { defineParams } from '../../core/params.js';
 import { frameParams }  from '../../core/frame.js';
+import { easeParam }    from '../../core/easing.js';
 
 /** How the drawers read, top to bottom. `format` is core's own. */
 export const GROUPS = {
   source:   { label: 'Source',   open: true },
   material: { label: 'Material', open: true },
+  transition: { label: 'Transition', open: true },
   ground:   { label: 'Ground',   open: false },
 };
 
@@ -110,6 +112,32 @@ export function gridParams(manifest) {
       label: 'alpha floor',
       group: 'material',
     },
+
+    /**
+     * A loop's cells, as they fill: over this many frames a sprite grows from
+     * nothing to its size, instead of cutting in (growth.js). 0 is the cut.
+     */
+    growIn: {
+      type: 'int',
+      min: 0,
+      max: 60,
+      default: 0,
+      label: 'grow in (frames)',
+      group: 'transition',
+    },
+
+    /** And as they empty: the last sprite shrinks away over this many frames. */
+    growOut: {
+      type: 'int',
+      min: 0,
+      max: 60,
+      default: 0,
+      label: 'grow out (frames)',
+      group: 'transition',
+    },
+
+    /** The curve both run along — out is in, backwards (core/easing.js). */
+    growEase: easeParam({ group: 'transition' }),
 
     /**
      * Behind the empty cells: a colour, or none for a transparent ground.

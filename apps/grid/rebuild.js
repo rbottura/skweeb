@@ -36,6 +36,7 @@
  */
 
 import { renderGrid }    from './grid.js';
+import { Growth }        from './growth.js';
 import { ramp, materialTiles } from './materials.js';
 import { roleOf }        from '../../core/uses.js';
 import { fromVault }     from './source.js';
@@ -105,9 +106,11 @@ export async function openObject(object, opts = {}) {
   const frame = resolveFrame(recipe, parent.content, parent);
 
   let current = null;
+  const growth = new Growth(parent);        // sprites growing in, looked back for
 
   const render = i => {
-    current = renderGrid({ recipe, source: parent.frame(i), tiles, frame });
+    const { indices, scales } = growth.at(i, recipe, frame, tiles.length);
+    current = renderGrid({ recipe, tiles, frame, indices, scales });
     return current.canvas;
   };
 

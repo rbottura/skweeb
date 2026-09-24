@@ -16,10 +16,11 @@
  */
 
 import { gridParams, GROUPS }      from './params.js';
-import { renderGrid }              from './grid.js';
+import { renderGrid, surface }     from './grid.js';
 import { rampUsage }               from './map.js';
 import { manifest, ramp, materialTiles } from './materials.js';
 import { Maker }                   from './maker.js';
+import { Growth }                  from './growth.js';
 import { fromFile, fromVault }     from './source.js';
 import { saveStill, saveSequence } from './save.js';
 import { ParamPanel }              from '../../core/ParamPanel.js';
@@ -38,6 +39,8 @@ let previewTiles = null;           // the maker's tray, while it is open
 let maker;
 let labelMake = () => {};          // the maker's button says what it will do
 let source = null;                 // a handle from source.js — still or sequence
+let growth = null;                 // its frames mapped, cached, and grown (growth.js)
+let preview = null;                // the canvas the preview dithers into, reused frame to frame
 let last = null;                   // the most recent render, for saving
 let busy = false;                  // an export is running; nothing else may start
 
@@ -208,6 +211,7 @@ async function loadTiles() {
 function setSource(next) {
   if (source) source.dispose();
   source = next;
+  growth = next ? new Growth(next, { draft: true }) : null;   // the preview never reads back
   clock.configure({
     length: next ? next.frames : 0,
     fps: next ? next.fps : 0,
@@ -269,7 +273,9 @@ function paint() {
   }
 
   const frame = resolveFrame(recipe, source.content, source);
-  last = renderGrid({ recipe, source: source.frame(clock.tick), tiles: use, frame });
+  const { indices, scales } = growth.at(clock.tick, recipe, frame, use.length);
+  if (!preview) preview = surface(1, 1);
+  last = renderGrid({ recipe, tiles: use, frame, indices, scales, draft: true, into: preview });
 
   if (canvas.width !== last.canvas.width) canvas.width = last.canvas.width;
   if (canvas.height !== last.canvas.height) canvas.height = last.canvas.height;
@@ -286,6 +292,7 @@ function paint() {
 function showLoopControls() {
   const many = !!source && source.frames > 1;
   panel.drawer('player').hidden = !many;
+  panel.drawer('transition').hidden = !many;       // a still has no frames to grow across
   if (buttons.frames) buttons.frames.hidden = !many;
   if (transport) transport.configure();
 }
@@ -314,7 +321,11 @@ async function save({ keepFrames = false } = {}) {
         : `no vault — ${frames} frames dithered, downloaded instead`);
     } else {
       bar.say('saving…');
-      const object = await saveStill({ params, render: last, sourceId: source.id, name: tilesName });
+      // Drawn again the exact way: the preview fills tile by tile (draft-paint.js).
+      const recipe = params.values;
+      const exact = renderGrid({ recipe, source: source.frame(0), tiles,
+                                 frame: resolveFrame(recipe, source.content, source) });
+      const object = await saveStill({ params, render: exact, sourceId: source.id, name: tilesName });
       bar.announce(object ? `saved ${object.id}` : 'no vault — downloaded instead');
     }
   } catch (err) {

@@ -39,6 +39,7 @@
  */
 
 import { renderGrid }    from './grid.js';
+import { Growth }        from './growth.js';
 import { resolveFrame }  from '../../core/frame.js';
 import { Vault }      from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
@@ -108,11 +109,14 @@ export async function saveSequence({ params, source, tiles, keepFrames = false, 
   const frame = resolveFrame(recipe, source.content, source);
 
   let best = null, bestDrawn = -1, bestIndex = 0;
+  // The same growth the preview drew: each frame looks back at the ones before.
+  const growth = new Growth(source);
 
   await runFrames({
     count,
     async frame(i) {
-      const out = renderGrid({ recipe, source: source.frame(i), tiles, frame });
+      const { indices, scales } = growth.at(i, recipe, frame, tiles.length);
+      const out = renderGrid({ recipe, tiles, frame, indices, scales });
       if (blobs) blobs.push(await toPng(out.canvas));
 
       // renderGrid allocates a fresh surface every call, so keeping the best

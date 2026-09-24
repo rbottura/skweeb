@@ -25,6 +25,7 @@
 
 import { gridSize, mapPixels } from './map.js';
 import { fitInCell }           from './tone.js';
+import { paintDraft }          from './draft-paint.js';
 
 /**
  * A drawing surface. OffscreenCanvas where it exists, because that is what
@@ -41,6 +42,9 @@ export function surface(w, h) {
   canvas.height = height;
   return canvas;
 }
+
+/** Reused while the grid keeps its size: a loop maps every frame. */
+let _sampler = null;
 
 /**
  * Resample a source down to one pixel per cell, and read those pixels.
@@ -73,7 +77,8 @@ export function surface(w, h) {
 export function samplePixels(source, cols, rows, place) {
   if (cols < 1 || rows < 1) return new Uint8ClampedArray(0);
 
-  const canvas = surface(cols, rows);
+  if (!_sampler || _sampler.width !== cols || _sampler.height !== rows) _sampler = surface(cols, rows);
+  const canvas = _sampler;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
@@ -109,10 +114,14 @@ export function samplePixels(source, cols, rows, place) {
  * row, so a later one lies over an earlier. Written so that at 1 the numbers
  * are the ones this drew before it existed, to the last bit: a dither saved
  * then replays identically.
+ *
+ * `scales` is one more factor per cell — a sprite growing in as its cell
+ * fills (growth.js). Where it is 1, or absent, nothing changes; where it is 0
+ * the cell draws nothing yet.
  */
-export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0, offsetY = 0, size = 1 }) {
+export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0, offsetY = 0, size = 1, scales = null }) {
   let drawn = 0;
-  const s = size > 0 ? size : 1;
+  const base = size > 0 ? size : 1;
   const fits = tiles.map(t => t && fitInCell(t.width, t.height));
 
   for (let row = 0; row < rows; row++) {
@@ -123,6 +132,9 @@ export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0,
       const tile = tiles[index];
       if (!tile) continue;
 
+      const g = scales ? scales[row * cols + col] : 1;
+      if (!(g > 0)) continue;
+      const s = g === 1 ? base : base * g;
       const f = fits[index];
       ctx.drawImage(tile,
         offsetX + (col + f.x + f.w * (1 - s) / 2) * cell,
@@ -133,6 +145,35 @@ export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0,
   }
 
   return drawn;
+}
+
+/**
+ * Which ramp member each cell gets, for one frame of the source: the dither
+ * itself, without drawing it. -1 is an empty cell. Split out of renderGrid so
+ * that growth.js can ask it of past frames too, by the very same arithmetic.
+ *
+ * @param {object} args
+ * @param {object} args.recipe
+ * @param {CanvasImageSource} args.source
+ * @param {object} args.frame    from core/frame.js resolveFrame()
+ * @param {number} args.steps    members in the ramp
+ * @returns {Int16Array}
+ */
+export function mapFrame({ recipe, source, frame, steps }) {
+  const grid = gridSize({ width: frame.width, height: frame.height, cell: recipe.cell });
+  if (!grid.cols || !grid.rows || !source || !steps) return new Int16Array(0);
+  const pixels = samplePixels(source, grid.cols, grid.rows, {
+    from: frame.from,
+    to: frame.to,
+    width: frame.width,
+    height: frame.height,
+  });
+  return mapPixels(pixels, {
+    steps,
+    invert: recipe.invert,
+    alphaFloor: recipe.alphaFloor,
+    weighting: recipe.weighting,
+  });
 }
 
 /**
@@ -160,9 +201,14 @@ export function paintField(ctx, { indices, cols, rows, cell, tiles, offsetX = 0,
  * @param {CanvasImageSource[]} args.tiles the ramp, light to dark
  * @param {object} args.frame           from core/frame.js resolveFrame()
  * @param {number} [args.scale]         overrides recipe.scale, for export
+ * @param {Int16Array} [args.indices]   the frame already mapped (growth.js); `source` is then not read
+ * @param {?Float32Array} [args.scales] per cell, a sprite growing in (growth.js)
+ * @param {boolean} [args.draft]        the live preview: one fill per tile (draft-paint.js)
+ * @param {HTMLCanvasElement|OffscreenCanvas} [args.into]  drawn into and reused, not made anew
  * @returns {{canvas, cols, rows, cell, indices, drawn, scale, frame}}
  */
-export function renderGrid({ recipe, source, tiles, frame, scale }) {
+export function renderGrid({ recipe, source, tiles, frame, scale, indices: mapped, scales = null,
+                             draft = false, into = null }) {
   const zoom = Math.max(0.01, scale || recipe.scale || 1);
 
   // Counted in frame pixels, so the answer does not move with `scale`.
@@ -172,8 +218,12 @@ export function renderGrid({ recipe, source, tiles, frame, scale }) {
   const outW = Math.max(1, Math.round(frame.width * zoom));
   const outH = Math.max(1, Math.round(frame.height * zoom));
 
-  const canvas = surface(outW, outH);
+  const canvas = into || surface(outW, outH);
+  if (canvas.width !== outW) canvas.width = outW;
+  if (canvas.height !== outH) canvas.height = outH;
   const ctx = canvas.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (into) ctx.clearRect(0, 0, outW, outH);      // a reused canvas holds the last frame
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
@@ -187,27 +237,17 @@ export function renderGrid({ recipe, source, tiles, frame, scale }) {
     canvas, cols: grid.cols, rows: grid.rows, cell: cellPx, scale: zoom, frame,
   };
 
-  if (!grid.cols || !grid.rows || !source || !tiles.length) {
+  if (!grid.cols || !grid.rows || !(source || mapped) || !tiles.length) {
     return { ...out, indices: new Int16Array(0), drawn: 0 };
   }
 
-  const pixels = samplePixels(source, grid.cols, grid.rows, {
-    from: frame.from,
-    to: frame.to,
-    width: frame.width,
-    height: frame.height,
-  });
-
-  const indices = mapPixels(pixels, {
-    steps: tiles.length,
-    invert: recipe.invert,
-    alphaFloor: recipe.alphaFloor,
-    weighting: recipe.weighting,
-  });
+  const indices = mapped || mapFrame({ recipe, source, frame, steps: tiles.length });
 
   // Whole cells only, so the leftover is split either side and the field sits
-  // centred rather than pinned to the top left with a gap at the end.
-  const drawn = paintField(ctx, {
+  // centred rather than pinned to the top left with a gap at the end. The
+  // preview fills tile by tile when every sprite stays in its cell.
+  const paint = draft && (recipe.tileScale ?? 1) === 1 ? paintDraft : paintField;
+  const drawn = paint(ctx, {
     indices,
     cols: grid.cols,
     rows: grid.rows,
@@ -216,6 +256,7 @@ export function renderGrid({ recipe, source, tiles, frame, scale }) {
     offsetX: Math.round((outW - grid.cols * cellPx) / 2),
     offsetY: Math.round((outH - grid.rows * cellPx) / 2),
     size: recipe.tileScale ?? 1,
+    scales,
   });
 
   return { ...out, indices, drawn };
