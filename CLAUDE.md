@@ -14,11 +14,12 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/gamepad/` | draw with a gamepad, record sequences | — |
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
+| `apps/compose/` | M4: objects from every app placed on one page | `apps/compose/STATUS.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | static server + the vault write API | — |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome; `check-compose.mjs` is a browser check as a command. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
 
@@ -80,9 +81,12 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page; do
   node tests/$t.mjs || break
 done
+
+# In a real browser: compose in headless Chrome, on a copy of the vault.
+node scripts/check-compose.mjs
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at
