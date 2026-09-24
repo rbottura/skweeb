@@ -17,7 +17,7 @@ import { paintPage, pageSize } from './page.js';
  * A drawing surface, off screen. Grid and ckt each have these few lines too —
  * copied rather than imported, so no app needs another installed (rule 7).
  */
-function surface(w, h) {
+export function surface(w, h) {
   const width = Math.max(1, Math.round(w));
   const height = Math.max(1, Math.round(h));
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(width, height);
@@ -28,17 +28,19 @@ function surface(w, h) {
 }
 
 /**
- * A composition opened: every placement's object in exact frames.
+ * A composition opened: every placement's object in exact frames — or, for a
+ * page placed live on another page, a preview's (`draft`), as that page asks.
  *
  * @param {{page: object, place: object[]}} recipe
  * @param {object} [opts]
- * @param {number} [opts.depth]   how many rebuilds deep this already is (core/rebuild.js)
+ * @param {number} [opts.depth]    how many rebuilds deep this already is (core/rebuild.js)
+ * @param {boolean} [opts.draft]   a live preview's frames
  */
-export async function openComposition(recipe, { depth = 0 } = {}) {
+export async function openComposition(recipe, { depth = 0, draft = false } = {}) {
   const list = new Placements({
     load: async ref => {
       const { object, url, thumbUrl } = await Vault.load(ref);
-      return { object, handle: await openFrames(object, { url, depth }), thumb: thumbUrl };
+      return { object, handle: await openFrames(object, { url, depth, draft }), thumb: thumbUrl };
     },
   });
   for (const block of recipe.place || []) list.add(block);

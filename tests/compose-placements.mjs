@@ -130,5 +130,15 @@ const objects = {
   ok('taken off, its object is disposed', s.disposed, true);
 }
 
+// -- which of compose's objects it takes back ---------------------------------
+{
+  const { reopens } = await import('../apps/compose/rebuild.js');
+  const page = { page: { width: 1240, height: 1754 }, place: [] };
+  ok('a composition comes back to compose', reopens({ type: 'composition', recipe: page }), true);
+  ok('one with no list does not', reopens({ type: 'composition', recipe: { page: page.page } }), false);
+  ok('nor a leaf, nor a still', [reopens({ type: 'composition', recipe: null }), reopens({ type: 'still', recipe: page })],
+     [false, false]);
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

@@ -347,6 +347,16 @@ and the page lasts as long as its longest loop (`docs/object-model.md`,
 own "`at: 0` for something that is simply there". And a placement is picked
 up on the page by its box, not its ink, as a sheet of glass would be.
 
+**The fourth, a composition in the vault, left M4 one clause short.** A
+composition saves as `{ page, place }` with every placed object a parent,
+its render drawn from exact frames; compose's `rebuild.js` answers core's
+dispatch, so the vault plays a page that moves, `?open=<id>` restores one,
+and a page can be placed on a page. Against *Done when*: a sheet of objects
+from all three apps, one of them moving, previews live — yes; one object has
+a URL you can send — the `?open=` link, on the author's tailnet — yes;
+renders at print scale — the fifth brick. Core replays anything with a
+recipe and more than one frame now, not only a `sequence`.
+
 ## Still open
 
 1. ~~**`destra.otf` and `GPDestra-Light.otf`**~~ **Answered 2026-09-23** —

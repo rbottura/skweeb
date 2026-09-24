@@ -2,7 +2,7 @@
 _last touched: 2026-09-24_
 
 M4's app: objects from every process placed on one page, previewed live and
-rendered out (`docs/roadmap.md`, M4). Built a brick at a time; three of five
+rendered out (`docs/roadmap.md`, M4). Built a brick at a time; four of five
 are in.
 
 ## Works now — all of it seen running in Chrome
@@ -70,6 +70,17 @@ are in.
   not open is not saved. Seen: a grid dither under a ckt loop turned −12°,
   saved as `A4 · 2 placed`, 1240 × 1754, 668 frames at 60; saved twice
   unchanged, one object.
+- **A composition comes back** (brick 4, done; `rebuild.js`). Compose
+  answers core's dispatch: `openObject()` opens every object on the page and
+  paints it at the tick asked for, so the vault's player plays a composition
+  that moves — core now replays anything with a recipe and more than one
+  frame, not only a `sequence` — and the vault's detail offers *Open in
+  compose ↗*. `?open=<id>` restores the page's values and its list as saved,
+  nothing refitted, the top one chosen. And a page is placeable: a saved
+  composition goes on another page like any loop, replayed by the same
+  dispatch, core's depth guard stopping a chain nobody meant. Seen: the list
+  back in order with a dragged `x` of 100, the vault playing 360 frames, the
+  page placed whole on a new one.
 
 ## Tests
 
@@ -85,24 +96,26 @@ tick asked for once, moving through the stack, the newest load winning, an
 entry taken off before it opened never coming back, a handle nobody holds
 disposed.
 
-`node scripts/check-compose.mjs` runs it all in Chrome: 52 checks, the save
-read back out of the vault copy included.
+`node scripts/check-compose.mjs` runs it all in Chrome: 59 checks — the save
+read back out of the vault copy, reopened by link, played in the vault and
+placed on a page included.
 
 ## Next — the bricks, in order
 
 1. ~~**One object on a page at a transform, frame 0.**~~
 2. ~~**The page plays.**~~
 3. ~~**Many placements.**~~
-4. **A composition in the vault.** ~~Saving~~ is in. Next: compose's own
-   `rebuild.js` — `openObject()` on `openComposition()` (`render.js`), so
-   the vault's player replays a composition and another page can place one
-   (`PLACEABLE` gains `composition`; a page inside a page is the depth guard
-   `core/rebuild.js` already has) — `reopens()`, and `?open=<id>` restoring
-   the page and its list.
+4. ~~**A composition in the vault.**~~
 5. **Export at print scale.** Each placement drawn again by its own app at the
    size the page needs, not its saved pixels scaled up — the roadmap's
    "`render()` finally has to be real". A still, or frames and ffmpeg for a
-   page that moves.
+   page that moves. Its first move: `openFrames(object, { scale })` asking
+   the app that made an object for pixels at that scale — the gamepad's
+   replay has `renderScale` already, grid's `renderGrid` a `scale`, ckt's
+   `framing` a view factor — so `render.js` can ask each placement for the
+   page's scale times its own, and a still with a recipe is drawn again
+   rather than stretched. What an export writes — a PNG, frames for ffmpeg,
+   a PDF by way of sketch-2-print's paged.js — is the author's to say.
 
 And the link, `any → compose: place on a sheet`: the vault detail's
 *Place in compose ↗* on anything placeable. `?place=<id>` is ready for it.
@@ -124,3 +137,9 @@ And the link, `any → compose: place on a sheet`: the vault detail's
   turned sprite takes it, not what shows through beneath.
 - The picker lists shapes inside their `folder:` groups, closed, so a legacy
   sprite is two clicks away.
+- A page placed on a page is drawn at its own page pixels and scaled like a
+  picture; brick 5's scale reaches through it too.
+- `main.js` is at 341 lines and `scripts/check-compose.mjs` at 333. Before
+  brick 5 adds to either: the placement editing (`choose`, `sync`, `putOn`,
+  `takeOff`, `fitWhenOpen`) is one concept for a file of its own, and the
+  check splits by what it checks.

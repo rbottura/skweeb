@@ -98,7 +98,8 @@ place.restore(Params.fromPlacement(block));
 ok('and comes back from it', place.values, { ref: 'gam_1_abc', x: -40, y: 12, scale: 0.5, rot: 15 });
 place.restore(Params.fromPlacement({ ref: 'gam_2_def' }));
 ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', x: 0, y: 0, scale: 1, rot: 0 });
-ok('a placement takes what core gives frames of', place.spec('ref').accepts, ['still', 'sequence', 'shape']);
+ok('a placement takes what core gives frames of, pages too', place.spec('ref').accepts,
+   ['still', 'sequence', 'shape', 'composition']);
 
 // -- a composition's lineage -------------------------------------------------
 

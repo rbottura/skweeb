@@ -33,6 +33,7 @@ import { Bar }            from '../../core/Bar.js';
 import { Playhead }       from '../../core/playback.js';
 import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
+import { requested }      from '../../core/reopen.js';
 
 const canvas = document.getElementById('page');
 const ctx = canvas.getContext('2d');
@@ -118,8 +119,28 @@ async function boot() {
   wireKeys();
   refresh();
 
+  await openRequested();
   const asked = new URLSearchParams(location.search).get('place');
   if (asked) putOn(toPlacement({ ref: asked, ...AT_REST }));
+}
+
+/**
+ * `?open=<id>`: a composition back to work on (core/reopen.js). The page's
+ * values come back, and its list as it was saved — nothing refitted — with
+ * the top one chosen. Its objects open behind it, as any placement's do.
+ */
+async function openRequested() {
+  try {
+    const opened = await requested('compose');
+    if (!opened) return;
+    const { recipe } = opened.object;
+    page.restore(recipe.page);
+    for (const block of recipe.place || []) placements.add(block);
+    choose(placements.items[placements.length - 1] || null);
+    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+  } catch (err) {
+    bar.announce('could not open it: ' + err.message);
+  }
 }
 
 // ── Placements ───────────────────────────────────────────────────────────────

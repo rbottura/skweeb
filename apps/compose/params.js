@@ -26,8 +26,11 @@ export const PLACE_GROUPS = {
   transform: { label: 'Transform', open: true },
 };
 
-/** What a page takes: anything core gives frames of (core/rebuild.js `openFrames`). */
-export const PLACEABLE = ['still', 'sequence', 'shape'];
+/**
+ * What a page takes: anything core gives frames of (core/rebuild.js
+ * `openFrames`) — another page included, replayed by compose's rebuild.js.
+ */
+export const PLACEABLE = ['still', 'sequence', 'shape', 'composition'];
 
 /**
  * The page: the frame group as a sheet, and the paper under everything.

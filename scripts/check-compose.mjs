@@ -18,7 +18,8 @@
  *                         kept while loops play, removed, picked up and dragged
  *                         on the page, sent back
  *   saved                 the page as a composition in the vault copy: recipe,
- *                         parents, frames, render, and one object for two saves
+ *                         parents, frames, render, and one object for two saves;
+ *                         back by ?open=, played in the vault, placed on a page
  *   no vault at all       the repo served as plain files: it boots, says so
  *
  * and a console with nothing in it but a missing favicon. Screenshots land in
@@ -286,6 +287,35 @@ try {
          `${o.render.w}×${o.render.h}, thumb ${o.thumb}`);
       const again = await saved();
       ok('saved again unchanged, it is the same object', !!again && again[1] === m[1], again ? again[1] : 'none');
+
+      // It comes back: by link, in the vault's own player, and on another page.
+      await go(BASE + '/apps/compose/?open=' + m[1]);
+      await page.until(`document.querySelectorAll('#place-side .pl-row').length === 2
+        && !document.querySelector('#place-side .pl-sub')?.textContent.includes('opening')`, { timeout: 90000 });
+      ok('?open= puts the list back as it was saved', JSON.stringify(await rowsOf()) === JSON.stringify(rows),
+         JSON.stringify(await rowsOf()));
+      await page.click(`[...document.querySelectorAll('#place-side .pl-row')].at(-1)`);
+      await page.until(`document.querySelector('#place-side .pp-object-name')?.textContent === ${JSON.stringify(loopB.title)}`);
+      const xBack = Number(await page.eval(row('place-side', 'x from centre') + '.querySelector(".pp-num").value'));
+      ok('and each placement where it was left', xBack === x1, `x ${xBack}`);
+      ok('and the page\'s length with it', (await playerNote()).startsWith(o.render.frames + ' frames'), await playerNote());
+
+      await press('V');
+      await page.until(`[...document.querySelectorAll('.vp--visible .vp-card .vp-name')].some(n => n.textContent === ${JSON.stringify(o.title)})`);
+      await page.click(`[...document.querySelectorAll('.vp--visible .vp-card')].find(c => c.querySelector('.vp-name').textContent === ${JSON.stringify(o.title)})`);
+      await page.until(`[...document.querySelectorAll('.vp-btn')].some(b => b.textContent === '▶ Play the loop')`);
+      const link = await page.eval(`[...document.querySelectorAll('.vp-btn')].find(b => b.textContent === 'Open in compose ↗')?.title || ''`);
+      ok('the vault offers it back to compose', link === '/apps/compose/?open=' + m[1], link || 'no link');
+      await page.click(`[...document.querySelectorAll('.vp-btn')].find(b => b.textContent === '▶ Play the loop')`);
+      await page.until(`Number(document.querySelector('.sv-count')?.textContent.split(' / ')[0]) > 30`, { timeout: 90000 });
+      ok('and plays it: a page is a loop the vault can replay', true, await page.eval(`document.querySelector('.sv-count').textContent`));
+      await press('Escape');
+
+      await go(BASE + '/apps/compose/?place=' + m[1]);
+      await page.until(settled, { timeout: 90000 });
+      const said = await page.eval(`document.querySelector('.bar-say').textContent`);
+      ok('a page placed on a page, whole and moving', said.includes('composition') && said.includes('fps loop'), said);
+      await shot('07-page-on-a-page');
     }
   }
   const noise = kit.quiet();
