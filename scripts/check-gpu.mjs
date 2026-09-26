@@ -69,6 +69,27 @@ async function inPage() {
   out.brightOpaque = [at(src, 64, 10, 10), at(lit, 64, 10, 10)];
   out.brightHalf = [at(src, 64, 10, 60), at(lit, 64, 10, 60)];
 
+  // The six from p5.FIP, each on one opaque pixel of the gradient, against its formula.
+  const [pr, pg, pb] = at(src, 64, 10, 30).slice(0, 3).map(v => v / 255);
+  const L709 = 0.2126 * pr + 0.7152 * pg + 0.0722 * pb;
+  const L601 = 0.299 * pr + 0.587 * pg + 0.114 * pb;
+  const byte = v => Math.round(Math.min(1, Math.max(0, v)) * 255);
+  const formulas = {
+    saturation: [{ amount: 0 }, [L709, L709, L709]],
+    invert: [{}, [1 - pr, 1 - pg, 1 - pb]],
+    sepia: [{}, [L601 * 1.2, L601 * 0.9, L601 * 0.7]],
+    duotone: [{ dark: '#ff0000', light: '#0000ff' }, [1 - L601, 0, L601]],
+    threshold: [{ level: 0.5 }, L709 >= 0.5 ? [1, 1, 1] : [0, 0, 0]],
+    posterize: [{ shades: 4 }, [pr, pg, pb].map(v => Math.min(Math.floor(v * 4), 3) / 3)],
+  };
+  out.ported = {};
+  for (const [id, [params, want]] of Object.entries(formulas)) {
+    const got = at(read(runner.run(grad, [{ id, params }])), 64, 10, 30);
+    out.ported[id] = { got: got.slice(0, 3).join(','), want: want.map(byte).join(','),
+      off: Math.max(...want.map((w, i) => Math.abs(byte(w) - got[i]))), alpha: got[3] };
+  }
+  out.invertHalf = [at(src, 64, 10, 60), at(read(runner.run(grad, [{ id: 'invert' }])), 64, 10, 60)];
+
   const hard = read(runner.run(grad, [{ id: 'contrast', params: { amount: 2 } }]));
   out.contrast = [at(hard, 64, 16, 16)[0], at(hard, 64, 48, 48)[0]];
 
@@ -175,6 +196,11 @@ if (r.gpu) {
     c.ok('on a half-clear pixel it moves the colour, not the alpha',
       hn[3] === hw[3] && Math.abs(hn[0] - (hw[0] + 51)) <= 3, `${hw} → ${hn}`);
     c.ok('contrast 2 pushes 64 to black and 192 to white', r.contrast[0] <= 2 && r.contrast[1] >= 253, r.contrast.join(', '));
+    for (const [id, p] of Object.entries(r.ported)) {
+      c.ok(`${id}, from p5.FIP, lands on its formula`, p.off <= 2 && p.alpha === 255, `${p.got} (formula ${p.want})`);
+    }
+    const [iw, ih] = r.invertHalf;
+    c.ok('inverted, a half-clear pixel keeps its coverage', ih[3] === iw[3] && Math.abs(ih[0] - (255 - iw[0])) <= 2, `${iw} → ${ih}`);
     c.ok('pixelate: every block one colour', r.pixelate.flat === 0, 'worst in a block ' + r.pixelate.flat);
     c.ok('the colour the source had at its centre', r.pixelate.centred <= 1, 'off by ' + r.pixelate.centred);
     c.ok('a blur lands on its own Gaussian weights', r.blurOff <= 1.5, 'worst pixel off by ' + r.blurOff.toFixed(2));

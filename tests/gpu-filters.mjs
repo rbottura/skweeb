@@ -9,6 +9,7 @@
  * browser check's: node scripts/check-gpu.mjs.
  */
 
+import fs from 'node:fs';
 const { FILTERS } = await import('../core/gpu/filters/index.js');
 const { passesOf, reachOf, marginOf } = await import('../core/gpu/runner.js');
 const { moduleFor } = await import('../core/gpu/wgsl.js');
@@ -35,7 +36,12 @@ for (const [key, f] of all) {
   ok(name + 'listed under its own id', key, f.id);
   ok(name + 'has a label', typeof f.label === 'string' && f.label.length > 0, true);
   ok(name + 'says where it came from', f.source === 'skweeb' || /^https:\/\//.test(f.source), true);
-  if (f.source !== 'skweeb') ok(name + 'keeps its copyright line', typeof f.copyright === 'string', true);
+  if (f.source !== 'skweeb') {
+    ok(name + 'keeps its copyright line', typeof f.copyright === 'string', true);
+    const notice = new URL('../core/gpu/filters/' + (f.notice || '-'), import.meta.url);
+    ok(name + 'the whole text of its licence is beside it', fs.existsSync(notice)
+      && fs.readFileSync(notice, 'utf8').includes(f.copyright), true);
+  }
   ok(name + 'a licence that allows a game', LICENCES.includes(f.licence), true);
 
   const schema = f.params || {};

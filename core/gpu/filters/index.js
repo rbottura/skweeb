@@ -7,7 +7,9 @@
  *
  *   id, label
  *   source      where it came from: `skweeb` for one written here, otherwise
- *               a URL — and then `copyright`, the line its licence asks to keep
+ *               a URL — and then `copyright`, the line its licence asks to keep,
+ *               and `notice`, the file beside these that holds its licence's
+ *               whole text (LICENSE-p5.FIP.txt), as MIT and BSD ask
  *   licence     rule 5: every shader says under what. MIT, BSD or the like;
  *               LYGIA and unlicensed Shadertoy code are noncommercial and
  *               never enter
@@ -24,6 +26,15 @@ import brightness from './brightness.js';
 import contrast from './contrast.js';
 import blur from './blur.js';
 import pixelate from './pixelate.js';
+// From p5.FIP (MIT): LICENSE-p5.FIP.txt.
+import saturation from './saturation.js';
+import invert from './invert.js';
+import sepia from './sepia.js';
+import duotone from './duotone.js';
+import threshold from './threshold.js';
+import posterize from './posterize.js';
 
+/** In the order the add menu lists them: tone and colour first, then blur and blocks. */
 export const FILTERS = Object.freeze(Object.fromEntries(
-  [brightness, contrast, blur, pixelate].map(f => [f.id, f])));
+  [brightness, contrast, saturation, invert, sepia, duotone, threshold, posterize, blur, pixelate]
+    .map(f => [f.id, f])));

@@ -17,11 +17,21 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 4. **A look** — done 2026-09-26: a chain saved alone, as a `params` object,
    and applied to a placement in compose — M5's link, `filter → compose: a
    look`. With it, filters reach past the edge (`edges`: grow or keep).
-5. **The catalogue grows**: p5.FIP's, glfx's and GPUImage's filters, each with
-   its copyright line; then the suite's own groups — game assets, motion, time.
+5. **The catalogue grows** — begun 2026-09-26: p5.FIP's, glfx's and GPUImage's
+   filters, each with its copyright line; then the suite's own groups — game
+   assets, motion, time. First batch in: six from p5.FIP.
 
 ## Works now
 
+- **Ten filters.** Written here: brightness, contrast, gaussian blur,
+  pixelate. From p5.FIP (MIT, its whole licence in
+  `core/gpu/filters/LICENSE-p5.FIP.txt`): saturation, invert, sepia, duotone,
+  threshold, posterize — each file names its source, licence and copyright
+  line and what was changed: all six unpremultiply and keep the alpha, where
+  p5.FIP greyed a sprite's clear pixels (saturation) or darkened its soft
+  edge; posterize holds white to the last step. `check-gpu` holds each to
+  its formula on a pixel; `tests/gpu-filters.mjs` holds every ported filter
+  to its notice.
 - **A look** (`node scripts/check-look.mjs`, 12 checks). *Save the chain as a
   look* writes the chain alone — `{ chain, edges }`, a `params` object with a
   picture of what it does; `?open=<look>` puts the chain back over whatever is
@@ -70,19 +80,21 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 - **Reloading the page loses an unsaved chain** — only a save keeps it.
 - **A frames download holds every PNG until the zip is built**, as grid's
   does: a long loop at a big size is a lot of memory.
-- **Four filters** in the catalogue, all written here.
 - **Time filters** (echo, slit-scan) need frames other than the one shown;
   `run()` takes one picture. They wait for the catalogue's time group.
 
 ## Next single step
 
-**Brick 5, its first batch: six filters from p5.FIP** — saturation, invert,
-sepia, duotone, threshold and quantization, each a file in
-`core/gpu/filters/` whose `source` is p5.FIP, `licence` MIT and `copyright`
-"Copyright (c) 2024 Darragh Nolan", its WGSL written from p5.FIP's GLSL; and,
-with the first port, p5.FIP's licence text beside them, as MIT asks.
-`tests/gpu-filters.mjs` holds them to the rules; `check-gpu.mjs` compiles
-them and checks a pixel of each against its formula.
+**Brick 5, the next batch: the game-asset group, the suite's own** — a
+sprite *outline* (a width and a colour, reaching its width past the edge),
+a *drop shadow* (an offset, a blur, a colour, reaching as far as both), and
+*palette lock* (every pixel to the nearest colour of a `color[]` param, until
+the `palette` type exists). Written here; `check-gpu` holds each to what it
+should do to a sprite on nothing — an outline one colour and one width, a
+shadow where it was sent.
+
+After it, from p5.FIP: the neighbourhood filters — sharpen, unsharp mask,
+emboss, sobel edges, dilate, erode — and glfx's and GPUImage's after.
 
 ## Parked
 
