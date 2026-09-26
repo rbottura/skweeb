@@ -2,18 +2,23 @@
  * wgsl.js — what every filter pass is written against.
  *
  * A pass is WGSL: a function `fx(uv: vec2f) -> vec4f`, and, when it takes
- * params, a `struct Params` of `f32` fields and nothing else. That one rule
- * keeps packing clear of WGSL's alignment rules — a colour is four f32
- * fields — and tests/gpu-filters.mjs holds every filter to it.
+ * params, a `struct Params` of `f32` fields — and, last, at most one
+ * `array<vec4f, N>`, with the f32 fields before it a multiple of four, which
+ * is where WGSL's alignment puts it (a palette). That rule keeps packing a
+ * flat list of numbers; tests/gpu-filters.mjs holds every filter to it.
  *
  * Everything else is here, prepended to each pass:
  *
  *   frame      size and texel (1/size) in pixels; scale, the print scale a
  *              size param is multiplied by; time in seconds; seed (rule 2)
- *   src, orig  the previous pass's output, and the chain's source
+ *   src        the previous pass's output
+ *   orig       this filter's own input — the picture before its first pass,
+ *              what a later pass lays back over (an outline, a shadow)
  *   tex(uv)    src sampled bilinear at any uv. textureSampleLevel, so there
  *              is no uniformity rule to trip on in a loop or a branch
- *   texAt(px)  one texel of src, exactly, clamped to the edge
+ *   texAt(px)  one texel of src, exactly, clamped to the edge; origAt(px), of orig
+ *   oklab(rgb) a colour in OKLab, where distance is how different two
+ *              colours look — Björn Ottosson's published matrices
  *   unpremul, premul
  *              textures hold premultiplied alpha, as a canvas does: a colour
  *              adjustment unpremultiplies first, a blur never does — that is
@@ -65,6 +70,24 @@ fn tex(uv: vec2f) -> vec4f {
 fn texAt(px: vec2i) -> vec4f {
   let last = vec2i(textureDimensions(src)) - vec2i(1);
   return textureLoad(src, clamp(px, vec2i(0), last), 0);
+}
+
+fn origAt(px: vec2i) -> vec4f {
+  let last = vec2i(textureDimensions(orig)) - vec2i(1);
+  return textureLoad(orig, clamp(px, vec2i(0), last), 0);
+}
+
+fn oklab(rgb: vec3f) -> vec3f {
+  let l = select(pow((rgb + 0.055) / 1.055, vec3f(2.4)), rgb / 12.92, rgb <= vec3f(0.04045));
+  let lms = vec3f(
+    0.4122214708 * l.r + 0.5363325363 * l.g + 0.0514459929 * l.b,
+    0.2119034982 * l.r + 0.6806995451 * l.g + 0.1073969566 * l.b,
+    0.0883024619 * l.r + 0.2817188376 * l.g + 0.6299787005 * l.b);
+  let q = pow(max(lms, vec3f(1e-9)), vec3f(1.0 / 3.0));
+  return vec3f(
+    0.2104542553 * q.x + 0.7936177850 * q.y - 0.0040720468 * q.z,
+    1.9779984951 * q.x - 2.4285922050 * q.y + 0.4505937099 * q.z,
+    0.0259040371 * q.x + 0.7827717662 * q.y - 0.8086757660 * q.z);
 }
 
 fn unpremul(c: vec4f) -> vec4f {

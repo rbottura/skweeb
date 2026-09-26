@@ -14,7 +14,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `stage/` | `clip` `player` `transport` `recorder` `stage` `bounds` | **in**, was `gamepad/core/sequence*.js` |
 | `stamp.js` | where a pattern puts its stamps | **in**, split out of `joyImage.js` |
 | `VaultPanel.js` | the window onto the objects on disk; `folder:` tags group; ctrl-click selects, for the trash | **in**, detail view in `vault-detail.js`, a card in `vault-card.js`, a folder's card and strip in `vault-folder.js`, the selection bar and the delete question in `vault-trash.js` |
-| `gpu/` | filters on the GPU, WebGPU: one device for the page (`device.js`), a chain run in one call (`runner.js`), the catalogue as data (`filters/`), a look over any object's frames (`look.js`) — see *gpu/* below | **in**, 2026-09-26, M5: ten filters, six from p5.FIP; looks |
+| `gpu/` | filters on the GPU, WebGPU: one device for the page (`device.js`), a chain run in one call (`runner.js`), the catalogue as data (`filters/`), a look over any object's frames (`look.js`) — see *gpu/* below | **in**, 2026-09-26, M5: thirteen filters, six from p5.FIP; looks |
 | `reopen.js` | an object back in its app: `/apps/<app>/?open=<id>` | **in**, 2026-09-23 |
 | `rebuild.js` | frame N of any object: `openFrames()` — anything with a recipe and more than one frame replayed by its app (a sequence, a composition that moves), a picture as itself — and the dispatch to an app's own `rebuild.js`. `draft: true` asks for a live preview's frames, which an app may make faster and near-exact; nothing saved asks for them. `scale` asks for frames at more pixels: an app draws a still again when its rebuild.js `redraws()` it, and a handle's `scale` says what it really drew — its size is always its render's | **in**; `openFrames`, `draft` and `scale` 2026-09-24, for compose |
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
@@ -194,9 +194,11 @@ between passes.
 
 A filter is data too (`gpu/filters/`, listed in its `index.js`): an id, a
 label, its `source` and `licence` (rule 5), a param schema, and passes — each
-a WGSL `fx(uv)` with, if it takes params, a `Params` of f32 fields, the
-numbers its `uniforms(values, info)` returns. `wgsl.js` is what a pass is
-written against. `node tests/gpu-filters.mjs` holds the catalogue to all of
+a WGSL `fx(uv)` with, if it takes params, a `Params` of f32 fields and, last,
+at most one `array<vec4f, N>` (a palette): the numbers its
+`uniforms(values, info)` returns. A pass reads the pass before it as `src`
+and its filter's own input as `orig` — what an outline lays the sprite back
+over. `wgsl.js` is what a pass is written against. `node tests/gpu-filters.mjs` holds the catalogue to all of
 this without a GPU; `node scripts/check-gpu.mjs` runs it on one.
 
 **Past the edge.** A filter may say how far it reaches past its picture —

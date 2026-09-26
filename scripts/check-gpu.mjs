@@ -134,6 +134,37 @@ async function inPage() {
   spread = at(soft, 64, 22, 32)[3];
   out.halo = { darkest, tinted, spread };
 
+  // For game assets, on a red square on nothing (x and y 16 to 31).
+  const square = canvas(48, 48, x => { x.fillStyle = '#f00'; x.fillRect(16, 16, 16, 16); });
+  const blue = { id: 'outline', params: { width: 2, colour: '#0000ff' } };
+  const lined = read(runner.run(square, [blue]));
+  out.outline = { inside: at(lined, 48, 24, 24), one: at(lined, 48, 32, 24), two: at(lined, 48, 33, 24),
+    past: at(lined, 48, 35, 24)[3], corner: at(lined, 48, 33, 33)[3] };
+  // Second in a chain, its `orig` is its own input — the brightened square, not the source.
+  out.outlineSecond = at(read(runner.run(square, [{ id: 'brightness', params: { amount: 0.2 } }, blue])), 48, 24, 24);
+  const cast = read(runner.run(square, [{ id: 'shadow',
+    params: { x: 4, y: 4, softness: 0, colour: '#000000', opacity: 1 } }]));
+  out.shadow = { under: at(cast, 48, 34, 34), sprite: at(cast, 48, 24, 24), beside: at(cast, 48, 18, 34)[3] };
+
+  // Palette lock: each pixel to the colour OKLab calls nearest, worked out here the same way.
+  const lab = rgb => {
+    const l = rgb.map(v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+    const q = [0.4122214708 * l[0] + 0.5363325363 * l[1] + 0.0514459929 * l[2],
+      0.2119034982 * l[0] + 0.6806995451 * l[1] + 0.1073969566 * l[2],
+      0.0883024619 * l[0] + 0.2817188376 * l[1] + 0.6299787005 * l[2]].map(Math.cbrt);
+    return [0.2104542553 * q[0] + 0.7936177850 * q[1] - 0.0040720468 * q[2],
+      1.9779984951 * q[0] - 2.4285922050 * q[1] + 0.4505937099 * q[2],
+      0.0259040371 * q[0] + 0.7827717662 * q[1] - 0.8086757660 * q[2]];
+  };
+  const palette = [[0, 0, 0], [255, 255, 255], [255, 0, 0]];
+  const nearest = rgb => palette.reduce((best, p) => {
+    const d = Math.hypot(...lab(p).map((v, i) => v - lab(rgb)[i]));
+    return d < best.d ? { p, d } : best;
+  }, { p: null, d: Infinity }).p;
+  const locked = read(runner.run(grad, [{ id: 'palette', params: { colours: ['#000000', '#ffffff', '#ff0000'] } }]));
+  out.palette = [[10, 30], [60, 2], [2, 2], [50, 40]].map(([x, y]) => ({
+    at: `${x},${y}`, got: at(locked, 64, x, y).slice(0, 3).join(','), want: nearest(at(src, 64, x, y).slice(0, 3)).join(',') }));
+
   // A sprite trimmed to its ink: grown, a blur keeps its halo past the trim;
   // held, the size stays and what lies past the edge is the edge's colour.
   const tight = canvas(16, 16, x => { x.fillStyle = '#f00'; x.fillRect(0, 0, 16, 16); });
@@ -209,6 +240,20 @@ if (r.gpu) {
     c.ok('a blurred sprite\'s edge stays red, never dark', r.halo.darkest >= 250 && r.halo.tinted <= 3,
       `reddest-to-darkest ${r.halo.darkest}, most green or blue ${r.halo.tinted}`);
     c.ok('and fades out past where it was', r.halo.spread > 0 && r.halo.spread < 255, 'alpha 2 px out: ' + r.halo.spread);
+    const o = r.outline;
+    c.ok('outline: the line one colour and its width, round the sprite',
+      o.one.join() === '0,0,255,255' && o.two.join() === '0,0,255,255' && o.past === 0 && o.inside.join() === '255,0,0,255',
+      `inside ${o.inside}, 1 out ${o.one}, 2 out ${o.two}, 4 out alpha ${o.past}`);
+    c.ok('its corners round, as a pen draws them', o.corner > 0 && o.corner < 255, 'corner alpha ' + o.corner);
+    c.ok('second in a chain, it lays back its own input, not the source',
+      Math.abs(r.outlineSecond[1] - 51) <= 2 && r.outlineSecond[0] === 255, String(r.outlineSecond));
+    const s = r.shadow;
+    c.ok('drop shadow: cast where it was sent, under the sprite',
+      s.under.join() === '0,0,0,255' && s.sprite.join() === '255,0,0,255' && s.beside === 0,
+      `under ${s.under}, sprite ${s.sprite}, beside alpha ${s.beside}`);
+    for (const p of r.palette) {
+      c.ok(`palette lock: ${p.at} to the nearest colour in OKLab`, p.got === p.want, `${p.got} (nearest ${p.want})`);
+    }
     c.ok('grown, a trimmed sprite keeps its halo past the trim',
       r.grow.width === 28 && r.grow.height === 28 && r.grow.halo > 0 && r.grow.centre === 255,
       `${r.grow.width} × ${r.grow.height}, alpha 4 px past the trim ${r.grow.halo}`);

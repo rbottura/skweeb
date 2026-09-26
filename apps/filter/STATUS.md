@@ -19,12 +19,21 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
    look`. With it, filters reach past the edge (`edges`: grow or keep).
 5. **The catalogue grows** — begun 2026-09-26: p5.FIP's, glfx's and GPUImage's
    filters, each with its copyright line; then the suite's own groups — game
-   assets, motion, time. First batch in: six from p5.FIP.
+   assets, motion, time. In: six from p5.FIP, and the game-asset group
+   begun — outline, drop shadow, palette lock.
 
 ## Works now
 
-- **Ten filters.** Written here: brightness, contrast, gaussian blur,
-  pixelate. From p5.FIP (MIT, its whole licence in
+- **For game assets** (the suite's own, 2026-09-26): an *outline* round a
+  sprite — its width and colour, measured by an exact distance in two passes,
+  its corners round; a *drop shadow* — moved, softened, coloured, faded; and
+  *palette lock* — every pixel to the nearest colour of a palette as the eye
+  judges it (OKLab), up to 32, four greens of an old handheld to start. The
+  outline and the shadow reach past the edge, so a sprite grows to hold them,
+  and lay the sprite back over what they drew — `orig` is now a filter's own
+  input, whatever runs before it in the chain.
+- **Thirteen filters.** Written here: brightness, contrast, gaussian blur,
+  pixelate, outline, drop shadow, palette lock. From p5.FIP (MIT, its whole licence in
   `core/gpu/filters/LICENSE-p5.FIP.txt`): saturation, invert, sepia, duotone,
   threshold, posterize — each file names its source, licence and copyright
   line and what was changed: all six unpremultiply and keep the alpha, where
@@ -85,16 +94,15 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 
 ## Next single step
 
-**Brick 5, the next batch: the game-asset group, the suite's own** — a
-sprite *outline* (a width and a colour, reaching its width past the edge),
-a *drop shadow* (an offset, a blur, a colour, reaching as far as both), and
-*palette lock* (every pixel to the nearest colour of a `color[]` param, until
-the `palette` type exists). Written here; `check-gpu` holds each to what it
-should do to a sprite on nothing — an outline one colour and one width, a
-shadow where it was sent.
+**Brick 5, the next batch: p5.FIP's neighbourhood filters** — sharpen,
+unsharp mask, emboss, sobel edges, dilate and erode, each a file with its
+copyright line and its reach (a pixel, or its radius). Unsharp mask is a
+blur and then the picture pushed away from it: two passes and `orig`, as the
+outline is. `check-gpu` holds each to what it does to one edge — a step from
+dark to light, sharpened, embossed, found, grown and shrunk.
 
-After it, from p5.FIP: the neighbourhood filters — sharpen, unsharp mask,
-emboss, sobel edges, dilate, erode — and glfx's and GPUImage's after.
+Then glfx's and GPUImage's, and the suite's own groups: motion — a still in,
+a loop out, for idle animation — and time.
 
 ## Parked
 

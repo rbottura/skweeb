@@ -61,10 +61,14 @@ for (const [key, f] of all) {
     }
     ok(pass + 'declares its Params', !!struct, true);
     if (!struct) return;
-    const fields = struct[1].split(',').map(s => s.trim()).filter(Boolean);
-    ok(pass + 'Params is f32 fields only', fields.every(s => /^\w+: f32$/.test(s)), true);
+    // f32 fields, and last at most one array<vec4f, N> after a multiple of four of them.
+    const fields = struct[1].split(/,(?![^<]*>)/).map(s => s.trim()).filter(Boolean);
+    const tail = /^\w+: array<vec4f, (\d+)>$/.exec(fields[fields.length - 1] || '');
+    const flat = tail ? fields.slice(0, -1) : fields;
+    ok(pass + 'Params is f32 fields, a vec4f array last', flat.every(s => /^\w+: f32$/.test(s))
+      && (!tail || flat.length % 4 === 0), true);
     const numbers = p.uniforms(defaults, info);
-    ok(pass + 'uniforms() fills every field', numbers.length, fields.length);
+    ok(pass + 'uniforms() fills every field', numbers.length, flat.length + (tail ? 4 * Number(tail[1]) : 0));
     ok(pass + 'with finite numbers', numbers.every(Number.isFinite), true);
     ok(pass + 'and the module binds params', /@binding\(3\) var<uniform> params: Params/.test(moduleFor(p)), true);
   });
@@ -91,6 +95,9 @@ ok('a blur of 2 at 2x is a blur of 4 at 1x', at('blur', { radius: 2 }, 2), at('b
 ok('its taps reach three deviations', at('blur', { radius: 4 }, 1)[3], 12);
 ok('a block of 8 at 2x is 16 pixels', at('pixelate', { size: 8 }, 2), [16]);
 ok('a blur of nothing takes no taps', at('blur', { radius: 0 }, 1)[3], 0);
+ok('an outline looks its width and a pixel past', at('outline', { width: 2, colour: '#000000' }, 2), [6]);
+ok('a palette of two fills two of 32 places', at('palette', { colours: ['#000000', '#ffffff'] }, 1).slice(0, 12),
+  [2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0]);
 
 // ── How far a chain reaches past its picture ────────────────────────────────
 ok('a colour change reaches nowhere', reachOf([{ id: 'brightness' }, { id: 'contrast' }]), 0);
@@ -98,6 +105,10 @@ ok('a blur reaches its three deviations', reachOf([{ id: 'blur', params: { radiu
 ok('two blurs, their reaches added, rounded up',
   reachOf([{ id: 'blur', params: { radius: 1.5 } }, { id: 'blur', params: { radius: 2 } }]), 11);
 ok('a filter switched off reaches nowhere', reachOf([{ id: 'blur', params: { radius: 4 }, on: false }]), 0);
+ok('an outline reaches its width and a pixel', reachOf([{ id: 'outline', params: { width: 2 } }]), 3);
+ok('a shadow reaches as far as it goes and its softness',
+  reachOf([{ id: 'shadow', params: { x: -5, y: 3, softness: 2 } }]), 11);
+ok('palette lock reaches nowhere', reachOf([{ id: 'palette' }]), 0);
 ok('a filter this catalogue lacks is left out, not thrown', reachOf([{ id: 'nope' }, { id: 'blur', params: { radius: 1 } }]), 3);
 ok('the room at 2x is twice the pixels', marginOf([{ id: 'blur', params: { radius: 4 } }], 2), 24);
 ok('and whole pixels at any scale', marginOf([{ id: 'blur', params: { radius: 1.5 } }], 1.5), 8);

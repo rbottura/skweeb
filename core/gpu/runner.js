@@ -18,9 +18,12 @@
  * compiling, is prepare()'s, awaited before.
  *
  * Between passes the picture is rgba16float, premultiplied as a canvas is, so
- * a long chain does not band. Two such textures are used in turns; the
- * source keeps its own, which a pass reads as `orig`. They are kept for the
- * next run at the same size.
+ * a long chain does not band. A filter of several passes may need its own
+ * input again at its last — an outline lays the sprite back over its line —
+ * so that input stays put while the filter runs, and its passes read it as
+ * `orig`: three work textures turn, a filter writing into the two it did not
+ * start from. They and the source's are kept for the next run at the same
+ * size.
  *
  * ── Past the edge ───────────────────────────────────────────────────────────
  *
@@ -40,7 +43,7 @@ import { FILTERS } from './filters/index.js';
 import { valuesFor } from '../params.js';
 
 const MID = 'rgba16float';
-const PARAM_BYTES = 256;         // 64 f32 — far more than a pass has
+const PARAM_BYTES = 1024;        // 256 f32 — a palette of 32 colours and room over
 
 /** A pass's whole module, built once per pass rather than once per run. */
 const _modules = new WeakMap();
@@ -84,7 +87,7 @@ export function passesOf(chain) {
     const filter = FILTERS[entry.id];
     if (!filter) throw new Error(`gpu: no filter "${entry.id}" in this catalogue`);
     const values = valuesFor(filter.params || {}, entry.params);
-    filter.passes.forEach((pass, i) => out.push({ filter, pass, values, label: `${filter.id}.${i}` }));
+    filter.passes.forEach((pass, i) => out.push({ filter, pass, values, first: i === 0, label: `${filter.id}.${i}` }));
   }
   return out;
 }
@@ -121,6 +124,8 @@ class Runner {
 
     this.w = 0;
     this.h = 0;
+    this.src = null;
+    this.work = [];                  // three, made to the size by fit()
     this.picture = null;
   }
 
@@ -214,18 +219,26 @@ class Runner {
     const encoder = device.createCommandEncoder({ label: 'chain' });
     const info = { width: w, height: h, scale, time, seed };
     let input = this.src;
-    passesOf(chain).forEach(({ pass, values, label }, i) => {
-      const output = input === this.ping ? this.pong : this.ping;
+    let own = input;                 // the filter's own input: its passes' `orig`
+    let free = [];                   // the two textures it writes into, in turns
+    let k = 0;
+    passesOf(chain).forEach(({ pass, values, label, first }, i) => {
+      if (first) {
+        own = input;
+        free = this.work.filter(t => t !== own);
+        k = 0;
+      }
+      const output = free[k++ % 2];
       const params = this.paramBuffer(i);
       if (pass.uniforms) device.queue.writeBuffer(params, 0, new Float32Array(pass.uniforms(values, info)));
-      this.draw(encoder, this.pipeline(pass, MID, label), input, params, output.createView());
+      this.draw(encoder, this.pipeline(pass, MID, label), input, params, output.createView(), own);
       input = output;
     });
 
     if (this.canvas.width !== w) this.canvas.width = w;
     if (this.canvas.height !== h) this.canvas.height = h;
     const present = this.pipeline(PRESENT, this.format, 'present');
-    this.draw(encoder, present, input, this.paramBuffer(0), this.context.getCurrentTexture().createView());
+    this.draw(encoder, present, input, this.paramBuffer(0), this.context.getCurrentTexture().createView(), input);
     device.queue.submit([encoder.finish()]);
 
     if (this.picture) this.picture.close();
@@ -233,7 +246,7 @@ class Runner {
     return this.picture;
   }
 
-  draw(encoder, pipeline, input, params, view) {
+  draw(encoder, pipeline, input, params, view, own) {
     const group = this.device.createBindGroup({
       layout: this.layout,
       entries: [
@@ -241,7 +254,7 @@ class Runner {
         { binding: 1, resource: this.sampler },
         { binding: 2, resource: input.createView() },
         { binding: 3, resource: { buffer: params } },
-        { binding: 4, resource: this.src.createView() },
+        { binding: 4, resource: own.createView() },
       ],
     });
     const pass = encoder.beginRenderPass({
@@ -269,22 +282,22 @@ class Runner {
     if (w > this.maxSide || h > this.maxSide) {
       throw new Error(`gpu: ${w} × ${h} is past this GPU's largest texture, ${this.maxSide}`);
     }
-    for (const t of [this.src, this.ping, this.pong]) if (t) t.destroy();
+    for (const t of [this.src, ...this.work]) if (t) t.destroy();
     const make = (label, usage) => this.device.createTexture({ label, size: [w, h], format: MID, usage });
     const U = GPUTextureUsage;
     this.src = make('source', U.TEXTURE_BINDING | U.COPY_DST | U.RENDER_ATTACHMENT);
-    this.ping = make('ping', U.TEXTURE_BINDING | U.RENDER_ATTACHMENT);
-    this.pong = make('pong', U.TEXTURE_BINDING | U.RENDER_ATTACHMENT);
+    this.work = ['work 0', 'work 1', 'work 2'].map(label => make(label, U.TEXTURE_BINDING | U.RENDER_ATTACHMENT));
     this.w = w;
     this.h = h;
   }
 
   /** Let the GPU memory go; the runner is done. */
   dispose() {
-    for (const t of [this.src, this.ping, this.pong]) if (t) t.destroy();
+    for (const t of [this.src, ...this.work]) if (t) t.destroy();
     for (const b of [this.frameBuffer, ...this.paramBuffers]) b.destroy();
     if (this.picture) this.picture.close();
-    this.src = this.ping = this.pong = this.picture = null;
+    this.src = this.picture = null;
+    this.work = [];
     this.w = this.h = 0;
   }
 }
