@@ -10,7 +10,8 @@
  * Everything else is here, prepended to each pass:
  *
  *   frame      size and texel (1/size) in pixels; scale, the print scale a
- *              size param is multiplied by; time in seconds; seed (rule 2)
+ *              size param is multiplied by; time in seconds; seed (rule 2);
+ *              tick, the frame of a loop — 0 for a still
  *   src        the previous pass's output
  *   orig       this filter's own input — the picture before its first pass,
  *              what a later pass lays back over (an outline, a shadow)
@@ -24,7 +25,9 @@
  *              adjustment unpremultiplies first, a blur never does — that is
  *              what keeps a sprite's edge from going dark
  *   luma       Rec. 709
- *   rand(px)   a hash of a pixel and the seed, in [0, 1]
+ *   rand(px)   a hash of a pixel and the seed, in [0, 1]; randAt(px, salt)
+ *              the same with more mixed in — the tick, for grain that moves
+ *              and still comes round when the loop does
  *
  * WGSL reserves many words a pass might reach for — `filter`, `pass`,
  * `target`, `type`, `module`, `set` among them — hence `fx`.
@@ -37,7 +40,7 @@ struct Frame {
   scale: f32,
   time: f32,
   seed: u32,
-  pad: u32,
+  tick: u32,
 }
 
 @group(0) @binding(0) var<uniform> frame: Frame;
@@ -107,6 +110,10 @@ fn pcg(n: u32) -> u32 {
   let s = n * 747796405u + 2891336453u;
   let w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u;
   return (w >> 22u) ^ w;
+}
+
+fn randAt(px: vec2i, salt: u32) -> f32 {
+  return f32(pcg(pcg(pcg(u32(px.x) ^ frame.seed) ^ u32(px.y)) ^ salt)) / 4294967295.0;
 }
 
 fn rand(px: vec2i) -> f32 {

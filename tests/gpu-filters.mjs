@@ -11,7 +11,7 @@
 
 import fs from 'node:fs';
 const { FILTERS } = await import('../core/gpu/filters/index.js');
-const { passesOf, reachOf, marginOf } = await import('../core/gpu/runner.js');
+const { passesOf, reachOf, marginOf, drawsAtRandom } = await import('../core/gpu/runner.js');
 const { moduleFor } = await import('../core/gpu/wgsl.js');
 const { PARAM_TYPES, valuesFor } = await import('../core/params.js');
 
@@ -114,6 +114,16 @@ ok('dilate reaches its radius, erode nowhere',
   [reachOf([{ id: 'dilate', params: { radius: 2 } }]), reachOf([{ id: 'erode', params: { radius: 2 } }])], [2, 0]);
 ok('sharpening reaches nowhere: what it pushes past the edge is held to nothing',
   reachOf([{ id: 'sharpen' }, { id: 'unsharp' }, { id: 'emboss' }]), 0);
+ok('a CRT reaches as far as its colours split; a glitch as far as it tears, and splits',
+  [reachOf([{ id: 'crt', params: { split: 2 } }]), reachOf([{ id: 'glitch', params: { shift: 10, split: 2 } }])], [2, 12]);
+
+// ── What draws at random ─────────────────────────────────────────────────────
+ok('grain and glitch draw at random', ['grain', 'glitch'].every(id => FILTERS[id].random === true), true);
+ok('and nothing else in the catalogue does',
+  Object.values(FILTERS).filter(f => f.random).map(f => f.id).sort(), ['glitch', 'grain']);
+ok('a chain with one draws at random', drawsAtRandom([{ id: 'blur' }, { id: 'grain' }]), true);
+ok('switched off, it does not', drawsAtRandom([{ id: 'blur' }, { id: 'grain', on: false }]), false);
+ok('a chain without one does not', drawsAtRandom([{ id: 'blur' }, { id: 'halftone' }]), false);
 ok('unsharp mask blurs with the blur\'s own two passes, then one of its own',
   FILTERS.unsharp.passes.length === 3 && FILTERS.unsharp.passes[0].code === FILTERS.blur.passes[0].code, true);
 ok('a filter this catalogue lacks is left out, not thrown', reachOf([{ id: 'nope' }, { id: 'blur', params: { radius: 1 } }]), 3);

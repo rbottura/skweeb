@@ -5,7 +5,7 @@
  * A chain is a list, and each entry carries the schema of its own filter
  * (core/gpu/filters/), so it lives beside the params, as compose's
  * placements live beside its page (chain.js). The recipe is
- * `{ source, edges, chain }`.
+ * `{ source, edges, seed, chain }`.
  */
 
 import { defineParams } from '../../core/params.js';
@@ -46,5 +46,12 @@ export function filterParams() {
       label: 'at the edge',
       group: 'filters',
     },
+
+    /**
+     * What a filter that draws at random draws from — grain, glitch (rule 2):
+     * the same seed, the same noise. Saved in the recipe, and as the object's
+     * seed when its chain draws at random.
+     */
+    seed: { type: 'int', min: 0, max: 999999, default: 1, label: 'seed', group: 'filters' },
   });
 }

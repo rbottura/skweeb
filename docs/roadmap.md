@@ -115,9 +115,10 @@ bricks (`apps/filter/STATUS.md`). A still or a loop filtered, saved with its
 source as its parent, replayed and drawn again at print scale; a look made
 in filter over a placement in compose, the page saved with it and replayed.
 Both clauses of *Done when* are met. M5 stays open for what the author asked
-it for, a big catalogue: nineteen filters — twelve of them p5.FIP's, and
-the game-asset group begun with an outline, a drop shadow and palette lock —
-is under way, not done. The fifth brick.
+it for, a big catalogue: twenty-five filters — seventeen of them p5.FIP's,
+grain and glitch at random from a seed, and the game-asset group begun with
+an outline, a drop shadow and palette lock — is under way, not done. The
+fifth brick; motion, for idle animation, next.
 
 **M6 — particles.** A particle is a function of its spawn slot and its age, not
 a step in one shared simulation: seeded from its emitter and its slot, and

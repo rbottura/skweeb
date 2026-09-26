@@ -78,7 +78,7 @@ async function openRequested() {
     const unknown = chain.restore(recipe.chain);
     const lost = unknown.length ? ` · ${unknown.length} of its filters are not in this catalogue` : '';
     if (object.type === 'params') {
-      params.set('edges', recipe.edges || 'grow');
+      params.set({ edges: recipe.edges || 'grow', seed: recipe.seed ?? 1 });
       return bar.announce(`${object.title} — choose a source to see it on${lost}`);
     }
     // Saved before `edges` existed, it kept its size.
@@ -125,7 +125,7 @@ function button(label, onClick, primary = false) {
 
 async function onParamChange(key, value) {
   if (key === 'source') await loadSource(value);
-  if (key === 'edges') draw();
+  if (key === 'edges' || key === 'seed') draw();
 }
 
 /** Whether the chain gets room past the picture's edge (params.js, `edges`). */
@@ -235,8 +235,8 @@ async function look() {
   busy = true;
   try {
     const shown = runner.run(source.frame(clock.tick), list,
-      { time: source.fps ? clock.tick / source.fps : 0, grow: growing() });
-    const object = await saveLook({ chain: list, edges: params.get('edges'), picture: shown });
+      { time: source.fps ? clock.tick / source.fps : 0, grow: growing(), seed: params.get('seed'), tick: clock.tick });
+    const object = await saveLook({ chain: list, edges: params.get('edges'), seed: params.get('seed'), picture: shown });
     bar.announce(object ? `saved the look ${object.id} — ${object.title}` : 'no vault — downloaded instead');
   } catch (err) {
     console.error('[filter] the look did not save:', err);
@@ -281,7 +281,8 @@ function paint() {
   let trouble = failing;
   if (runner && on && !failing) {
     try {
-      picture = runner.run(frame, list, { time: source.fps ? clock.tick / source.fps : 0, grow: growing() });
+      picture = runner.run(frame, list, { time: source.fps ? clock.tick / source.fps : 0, grow: growing(),
+        seed: params.get('seed'), tick: clock.tick });
     } catch (err) {
       trouble = err.message;
     }

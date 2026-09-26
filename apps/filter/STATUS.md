@@ -19,8 +19,8 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
    look`. With it, filters reach past the edge (`edges`: grow or keep).
 5. **The catalogue grows** — begun 2026-09-26: p5.FIP's, glfx's and GPUImage's
    filters, each with its copyright line; then the suite's own groups — game
-   assets, motion, time. In: twelve from p5.FIP, and the game-asset group
-   begun — outline, drop shadow, palette lock.
+   assets, motion, time. In: seventeen from p5.FIP, grain, and the game-asset
+   group begun — outline, drop shadow, palette lock.
 
 ## Works now
 
@@ -41,8 +41,17 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
   there were four neighbours, erode keeping its colour. Their distances
   follow the print scale. `check-gpu` holds each to one step from dark to
   light, and dilate and erode to a sprite grown and shrunk by their radius.
-- **Nineteen filters**, in the menu by group — tone and colour; blur and
-  detail; shape and edges; for game assets. Written here: brightness,
+- **Stylise** (2026-09-27): halftone — dots of an ink on an optional paper,
+  its screen turned, their area following the darkness; dots — each cell's
+  colour; CRT — lines that hold still, so a loop still closes, and a colour
+  split; vignette; grain; glitch — bands torn sideways, colours split.
+  Grain and glitch are the first filters to draw at random: from the
+  Filters drawer's `seed` and the loop's frame, never the clock (rule 2) —
+  the same seed, the same noise; the seed is saved in the recipe, and as
+  the object's seed when its chain draws at random. `check-filters.mjs`
+  holds each to what it does.
+- **Twenty-five filters**, in the menu by group — tone and colour; blur and
+  detail; shape and edges; stylise; for game assets. Written here: brightness,
   contrast, gaussian blur, pixelate, outline, drop shadow, palette lock. From p5.FIP (MIT, its whole licence in
   `core/gpu/filters/LICENSE-p5.FIP.txt`): saturation, invert, sepia, duotone,
   threshold, posterize — each file names its source, licence and copyright
@@ -104,14 +113,14 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 
 ## Next single step
 
-**Brick 5, the next batch: p5.FIP's stylise group** — halftone, dot screen,
-CRT, vignette, grain and glitch. Grain is the first filter to draw at random:
-from `rand(px)` and the seed (rule 2), so the recipe gains a seed — a param,
-saved, never `Math.random`. `check-gpu` holds grain to the same pixels for
-the same seed and others for another.
-
-Then the suite's own groups, which the game wants most: motion — a still in,
-a loop out, for idle animation — and time. glfx's and GPUImage's between.
+**The motion group's first brick: a still becomes a loop**, for idle
+animation. When the source is a still, the Filters drawer offers `frames`
+and `fps`, and the clock plays that many; a motion filter reads its phase
+from the tick — 2π · tick / frames — so the loop closes on its first frame.
+The first is *bob*: the picture up and down by a height, eased. Saving such
+a chain saves a `sequence`, its render the frame on screen, replayed by
+rebuild.js from the still and the chain. Then breathe, sway, glow pulse,
+spin — and time, a loop in.
 
 ## Parked
 

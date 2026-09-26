@@ -14,6 +14,8 @@
  *               LYGIA and unlicensed Shadertoy code are noncommercial and
  *               never enter
  *   params      a param schema, as an app's (core/params.js)
+ *   random?     true when it draws at random — from the recipe's seed and
+ *               the frame's tick, never the clock (rule 2)
  *   reach?      (values) → how far past its picture it can spread, in the
  *               source's pixels: a blur's taps, an outline's width. Absent is
  *               0 — a colour change reaches nowhere (runner.js, *Past the edge*)
@@ -39,6 +41,12 @@ import emboss from './emboss.js';
 import edges from './edges.js';
 import dilate from './dilate.js';
 import erode from './erode.js';
+import halftone from './halftone.js';
+import dots from './dots.js';
+import crt from './crt.js';
+import vignette from './vignette.js';
+import grain from './grain.js';
+import glitch from './glitch.js';
 // For game assets, the suite's own.
 import outline from './outline.js';
 import shadow from './shadow.js';
@@ -46,11 +54,12 @@ import palette from './palette.js';
 
 /**
  * In the order the add menu lists them: tone and colour; blur and detail;
- * shape and edges; then for game assets.
+ * shape and edges; stylise; then for game assets.
  */
 export const FILTERS = Object.freeze(Object.fromEntries([
   brightness, contrast, saturation, invert, sepia, duotone, threshold, posterize,
   blur, sharpen, unsharp, pixelate,
   emboss, edges, dilate, erode,
+  halftone, dots, crt, vignette, grain, glitch,
   outline, shadow, palette,
 ].map(f => [f.id, f])));

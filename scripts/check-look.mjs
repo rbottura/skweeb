@@ -57,7 +57,7 @@ c.ok('the chain saves alone, as a params object: a look', look.type === 'params'
   && look.origin.app === 'filter' && !look.parents.length, `${look.id} — ${look.title}`);
 c.ok('its recipe is the chain and what it does at the edge', JSON.stringify(look.recipe) === JSON.stringify({
   chain: [{ id: 'blur', params: { radius: 3 }, on: true }, { id: 'brightness', params: { amount: 0.2 }, on: true }],
-  edges: 'grow' }), JSON.stringify(look.recipe));
+  edges: 'grow', seed: 1 }), JSON.stringify(look.recipe));
 c.ok('its picture is what it did to the sprite', look.render.w === grown[0] && look.render.h === grown[1],
   `${look.render.w} × ${look.render.h}`);
 

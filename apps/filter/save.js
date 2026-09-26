@@ -22,6 +22,7 @@
 
 import { fromVault }     from './source.js';
 import { FILTERS }       from '../../core/gpu/filters/index.js';
+import { drawsAtRandom } from '../../core/gpu/runner.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { runFrames, toPng, zipStore, frameName, download } from '../../core/export.js';
@@ -61,7 +62,8 @@ export async function save({ params, chain, source, runner, tick = 0, keepFrames
   try {
     const fps = exact.fps || 0;
     const grow = params.get('edges') !== 'keep';
-    const at = i => runner.run(exact.frame(i), chain, { time: fps ? i / fps : 0, grow });
+    const seed = params.get('seed');
+    const at = i => runner.run(exact.frame(i), chain, { time: fps ? i / fps : 0, grow, seed, tick: i });
 
     const shown = keep(at(loop ? tick : 0));
     const blob = await toPng(shown);
@@ -72,7 +74,7 @@ export async function save({ params, chain, source, runner, tick = 0, keepFrames
       title: `${source.title} · ${chainName(chain)}` + (loop ? ` ×${exact.frames}` : ''),
       tags: ['filter', ...(loop ? ['loop'] : []), ...(recipe ? [] : ['leaf'])],
       origin: APP,
-      seed: null,                     // nothing in the catalogue draws at random yet
+      seed: drawsAtRandom(chain) ? seed : null,   // grain, glitch: rule 2
       recipe,
       parents: params.consumedObjectIds(),
       render: {
@@ -98,9 +100,10 @@ export async function save({ params, chain, source, runner, tick = 0, keepFrames
  * @param {object} args
  * @param {object[]} args.chain
  * @param {string} args.edges       grow or keep (params.js)
+ * @param {number} args.seed        what its random filters draw from
  * @param {ImageBitmap} args.picture  the chain on the frame on screen — kept at once
  */
-export async function saveLook({ chain, edges, picture }) {
+export async function saveLook({ chain, edges, seed, picture }) {
   const shown = keep(picture);
   const blob = await toPng(shown);
   return Vault.save({
@@ -108,8 +111,8 @@ export async function saveLook({ chain, edges, picture }) {
     title: `look · ${chainName(chain)}`,
     tags: ['filter', 'look'],
     origin: APP,
-    seed: null,
-    recipe: { chain, edges },
+    seed: drawsAtRandom(chain) ? seed : null,
+    recipe: { chain, edges, seed },
     parents: [],
     render: { blob, ext: 'png', w: shown.width, h: shown.height },
     thumb: await thumbFromBlob(blob),

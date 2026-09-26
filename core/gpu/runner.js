@@ -74,6 +74,11 @@ export function reachOf(chain) {
   return Math.ceil(sum);
 }
 
+/** Whether a chain draws at random — then what it made has a seed to keep (rule 2). */
+export function drawsAtRandom(chain) {
+  return (chain || []).some(e => e && e.on !== false && FILTERS[e.id] && FILTERS[e.id].random);
+}
+
 /** The room a grown run adds on each side, in pixels at this scale. */
 export function marginOf(chain, scale = 1) {
   return Math.round(reachOf(chain) * scale);
@@ -184,14 +189,15 @@ class Runner {
    *
    * @param {CanvasImageSource} source   a canvas, an OffscreenCanvas, an ImageBitmap, an image
    * @param {object[]} [chain]
-   * @param {{scale?: number, time?: number, seed?: number, grow?: boolean}} [opts]
+   * @param {{scale?: number, time?: number, seed?: number, tick?: number, grow?: boolean}} [opts]
    *   scale multiplies every size a filter has — its sizes are in the
    *   source's pixels at 1, so a picture drawn again at 2x keeps its look;
    *   grow gives the chain room past the edge, and the picture comes back
-   *   `marginOf(chain, scale)` bigger on every side
+   *   `marginOf(chain, scale)` bigger on every side; seed and tick are what a
+   *   filter drawing at random draws from — the recipe's seed, the loop's frame
    * @returns {ImageBitmap} the runner's, good until its next run()
    */
-  run(source, chain = [], { scale = 1, time = 0, seed = 0, grow = false } = {}) {
+  run(source, chain = [], { scale = 1, time = 0, seed = 0, tick = 0, grow = false } = {}) {
     const sw = source.naturalWidth || source.width;
     const sh = source.naturalHeight || source.height;
     const m = grow ? marginOf(chain, scale) : 0;
@@ -213,11 +219,11 @@ class Runner {
 
     const frame = new ArrayBuffer(32);
     new Float32Array(frame, 0, 6).set([w, h, 1 / w, 1 / h, scale, time]);
-    new Uint32Array(frame, 24, 2).set([seed >>> 0, 0]);
+    new Uint32Array(frame, 24, 2).set([seed >>> 0, tick >>> 0]);
     device.queue.writeBuffer(this.frameBuffer, 0, frame);
 
     const encoder = device.createCommandEncoder({ label: 'chain' });
-    const info = { width: w, height: h, scale, time, seed };
+    const info = { width: w, height: h, scale, time, seed, tick };
     let input = this.src;
     let own = input;                 // the filter's own input: its passes' `orig`
     let free = [];                   // the two textures it writes into, in turns

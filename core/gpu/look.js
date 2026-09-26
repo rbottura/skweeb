@@ -22,19 +22,19 @@ import { Vault } from '../vault.js';
 import { createRunner, reachOf } from './runner.js';
 import { drawFrameInto } from '../rebuild.js';
 
-/** A look by id: its chain, whether it grows, what it is called. */
+/** A look by id: its chain, whether it grows, its seed, what it is called. */
 export async function openLook(id) {
   const { object } = await Vault.load(id);
   const recipe = object.recipe || {};
   if (!Array.isArray(recipe.chain)) throw new Error(`${id} is not a look — it holds no chain`);
-  return { id, title: object.title || id, chain: recipe.chain, grow: recipe.edges !== 'keep' };
+  return { id, title: object.title || id, chain: recipe.chain, grow: recipe.edges !== 'keep', seed: recipe.seed ?? 1 };
 }
 
 /**
  * An object's frames through a look.
  *
  * @param {object} handle   what core/rebuild.js openFrames() gave
- * @param {{chain: object[], grow: boolean, title: string}} look
+ * @param {{chain: object[], grow: boolean, seed?: number, title: string}} look
  * @returns {Promise<object>} a handle of the same shape; its frames are the runner's, borrowed
  */
 export async function withLook(handle, look) {
@@ -66,7 +66,8 @@ export async function withLook(handle, look) {
       // Its pixels per pixel of the object, as its app drew them: a look's
       // sizes follow, so a blur keeps its look at print scale.
       const density = picture.width / box.w;
-      return runner.run(picture, look.chain, { scale: density, time: i / fps, grow: look.grow });
+      return runner.run(picture, look.chain, { scale: density, time: i / fps, grow: look.grow,
+        seed: look.seed ?? 1, tick: i });
     },
 
     drawInto(ctx, i, w, h) {

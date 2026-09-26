@@ -73,6 +73,7 @@ export async function openObject(object, opts = {}) {
 
   // Saved before `edges` existed, it kept its size (params.js).
   const grow = (recipe.edges || 'keep') !== 'keep';
+  const seed = recipe.seed ?? 1;
   const room = grow ? reachOf(chain) : 0;
   const width = parent.width + 2 * room;
   const height = parent.height + 2 * room;
@@ -93,7 +94,7 @@ export async function openObject(object, opts = {}) {
 
     /** Borrowed, as every frame is: the runner's picture, until the next call. */
     frame(i) {
-      return runner.run(parent.frame(i), chain, { scale: k, time: i / fps, grow });
+      return runner.run(parent.frame(i), chain, { scale: k, time: i / fps, grow, seed, tick: i });
     },
 
     drawInto(ctx, i, w, h) {

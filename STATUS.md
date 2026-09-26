@@ -12,13 +12,15 @@ _last touched: 2026-09-26_
   own. The head's `lineage` switch lays them out one by one, and the panel
   remembers it. A folder no longer reads as an object: shorter, its members
   a small tilted peek, on a little stack.
-- **The filter catalogue is nineteen** (2026-09-26): brightness, contrast,
-  blur and pixelate written here; twelve from p5.FIP, under MIT, its whole
-  licence beside them — saturation, invert, sepia, duotone, threshold,
-  posterize, sharpen, unsharp mask, emboss, edges, dilate, erode — each
-  changed where p5.FIP would have hurt a sprite; and, for game assets, the
-  suite's own outline, drop shadow and palette lock (nearest in OKLab, up
-  to 32 colours). Each is held to what it should do on the GPU (`check-gpu`)
+- **The filter catalogue is twenty-five** (2026-09-27): brightness,
+  contrast, blur, pixelate and grain written here; seventeen from p5.FIP,
+  under MIT, its whole licence beside them — saturation, invert, sepia,
+  duotone, threshold, posterize, sharpen, unsharp mask, emboss, edges,
+  dilate, erode, halftone, dots, CRT, vignette, glitch — each changed where
+  p5.FIP would have hurt a sprite or broken a loop; and, for game assets,
+  the suite's own outline, drop shadow and palette lock. Grain and glitch
+  draw at random from the recipe's seed and the loop's frame (rule 2). Each
+  is held to what it should do on the GPU (`check-gpu`, `check-filters`)
   and to its notice (`tests/gpu-filters`).
 - **A colour picker stays open while you drag in it** — every app's: the
   panel synced each change back into the widget, and a `color[]` row was
@@ -405,9 +407,9 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M5's fifth brick, the next batch: p5.FIP's stylise group** — halftone, dot
-screen, CRT, vignette, grain (the first at random: a seed in the recipe),
-glitch; `apps/filter/STATUS.md` has them.
+**The motion group's first brick: a still becomes a loop** — `frames` and
+`fps` for a still source, and *bob*, its phase from the tick so the loop
+closes; `apps/filter/STATUS.md` has it. The first of the idle animations.
 
 Parked behind M5, still wanted: **a gamepad still drawn again at print
 scale** — the last kind M4 prints stretched. A still's recipe carries
