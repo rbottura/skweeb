@@ -18,20 +18,16 @@
  * Folders: objects that share a `folder:<name>` tag collapse into one card —
  * how ckt keeps a session's dot-sets from flooding the grid. A folder is a
  * view, not a place: every object still lives at objects/<id>/, so no link
- * changes. See docs/object-model.md, *Tags that group*.
+ * changes. The card and its strip are vault-folder.js.
  *
  * Reads nothing but core/vault.js — no p5, no gamepad. The detail view is
  * built by vault-detail.js; its stylesheet reads core/theme.css's tokens.
  */
 
-/** The folder a row is filed in, from its `folder:` tag, or null. */
-export const folderOf = row => {
-  const tag = (row.tags || []).find(t => typeof t === 'string' && t.startsWith('folder:'));
-  return tag ? tag.slice('folder:'.length) : null;
-};
-
 import { Vault }       from './vault.js';
 import { paintDetail } from './vault-detail.js';
+import { folder, folderOf } from './vault-folder.js';
+export { folderOf };
 import { reopenUrl, placeUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
 
@@ -185,18 +181,27 @@ export class VaultPanel {
       : shown.length + ' of ' + this._rows.length;
 
     // Rows come newest first, so a folder sits where its newest member would.
-    const grid = el('div', 'vp-grid');
+    const order = [];
     const folders = new Map();
     for (const row of shown) {
       const name = folderOf(row);
-      if (!name) { grid.append(this._cardFor(row)); continue; }
-      if (!folders.has(name)) {
-        folders.set(name, []);
-        grid.append(this._folder(name, folders.get(name)));
-      }
+      if (!name) { order.push(row); continue; }
+      if (!folders.has(name)) { folders.set(name, []); order.push(name); }
       folders.get(name).push(row);
     }
-    for (const [name, rows] of folders) this._folderNote(name, rows.length);
+
+    const grid = el('div', 'vp-grid vp-grid--top');
+    for (const item of order) {
+      if (typeof item !== 'string') { grid.append(this._cardFor(item)); continue; }
+      grid.append(...folder({
+        name: item,
+        rows: folders.get(item),
+        open: this._openFolders.has(item),
+        thumb: row => row.thumb ? fileUrl(row.id, row.thumb) : null,
+        card: row => this._cardFor(row),
+        onToggle: on => on ? this._openFolders.add(item) : this._openFolders.delete(item),
+      }));
+    }
     this._body.append(grid);
   }
 
@@ -231,43 +236,6 @@ export class VaultPanel {
     o.tags = await switchOn(o, this._offeredTo);
     this._onPick(o);
     this.hide();
-  }
-
-  /**
-   * One folder: a head that opens it, and its cards, built the first time it
-   * opens. Toggled in place, so opening a folder does not lose the scroll.
-   */
-  _folder(name, rows) {
-    const box = el('div', 'vp-folder');
-    const head = el('button', 'vp-folder-head');
-    head.type = 'button';
-    const count = el('span', 'vp-folder-count', '');
-    head.append(el('span', 'vp-folder-name', name), count);
-    box.append(head);
-    box.dataset.folder = name;
-
-    let inner = null;
-    const fill = () => {
-      if (inner) return;
-      inner = el('div', 'vp-grid');
-      for (const row of rows) inner.append(this._cardFor(row));
-      box.append(inner);
-    };
-    const set = open => {
-      box.classList.toggle('vp-folder--open', open);
-      if (open) { fill(); this._openFolders.add(name); } else this._openFolders.delete(name);
-      if (inner) inner.hidden = !open;
-    };
-    head.addEventListener('click', () => set(!box.classList.contains('vp-folder--open')));
-    // rows is still filling when this runs; open it on the next tick if it was open
-    if (this._openFolders.has(name)) queueMicrotask(() => set(true));
-    return box;
-  }
-
-  _folderNote(name, n) {
-    for (const box of this._body.querySelectorAll('.vp-folder')) {
-      if (box.dataset.folder === name) box.querySelector('.vp-folder-count').textContent = n;
-    }
   }
 
   /** Move the highlight without rebuilding the grid, which would lose scroll. */
