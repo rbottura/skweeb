@@ -244,8 +244,12 @@ async function redrawn(object) {
   }
 }
 
-/** A render that is a picture, as a handle whose every tick is it. */
-async function openPicture(object, url) {
+/**
+ * A render that is a picture, as a handle whose every tick is it. Exported for
+ * an app's rebuild.js that cannot replay here — a GPU object on a machine
+ * without WebGPU shows as its saved render (docs/core-api.md, *gpu/*).
+ */
+export async function openPicture(object, url) {
   const res = await fetch(url || '/vault/objects/' + object.id + '/' + object.render.file);
   if (!res.ok) throw new Error(`rebuild: the render of ${object.id} did not load (HTTP ${res.status})`);
   const bitmap = await createImageBitmap(await res.blob());

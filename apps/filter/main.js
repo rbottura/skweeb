@@ -4,8 +4,9 @@
  * A source, a chain, one canvas. The source is any vault object with a
  * picture, or a file (source.js); the chain is a list of GPU filters, each a
  * card drawn from its own schema (chain.js); the canvas is the source's frame
- * under the clock, run through the chain by one core/gpu runner. Saving — and
- * with it rebuild.js and print scale — is the third brick (STATUS.md).
+ * under the clock, run through the chain by one core/gpu runner. S saves what
+ * is on screen (save.js), and `?open=<id>` brings a saved chain back; how a
+ * saved object replays elsewhere is rebuild.js's.
  *
  * Where there is no WebGPU the page opens all the same (rule 7): the chain
  * can be built, the source shows as it is, and the bar says why.
@@ -14,6 +15,8 @@
 import { filterParams, GROUPS } from './params.js';
 import { Chain }                from './chain.js';
 import { fromVault, fromFile }  from './source.js';
+import { save as saveObject }   from './save.js';
+import { requested }            from '../../core/reopen.js';
 import { ParamPanel }           from '../../core/ParamPanel.js';
 import { VaultPanel }           from '../../core/VaultPanel.js';
 import { Transport }            from '../../core/Transport.js';
@@ -28,6 +31,8 @@ let runner = null;       // core/gpu's, or null where there is no WebGPU
 let source = null;       // source.js's handle
 let failing = '';        // why the chain does not compile, until it does
 let asked = 0;           // the latest source asked for; an older answer is dropped
+let busy = false;        // a save is running; nothing else may start
+const buttons = {};
 
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
@@ -45,7 +50,7 @@ async function boot() {
   bar = new Bar({
     app: 'filter',
     mount: document.querySelector('.app'),
-    keys: 'V vault · space play · ← → step · drop an image',
+    keys: 'V vault · S save · space play · ← → step · drop an image',
   });
   panel = new ParamPanel(params, { title: 'filter', mount: document.getElementById('side'), groups: GROUPS });
   params.on(onParamChange);
@@ -55,6 +60,26 @@ async function boot() {
   if (!runner) bar.announce(`no GPU filters here — ${whyNoGpu()}; the source shows as it is`);
   wireKeys();
   onChainChange();
+  await openRequested();
+}
+
+/**
+ * `?open=<id>`: a saved filter object back to work on (core/reopen.js) — its
+ * chain card for card, and its source. A leaf, saved from a file, has neither.
+ */
+async function openRequested() {
+  try {
+    const opened = await requested('filter');
+    if (!opened) return;
+    const recipe = opened.object.recipe;
+    if (!recipe) return bar.announce(`${opened.object.id} was saved from a file, as a leaf — there is no chain to bring back`);
+    const unknown = chain.restore(recipe.chain);
+    params.restore(recipe);
+    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`
+      + (unknown.length ? ` · ${unknown.length} of its filters are not in this catalogue` : ''));
+  } catch (err) {
+    bar.announce('could not open it: ' + err.message);
+  }
 }
 
 /** The drawers that are not parameters: a file under Source, the chain, the player. */
@@ -70,14 +95,22 @@ function buildDrawers() {
   chain = new Chain({ mount: filters.body, onChange: onChainChange });
 
   const player = panel.addDrawer({ id: 'player', title: 'Sequence player' });
-  transport = new Transport({ clock, mount: player.body });
+  transport = new Transport({ clock, mount: player.body, busy: () => busy });
+
+  const exp = panel.addDrawer({ id: 'export', title: 'Export' });
+  const actions = document.createElement('div');
+  actions.className = 'pp-actions';
+  buttons.save = button('Save to the vault  [S]', () => save(), true);
+  buttons.frames = button('Save + download the frames', () => save({ keepFrames: true }));
+  actions.append(buttons.save, buttons.frames);
+  exp.body.append(actions);
   showLoopControls();
 }
 
-function button(label, onClick) {
+function button(label, onClick, primary = false) {
   const b = document.createElement('button');
   b.type = 'button';
-  b.className = 'nb-btn nb-btn--wide';
+  b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
   b.textContent = label;
   b.addEventListener('click', onClick);
   return b;
@@ -132,10 +165,48 @@ async function loadFile(file) {
   setSource(next);
 }
 
-/** The player exists only when there is a loop. */
+/** The player, and a loop's frames to download, exist only when there is a loop. */
 function showLoopControls() {
-  panel.drawer('player').hidden = !(source && source.frames > 1);
+  const many = !!source && source.frames > 1;
+  panel.drawer('player').hidden = !many;
+  if (buttons.frames) buttons.frames.hidden = !many;
   if (transport) transport.configure();
+}
+
+// ── Saving ───────────────────────────────────────────────────────────────────
+
+/**
+ * What is on screen, into the vault: a still source makes a still and a loop
+ * makes a loop, whose picture is the frame shown (save.js).
+ */
+async function save({ keepFrames = false } = {}) {
+  if (busy) return;
+  if (!source) return bar.announce('nothing to save yet — choose a source');
+  if (!runner) return bar.announce('no GPU here — nothing is filtered, so there is nothing to save');
+  if (failing) return bar.announce('the chain does not compile — ' + failing);
+  const list = chain.recipe();
+  if (!runner.ready(list)) return bar.announce('a filter is still compiling — try again in a moment');
+
+  clock.pause();
+  busy = true;
+  bar.say('saving…');
+  try {
+    const tick = clock.tick;
+    const { object, frames } = await saveObject({
+      params, chain: list, source, runner, tick, keepFrames, onStatus: t => bar.say(t),
+    });
+    bar.announce(!object ? 'no vault — downloaded instead'
+      : frames > 1 ? `saved ${object.id} — ${frames} frames, its picture frame ${tick + 1}`
+        + (keepFrames ? ', and every frame downloaded' : '')
+      : `saved ${object.id}`);
+  } catch (err) {
+    console.error('[filter] save failed:', err);
+    bar.announce('save failed: ' + err.message);
+  } finally {
+    busy = false;
+    refreshVaultState();
+    draw();
+  }
 }
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
@@ -207,7 +278,8 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (!source || source.frames < 2) return;
+    if (e.key === 's' || e.key === 'S') save();
+    if (busy || !source || source.frames < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }
     if (e.key === 'ArrowRight') { clock.pause(); clock.step(1); }
     if (e.key === 'ArrowLeft')  { clock.pause(); clock.step(-1); }
@@ -221,6 +293,10 @@ function wireKeys() {
     if (file && file.type.startsWith('image/')) loadFile(file);
   });
 
+  refreshVaultState();
+}
+
+function refreshVaultState() {
   Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
 }
 

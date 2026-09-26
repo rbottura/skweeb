@@ -202,7 +202,9 @@ this without a GPU; `node scripts/check-gpu.mjs` runs it on one.
 **Where there is no WebGPU** — a machine whose GPU the browser has not listed,
 a browser without it — `createRunner()` is null and nothing throws: every app
 still opens (rule 7). An app that makes GPU objects says why it cannot there;
-a GPU object shows as its saved render, as any picture does.
+a GPU object shows as its saved render, as any picture does — an app's
+rebuild.js hands back core's `openPicture(object)` when `createRunner()` is
+null, as filter's does.
 
 ## uses.js — where a set is offered
 

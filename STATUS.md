@@ -3,6 +3,13 @@ _last touched: 2026-09-26_
 
 ## Works right now
 
+- **filter saves, and its objects replay** (M5's third brick, 2026-09-26;
+  `node scripts/check-filter-save.mjs`, 17 checks). A still or a loop, its
+  recipe `{ source, chain }` and its source its parent; `apps/filter/rebuild.js`
+  replays it for the vault, compose and filter itself — a saved still came
+  back with no difference here, and draws again at print scale; `?open=`
+  brings the chain back. With no WebGPU a filter object shows as its render
+  (core's `openPicture`, exported for it).
 - **filter, M5's app, opens and filters live** (`apps/filter/`, 2026-09-26;
   `node scripts/check-filter.mjs`, 19 checks). Any vault still, shape, loop
   or moving composition — or a file dropped, with no vault — through a chain
@@ -370,9 +377,9 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M5's third brick, its first half: a filtered still saves** —
-`apps/filter/STATUS.md` has it in full: `{ source, chain }` the recipe, the
-source the parent, and `?open=<id>` bringing the chain back card for card.
+**M5's fourth brick, its first half: a look saves** — the chain alone, as a
+`params` object; `apps/filter/STATUS.md` has it in full. Its second half is
+M5's link: a look on a placement in compose.
 
 Parked behind M5, still wanted: **a gamepad still drawn again at print
 scale** — the last kind M4 prints stretched. A still's recipe carries

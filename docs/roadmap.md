@@ -108,6 +108,11 @@ previewed live on the GPU, saves with its source as its parent, replays, and
 redraws at print scale; and a look made there is applied to a placement in
 compose. The link: `filter → compose: a look`.
 
+*So far:* the kit, the app, and saving — 2026-09-26, in three bricks
+(`apps/filter/STATUS.md`). A still or a loop filtered, saved with its source
+as its parent, replayed, and drawn again at print scale: the first clause is
+met. The look is the fourth brick.
+
 **M6 — particles.** A particle is a function of its spawn slot and its age, not
 a step in one shared simulation: seeded from its emitter and its slot, and
 integrated from its own birth. So any frame renders on its own; emission that
