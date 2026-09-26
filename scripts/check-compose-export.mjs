@@ -60,7 +60,11 @@ try {
   await page.downloadsTo(DL);
   const rows = (await (await fetch(BASE + '/api/vault')).json()).objects || [];
   const pick = (type, app) => rows.find(r => r.type === type && r.origin && r.origin.app === app);
-  const gridLoop = rows.find(r => r.type === 'sequence' && r.origin.app === 'grid');
+  // The oldest grid loop, not the newest: what "drawn again" is measured on
+  // must not change as the vault grows. On 2026-09-26 the newest became a
+  // dither already fine at 1x, which gains 1.4 times the detail at 2x where
+  // the old ones gain 11 and 15 — drawn again all the same.
+  const gridLoop = [...rows].reverse().find(r => r.type === 'sequence' && r.origin.app === 'grid');
   const still = pick('still', 'gamepad');
 
   // 1. Every kind at scale 1 and 2.
