@@ -10,7 +10,7 @@ it.** Everything below is load-bearing; nothing below is background.
 
 | Path | What it is | Before touching it, read |
 |---|---|---|
-| `core/` | the shared kit — theme, panels and drawers, params, registry, rng, stage, vault client | `docs/core-api.md` |
+| `core/` | the shared kit — theme, panels and drawers, params, registry, rng, stage, vault client, GPU filters (`gpu/`) | `docs/core-api.md` |
 | `apps/gamepad/` | draw with a gamepad, record sequences | — |
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
@@ -19,7 +19,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault | `docs/object-model.md`, *Trash, and deleting* |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs` and `check-compose-export.mjs` are two, as commands. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs` and `check-gpu.mjs` are three, as commands. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/decisions.md` | what was decided before today, and why, by date | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
@@ -87,13 +87,14 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters; do
   node tests/$t.mjs || break
 done
 
 # In a real browser: compose in headless Chrome, on a copy of the vault.
 node scripts/check-compose.mjs
 node scripts/check-compose-export.mjs   # print scale: the PNG, the frames, the save
+node scripts/check-gpu.mjs              # the GPU kit, on this machine's GPU
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at

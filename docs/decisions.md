@@ -230,6 +230,19 @@ it, the one version in `core/libs/`, until they are ported — a job of its own,
 since every recording in the vault replays through that code and must replay
 the same after.
 
+**The GPU kit is WebGPU.** The author's call, after a probe of both on the
+serving machine: WebGL2 and WebGPU each ran in headless Chrome with no flags
+and each handed a frame to Canvas 2D in the same call; WebGPU adds compute,
+one device for any number of canvases, and is where 3D is going. Its cost is
+that it needs a real GPU the browser trusts: the author's smallest PC, an
+Intel gen-9, had the API but no adapter until Chrome's flags
+(`#enable-unsafe-webgpu`, and Vulkan) turned it on — textures to 16384, a
+software fallback adapter besides. Nothing is cut to fit a machine without it. Where WebGPU is missing the
+apps still open, an app that makes GPU objects says why, and a GPU object
+shows as its saved render; a flag lifts the browser's list where the GPU is
+merely unlisted. The kit's API speaks canvases, chains and schemas, never GPU
+objects, so a second backend stays possible and is not built.
+
 **A shader carries its licence, as a font does.** Rule 5 now covers shaders. The
 filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA
 is under the Prosperity licence — noncommercial, a thirty-day commercial trial —

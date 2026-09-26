@@ -14,6 +14,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `stage/` | `clip` `player` `transport` `recorder` `stage` `bounds` | **in**, was `gamepad/core/sequence*.js` |
 | `stamp.js` | where a pattern puts its stamps | **in**, split out of `joyImage.js` |
 | `VaultPanel.js` | the window onto the objects on disk; `folder:` tags group; ctrl-click selects, for the trash | **in**, detail view in `vault-detail.js`, a card in `vault-card.js`, a folder's card and strip in `vault-folder.js`, the selection bar and the delete question in `vault-trash.js` |
+| `gpu/` | filters on the GPU, WebGPU: one device for the page (`device.js`), a chain run in one call (`runner.js`), the catalogue as data (`filters/`) — see *gpu/* below | **in**, 2026-09-26, M5's first brick: four filters |
 | `reopen.js` | an object back in its app: `/apps/<app>/?open=<id>` | **in**, 2026-09-23 |
 | `rebuild.js` | frame N of any object: `openFrames()` — anything with a recipe and more than one frame replayed by its app (a sequence, a composition that moves), a picture as itself — and the dispatch to an app's own `rebuild.js`. `draft: true` asks for a live preview's frames, which an app may make faster and near-exact; nothing saved asks for them. `scale` asks for frames at more pixels: an app draws a still again when its rebuild.js `redraws()` it, and a handle's `scale` says what it really drew — its size is always its render's | **in**; `openFrames`, `draft` and `scale` 2026-09-24, for compose |
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
@@ -167,6 +168,38 @@ the trash so a set can still find its members. Rules in
 stays fast with thousands of objects. When `available` is false (a plain static
 server, no node), the apps still run and saving falls back to a download. That
 fallback is required, not optional: rule 7 in `CLAUDE.md`.
+
+## gpu/ — filters on the GPU
+
+WebGPU, decided 2026-09-26: one device for the page, however many canvases
+draw through it (`device.js`).
+
+```js
+const runner = await createRunner();       // null where there is no WebGPU — whyNoGpu() says why
+await runner.prepare(chain);               // compiles; rejects naming the pass and its line
+const picture = runner.run(source, chain, { scale, time, seed });   // same call: an ImageBitmap
+runner.dispose();
+```
+
+A chain is data, the part of a recipe that says what was done:
+`[{ id, params, on? }]`, its params coerced as an app's are (`valuesFor` in
+`params.js`). `run()` is synchronous because a handle's `frame(i)` is; the
+picture is the runner's until its next run. Sizes are in the source's pixels
+and multiplied by `scale`, so a picture drawn again at print scale keeps its
+look. Textures hold premultiplied alpha, as a canvas does, and rgba16float
+between passes.
+
+A filter is data too (`gpu/filters/`, listed in its `index.js`): an id, a
+label, its `source` and `licence` (rule 5), a param schema, and passes — each
+a WGSL `fx(uv)` with, if it takes params, a `Params` of f32 fields, the
+numbers its `uniforms(values, info)` returns. `wgsl.js` is what a pass is
+written against. `node tests/gpu-filters.mjs` holds the catalogue to all of
+this without a GPU; `node scripts/check-gpu.mjs` runs it on one.
+
+**Where there is no WebGPU** — a machine whose GPU the browser has not listed,
+a browser without it — `createRunner()` is null and nothing throws: every app
+still opens (rule 7). An app that makes GPU objects says why it cannot there;
+a GPU object shows as its saved render, as any picture does.
 
 ## uses.js — where a set is offered
 

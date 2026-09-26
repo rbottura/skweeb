@@ -83,7 +83,7 @@ functions. Under it, a kit in `core/` that M6 and M7 stand on too:
   panel is rule 1's and a chain of them is a recipe;
 - **seeded noise**, the same function in the shader language and in JS (rule 2).
 
-Which GPU API is *Still open*, 4; the recommendation is WebGPU.
+The API is WebGPU (*Still open*, 4 — closed 2026-09-26).
 
 The app opens any object — a still, a loop, a composition — and stacks filters
 on it, each a drawer from its schema. It saves a still or a loop with the
@@ -295,17 +295,20 @@ side branch, `grid/legacy-materials`, rebased onto main after.
    assumption that a sequence object needed a playable file inside the browser;
    it does not, and the muxer that would have provided one is now work that
    will not be done.
-4. **WebGPU or WebGL2, for the GPU kit.** Probed 2026-09-26 on the author's
-   machine (Chrome 154, a Radeon RX 7600), in headless Chrome as the checks run
-   it: both work with no flags, and both hand a frame to Canvas 2D in the same
+4. ~~**WebGPU or WebGL2, for the GPU kit.**~~ **Closed 2026-09-26: WebGPU**,
+   the author's call, with nothing cut for a machine without it — there the
+   apps still open and GPU objects show as their renders (`docs/core-api.md`,
+   *gpu/*). The author's smallest PC, an Intel gen-9, had WebGPU off for its
+   GPU until Chrome's WebGPU flags turned it on. What decided it: a probe on 2026-09-26 on the
+   author's machine (Chrome 154, a Radeon RX 7600), in headless Chrome as the
+   checks run it: both work with no flags, and both hand a frame to Canvas 2D in the same
    call, which `frame(i)` needs. WebGPU adds compute with atomics — flame
    accumulation, histograms, sorting particles — one device for any number of
    canvases, and it is where 3D is going; it needs a real GPU (with the GPU
    off, no adapter) and a WebGPU browser on every machine that opens the apps,
    and every GLSL source is translated as it is ported. WebGL2 runs anywhere,
    in software too, and takes the GLSL literature almost as it is; it has no
-   compute and gets no new features. **Recommended: WebGPU**, if the author's
-   other machines have it.
+   compute and gets no new features.
 5. **A GPU render replays within a tolerance across machines**, not bit for
    bit: GPU arithmetic differs between GPUs and drivers. On the machine that
    made it, it replays the same until a driver or the browser changes; the

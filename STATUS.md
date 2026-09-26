@@ -3,6 +3,21 @@ _last touched: 2026-09-26_
 
 ## Works right now
 
+- **The GPU kit, M5's first brick** (`core/gpu/`, WebGPU, 2026-09-26), seen
+  on this machine's GPU by `node scripts/check-gpu.mjs`, 18 checks. One
+  device for the page; a chain of filters run in one call, handed back as an
+  ImageBitmap that Canvas 2D draws at once, as `frame(i)` needs; premultiplied
+  alpha throughout, rgba16float between passes; sizes in the source's pixels,
+  times the print scale. Four filters, written here: brightness, contrast, a
+  two-pass Gaussian blur, pixelate. Each lands on its formula's pixels — the
+  blur within 0.45 of its exact weights — a blurred sprite's edge stays its
+  colour, and a chain of three on 1024 × 1024 takes 1.7 ms, read back. A
+  filter is data with its source and licence (rule 5); a broken shader names
+  its own line; a page with no WebGPU gets null and a reason.
+- **WebGPU on every machine the author uses**: the serving PC's Radeon, and
+  the smallest PC's Intel gen-9 once Chrome's flags are on
+  (`chrome://flags/#enable-unsafe-webgpu`, and Vulkan) — textures to 16384,
+  a software fallback adapter besides (webgpureport.org, 2026-09-26).
 - **The vault has a trash, and objects can be deleted** (2026-09-26), all of
   it seen in Chrome on a copy of the vault. Ctrl- or shift-click selects a
   card or a whole folder; the bar moves them to the trash — a `trash` tag, so
@@ -237,8 +252,10 @@ _last touched: 2026-09-26_
 
 ## Tests
 
-Twenty-one files, no runner, no dependencies — the command in `CLAUDE.md`
-runs all of them, and all pass. Newest: `delete` (a vault with every kind of
+Twenty-two files, no runner, no dependencies — the command in `CLAUDE.md`
+runs all of them, and all pass. Newest: `gpu-filters` (the catalogue as data:
+licence, schema, the WGSL conventions, a chain read, sizes at print scale).
+Then `delete` (a vault with every kind of
 edge: the refusals, the dry plan, cutting loose, the chain; 37 checks).
 Before it: `compose-page` (where a placement lands —
 moved, scaled, turned about its centre, the bleed moving nothing; picking one
@@ -271,6 +288,12 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Broken / half-done
 
+- **The GPU catalogue is four filters, none ported yet.** p5.FIP's, glfx's
+  and GPUImage's come next, each with its copyright line. A blur's taps stop
+  at 512 a side; past that it wants a smaller picture first.
+- **Whether a GPU render replays within a tolerance across machines** is
+  still open (`docs/roadmap.md`, *Still open* 5): to settle before the first
+  GPU object is saved, which is M5's third brick.
 - **Two kinds still print stretched from their pixels**: a gamepad still and a
   shape, and the export names them. The gamepad's is fixable (*Next*); a
   shape is a leaf, pixels by definition. `at` and `length` ride in every
@@ -340,15 +363,13 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M5's first brick: the GPU kit, once the author picks its API** (WebGPU is
-recommended — `docs/roadmap.md`, *Still open* 4). In `core/gpu/`: one device
-for the page, a runner for filters of several passes on textures used in
-turns, a filter declared as an id, a schema, a shader and passes, and three
-filters ported from p5.FIP with their licence in the file — brightness and
-contrast, a separable Gaussian blur, pixelate. A test page runs a chain over
-a vault still, and a browser check proves a frame reaches Canvas 2D in the
-same call, as `frame(i)` needs. The probe that showed both APIs work here
-was a scratchpad script; this check keeps it.
+**M5's second brick: `apps/filter/` opens and filters live** — the skweeb-app
+skill first. A page on core's theme with the vault picker for its source (a
+still or a loop, through `openFrames()`), the chain as a list of drawers
+each generated from its filter's schema, added from the catalogue, switched
+off and removed, and the result drawn live through one `core/gpu` runner.
+Where there is no WebGPU the page opens and says why. No save yet: saving,
+`rebuild.js` and print scale are the third brick.
 
 Parked behind M5, still wanted: **a gamepad still drawn again at print
 scale** — the last kind M4 prints stretched. A still's recipe carries
@@ -380,8 +401,10 @@ gamepad onto core params, and off p5 with it.
 - **Next: filters (M5), particles (M6), fractals (M7); 3D parked** (the
   author, 2026-09-26). The suite is to make a small game's assets — 2D first,
   fake 3D where it helps, real 3D later. The plan is in `docs/roadmap.md`.
-  Open there: WebGPU or WebGL2 for the kit, and whether a GPU render replays
-  within a tolerance across machines.
+- **The GPU kit is WebGPU** (the author, 2026-09-26), nothing cut for a
+  machine without it: there the apps open and GPU objects show as their
+  renders. Open still: whether a GPU render replays within a tolerance across
+  machines.
 - **Rule 8 settled** (2026-09-26): p5 is not required, and new work does not
   take it on; the gamepad and core's replay of its recordings keep p5 1.5.0
   until they are ported. **Rule 5 covers shaders**: each carries its source and

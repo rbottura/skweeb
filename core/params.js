@@ -180,6 +180,26 @@ const places = x => {
 };
 
 /**
+ * A whole set of values for a schema, from whatever came in: each key
+ * coerced as set() would, anything missing at its default. For a schema that
+ * is not an app's — a filter in a chain (core/gpu/) — where declaring a
+ * Params each would announce every value to the page.
+ *
+ * @param {Object<string, object>} schema
+ * @param {object} [incoming]
+ */
+export function valuesFor(schema, incoming = {}) {
+  const out = {};
+  for (const [key, spec] of Object.entries(schema)) {
+    const type = TYPES[spec.type];
+    if (!type) throw new Error(`params: unknown type ${spec.type} for ${key}`);
+    const given = incoming && Object.prototype.hasOwnProperty.call(incoming, key);
+    out[key] = given ? type.coerce(incoming[key], spec) : type.default(spec);
+  }
+  return out;
+}
+
+/**
  * Declare an app's parameters.
  *
  * @param {string} app     the app's name, carried on every change event
