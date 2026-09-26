@@ -13,6 +13,9 @@
  *                             -> { status: 'created' | 'duplicate', object }
  *   PATCH /api/vault/<id>     <- { add: [tag], remove: [tag] }
  *                             -> { status: 'updated', object }
+ *   POST /api/vault/delete    <- { ids, dependents? }   — server/delete.js
+ *
+ * Files are served by server/static.js; this file owns the vault.
  *
  * The server writes files and computes hashes. It does not make thumbnails:
  * the browser already has the pixels and a canvas to downscale them with, so
@@ -26,6 +29,8 @@ const http   = require('http');
 const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
+const staticHost  = require('./server/static.js');
+const deleteRoute = require('./server/delete.js');
 
 const argv  = process.argv.slice(2);
 const argOf = (name, fallback) => {
@@ -41,29 +46,6 @@ const VAULT_DIR   = path.resolve(argOf('--vault', path.join(ROOT, 'vault')));
 const OBJECTS_DIR = path.join(VAULT_DIR, 'objects');
 const INDEX_FILE  = path.join(VAULT_DIR, 'index.json');
 const MAX_UPLOAD  = 64 * 1024 * 1024;
-
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.js':   'text/javascript; charset=utf-8',
-  '.mjs':  'text/javascript; charset=utf-8',
-  '.css':  'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.svg':  'image/svg+xml',
-  '.png':  'image/png',
-  '.jpg':  'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp',
-  '.gif':  'image/gif',
-  '.webm': 'video/webm',
-  '.mp4':  'video/mp4',
-  '.ico':  'image/x-icon',
-  '.otf':  'font/otf',
-  '.ttf':  'font/ttf',
-  '.woff': 'font/woff',
-  '.woff2':'font/woff2',
-  '.md':   'text/plain; charset=utf-8',
-  '.map':  'application/json; charset=utf-8',
-};
 
 /** Render/thumb extensions the vault will write, with their magic bytes. */
 const MAGIC = {
@@ -87,36 +69,6 @@ function sendJson(res, code, body) {
     'Cache-Control': 'no-store',
   });
   res.end(buf);
-}
-
-function sendText(res, code, msg) {
-  const buf = Buffer.from(msg);
-  res.writeHead(code, { 'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': buf.length });
-  res.end(buf);
-}
-
-/**
- * Map a URL path to a file on disk, or null if it escapes.
- *
- * `/vault/...` resolves inside VAULT_DIR, which --vault may have moved off the
- * repo entirely; everything else comes from ROOT. Whichever base is picked, the
- * path is resolved first and re-checked against that base afterwards, so
- * encoded traversal and absolute paths cannot reach outside it.
- */
-function resolveStatic(urlPath) {
-  let decoded;
-  try { decoded = decodeURIComponent(urlPath); } catch { return null; }
-  if (decoded.indexOf('\0') !== -1) return null;
-  // [u005c] is a backslash; written as an escape so the source has no literal one.
-  const normalised = path.posix.normalize('/' + decoded.replace(/[\u005c]/g, '/'));
-  const inVault = normalised === '/vault' || normalised.startsWith('/vault/');
-  const base    = inVault ? VAULT_DIR : ROOT;
-  const within  = inVault ? (normalised.slice('/vault'.length) || '/') : normalised;
-
-  const full = path.resolve(base, '.' + within);
-  const rel  = path.relative(base, full);
-  if (rel !== '' && (rel.startsWith('..') || path.isAbsolute(rel))) return null;
-  return full;
 }
 
 function readBody(req, limit) {
@@ -339,30 +291,8 @@ async function apiRetag(req, res, id) {
   sendJson(res, 200, { status: 'updated', object: envelope });
 }
 
-// -- Static ------------------------------------------------------------------
-
-function serveStatic(req, res, urlPath) {
-  let full = resolveStatic(urlPath);
-  if (!full) return sendText(res, 400, 'bad path');
-
-  let stat = fs.existsSync(full) ? fs.statSync(full) : null;
-  if (stat && stat.isDirectory()) {
-    if (!urlPath.endsWith('/')) {
-      res.writeHead(301, { Location: urlPath + '/' });
-      return res.end();
-    }
-    full = path.join(full, 'index.html');
-    stat = fs.existsSync(full) ? fs.statSync(full) : null;
-  }
-  if (!stat || !stat.isFile()) return sendText(res, 404, 'not found');
-
-  res.writeHead(200, {
-    'Content-Type': MIME[path.extname(full).toLowerCase()] || 'application/octet-stream',
-    'Content-Length': stat.size,
-    'Cache-Control': 'no-store',
-  });
-  fs.createReadStream(full).pipe(res);
-}
+const apiDelete   = deleteRoute({ objectsDir: OBJECTS_DIR, allObjects, rebuildIndex, safeId, readBody, sendJson });
+const serveStatic = staticHost({ root: ROOT, vault: VAULT_DIR });
 
 // -- Routing -----------------------------------------------------------------
 
@@ -374,6 +304,10 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'POST') return await apiCreate(req, res);
       return sendJson(res, 405, { error: 'GET or POST' });
     }
+    if (urlPath === '/api/vault/delete') {
+      if (req.method === 'POST') return await apiDelete(req, res);
+      return sendJson(res, 405, { error: 'POST' });
+    }
     if (urlPath.startsWith('/api/vault/')) {
       const id = urlPath.slice('/api/vault/'.length);
       if (req.method === 'GET')   return apiGet(res, id);
@@ -381,7 +315,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 405, { error: 'GET or PATCH' });
     }
     if (urlPath.startsWith('/api/')) return sendJson(res, 404, { error: 'no such endpoint' });
-    if (req.method !== 'GET' && req.method !== 'HEAD') return sendText(res, 405, 'GET only');
     serveStatic(req, res, urlPath);
   } catch (err) {
     console.error(err);

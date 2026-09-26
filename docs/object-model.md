@@ -64,6 +64,7 @@ gallery/                      ← in git, deployed
 | `render.density` | the scale this render was made at. 1 is screen. Export writes a second render at 4 or more; the object keeps both. |
 | `render.sha256` | of the bytes of `render.<ext>`. Identity for dedup. |
 | `published` | true once a copy exists under `gallery/`. |
+| `detached` | absent until an object is **cut loose** from ones deleted since: a list of `{ at, ids, members?, placements?, recipe? }`, one per cut, with the recipe it had to set aside. Decided 2026-09-26 — see *Trash, and deleting*. |
 
 ## Tags that group
 
@@ -90,6 +91,42 @@ seed and the lineage never change; `PATCH /api/vault/<id>` takes
 client. An edit, not a replacement, so two machines on one vault cannot erase
 each other's tags. Dedup still compares bytes and recipe only: saving an
 identical object returns the old one with the tags it has now.
+
+## Trash, and deleting
+
+Decided 2026-09-26. Nothing leaves the vault in one step.
+
+**The trash is a tag**, `trash`, so it is the edit *Tags change* already
+allows and nothing about the object moves. A trashed object is still on disk
+and still loads — a page placing it still draws it — but `Vault.list()`
+leaves it out, and so does anything offering objects to choose from. The vault
+panel shows it in a trash view of its own, where it is restored or deleted.
+
+**Deleting is only from the trash**, `POST /api/vault/delete`
+(`server/delete.js`). The folder and its line in `index.json` go, and the id
+with them: the same bytes saved again are a new object.
+
+**What names it is asked about.** An object is named by another that lists it
+in `parents` or `refs`, or whose recipe holds its id anywhere — a set's
+members, a composition's placements, grid's source. `parents` is history, but
+it is also the only copy of how to make a replayed object again, so a delete
+treats it as a dependency. When anything outside the request names what is
+going, the delete asks first, and there are two answers:
+
+- **delete the chain** — everything that names a deleted object goes too, and
+  everything that names those, all the way down;
+- **cut them loose** — they stay, without what was deleted. `parents` and
+  `refs` lose the ids; a set's `recipe.members` and a composition's
+  `recipe.place` lose the members and placements that were them, and stay a
+  set and a page; a recipe that still names one after that cannot be replayed,
+  so it is set aside and `recipe` becomes `null` — the object is its render
+  now, and a loop becomes its poster. The render is not redrawn: a set's sheet
+  and a page's picture still show what was cut until they are saved again.
+
+Cutting loose is the one edit an ordinary object receives besides its tags,
+and it is written down in `detached`. The alternative, a new object for each
+dependent, would give each a new id and orphan every recipe naming *it* in
+turn — the same reason tags change in place.
 
 ## Types (v1)
 

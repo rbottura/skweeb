@@ -196,6 +196,14 @@ with its source — and the vault's detail offers the link wherever the app's
 `rebuild.js` says `reopens()` (`core/reopen.js`). It is the first time
 `restore()` runs for real, and it is what M4 reaches for.
 
+**Objects can be deleted, in two steps.** Decided 2026-09-26, by the author:
+a trash first, then deleting for good from it; and when other objects are made
+from what is going, either the chain goes too, or they are kept and cut loose —
+"still there and usable, but maybe not with all its past features". The trash
+is a `trash` tag; cutting loose is the one edit an ordinary object gets besides
+its tags, and it records itself in a new envelope field, `detached`. Rules in
+`docs/object-model.md`, *Trash, and deleting*.
+
 **The vault is reached over the author's tailnet.** One machine serves it; the
 others, at work and at home, open it by link. For the author's own machines,
 M4's "an object has a URL you can send" is therefore the `?open=` link;

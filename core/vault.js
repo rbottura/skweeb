@@ -17,9 +17,18 @@
  *   'vault:duplicate'{ id, type }
  *   'vault:offline'  { filename }   — saved to disk by download instead
  *   'vault:retagged' { id, tags }   — an object's tags changed
+ *   'vault:removed'  { id }         — an object left the vault for good
+ *
+ * The trash is a tag (docs/object-model.md, *Trash*): what carries it is
+ * still on disk and still loads — a composition placing it still draws it —
+ * but list() leaves it out, and so does anything offering objects to choose.
+ * `Vault.index` keeps it, because a set looks its members up there.
  */
 
 const API = '/api/vault';
+
+export const TRASH = 'trash';
+export const isTrashed = row => !!row && (row.tags || []).includes(TRASH);
 
 let _available = false;
 let _index = [];
@@ -47,12 +56,14 @@ export const Vault = {
   },
 
   /**
-   * Rows matching a filter, from the index alone.
-   * @param {{type?:string, app?:string, tag?:string}} [filter]
+   * Rows matching a filter, from the index alone — never the trash, unless
+   * `trash: true` asks for the trash and nothing else.
+   * @param {{type?:string, app?:string, tag?:string, trash?:boolean}} [filter]
    */
   async list(filter = {}) {
     if (!_available) await Vault.refresh();
     return _index.filter(row =>
+      isTrashed(row) === !!filter.trash &&
       (!filter.type || row.type === filter.type) &&
       (!filter.app  || (row.origin && row.origin.app) === filter.app) &&
       (!filter.tag  || (row.tags || []).includes(filter.tag)));
@@ -149,6 +160,42 @@ export const Vault = {
     if (row) row.tags = object.tags;
     dispatch('vault:retagged', { id, tags: object.tags });
     return object;
+  },
+
+  /** Put objects in the trash: a tag, so nothing breaks and it can be undone. */
+  async trash(ids) {
+    for (const id of ids) await Vault.retag(id, { add: [TRASH] });
+  },
+
+  /** Take objects back out of the trash. */
+  async restore(ids) {
+    for (const id of ids) await Vault.retag(id, { remove: [TRASH] });
+  },
+
+  /**
+   * Delete objects for good — only ones already in the trash. When something
+   * else names them the server asks first, and this hands back its answer,
+   * `{ status: 'dependents', dependents, chain }`: call again with
+   * `dependents: 'delete'` to take the chain too, or 'detach' to cut those
+   * objects loose and keep them (server/delete.js). `dry: true` asks the same
+   * question and does nothing: `{ status: 'plan', dependents, chain }`.
+   *
+   * @param {string[]} ids
+   * @param {{dependents?: 'delete'|'detach', dry?: boolean}} [opts]
+   * @returns {Promise<{status:string, deleted?:string[], detached?:string[], dependents?:object[], chain?:object[]}>}
+   */
+  async remove(ids, { dependents, dry = false } = {}) {
+    const res = await fetch(API + '/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids, dependents, dry }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (out.status === 'dependents' || out.status === 'plan') return out;
+    if (!res.ok) throw new Error(out.error || ('vault: HTTP ' + res.status));
+    await Vault.refresh();
+    for (const id of out.deleted) dispatch('vault:removed', { id });
+    return out;
   },
 };
 

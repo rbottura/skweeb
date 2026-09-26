@@ -17,7 +17,7 @@
  */
 
 import * as Registry from '../../core/registry.js';
-import { Vault }     from '../../core/vault.js';
+import { Vault, isTrashed } from '../../core/vault.js';
 import { folderOf }  from '../../core/VaultPanel.js';
 import { renderUrl } from './materials.js';
 
@@ -55,13 +55,13 @@ export async function shelves() {
   }
 
   if (await Vault.refresh()) {
-    for (const row of Vault.index.filter(r => r.type === 'set')) {
+    for (const row of Vault.index.filter(r => r.type === 'set' && !isTrashed(r))) {
       out.push({
         id: 'set:' + row.id, label: row.title || row.id, group: 'vault sets',
         items: () => membersOf(row.id),
       });
     }
-    const loose = Vault.index.filter(r => (r.type === 'still' || r.type === 'shape') && !folderOf(r));
+    const loose = Vault.index.filter(r => (r.type === 'still' || r.type === 'shape') && !folderOf(r) && !isTrashed(r));
     if (loose.length) {
       out.push({
         id: 'images', label: 'stills and shapes', group: 'vault', count: loose.length,
