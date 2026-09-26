@@ -196,14 +196,6 @@ with its source — and the vault's detail offers the link wherever the app's
 `rebuild.js` says `reopens()` (`core/reopen.js`). It is the first time
 `restore()` runs for real, and it is what M4 reaches for.
 
-**Objects can be deleted, in two steps.** Decided 2026-09-26, by the author:
-a trash first, then deleting for good from it; and when other objects are made
-from what is going, either the chain goes too, or they are kept and cut loose —
-"still there and usable, but maybe not with all its past features". The trash
-is a `trash` tag; cutting loose is the one edit an ordinary object gets besides
-its tags, and it records itself in a new envelope field, `detached`. Rules in
-`docs/object-model.md`, *Trash, and deleting*.
-
 **The vault is reached over the author's tailnet.** One machine serves it; the
 others, at work and at home, open it by link. For the author's own machines,
 M4's "an object has a URL you can send" is therefore the `?open=` link;
@@ -212,3 +204,34 @@ tailnet. `server.js` binds to 127.0.0.1 because it writes files, so the
 serving machine puts it behind `tailscale serve`, or passes `--host` its
 tailnet address — never `0.0.0.0`, which opens the write API to the local
 network as well.
+
+## Decided since, 2026-09-26
+
+**Objects can be deleted, in two steps.** Decided 2026-09-26, by the author:
+a trash first, then deleting for good from it; and when other objects are made
+from what is going, either the chain goes too, or they are kept and cut loose —
+"still there and usable, but maybe not with all its past features". The trash
+is a `trash` tag; cutting loose is the one edit an ordinary object gets besides
+its tags, and it records itself in a new envelope field, `detached`. Rules in
+`docs/object-model.md`, *Trash, and deleting*.
+
+**Filters, particles and fractals are next; 3D is parked.** The author, after
+M4: the suite is to make the assets of a small game, 2D first — with fake 3D
+motion where it helps — and 3D later. So M5 is filters, on a GPU kit in core
+that the next two share; M6 particles; M7 fractals. 3D was M5 (2026-09-21) and
+comes back after, starting from the kit. The plan, each milestone's *Done
+when* and its link are in `docs/roadmap.md`.
+
+**Rule 8 is settled: p5 is not required.** Open since M2, when grid was
+written without it, then ckt. Every app is ES modules with no globals across
+files, which was the point of the rule; p5 is optional and new work does not
+take it on. The gamepad's sketch and core's replay of its recordings still use
+it, the one version in `core/libs/`, until they are ported — a job of its own,
+since every recording in the vault replays through that code and must replay
+the same after.
+
+**A shader carries its licence, as a font does.** Rule 5 now covers shaders. The
+filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA
+is under the Prosperity licence — noncommercial, a thirty-day commercial trial —
+and Shadertoy code with no licence header is CC BY-NC-SA 3.0 by default: both
+stay out of a suite meant to make a game's assets.

@@ -67,9 +67,101 @@ entry in the catalogue. M3 `ckt → gamepad: brush family` — **done, 2026-09-2
 M4 `any → compose: place on a sheet` — **done, 2026-09-24**: compose's
 picker takes any object, and the vault detail offers *Place in compose ↗*.
 
-**M5 — 3D, the fourth process.** The test of whether this architecture was worth
-building: a new app should cost a folder, a schema and three functions, and the
-`model` and `material` types should slot in without touching the envelope.
+The next three were chosen by the author on 2026-09-26, with 3D parked: the
+suite is to make the assets of a small game — 2D first, fake 3D where it helps,
+real 3D later. Each stands on one new piece of core, the GPU kit.
+
+**M5 — filters, and the GPU kit under them.** The fifth process, and the test
+M5 was always meant to be: a new app should cost a folder, a schema and three
+functions. Under it, a kit in `core/` that M6 and M7 stand on too:
+
+- **one GPU device or context for the page**, however many objects are on it —
+  compose places many, and browsers cap WebGL contexts at about sixteen;
+- **filters of several passes**, on textures used in turns, so a blur is
+  separable and stays linear in its radius at print scale;
+- **a filter is data** — an id, a param schema, its shader, its passes — so its
+  panel is rule 1's and a chain of them is a recipe;
+- **seeded noise**, the same function in the shader language and in JS (rule 2).
+
+Which GPU API is *Still open*, 4; the recommendation is WebGPU.
+
+The app opens any object — a still, a loop, a composition — and stacks filters
+on it, each a drawer from its schema. It saves a still or a loop with the
+source as its parent and `{ source, chain }` as its recipe; its `rebuild.js`
+replays the source through `openFrames()` and runs the chain, as grid's does.
+A filter's sizes are in the source's pixels, so print scale draws it again
+exactly instead of stretching it. A chain saved alone is a **look**, a `params`
+object, and compose applies a look to a placement or to a page.
+
+The catalogue starts from p5.FIP (MIT, 45 effects, each one pass) and grows from
+glfx.js (MIT) and GPUImage (BSD, about 125): tone and colour, blur and sharpen,
+edges, stylise, distort. Three groups are the suite's own. **For game assets**:
+palette lock, sprite outline, drop shadow, nearest-neighbour scaling, alpha
+cleanup, a normal map from a sprite, make tileable. **Motion**, a still in and a
+loop out, for idle animation: bob, breathe, sway, shimmer, glow pulse, palette
+cycling, a spin. **Time**, a loop in: echo, slit-scan, blended motion blur, each
+reading a bounded window of frames, so any frame still renders on its own and a
+loop still closes. LYGIA and unlicensed Shadertoy code stay out (rule 5).
+
+*Done when:* any still or loop in the vault goes through a chain of filters
+previewed live on the GPU, saves with its source as its parent, replays, and
+redraws at print scale; and a look made there is applied to a placement in
+compose. The link: `filter → compose: a look`.
+
+**M6 — particles.** A particle is a function of its spawn slot and its age, not
+a step in one shared simulation: seeded from its emitter and its slot, and
+integrated from its own birth. So any frame renders on its own; emission that
+repeats with the loop's period closes the loop exactly, after one lifetime of
+warm-up; and a frame draws again at any size. Particles that interact —
+flocking, collisions — break all three, and wait for a mode that caches.
+Canvas 2D first: ckt already stamps thousands of turned sprites at 60 fps
+(`apps/ckt/stamps.js`), and that renderer moves into core. Sprites come from
+vault sets through one row in `core/uses.js`; an emitter is a point, a line, a
+circle or a shape's alpha; forces are gravity, wind, drag, vortex, attractors,
+seeded curl noise and a field taken from another object; colour, size, alpha
+and spin run over a particle's life on `core/easing.js` curves. Particles live
+in x, y and z behind a simple camera and are drawn as sprites sorted by depth —
+the suite's first fake 3D, and a start on the real one.
+
+*Done when:* a torch loop that closes exactly, drawn with a vault set's
+sprites and scrubbed to any frame, and a one-shot burst, both leaving as
+sprite sheets a game engine loads. The link: `set → particles: sprites`, a use.
+
+**M7 — fractals.** Escape-time on the GPU — Mandelbrot, Julia, Burning Ship,
+multibrot, Newton, Phoenix, Lyapunov — with smooth colouring and orbit traps,
+navigated by drag and zoom, a Julia chosen by clicking the Mandelbrot. A pure
+function of its params, so print scale is exact; GPU floats run out near a zoom
+of 10⁴–10⁵, and deeper is a later brick. Then the point families — IFS, strange
+attractors, fractal flames — as density plots, and L-systems for trees and
+plants. A loop closes by palette cycling, a Julia constant on a circle, or a
+turn. It makes palettes, and fields for the others: particles flow along a
+field, filters displace by one.
+
+*Done when:* a Julia loop that closes, redrawn exactly at print scale, whose
+field steers an M6 emitter. The link: `fractal → particles: a field`.
+
+**Across M5–M7, for the game.** Four things serve every app rather than one:
+
+- **sprite-sheet export** for any loop — the frames on one sheet with an
+  Aseprite-style JSON of frame rects, durations and tags. `core/sheet.js`
+  already lays out a set's contact sheet; this is its sibling. It needs
+  nothing new and can land any time, at the latest with M6;
+- **a `palette` type** — a game has one, and palette lock, gradient maps,
+  colour over life and fractal colouring all read it. A row in the object
+  model, not a field;
+- **pixel mode** — small, nearest-sampled, whole-number scales, if the game is
+  pixel art;
+- **tileable output** — filters, noise and fractals that wrap at their edges,
+  for backgrounds and textures.
+
+And fake 3D where it is cheap: particles in depth (M6); a sprite lit through
+its normal map by a moving light, and a spin (M5's motion filters); parallax
+by depth in compose; a sprite stack — a set of slices turned as one object.
+
+**3D, parked.** It was M5. When it returns it starts from the GPU kit:
+ray-marched shapes and 3D fractals are shader work and come first, as a family
+of M7; an app with the `model` and `material` types only when the game needs
+models.
 
 ## The page, and what print resolution actually means
 
@@ -109,10 +201,11 @@ A5 to A1 formats and the PDF export already solve the second half of M4.
 
 In `docs/decisions.md`, with their reasoning: the `.skw` smart object,
 `sketch-2-print` keeping its gamepad, export as two tools, the loop format,
-print resolution as an export concern, 3D as M5, the font audit, `render()`
-staying pure; video as frames plus ffmpeg, M2 done, replay as a dispatch,
-framing as one idea, trim measured; M3 done and ckt ported twice, the UI pass
-from the author's brief, an object reopening in its app, and the tailnet.
+print resolution as an export concern, 3D as M5 (parked since, 2026-09-26),
+the font audit, `render()` staying pure; video as frames plus ffmpeg, M2 done,
+replay as a dispatch, framing as one idea, trim measured; M3 done and ckt
+ported twice, the UI pass from the author's brief, an object reopening in its
+app, and the tailnet.
 
 ## Decided since, 2026-09-24
 
@@ -202,6 +295,22 @@ side branch, `grid/legacy-materials`, rebased onto main after.
    assumption that a sequence object needed a playable file inside the browser;
    it does not, and the muxer that would have provided one is now work that
    will not be done.
+4. **WebGPU or WebGL2, for the GPU kit.** Probed 2026-09-26 on the author's
+   machine (Chrome 154, a Radeon RX 7600), in headless Chrome as the checks run
+   it: both work with no flags, and both hand a frame to Canvas 2D in the same
+   call, which `frame(i)` needs. WebGPU adds compute with atomics — flame
+   accumulation, histograms, sorting particles — one device for any number of
+   canvases, and it is where 3D is going; it needs a real GPU (with the GPU
+   off, no adapter) and a WebGPU browser on every machine that opens the apps,
+   and every GLSL source is translated as it is ported. WebGL2 runs anywhere,
+   in software too, and takes the GLSL literature almost as it is; it has no
+   compute and gets no new features. **Recommended: WebGPU**, if the author's
+   other machines have it.
+5. **A GPU render replays within a tolerance across machines**, not bit for
+   bit: GPU arithmetic differs between GPUs and drivers. On the machine that
+   made it, it replays the same until a driver or the browser changes; the
+   recipe stays the truth, and a check compares with a tolerance. Proposed, to
+   settle before the first GPU object is saved.
 
 ## Migration facts
 

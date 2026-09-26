@@ -332,9 +332,6 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
   `sketch/gamepadSketch.js` (572), `ui/TimelinePanel.js` (547),
   `ui/ParamPanel.js`. The fit to the timeline went into its own file, but
   wiring it grew the first two by a few lines each.
-- Rule 8 asks for p5 in every app; grid and ckt draw with Canvas 2D alone. Open,
-  not decided — the proposal is to keep the rule's point (ES modules, no
-  globals, one p5 when an app uses p5) and drop "every app".
 - **Nothing can leave the author's machines**: `Vault.publish` is specified,
   not built. The tailnet covers the author's own use (*Parked*).
 - As before: old grid recipes re-render trimmed; `grd_` against `gri_` id
@@ -343,16 +340,25 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**A gamepad still drawn again at print scale** — the last kind M4 prints
-stretched. A still's recipe carries `marks`, the same shape as a recording's
-events, its `canvas`, and `frame.from`, its crop. In `core/rebuild.js`,
+**M5's first brick: the GPU kit, once the author picks its API** (WebGPU is
+recommended — `docs/roadmap.md`, *Still open* 4). In `core/gpu/`: one device
+for the page, a runner for filters of several passes on textures used in
+turns, a filter declared as an id, a schema, a shader and passes, and three
+filters ported from p5.FIP with their licence in the file — brightness and
+contrast, a separable Gaussian blur, pixelate. A test page runs a chain over
+a vault still, and a browser check proves a frame reaches Canvas 2D in the
+same call, as `frame(i)` needs. The probe that showed both APIs work here
+was a scratchpad script; this check keeps it.
+
+Parked behind M5, still wanted: **a gamepad still drawn again at print
+scale** — the last kind M4 prints stretched. A still's recipe carries
+`marks`, the same shape as a recording's events, its `canvas`, and
+`frame.from`, its crop. In `core/rebuild.js`,
 replay them through the stage at `renderScale` with every mark shown and the
 crop applied, return that as the still's handle when `openFrames` is asked
 for a scale above 1, and add it to `scripts/check-compose-export.mjs`: the
-gamepad still's row there should then say *drawn again*.
-
-Then M5, once the author has said what it is (*Parked*). Alongside: the
-gamepad onto core params.
+gamepad still's row there should then say *drawn again*. Alongside: the
+gamepad onto core params, and off p5 with it.
 
 ## Parked decisions
 
@@ -371,10 +377,15 @@ gamepad onto core params.
   stills it can draw again (`redraws()`).
 - **An export of a page writes a PNG and a frames zip** (the author,
   2026-09-24). No PDF for now; sketch-2-print's paged.js stays where it is.
-- **Open, for the author — what M5 is.** The roadmap's M5 is 3D, "the fourth
-  process", and the test of the architecture: a new app should cost a
-  folder, a schema and three functions. What it draws, and whether it is a
-  port of an existing sketch as grid and ckt were, is the author's to say.
+- **Next: filters (M5), particles (M6), fractals (M7); 3D parked** (the
+  author, 2026-09-26). The suite is to make a small game's assets — 2D first,
+  fake 3D where it helps, real 3D later. The plan is in `docs/roadmap.md`.
+  Open there: WebGPU or WebGL2 for the kit, and whether a GPU render replays
+  within a tolerance across machines.
+- **Rule 8 settled** (2026-09-26): p5 is not required, and new work does not
+  take it on; the gamepad and core's replay of its recordings keep p5 1.5.0
+  until they are ported. **Rule 5 covers shaders**: each carries its source and
+  licence; LYGIA and unlicensed Shadertoy code are noncommercial and stay out.
 - **Time on a page of many things** (the author, 2026-09-24,
   `docs/object-model.md`): a still with no length is there for the whole
   page, a loop with no length plays again until the page ends, and the page

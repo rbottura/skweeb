@@ -61,8 +61,10 @@ never symmetric, never inferred. The catalogue of links is the map of the suite.
    contents it needs splitting. This is the thing we are escaping: CKT v2 was a
    1223-line `index.html` with ~200 global ids, and every edit to it cost an
    hour of reading.
-5. **No font enters the repo or the vault without a licence record in the
-   file itself.** Six were pulled for this on 2026-09-21 — `docs/fonts.md`.
+5. **No font or shader enters the repo or the vault without a licence record
+   in the file itself.** Six fonts were pulled for this on 2026-09-21 —
+   `docs/fonts.md`. A shader names its source and its licence; LYGIA, and
+   Shadertoy code with no licence header, are noncommercial and stay out.
 6. **No binaries in git** except `gallery/` and the minimum an app needs to
    boot. The vault lives on disk, ignored; so are the heavy sprite families
    (579 files, 140 MB) — `brushes` and `timbre` are enough to draw with.
@@ -71,8 +73,11 @@ never symmetric, never inferred. The catalogue of links is the map of the suite.
 7. **Every app runs alone.** `apps/<name>/index.html` opens and works with the
    vault absent. The suite is a shared core and a shared vault, not a shell
    that owns the page.
-8. **Every app is ES modules, instance-mode p5, one p5 version** (`core/libs/`).
-   No globals crossing file boundaries, ever.
+8. **Every app is ES modules. No globals crossing file boundaries, ever.**
+   p5 is not required, and new work does not take it on — grid and ckt draw
+   with Canvas 2D. What still uses p5, the gamepad's sketch and core's replay
+   of its recordings, uses the one version in `core/libs/`, in instance mode,
+   until it is ported. Settled 2026-09-26.
 
 ## Running
 
