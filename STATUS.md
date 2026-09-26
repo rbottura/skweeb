@@ -3,6 +3,15 @@ _last touched: 2026-09-26_
 
 ## Works right now
 
+- **Kin sit together in the vault** (2026-09-27, the author's ask;
+  `node scripts/check-vault.mjs`, 10 checks; `tests/vault-kin.mjs`). Loose
+  objects made from one another share a small dashed container, the most
+  original first, an arrow between each, where the newest of them would sit;
+  joined through the whole vault, so two loops from one dot-set in a session
+  folder sit together and name it — a click opens it. Folders keep their
+  own. The head's `lineage` switch lays them out one by one, and the panel
+  remembers it. A folder no longer reads as an object: shorter, its members
+  a small tilted peek, on a little stack.
 - **The filter catalogue is nineteen** (2026-09-26): brightness, contrast,
   blur and pixelate written here; twelve from p5.FIP, under MIT, its whole
   licence beside them — saturation, invert, sepia, duotone, threshold,
@@ -287,8 +296,9 @@ _last touched: 2026-09-26_
 
 ## Tests
 
-Twenty-two files, no runner, no dependencies — the command in `CLAUDE.md`
-runs all of them, and all pass. Newest: `gpu-filters` (the catalogue as data:
+Twenty-three files, no runner, no dependencies — the command in `CLAUDE.md`
+runs all of them, and all pass. Newest: `vault-kin` (who is kin, in what
+order, where a group sits, a cycle that must not hang), then `gpu-filters` (the catalogue as data:
 licence, schema, the WGSL conventions, a chain read, sizes at print scale).
 Then `delete` (a vault with every kind of
 edge: the refusals, the dry plan, cutting loose, the chain; 37 checks).

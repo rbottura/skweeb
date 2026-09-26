@@ -264,6 +264,16 @@ it does; compose puts it over a placement, whose frames then run through it
 gains `look` — written into the object model's *Placement* before it was
 used — and a look is a parent of the page it is on.
 
+**Kin sit together in the vault; folders keep their own.** The author, on
+2026-09-27: objects joined as parent and child are shown together by
+default, from the most original to the last made, in a small container.
+Only loose objects: a folder is an explicit decision — a session's
+dot-sets, a material's earlier versions put away — and keeps what it holds.
+The whole vault still joins them, so two loops made from one dot-set in a
+folder sit together and name it. A `lineage` switch in the panel's head
+lays them out one by one. And a folder should not look like one more
+object: it is shorter now, a peek of its members on a small stack.
+
 **A shader carries its licence, as a font does.** Rule 5 now covers shaders. The
 filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA
 is under the Prosperity licence — noncommercial, a thirty-day commercial trial —

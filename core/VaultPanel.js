@@ -1,14 +1,10 @@
 /**
  * VaultPanel.js — the window onto the objects on disk.
  *
- * The vault had a write path and no read path: objects went in and sat there.
- * This is `Vault.list()` with something in front of it.
- *
- * It lives in core/ rather than in an app because every app needs the same
- * window, and because at M2 this markup is the object picker that a param of
- * `type: "object"` renders — pass `onPick` and the cards become selectable.
- * That is the whole reason cross-app loading is nearly free: see
- * docs/core-api.md, params.js.
+ * `Vault.list()` with something in front of it. In core/ because every app
+ * needs the same window, and because it is the object picker a param of
+ * `type: "object"` renders — pass `onPick` and the cards become selectable,
+ * which is why cross-app loading is nearly free (docs/core-api.md, params.js).
  *
  * Two tiers of read, matching the two tiers of storage:
  *   the grid comes from index.json alone, so it stays fast with thousands
@@ -20,6 +16,10 @@
  * view, not a place: every object still lives at objects/<id>/, so no link
  * changes. The card and its strip are vault-folder.js.
  *
+ * Kin: loose objects made from one another sit together in one small
+ * container, the most original first — vault-kin.js, and the head's
+ * `lineage` switch.
+ *
  * Ctrl- or shift-click selects a card, or a folder's every card, for the
  * trash — a view of its own, where they are restored or deleted for good. Not
  * in a picker, which is choosing, not tidying. The bar is vault-trash.js.
@@ -30,12 +30,13 @@
 
 import { Vault, isTrashed } from './vault.js';
 import { paintBar, deleteFlow } from './vault-trash.js';
-import { paintDetail } from './vault-detail.js';
+import { paintDetail, detailDrawer } from './vault-detail.js';
 import { folder, folderOf } from './vault-folder.js';
 export { folderOf };
 import { reopenUrl, placeUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
 import { objectCard, pickableCell, fileUrl } from './vault-card.js';
+import { arrange, kinBox, columnsIn, fit, lineageOn, rememberLineage } from './vault-kin.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -55,9 +56,7 @@ export class VaultPanel {
    */
   constructor(opts = {}) {
     this._filter    = opts.filter || {};
-    // Vault.list() filters on one type because index.json is a flat list and
-    // that is the cheap query. A param declares `accepts: [...]`, so the
-    // several-types case is narrowed here instead.
+    // Vault.list() filters on one type, the cheap query; a param's several are narrowed here.
     this._accepts   = Array.isArray(opts.accepts) && opts.accepts.length
       ? opts.accepts.slice() : null;
     this._offeredTo = opts.use || null;
@@ -76,8 +75,14 @@ export class VaultPanel {
     this._selected = new Set(); // ids, for the bar (vault-trash.js)
     this._tiles    = [];        // [folder tile, its ids], for the highlight
     this._busy     = false;     // moving many: one repaint at the end, not one each
+    this._kinOn    = lineageOn(); // kin kept together (vault-kin.js)
+    this._kins     = [];        // their containers, refitted when the panel resizes
 
     this._build();
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => {
+      const cols = columnsIn(this._body.clientWidth);
+      for (const box of this._kins) fit(box, cols);
+    }).observe(this._body);
 
     // A save while the panel is open should appear without being asked for.
     const live = () => { if (this._open && !this._busy) this.refresh(); };
@@ -161,26 +166,20 @@ export class VaultPanel {
       this.refresh();
     });
 
-    head.append(this._trashBtn, reload, close);
+    const kin = el('button', 'vp-chip' + (this._kinOn ? ' vp-chip--on' : ''), 'lineage');
+    kin.title = 'Keep objects made from one another together, the most original first';
+    kin.addEventListener('click', () => {
+      rememberLineage(this._kinOn = !this._kinOn);
+      kin.classList.toggle('vp-chip--on', this._kinOn);
+      this._paint();
+    });
 
+    head.append(kin, this._trashBtn, reload, close);
     this._body = el('div', 'vp-body');
-    this._root.append(head, this._body, this._buildDetail());
+    const drawer = detailDrawer(() => this._closeDetail());
+    Object.assign(this, { _detail: drawer.root, _detailTitle: drawer.title, _detailBody: drawer.body });
+    this._root.append(head, this._body, drawer.root);
     document.body.append(this._root);
-  }
-
-  _buildDetail() {
-    this._detail = el('aside', 'vp-detail');
-
-    const head = el('div', 'vp-detail-head');
-    this._detailTitle = el('span', 'vp-title', '');
-    const back = el('button', 'vp-btn', '✕');
-    back.title = 'Close this object';
-    back.addEventListener('click', () => this._closeDetail());
-    head.append(this._detailTitle, el('span', 'vp-spacer'), back);
-
-    this._detailBody = el('div', 'vp-detail-body');
-    this._detail.append(head, this._detailBody);
-    return this._detail;
   }
 
   // ── The grid ───────────────────────────────────────────────────────────────
@@ -219,33 +218,33 @@ export class VaultPanel {
       ? shown.length + ' objects'
       : shown.length + ' of ' + this._rows.length;
 
-    // Rows come newest first, so a folder sits where its newest member would.
-    const order = [];
-    const folders = new Map();
-    for (const row of shown) {
-      const name = folderOf(row);
-      if (!name) { order.push(row); continue; }
-      if (!folders.has(name)) { folders.set(name, []); order.push(name); }
-      folders.get(name).push(row);
-    }
-
+    // Rows come newest first, so a folder or a kin sits where its newest member would.
     const grid = el('div', 'vp-grid vp-grid--top');
-    for (const item of order) {
-      if (typeof item !== 'string') { grid.append(this._cardFor(item)); continue; }
-      const rows = folders.get(item);
-      const [tile, strip] = folder({
-        name: item,
-        rows,
-        open: this._openFolders.has(item),
-        thumb: row => row.thumb ? fileUrl(row.id, row.thumb) : null,
-        card: row => this._cardFor(row),
-        onToggle: on => on ? this._openFolders.add(item) : this._openFolders.delete(item),
-        select: e => this._modClick(e, rows.map(r => r.id)),
-      });
-      this._tiles.push([tile, rows.map(r => r.id)]);
-      grid.append(tile, strip);
+    const cols = columnsIn(this._body.clientWidth);
+    this._kins = [];
+    for (const item of arrange(shown, Vault.index, { kin: this._kinOn && !this._inTrash, folderOf })) {
+      if (item.row) grid.append(this._cardFor(item.row));
+      else if (item.kin) {
+        const box = kinBox(item.kin, { card: row => this._cardFor(row), open: id => this._openDetail(id),
+          select: (e, ids) => this._modClick(e, ids), cols });
+        this._kins.push(box);
+        grid.append(box);
+      } else grid.append(...this._folder(item.folder, item.rows));
     }
     this._body.append(grid);
+  }
+
+  _folder(name, rows) {
+    const ids = rows.map(r => r.id);
+    const [tile, strip] = folder({
+      name, rows, open: this._openFolders.has(name),
+      thumb: row => row.thumb ? fileUrl(row.id, row.thumb) : null,
+      card: row => this._cardFor(row),
+      onToggle: on => on ? this._openFolders.add(name) : this._openFolders.delete(name),
+      select: e => this._modClick(e, ids),
+    });
+    this._tiles.push([tile, ids]);
+    return [tile, strip];
   }
 
   _cardFor(row) {

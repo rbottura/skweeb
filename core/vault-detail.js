@@ -18,6 +18,20 @@ const el = (tag, cls, text) => {
   return node;
 };
 
+/** The drawer an object opens in: a head with its type and a close, and a body to paint. */
+export function detailDrawer(onClose) {
+  const root = el('aside', 'vp-detail');
+  const head = el('div', 'vp-detail-head');
+  const title = el('span', 'vp-title', '');
+  const back = el('button', 'vp-btn', '✕');
+  back.title = 'Close this object';
+  back.addEventListener('click', onClose);
+  head.append(title, el('span', 'vp-spacer'), back);
+  const body = el('div', 'vp-detail-body');
+  root.append(head, body);
+  return { root, title, body };
+}
+
 /** A render the browser can show as a picture. Anything else is data. */
 const PICTURE = /^(png|jpe?g|webp|gif|avif|svg|bmp)$/i;
 

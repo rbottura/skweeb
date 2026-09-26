@@ -1,0 +1,73 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   vault-kin.css — objects made from one another, kept together (vault-kin.js).
+
+   Imported by vault-panel.css. A small container, dashed as a plan is drawn
+   and faintly hatched: its members in the order they came, an arrow between
+   each, its head naming it and any parent it does not show.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.vp-kin {
+  grid-column: span var(--kin-span, 2);
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--kin-span, 2), minmax(0, 1fr));
+  gap: 14px;
+  align-content: start;
+  padding: 26px 8px 8px;
+  border: var(--nb-line-sm, 2px) dashed var(--nb-ink, #111);
+  background: repeating-linear-gradient(135deg, transparent 0 7px, rgba(17, 17, 17, 0.05) 7px 8px);
+}
+
+.vp-kin-head {
+  position: absolute;
+  top: 5px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  font: 700 10px var(--nb-mono, monospace);
+}
+
+.vp-kin-name {
+  flex: none;
+  padding: 1px 6px;
+  border: 0;
+  background: var(--nb-ink, #111);
+  color: var(--nb-paper, #fffdf6);
+  font: inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.vp-kin-from {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--nb-ink, #111);
+  font: 400 10px var(--nb-mono, monospace);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.vp-kin-from:hover { background: var(--nb-accent, #ffd60a); }
+.vp-kin-more { color: var(--nb-muted, #6b665c); }
+
+/* The arrow from one to the next, in the gap between them. */
+.vp-kin > .vp-card ~ .vp-card::before,
+.vp-kin > .vp-cell ~ .vp-cell::before {
+  content: '→';
+  position: absolute;
+  z-index: 1;
+  left: -15px;
+  top: 30%;
+  width: 16px;
+  text-align: center;
+  font: 700 14px var(--nb-font, sans-serif);
+  color: var(--nb-ink, #111);
+}
