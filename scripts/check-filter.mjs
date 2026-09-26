@@ -86,6 +86,39 @@ await page.until(`${cards}.length === 0 && !document.querySelector('.fl-empty').
 c.ok('taken out, the chain is empty and says so', true, await page.eval(say));
 await c.shot('1-empty-again');
 
+// ── 4b. Picking a colour leaves the picker open ─────────────────────────────
+// A native picker cannot be driven from here, so what closed it is checked: a
+// drag in it sets the input's value and fires `input`, over and over, and the
+// widget answering must neither replace the input nor write its value back.
+await page.typeInto(addMenu, 'palette');
+await page.typeInto(addMenu, 'duotone');
+await page.until(`${cards}.length === 2`);
+const drag = which => page.eval(`(async () => {
+  const proto = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  const card = ${cards}.find(k => k.querySelector('.pp-title').textContent === ${JSON.stringify(which)});
+  const input = card.querySelector('.pp-color');
+  let writes = 0;
+  Object.defineProperty(input, 'value', { configurable: true,
+    get() { return proto.get.call(this); }, set(v) { writes++; proto.set.call(this, v); } });
+  for (const c of ['#112233', '#223344', '#334455']) {
+    proto.set.call(input, c);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  return { same: input.isConnected && card.querySelector('.pp-color') === input, writes, value: proto.get.call(input) };
+})()`);
+const swatch = await drag('palette lock');
+c.ok('dragging in a palette swatch\'s picker keeps the swatch, and its picker', swatch.same && swatch.writes === 0
+  && swatch.value === '#334455', JSON.stringify(swatch));
+const tone = await drag('duotone');
+c.ok('and a single colour is not written back under the hand', tone.same && tone.writes === 0
+  && tone.value === '#334455', JSON.stringify(tone));
+await page.click(`${cards}[0].querySelector('.pp-colors .pp-btn')`);
+c.ok('adding a colour still makes its swatch', await page.eval(`${cards}[0].querySelectorAll('.pp-colors .pp-color').length`) === 5);
+await page.click(headButton(1, '✕'));
+await page.click(headButton(0, '✕'));
+await page.until(`${cards}.length === 0`);
+
 // ── 5. A loop from the vault, through the chain, playing ────────────────────
 const rows = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
 const loop = rows.find(r => r.type === 'sequence' && r.origin && r.origin.app === 'gamepad'

@@ -83,13 +83,19 @@ export const WIDGETS = {
    */
   enum: ctx => (ctx.spec.display === 'chips' ? chipEnum(ctx) : selectEnum(ctx)),
 
+  /**
+   * A colour. Its sync never writes back a value the input already shows: the
+   * panel syncs every change, the input's own included, and writing a colour
+   * input's value while its picker is open closes the picker under the hand
+   * dragging in it. The same holds for `ground` and each swatch of `color[]`.
+   */
   color: ({ value, set, readout }) => {
     const input = el('input', 'pp-color');
     input.type = 'color';
     input.value = value;
     readout.textContent = value;
     input.addEventListener('input', () => set(input.value));
-    return { node: input, sync(v) { input.value = v; readout.textContent = v; } };
+    return { node: input, sync(v) { if (input.value !== v) input.value = v; readout.textContent = v; } };
   },
 
   /** A colour, or none: a transparent ground is a choice, not a second switch. */
@@ -110,7 +116,7 @@ export const WIDGETS = {
     const sync = v => {
       current = v;
       const off = v === 'none';
-      if (!off) { last = v; color.value = v; }
+      if (!off) { last = v; if (color.value !== v) color.value = v; }
       none.classList.toggle('pp-chip--on', off);
       color.classList.toggle('pp-color--off', off);
       readout.textContent = off ? 'none' : v;
@@ -132,15 +138,17 @@ export const WIDGETS = {
   'color[]': ({ value, set, readout }) => {
     const wrap = el('div', 'pp-colors');
     let colors = Array.from(value || []);
+    let swatches = [];
     const repaint = () => {
       wrap.replaceChildren();
       readout.textContent = colors.length;
-      colors.forEach((c, i) => {
+      swatches = colors.map((c, i) => {
         const swatch = el('input', 'pp-color');
         swatch.type = 'color';
         swatch.value = c;
         swatch.addEventListener('input', () => { colors[i] = swatch.value; set(colors.slice()); });
         wrap.append(swatch);
+        return swatch;
       });
       const add = el('button', 'pp-btn', '+');
       add.title = 'Add a colour';
@@ -151,7 +159,22 @@ export const WIDGETS = {
       wrap.append(add, drop);
     };
     repaint();
-    return { node: wrap, sync(v) { colors = Array.from(v || []); repaint(); } };
+    return {
+      node: wrap,
+      /**
+       * As many colours as before: each swatch set in place, the one being
+       * picked left alone. Only a colour added or taken away rebuilds the row
+       * — rebuilding while a picker is open takes its swatch, and the picker,
+       * away (see `color`).
+       */
+      sync(v) {
+        const next = Array.from(v || []);
+        if (next.length !== swatches.length) { colors = next; repaint(); return; }
+        colors = next;
+        next.forEach((c, i) => { if (swatches[i].value !== c) swatches[i].value = c; });
+        readout.textContent = colors.length;
+      },
+    };
   },
 
   /**
