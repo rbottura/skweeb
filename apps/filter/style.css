@@ -1,0 +1,35 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — filter
+
+   Everything that looks like the suite comes from core. All filter says is its
+   layout — the viewer, then one column of drawers — and how a filter's card
+   sits in the Filters drawer: a small param panel of its own (chain.js).
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+@import '../../core/param-panel.css';
+@import '../../core/vault-panel.css';
+@import '../../core/sequence-viewer.css';
+
+.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+
+/* ── A filter's card ───────────────────────────────────────────────────────── */
+
+.fl-cards { display: grid; gap: 12px; }
+
+/* Two rows, always: the filter's name, then its buttons at the right — the
+   same for a short name and a long one, rather than wrapping where it falls. */
+.fl-card .pp-head { flex-wrap: wrap; gap: 5px; margin-bottom: 0; }
+.fl-card .pp-title { flex: 1 0 100%; }
+.fl-card .pp-head .pp-btn { min-height: 24px; padding: 0 7px; }
+.fl-card .pp-btn:disabled { opacity: 0.35; cursor: default; }
+.fl-card .pp-body { overflow: visible; padding: 0; }
+.fl-card .pp-loose:not(:empty) { margin-bottom: 0; }
+
+/* Off: still in the chain and still editable, just not run. */
+.fl-card--off .pp-title { text-decoration: line-through; }
+.fl-card--off .pp-loose { opacity: 0.5; }
+
+.fl-empty { margin: 2px 0 10px; color: var(--nb-muted); font-style: italic; }
+.fl-empty[hidden] { display: none; }
+.fl-add { width: 100%; margin-top: 12px; }

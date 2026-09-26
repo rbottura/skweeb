@@ -12,7 +12,9 @@
  *
  * A result — "saved ckt_…" — holds the status line for a few seconds, because
  * a playing loop rewrites that line every frame and would otherwise show a
- * result for one frame.
+ * result for one frame. What was said meanwhile shows when the hold ends: an
+ * app that says things only when something changes — a still being filtered
+ * — would otherwise keep the result on the line for good.
  */
 
 import { dpiOf }   from './formats.js';
@@ -53,9 +55,12 @@ export class Bar {
     this._holdUntil = 0;
   }
 
-  /** The status line, unless a result is holding it. */
+  /** The status line — once any result holding it has had its few seconds. */
   say(text) {
-    if (performance.now() < this._holdUntil) return;
+    if (performance.now() < this._holdUntil) {
+      this._waiting = text;              // shown when the hold ends
+      return;
+    }
     this._say.textContent = text;
     this._say.classList.remove('bar-say--held');
   }
@@ -65,6 +70,12 @@ export class Bar {
     this._say.textContent = text;
     this._say.classList.add('bar-say--held');
     this._holdUntil = performance.now() + HOLD_MS;
+    this._waiting = null;
+    clearTimeout(this._release);
+    this._release = setTimeout(() => {
+      this._holdUntil = 0;               // a timer may wake a hair early
+      if (this._waiting != null) this.say(this._waiting);
+    }, HOLD_MS);
   }
 
   /**

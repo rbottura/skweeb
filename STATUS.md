@@ -3,6 +3,16 @@ _last touched: 2026-09-26_
 
 ## Works right now
 
+- **filter, M5's app, opens and filters live** (`apps/filter/`, 2026-09-26;
+  `node scripts/check-filter.mjs`, 19 checks). Any vault still, shape, loop
+  or moving composition — or a file dropped, with no vault — through a chain
+  of GPU filters, each a card drawn from its own schema by core's ParamPanel,
+  switched off, moved, taken out. A loop plays through the chain at 61 paints
+  a second here; with no WebGPU the page opens, says why and shows the source
+  as it is. Nothing saves yet: `apps/filter/STATUS.md` has the bricks.
+- **The bar gives the status line back** after a result's three seconds —
+  an app that says things only when something changes kept a result on it
+  for good.
 - **The GPU kit, M5's first brick** (`core/gpu/`, WebGPU, 2026-09-26), seen
   on this machine's GPU by `node scripts/check-gpu.mjs`, 18 checks. One
   device for the page; a chain of filters run in one call, handed back as an
@@ -363,13 +373,11 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M5's second brick: `apps/filter/` opens and filters live** — the skweeb-app
-skill first. A page on core's theme with the vault picker for its source (a
-still or a loop, through `openFrames()`), the chain as a list of drawers
-each generated from its filter's schema, added from the catalogue, switched
-off and removed, and the result drawn live through one `core/gpu` runner.
-Where there is no WebGPU the page opens and says why. No save yet: saving,
-`rebuild.js` and print scale are the third brick.
+**M5's third brick, its first half: a filtered still saves** —
+`apps/filter/STATUS.md` has it in full: `{ source, chain }` the recipe, the
+source the parent, and `?open=<id>` bringing the chain back card for card.
+Before it, the author's answer to *Still open* 5 (`docs/roadmap.md`): may a
+GPU render replay within a tolerance on another machine?
 
 Parked behind M5, still wanted: **a gamepad still drawn again at print
 scale** — the last kind M4 prints stretched. A still's recipe carries

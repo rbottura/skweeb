@@ -133,6 +133,21 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
       throw new Error('timed out waiting for ' + expression);
     },
 
+    /**
+     * Run a script in every page this tab opens from now on, before the
+     * page's own — how a check takes something away first, WebGPU say.
+     * Returns what `forget()` takes to stop it.
+     */
+    async beforeLoad(source) {
+      const { identifier } = await send('Page.addScriptToEvaluateOnNewDocument', { source });
+      return identifier;
+    },
+
+    /** Stop a script beforeLoad() set going; pages opened after are left alone. */
+    forget(identifier) {
+      return send('Page.removeScriptToEvaluateOnNewDocument', { identifier });
+    },
+
     /** Click the element an expression finds. False when it finds none. */
     click(element) {
       return page.eval(`(() => { const el = ${element}; if (!el) return false; el.click(); return true; })()`);

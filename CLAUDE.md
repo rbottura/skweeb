@@ -15,11 +15,12 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
 | `apps/compose/` | M4: objects from every app placed on one page | `apps/compose/STATUS.md` |
+| `apps/filter/` | M5: any picture or loop through a chain of GPU filters | `apps/filter/STATUS.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault | `docs/object-model.md`, *Trash, and deleting* |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs` and `check-gpu.mjs` are three, as commands. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs` and `check-filter.mjs` are four, as commands. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/decisions.md` | what was decided before today, and why, by date | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
@@ -95,6 +96,7 @@ done
 node scripts/check-compose.mjs
 node scripts/check-compose-export.mjs   # print scale: the PNG, the frames, the save
 node scripts/check-gpu.mjs              # the GPU kit, on this machine's GPU
+node scripts/check-filter.mjs           # the filter app: a chain built, a loop played, no WebGPU
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at

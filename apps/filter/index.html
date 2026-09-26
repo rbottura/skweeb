@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="filter — any picture or loop through a chain of GPU filters.">
+  <title>filter — skweeb</title>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!--
+    The shell from core/theme.css: the viewer, one column of drawers, and the
+    bar as a row of its own below them. No p5: the filters run on the GPU
+    through core/gpu/, and the page is Canvas 2D around them.
+  -->
+  <div class="app">
+    <main class="app-main">
+      <section class="viewer" aria-label="filter output">
+        <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+      </section>
+      <div class="app-side" id="side"></div>
+    </main>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

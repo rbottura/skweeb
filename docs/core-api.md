@@ -101,10 +101,13 @@ whatever is positioned inside it, because `overflow: hidden` on the body does
 not stop focus from scrolling the page — so a popover that must spill past
 the shell is `position: fixed`. The bar says what an app will make — output
 size, density, a paper format's dpi, the paint rate while a loop plays — and a
-few keys. It holds no buttons.
+few keys. It holds no buttons. A result (`announce`) holds the status line for
+three seconds; what was said meanwhile shows when they are up.
 
 A panel docks into a layout column (`new ParamPanel(params, { mount })`) and
-is made of drawers. A param's `group` names its drawer; `format` is core's
+is made of drawers. A small panel can also be a card inside another's drawer
+— one per filter in filter's chain — with `panel.head` for an app's buttons
+beside Reset and `panel.remove()` to take it off the page. A param's `group` names its drawer; `format` is core's
 own group, so the frame section is the same in every app. Things that are not
 parameters get drawers too: `panel.addDrawer({ id, title })` for the sequence
 player (`Transport.js`) or an app's export actions, `panel.drawer(id).body`

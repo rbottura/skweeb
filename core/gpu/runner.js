@@ -127,6 +127,16 @@ class Runner {
     return pipeline;
   }
 
+  /** Whether everything a chain needs is compiled, so run() will not refuse it. */
+  ready(chain) {
+    const has = (pass, format) => this.pipelines.has(format + '\n' + moduleOf(pass));
+    try {
+      return has(PRESENT, this.format) && passesOf(chain).every(p => has(p.pass, MID));
+    } catch {
+      return false;                    // a filter this catalogue does not have
+    }
+  }
+
   pipeline(pass, format, label) {
     const found = this.pipelines.get(format + '\n' + moduleOf(pass));
     if (!found) throw new Error(`gpu: ${label} is not compiled — await runner.prepare(chain) first`);

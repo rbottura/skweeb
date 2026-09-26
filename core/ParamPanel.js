@@ -95,6 +95,12 @@ export class ParamPanel {
   /** A drawer by group id or by the id it was added under. */
   drawer(id) { return this._drawers.get(id) || null; }
 
+  /** The title bar, for an app's buttons beside Reset — a filter's in a chain. */
+  get head() { return this._head; }
+
+  /** Take the panel off the page; its params go with whoever holds them. */
+  remove() { this._root.remove(); }
+
   /**
    * A drawer for something that is not a parameter.
    *
@@ -127,7 +133,7 @@ export class ParamPanel {
     this._root = el('aside', this._mount ? 'pp pp--docked' : 'pp');
     this._root.setAttribute('aria-label', this._title + ' parameters');
 
-    const head = el('div', 'pp-head');
+    const head = this._head = el('div', 'pp-head');
     head.append(el('span', 'pp-title', this._title), el('span', 'pp-spacer'));
     const reset = el('button', 'pp-btn', 'Reset');
     reset.title = 'Every parameter back to its default';
