@@ -26,7 +26,8 @@ async function inPage() {
   const { createRunner } = await import('/core/gpu/runner.js');
   const runner = await createRunner();
   if (!runner) return { gpu: false };
-  await runner.prepare(['halftone', 'dots', 'crt', 'vignette', 'grain', 'glitch'].map(id => ({ id })));
+  await runner.prepare(['halftone', 'dots', 'crt', 'vignette', 'grain', 'glitch',
+    'gradientmap', 'motionblur', 'zoomblur', 'dither'].map(id => ({ id })));
 
   const canvas = (w, h, draw) => {
     const el = Object.assign(document.createElement('canvas'), { width: w, height: h });
@@ -90,6 +91,34 @@ async function inPage() {
   const t = glitch(3, 0);
   out.glitch = { torn: differing(t, src), again: same(t, glitch(3, 0)), nextFrame: differing(t, glitch(3, 1)) };
 
+  // Gradient map: black, red, white — a flat grey lands where its brightness is.
+  const mapped = g => at(read(runner.run(flat(`rgb(${g},${g},${g})`),
+    [{ id: 'gradientmap', params: { colours: ['#000000', '#ff0000', '#ffffff'], amount: 1 } }])), 64, 5, 5);
+  out.gradient = { black: mapped(0), quarter: mapped(64), white: mapped(255) };
+
+  // Motion blur: a white line one pixel wide, smeared across it, then along it.
+  const line = canvas(64, 64, x => { x.fillStyle = '#000'; x.fillRect(0, 0, 64, 64);
+    x.fillStyle = '#fff'; x.fillRect(32, 0, 1, 64); });
+  const across = read(runner.run(line, [{ id: 'motionblur', params: { length: 8, angle: 0 } }]));
+  const along = read(runner.run(line, [{ id: 'motionblur', params: { length: 8, angle: 90 } }]));
+  out.motion = { centre: at(across, 64, 32, 20)[0], near: at(across, 64, 35, 20)[0], far: at(across, 64, 37, 20)[0],
+    along: at(along, 64, 32, 20)[0], beside: at(along, 64, 33, 20)[0] };
+
+  // Zoom blur: a red square at the centre streaked outwards, the same twice.
+  const sq = canvas(64, 64, x => { x.fillStyle = '#f00'; x.fillRect(24, 24, 16, 16); });
+  const zoomed = () => read(runner.run(sq, [{ id: 'zoomblur', params: { strength: 0.5, x: 0.5, y: 0.5 } }]));
+  const z = zoomed();
+  out.zoom = { centre: at(z, 64, 32, 32), streak: at(z, 64, 44, 44)[3], clear: at(z, 64, 60, 60)[3], again: same(z, zoomed()) };
+
+  // Ordered dither: a flat grey in two levels, as much white as it was light.
+  const dithered = g => {
+    const d = read(runner.run(flat(`rgb(${g},${g},${g})`), [{ id: 'dither', params: { levels: 2, matrix: '4', size: 1, grey: true } }]));
+    let white = 0, between = 0;
+    for (let i = 0; i < d.length; i += 4) { if (d[i] === 255) white++; else if (d[i] !== 0) between++; }
+    return { white: white / (d.length / 4), between };
+  };
+  out.dither = { half: dithered(128), quarter: dithered(64) };
+
   runner.dispose();
   return out;
 }
@@ -117,6 +146,25 @@ if (r.gpu) {
   c.ok('glitch: bands torn, the same for the same seed and frame', t.torn > 0.2 && t.again,
     `${Math.round(t.torn * 100)}% of pixels moved`);
   c.ok('and torn again on the next frame', t.nextFrame > 0.1, `${Math.round(t.nextFrame * 100)}% differ`);
+
+  const gm = r.gradient;
+  c.ok('gradient map: black to its first stop, white to its last',
+    gm.black.join() === '0,0,0,255' && gm.white.join() === '255,255,255,255', `${gm.black} · ${gm.white}`);
+  c.ok('and a quarter grey halfway from black to red', Math.abs(gm.quarter[0] - 128) <= 2 && gm.quarter[1] === 0,
+    String(gm.quarter));
+  const m = r.motion;
+  c.ok('motion blur: a line smeared four pixels either side, and no further',
+    Math.abs(m.centre - 28) <= 2 && Math.abs(m.near - 28) <= 2 && m.far === 0, `${m.centre} · ${m.near} · ${m.far}`);
+  c.ok('along the line, the line is left as it was', m.along === 255 && m.beside === 0, `${m.along} · ${m.beside}`);
+  const zb = r.zoom;
+  c.ok('zoom blur: streaked out from its centre, the centre kept',
+    zb.centre.join() === '255,0,0,255' && zb.streak > 0 && zb.streak < 255 && zb.clear === 0,
+    `streak alpha ${zb.streak}, far corner ${zb.clear}`);
+  c.ok('and the same twice: no seed, no chance', zb.again);
+  const d = r.dither;
+  c.ok('ordered dither: half grey half white, a quarter a quarter, nothing between',
+    d.half.white === 0.5 && d.quarter.white === 0.25 && !d.half.between && !d.quarter.between,
+    `${d.half.white} and ${d.quarter.white} white`);
 }
 
 const noise = c.quiet();

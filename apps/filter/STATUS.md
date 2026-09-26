@@ -19,8 +19,9 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
    look`. With it, filters reach past the edge (`edges`: grow or keep).
 5. **The catalogue grows** — begun 2026-09-26: p5.FIP's, glfx's and GPUImage's
    filters, each with its copyright line; then the suite's own groups — game
-   assets, motion, time. In: seventeen from p5.FIP, grain, and the game-asset
-   group begun — outline, drop shadow, palette lock.
+   assets, motion, time. In: eighteen from p5.FIP, glfx's zoom blur, grain,
+   gradient map, ordered dither, and the game-asset group begun — outline,
+   drop shadow, palette lock.
 
 ## Works now
 
@@ -50,7 +51,14 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
   the same seed, the same noise; the seed is saved in the recipe, and as
   the object's seed when its chain draws at random. `check-filters.mjs`
   holds each to what it does.
-- **Twenty-five filters**, in the menu by group — tone and colour; blur and
+- **The author's four** (2026-09-27): a *gradient map* — brightness looked up
+  on up to 16 colours, dark to light; a *motion blur* — any length, any
+  angle, centred, from p5.FIP's fixed diagonal; a *zoom blur* — glfx.js's
+  (MIT, its licence beside the filters), its jitter fixed per pixel so it
+  needs no seed; an *ordered dither* — Bayer's 2×2, 4×4 or 8×8, in levels,
+  in colour or grey, chunky if asked. Held to exact values in
+  `check-filters`: a half grey dithers exactly half white.
+- **Twenty-nine filters**, in the menu by group — tone and colour; blur and
   detail; shape and edges; stylise; for game assets. Written here: brightness,
   contrast, gaussian blur, pixelate, outline, drop shadow, palette lock. From p5.FIP (MIT, its whole licence in
   `core/gpu/filters/LICENSE-p5.FIP.txt`): saturation, invert, sepia, duotone,

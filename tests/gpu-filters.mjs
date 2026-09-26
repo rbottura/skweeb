@@ -117,6 +117,15 @@ ok('sharpening reaches nowhere: what it pushes past the edge is held to nothing'
 ok('a CRT reaches as far as its colours split; a glitch as far as it tears, and splits',
   [reachOf([{ id: 'crt', params: { split: 2 } }]), reachOf([{ id: 'glitch', params: { shift: 10, split: 2 } }])], [2, 12]);
 
+ok('a motion blur reaches half its length; zoom blur, dither and gradient map nowhere',
+  [reachOf([{ id: 'motionblur', params: { length: 8 } }]), reachOf([{ id: 'zoomblur' }, { id: 'dither' }, { id: 'gradientmap' }])], [4, 0]);
+ok('a motion blur steps no more than a pixel, both ways',
+  FILTERS.motionblur.passes[0].uniforms({ length: 10, angle: 90 }, { scale: 1 }).map(v => Math.round(v * 1000) / 1000), [0, 1, 5]);
+ok('a gradient of three fills three of sixteen stops',
+  FILTERS.gradientmap.passes[0].uniforms({ colours: ['#000000', '#ff0000', '#ffffff'], amount: 1 }).slice(0, 16),
+  [3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0]);
+ok('a 4×4 matrix is two bits a side', FILTERS.dither.passes[0].uniforms({ levels: 2, matrix: '4', size: 1, grey: false }, { scale: 1 })[1], 2);
+
 // ── What draws at random ─────────────────────────────────────────────────────
 ok('grain and glitch draw at random', ['grain', 'glitch'].every(id => FILTERS[id].random === true), true);
 ok('and nothing else in the catalogue does',

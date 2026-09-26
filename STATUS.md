@@ -12,8 +12,10 @@ _last touched: 2026-09-26_
   own. The head's `lineage` switch lays them out one by one, and the panel
   remembers it. A folder no longer reads as an object: shorter, its members
   a small tilted peek, on a little stack.
-- **The filter catalogue is twenty-five** (2026-09-27): brightness,
-  contrast, blur, pixelate and grain written here; seventeen from p5.FIP,
+- **The filter catalogue is twenty-nine** (2026-09-27), the author's four
+  favourites last: gradient map, motion blur, zoom blur (glfx.js's, MIT),
+  ordered dither. Brightness, contrast, blur, pixelate, grain, gradient map
+  and ordered dither written here; eighteen from p5.FIP,
   under MIT, its whole licence beside them — saturation, invert, sepia,
   duotone, threshold, posterize, sharpen, unsharp mask, emboss, edges,
   dilate, erode, halftone, dots, CRT, vignette, glitch — each changed where

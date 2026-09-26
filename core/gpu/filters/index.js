@@ -9,7 +9,7 @@
  *   source      where it came from: `skweeb` for one written here, otherwise
  *               a URL — and then `copyright`, the line its licence asks to keep,
  *               and `notice`, the file beside these that holds its licence's
- *               whole text (LICENSE-p5.FIP.txt), as MIT and BSD ask
+ *               whole text (LICENSE-p5.FIP.txt, LICENSE-glfx.txt), as MIT and BSD ask
  *   licence     rule 5: every shader says under what. MIT, BSD or the like;
  *               LYGIA and unlicensed Shadertoy code are noncommercial and
  *               never enter
@@ -47,6 +47,10 @@ import crt from './crt.js';
 import vignette from './vignette.js';
 import grain from './grain.js';
 import glitch from './glitch.js';
+import gradientmap from './gradientmap.js';
+import motionblur from './motionblur.js';
+import zoomblur from './zoomblur.js';
+import dither from './dither.js';
 // For game assets, the suite's own.
 import outline from './outline.js';
 import shadow from './shadow.js';
@@ -57,9 +61,9 @@ import palette from './palette.js';
  * shape and edges; stylise; then for game assets.
  */
 export const FILTERS = Object.freeze(Object.fromEntries([
-  brightness, contrast, saturation, invert, sepia, duotone, threshold, posterize,
-  blur, sharpen, unsharp, pixelate,
+  brightness, contrast, saturation, invert, sepia, duotone, gradientmap, threshold, posterize,
+  blur, motionblur, zoomblur, sharpen, unsharp, pixelate,
   emboss, edges, dilate, erode,
-  halftone, dots, crt, vignette, grain, glitch,
+  halftone, dots, dither, crt, vignette, grain, glitch,
   outline, shadow, palette,
 ].map(f => [f.id, f])));
