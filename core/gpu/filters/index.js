@@ -33,12 +33,24 @@ import sepia from './sepia.js';
 import duotone from './duotone.js';
 import threshold from './threshold.js';
 import posterize from './posterize.js';
+import sharpen from './sharpen.js';
+import unsharp from './unsharp.js';
+import emboss from './emboss.js';
+import edges from './edges.js';
+import dilate from './dilate.js';
+import erode from './erode.js';
 // For game assets, the suite's own.
 import outline from './outline.js';
 import shadow from './shadow.js';
 import palette from './palette.js';
 
-/** In the order the add menu lists them: tone and colour, blur and blocks, then for game assets. */
-export const FILTERS = Object.freeze(Object.fromEntries(
-  [brightness, contrast, saturation, invert, sepia, duotone, threshold, posterize, blur, pixelate,
-   outline, shadow, palette].map(f => [f.id, f])));
+/**
+ * In the order the add menu lists them: tone and colour; blur and detail;
+ * shape and edges; then for game assets.
+ */
+export const FILTERS = Object.freeze(Object.fromEntries([
+  brightness, contrast, saturation, invert, sepia, duotone, threshold, posterize,
+  blur, sharpen, unsharp, pixelate,
+  emboss, edges, dilate, erode,
+  outline, shadow, palette,
+].map(f => [f.id, f])));

@@ -13,7 +13,8 @@
 
 const MAX_TAPS = 512;            // a side; past it a blur wants a smaller picture first
 
-const across = (dx, dy) => ({
+/** One pass of it, along (dx, dy) — unsharp mask blurs with the same two. */
+export const across = (dx, dy) => ({
   code: /* wgsl */ `
 struct Params { dx: f32, dy: f32, sigma: f32, taps: f32 }
 fn fx(uv: vec2f) -> vec4f {

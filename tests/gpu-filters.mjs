@@ -109,6 +109,13 @@ ok('an outline reaches its width and a pixel', reachOf([{ id: 'outline', params:
 ok('a shadow reaches as far as it goes and its softness',
   reachOf([{ id: 'shadow', params: { x: -5, y: 3, softness: 2 } }]), 11);
 ok('palette lock reaches nowhere', reachOf([{ id: 'palette' }]), 0);
+ok('edges reach the line round the outside', reachOf([{ id: 'edges' }]), 1);
+ok('dilate reaches its radius, erode nowhere',
+  [reachOf([{ id: 'dilate', params: { radius: 2 } }]), reachOf([{ id: 'erode', params: { radius: 2 } }])], [2, 0]);
+ok('sharpening reaches nowhere: what it pushes past the edge is held to nothing',
+  reachOf([{ id: 'sharpen' }, { id: 'unsharp' }, { id: 'emboss' }]), 0);
+ok('unsharp mask blurs with the blur\'s own two passes, then one of its own',
+  FILTERS.unsharp.passes.length === 3 && FILTERS.unsharp.passes[0].code === FILTERS.blur.passes[0].code, true);
 ok('a filter this catalogue lacks is left out, not thrown', reachOf([{ id: 'nope' }, { id: 'blur', params: { radius: 1 } }]), 3);
 ok('the room at 2x is twice the pixels', marginOf([{ id: 'blur', params: { radius: 4 } }], 2), 24);
 ok('and whole pixels at any scale', marginOf([{ id: 'blur', params: { radius: 1.5 } }], 1.5), 8);

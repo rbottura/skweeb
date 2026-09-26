@@ -19,7 +19,7 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
    look`. With it, filters reach past the edge (`edges`: grow or keep).
 5. **The catalogue grows** — begun 2026-09-26: p5.FIP's, glfx's and GPUImage's
    filters, each with its copyright line; then the suite's own groups — game
-   assets, motion, time. In: six from p5.FIP, and the game-asset group
+   assets, motion, time. In: twelve from p5.FIP, and the game-asset group
    begun — outline, drop shadow, palette lock.
 
 ## Works now
@@ -32,8 +32,18 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
   outline and the shadow reach past the edge, so a sprite grows to hold them,
   and lay the sprite back over what they drew — `orig` is now a filter's own
   input, whatever runs before it in the chain.
-- **Thirteen filters.** Written here: brightness, contrast, gaussian blur,
-  pixelate, outline, drop shadow, palette lock. From p5.FIP (MIT, its whole licence in
+- **The neighbourhood filters, from p5.FIP** (2026-09-26): sharpen, unsharp
+  mask, emboss, edges (Sobel), dilate, erode — each changed where p5.FIP
+  would have hurt a sprite or cut a corner: held in range so a sprite's edge
+  does not overshoot into a rim, a true Gaussian under unsharp mask (the
+  blur's own passes, then its original laid back against it), the Sobel
+  kernel itself on brightness and alpha, a disc for dilate and erode where
+  there were four neighbours, erode keeping its colour. Their distances
+  follow the print scale. `check-gpu` holds each to one step from dark to
+  light, and dilate and erode to a sprite grown and shrunk by their radius.
+- **Nineteen filters**, in the menu by group — tone and colour; blur and
+  detail; shape and edges; for game assets. Written here: brightness,
+  contrast, gaussian blur, pixelate, outline, drop shadow, palette lock. From p5.FIP (MIT, its whole licence in
   `core/gpu/filters/LICENSE-p5.FIP.txt`): saturation, invert, sepia, duotone,
   threshold, posterize — each file names its source, licence and copyright
   line and what was changed: all six unpremultiply and keep the alpha, where
@@ -94,15 +104,14 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 
 ## Next single step
 
-**Brick 5, the next batch: p5.FIP's neighbourhood filters** — sharpen,
-unsharp mask, emboss, sobel edges, dilate and erode, each a file with its
-copyright line and its reach (a pixel, or its radius). Unsharp mask is a
-blur and then the picture pushed away from it: two passes and `orig`, as the
-outline is. `check-gpu` holds each to what it does to one edge — a step from
-dark to light, sharpened, embossed, found, grown and shrunk.
+**Brick 5, the next batch: p5.FIP's stylise group** — halftone, dot screen,
+CRT, vignette, grain and glitch. Grain is the first filter to draw at random:
+from `rand(px)` and the seed (rule 2), so the recipe gains a seed — a param,
+saved, never `Math.random`. `check-gpu` holds grain to the same pixels for
+the same seed and others for another.
 
-Then glfx's and GPUImage's, and the suite's own groups: motion — a still in,
-a loop out, for idle animation — and time.
+Then the suite's own groups, which the game wants most: motion — a still in,
+a loop out, for idle animation — and time. glfx's and GPUImage's between.
 
 ## Parked
 

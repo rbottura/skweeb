@@ -165,6 +165,21 @@ async function inPage() {
   out.palette = [[10, 30], [60, 2], [2, 2], [50, 40]].map(([x, y]) => ({
     at: `${x},${y}`, got: at(locked, 64, x, y).slice(0, 3).join(','), want: nearest(at(src, 64, x, y).slice(0, 3)).join(',') }));
 
+  // The neighbourhood filters, on one step from dark (64) to light (192) at x = 16.
+  const stair = canvas(32, 8, x => { x.fillStyle = 'rgb(64,64,64)'; x.fillRect(0, 0, 16, 8);
+    x.fillStyle = 'rgb(192,192,192)'; x.fillRect(16, 0, 16, 8); });
+  const row = (chain, xs) => { const d = read(runner.run(stair, chain)); return xs.map(x => at(d, 32, x, 4)[0]); };
+  out.steps = {
+    sharpen: row([{ id: 'sharpen', params: { amount: 1 } }], [4, 15, 16, 28]),
+    unsharp: row([{ id: 'unsharp', params: { radius: 1, amount: 1 } }], [4, 15, 16, 28]),
+    emboss: row([{ id: 'emboss', params: { strength: 1 } }], [4, 15, 28]),
+    edges: row([{ id: 'edges', params: { level: 0.25 } }], [4, 15, 16, 28]),
+  };
+  const grownSq = read(runner.run(square, [{ id: 'dilate', params: { radius: 2 } }]));
+  const shrunkSq = read(runner.run(square, [{ id: 'erode', params: { radius: 2 } }]));
+  out.morph = { grown: [33, 34].map(x => at(grownSq, 48, x, 24)[3]), corner: at(grownSq, 48, 33, 33)[3],
+    shrunk: [17, 18, 24].map(x => at(shrunkSq, 48, x, 24)[3]) };
+
   // A sprite trimmed to its ink: grown, a blur keeps its halo past the trim;
   // held, the size stays and what lies past the edge is the edge's colour.
   const tight = canvas(16, 16, x => { x.fillStyle = '#f00'; x.fillRect(0, 0, 16, 16); });
@@ -254,6 +269,19 @@ if (r.gpu) {
     for (const p of r.palette) {
       c.ok(`palette lock: ${p.at} to the nearest colour in OKLab`, p.got === p.want, `${p.got} (nearest ${p.want})`);
     }
+    const st = r.steps, near = (v, want, by = 2) => Math.abs(v - want) <= by;
+    c.ok('sharpen pushes the two sides of a step apart, and leaves flat ground',
+      near(st.sharpen[0], 64) && st.sharpen[1] === 0 && st.sharpen[2] === 255 && near(st.sharpen[3], 192), st.sharpen.join(', '));
+    c.ok('unsharp mask does so against a true blur', near(st.unsharp[0], 64) && near(st.unsharp[1], 26, 3)
+      && near(st.unsharp[2], 230, 3) && near(st.unsharp[3], 192), st.unsharp.join(', '));
+    c.ok('emboss: flat ground mid grey, the step stood up', near(st.emboss[0], 128, 1) && st.emboss[1] === 255
+      && near(st.emboss[2], 128, 1), st.emboss.join(', '));
+    c.ok('edges: white on the step, black on flat ground',
+      st.edges[0] === 0 && st.edges[1] === 255 && st.edges[2] === 255 && st.edges[3] === 0, st.edges.join(', '));
+    const m = r.morph;
+    c.ok('dilate grows a sprite by its radius, round at the corner',
+      m.grown[0] === 255 && m.grown[1] === 0 && m.corner === 0, `2 out ${m.grown[0]}, 3 out ${m.grown[1]}, corner ${m.corner}`);
+    c.ok('erode shrinks it by as much', m.shrunk.join() === '0,255,255', `alpha at 1, 2 and 8 in: ${m.shrunk}`);
     c.ok('grown, a trimmed sprite keeps its halo past the trim',
       r.grow.width === 28 && r.grow.height === 28 && r.grow.halo > 0 && r.grow.centre === 255,
       `${r.grow.width} × ${r.grow.height}, alpha 4 px past the trim ${r.grow.halo}`);

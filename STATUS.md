@@ -3,13 +3,17 @@ _last touched: 2026-09-26_
 
 ## Works right now
 
-- **The filter catalogue is thirteen** (2026-09-26): brightness, contrast,
-  blur and pixelate written here; saturation, invert, sepia, duotone,
-  threshold and posterize from p5.FIP, under MIT, its whole licence beside
-  them, each changed where p5.FIP mishandled a sprite's alpha; and, for game
-  assets, the suite's own outline, drop shadow and palette lock (nearest in
-  OKLab, up to 32 colours). Each is held to what it should do on the GPU
-  (`check-gpu`) and to its notice (`tests/gpu-filters`).
+- **The filter catalogue is nineteen** (2026-09-26): brightness, contrast,
+  blur and pixelate written here; twelve from p5.FIP, under MIT, its whole
+  licence beside them — saturation, invert, sepia, duotone, threshold,
+  posterize, sharpen, unsharp mask, emboss, edges, dilate, erode — each
+  changed where p5.FIP would have hurt a sprite; and, for game assets, the
+  suite's own outline, drop shadow and palette lock (nearest in OKLab, up
+  to 32 colours). Each is held to what it should do on the GPU (`check-gpu`)
+  and to its notice (`tests/gpu-filters`).
+- **A colour picker stays open while you drag in it** — every app's: the
+  panel synced each change back into the widget, and a `color[]` row was
+  rebuilt under the hand (found by the author, 2026-09-26).
 - **M5's link: a look** (`filter → compose: a look`, 2026-09-26;
   `node scripts/check-look.mjs`, 12 checks). A chain saved alone in filter is
   a look, a `params` object; compose puts it over a placement, sized by what
@@ -391,9 +395,9 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M5's fifth brick, the next batch: p5.FIP's neighbourhood filters** —
-sharpen, unsharp mask, emboss, sobel edges, dilate, erode;
-`apps/filter/STATUS.md` has them.
+**M5's fifth brick, the next batch: p5.FIP's stylise group** — halftone, dot
+screen, CRT, vignette, grain (the first at random: a seed in the recipe),
+glitch; `apps/filter/STATUS.md` has them.
 
 Parked behind M5, still wanted: **a gamepad still drawn again at print
 scale** — the last kind M4 prints stretched. A still's recipe carries
