@@ -9,6 +9,8 @@
    reads — rule 7.
    ────────────────────────────────────────────────────────────────────────────── */
 
+@import 'vault-trash.css';
+
 .vp {
   position: fixed;
   inset: 28px;

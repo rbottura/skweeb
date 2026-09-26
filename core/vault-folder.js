@@ -45,9 +45,11 @@ const icon = () => {
  * @param {(row:object)=>string|null} f.thumb  a member's thumbnail url
  * @param {(row:object)=>Element} f.card       a member's card, as the grid makes it
  * @param {(open:boolean)=>void} f.onToggle     so the panel can reopen it on repaint
+ * @param {(e:MouseEvent)=>boolean} [f.select]  takes a click first: true when it
+ *   was a selection (a ctrl-click), which then does not open the folder
  * @returns {[Element, Element]} the card and its strip, to go into the grid in that order
  */
-export function folder({ name, rows, open, thumb, card, onToggle }) {
+export function folder({ name, rows, open, thumb, card, onToggle, select }) {
   const tile = el('button', 'vp-card vp-fcard');
   tile.type = 'button';
   tile.title = 'Folder — ' + rows.length + ' objects';
@@ -95,7 +97,7 @@ export function folder({ name, rows, open, thumb, card, onToggle }) {
     tile.setAttribute('aria-expanded', String(on));
     onToggle(on);
   };
-  tile.addEventListener('click', () => set(strip.hidden));
+  tile.addEventListener('click', e => { if (!(select && select(e))) set(strip.hidden); });
   set(open);
 
   return [tile, strip];

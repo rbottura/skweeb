@@ -20,19 +20,22 @@
  * view, not a place: every object still lives at objects/<id>/, so no link
  * changes. The card and its strip are vault-folder.js.
  *
+ * Ctrl- or shift-click selects a card, or a folder's every card, for the
+ * trash — a view of its own, where they are restored or deleted for good. Not
+ * in a picker, which is choosing, not tidying. The bar is vault-trash.js.
+ *
  * Reads nothing but core/vault.js — no p5, no gamepad. The detail view is
- * built by vault-detail.js; its stylesheet reads core/theme.css's tokens.
+ * vault-detail.js, a card vault-card.js; the stylesheet reads theme.css.
  */
 
-import { Vault }       from './vault.js';
+import { Vault, isTrashed } from './vault.js';
+import { paintBar, deleteFlow } from './vault-trash.js';
 import { paintDetail } from './vault-detail.js';
 import { folder, folderOf } from './vault-folder.js';
 export { folderOf };
 import { reopenUrl, placeUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
-
-/** Files inside an object folder are served straight from the vault. */
-const fileUrl = (id, file) => '/vault/objects/' + id + '/' + file;
+import { objectCard, pickableCell, fileUrl } from './vault-card.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -69,11 +72,15 @@ export class VaultPanel {
     this._current = null;      // id showing in the drawer
     this._cards   = new Map(); // id -> card element, for the highlight
     this._openFolders = new Set();
+    this._inTrash  = false;     // showing the trash instead of the vault
+    this._selected = new Set(); // ids, for the bar (vault-trash.js)
+    this._tiles    = [];        // [folder tile, its ids], for the highlight
+    this._busy     = false;     // moving many: one repaint at the end, not one each
 
     this._build();
 
     // A save while the panel is open should appear without being asked for.
-    const live = () => { if (this._open) this.refresh(); };
+    const live = () => { if (this._open && !this._busy) this.refresh(); };
     document.addEventListener('vault:saved', live);
     document.addEventListener('vault:duplicate', live);
     // A retag can move an object into a folder, or out of what a picker offers.
@@ -81,7 +88,9 @@ export class VaultPanel {
 
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape' || !this._open) return;
-      if (this._current) this._closeDetail(); else this.hide();
+      if (this._current) this._closeDetail();
+      else if (this._selected.size) this._select(null);
+      else this.hide();
     });
   }
 
@@ -98,11 +107,21 @@ export class VaultPanel {
   /** Ask the server again, then repaint. */
   async refresh() {
     await Vault.refresh();
-    const rows = (await Vault.list(this._filter)).filter(r => !this._accepts || this._accepts.includes(r.type));
-    // A use filter narrows sets only, and says what it left out (vault-offer.js).
-    const { kept, left } = await byUse(rows, this._offeredTo);
-    this._unoffered = left;
-    this._rows = this._showAll ? rows : kept;
+    const ours = rows => rows.filter(r => !this._accepts || this._accepts.includes(r.type));
+    const rows = ours(await Vault.list(this._filter));
+    const trashed = ours(await Vault.list({ ...this._filter, trash: true }));
+    this._trashBtn.textContent = 'trash' + (trashed.length ? ' ' + trashed.length : '');
+    if (this._inTrash) {
+      this._unoffered = [];
+      this._rows = trashed;
+    } else {
+      // A use filter narrows sets only, and says what it left out (vault-offer.js).
+      const { kept, left } = await byUse(rows, this._offeredTo);
+      this._unoffered = left;
+      this._rows = this._showAll ? rows : kept;
+    }
+    const here = new Set(this._rows.map(r => r.id));
+    for (const id of this._selected) if (!here.has(id)) this._selected.delete(id);
     this._paint();
   }
 
@@ -114,7 +133,8 @@ export class VaultPanel {
     this._root.setAttribute('aria-label', 'Vault');
 
     const head = el('div', 'vp-head');
-    head.append(el('span', 'vp-title', 'VAULT'));
+    this._title = el('span', 'vp-title', 'VAULT');
+    head.append(this._title);
     this._count = el('span', 'vp-count', '');
     head.append(this._count);
 
@@ -129,7 +149,19 @@ export class VaultPanel {
     close.title = 'Close (Esc)';
     close.addEventListener('click', () => this.hide());
 
-    head.append(reload, close);
+    this._trashBtn = el('button', 'vp-chip vp-trash', 'trash');
+    this._trashBtn.title = 'What was put away — restore it, or delete it for good';
+    this._trashBtn.hidden = !!this._onPick;
+    this._trashBtn.addEventListener('click', () => {
+      this._inTrash = !this._inTrash;
+      this._trashBtn.classList.toggle('vp-chip--on', this._inTrash);
+      this._title.textContent = this._inTrash ? 'TRASH' : 'VAULT';
+      this._selected.clear();
+      this._closeDetail();
+      this.refresh();
+    });
+
+    head.append(this._trashBtn, reload, close);
 
     this._body = el('div', 'vp-body');
     this._root.append(head, this._body, this._buildDetail());
@@ -156,6 +188,7 @@ export class VaultPanel {
   _paint() {
     this._body.replaceChildren();
     this._cards = new Map();
+    this._tiles = [];
     this._paintFilters();
 
     if (!Vault.available) return this._notice(
@@ -164,15 +197,21 @@ export class VaultPanel {
       'node server.js');
 
     const shown = this._rows.filter(r => !this._type || r.type === this._type);
+    this._shown = shown;
+    this._bar = el('div', 'vp-bar');
+    this._body.append(this._bar);
+    this._paintBar();
     if (this._unoffered.length) this._body.append(offerNote({
       use: this._offeredTo, left: this._unoffered, showAll: this._showAll,
       onToggle: () => { this._showAll = !this._showAll; this.refresh(); },
     }));
 
     if (!shown.length) return this._notice(
-      this._type ? 'Nothing of that type yet.'
+      this._inTrash ? 'The trash is empty.'
+        : this._type ? 'Nothing of that type yet.'
         : this._offeredTo ? 'Nothing here is offered for this yet.' : 'The vault is empty.',
-      this._type ? 'Every object is still here — only this filter is hiding them.'
+      this._inTrash ? ' Ctrl-click objects in the vault to select them, then move them here.'
+        : this._type ? 'Every object is still here — only this filter is hiding them.'
         : this._offeredTo ? ' A set is offered in its detail, under Offered as — V opens the vault.'
         : 'Draw something and save it, or record a sequence and export it from the timeline.');
 
@@ -193,37 +232,74 @@ export class VaultPanel {
     const grid = el('div', 'vp-grid vp-grid--top');
     for (const item of order) {
       if (typeof item !== 'string') { grid.append(this._cardFor(item)); continue; }
-      grid.append(...folder({
+      const rows = folders.get(item);
+      const [tile, strip] = folder({
         name: item,
-        rows: folders.get(item),
+        rows,
         open: this._openFolders.has(item),
         thumb: row => row.thumb ? fileUrl(row.id, row.thumb) : null,
         card: row => this._cardFor(row),
         onToggle: on => on ? this._openFolders.add(item) : this._openFolders.delete(item),
-      }));
+        select: e => this._modClick(e, rows.map(r => r.id)),
+      });
+      this._tiles.push([tile, rows.map(r => r.id)]);
+      grid.append(tile, strip);
     }
     this._body.append(grid);
   }
 
   _cardFor(row) {
-    const card = this._card(row);
+    const card = objectCard(row, { on: row.id === this._current,
+      onClick: e => this._modClick(e, [row.id]) || this._openDetail(row.id) });
+    card.classList.toggle('vp-card--picked', this._selected.has(row.id));
     this._cards.set(row.id, card);
-    return this._onPick ? this._pickable(row, card) : card;
+    return this._onPick ? pickableCell(card, this._pickLabel, () => this._use(row.id)) : card;
   }
 
-  /**
-   * A picker's card carries its own Use button, shown while it is the chosen
-   * one: the choice is made where the eye already is, not at the foot of the
-   * detail across the panel. A double click uses it outright.
-   */
-  _pickable(row, card) {
-    const cell = el('div', 'vp-cell');
-    const use = el('button', 'vp-btn vp-btn--primary vp-use', this._pickLabel);
-    use.type = 'button';
-    use.addEventListener('click', () => this._use(row.id));
-    card.addEventListener('dblclick', () => this._use(row.id));
-    cell.append(card, use);
-    return cell;
+  // ── Selection and the trash ────────────────────────────────────────────────
+
+  /** Ctrl- or shift-click: select these ids, or unselect them. True when it was one. */
+  _modClick(e, ids) {
+    if (this._onPick || !(e.ctrlKey || e.metaKey || e.shiftKey)) return false;
+    const all = ids.every(id => this._selected.has(id));
+    for (const id of ids) if (all) this._selected.delete(id); else this._selected.add(id);
+    this._select(this._selected);
+    return true;
+  }
+
+  /** Set the selection — null clears it — and show it without a repaint. */
+  _select(ids) {
+    if (ids !== this._selected) this._selected = new Set(ids || []);
+    this._markCurrent();
+    this._paintBar();
+  }
+
+  _paintBar() {
+    if (!this._bar) return;
+    paintBar(this._bar, {
+      selected: this._selected.size, inTrash: this._inTrash, shown: this._shown.length,
+      act: a => a === 'all' ? this._select(this._shown.map(r => r.id))
+        : a === 'none' ? this._select(null) : this._bin(a, [...this._selected]),
+    });
+  }
+
+  /** Trash, restore or delete for good — then one repaint, however many moved. */
+  async _bin(action, ids) {
+    this._busy = true;
+    let failed = null;
+    try {
+      if (action === 'trash') await Vault.trash(ids);
+      else if (action === 'restore') await Vault.restore(ids);
+      else if (!(await deleteFlow(this._root, ids))) return;
+    } catch (err) {
+      failed = err;
+    } finally {
+      this._busy = false;
+    }
+    if (!failed) for (const id of ids) this._selected.delete(id);
+    if (!failed && ids.includes(this._current)) this._closeDetail();
+    await this.refresh();
+    if (failed) this._count.textContent = 'could not: ' + failed.message;
   }
 
   /**
@@ -243,6 +319,10 @@ export class VaultPanel {
     if (!this._cards) return;
     for (const [id, card] of this._cards) {
       card.classList.toggle('vp-card--on', id === this._current);
+      card.classList.toggle('vp-card--picked', this._selected.has(id));
+    }
+    for (const [tile, ids] of this._tiles) {
+      tile.classList.toggle('vp-card--picked', ids.every(id => this._selected.has(id)));
     }
   }
 
@@ -258,32 +338,6 @@ export class VaultPanel {
     };
     this._filters.append(chip('all', null));
     for (const t of types) this._filters.append(chip(t, t));
-  }
-
-  _card(row) {
-    const card = el('button', 'vp-card' + (row.id === this._current ? ' vp-card--on' : ''));
-    card.type = 'button';
-
-    const img = el('img', 'vp-thumb');
-    img.loading = 'lazy';
-    img.alt = '';
-    if (row.thumb) img.src = fileUrl(row.id, row.thumb);
-    card.append(img);
-
-    const meta = el('div', 'vp-meta');
-    meta.append(el('div', 'vp-name', row.title || row.id));
-
-    const sub = el('div', 'vp-sub');
-    sub.append(el('span', 'vp-type', row.type));
-    const facts = [];
-    if (row.render && row.render.w) facts.push(row.render.w + '×' + row.render.h);
-    if (row.render && row.render.frames > 1) facts.push(row.render.frames + 'f');
-    if (facts.length) sub.append(document.createTextNode(' · ' + facts.join(' · ')));
-    meta.append(sub);
-
-    card.append(meta);
-    card.addEventListener('click', () => this._openDetail(row.id));
-    return card;
   }
 
   _notice(strongText, bodyText, code) {
@@ -339,6 +393,8 @@ export class VaultPanel {
       playing: viewer => { this._disposeViewer(); this._viewer = viewer; },
       pick: this._onPick ? picked => this._use(picked.id) : null,
       pickLabel: this._pickLabel,
+      bin: this._onPick ? null : action => this._bin(action, [o.id]),
+      trashed: isTrashed(o),
     });
   }
 }

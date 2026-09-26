@@ -34,6 +34,8 @@ const PICTURE = /^(png|jpe?g|webp|gif|avif|svg|bmp)$/i;
  * @param {(viewer:object)=>void} hooks.playing  a player started; the panel disposes it later
  * @param {?(o:object)=>void} [hooks.pick]       present when the panel is a picker
  * @param {string} [hooks.pickLabel]
+ * @param {?(action:string)=>void} [hooks.bin]   'trash' | 'restore' | 'delete'; absent in a picker
+ * @param {boolean} [hooks.trashed]             it is in the trash
  */
 export function paintDetail(body, o, urls, hooks) {
   body.replaceChildren();
@@ -99,17 +101,24 @@ export function paintDetail(body, o, urls, hooks) {
 
   // Lineage. parents is frozen history, refs a live dependency — the panel
   // names the difference rather than merging them.
-  if ((o.parents && o.parents.length) || (o.refs && o.refs.length)) {
+  // An object cut loose from ones deleted since (server/delete.js) says so.
+  const cuts = o.detached || [];
+  if ((o.parents && o.parents.length) || (o.refs && o.refs.length) || cuts.length) {
     body.append(el('div', 'vp-section', 'Lineage'));
     const lin = el('div', 'vp-lineage');
     for (const p of o.parents || []) lin.append(idLink('made from ', p, hooks.open));
     for (const f of o.refs || [])    lin.append(idLink('depends on ', f, hooks.open));
+    for (const c of cuts) lin.append(el('div', 'vp-leaf', cutLine(c)));
     body.append(lin);
   }
 
   body.append(el('div', 'vp-section', o.recipe ? 'Recipe' : 'No recipe'));
   if (o.recipe) {
     body.append(el('pre', 'vp-json', JSON.stringify(o.recipe, null, 1)));
+  } else if (cuts.some(c => c.recipe)) {
+    body.append(el('div', 'vp-sub vp-leaf',
+      'Its recipe named an object that was deleted, so it is its picture now. '
+      + 'The recipe is kept, set aside, in object.json under detached.'));
   } else {
     body.append(el('div', 'vp-sub vp-leaf',
       'A leaf: this one cannot redraw itself. Correct when something came from '
@@ -167,6 +176,14 @@ function usesSection(o, onTags) {
   box.append(note);
   sync();
   return box;
+}
+
+/** One cut, in words: when, from how many, and what it cost. */
+function cutLine(c) {
+  const lost = [c.members && c.members + ' members', c.placements && c.placements + ' placements',
+    c.recipe && 'its recipe'].filter(Boolean);
+  return 'cut loose from ' + c.ids.length + ' deleted ' + (c.ids.length === 1 ? 'object' : 'objects')
+    + ', ' + new Date(c.at).toLocaleDateString() + (lost.length ? ' — lost ' + lost.join(', ') : '');
 }
 
 function idLink(prefix, id, open) {
@@ -230,6 +247,15 @@ function actions(o, urls, hooks) {
     pick.addEventListener('click', () => hooks.pick(o));
     row.append(pick);
   }
+
+  // Put away, and from the trash back again or out for good (vault-trash.js).
+  const bin = (label, action, cls = '') => {
+    const b = el('button', 'vp-btn ' + cls, label);
+    b.addEventListener('click', () => hooks.bin(action));
+    row.append(b);
+  };
+  if (hooks.bin && !hooks.trashed) bin('Move to trash', 'trash');
+  if (hooks.bin && hooks.trashed) { bin('Restore', 'restore'); bin('Delete for good…', 'delete', 'vp-btn--danger'); }
   return row;
 }
 

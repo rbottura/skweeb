@@ -1,0 +1,71 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   vault-trash.css — selection, the trash, and the question a delete asks.
+
+   Imported by vault-panel.css, so every app that has the panel has this —
+   and read before it, which is why an override here names .vp-btn twice.
+   A selected card is marked with a thick ruled outline and a corner tick,
+   distinct from the yellow of the card open in the drawer.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.vp-card--picked { outline: var(--nb-line, 3px) solid var(--nb-ink, #111); outline-offset: 3px; }
+.vp-card--picked::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  background: var(--nb-accent, #ffd60a);
+  font: 700 13px var(--nb-font, sans-serif);
+}
+.vp-card { position: relative; }
+
+.vp-trash { margin-right: 4px; }
+
+.vp-btn.vp-btn--danger { background: var(--nb-alert, #ff4d4d); color: var(--nb-ink, #111); }
+.vp-btn.vp-btn--danger:hover { background: var(--nb-ink, #111); color: var(--nb-paper, #fffdf6); }
+
+/* The bar over the grid: what is selected, and what can be done with it. */
+.vp-bar {
+  position: sticky;
+  top: -16px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: -16px -16px 14px;
+  padding: 10px 16px;
+  border-bottom: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
+  background: var(--nb-paper, #fffdf6);
+}
+.vp-bar[hidden] { display: none; }
+.vp-bar-say { font: 400 12px var(--nb-mono, monospace); }
+
+/* The question: over the whole panel, nothing behind it clickable. */
+.vp-ask {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(17, 17, 17, 0.45);
+}
+.vp-ask-box {
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 16px 18px;
+  border: var(--nb-line, 3px) solid var(--nb-ink, #111);
+  background: var(--nb-paper, #fffdf6);
+  box-shadow: 8px 8px 0 var(--nb-ink, #111);
+  line-height: 1.5;
+}
+.vp-ask-title { font: 700 16px var(--nb-font, sans-serif); }
+.vp-ask-box p { margin: 8px 0; }
+.vp-ask-list { margin: 8px 0; padding-left: 18px; }
+.vp-ask-list li { margin: 6px 0; }

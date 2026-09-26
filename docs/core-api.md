@@ -13,7 +13,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `registry.js` | manifest-driven asset loading, families of sprites | **in**, was `gamepad/core/brushRegistry.js` |
 | `stage/` | `clip` `player` `transport` `recorder` `stage` `bounds` | **in**, was `gamepad/core/sequence*.js` |
 | `stamp.js` | where a pattern puts its stamps | **in**, split out of `joyImage.js` |
-| `VaultPanel.js` | the window onto the objects on disk; `folder:` tags group | **in**, detail view in `vault-detail.js`, a folder's card and strip in `vault-folder.js` |
+| `VaultPanel.js` | the window onto the objects on disk; `folder:` tags group; ctrl-click selects, for the trash | **in**, detail view in `vault-detail.js`, a card in `vault-card.js`, a folder's card and strip in `vault-folder.js`, the selection bar and the delete question in `vault-trash.js` |
 | `reopen.js` | an object back in its app: `/apps/<app>/?open=<id>` | **in**, 2026-09-23 |
 | `rebuild.js` | frame N of any object: `openFrames()` — anything with a recipe and more than one frame replayed by its app (a sequence, a composition that moves), a picture as itself — and the dispatch to an app's own `rebuild.js`. `draft: true` asks for a live preview's frames, which an app may make faster and near-exact; nothing saved asks for them. `scale` asks for frames at more pixels: an app draws a still again when its rebuild.js `redraws()` it, and a handle's `scale` says what it really drew — its size is always its render's | **in**; `openFrames`, `draft` and `scale` 2026-09-24, for compose |
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
@@ -148,9 +148,20 @@ await Vault.save({ type, render, recipe, parents, title, tags });   // returns i
 await Vault.load(id);                    // { object, blob, url }
 await Vault.list({ type, app, tag });    // index rows, no blobs
 await Vault.retag(id, { add, remove });  // tags are the one thing that changes
+await Vault.trash(ids);                  // the `trash` tag: hidden from list(), nothing breaks
+await Vault.restore(ids);
+await Vault.remove(ids, { dependents, dry });  // for good, from the trash only — see below
 await Vault.publish(id);
 Vault.available                          // false when served without the write API
 ```
+
+`remove()` asks the server first when other objects name what is going: it
+returns `{ status: 'dependents', dependents, chain }`, and is called again with
+`dependents: 'delete'` (the chain goes too) or `'detach'` (they are cut loose).
+`dry: true` returns that plan without doing anything. `isTrashed(row)` is
+exported for code that offers objects straight from `Vault.index`, which keeps
+the trash so a set can still find its members. Rules in
+`docs/object-model.md`, *Trash, and deleting*.
 
 `list()` reads `index.json` only — it never opens object folders, so the gallery
 stays fast with thousands of objects. When `available` is false (a plain static
