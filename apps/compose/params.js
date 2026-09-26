@@ -66,6 +66,8 @@ export function pageParams() {
 export function placeParams() {
   return defineParams('compose-place', {
     ref: { type: 'object', accepts: PLACEABLE, label: 'object', group: 'object' },
+    /** A look made in filter, run over the object's frames (core/gpu/look.js). */
+    look: { type: 'object', accepts: ['params'], label: 'look', group: 'object' },
     x: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'x from centre', group: 'transform' },
     y: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'y from centre', group: 'transform' },
     scale: { type: 'range', min: 0.01, max: 8, step: 0.01, default: 1, label: 'scale', group: 'transform' },
@@ -78,23 +80,26 @@ export function placeParams() {
  * (docs/object-model.md, *Placement*). `at` and `length` are time, frames from
  * the composition's start and `null` for the object's own length. `version`
  * pins only a `.skw`; any other object never changes, so it is `latest`.
+ * `look` is there only when there is one, so a block with none is the block
+ * it always was.
  */
 export function toPlacement(values, { at = 0, length = null } = {}) {
-  const { ref, x, y, scale, rot } = values;
-  return { ref, version: 'latest', transform: { x, y, scale, rot }, at, length };
+  const { ref, x, y, scale, rot, look } = values;
+  return { ref, version: 'latest', transform: { x, y, scale, rot }, at, length, ...(look ? { look } : {}) };
 }
 
 /** And back: the values a placement's panel shows for a block. */
 export function fromPlacement(block) {
   const t = (block && block.transform) || {};
-  return { ref: (block && block.ref) || null, x: t.x, y: t.y, scale: t.scale, rot: t.rot };
+  return { ref: (block && block.ref) || null, x: t.x, y: t.y, scale: t.scale, rot: t.rot,
+           look: (block && block.look) || null };
 }
 
 /**
  * What a composition is made from — its `parents`: every object placed on
- * it, once each, bottom first. Read off the recipe, which names them all, so
- * lineage cannot drift from what the page holds.
+ * it and every look over one, once each, bottom first. Read off the recipe,
+ * which names them all, so lineage cannot drift from what the page holds.
  */
 export function parentsOf(recipe) {
-  return [...new Set(((recipe && recipe.place) || []).map(b => b.ref).filter(Boolean))];
+  return [...new Set(((recipe && recipe.place) || []).flatMap(b => [b.ref, b.look]).filter(Boolean))];
 }

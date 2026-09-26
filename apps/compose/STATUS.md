@@ -1,5 +1,5 @@
 # STATUS — compose
-_last touched: 2026-09-24_
+_last touched: 2026-09-26_
 
 M4's app: objects from every process placed on one page, previewed live and
 rendered out (`docs/roadmap.md`, M4). Built in five bricks, all in: **M4 is
@@ -7,6 +7,13 @@ done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome
 
+- **A placement can carry a look** (2026-09-26, M5's link): the placement
+  panel's *look* row takes a chain saved in filter, and the object's frames
+  run through it on the GPU (`core/gpu/look.js`), in the preview and in the
+  exact render alike; the object is sized by what the look grows. The block
+  keeps `look`, and a look is one of the page's parents. With no WebGPU the
+  page shows the object as it is and says it is drawn without the look.
+  Checked by `scripts/check-look.mjs`.
 - **Three columns**, as ckt has: `placed` on the left — what is on the page,
   and the chosen one's object and transform — the page between, `page` on
   the right: core's Format drawer, open, the player and the ground. Both

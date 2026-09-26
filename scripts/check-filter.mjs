@@ -64,6 +64,12 @@ c.ok('a value typed into the card changes the pixels', true, '100 → ' + (await
 await page.typeInto(addMenu, 'blur');
 await page.until(`${cards}.length === 2`);
 c.ok('a second filter goes under the first', (await titles()).join() === 'brightness,gaussian blur', (await titles()).join());
+const size = `[document.getElementById('stage').width, document.getElementById('stage').height].join(' × ')`;
+await page.until(`${size} === '88 × 72'`);
+c.ok('a blur grows the picture by its reach, 12 a side', true, await page.eval(size));
+await page.click(`[...document.querySelectorAll('.pp-chip')].find(b => b.textContent === 'keep')`);
+await page.until(`${size} === '64 × 48'`);
+c.ok('kept, the picture stays its size — for one that fills its frame', true, await page.eval(size));
 await page.click(headButton(1, '↑'));
 await page.until(`${cards}[0].querySelector('.pp-title').textContent === 'gaussian blur'`);
 c.ok('↑ runs it earlier', (await titles()).join() === 'gaussian blur,brightness', (await titles()).join());

@@ -21,6 +21,17 @@
  * a long chain does not band. Two such textures are used in turns; the
  * source keeps its own, which a pass reads as `orig`. They are kept for the
  * next run at the same size.
+ *
+ * ── Past the edge ───────────────────────────────────────────────────────────
+ *
+ * A blur, a glow, an outline reaches past what it is given; a sprite trimmed
+ * to its ink would lose its halo at the trim. A filter says how far it
+ * reaches (`reach(values)`, in the source's pixels), a chain adds its filters
+ * up (`reachOf`), and a run asked to `grow` puts the picture in the middle of
+ * that much clear room on every side — `marginOf(chain, scale)` pixels — and
+ * hands back the bigger picture. Not growing, the edge is held: what lies
+ * past it is the edge's own colour, right for a photograph that fills its
+ * frame.
  */
 
 import { openGpu } from './device.js';
@@ -43,6 +54,26 @@ const moduleOf = pass => {
 export async function createRunner() {
   const gpu = await openGpu();
   return gpu ? new Runner(gpu) : null;
+}
+
+/**
+ * How far past its picture a chain can reach, in the source's pixels at
+ * scale 1, rounded up to whole pixels: its filters' reaches added up — a safe
+ * bound, since blurs in a row spread less than their sum.
+ */
+export function reachOf(chain) {
+  let sum = 0;
+  for (const entry of chain || []) {
+    if (!entry || entry.on === false) continue;
+    const filter = FILTERS[entry.id];
+    if (filter && filter.reach) sum += Math.max(0, filter.reach(valuesFor(filter.params || {}, entry.params)) || 0);
+  }
+  return Math.ceil(sum);
+}
+
+/** The room a grown run adds on each side, in pixels at this scale. */
+export function marginOf(chain, scale = 1) {
+  return Math.round(reachOf(chain) * scale);
 }
 
 /** The passes a chain runs, each with the values its filter was given. */
@@ -148,18 +179,32 @@ class Runner {
    *
    * @param {CanvasImageSource} source   a canvas, an OffscreenCanvas, an ImageBitmap, an image
    * @param {object[]} [chain]
-   * @param {{scale?: number, time?: number, seed?: number}} [opts]
+   * @param {{scale?: number, time?: number, seed?: number, grow?: boolean}} [opts]
    *   scale multiplies every size a filter has — its sizes are in the
-   *   source's pixels at 1, so a picture drawn again at 2x keeps its look
+   *   source's pixels at 1, so a picture drawn again at 2x keeps its look;
+   *   grow gives the chain room past the edge, and the picture comes back
+   *   `marginOf(chain, scale)` bigger on every side
    * @returns {ImageBitmap} the runner's, good until its next run()
    */
-  run(source, chain = [], { scale = 1, time = 0, seed = 0 } = {}) {
-    const w = source.naturalWidth || source.width;
-    const h = source.naturalHeight || source.height;
+  run(source, chain = [], { scale = 1, time = 0, seed = 0, grow = false } = {}) {
+    const sw = source.naturalWidth || source.width;
+    const sh = source.naturalHeight || source.height;
+    const m = grow ? marginOf(chain, scale) : 0;
+    const w = sw + 2 * m;
+    const h = sh + 2 * m;
     this.fit(w, h);
     const { device } = this;
 
-    device.queue.copyExternalImageToTexture({ source }, { texture: this.src, premultipliedAlpha: true }, [w, h]);
+    // The room starts clear, whatever an earlier run left in it: submitted
+    // before the copy, so the queue keeps them in that order.
+    if (m > 0) {
+      const clearing = device.createCommandEncoder({ label: 'room' });
+      clearing.beginRenderPass({ colorAttachments: [{ view: this.src.createView(), loadOp: 'clear',
+        storeOp: 'store', clearValue: { r: 0, g: 0, b: 0, a: 0 } }] }).end();
+      device.queue.submit([clearing.finish()]);
+    }
+    device.queue.copyExternalImageToTexture({ source },
+      { texture: this.src, origin: [m, m], premultipliedAlpha: true }, [sw, sh]);
 
     const frame = new ArrayBuffer(32);
     new Float32Array(frame, 0, 6).set([w, h, 1 / w, 1 / h, scale, time]);

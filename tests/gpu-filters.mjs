@@ -10,7 +10,7 @@
  */
 
 const { FILTERS } = await import('../core/gpu/filters/index.js');
-const { passesOf } = await import('../core/gpu/runner.js');
+const { passesOf, reachOf, marginOf } = await import('../core/gpu/runner.js');
 const { moduleFor } = await import('../core/gpu/wgsl.js');
 const { PARAM_TYPES, valuesFor } = await import('../core/params.js');
 
@@ -85,6 +85,16 @@ ok('a blur of 2 at 2x is a blur of 4 at 1x', at('blur', { radius: 2 }, 2), at('b
 ok('its taps reach three deviations', at('blur', { radius: 4 }, 1)[3], 12);
 ok('a block of 8 at 2x is 16 pixels', at('pixelate', { size: 8 }, 2), [16]);
 ok('a blur of nothing takes no taps', at('blur', { radius: 0 }, 1)[3], 0);
+
+// ── How far a chain reaches past its picture ────────────────────────────────
+ok('a colour change reaches nowhere', reachOf([{ id: 'brightness' }, { id: 'contrast' }]), 0);
+ok('a blur reaches its three deviations', reachOf([{ id: 'blur', params: { radius: 4 } }]), 12);
+ok('two blurs, their reaches added, rounded up',
+  reachOf([{ id: 'blur', params: { radius: 1.5 } }, { id: 'blur', params: { radius: 2 } }]), 11);
+ok('a filter switched off reaches nowhere', reachOf([{ id: 'blur', params: { radius: 4 }, on: false }]), 0);
+ok('a filter this catalogue lacks is left out, not thrown', reachOf([{ id: 'nope' }, { id: 'blur', params: { radius: 1 } }]), 3);
+ok('the room at 2x is twice the pixels', marginOf([{ id: 'blur', params: { radius: 4 } }], 2), 24);
+ok('and whole pixels at any scale', marginOf([{ id: 'blur', params: { radius: 1.5 } }], 1.5), 8);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

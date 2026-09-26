@@ -95,9 +95,20 @@ ok('a placement is the object model\'s block', block,
    { ref: 'gam_1_abc', version: 'latest', transform: { x: -40, y: 12, scale: 0.5, rot: 15 }, at: 0, length: null });
 place.reset();
 place.restore(Params.fromPlacement(block));
-ok('and comes back from it', place.values, { ref: 'gam_1_abc', x: -40, y: 12, scale: 0.5, rot: 15 });
+ok('and comes back from it', place.values, { ref: 'gam_1_abc', look: null, x: -40, y: 12, scale: 0.5, rot: 15 });
 place.restore(Params.fromPlacement({ ref: 'gam_2_def' }));
-ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', x: 0, y: 0, scale: 1, rot: 0 });
+ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', look: null, x: 0, y: 0, scale: 1, rot: 0 });
+
+// A look over it (M5's link): in the block only when there is one.
+place.set({ ref: 'gam_1_abc', look: 'fil_1_look' });
+const looked = Params.toPlacement(place.values);
+ok('a look rides in the block', looked.look, 'fil_1_look');
+place.restore(Params.fromPlacement(looked));
+ok('and comes back with it', place.values.look, 'fil_1_look');
+ok('a block with no look has no look key', 'look' in Params.toPlacement({ ...place.values, look: null }), false);
+ok('a look is a parent of its page, once',
+  Params.parentsOf({ place: [looked, { ...looked, ref: 'gam_2_def' }] }), ['gam_1_abc', 'fil_1_look', 'gam_2_def']);
+place.reset();
 ok('a placement takes what core gives frames of, pages too', place.spec('ref').accepts,
    ['still', 'sequence', 'shape', 'composition']);
 

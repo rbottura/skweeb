@@ -20,12 +20,17 @@
  */
 
 import { fromVault }    from './source.js';
-import { createRunner } from '../../core/gpu/runner.js';
+import { createRunner, reachOf } from '../../core/gpu/runner.js';
 import { drawFrameInto, openPicture } from '../../core/rebuild.js';
 
-/** `?open=<id>` brings back a chain whose source is in the vault; a leaf has none. */
+/**
+ * `?open=<id>` brings back a chain whose source is in the vault, and a look —
+ * a chain with no source, to go over whatever is chosen. A leaf has neither.
+ */
 export function reopens(object) {
-  return !!(object && object.recipe && object.recipe.source);
+  const recipe = object && object.recipe;
+  if (!recipe) return false;
+  return !!recipe.source || (object.type === 'params' && Array.isArray(recipe.chain));
 }
 
 /**
@@ -34,7 +39,7 @@ export function reopens(object) {
  * by its own app where it can be, and the chain's sizes follow the scale.
  */
 export function redraws(object) {
-  return reopens(object);
+  return !!(object && object.recipe && object.recipe.source);
 }
 
 /**
@@ -66,15 +71,21 @@ export async function openObject(object, opts = {}) {
   }
   const fps = parent.fps || (object.render && object.render.fps) || 30;
 
+  // Saved before `edges` existed, it kept its size (params.js).
+  const grow = (recipe.edges || 'keep') !== 'keep';
+  const room = grow ? reachOf(chain) : 0;
+  const width = parent.width + 2 * room;
+  const height = parent.height + 2 * room;
+
   return {
     length: parent.frames,
     fps,
     loop: parent.loop,
-    width: parent.width,
-    height: parent.height,
+    width,
+    height,
 
-    /** The chain fills the source's box, so the buffer is the frame. */
-    bounds: { x: 0, y: 0, w: parent.width, h: parent.height },
+    /** The chain fills the source's box and its room, so the buffer is the frame. */
+    bounds: { x: 0, y: 0, w: width, h: height },
     missing: parent.missing,
 
     /** What the source really drew at; the chain's sizes follow the pixels it is handed. */
@@ -82,7 +93,7 @@ export async function openObject(object, opts = {}) {
 
     /** Borrowed, as every frame is: the runner's picture, until the next call. */
     frame(i) {
-      return runner.run(parent.frame(i), chain, { scale: k, time: i / fps });
+      return runner.run(parent.frame(i), chain, { scale: k, time: i / fps, grow });
     },
 
     drawInto(ctx, i, w, h) {

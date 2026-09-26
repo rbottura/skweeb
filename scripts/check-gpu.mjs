@@ -113,6 +113,16 @@ async function inPage() {
   spread = at(soft, 64, 22, 32)[3];
   out.halo = { darkest, tinted, spread };
 
+  // A sprite trimmed to its ink: grown, a blur keeps its halo past the trim;
+  // held, the size stays and what lies past the edge is the edge's colour.
+  const tight = canvas(16, 16, x => { x.fillStyle = '#f00'; x.fillRect(0, 0, 16, 16); });
+  const blur2 = [{ id: 'blur', params: { radius: 2 } }];
+  const grown = runner.run(tight, blur2, { grow: true });
+  const gw = grown.width, gh = grown.height;
+  const g = read(grown);
+  out.grow = { width: gw, height: gh, halo: at(g, gw, 2, gw >> 1)[3], centre: at(g, gw, gw >> 1, gh >> 1)[3] };
+  out.held = { width: runner.run(tight, blur2).width, corner: at(read(runner.run(tight, blur2)), 16, 0, 0)[3] };
+
   // Mistakes are named.
   try { await runner.prepare([{ id: 'nope' }]); out.unknown = ''; } catch (err) { out.unknown = err.message; }
   try {
@@ -173,6 +183,11 @@ if (r.gpu) {
     c.ok('a blurred sprite\'s edge stays red, never dark', r.halo.darkest >= 250 && r.halo.tinted <= 3,
       `reddest-to-darkest ${r.halo.darkest}, most green or blue ${r.halo.tinted}`);
     c.ok('and fades out past where it was', r.halo.spread > 0 && r.halo.spread < 255, 'alpha 2 px out: ' + r.halo.spread);
+    c.ok('grown, a trimmed sprite keeps its halo past the trim',
+      r.grow.width === 28 && r.grow.height === 28 && r.grow.halo > 0 && r.grow.centre === 255,
+      `${r.grow.width} × ${r.grow.height}, alpha 4 px past the trim ${r.grow.halo}`);
+    c.ok('held, it keeps its size and its edge', r.held.width === 16 && r.held.corner === 255,
+      `${r.held.width} wide, corner alpha ${r.held.corner}`);
     c.ok('an unknown filter is named', r.unknown.includes('"nope"'), r.unknown);
     c.ok('a broken shader names its own line', /broken does not compile — line 2/.test(r.broken), r.broken);
     c.ok('a chain of three on 1024 × 1024, read back', true, r.ms + ' ms a run');

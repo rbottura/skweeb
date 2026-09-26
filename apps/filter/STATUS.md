@@ -14,13 +14,27 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
    source and runs the chain, and draws again at print scale (`redraws()`);
    `?open=<id>` brings a chain back. A replay on another machine may differ a
    little — settled 2026-09-26 (`docs/object-model.md`, *The recipe contract*).
-4. **A look**: a chain saved alone, as a `params` object, and applied to a
-   placement in compose — M5's link, `filter → compose: a look`.
+4. **A look** — done 2026-09-26: a chain saved alone, as a `params` object,
+   and applied to a placement in compose — M5's link, `filter → compose: a
+   look`. With it, filters reach past the edge (`edges`: grow or keep).
 5. **The catalogue grows**: p5.FIP's, glfx's and GPUImage's filters, each with
    its copyright line; then the suite's own groups — game assets, motion, time.
 
 ## Works now
 
+- **A look** (`node scripts/check-look.mjs`, 12 checks). *Save the chain as a
+  look* writes the chain alone — `{ chain, edges }`, a `params` object with a
+  picture of what it does; `?open=<look>` puts the chain back over whatever is
+  chosen next. In compose, a placement's *look* row takes one: its frames run
+  through it (`core/gpu/look.js`), the placement sized by what it grows — a
+  blur of 3 over a 228 × 501 sprite makes it 246 × 519 on the page. The page
+  saves with the look in its block and among its parents, replays with no
+  difference here, and at print scale; with no WebGPU it opens without the
+  look and says so.
+- **Past the edge**: a blur reaches its three deviations, and `edges` — grow,
+  the default, or keep, in the Filters drawer — says whether the picture
+  grows to give it room. A sprite keeps its halo; a photograph keeps its size.
+  A recipe saved before `edges` replays as it was, kept.
 - **It saves, and it replays** (`node scripts/check-filter-save.mjs`, 17
   checks). S — or *Save to the vault* — saves what is on screen: a still
   source a `still`, a loop a `sequence`, the recipe `{ source, chain }` and
@@ -62,13 +76,13 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 
 ## Next single step
 
-**Brick 4's first half: a look saves.** *Save the chain as a look*, in the
-Export drawer, writes the chain alone as a `params` object — recipe
-`{ chain }`, tagged `look`, its render the chain on the picture on screen —
-and `?open=<look id>` puts the chain back over whatever source is chosen.
-The second half is compose: a placement takes a look, and its frames run
-through the look's chain. That adds `look` to the placement block, a field
-in `docs/object-model.md`'s *Placement*, written there before it is used.
+**Brick 5, its first batch: six filters from p5.FIP** — saturation, invert,
+sepia, duotone, threshold and quantization, each a file in
+`core/gpu/filters/` whose `source` is p5.FIP, `licence` MIT and `copyright`
+"Copyright (c) 2024 Darragh Nolan", its WGSL written from p5.FIP's GLSL; and,
+with the first port, p5.FIP's licence text beside them, as MIT asks.
+`tests/gpu-filters.mjs` holds them to the rules; `check-gpu.mjs` compiles
+them and checks a pixel of each against its formula.
 
 ## Parked
 

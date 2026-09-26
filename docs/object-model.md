@@ -139,7 +139,7 @@ turn — the same reason tags change in place.
 | `shape` | png with alpha | maybe | gamepad | gamepad, ckt, grid |
 | `set` | contact sheet | yes, an ordered member list | all | gamepad as a brush family, ckt as a sprite library |
 | `font` | otf/ttf in `source/` | no | imported | ckt, grid |
-| `params` | none, the recipe *is* the object | yes | all | its own app |
+| `params` | the recipe *is* the object; its render a picture of what it does — a look, the chain on the frame it was made on | yes | all | its own app; a filter look, compose on a placement |
 | `composition` | png/pdf, rendered at export scale | yes | the page app, M4 | all |
 | `model` `material` | **deferred**, 3D, when a 3D process exists | | | |
 
@@ -198,7 +198,8 @@ JavaScript to someone else's browser.
   "transform": { "x": 0, "y": 0, "scale": 1, "rot": 0 },
   "overrides": { "cell": 8 },
   "at": 0,
-  "length": null
+  "length": null,
+  "look": "fil_1790460000000_c0ffee"
 }
 ```
 
@@ -223,6 +224,13 @@ JavaScript to someone else's browser.
   that scaling or turning an object leaves it where it is, and a page that
   changes size keeps centred what was centred on it. Decided 2026-09-24 with
   compose's first brick (`apps/compose/page.js`).
+- `look` — optional: a look's id, a filter chain saved alone as a `params`
+  object, run over the object's frames on the GPU (`core/gpu/look.js`). A
+  look that grows past the edge makes the object's ink bigger by the chain's
+  reach on every side, and the object is sized by that. Absent — not `null`
+  — when there is none, so a block with no look is the block it always was.
+  A look is a parent of the page it is on: the page cannot be made again
+  without it. Added 2026-09-26 with M5's link, `filter → compose: a look`.
 
 **Why `version` and not `at` for the pin.** This block said `at` for the
 version until 2026-09-22, which worked only while nothing in a placement had a

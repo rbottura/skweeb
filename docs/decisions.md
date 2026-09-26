@@ -249,6 +249,21 @@ fine. So a GPU object's promise is its recipe; on the machine that made it, it
 replays the same, and a check compares a replay with a tolerance. Written into
 `docs/object-model.md`, *The recipe contract*.
 
+**A filter may reach past its picture, and a sprite gets the room.** A blur,
+a glow, an outline spreads past what it is given; a sprite trimmed to its ink
+lost its halo at the trim. So a filter says how far it reaches, and filter's
+`edges` — grow or keep — says whether the picture grows to give it room:
+`grow` by default, since the suite's pictures are mostly sprites on nothing,
+`keep` for a photograph that fills its frame. A recipe from before `edges`
+kept its size, and still does: read as `keep`, it replays as it was saved.
+
+**A look is a chain saved alone, and a placement may carry one.** M5's link.
+A `params` object made by filter, `{ chain, edges }`, with a picture of what
+it does; compose puts it over a placement, whose frames then run through it
+(`core/gpu/look.js`), sized by what the look grows. The placement block
+gains `look` — written into the object model's *Placement* before it was
+used — and a look is a parent of the page it is on.
+
 **A shader carries its licence, as a font does.** Rule 5 now covers shaders. The
 filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA
 is under the Prosperity licence — noncommercial, a thirty-day commercial trial —

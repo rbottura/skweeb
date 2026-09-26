@@ -14,6 +14,7 @@
 
 import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
+import { lookOver }   from '../../core/gpu/look.js';
 import { inkSize }    from './page.js';
 import { moves, framesOnPage, tickAt } from './time.js';
 
@@ -21,12 +22,16 @@ import { moves, framesOnPage, tickAt } from './time.js';
  * An object from the vault as a preview's frames (`draft`): near exact where
  * its app has a faster way. An export will ask for exact ones.
  *
+ * A block's look, when it has one, goes over the frames (core/gpu/look.js).
+ *
  * @param {string} ref
+ * @param {object} [block]
  * @returns {Promise<{object, handle, thumb}>}
  */
-async function fromVault(ref) {
+async function fromVault(ref, block) {
   const { object, url, thumbUrl } = await Vault.load(ref);
-  return { object, handle: await openFrames(object, { url, draft: true }), thumb: thumbUrl };
+  const handle = await openFrames(object, { url, draft: true });
+  return { object, handle: await lookOver(handle, block && block.look), thumb: thumbUrl };
 }
 
 export class Placements {
@@ -91,9 +96,9 @@ export class Placements {
     this.onChange();
   }
 
-  /** An entry's block, changed. Naming another object opens that one. */
+  /** An entry's block, changed. Naming another object, or another look, opens it again. */
   update(p, block) {
-    const other = block.ref !== p.block.ref;
+    const other = block.ref !== p.block.ref || (block.look || null) !== (p.block.look || null);
     p.block = block;
     if (other) p.opening = this.open(p);
     return p.opening;

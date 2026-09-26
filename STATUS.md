@@ -3,6 +3,13 @@ _last touched: 2026-09-26_
 
 ## Works right now
 
+- **M5's link: a look** (`filter → compose: a look`, 2026-09-26;
+  `node scripts/check-look.mjs`, 12 checks). A chain saved alone in filter is
+  a look, a `params` object; compose puts it over a placement, sized by what
+  it grows, and the page saves it in its block and among its parents and
+  replays it. Filters now reach past the edge: filter's `edges`, grow or
+  keep. Both clauses of M5's *Done when* are met; M5 stays open for its
+  catalogue.
 - **filter saves, and its objects replay** (M5's third brick, 2026-09-26;
   `node scripts/check-filter-save.mjs`, 17 checks). A still or a loop, its
   recipe `{ source, chain }` and its source its parent; `apps/filter/rebuild.js`
@@ -377,9 +384,9 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 
 ## Next single step
 
-**M5's fourth brick, its first half: a look saves** — the chain alone, as a
-`params` object; `apps/filter/STATUS.md` has it in full. Its second half is
-M5's link: a look on a placement in compose.
+**M5's fifth brick, its first batch: six filters ported from p5.FIP**, each
+with its copyright line, and p5.FIP's licence text beside them —
+`apps/filter/STATUS.md` has the list.
 
 Parked behind M5, still wanted: **a gamepad still drawn again at print
 scale** — the last kind M4 prints stretched. A still's recipe carries

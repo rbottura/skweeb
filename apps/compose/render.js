@@ -10,6 +10,7 @@
 
 import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
+import { lookOver }   from '../../core/gpu/look.js';
 import { Placements } from './placements.js';
 import { paintPage, pageSize } from './page.js';
 
@@ -49,7 +50,7 @@ export async function openComposition(recipe, { depth = 0, draft = false, scale 
     load: async (ref, block) => {
       const { object, url, thumbUrl } = await Vault.load(ref);
       const handle = await openFrames(object, { url, depth, draft, scale: asked(block) });
-      return { object, handle, thumb: thumbUrl };
+      return { object, handle: await lookOver(handle, block.look), thumb: thumbUrl };
     },
   });
   for (const block of recipe.place || []) list.add(block);

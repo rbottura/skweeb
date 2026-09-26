@@ -66,6 +66,8 @@ M2 `grid → vault: dithered sequence` — **done, 2026-09-22**, and the first
 entry in the catalogue. M3 `ckt → gamepad: brush family` — **done, 2026-09-23**.
 M4 `any → compose: place on a sheet` — **done, 2026-09-24**: compose's
 picker takes any object, and the vault detail offers *Place in compose ↗*.
+M5 `filter → compose: a look` — **done, 2026-09-26**: a chain saved in filter
+as a look goes over any placement, and the page keeps it in its block.
 
 The next three were chosen by the author on 2026-09-26, with 3D parked: the
 suite is to make the assets of a small game — 2D first, fake 3D where it helps,
@@ -108,10 +110,12 @@ previewed live on the GPU, saves with its source as its parent, replays, and
 redraws at print scale; and a look made there is applied to a placement in
 compose. The link: `filter → compose: a look`.
 
-*So far:* the kit, the app, and saving — 2026-09-26, in three bricks
-(`apps/filter/STATUS.md`). A still or a loop filtered, saved with its source
-as its parent, replayed, and drawn again at print scale: the first clause is
-met. The look is the fourth brick.
+*So far:* the kit, the app, saving, and the look — 2026-09-26, in four
+bricks (`apps/filter/STATUS.md`). A still or a loop filtered, saved with its
+source as its parent, replayed and drawn again at print scale; a look made
+in filter over a placement in compose, the page saved with it and replayed.
+Both clauses of *Done when* are met. M5 stays open for what the author asked
+it for, a big catalogue: four filters is a kit, not a set — the fifth brick.
 
 **M6 — particles.** A particle is a function of its spawn slot and its age, not
 a step in one shared simulation: seeded from its emitter and its slot, and

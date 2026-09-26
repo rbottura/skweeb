@@ -60,7 +60,8 @@ export async function save({ params, chain, source, runner, tick = 0, keepFrames
   const exact = source.id ? await fromVault(source.id, { draft: false }) : source;
   try {
     const fps = exact.fps || 0;
-    const at = i => runner.run(exact.frame(i), chain, { time: fps ? i / fps : 0 });
+    const grow = params.get('edges') !== 'keep';
+    const at = i => runner.run(exact.frame(i), chain, { time: fps ? i / fps : 0, grow });
 
     const shown = keep(at(loop ? tick : 0));
     const blob = await toPng(shown);
@@ -86,6 +87,33 @@ export async function save({ params, chain, source, runner, tick = 0, keepFrames
   } finally {
     if (exact !== source) exact.dispose();
   }
+}
+
+/**
+ * The chain alone: a look, which another app puts over anything it holds
+ * (core/gpu/look.js). A `params` object — its recipe is the object — with a
+ * picture of what it does, since a card with no picture says nothing. Made
+ * from nothing in the vault, so it has no parents.
+ *
+ * @param {object} args
+ * @param {object[]} args.chain
+ * @param {string} args.edges       grow or keep (params.js)
+ * @param {ImageBitmap} args.picture  the chain on the frame on screen — kept at once
+ */
+export async function saveLook({ chain, edges, picture }) {
+  const shown = keep(picture);
+  const blob = await toPng(shown);
+  return Vault.save({
+    type: 'params',
+    title: `look · ${chainName(chain)}`,
+    tags: ['filter', 'look'],
+    origin: APP,
+    seed: null,
+    recipe: { chain, edges },
+    parents: [],
+    render: { blob, ext: 'png', w: shown.width, h: shown.height },
+    thumb: await thumbFromBlob(blob),
+  });
 }
 
 /** Every frame of the loop, filtered, as numbered PNGs and the loop's rate. */

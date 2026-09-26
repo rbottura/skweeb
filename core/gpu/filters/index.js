@@ -12,6 +12,9 @@
  *               LYGIA and unlicensed Shadertoy code are noncommercial and
  *               never enter
  *   params      a param schema, as an app's (core/params.js)
+ *   reach?      (values) → how far past its picture it can spread, in the
+ *               source's pixels: a blur's taps, an outline's width. Absent is
+ *               0 — a colour change reaches nowhere (runner.js, *Past the edge*)
  *   passes      in order: { code, uniforms?(values, info) → number[] }, the
  *               code a WGSL `fx` (core/gpu/wgsl.js), the numbers its `Params`
  *               fields in the order declared

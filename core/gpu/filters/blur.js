@@ -44,5 +44,7 @@ export default {
   params: {
     radius: { type: 'range', min: 0, max: 64, step: 0.5, default: 4, label: 'radius' },
   },
+  /** As far as its taps: three deviations, in the source's pixels. */
+  reach: v => 3 * v.radius,
   passes: [across(1, 0), across(0, 1)],
 };

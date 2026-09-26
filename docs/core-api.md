@@ -14,7 +14,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `stage/` | `clip` `player` `transport` `recorder` `stage` `bounds` | **in**, was `gamepad/core/sequence*.js` |
 | `stamp.js` | where a pattern puts its stamps | **in**, split out of `joyImage.js` |
 | `VaultPanel.js` | the window onto the objects on disk; `folder:` tags group; ctrl-click selects, for the trash | **in**, detail view in `vault-detail.js`, a card in `vault-card.js`, a folder's card and strip in `vault-folder.js`, the selection bar and the delete question in `vault-trash.js` |
-| `gpu/` | filters on the GPU, WebGPU: one device for the page (`device.js`), a chain run in one call (`runner.js`), the catalogue as data (`filters/`) — see *gpu/* below | **in**, 2026-09-26, M5's first brick: four filters |
+| `gpu/` | filters on the GPU, WebGPU: one device for the page (`device.js`), a chain run in one call (`runner.js`), the catalogue as data (`filters/`), a look over any object's frames (`look.js`) — see *gpu/* below | **in**, 2026-09-26, M5: four filters, looks |
 | `reopen.js` | an object back in its app: `/apps/<app>/?open=<id>` | **in**, 2026-09-23 |
 | `rebuild.js` | frame N of any object: `openFrames()` — anything with a recipe and more than one frame replayed by its app (a sequence, a composition that moves), a picture as itself — and the dispatch to an app's own `rebuild.js`. `draft: true` asks for a live preview's frames, which an app may make faster and near-exact; nothing saved asks for them. `scale` asks for frames at more pixels: an app draws a still again when its rebuild.js `redraws()` it, and a handle's `scale` says what it really drew — its size is always its render's | **in**; `openFrames`, `draft` and `scale` 2026-09-24, for compose |
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
@@ -198,6 +198,23 @@ a WGSL `fx(uv)` with, if it takes params, a `Params` of f32 fields, the
 numbers its `uniforms(values, info)` returns. `wgsl.js` is what a pass is
 written against. `node tests/gpu-filters.mjs` holds the catalogue to all of
 this without a GPU; `node scripts/check-gpu.mjs` runs it on one.
+
+**Past the edge.** A filter may say how far it reaches past its picture —
+`reach(values)`, in the source's pixels: a blur its three deviations. A run
+asked to `grow` gives the chain that room on every side and hands back the
+bigger picture (`marginOf(chain, scale)` more each side; `reachOf(chain)` at
+scale 1); not growing, the edge is held. A sprite on nothing wants to grow, a
+photograph filling its frame to keep — filter's `edges` param says which.
+
+**A look** is a chain saved alone, a `params` object (`{ chain, edges }`,
+made by filter). `lookOver(handle, lookId)` (`look.js`) wraps any
+`openFrames()` handle so its frames run through the look, its bounds grown by
+the look's reach where it grows; a look that cannot run leaves the frames as
+they are and says so in `missing`. Compose puts one over a placement.
+
+```js
+const looked = await lookOver(await openFrames(object, { url }), block.look);
+```
 
 **Where there is no WebGPU** — a machine whose GPU the browser has not listed,
 a browser without it — `createRunner()` is null and nothing throws: every app

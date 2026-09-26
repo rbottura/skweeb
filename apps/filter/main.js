@@ -15,7 +15,7 @@
 import { filterParams, GROUPS } from './params.js';
 import { Chain }                from './chain.js';
 import { fromVault, fromFile }  from './source.js';
-import { save as saveObject }   from './save.js';
+import { save as saveObject, saveLook } from './save.js';
 import { requested }            from '../../core/reopen.js';
 import { ParamPanel }           from '../../core/ParamPanel.js';
 import { VaultPanel }           from '../../core/VaultPanel.js';
@@ -66,17 +66,24 @@ async function boot() {
 /**
  * `?open=<id>`: a saved filter object back to work on (core/reopen.js) — its
  * chain card for card, and its source. A leaf, saved from a file, has neither.
+ * A look has a chain and no source: it goes over whatever is chosen next.
  */
 async function openRequested() {
   try {
     const opened = await requested('filter');
     if (!opened) return;
-    const recipe = opened.object.recipe;
-    if (!recipe) return bar.announce(`${opened.object.id} was saved from a file, as a leaf — there is no chain to bring back`);
+    const { object } = opened;
+    const recipe = object.recipe;
+    if (!recipe) return bar.announce(`${object.id} was saved from a file, as a leaf — there is no chain to bring back`);
     const unknown = chain.restore(recipe.chain);
-    params.restore(recipe);
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`
-      + (unknown.length ? ` · ${unknown.length} of its filters are not in this catalogue` : ''));
+    const lost = unknown.length ? ` · ${unknown.length} of its filters are not in this catalogue` : '';
+    if (object.type === 'params') {
+      params.set('edges', recipe.edges || 'grow');
+      return bar.announce(`${object.title} — choose a source to see it on${lost}`);
+    }
+    // Saved before `edges` existed, it kept its size.
+    params.restore({ edges: 'keep', ...recipe });
+    bar.announce(`opened ${object.id} — ${object.title}${lost}`);
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
@@ -91,8 +98,7 @@ function buildDrawers() {
   file.addEventListener('change', () => loadFile(file.files[0]));
   panel.drawer('source').body.append(button('Open a file', () => file.click()), file);
 
-  const filters = panel.addDrawer({ id: 'chain', title: 'Filters' });
-  chain = new Chain({ mount: filters.body, onChange: onChainChange });
+  chain = new Chain({ mount: panel.drawer('filters').body, onChange: onChainChange });
 
   const player = panel.addDrawer({ id: 'player', title: 'Sequence player' });
   transport = new Transport({ clock, mount: player.body, busy: () => busy });
@@ -102,7 +108,8 @@ function buildDrawers() {
   actions.className = 'pp-actions';
   buttons.save = button('Save to the vault  [S]', () => save(), true);
   buttons.frames = button('Save + download the frames', () => save({ keepFrames: true }));
-  actions.append(buttons.save, buttons.frames);
+  buttons.look = button('Save the chain as a look', () => look());
+  actions.append(buttons.save, buttons.frames, buttons.look);
   exp.body.append(actions);
   showLoopControls();
 }
@@ -118,12 +125,16 @@ function button(label, onClick, primary = false) {
 
 async function onParamChange(key, value) {
   if (key === 'source') await loadSource(value);
+  if (key === 'edges') draw();
 }
+
+/** Whether the chain gets room past the picture's edge (params.js, `edges`). */
+const growing = () => params.get('edges') !== 'keep';
 
 /** A filter came, went, moved or changed: compile what is new, then draw. */
 function onChainChange() {
   const { on, all } = chain.counts;
-  panel.drawer('chain').note(all ? `${on} of ${all} on` : '');
+  panel.drawer('filters').note(all ? `${on} of ${all} on` : '');
   if (!runner) return draw();
   runner.prepare(chain.recipe()).then(
     () => { failing = ''; draw(); },
@@ -209,6 +220,34 @@ async function save({ keepFrames = false } = {}) {
   }
 }
 
+/**
+ * The chain alone, as a look another app can put over anything: compose
+ * over a placement (core/gpu/look.js). Its picture is what it does to the
+ * frame on screen, so its card in the vault shows what it is.
+ */
+async function look() {
+  if (busy) return;
+  const list = chain.recipe();
+  if (!chain.counts.on) return bar.announce('a look needs a filter that is on');
+  if (!source || !runner) return bar.announce('choose a source first — a look is saved with a picture of what it does');
+  if (failing || !runner.ready(list)) return bar.announce('the chain is not ready — ' + (failing || 'still compiling'));
+
+  busy = true;
+  try {
+    const shown = runner.run(source.frame(clock.tick), list,
+      { time: source.fps ? clock.tick / source.fps : 0, grow: growing() });
+    const object = await saveLook({ chain: list, edges: params.get('edges'), picture: shown });
+    bar.announce(object ? `saved the look ${object.id} — ${object.title}` : 'no vault — downloaded instead');
+  } catch (err) {
+    console.error('[filter] the look did not save:', err);
+    bar.announce('the look did not save: ' + err.message);
+  } finally {
+    busy = false;
+    refreshVaultState();
+    draw();
+  }
+}
+
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
 let pending = false;
@@ -242,18 +281,19 @@ function paint() {
   let trouble = failing;
   if (runner && on && !failing) {
     try {
-      picture = runner.run(frame, list, { time: source.fps ? clock.tick / source.fps : 0 });
+      picture = runner.run(frame, list, { time: source.fps ? clock.tick / source.fps : 0, grow: growing() });
     } catch (err) {
       trouble = err.message;
     }
   }
 
-  if (canvas.width !== source.width) canvas.width = source.width;
-  if (canvas.height !== source.height) canvas.height = source.height;
+  // The picture's own size: the source's, or more where the chain grew it.
+  if (canvas.width !== picture.width) canvas.width = picture.width;
+  if (canvas.height !== picture.height) canvas.height = picture.height;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(picture, 0, 0);
 
-  bar.output({ width: source.width, height: source.height });
+  bar.output({ width: picture.width, height: picture.height });
   bar.say(`${source.title} · `
     + (!runner ? 'no GPU — unfiltered' : all ? `${on} of ${all} filters on` : 'no filters yet')
     + (trouble ? ' — ' + trouble : ''));
