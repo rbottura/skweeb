@@ -309,11 +309,12 @@ side branch, `grid/legacy-materials`, rebased onto main after.
    and every GLSL source is translated as it is ported. WebGL2 runs anywhere,
    in software too, and takes the GLSL literature almost as it is; it has no
    compute and gets no new features.
-5. **A GPU render replays within a tolerance across machines**, not bit for
-   bit: GPU arithmetic differs between GPUs and drivers. On the machine that
-   made it, it replays the same until a driver or the browser changes; the
-   recipe stays the truth, and a check compares with a tolerance. Proposed, to
-   settle before the first GPU object is saved.
+5. ~~**A GPU render replays within a tolerance across machines**~~ **Closed
+   2026-09-26: yes**, the author's call — "totally ok with a bit of difference
+   between two machines". On the machine that made it, it replays the same
+   until a driver or the browser changes; the recipe stays the truth, and a
+   check compares with a tolerance (`docs/object-model.md`, *The recipe
+   contract*).
 
 ## Migration facts
 

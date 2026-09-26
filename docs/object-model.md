@@ -340,6 +340,15 @@ pixels-only: save it with `recipe: null` and it is a leaf — viewable, usable a
 input, never re-rendered, never a smart object. A legitimate object, just a
 smaller one.
 
+**A GPU render replays close, not bit for bit, on another machine.** Decided
+by the author on 2026-09-26, when the first GPU objects were about to be saved
+(`core/gpu/`): GPU arithmetic is not the same on every GPU and driver. On the
+machine that made it, an object replays the same until a driver or the
+browser changes; elsewhere it replays within a small difference. The recipe
+stays the truth, and a check compares a GPU replay with a tolerance, never
+byte for byte. Dedup is untouched — it compares a save's bytes — so the same
+recipe saved again on another machine may be a second object.
+
 ## Resolution is an export concern
 
 The live loop runs at screen size, with `density` as an ordinary parameter.

@@ -12,7 +12,8 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 3. **It saves**: a still or a loop with the source as its parent and
    `{ source, chain }` as its recipe; `rebuild.js` replays the source and runs
    the chain, and draws again at print scale (`redraws()`); `?open=<id>`
-   brings a chain back. Needs *Still open* 5 of the roadmap settled first.
+   brings a chain back. A replay on another machine may differ a little —
+   settled 2026-09-26 (`docs/object-model.md`, *The recipe contract*).
 4. **A look**: a chain saved alone, as a `params` object, and applied to a
    placement in compose — M5's link, `filter → compose: a look`.
 5. **The catalogue grows**: p5.FIP's, glfx's and GPUImage's filters, each with
@@ -57,6 +58,4 @@ back card for card. Loops, `rebuild.js` and print scale are the second half.
 
 ## Parked
 
-- Whether a GPU render replays within a tolerance across machines —
-  `docs/roadmap.md`, *Still open* 5. The author's call, before a GPU object is
-  saved.
+- Nothing waiting on the author.

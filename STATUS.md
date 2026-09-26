@@ -301,9 +301,6 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 - **The GPU catalogue is four filters, none ported yet.** p5.FIP's, glfx's
   and GPUImage's come next, each with its copyright line. A blur's taps stop
   at 512 a side; past that it wants a smaller picture first.
-- **Whether a GPU render replays within a tolerance across machines** is
-  still open (`docs/roadmap.md`, *Still open* 5): to settle before the first
-  GPU object is saved, which is M5's third brick.
 - **Two kinds still print stretched from their pixels**: a gamepad still and a
   shape, and the export names them. The gamepad's is fixable (*Next*); a
   shape is a leaf, pixels by definition. `at` and `length` ride in every
@@ -376,8 +373,6 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
 **M5's third brick, its first half: a filtered still saves** —
 `apps/filter/STATUS.md` has it in full: `{ source, chain }` the recipe, the
 source the parent, and `?open=<id>` bringing the chain back card for card.
-Before it, the author's answer to *Still open* 5 (`docs/roadmap.md`): may a
-GPU render replay within a tolerance on another machine?
 
 Parked behind M5, still wanted: **a gamepad still drawn again at print
 scale** — the last kind M4 prints stretched. A still's recipe carries
@@ -411,8 +406,8 @@ gamepad onto core params, and off p5 with it.
   fake 3D where it helps, real 3D later. The plan is in `docs/roadmap.md`.
 - **The GPU kit is WebGPU** (the author, 2026-09-26), nothing cut for a
   machine without it: there the apps open and GPU objects show as their
-  renders. Open still: whether a GPU render replays within a tolerance across
-  machines.
+  renders. A GPU render replays within a small difference on another machine
+  — the author, 2026-09-26 (`docs/object-model.md`, *The recipe contract*).
 - **Rule 8 settled** (2026-09-26): p5 is not required, and new work does not
   take it on; the gamepad and core's replay of its recordings keep p5 1.5.0
   until they are ported. **Rule 5 covers shaders**: each carries its source and

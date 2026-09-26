@@ -243,6 +243,12 @@ shows as its saved render; a flag lifts the browser's list where the GPU is
 merely unlisted. The kit's API speaks canvases, chains and schemas, never GPU
 objects, so a second backend stays possible and is not built.
 
+**A GPU render replays close, not bit for bit.** The author's answer, before
+the first GPU object was saved: a small difference between two machines is
+fine. So a GPU object's promise is its recipe; on the machine that made it, it
+replays the same, and a check compares a replay with a tolerance. Written into
+`docs/object-model.md`, *The recipe contract*.
+
 **A shader carries its licence, as a font does.** Rule 5 now covers shaders. The
 filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA
 is under the Prosperity licence — noncommercial, a thirty-day commercial trial —
