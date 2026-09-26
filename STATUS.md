@@ -1,8 +1,21 @@
 # STATUS — skweeb
-_last touched: 2026-09-24_
+_last touched: 2026-09-26_
 
 ## Works right now
 
+- **The vault has a trash, and objects can be deleted** (2026-09-26), all of
+  it seen in Chrome on a copy of the vault. Ctrl- or shift-click selects a
+  card or a whole folder; the bar moves them to the trash — a `trash` tag, so
+  nothing breaks and it can be undone. The trash is a view of its own: restore,
+  or delete for good. When other objects are made from what is going, the
+  panel asks once and says what each would lose: delete the chain too, or keep
+  them cut loose — a set loses those members, a page those placements, and a
+  recipe still naming a deleted object is set aside, the object becoming its
+  picture. `server/delete.js`; rules in `docs/object-model.md`, *Trash, and
+  deleting*.
+- **A vault folder is a card** the size of any object — a tab, its first four
+  members as its picture — opening into a strip across the grid, and it
+  closes again: it never did, the grid's `display` beating `hidden`.
 - **Side note, between M4's fourth and fifth bricks: the original grid's
   seven materials are in the vault.** degz, trames, sprites, myFace, shapes,
   tiles and stones — what grid_sketch loaded as mapping material — as legacy
@@ -224,8 +237,10 @@ _last touched: 2026-09-24_
 
 ## Tests
 
-Twenty files, no runner, no dependencies — the command in `CLAUDE.md` runs
-all of them, and all pass. New: `compose-page` (where a placement lands —
+Twenty-one files, no runner, no dependencies — the command in `CLAUDE.md`
+runs all of them, and all pass. Newest: `delete` (a vault with every kind of
+edge: the refusals, the dry plan, cutting loose, the chain; 37 checks).
+Before it: `compose-page` (where a placement lands —
 moved, scaled, turned about its centre, the bleed moving nothing; picking one
 up, the top one where two overlap, a turned one where it stands; an object's
 ink; placed whole; a page with no zoom and an A4 box that agrees with its
@@ -300,8 +315,16 @@ gone; `scripts/chrome.mjs` is the driver to write the next ones on.
   serves the new pages from disk but answers with old code. That is what hid
   the author's two materials on 2026-09-24 (no `role` on its rows) and what
   would make the vault switches fail (no PATCH). Restart it after pulling.
-- **`server.js` is at 399 lines.** The next endpoint splits it — the vault
-  API into `server/vault.js`, say — before anything is added.
+- **`core/VaultPanel.js` is at exactly 400 lines.** The next thing it
+  learns needs a split first — the filters, or the drawer. `server.js` was
+  split this session (332).
+- **Trashed brush sets still show in the gamepad and in ckt**: both register
+  vault sets as families that saved recordings may need to replay, so they
+  were left alone; only grid's shelves hide the trash. A cut-loose set or page
+  keeps its old picture — the render is not redrawn — until it is saved again.
+- **`detached` is a new envelope field**, added for cutting loose; the object
+  model says not to add fields, so it is written up as decided — the author
+  may want to confirm it.
 - **The legacy copy is a button, not the script planned** (`scripts/` has no
   canvas for thumbnails). Heavy families copy as they are: fleurs is 18 MB on
   disk, and copying it puts 18 MB more in the vault.
@@ -333,6 +356,9 @@ gamepad onto core params.
 
 ## Parked decisions
 
+- **Objects are deleted in two steps** (the author, 2026-09-26): the trash,
+  then deleting from it; objects made from what goes are deleted with it or
+  cut loose, never left broken. `docs/decisions.md`.
 - **compose's first brick settled four things** (2026-09-24,
   `docs/roadmap.md`): a page and a placement are two schemas, and a
   placement's panel edits one entry of `place[]`; a transform is page pixels
