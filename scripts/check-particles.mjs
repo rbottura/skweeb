@@ -17,6 +17,8 @@
  * aimed outward blooms; a stream through a vortex and curl noise still
  * closes its loop, and a frame of it costs less than a 60 fps frame; tilted
  * into depth behind a close camera, it is another picture and still a loop.
+ * The guides: G switches them, the emitter and the fields' centre are dragged
+ * by their handles, and a save made with them on has none in its picture.
  */
 
 import fs   from 'node:fs';
@@ -373,6 +375,64 @@ await wait(500);
 c.ok('in depth, the loop still closes pixel for pixel', apart(await pixels(), deep) === 0,
   `${await page.eval(count)}, apart by ${apart(await pixels(), deep)}`);
 await c.shot('9-depth');
+
+// ── Guides: seen in the preview, dragged, never saved ───────────────────────
+
+await c.go(c.base + '/apps/particles/');
+await page.until(`${say}.includes('alive')`, { timeout: 20000 });
+key(' '); await wait(200);
+await scrubTo(10);
+const guided = await pixels();
+key('g'); await wait(300);
+const bare = await pixels();
+c.ok('G takes the guides away, and the particles stay', apart(guided, bare) > 1
+  && (await page.eval(`${row('show, preview only  [G]')}?.querySelector('input')?.checked`)) === false);
+key('g'); await wait(300);
+// Within a level, not to the pixel: Chrome moves a canvas read back often off
+// the GPU and draws it a hair differently after (check-frames.mjs says the same).
+c.ok('and G brings them back', apart(await pixels(), guided) <= 1, 'apart by ' + apart(await pixels(), guided).toFixed(2));
+
+/** Where a point of the picture, from its centre, is on screen. */
+const onScreen = (x, y) => page.eval(`(() => { const r = document.getElementById('stage').getBoundingClientRect();
+  return [r.left + r.width / 2 + ${x} * r.width / 1080, r.top + r.height / 2 + ${y} * r.height / 1080]; })()`);
+const value = name => page.eval(`Number(${row(name)}?.querySelector('.pp-num')?.value)`);
+const grab = await onScreen(0, 260);
+await page.pointer(grab, [grab[0] + 80, grab[1] - 60], 8);
+await wait(300);
+const moved = [await value('x from centre'), await value('y from centre')];
+const css = await page.eval(`document.getElementById('stage').getBoundingClientRect().width / 1080`);
+c.ok('the emitter dragged by its handle, its rows following', Math.abs(moved[0] - 80 / css) <= 2 && Math.abs(moved[1] - (260 - 60 / css)) <= 2,
+  `x ${moved[0]}, y ${moved[1]}`);
+await page.pointer(await onScreen(300, -300), await onScreen(200, -200), 4);
+await wait(200);
+c.ok('a press away from any handle moves nothing', (await value('x from centre')) === moved[0]);
+
+await set('vortex px/s²', '500');
+const fgrab = await onScreen(0, 0);
+await page.pointer(fgrab, [fgrab[0] - 50, fgrab[1] + 40], 6);
+await wait(300);
+const f = [await value('centre x'), await value('centre y')];
+c.ok('the fields\' centre dragged by its handle', Math.abs(f[0] + 50 / css) <= 2 && Math.abs(f[1] - 40 / css) <= 2, `fx ${f[0]}, fy ${f[1]}`);
+await c.shot('10-guides');
+
+// Saved, the render is the particles alone: the replay, which draws no guides, is it to the pixel.
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+key('S');
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+const gid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const clean = gid && await page.eval(`(async () => {
+  const { Vault } = await import('/core/vault.js');
+  const { openFrames } = await import('/core/rebuild.js');
+  const { object, url } = await Vault.load(${JSON.stringify(gid || '')});
+  const h = await openFrames(object, { url });
+  const img = await createImageBitmap(await (await fetch(url)).blob());
+  const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
+  const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(h.frame(10), 0, 0);
+  const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
+  let worst = 0; for (let i = 0; i < da.length; i++) worst = Math.max(worst, Math.abs(da[i] - db[i]));
+  h.dispose(); return worst;
+})()`);
+c.ok('saved with the guides on, its picture has none', clean === 0, 'worst ' + clean);
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

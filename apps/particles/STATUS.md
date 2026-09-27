@@ -42,7 +42,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 48 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 54 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -121,6 +121,18 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   those behind the camera left out. With every z at 0 the scale is exactly
   1, so a flat recipe draws as it always did; no switch. A stream in depth
   still closes its loop pixel for pixel.
+- **Guides, and handles to drag** (2026-09-27, the author's ask before M7;
+  `guides.js`, `pointer.js`). Over the preview, never in a save, a frame or
+  a sheet: the picture's centre; the emitter in blue — its shape through
+  the camera at its depth, its launch cone or its arrows outward, a handle;
+  the fields in magenta — arrows of the whole field on a grid, sampled
+  from the very function the particles move through, a vortex's turn and
+  an attractor's pull round a diamond handle; and the pull of gravity and
+  wind in the corner. Drag a handle and the emitter, or the fields'
+  centre, follows through the panel's own rows; an emitter in depth is
+  dragged at the camera's scale so it stays under the pointer. *Guides* in
+  the picture panel, or G. Sized in CSS pixels, so they read the same at
+  any preview size.
 - **M6's *Done when* is met** (2026-09-27): a torch loop that closes
   exactly, drawn with a vault set's sprites and scrubbed to any frame, and
   a one-shot burst, both leaving as sprite sheets — the burst's tag says it
@@ -141,6 +153,12 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 - Depth has no gravity or field of its own, and the emitter's shape stays
   in the plane: a disc is flat, facing the camera.
 - The camera looks at the picture's centre and cannot move or turn.
+- A vortex and an attractor pull as hard far away as near — the guides'
+  arrows show it, the whole picture turning. A radius they fall off over
+  would make one a local swirl.
+- A frame drawn with the guides off and on again can differ by under a
+  level from the first paint: Chrome moves a canvas it has read back off
+  the GPU. Only the checks see it; they allow a level there.
 - A picture carries its ground onto a compose page: an opaque square
   round the torch. For placing over other things, set the ground to none.
 - A loop's thumbnail is its whole picture, so a narrow torch on a square
@@ -160,6 +178,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 M6's seven bricks are in and its *Done when* met. What is left of it, none
 started, in the order it would pay:
 
+- **A falloff for the vortex and the attractor** — a radius past which
+  they fade, so a swirl can be local; the guides would draw the radius.
 - **Load a sheet in an engine** — a Phaser or PixiJS page of a dozen lines
   in `scripts/`, pointed at a downloaded sheet, the one thing *Done when*
   says that no check has done.

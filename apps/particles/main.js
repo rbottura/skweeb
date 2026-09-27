@@ -28,12 +28,15 @@ import { Playhead }       from '../../core/playback.js';
 import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { viewFactor }     from '../../core/view.js';
+import { drawGuides }     from './guides.js';
+import { wirePointer }    from './pointer.js';
 
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 
 let emit, picture, bar, transport, player;
 let clockFps = 0;
+let shownView = 1;         // canvas pixels per picture pixel, as last painted
 let model = null;          // the recipe, prepared: remade when a value changes, not every frame
 let shown = [];            // the particles on screen, for the bar
 let sprites = null;        // the chosen set's images, or null: dots
@@ -52,7 +55,7 @@ const clock = new Playhead({
 
 async function boot() {
   bar = new Bar({ app: 'particles', mount: document.querySelector('.app'),
-                  keys: 'space play · , . frame · S save · V vault' });
+                  keys: 'drag the handles · G guides · space play · , . frame · S save · V vault' });
   emit = emitParams();
   picture = pictureParams();
   new ParamPanel(emit, { title: 'particles', mount: document.getElementById('emit-side'), groups: EMIT_GROUPS });
@@ -73,6 +76,7 @@ async function boot() {
     else draw();
   });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
+  wirePointer({ canvas, view: () => shownView, emit, picture });
   wireKeys();
   remake();
   if (await openRequested()) return;
@@ -238,6 +242,8 @@ function paint() {
 
   shown = particlesAt(model, clock.tick / p.fps);
   drawParticles(ctx, shown, p, view, sprites);
+  shownView = view;
+  if (p.guides) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width));
 
   bar.output({ width: Math.round(size.width * p.scale), height: Math.round(size.height * p.scale),
                scale: p.scale, format: p.format });
@@ -263,6 +269,7 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
+    if (e.key === 'g' || e.key === 'G') picture.set('guides', !picture.get('guides'));
     if (e.key === 's' || e.key === 'S') save();
     if (busy || clock.length < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }

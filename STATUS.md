@@ -10,6 +10,11 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **Particles show what makes them** (2026-09-27, the author's ask;
+  `check-particles`, 54 checks). Guides over the preview — the emitter and
+  its launch, the whole field as arrows, the fields' centre, the pull —
+  never in anything saved; the emitter and the fields' centre dragged by
+  their handles, the rows following. G switches them.
 - **Particles have depth, and M6's *Done when* is met** (2026-09-27, brick 6;
   `check-particles`, 48 checks; `particles-model`, 68). A z per particle —
   the cone tilted into depth — and a camera: far ones smaller, drawn first.

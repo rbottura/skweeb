@@ -11,3 +11,6 @@
 @import '../../core/sequence-viewer.css';
 
 .app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
+
+/* Over a guide's handle, the pointer says it can move it (pointer.js). */
+.viewer-stage canvas.can-move { cursor: move; }

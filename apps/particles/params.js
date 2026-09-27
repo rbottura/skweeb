@@ -35,6 +35,7 @@ export const EMIT_GROUPS = {
 
 /** The picture panel's drawers. Format is the picture, so it starts open. */
 export const PICTURE_GROUPS = {
+  guides: { label: 'Guides', open: true },
   format: { label: 'Format', open: true },
   player: { label: 'Sequence player', open: true },
   look:   { label: 'Look', open: true },
@@ -142,6 +143,12 @@ export function pictureParams() {
      * depth shows more. Nothing changes while every particle is at depth 0.
      */
     focal:  { type: 'range', min: 100, max: 5000, step: 10, default: 800, label: 'focal px', group: 'camera' },
+    /**
+     * The preview's guides (guides.js): the emitter, its launch, the fields
+     * and the pull, drawn over the particles, with handles to drag. Never in
+     * a save, a frame or a sheet. G switches them.
+     */
+    guides: { type: 'bool', default: true, label: 'show, preview only  [G]', group: 'guides' },
   });
 }
 
