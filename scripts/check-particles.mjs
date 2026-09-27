@@ -13,7 +13,9 @@
  * sprites (core/uses.js). Saved: a loop and a still into the vault, the set
  * its parent; replayed by the vault to the pixel of its render, drawn again
  * at scale 2, reopened by `?open=`, and placed on a compose page; its frames
- * zipped, and a sprite sheet with its JSON, cropped to the torch.
+ * zipped, and a sprite sheet with its JSON, cropped to the torch. A ring
+ * aimed outward blooms; a stream through a vortex and curl noise still
+ * closes its loop, and a frame of it costs less than a 60 fps frame.
  */
 
 import fs   from 'node:fs';
@@ -298,6 +300,47 @@ if (picked) {
     await c.shot('6-in-compose');
   }
 }
+
+// ── Emitters and fields ─────────────────────────────────────────────────────
+
+await c.go(c.base + '/apps/particles/');
+await page.until(`${say}.includes('alive')`, { timeout: 20000 });
+key(' '); await wait(200);
+const chip = (name, text) => page.click(`[...${row(name)}.querySelectorAll('button')].find(b => b.textContent === ${JSON.stringify(text)})`);
+await scrubTo(20);
+const torchAt20 = await pixels();
+
+// A ring, aimed outward, as a burst: a bloom.
+await chip('mode', 'burst');
+await chip('emitter', 'ring');
+await wait(200);
+await chip('launch', 'outward');
+await set('gravity px/s²', '0');
+await scrubTo(12);
+c.ok('a ring aimed outward blooms', apart(await pixels(), torchAt20) > 4, 'apart by ' + apart(await pixels(), torchAt20).toFixed(1));
+await c.shot('7-ring-bloom');
+
+// A stream through a vortex and curl noise: every frame still its own, the loop still closed.
+await chip('mode', 'stream');
+await chip('emitter', 'disc');
+await set('gravity px/s²', '-200');
+await set('vortex px/s²', '600');
+await set('curl noise px/s²', '900');
+await scrubTo(17);
+const swirl = await pixels();
+c.ok('a vortex and curl noise move the stream', apart(swirl, torchAt20) > 4);
+await scrubTo(59); key('.'); await wait(300);
+for (let i = 0; i < 17; i++) key('.');
+await wait(500);
+c.ok('through a field, the loop still closes pixel for pixel', apart(await pixels(), swirl) === 0,
+  `${await page.eval(count)}, apart by ${apart(await pixels(), swirl)}`);
+const ms = await page.eval(`(async () => {
+  const { particlesAt, prepare } = await import('/apps/particles/model.js');
+  const m = prepare({ rate: 90, period: 2, life: 1.4, gravity: -200, vortex: 600, noise: 900, shape: 'disc' });
+  const t0 = performance.now(); for (let i = 0; i < 20; i++) particlesAt(m, i / 30); return (performance.now() - t0) / 20;
+})()`);
+c.ok('a frame through the fields costs less than a 60 fps frame', ms < 16, ms.toFixed(1) + ' ms');
+await c.shot('8-swirl');
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

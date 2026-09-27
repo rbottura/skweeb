@@ -4,7 +4,7 @@
  *
  * Two, as compose has a page and a placement, because they are two kinds of
  * thing and sit in two columns. The emitter — emission, launch, life,
- * forces, turning — is the model's recipe (model.js), key for key, with its
+ * forces, fields, turning — is the model's recipe (model.js), key for key, with its
  * defaults, but where the app opens on a torch — rising, warm, shrinking as
  * it goes — rather than the model's plain fountain. The picture is core's
  * Format drawer, less what has no meaning without a source (no `ink` or
@@ -28,6 +28,7 @@ export const EMIT_GROUPS = {
   launch:   { label: 'Launch', open: true },
   life:     { label: 'Life', open: true },
   forces:   { label: 'Forces', open: true },
+  fields:   { label: 'Fields', open: false },
   turning:  { label: 'Turning', open: false },
 };
 
@@ -54,6 +55,15 @@ export function emitParams() {
     x:       { type: 'int', min: -4000, max: 4000, default: D.x, label: 'x from centre', group: 'emission' },
     y:       { type: 'int', min: -4000, max: 4000, default: 260, label: 'y from centre', group: 'emission' },
     seed:    { type: 'int', min: 0, max: 999999, default: D.seed, label: 'seed', group: 'emission' },
+    /** Where on the emitter a particle leaves from (model.js, *Where it leaves from*). */
+    shape:     { type: 'enum', options: ['point', 'line', 'disc', 'ring'], default: D.shape, display: 'chips',
+                 label: 'emitter', group: 'emission' },
+    extent:    { type: 'range', min: 1, max: 2000, step: 1, default: D.extent, label: 'length / radius px',
+                 group: 'emission', when: { shape: { not: 'point' } } },
+    lineAngle: { type: 'range', min: -180, max: 180, step: 1, default: D.lineAngle, label: 'line angle °',
+                 group: 'emission', when: { shape: 'line' } },
+    aim:       { type: 'enum', options: ['fixed', 'outward'], default: D.aim, display: 'chips', label: 'launch',
+                 labels: { fixed: 'as the angle', outward: 'outward' }, group: 'emission', when: { shape: ['disc', 'ring'] } },
 
     speed:       { type: 'range', min: 0, max: 3000, step: 1, default: 140, label: 'speed px/s', group: 'launch' },
     speedSpread: { type: 'range', min: 0, max: 1, step: 0.01, default: D.speedSpread, label: 'speed spread', group: 'launch' },
@@ -66,6 +76,19 @@ export function emitParams() {
     gravity: { type: 'range', min: -3000, max: 3000, step: 1, default: -260, label: 'gravity px/s²', group: 'forces' },
     wind:    { type: 'range', min: -3000, max: 3000, step: 1, default: D.wind, label: 'wind px/s²', group: 'forces' },
     drag:    { type: 'range', min: 0, max: 20, step: 0.05, default: 1.2, label: 'drag /s', group: 'forces' },
+
+    /**
+     * Pulls that depend on where a particle is (forces.js): round a centre,
+     * towards it, and along curl noise. Any of them on, each particle is
+     * integrated from its birth — slower, and every frame still its own.
+     */
+    vortex:     { type: 'range', min: -3000, max: 3000, step: 1, default: D.vortex, label: 'vortex px/s²', group: 'fields' },
+    attract:    { type: 'range', min: -3000, max: 3000, step: 1, default: D.attract, label: 'attract px/s²', group: 'fields' },
+    fx:         { type: 'int', min: -4000, max: 4000, default: D.fx, label: 'centre x', group: 'fields' },
+    fy:         { type: 'int', min: -4000, max: 4000, default: D.fy, label: 'centre y', group: 'fields' },
+    noise:      { type: 'range', min: 0, max: 5000, step: 1, default: D.noise, label: 'curl noise px/s²', group: 'fields' },
+    noiseScale: { type: 'range', min: 4, max: 2000, step: 1, default: D.noiseScale, label: 'noise size px',
+                  group: 'fields', when: { noise: { not: 0 } } },
 
     /** Facing where it goes — a spark, a streak — instead of turning on its own. */
     align:      { type: 'bool', default: D.align, label: 'face where it goes', group: 'turning' },

@@ -30,7 +30,7 @@
  * is over when the longest of them is.
  *
  * A slot's draws are made in a fixed order — jitter, life, speed, angle,
- * pick, turn, twist — and a new one is only ever added at the end, so a
+ * pick, turn, twist, spot, spot — and a new one is only ever added at the end, so a
  * recipe saved today draws the same particles after the model has grown.
  *
  * ── Motion ─────────────────────────────────────────────────────────────────
@@ -45,11 +45,22 @@
  * `spin` degrees a second, each its own speed within `spinSpread` — or,
  * with `align`, it faces where it is going, as a spark or a streak does.
  * `rot` is radians, clockwise, 0 as the sprite was drawn.
- * The later forces — vortex, attractors, curl noise, a field from another
- * object — and depth come in their own bricks.
+ * A vortex, an attractor and curl noise have no closed form: with any of
+ * them on, a particle is integrated from its own birth (forces.js), which
+ * keeps every promise above at the cost of its age in steps. A field from
+ * another object, and depth, come in their own bricks.
+ *
+ * ── Where it leaves from ───────────────────────────────────────────────────
+ *
+ * The emitter is a `point`, a `line` `extent` px long turned `lineAngle`
+ * degrees clockwise from level, a `disc` of radius `extent` — filled evenly,
+ * not crowded at its centre — or a `ring` on its edge. On a disc or a ring
+ * the launch can `aim` `outward`: the cone turned to point away from the
+ * centre, for a burst that blooms. The spot is two more draws of the slot.
  */
 
 import { makeRng, seedFrom } from '../../core/rng.js';
+import { fieldOf, integrate } from './forces.js';
 
 const DEG = Math.PI / 180;
 
@@ -79,6 +90,15 @@ export const DEFAULTS = {
   spin: 0,              // degrees a second, clockwise
   spinSpread: 0,        // 0..1, either way
   align: false,         // facing where it goes, instead of turning
+  shape: 'point',       // 'point' | 'line' | 'disc' | 'ring'
+  extent: 100,          // px: a line's length, a disc's or a ring's radius
+  lineAngle: 0,         // degrees clockwise from level
+  aim: 'fixed',         // 'fixed' | 'outward', on a disc or a ring
+  fx: 0, fy: 0,         // the fields' centre, from the picture's centre
+  vortex: 0,            // px/s², round the centre, clockwise
+  attract: 0,           // px/s², towards the centre
+  noise: 0,             // px/s², along curl noise
+  noiseScale: 200,      // px, the noise's features
 };
 
 /**
@@ -89,8 +109,29 @@ export function prepare(recipe = {}) {
   const r = { ...DEFAULTS, ...recipe };
   const burst = r.mode === 'burst';
   const n = burst ? Math.max(0, Math.round(r.count)) : Math.max(1, Math.round(r.rate * r.period));
-  return { ...r, prepared: true, burst, n, spacing: burst ? 0 : r.period / n, longest: r.life * (1 + Math.max(0, r.lifeSpread)),
-           seed: seedFrom(r.seed) };
+  const m = { ...r, prepared: true, burst, n, spacing: burst ? 0 : r.period / n,
+              longest: r.life * (1 + Math.max(0, r.lifeSpread)), seed: seedFrom(r.seed) };
+  m.field = fieldOf(m);
+  return m;
+}
+
+/**
+ * Where on the emitter a particle leaves from, from its two spot draws `a`
+ * and `b`: its offset from the emitter's centre, and — on a disc or a ring
+ * aimed outward — the angle pointing away from it, clockwise from up.
+ */
+export function spotOf(m, a, b) {
+  if (m.shape === 'line') {
+    const t = m.lineAngle * DEG, u = (a - 0.5) * m.extent;
+    return { dx: Math.cos(t) * u, dy: Math.sin(t) * u, out: null };
+  }
+  if (m.shape === 'disc' || m.shape === 'ring') {
+    const r = m.shape === 'ring' ? m.extent : m.extent * Math.sqrt(a);
+    const phi = b * Math.PI * 2;
+    const dx = Math.cos(phi) * r, dy = Math.sin(phi) * r;
+    return { dx, dy, out: m.aim === 'outward' ? Math.atan2(Math.cos(phi), -Math.sin(phi)) : null };
+  }
+  return { dx: 0, dy: 0, out: null };
 }
 
 /**
@@ -127,8 +168,10 @@ export function slot(m, k) {
   const pick = rng();
   const turn = m.turn * (rng() - 0.5) * DEG;
   const spin = m.spin * (1 + m.spinSpread * (rng() * 2 - 1)) * DEG;
+  const spot = spotOf(m, rng(), rng());
   const born = m.burst ? 0 : (k + m.jitter * jitter) * m.spacing;
-  return { slot: own, born, life: Math.max(1e-3, life), speed, angle, pick, turn, spin };
+  return { slot: own, born, life: Math.max(1e-3, life), speed,
+           angle: angle + (spot.out ?? 0), pick, turn, spin, dx: spot.dx, dy: spot.dy };
 }
 
 /**
@@ -161,7 +204,8 @@ export function particlesAt(recipe, t) {
     const age = t - s.born;
     if (age < 0 || age >= s.life) continue;
     const v = { x: Math.sin(s.angle) * s.speed, y: -Math.cos(s.angle) * s.speed };
-    const at = motion({ x: m.x, y: m.y }, v, a, m.drag, age);
+    const from = { x: m.x + s.dx, y: m.y + s.dy };
+    const at = m.field ? integrate(from, v, m, m.field, age) : motion(from, v, a, m.drag, age);
     const rot = m.align ? Math.atan2(at.vx, -at.vy) : s.turn + s.spin * age;
     out.push({ slot: s.slot, ...at, rot, age, life: s.life, t: age / s.life, pick: s.pick });
   }

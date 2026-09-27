@@ -10,6 +10,12 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **Particles leave from a line, a disc or a ring, and swirl** (2026-09-27,
+  M6 brick 5; `check-particles`, 45 checks; `tests/noise.mjs`). A burst
+  from a ring aimed outward blooms; a vortex, an attractor and curl noise
+  in a *Fields* drawer, each particle integrated from its own birth, so a
+  loop through them still closes pixel for pixel. `core/noise.js`: seeded
+  noise on the GPU kit's hash, bit for bit, with its exact slope.
 - **A loop leaves as a sprite sheet** (2026-09-27; `core/spritesheet.js`,
   `tests/spritesheet.mjs`, 26 checks; `check-particles`, 41). Every frame
   on one PNG, cropped to the box the loop reaches, and Aseprite's array
@@ -234,7 +240,7 @@ it said is here, shorter, or in the files it points to.
 
 ## Tests
 
-Twenty-five files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+Twenty-six files, no runner, no dependencies — the loop in `CLAUDE.md` runs
 all of them, and all pass. Newest: `compose-time` gained the ripple, and
 with `compose-placements` a placement's time — windows, a page's end, a
 flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
@@ -313,9 +319,8 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M6, brick 5: emitters and forces** — `apps/particles/STATUS.md` has it:
-a line, a circle, a ring; then a vortex, an attractor and curl noise,
-integrated from each particle's birth so every frame still stands alone.
+**M6, brick 6: depth** — `apps/particles/STATUS.md` has it: a z for each
+particle and a simple camera, far ones drawn first and smaller.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

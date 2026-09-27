@@ -9,6 +9,7 @@
  */
 
 const { particlesAt, prepare, motion, slot, duration, MAX_ALIVE } = await import('../apps/particles/model.js');
+const { integrate, fieldOf, STEP } = await import('../apps/particles/forces.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -121,6 +122,45 @@ const spinning = { ...torch, turn: 360, spin: 180, spinSpread: 0.5 };
 ok('a turning stream still closes its loop', particlesAt(spinning, 2.4).map(p => +p.rot.toFixed(6)),
    particlesAt(spinning, 0.4).map(p => +p.rot.toFixed(6)));
 ok('and turning draws nothing it drew before differently', round(particlesAt(spinning, 0.9)), round(particlesAt(torch, 0.9)));
+
+// ── Where it leaves from: a line, a disc, a ring ────────────────────────────
+
+const born = shape => particlesAt({ seed: 4, mode: 'burst', count: 300, speed: 0, speedSpread: 0, gravity: 0, drag: 0,
+                                    life: 1, lifeSpread: 0, x: 10, y: -20, extent: 50, ...shape }, 0);
+const line = born({ shape: 'line', lineAngle: 90 });
+ok('a line, turned 90°, stands upright on the emitter', line.every(p => Math.abs(p.x - 10) < 1e-9 && Math.abs(p.y + 20) <= 25 + 1e-9), true);
+ok('and spans it', Math.max(...line.map(p => p.y)) - Math.min(...line.map(p => p.y)) > 45, true);
+const disc = born({ shape: 'disc' });
+const r = p => Math.hypot(p.x - 10, p.y + 20);
+ok('a disc: all inside its radius', disc.every(p => r(p) <= 50 + 1e-9), true);
+ok('filled evenly: about a quarter inside half the radius', Math.abs(disc.filter(p => r(p) < 25).length / 300 - 0.25) < 0.08, true);
+ok('a ring: all on its edge', born({ shape: 'ring' }).every(p => Math.abs(r(p) - 50) < 1e-9), true);
+const bloom = particlesAt({ seed: 4, mode: 'burst', count: 60, shape: 'ring', aim: 'outward', extent: 40, spread: 0,
+                            speed: 100, speedSpread: 0, gravity: 0, drag: 0, life: 1, lifeSpread: 0 }, 0.5);
+ok('aimed outward, every one leaves away from the centre', bloom.every(p => Math.abs(Math.hypot(p.x, p.y) - 90) < 1e-6), true);
+ok('a point is where it was', born({ shape: 'point' }).every(p => p.x === 10 && p.y === -20), true);
+
+// ── Fields: integrated from birth ───────────────────────────────────────────
+
+const none = () => [0, 0];
+const mm = { gravity: 300, wind: -40, drag: 1.5 };
+const num = integrate({ x: 5, y: 5 }, { x: 60, y: -200 }, mm, none, 1.37);
+const exact = motion({ x: 5, y: 5 }, { x: 60, y: -200 }, { x: -40, y: 300 }, 1.5, 1.37);
+ok('with no field, the steps land where the formula does, to a hundredth of a pixel',
+   Math.hypot(num.x - exact.x, num.y - exact.y) < 0.01, true);
+ok('no field on, the formula places them', prepare({}).field, null);
+const swirl = { ...torch, vortex: 400, attract: 150, noise: 300, noiseScale: 120, fx: 0, fy: -150 };
+ok('a field on, the same time is the same picture', round(particlesAt(swirl, 0.8)), round(particlesAt(swirl, 0.8)));
+ok('and still closes its loop', round(particlesAt(swirl, 2.8)), round(particlesAt(swirl, 0.8)));
+ok('and moves them off the path the formula gives', JSON.stringify(round(particlesAt(swirl, 0.8)))
+   === JSON.stringify(round(particlesAt(torch, 0.8))), false);
+const still0 = { seed: 2, mode: 'burst', count: 1, speed: 0, speedSpread: 0, gravity: 0, drag: 0, life: 3, lifeSpread: 0,
+                 x: 100, y: 0, fx: 0, fy: 0 };
+ok('an attractor pulls towards its centre', Math.hypot(particlesAt({ ...still0, attract: 200 }, 0.5)[0].x, 0) < 100, true);
+const turned = particlesAt({ ...still0, vortex: 300 }, 0.3)[0];
+ok('a vortex turns it clockwise: right of centre, it goes down', turned.vy > 0 && turned.y > 0, true);
+ok('its steps are 120 a second', STEP, 1 / 120);
+ok('a field is null when nothing pulls', fieldOf(prepare({ vortex: 0, attract: 0, noise: 0 })), null);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

@@ -16,8 +16,9 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
    over a particle's life on `core/easing.js` curves. M6's link.
 4. **It saves** — done 2026-09-27: a loop or a still, every frame as a zip,
    `rebuild.js` for the vault's replay, compose's placing and print scale.
-5. **Emitters and forces**: a line, a circle, a shape's alpha; vortex,
-   attractors, seeded curl noise.
+5. **Emitters and forces** — done 2026-09-27: a line, a disc, a ring, aimed
+   outward or not; a vortex, an attractor and curl noise. A shape's alpha
+   as an emitter, and a field from another object, are still to come.
 6. **Depth**: x, y and z behind a simple camera, sprites sorted by depth.
 7. **Sprite-sheet export** — done 2026-09-27, ahead of 5 and 6
    (`core/spritesheet.js`).
@@ -25,7 +26,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 ## Works now
 
 - **A particle is a function of its slot and its age** (`model.js`,
-  `tests/particles-model.mjs`, 42 checks). A stream emits `rate` a second as
+  `tests/particles-model.mjs`, now 58 checks). A stream emits `rate` a second as
   `rate × period` slots a loop; slot `k` draws everything from the seed and
   `k mod n`, so slot `k + n` is slot `k` one period on, and the picture at
   `t + period` is the picture at `t` — checked to a millionth of a pixel,
@@ -40,7 +41,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 41 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 45 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -97,14 +98,31 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   one tag for the loop, and in `meta.skweeb` the crop and the recipe. One
   zip, `<name>.png` and `<name>.json`. Drawn on no ground, whatever the
   picture's.
+- **Emitters and fields** (2026-09-27, brick 5; `forces.js`,
+  `core/noise.js`, `tests/noise.mjs`). The emitter is a point, a line
+  (length, angle), a disc filled evenly or a ring — on a disc or a ring the
+  launch can aim outward, so a burst blooms; the spot is two new draws at
+  the end of each slot. The *Fields* drawer: a vortex round a centre, an
+  attractor to it (or away), and curl noise of a size, all in px/s². None
+  has a closed form, so with any on, each particle is integrated from its
+  own birth, 120 steps a second by the midpoint rule — the same age, the
+  same steps — and every frame still stands alone: a stream through a
+  vortex and noise closes its loop pixel for pixel. With none on, the
+  formula places them, as before. The noise is `core/noise.js`: WGSL's
+  `pcg` bit for bit, gradient noise from eight directions with its exact
+  slope in one pass, so a frame through the fields is 2.3 ms, not 27.
 - **It opens on a torch**: rising, warm, shrinking as it goes — the app's
   defaults, not the model's, which stay a plain fountain.
 
 ## Known
 
 - A slot's draws are in a fixed order — jitter, life, speed, angle, pick,
-  turn, twist — and new ones go at the end, or saved recipes redraw
-  differently.
+  turn, twist, spot, spot — and new ones go at the end, or saved recipes
+  redraw differently.
+- A field costs a particle's age in steps, each frame: a long life through
+  one is the slow case — 20 s lives are 2400 steps each.
+- The fields do not move in time — a moving field would have to repeat
+  with the loop to keep it closed.
 - 2D only: z and the camera are brick 6.
 - A picture carries its ground onto a compose page: an opaque square
   round the torch. For placing over other things, set the ground to none.
@@ -122,9 +140,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Next single step
 
-**Brick 5: emitters and forces.** A line, a circle and a ring for the
-emitter — each particle's spot from two new draws at the end of its slot;
-then forces with no closed form — a vortex, an attractor, seeded curl
-noise — integrated from each particle's own birth in fixed steps, so a
-frame still stands alone and a loop still closes. The closed form stays
-for gravity, wind and drag alone.
+**Brick 6: depth.** A `z` for each particle — launched in a 3D cone, the
+forces in z too — and a simple camera: a focal length and its distance, so
+a particle's drawn size and position are divided by its depth, and the
+particles drawn far first. Still a function of slot and age, so a loop
+still closes; checked the same way.
