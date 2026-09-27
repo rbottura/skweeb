@@ -24,6 +24,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
 | `stamps.js` | a sprite drawn once at the size and angle it shows, blitted to many (`stampFor`, `blit`); the halving of a picture nearest above a size (`mipFor`) | **in**, 2026-09-27, moved from ckt when particles needed `mipFor` |
 | `surface.js` | an off-screen canvas: OffscreenCanvas where there is one | **in**, 2026-09-27, with `stamps.js`; grid keeps its own copy |
+| `spritesheet.js` | a loop as a sprite sheet: every frame on one PNG, cropped to the box the loop reaches, and Aseprite's array JSON — rects, whole-ms durations that sum exactly, one tag (`buildSheet`; the pure parts in `tests/spritesheet.mjs`) | **in**, 2026-09-27, for particles first |
 | `view.js` | how large a preview draws: `viewFactor()`, the size the viewer shows, never more than an export makes | **in**, 2026-09-27, moved from compose when particles needed it |
 | `theme.css` | the suite's look: tokens, the page shell, controls | **in**, 2026-09-23 |
 | `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |

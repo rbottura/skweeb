@@ -12,7 +12,8 @@
  * sprites, the loop still closes, and the set is switched on as particle
  * sprites (core/uses.js). Saved: a loop and a still into the vault, the set
  * its parent; replayed by the vault to the pixel of its render, drawn again
- * at scale 2, reopened by `?open=`, and placed on a compose page.
+ * at scale 2, reopened by `?open=`, and placed on a compose page; its frames
+ * zipped, and a sprite sheet with its JSON, cropped to the torch.
  */
 
 import fs   from 'node:fs';
@@ -43,6 +44,16 @@ const pixels = () => page.eval(`(() => { const c = document.getElementById('stag
   }
   return out.map((v, j) => v / Math.max(1, k[j]) / 3); })()`);
 const apart = (p, q) => Math.max(...p.map((v, i) => Math.abs(v - q[i])));
+/** A store-only zip's entries, as core/export.js writes them: [{ name, bytes }]. */
+const readZip = file => {
+  const b = fs.readFileSync(file), out = [];
+  for (let off = 0; b.readUInt32LE(off) === 0x04034b50;) {
+    const size = b.readUInt32LE(off + 18), nl = b.readUInt16LE(off + 26);
+    out.push({ name: b.slice(off + 30, off + 30 + nl).toString(), bytes: b.slice(off + 30 + nl, off + 30 + nl + size) });
+    off += 30 + nl + size;
+  }
+  return out;
+};
 
 // ── Rule 7: no vault at all ─────────────────────────────────────────────────
 
@@ -228,24 +239,44 @@ if (picked) {
     await page.eval(`document.querySelector('.bar-say').textContent = ''`);
     await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download every frame (zip)')`);
     await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 120000 });
-    let zip = null;
-    for (let i = 0; i < 100 && !zip; i++) {
-      const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.endsWith('_frames.zip'));
-      if (f) zip = path.join(DL, f); else await wait(200);
-    }
-    let pngs = 0, meta = null;
-    if (zip) {
-      const b = fs.readFileSync(zip);
-      for (let off = 0; b.readUInt32LE(off) === 0x04034b50;) {
-        const size = b.readUInt32LE(off + 18), nl = b.readUInt16LE(off + 26);
-        const name = b.slice(off + 30, off + 30 + nl).toString();
-        if (name === 'meta.json') meta = JSON.parse(b.slice(off + 30 + nl, off + 30 + nl + size).toString());
-        else pngs++;
-        off += 30 + nl + size;
+    const downloaded = async ending => {
+      for (let i = 0; i < 100; i++) {
+        const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.endsWith(ending));
+        if (f) return path.join(DL, f);
+        await wait(200);
       }
-    }
+      return null;
+    };
+    const zip = await downloaded('_frames.zip');
+    const entries = zip ? readZip(zip) : [];
+    const metaEntry = entries.find(e => e.name === 'meta.json');
+    const meta = metaEntry ? JSON.parse(metaEntry.bytes.toString()) : null;
+    const pngs = entries.filter(e => e.name.endsWith('.png')).length;
     c.ok('every frame downloads, zipped, with its rate', !!meta && pngs === 60 && meta.frames === 60 && meta.fps === 30,
       `${pngs} PNGs, ${meta ? `${meta.frames} at ${meta.fps}, ${meta.width}×${meta.height}` : 'no meta'}`);
+
+    // A sprite sheet: the frames on one PNG, cropped to where the particles reach, and its JSON.
+    await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+    await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download a sprite sheet')`);
+    await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 120000 });
+    const sheetZip = await downloaded('_sheet.zip');
+    const parts = sheetZip ? readZip(sheetZip) : [];
+    const png = parts.find(e => e.name.endsWith('.png')), js = parts.find(e => e.name.endsWith('.json'));
+    const sheet = js ? JSON.parse(js.bytes.toString()) : null;
+    const pngSize = png ? [png.bytes.readUInt32BE(16), png.bytes.readUInt32BE(20)] : [0, 0];
+    c.ok('a sprite sheet: its PNG and its JSON, side by side', !!png && !!sheet && sheet.meta.image === png.name,
+      parts.map(e => e.name).join(', ') + ' · ' + (await page.eval(say)));
+    if (sheet) {
+      const f0 = sheet.frames[0].frame;
+      c.ok('sixty frames, the sheet the size its JSON says', sheet.frames.length === 60
+        && sheet.meta.size.w === pngSize[0] && sheet.meta.size.h === pngSize[1], `${sheet.frames.length} on ${pngSize.join(' × ')}`);
+      c.ok('cropped to the torch: narrower than the picture', f0.w < 1080 / 2 && f0.h < 1080, `${f0.w} × ${f0.h} of 1080 × 1080`);
+      c.ok('every rect inside the sheet', sheet.frames.every(f => f.frame.x + f.frame.w <= pngSize[0] && f.frame.y + f.frame.h <= pngSize[1]));
+      c.ok('durations in whole ms, summing to its two seconds', sheet.frames.every(f => Number.isInteger(f.duration))
+        && sheet.frames.reduce((a, f) => a + f.duration, 0) === 2000);
+      c.ok('one tag, the loop, forward', sheet.meta.frameTags.length === 1 && sheet.meta.frameTags[0].to === 59
+        && sheet.meta.frameTags[0].direction === 'forward', JSON.stringify(sheet.meta.frameTags));
+    }
 
     // Reopened: both panels and the frame, as saved.
     await c.go(c.base + '/apps/particles/?open=' + o.id);

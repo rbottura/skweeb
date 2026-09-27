@@ -89,7 +89,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet; do
   node tests/$t.mjs || break
 done
 
@@ -103,7 +103,7 @@ node scripts/check-filter-save.mjs      # …and what it saves: replayed, reopen
 node scripts/check-look.mjs             # M5's link: a look made in filter, over a placement in compose
 node scripts/check-vault.mjs            # the vault panel: kin together, folders, the lineage switch
 node scripts/check-frames.mjs           # a flipbook in compose: next frames, stepped, picked up, saved
-node scripts/check-particles.mjs        # particles: a loop that closes, sprites, saved, replayed, placed
+node scripts/check-particles.mjs        # particles: a loop that closes, sprites, saved, replayed, placed, a sprite sheet
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at

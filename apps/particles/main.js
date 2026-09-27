@@ -18,7 +18,7 @@ import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROU
 import { prepare, particlesAt } from './model.js';
 import { drawParticles, pictureSize } from './draw.js';
 import { loadSprites }  from './sprites.js';
-import { saveParticles, downloadFrames } from './save.js';
+import { saveParticles, downloadFrames, downloadSheet } from './save.js';
 import { requested }      from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -164,6 +164,7 @@ function buildExport(side) {
   button('Save the loop to the vault  [S]', () => save(), true);
   button('Save this frame as a still', () => save({ still: true }));
   button('Download every frame (zip)', frames);
+  button('Download a sprite sheet', sheet);
   exp.body.append(actions);
 }
 
@@ -194,6 +195,15 @@ function save({ still = false } = {}) {
     if (!object) return 'no vault — downloaded instead';
     return still ? `saved ${object.id} — frame ${tick + 1}, a still`
       : `saved ${object.id} — ${object.render.frames} frames at ${object.render.fps} fps, its picture frame ${tick + 1}`;
+  });
+}
+
+/** The loop as a sprite sheet and its JSON, cropped to where the particles reach (save.js). */
+function sheet() {
+  return leave(async () => {
+    const out = await downloadSheet({ emit, picture, sprites, onStatus: t => bar.say(t) });
+    return `downloaded ${out.name} — ${out.frames} frames of ${out.box.w} × ${out.box.h} on a `
+      + `${out.width} × ${out.height} sheet, and its JSON`;
   });
 }
 

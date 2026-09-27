@@ -1,5 +1,5 @@
 /**
- * save.js — what leaves particles: a loop, a still, or every frame.
+ * save.js — what leaves particles: a loop, a still, every frame, or a sprite sheet.
  *
  * A loop saves as a `sequence` — a stream that closes, or a burst that plays
  * once — its render the frame on screen, compose's rule for a picture that
@@ -20,6 +20,7 @@ import { openParticles } from './frames.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { runFrames, toPng, zipStore, frameName, download, crc32 } from '../../core/export.js';
+import { buildSheet }    from '../../core/spritesheet.js';
 
 export const APP = { app: 'particles', version: '1.0.0' };
 
@@ -94,4 +95,31 @@ export async function downloadFrames({ emit, picture, sprites, onStatus = () => 
   });
   download(zipStore(entries), `particles_${frames.length}_frames.zip`);
   return { frames: frames.length, fps: frames.fps, width: frames.width, height: frames.height };
+}
+
+/**
+ * The loop as a sprite sheet for a game (core/spritesheet.js): every frame on
+ * one PNG, cropped to the box the particles reach over the whole loop, and
+ * the Aseprite-style JSON beside it — both in one zip, `<name>.png` and
+ * `<name>.json`, so the browser asks once. Drawn on no ground, whatever the
+ * picture's is: a game puts its own under a sprite.
+ *
+ * @returns {Promise<{name, frames, width, height, box}>}
+ */
+export async function downloadSheet({ emit, picture, sprites, onStatus = () => {} }) {
+  const recipe = { emit: emit.values, picture: { ...picture.values, ground: 'none' } };
+  const frames = openParticles(recipe, sprites);
+  const name = `particles_${recipe.emit.mode}_${frames.length}f`;
+  const { canvas, json, box, layout } = await buildSheet({
+    count: frames.length, frame: i => frames.frame(i), fps: frames.fps, name, loop: frames.loop,
+    source: { app: APP.app, recipe },
+    onProgress: (done, total) => onStatus(`drawing the sheet ${done}/${total}…`),
+  });
+  const blob = await toPng(canvas);
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  download(zipStore([
+    { name: `${name}.png`, blob, crc: crc32(bytes), size: bytes.length },
+    { name: `${name}.json`, bytes: new TextEncoder().encode(JSON.stringify(json, null, 1)) },
+  ]), `${name}_sheet.zip`);
+  return { name, frames: frames.length, width: layout.width, height: layout.height, box };
 }

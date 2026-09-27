@@ -10,6 +10,11 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **A loop leaves as a sprite sheet** (2026-09-27; `core/spritesheet.js`,
+  `tests/spritesheet.mjs`, 26 checks; `check-particles`, 41). Every frame
+  on one PNG, cropped to the box the loop reaches, and Aseprite's array
+  JSON beside it — rects, whole-ms durations that sum exactly, one tag —
+  in one zip. Particles first; any app's loop can use it.
 - **Particles save** (2026-09-27, M6 brick 4; `node scripts/check-particles.mjs`,
   35 checks). S saves the loop as a `sequence`, the sprite set its parent;
   a frame saves as a still; every frame downloads as a zip for
@@ -229,7 +234,7 @@ it said is here, shorter, or in the files it points to.
 
 ## Tests
 
-Twenty-four files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+Twenty-five files, no runner, no dependencies — the loop in `CLAUDE.md` runs
 all of them, and all pass. Newest: `compose-time` gained the ripple, and
 with `compose-placements` a placement's time — windows, a page's end, a
 flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
@@ -308,10 +313,9 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M6, a sprite sheet** — `apps/particles/STATUS.md` has it:
-`core/spritesheet.js`, a loop's frames on one PNG with an Aseprite-style
-JSON, cropped to where the particles reach; a button in the particles'
-Export drawer.
+**M6, brick 5: emitters and forces** — `apps/particles/STATUS.md` has it:
+a line, a circle, a ring; then a vortex, an attractor and curl noise,
+integrated from each particle's birth so every frame still stands alone.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

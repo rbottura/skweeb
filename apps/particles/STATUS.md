@@ -19,7 +19,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 5. **Emitters and forces**: a line, a circle, a shape's alpha; vortex,
    attractors, seeded curl noise.
 6. **Depth**: x, y and z behind a simple camera, sprites sorted by depth.
-7. **Sprite-sheet export** (`docs/roadmap.md`, *Across M5–M7*).
+7. **Sprite-sheet export** — done 2026-09-27, ahead of 5 and 6
+   (`core/spritesheet.js`).
 
 ## Works now
 
@@ -39,7 +40,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 35 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 41 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -86,6 +87,16 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   is drawn again at twice the pixels. `?open=<id>` brings both panels back
   and the sprites with them — a still at the frame it is — and compose
   places a saved loop and plays it: *a 30 fps loop of 60*.
+- **A sprite sheet** (2026-09-27, brick 7; `core/spritesheet.js`,
+  `tests/spritesheet.mjs`). *Download a sprite sheet*: every frame on one
+  PNG, cropped to the one box the particles reach over the whole loop —
+  the torch is 92 × 438 of a 1080 square — in a grid as square as the
+  frames allow, 2 px between cells; beside it Aseprite's array JSON, which
+  Phaser, Godot's importers and PixiJS read: each frame's rect, its
+  duration in whole ms summing to the loop exactly (33, 34, 33… at 30 fps),
+  one tag for the loop, and in `meta.skweeb` the crop and the recipe. One
+  zip, `<name>.png` and `<name>.json`. Drawn on no ground, whatever the
+  picture's.
 - **It opens on a torch**: rising, warm, shrinking as it goes — the app's
   defaults, not the model's, which stay a plain fountain.
 
@@ -98,8 +109,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 - A picture carries its ground onto a compose page: an opaque square
   round the torch. For placing over other things, set the ground to none.
 - A loop's thumbnail is its whole picture, so a narrow torch on a square
-  canvas is a thin line on its card; nothing crops to where the particles
-  reach — the sprite sheet will want exactly that crop.
+  canvas is a thin line on its card. The sheet crops; the save does not.
+- The sheet is not saved to the vault — it is a download, as frames are.
 - A loop reopens at its first frame: its recipe is the loop, not the frame
   its picture was taken at.
 - A value changed keeps the frame on screen; a loop made shorter than it
@@ -111,13 +122,9 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Next single step
 
-**Brick 7 before 5 and 6: a sprite sheet** — what *Done when* asks for, and
-what a game engine loads. `core/spritesheet.js`, the sibling of
-`core/sheet.js`: a loop's frames laid on one PNG in a grid, and an
-Aseprite-style JSON beside it — each frame's rect and duration in ms, the
-sheet's size, one tag for the loop. Cropped first to the box the particles
-reach over the whole loop (every frame's alpha, the ground set to none),
-so a torch is a torch-sized frame and not a mostly empty square. A
-*Download a sprite sheet* button in the Export drawer; checked in
-`scripts/check-particles.mjs` — the PNG's size, the JSON's rects and
-durations. Any app's loop can use it after; compose's first.
+**Brick 5: emitters and forces.** A line, a circle and a ring for the
+emitter — each particle's spot from two new draws at the end of its slot;
+then forces with no closed form — a vortex, an attractor, seeded curl
+noise — integrated from each particle's own birth in fixed steps, so a
+frame still stands alone and a loop still closes. The closed form stays
+for gravity, wind and drag alone.
