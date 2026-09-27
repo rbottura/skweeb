@@ -174,6 +174,12 @@ field, filters displace by one.
 *Done when:* a Julia loop that closes, redrawn exactly at print scale, whose
 field steers an M6 emitter. The link: `fractal → particles: a field`.
 
+*So far:* brick 1 of seven, 2026-09-27 (`apps/fractals/STATUS.md`): the
+Mandelbrot set and its Julia sets as one WGSL pass through the GPU kit,
+smooth colouring round a ramp, dragged and wheeled about the pointer, the
+picture a function of its params — a PNG at print scale is drawn again,
+not enlarged. Held to the escape count in doubles.
+
 **Across M5–M7, for the game.** Four things serve every app rather than one:
 
 - **sprite-sheet export** for any loop — the frames on one sheet with an

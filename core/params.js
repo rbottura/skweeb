@@ -35,7 +35,8 @@ const TYPES = {
     default: spec => clamp(num(spec.default, spec.min ?? 0), spec),
     coerce(value, spec) {
       const n = num(value, this.default(spec));
-      return clamp(spec.step ? snap(n, spec) : n, spec);
+      // `step: 'any'`, as HTML has it: no grid — a fractal's centre wants every digit.
+      return clamp(typeof spec.step === 'number' && spec.step > 0 ? snap(n, spec) : n, spec);
     },
   },
 

@@ -84,12 +84,18 @@ export function marginOf(chain, scale = 1) {
   return Math.round(reachOf(chain) * scale);
 }
 
-/** The passes a chain runs, each with the values its filter was given. */
+/**
+ * The passes a chain runs, each with the values its filter was given. An
+ * entry names a filter of the catalogue by `id` — or carries its own as
+ * `filter`, the same shape: an app's pass through the kit that is no filter
+ * of filter's (apps/fractals/fractal.js). An entry that carries its filter
+ * is the app's to keep; a recipe names the catalogue's by id.
+ */
 export function passesOf(chain) {
   const out = [];
   for (const entry of chain || []) {
     if (!entry || entry.on === false) continue;
-    const filter = FILTERS[entry.id];
+    const filter = entry.filter || FILTERS[entry.id];
     if (!filter) throw new Error(`gpu: no filter "${entry.id}" in this catalogue`);
     const values = valuesFor(filter.params || {}, entry.params);
     filter.passes.forEach((pass, i) => out.push({ filter, pass, values, first: i === 0, label: `${filter.id}.${i}` }));

@@ -186,7 +186,10 @@ A chain is data, the part of a recipe that says what was done:
 `params.js`). `run()` is synchronous because a handle's `frame(i)` is; the
 picture is the runner's until its next run. Sizes are in the source's pixels
 and multiplied by `scale`, so a picture drawn again at print scale keeps its
-look. Textures hold premultiplied alpha, as a canvas does, and rgba16float
+look. An entry may carry its own filter, `{ filter, params }`, the same
+shape as the catalogue's: an app's pass through the kit that is no filter
+of filter's — the fractals app draws escape time so, over a blank picture.
+Such an entry is the app's to keep; a recipe names a catalogue filter by id. Textures hold premultiplied alpha, as a canvas does, and rgba16float
 between passes.
 
 A filter is data too (`gpu/filters/`, listed in its `index.js`): an id, a

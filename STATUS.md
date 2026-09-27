@@ -10,6 +10,14 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **M7 has begun: the Mandelbrot set and its Julia sets on the GPU**
+  (2026-09-27; `apps/fractals/`, `tests/fractal.mjs` 23 checks,
+  `check-fractals` 9). One WGSL pass through the GPU kit, carried in a chain
+  entry of its own (`core/gpu/runner.js` now takes `{ filter, params }`);
+  smooth colouring round a ramp; drag pans, the wheel zooms about the
+  pointer; a PNG at print scale drawn again. The GPU agrees with the escape
+  count in doubles at all 158 points checked. A range may say
+  `step: 'any'` now (`core/params.js`): the centre keeps every digit.
 - **A game engine loads a particles sheet** (2026-09-27;
   `node scripts/check-sheet-engine.mjs`, 8 checks). Phaser 3.80, in the
   check's headless Chrome, reads the torch's sheet and JSON as they are:
@@ -271,7 +279,7 @@ it said is here, shorter, or in the files it points to.
 
 ## Tests
 
-Twenty-six files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+Twenty-seven files, no runner, no dependencies — the loop in `CLAUDE.md` runs
 all of them, and all pass. Newest: `compose-time` gained the ripple, and
 with `compose-placements` a placement's time — windows, a page's end, a
 flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
@@ -279,7 +287,7 @@ hang), `gpu-filters` (the catalogue as data: licence, schema, the WGSL
 conventions, sizes at print scale) and `delete` (every kind of edge: the
 refusals, the dry plan, cutting loose, the chain; 37 checks).
 
-Eleven browser checks, each a command in `CLAUDE.md`: its own server on a copy
+Twelve browser checks, each a command in `CLAUDE.md`: its own server on a copy
 of the vault, headless Chrome through `scripts/chrome.mjs` — a real mouse
 included — and `scripts/check-kit.mjs` under it. Outside the loop because
 each needs Chrome and a vault with things in it; each fails when a page
@@ -350,17 +358,11 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M7's first brick: a Mandelbrot on the GPU kit** (`docs/roadmap.md`, M7).
-`apps/fractals/`: index.html, a schema — centre x and y, zoom, iterations,
-a palette as `color[]` — and one filter-shaped WGSL pass through
-`core/gpu/runner.js` that draws escape time with smooth colouring into
-the picture, no source; drag to move, the wheel to zoom about the pointer.
-Opens with no vault; without WebGPU it says so, as filter does. Checked by
-a new `scripts/check-fractals.mjs`: a known point inside the set is the
-inside colour, one far outside escapes at once, and a zoom about the
-pointer keeps that point under it. Left of M6, the author's to order
-(`apps/particles/STATUS.md`): colour over life, a shape as an emitter.
-The gamepad's *newest behind* stays parked.
+**M7, brick 2's first half: a fractal saves and comes back** —
+`apps/fractals/STATUS.md` has it: a still into the vault, its recipe the
+params; a `rebuild.js` drawing it again exactly at any scale; `?open=`.
+Left of M6, the author's to order (`apps/particles/STATUS.md`): colour over
+life, a shape as an emitter. The gamepad's *newest behind* stays parked.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

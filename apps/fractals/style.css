@@ -1,0 +1,16 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — fractals
+
+   Everything that looks like the suite comes from core. fractals says only its
+   layout — the viewer, then one column of drawers — and that the picture is
+   dragged and wheeled.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+@import '../../core/param-panel.css';
+@import '../../core/vault-panel.css';
+
+.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+
+.viewer-stage canvas { cursor: grab; touch-action: none; }
+.viewer-stage canvas.dragging { cursor: grabbing; }
