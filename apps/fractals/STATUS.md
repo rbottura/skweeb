@@ -1,8 +1,8 @@
 # STATUS — fractals
-_last touched: 2026-09-27_
+_last touched: 2026-09-28_
 
-M7's app: fractals — escape time on the GPU kit, and a sprite copying itself. The plan and *Done when* are in
-`docs/roadmap.md`, M7 — a Julia loop that closes, redrawn exactly at print
+M7's app: fractals — escape time on the GPU kit, and a sprite copying
+itself. The plan and *Done when* are in `docs/roadmap.md`, M7 — a Julia loop that closes, redrawn exactly at print
 scale, whose field steers an M6 emitter. The link: `fractal → particles: a
 field`.
 
@@ -81,12 +81,14 @@ field`.
 
 ## Next single step
 
-**Brick 2, first half: a fractal saves, and comes back.** `save.js`: S, or
-*Save to the vault* in the Export drawer — a `still`, its recipe the
-params' values, its render the picture at the format's size times its
-scale. `rebuild.js`: `openObject` draws it again with the runner at the
-scale asked (`redraws()` true: exact at any size), `openPicture` where
-there is no WebGPU, as filter's does; `reopens()` for `?open=`. Checked in
+**Brick 2, first half: a fractal saves, and comes back** — either family.
+`save.js`: S, or *Save to the vault* in the Export drawer — a `still`, its
+recipe the params' values, its render the picture at the format's size
+times its scale; the copies' sprite its parent, by the `object` param. `rebuild.js`: `openObject` draws it again with the runner at the
+scale asked (`redraws()` true: exact at any size) — escape time with the
+runner, `openPicture` where there is no WebGPU as filter's does; copies
+with `drawCopies` and the sprite from `core/sprites.js`, on any machine —
+and `reopens()` for `?open=`. Checked in
 `scripts/check-fractals.mjs`: saved, the vault's replay the render to
 within the GPU's rounding, drawn again at 2×, reopened, placed in compose.
 
