@@ -10,6 +10,12 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **Particles save** (2026-09-27, M6 brick 4; `node scripts/check-particles.mjs`,
+  38 checks). S saves the loop as a `sequence`, the sprite set its parent;
+  a frame saves as a still; every frame downloads as a zip for
+  `frames-to-video`. The vault's replay of a frame is its render to the
+  pixel, drawn again at scale 2; `?open=` brings the panels back; compose
+  places a saved loop and plays it.
 - **Particles draw a vault set's sprites — M6's link** (2026-09-27, brick 3;
   `node scripts/check-particles.mjs`, 21 checks). The Look's `sprites`
   picks a set, each particle one of its members, the same one every frame;
@@ -302,10 +308,10 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M6, brick 4: particles save** — `apps/particles/STATUS.md` has it: a
-still or a loop into the vault with `{ emit, picture }` as its recipe and
-the sprite set as a parent, and a `rebuild.js` so the vault plays it and
-compose places it.
+**M6, a sprite sheet** — `apps/particles/STATUS.md` has it:
+`core/spritesheet.js`, a loop's frames on one PNG with an Aseprite-style
+JSON, cropped to where the particles reach; a button in the particles'
+Export drawer.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

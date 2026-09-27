@@ -10,13 +10,16 @@
  *
  * A set from the vault is the sprites (sprites.js), one each; with none, or
  * no vault at all, the particles are dots and the app plays the same
- * (rule 7). Saving is the brick after (STATUS.md).
+ * (rule 7). S saves the loop (save.js), and the vault plays it back through
+ * rebuild.js; `?open=<id>` brings a saved one back to work on.
  */
 
 import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROUPS } from './params.js';
 import { prepare, particlesAt } from './model.js';
 import { drawParticles, pictureSize } from './draw.js';
 import { loadSprites }  from './sprites.js';
+import { saveParticles, downloadFrames } from './save.js';
+import { requested }      from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Transport }      from '../../core/Transport.js';
@@ -34,7 +37,11 @@ let clockFps = 0;
 let model = null;          // the recipe, prepared: remade when a value changes, not every frame
 let shown = [];            // the particles on screen, for the bar
 let sprites = null;        // the chosen set's images, or null: dots
+let spritesTitle = '';     // and its title, for a saved object's
+let loading = false;       // a set is on its way in: nothing saves until it is
+let spritesIn = Promise.resolve();   // the set on its way in, for a reopen to wait on
 let asked = 0;             // the latest set asked for; an older answer is dropped
+let busy = false;          // a save or a download is drawing; nothing else starts
 const painted = [];        // when the last paints were, while playing
 
 /** The clock plays the picture's frames at its rate; a tick is a time, tick / fps. */
@@ -45,7 +52,7 @@ const clock = new Playhead({
 
 async function boot() {
   bar = new Bar({ app: 'particles', mount: document.querySelector('.app'),
-                  keys: 'space play · , . frame · V vault' });
+                  keys: 'space play · , . frame · S save · V vault' });
   emit = emitParams();
   picture = pictureParams();
   new ParamPanel(emit, { title: 'particles', mount: document.getElementById('emit-side'), groups: EMIT_GROUPS });
@@ -55,19 +62,44 @@ async function boot() {
   player = side.drawer('player');
   const holder = document.createElement('div');
   player.body.prepend(holder);
-  transport = new Transport({ clock, mount: holder });
+  transport = new Transport({ clock, mount: holder, busy: () => busy });
+  buildExport(side);
 
   emit.on(() => remake());
   picture.on(key => {
     applyFrameEdit(picture, key);
     if (key === 'fps') remake();
-    else if (key === 'sprites') chooseSprites(picture.get('sprites'));
+    else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'));
     else draw();
   });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
   wireKeys();
   remake();
+  if (await openRequested()) return;
   clock.play();
+}
+
+/**
+ * `?open=<id>`: a saved loop or still back to work on (core/reopen.js) —
+ * both panels as they were, its sprites with them, at the frame it kept.
+ *
+ * @returns {Promise<boolean>} whether anything was opened
+ */
+async function openRequested() {
+  try {
+    const opened = await requested('particles');
+    if (!opened) return false;
+    const { recipe } = opened.object;
+    emit.restore(recipe.emit);
+    picture.restore(recipe.picture);
+    await spritesIn;
+    clock.show(Math.min(Number.isInteger(recipe.tick) ? recipe.tick : 0, clock.length - 1));
+    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+    return true;
+  } catch (err) {
+    bar.announce('could not open it: ' + err.message);
+    return false;
+  }
 }
 
 /**
@@ -95,19 +127,83 @@ function remake() {
 async function chooseSprites(id) {
   const ask = ++asked;
   sprites = null;
+  spritesTitle = '';
+  loading = !!id;
   draw();
   if (!id) return;
   try {
     const set = await loadSprites(id);
     if (ask !== asked) return;
     sprites = set.images.length ? set.images : null;
+    spritesTitle = set.title;
     bar.announce(`${set.title}: ${set.images.length} sprites`
       + (set.missing ? ` — ${set.missing} would not load` : '') + (sprites ? '' : ' — drawing dots'));
   } catch (err) {
     if (ask !== asked) return;
     bar.announce(`could not open the sprites: ${err.message} — drawing dots`);
   }
+  loading = false;
   draw();
+}
+
+// ── Leaving: a loop, a still, the frames ─────────────────────────────────────
+
+/** The Export drawer, under the picture's settings. */
+function buildExport(side) {
+  const exp = side.addDrawer({ id: 'export', title: 'Export' });
+  const actions = document.createElement('div');
+  actions.className = 'pp-actions';
+  const button = (label, onClick, primary = false) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
+    b.textContent = label;
+    b.addEventListener('click', onClick);
+    actions.append(b);
+  };
+  button('Save the loop to the vault  [S]', () => save(), true);
+  button('Save this frame as a still', () => save({ still: true }));
+  button('Download every frame (zip)', frames);
+  exp.body.append(actions);
+}
+
+/** One way out for all three: the player held still, nothing else started meanwhile. */
+async function leave(action) {
+  if (busy) return;
+  if (loading) return bar.announce('the sprites are still loading — a moment');
+  busy = true;
+  clock.pause();
+  try {
+    bar.announce(await action());
+  } catch (err) {
+    console.error('[particles] failed:', err);
+    bar.announce('failed: ' + err.message);
+  } finally {
+    busy = false;
+    refreshVault();
+    draw();
+  }
+}
+
+/** The loop, or the frame on screen as a still, into the vault (save.js). */
+function save({ still = false } = {}) {
+  return leave(async () => {
+    bar.say('saving…');
+    const tick = clock.tick;
+    const object = await saveParticles({ emit, picture, sprites, spritesTitle, tick, still });
+    if (!object) return 'no vault — downloaded instead';
+    return still ? `saved ${object.id} — frame ${tick + 1}, a still`
+      : `saved ${object.id} — ${object.render.frames} frames at ${object.render.fps} fps, its picture frame ${tick + 1}`;
+  });
+}
+
+/** Every frame, zipped with its rate (save.js). */
+function frames() {
+  return leave(async () => {
+    const out = await downloadFrames({ emit, picture, sprites, onStatus: t => bar.say(t) });
+    return `downloaded ${out.frames} frames at ${out.fps} fps, ${out.width} × ${out.height} px — `
+      + 'node scripts/frames-to-video.mjs makes the video';
+  });
 }
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
@@ -157,11 +253,16 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (clock.length < 2) return;
+    if (e.key === 's' || e.key === 'S') save();
+    if (busy || clock.length < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }
     if (e.key === ',') { clock.pause(); clock.step(-1); }
     if (e.key === '.') { clock.pause(); clock.step(1); }
   });
+  refreshVault();
+}
+
+function refreshVault() {
   Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
 }
 

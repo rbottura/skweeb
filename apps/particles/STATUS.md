@@ -14,8 +14,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 3. **Sprites from a set** — done 2026-09-27: ckt's stamps renderer in
    core, a set chosen through a row in `core/uses.js`, size, alpha and spin
    over a particle's life on `core/easing.js` curves. M6's link.
-4. **It saves** — a still or a loop, `render()` redrawn at print scale,
-   `rebuild.js` for the vault's replay.
+4. **It saves** — done 2026-09-27: a loop or a still, every frame as a zip,
+   `rebuild.js` for the vault's replay, compose's placing and print scale.
 5. **Emitters and forces**: a line, a circle, a shape's alpha; vortex,
    attractors, seeded curl noise.
 6. **Depth**: x, y and z behind a simple camera, sprites sorted by depth.
@@ -39,7 +39,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 23 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 38 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -74,6 +74,18 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   behind* — a trail or smoke, the older ones in front. The picture is
   redrawn whole each frame, so it is the draw loop's order, not a composite
   operation; checked, and the loop still closes.
+- **It saves** (2026-09-27, brick 4; `save.js`, `frames.js`, `rebuild.js`).
+  The picture's Export drawer: *Save the loop to the vault* [S] — a
+  `sequence` of every frame at the picture's `fps`, its picture the frame on
+  screen — *Save this frame as a still*, and *Download every frame (zip)*,
+  numbered PNGs and a `meta.json` for `scripts/frames-to-video.mjs`. The
+  recipe is `{ emit, picture }`, both panels' values, and `tick` for a
+  still; the sprite set is the parent (`consumedObjectIds`), the seed the
+  emitter's. A save and a replay draw with the same code (`frames.js`), so
+  the vault's replay of a frame is its render to the pixel; at scale 2 it
+  is drawn again at twice the pixels. `?open=<id>` brings both panels back
+  and the sprites with them — a still at the frame it is — and compose
+  places a saved loop and plays it: *a 30 fps loop of 60*.
 - **It opens on a torch**: rising, warm, shrinking as it goes — the app's
   defaults, not the model's, which stay a plain fountain.
 
@@ -83,7 +95,13 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   turn, twist — and new ones go at the end, or saved recipes redraw
   differently.
 - 2D only: z and the camera are brick 6.
-- Nothing saves yet: brick 4.
+- A picture carries its ground onto a compose page: an opaque square
+  round the torch. For placing over other things, set the ground to none.
+- A loop's thumbnail is its whole picture, so a narrow torch on a square
+  canvas is a thin line on its card; nothing crops to where the particles
+  reach — the sprite sheet will want exactly that crop.
+- A loop reopens at its first frame: its recipe is the loop, not the frame
+  its picture was taken at.
 - A value changed keeps the frame on screen; a loop made shorter than it
   lands on its last.
 - Sprites have no tint: a set's colours are its own. Colour over life, for
@@ -93,14 +111,13 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Next single step
 
-**Brick 4: it saves.** `save.js` beside `main.js`, filter's `save.js` the
-pattern: *Save to the vault* in an Export drawer, or S — paused, a `still`
-of the frame on screen; a stream or a burst, a `sequence` of every frame
-at the picture's `fps`, its picture the frame on screen. The recipe is
-`{ emit, picture }`, both panels' values; the set picked is a parent, by
-the `object` param (core/params.js `consumedObjectIds`); the seed is the
-emitter's. Then `rebuild.js` answering core's dispatch
-(`core/rebuild.js`, filter's and compose's are the pattern), so the vault
-plays it and compose places it — and `redraws()`, since `draw.js` at a
-larger `scale` is exact. Add the save, the replay and a placement in
-compose to `scripts/check-particles.mjs`.
+**Brick 7 before 5 and 6: a sprite sheet** — what *Done when* asks for, and
+what a game engine loads. `core/spritesheet.js`, the sibling of
+`core/sheet.js`: a loop's frames laid on one PNG in a grid, and an
+Aseprite-style JSON beside it — each frame's rect and duration in ms, the
+sheet's size, one tag for the loop. Cropped first to the box the particles
+reach over the whole loop (every frame's alpha, the ground set to none),
+so a torch is a torch-sized frame and not a mostly empty square. A
+*Download a sprite sheet* button in the Export drawer; checked in
+`scripts/check-particles.mjs` — the PNG's size, the JSON's rects and
+durations. Any app's loop can use it after; compose's first.

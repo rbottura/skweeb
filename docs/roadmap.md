@@ -153,8 +153,10 @@ before zero born too, so the first frame needs no warm-up — the roadmap's
 "one lifetime of warm-up" is paid in arithmetic, not in frames. The app
 plays dots or a set's sprites, sized, faded and turned over their life, and
 opens on a torch. The link, `set → particles: sprites`, is a row in
-`core/uses.js`: a brush family is offered by default. Seven bricks in
-`apps/particles/STATUS.md`; saving is next.
+`core/uses.js`: a brush family is offered by default. It saves a loop or a
+still, replays them to the pixel, and compose places them. Seven bricks in
+`apps/particles/STATUS.md`; the sprite sheet is next, ahead of emitters and
+depth, since *Done when* asks for it.
 
 **M7 — fractals.** Escape-time on the GPU — Mandelbrot, Julia, Burning Ship,
 multibrot, Newton, Phoenix, Lyapunov — with smooth colouring and orbit traps,

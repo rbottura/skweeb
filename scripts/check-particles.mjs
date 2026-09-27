@@ -10,9 +10,13 @@
  * full as any; a burst starts all at the emitter and ends; print scale makes
  * the same picture in more pixels; a vault set chosen, the particles are its
  * sprites, the loop still closes, and the set is switched on as particle
- * sprites (core/uses.js).
+ * sprites (core/uses.js). Saved: a loop and a still into the vault, the set
+ * its parent; replayed by the vault to the pixel of its render, drawn again
+ * at scale 2, reopened by `?open=`, and placed on a compose page.
  */
 
+import fs   from 'node:fs';
+import path from 'node:path';
 import { startCheck } from './check-kit.mjs';
 
 const c = await startCheck();
@@ -170,6 +174,98 @@ if (picked) {
   await wait(400);
   c.ok('and the loop still closes', apart(await pixels(), under) === 0);
   await c.shot('5-newest-behind');
+
+  // ── Saved: a loop, replayed exactly, redrawn at scale, reopened, placed ──
+
+  const saveAs = async (how) => {
+    await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+    await how();
+    await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+    const sid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+    return sid ? (await fetch(c.base + '/api/vault/' + sid)).json() : null;
+  };
+  const tickShown = Number((await page.eval(count)).split(' / ')[0]) - 1;
+  const o = await saveAs(() => key('S'));
+  c.ok('S saves the loop, a sequence of every frame', !!o && o.type === 'sequence' && o.render.frames === 60
+    && o.render.fps === 30 && o.render.loop === true, o ? `${o.type} ${o.render.frames} at ${o.render.fps}` : await page.eval(say));
+  if (o) {
+    const setRow = all.find(r => r.title === picked && r.type === 'set');
+    c.ok('the sprite set is its parent', JSON.stringify(o.parents) === JSON.stringify([setRow && setRow.id]), JSON.stringify(o.parents));
+    c.ok('its recipe is both panels, its seed the emitter\'s', !!o.recipe.emit && !!o.recipe.picture
+      && o.recipe.picture.order === 'under' && o.seed === o.recipe.emit.seed, Object.keys(o.recipe).join(','));
+
+    // The replay's frame against the saved render: the same code, so the same pixels.
+    const replay = await page.eval(`(async () => {
+      const { Vault } = await import('/core/vault.js');
+      const { openFrames } = await import('/core/rebuild.js');
+      const { object, url } = await Vault.load(${JSON.stringify(o.id)});
+      const h = await openFrames(object, { url });
+      const img = await createImageBitmap(await (await fetch('/vault/objects/${o.id}/' + object.render.file)).blob());
+      const a = new OffscreenCanvas(img.width, img.height).getContext('2d');
+      a.drawImage(img, 0, 0);
+      const b = new OffscreenCanvas(img.width, img.height).getContext('2d');
+      b.drawImage(h.frame(${tickShown}), 0, 0);
+      const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
+      let worst = 0; for (let i = 0; i < da.length; i++) worst = Math.max(worst, Math.abs(da[i] - db[i]));
+      const out = { length: h.length, fps: h.fps, w: h.width, worst, missing: h.missing };
+      const big = await openFrames(object, { url, scale: 2 });
+      out.big = [big.scale, big.frame(0).width, big.width];
+      h.dispose(); big.dispose();
+      return out;
+    })()`);
+    c.ok('the vault replays it: 60 frames at 30', replay.length === 60 && replay.fps === 30, JSON.stringify(replay).slice(0, 120));
+    c.ok('its frame is its render, pixel for pixel', replay.worst === 0, 'worst ' + replay.worst);
+    c.ok('at scale 2 it is drawn again, twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.w
+      && replay.big[2] === replay.w, JSON.stringify(replay.big));
+
+    const still = await saveAs(() => page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Save this frame as a still')`));
+    c.ok('a frame saves as a still, with the tick it is', !!still && still.type === 'still' && still.recipe.tick === tickShown,
+      still ? `${still.type}, tick ${still.recipe.tick}` : '');
+
+    // Every frame, zipped: 60 PNGs and a meta.json with the rate.
+    const DL = path.join(c.dir, 'downloads');
+    await page.downloadsTo(DL);
+    await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+    await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download every frame (zip)')`);
+    await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 120000 });
+    let zip = null;
+    for (let i = 0; i < 100 && !zip; i++) {
+      const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.endsWith('_frames.zip'));
+      if (f) zip = path.join(DL, f); else await wait(200);
+    }
+    let pngs = 0, meta = null;
+    if (zip) {
+      const b = fs.readFileSync(zip);
+      for (let off = 0; b.readUInt32LE(off) === 0x04034b50;) {
+        const size = b.readUInt32LE(off + 18), nl = b.readUInt16LE(off + 26);
+        const name = b.slice(off + 30, off + 30 + nl).toString();
+        if (name === 'meta.json') meta = JSON.parse(b.slice(off + 30 + nl, off + 30 + nl + size).toString());
+        else pngs++;
+        off += 30 + nl + size;
+      }
+    }
+    c.ok('every frame downloads, zipped, with its rate', !!meta && pngs === 60 && meta.frames === 60 && meta.fps === 30,
+      `${pngs} PNGs, ${meta ? `${meta.frames} at ${meta.fps}, ${meta.width}×${meta.height}` : 'no meta'}`);
+
+    // Reopened: both panels and the frame, as saved.
+    await c.go(c.base + '/apps/particles/?open=' + o.id);
+    await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+    const spinBack = await page.eval(`${row('spin °/s')}?.querySelector('.pp-num')?.value`);
+    const stackBack = await page.eval(`[...${row('stacking')}.querySelectorAll('button')].find(b => b.getAttribute('aria-pressed') === 'true' || b.classList.contains('is-on') || b.className.includes('on'))?.textContent`);
+    c.ok('?open= brings the panels back', spinBack === '240', `spin ${spinBack}, stacking ${stackBack}`);
+    c.ok('a loop opens at its first frame', (await page.eval(count)) === '1 / 60', await page.eval(count));
+    if (still) {
+      await c.go(c.base + '/apps/particles/?open=' + still.id);
+      await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+      c.ok('a still opens at the frame it is', (await page.eval(count)) === `${tickShown + 1} / 60`, await page.eval(count));
+    }
+
+    // Placed on a compose page, it plays there.
+    await c.go(c.base + '/apps/compose/?place=' + o.id);
+    await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
+    c.ok('compose places it, a loop of 60 at 30', (await page.eval(say)).includes('a 30 fps loop of 60'), await page.eval(say));
+    await c.shot('6-in-compose');
+  }
 }
 
 const noise = c.quiet();

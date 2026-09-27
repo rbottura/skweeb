@@ -103,7 +103,7 @@ node scripts/check-filter-save.mjs      # …and what it saves: replayed, reopen
 node scripts/check-look.mjs             # M5's link: a look made in filter, over a placement in compose
 node scripts/check-vault.mjs            # the vault panel: kin together, folders, the lineage switch
 node scripts/check-frames.mjs           # a flipbook in compose: next frames, stepped, picked up, saved
-node scripts/check-particles.mjs        # particles: no vault, a loop closed pixel for pixel, a burst
+node scripts/check-particles.mjs        # particles: a loop that closes, sprites, saved, replayed, placed
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at
