@@ -35,6 +35,8 @@ export const USES = [
   { id: 'sprites',  app: 'ckt',     label: 'ckt sprite family',    role: null },
   /** M6's link, `set → particles: sprites`. A brush family is sprites already, so it is offered by default. */
   { id: 'particles', app: 'particles', label: 'particle sprites',  role: 'brush-family' },
+  /** A sprite copying itself in fractals. A brush family is sprites already. */
+  { id: 'copies',   app: 'fractals',  label: 'fractal copies',     role: 'brush-family' },
 ];
 
 const isUseTag = t => typeof t === 'string' && t.startsWith(USE_PREFIX);

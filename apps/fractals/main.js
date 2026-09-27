@@ -1,20 +1,24 @@
 /**
- * main.js — fractals, assembled. M7, brick 1: the Mandelbrot set and its
- * Julia sets, on the GPU, moved by hand.
+ * main.js — fractals, assembled. M7: two families of fractal on one picture.
  *
- * One schema (params.js), one pass (fractal.js), one core/gpu runner: the
- * pass carried in a chain entry of its own, run over a blank picture of the
- * size wanted. The preview is drawn at the size the viewer shows
+ * Escape time — the Mandelbrot set and its Julia sets — is one pass
+ * (fractal.js) through one core/gpu runner, carried in a chain entry of its
+ * own and run over a blank picture of the size wanted. Copies — a sprite
+ * from the vault copying itself by a few maps (copies.js) — is drawn on the
+ * Canvas 2D, and needs no GPU at all. The preview is drawn at the size the viewer shows
  * (core/view.js); *Download the picture* draws it again at the format's
  * size times its scale — the same function of the same params, so exact.
  * Drag to pan, the wheel to zoom about the pointer (pointer.js).
  *
- * Opens with no vault (rule 7), and with no WebGPU says why, as filter does:
- * the panel works, and nothing is drawn.
+ * Opens with no vault (rule 7): copies are dots until a sprite is chosen.
+ * With no WebGPU escape time says why, as filter does; copies still draw.
  */
 
 import { fractalParams, GROUPS } from './params.js';
 import { FRACTAL } from './fractal.js';
+import { drawCopies, SHAPES } from './copies.js';
+import { loadSprites }    from '../../core/sprites.js';
+import { mipFor }         from '../../core/stamps.js';
 import { wirePointer }    from './pointer.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -36,6 +40,8 @@ const DEEPEST = 5e4;
 let params, bar, runner = null, failing = '';
 let blank = null;                  // the picture the pass writes over: only its size matters
 let busy = false;
+let sprites = null;                // the copies' sprite, or a set's members; null: dots
+let asked = 0;                     // the latest sprite asked for; an older answer is dropped
 
 const chainOf = values => [{ filter: FRACTAL, params: values }];
 
@@ -56,14 +62,21 @@ async function boot() {
   actions.append(png);
   exp.body.append(actions);
 
-  params.on(key => { applyFrameEdit(params, key); draw(); });
+  params.on(key => {
+    applyFrameEdit(params, key);
+    // A shape picked starts from its own ratio, twist and depth; a recipe arriving keeps its own.
+    if (key === 'shape' && !params.restoring) params.set(SHAPES[params.get('shape')].start);
+    if (key === 'sprite') chooseSprite(params.get('sprite'));
+    draw();
+  });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
   wirePointer({ canvas, params });
   wireKeys();
 
   runner = await createRunner();
   if (!runner) {
-    bar.announce(`no fractals here — ${whyNoGpu()}`);
+    bar.announce(`no escape time here — ${whyNoGpu()}; copies still draw`);
+    draw();
     return;
   }
   try {
@@ -71,6 +84,22 @@ async function boot() {
   } catch (err) {
     failing = err.message;
     bar.announce(err.message);
+  }
+  draw();
+}
+
+/** The copies' sprite (core/sprites.js): dots until it is in, and dots if it will not come. */
+async function chooseSprite(id) {
+  const ask = ++asked;
+  sprites = null;
+  if (!id) return draw();
+  try {
+    const got = await loadSprites(id);
+    if (ask !== asked) return;
+    sprites = got.images.length ? got.images : null;
+    bar.announce(`${got.title}: ${got.images.length} sprite${got.images.length === 1 ? '' : 's'}`);
+  } catch (err) {
+    if (ask === asked) bar.announce(`could not open the sprite: ${err.message} — drawing dots`);
   }
   draw();
 }
@@ -104,6 +133,13 @@ function paint() {
   if (canvas.height !== h) canvas.height = h;
 
   bar.output({ width: Math.round(v.width * v.scale), height: Math.round(v.height * v.scale), scale: v.scale, format: v.format });
+  canvas.classList.toggle('copies', v.family === 'copies');
+  if (v.family === 'copies') {
+    const { copies, depth } = drawCopies(ctx, v, sprites, view, mipFor);
+    bar.say(`${v.shape} · ${copies.toLocaleString('en')} copies, ${depth} generation${depth === 1 ? '' : 's'}`
+      + (depth < v.depth ? ` — stopped short of ${v.depth}: too many copies` : '') + (sprites ? '' : ' · dots: choose a sprite'));
+    return;
+  }
   if (!runner || failing) {
     ctx.clearRect(0, 0, w, h);
     return;
@@ -129,16 +165,16 @@ function describe(v) {
  */
 async function downloadPicture() {
   if (busy) return;
-  if (!runner) return bar.announce(`no WebGPU here — ${whyNoGpu()}`);
+  const v = params.values;
+  if (v.family !== 'copies' && !runner) return bar.announce(`no WebGPU here — ${whyNoGpu()}`);
   busy = true;
   try {
-    const v = params.values;
     const w = Math.round(v.width * v.scale), h = Math.round(v.height * v.scale);
     bar.say(`drawing ${w} × ${h}…`);
-    const picture = render(v, w, h);
     const out = surface(w, h);
-    out.getContext('2d').drawImage(picture, 0, 0);
-    download(await toPng(out), `fractal_${v.kind}_${w}x${h}.png`);
+    if (v.family === 'copies') drawCopies(out.getContext('2d'), v, sprites, v.scale, mipFor);
+    else out.getContext('2d').drawImage(render(v, w, h), 0, 0);
+    download(await toPng(out), `fractal_${v.family === 'copies' ? v.shape : v.kind}_${w}x${h}.png`);
     bar.announce(`downloaded ${w} × ${h} px`);
   } catch (err) {
     console.error('[fractals] download failed:', err);

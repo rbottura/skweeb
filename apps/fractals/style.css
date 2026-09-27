@@ -14,3 +14,5 @@
 
 .viewer-stage canvas { cursor: grab; touch-action: none; }
 .viewer-stage canvas.dragging { cursor: grabbing; }
+/* Copies are fitted to the picture: nothing to drag, the wheel sizes them (pointer.js). */
+.viewer-stage canvas.copies { cursor: zoom-in; }

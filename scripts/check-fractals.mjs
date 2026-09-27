@@ -10,13 +10,16 @@
  * soon is not — wherever the two cannot differ by 32 bits against 64; the
  * wheel zooms about the pointer, keeping its point under it; a drag pans by
  * as much as the pointer moved; a Julia set is another picture; and the PNG
- * is the format at its scale.
+ * is the format at its scale. The zoom's slider runs on the logarithm. And
+ * copies: dots with no sprite, as many as copies.js says; a star brought in
+ * and picked, drawn in its place; a tree; the PNG drawn again at its scale.
  */
 
 import fs   from 'node:fs';
 import path from 'node:path';
 import { startCheck } from './check-kit.mjs';
 import { planeAt, escape } from '../apps/fractals/fractal.js';
+import { copiesOf, SHAPES } from '../apps/fractals/copies.js';
 
 const c = await startCheck();
 const { page } = c;
@@ -24,6 +27,8 @@ const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const row = name => `[...document.querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const set = async (name, value) => { await page.typeInto(`${row(name)}?.querySelector('.pp-num')`, value); await wait(300); };
+/** The bar's line once it says `text`: an announcement holds the bar a few seconds first. */
+const sayWith = text => page.until(`${say}.includes(${JSON.stringify(text)})`, { timeout: 10000 }).then(() => page.eval(say), () => page.eval(say));
 const value = name => page.eval(`Number(${row(name)}?.querySelector('.pp-num')?.value)`);
 const view = async () => ({ kind: 'mandelbrot', cx: await value('centre x'), cy: await value('centre y'),
                             zoom: await value('zoom'), iterations: await value('iterations') });
@@ -128,6 +133,71 @@ for (let i = 0; i < 100 && !file; i++) {
 }
 const size = file ? (b => [b.readUInt32BE(16), b.readUInt32BE(20)])(fs.readFileSync(file)) : [0, 0];
 c.ok('the PNG is the format at its scale', size[0] === 2160 && size[1] === 2160, size.join(' × '));
+
+// ── The zoom's slider is logarithmic ────────────────────────────────────────
+
+await page.click(`[...${row('set')}.querySelectorAll('button')].find(b => b.textContent === 'mandelbrot')`);
+await page.eval(`(() => { const s = ${row('zoom')}.querySelector('.pp-range'); s.value = 3;
+  s.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+await wait(300);
+const logZoom = await value('zoom');
+c.ok('the zoom slider runs on the logarithm: 3 along is 1000×', Math.abs(logZoom - 1000) < 1e-6, String(logZoom));
+await page.eval(`(() => { const s = ${row('zoom')}.querySelector('.pp-range'); s.value = 0;
+  s.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+await wait(200);
+c.ok('and 0 along is 1×', Math.abs((await value('zoom')) - 1) < 1e-9, String(await value('zoom')));
+
+// ── Copies: a sprite copying itself ─────────────────────────────────────────
+
+await set('scale', '1');
+await page.click(`[...${row('family')}.querySelectorAll('button')].find(b => b.textContent === 'a sprite, copied')`);
+await wait(400);
+const tri = { shape: 'triangle', ...SHAPES.triangle.start };
+const want = copiesOf(tri).copies.length;
+const dotsSay = await sayWith(`${want.toLocaleString('en')} copies`);
+c.ok('copies with no sprite are dots, as many as the maps make', dotsSay.includes(`${want.toLocaleString('en')} copies`) && dotsSay.includes('dots'), dotsSay);
+c.ok('escape time\'s rows are put away', await page.eval(`${row('zoom')}?.hidden === true`));
+
+// A star from outside, brought in and picked where the picker opens.
+const star = `(async () => { const c = new OffscreenCanvas(96, 96), g = c.getContext('2d');
+  g.fillStyle = '#d8342a'; g.beginPath();
+  for (let i = 0; i < 10; i++) { const r = i % 2 ? 18 : 46, a = i * Math.PI / 5 - Math.PI / 2; g.lineTo(48 + Math.cos(a) * r, 48 + Math.sin(a) * r); }
+  g.fill(); return new File([await c.convertToBlob({ type: 'image/png' })], 'copy star.png', { type: 'image/png' }); })()`;
+await page.click(`[...${row('sprite')}.querySelectorAll('button')].find(b => b.textContent === 'Choose…')`);
+await page.until(`!!document.querySelector('.vp--visible')`, { timeout: 20000 });
+await page.eval(`(async () => { const dt = new DataTransfer(); dt.items.add(await ${star});
+  document.querySelector('.vp--visible').dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true })); })()`);
+await page.until(`[...document.querySelectorAll('.vp--visible .vp-cell')].some(k => k.querySelector('.vp-name')?.textContent === 'copy star')`,
+  { timeout: 30000 }).catch(() => {});
+await page.click(`[...document.querySelectorAll('.vp--visible .vp-cell')].find(k => k.querySelector('.vp-name')?.textContent === 'copy star')?.querySelector('.vp-use')`);
+await page.until(`${say}.includes('copy star: 1 sprite') || ${say}.includes('could not')`, { timeout: 30000 }).catch(() => {});
+await wait(400);
+const starSay = await sayWith(`${want.toLocaleString('en')} copies`);
+c.ok('a star brought in and picked is what is copied', starSay.includes(`${want.toLocaleString('en')} copies`) && !starSay.includes('dots')
+, starSay);
+await c.shot('4-copies-triangle');
+
+await page.click(`[...${row('shape')}.querySelectorAll('button')].find(b => b.textContent === 'tree')`);
+await wait(400);
+const tree = copiesOf({ shape: 'tree', ...SHAPES.tree.start }).copies.length;
+c.ok('a tree picked starts from its own depth and ratio', (await value('generations')) === SHAPES.tree.start.depth
+  && Math.abs((await value('each copy ×')) - SHAPES.tree.start.ratio) < 1e-9, `${await value('generations')} deep`);
+const treeSay = await sayWith(`${tree.toLocaleString('en')} copies`);
+c.ok('and has as many copies as its branches make', treeSay.includes(`${tree.toLocaleString('en')} copies`), treeSay);
+await c.shot('5-copies-tree');
+
+await set('scale', '2');
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+const before2 = fs.existsSync(DL) ? fs.readdirSync(DL).length : 0;
+await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download the picture (PNG)')`);
+await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 60000 });
+let tfile = null;
+for (let i = 0; i < 100 && !tfile; i++) {
+  const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.startsWith('fractal_tree'));
+  if (f) tfile = path.join(DL, f); else await wait(200);
+}
+const tsize = tfile ? (b => [b.readUInt32BE(16), b.readUInt32BE(20)])(fs.readFileSync(tfile)) : [0, 0];
+c.ok('copies at print scale: the format at its scale, drawn again', tsize[0] === 2160 && tsize[1] === 2160, tsize.join(' × '));
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

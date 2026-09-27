@@ -1,7 +1,7 @@
 # STATUS — fractals
 _last touched: 2026-09-27_
 
-M7's app: fractals on the GPU kit. The plan and *Done when* are in
+M7's app: fractals — escape time on the GPU kit, and a sprite copying itself. The plan and *Done when* are in
 `docs/roadmap.md`, M7 — a Julia loop that closes, redrawn exactly at print
 scale, whose field steers an M6 emitter. The link: `fractal → particles: a
 field`.
@@ -19,12 +19,33 @@ field`.
    orbit traps.
 5. **Deeper** — two floats for one (double-float in WGSL) past a zoom of
    10⁴–10⁵.
-6. **Point families** — IFS, strange attractors, fractal flames, as density;
-   then L-systems.
+6. **Point families** — begun 2026-09-28, ahead of order, as the author
+   asked: a sprite copying itself, an IFS drawn with a sprite (*copies*).
+   Then strange attractors and fractal flames as density, and L-systems.
 7. **A field for particles** — M7's link: the fractal's slope, or its
    escape, as a field an emitter's particles follow.
 
 ## Works now
+
+- **A sprite, copied** (2026-09-28, the author's ask; `copies.js`,
+  `tests/fractal-copies.mjs` 19 checks, `check-fractals` 17). The *family*
+  switch: *escape time*, or *a sprite, copied* — a vault sprite (a shape, a
+  still, or a set: a member a generation or a branch) copied by a few maps,
+  each a shrink, a turn and a move, `generations` deep: a **triangle**
+  (Sierpiński's), a **carpet**, a **cross** (Vicsek's), a **tree** (copies
+  standing on each copy's tip, `branches` of them `spread` apart), a
+  **spiral**. Each copy ×, each turned by *twist*; *every generation* or
+  *the last*. A shape picked starts from its own ratio, twist and depth. No
+  random: the copies are all the maps' compositions, generation by
+  generation, a parent under its children, so the picture is a function of
+  its params — fitted to the picture together, sized and turned about its
+  centre, and drawn again at print scale from the sprite's own pixels. Up to
+  50 000 copies; past that the last generation is left out, and the bar
+  says so. No GPU needed: Canvas 2D. The wheel sizes it. With no sprite, dots.
+- **Log sliders** (2026-09-28, the author's ask): a range may say
+  `log: true` (`core/widgets.js`) — every factor of ten the same length of
+  track. The zoom (0.1 to a million), the iterations, the ramp's turn and
+  the copies' size run so.
 
 - **The Mandelbrot set and its Julia sets, on the GPU** (2026-09-27, brick 1;
   `fractal.js`, `tests/fractal.mjs` 23 checks, `node scripts/check-fractals.mjs`
@@ -52,7 +73,11 @@ field`.
 - Nothing saves to the vault yet: the PNG is a download. Brick 2.
 - The iterations do not follow the zoom: deep in, raise them by hand.
 - A drag or a wheel redraws the whole picture each move; at 1080 square
-  and a few hundred iterations that is quick, at thousands it is not.
+  and a few hundred iterations that is quick, at thousands it is not. Tens
+  of thousands of copies are slow to drag a slider over too.
+- A copy drawn larger than its sprite's own pixels is soft: a 96 px star as
+  a tree's trunk. The sprite's resolution is the ceiling.
+- Copies do not move yet: a twist or a ratio run round a loop is brick 3's.
 
 ## Next single step
 

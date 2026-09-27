@@ -17,7 +17,7 @@
 import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROUPS } from './params.js';
 import { prepare, particlesAt } from './model.js';
 import { drawParticles, pictureSize } from './draw.js';
-import { loadSprites }  from './sprites.js';
+import { loadSprites }  from '../../core/sprites.js';
 import { saveParticles, downloadFrames, downloadSheet } from './save.js';
 import { requested }      from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';

@@ -13,7 +13,7 @@
  */
 
 import { openParticles } from './frames.js';
-import { loadSprites }   from './sprites.js';
+import { loadSprites }   from '../../core/sprites.js';
 import { drawFrameInto } from '../../core/rebuild.js';
 
 const isParticles = object => !!(object && object.recipe && object.recipe.emit && object.recipe.picture);

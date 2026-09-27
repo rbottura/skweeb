@@ -41,8 +41,8 @@ export const FRACTAL_PARAMS = {
           label: 'set', group: 'fractal' },
   cx:   { type: 'range', min: -4, max: 4, step: 'any', default: -0.6, label: 'centre x', group: 'fractal' },
   cy:   { type: 'range', min: -4, max: 4, step: 'any', default: 0, label: 'centre y', group: 'fractal' },
-  zoom: { type: 'range', min: 0.1, max: 1000000, step: 'any', default: 1, label: 'zoom', group: 'fractal' },
-  iterations: { type: 'int', min: 8, max: 5000, default: 200, label: 'iterations', group: 'fractal' },
+  zoom: { type: 'range', min: 0.1, max: 1000000, step: 'any', log: true, default: 1, label: 'zoom', group: 'fractal' },
+  iterations: { type: 'int', min: 8, max: 5000, log: true, default: 200, label: 'iterations', group: 'fractal' },
   /** The Julia set's `c`: the Mandelbrot point it belongs to. */
   jx:   { type: 'range', min: -2, max: 2, step: 'any', default: -0.8, label: 'julia c x', group: 'fractal',
           when: { kind: 'julia' } },
@@ -52,7 +52,7 @@ export const FRACTAL_PARAMS = {
   colours: { type: 'color[]', default: ['#0b1d51', '#2a62d8', '#fffdf6', '#ffd60a', '#d8342a', '#1b1464'],
              label: 'ramp, round', group: 'colour' },
   /** Iterations for one turn of the ramp: fewer, the bands come closer. */
-  cycle:  { type: 'range', min: 1, max: 1000, step: 0.5, default: 48, label: 'iterations a turn', group: 'colour' },
+  cycle:  { type: 'range', min: 1, max: 1000, step: 0.5, log: true, default: 48, label: 'iterations a turn', group: 'colour' },
   /** Where on the ramp the count starts: turned round the whole way, the same picture — a loop. */
   phase:  { type: 'range', min: 0, max: 1, step: 0.001, default: 0, label: 'phase', group: 'colour' },
   inside: { type: 'color', default: '#111111', label: 'inside', group: 'colour' },

@@ -38,7 +38,7 @@ const family = { type: 'set', tags: ['ckt', 'brush-family'], recipe: { members: 
 const material = { type: 'set', tags: ['grid'], recipe: { members: ['a'], role: 'material' } };
 
 // A brush family is sprites already: particles take one by default too (M6's link).
-ok('a brush family is offered as brushes, and as particle sprites', sorted(usesOf(family)), ['brushes', 'particles']);
+ok('a brush family is offered as brushes, particle sprites and fractal copies', sorted(usesOf(family)), ['brushes', 'copies', 'particles']);
 ok('a material is not offered as particle sprites until switched on', offers(material, 'particles'), false);
 ok('a material is offered as a material', sorted(usesOf(material)), ['material']);
 ok('and not as brushes', offers(material, 'brushes'), false);

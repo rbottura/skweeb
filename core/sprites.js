@@ -1,21 +1,20 @@
 /**
- * sprites.js — a vault set as the particles' sprites: M6's link,
- * `set → particles: sprites`.
+ * sprites.js — a vault object as sprites to draw with: a set's members in
+ * its order, or one shape or still.
  *
- * One shape or still is one sprite, drawn for every particle. A set is an
- * ordered list of objects (docs/object-model.md, *Sets*); each
- * member's render is one sprite, in the set's order, and a particle draws
- * `images[floor(pick × n)]` — its `pick` a draw of its own slot, so the same
- * particle is the same sprite every time it is drawn and the loop still
- * closes. The images are the members' render files, as core/registry.js
- * reads a set as a gamepad family (`familyFromSet`), loaded once each.
+ * A set is an ordered list of objects (docs/object-model.md, *Sets*); each
+ * member's render is one sprite, as core/registry.js reads a set as a
+ * gamepad family (`familyFromSet`), loaded once each. Particles draw
+ * `images[floor(pick × n)]` for each particle — M6's link, `set → particles:
+ * sprites` — and fractals a member for each level of copies. Moved here from
+ * particles when fractals needed it too.
  *
- * No vault, or a set that will not open: no sprites, and the particles are
- * dots — the app draws all the same (rule 7).
+ * No vault, or an object that will not open, is the caller's to meet: both
+ * apps draw dots or nothing instead, and go on (rule 7).
  */
 
-import { Vault }         from '../../core/vault.js';
-import { familyFromSet } from '../../core/registry.js';
+import { Vault }         from './vault.js';
+import { familyFromSet } from './registry.js';
 
 const _images = new Map();         // url → Promise<?ImageBitmap>
 

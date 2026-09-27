@@ -49,22 +49,33 @@ function numberBox(spec, value, set, current) {
 }
 
 export const WIDGETS = {
+  /**
+   * A slider and a number. With `log: true` the slider runs on the
+   * logarithm — every factor of ten the same length of track — for a range
+   * of many orders, a zoom from 0.1 to a million; the number is the value.
+   * Its min must be above 0.
+   */
   range: ({ key, spec, value, set, readout, panel }) => {
     const input = el('input', 'pp-range');
     input.type = 'range';
-    input.min = spec.min ?? 0;
-    input.max = spec.max ?? 100;
-    input.step = spec.step ?? 1;
-    input.value = value;
-    input.addEventListener('input', () => set(parseFloat(input.value)));
+    const log = !!spec.log && spec.min > 0;
+    const along = v => (log ? Math.log10(v) : v);
+    input.min = along(spec.min ?? 0);
+    input.max = along(spec.max ?? 100);
+    input.step = log ? 'any' : spec.step ?? 1;
+    input.value = along(value);
+    input.addEventListener('input', () => {
+      const x = parseFloat(input.value);
+      set(log ? 10 ** x : x);
+    });
     const box = numberBox(spec, value, set, () => panel.value(key));
     readout.replaceChildren(box);
-    return { node: input, sync(v) { input.value = v; box.value = v; } };
+    return { node: input, sync(v) { input.value = along(v); box.value = v; } };
   },
 
   // A count. Declaring `int` rather than `range` with step 1 says the value is
   // whole, which a panel shows the same way but a recipe reader can rely on.
-  int: ctx => WIDGETS.range({ ...ctx, spec: { ...ctx.spec, step: 1 } }),
+  int: ctx => WIDGETS.range({ ...ctx, spec: { ...ctx.spec, step: 1 } }),   // a log slider's value is rounded by the param
 
   bool: ({ value, set }) => {
     const wrap  = el('label', 'pp-switch');

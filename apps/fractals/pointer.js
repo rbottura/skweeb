@@ -8,6 +8,9 @@
  * point under the pointer where it is and brings the rest in or out round
  * it (fractal.js `zoomAbout`). The zoom stays within its row's bounds, and
  * the centre follows the zoom it really got, so nothing drifts at a bound.
+ *
+ * With copies (copies.js) there is no plane: they are fitted to the
+ * picture, and the wheel sizes them about its centre; a drag does nothing.
  */
 
 import { planeAt, zoomAbout } from './fractal.js';
@@ -27,8 +30,10 @@ export function wirePointer({ canvas, params }) {
     return { px: ((ev.clientX - rect.left) / rect.width) * w, py: ((ev.clientY - rect.top) / rect.height) * h, w, h };
   };
 
+  const copies = () => params.get('family') === 'copies';
+
   canvas.addEventListener('pointerdown', ev => {
-    if (ev.button !== 0) return;
+    if (ev.button !== 0 || copies()) return;
     const p = at(ev);
     drag = { from: p, view: params.values };
     canvas.setPointerCapture(ev.pointerId);
@@ -49,6 +54,12 @@ export function wirePointer({ canvas, params }) {
 
   canvas.addEventListener('wheel', ev => {
     ev.preventDefault();
+    if (copies()) {
+      // Copies are fitted to the picture: the wheel sizes them about its centre.
+      const spec = params.spec('size');
+      params.set('size', Math.min(spec.max, Math.max(spec.min, params.get('size') * Math.exp(-ev.deltaY * 0.0015))));
+      return;
+    }
     const p = at(ev);
     const v = params.values;
     const spec = params.spec('zoom');

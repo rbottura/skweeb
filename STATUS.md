@@ -10,6 +10,14 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **A sprite copying itself** (2026-09-28, the author's ask; `check-fractals`,
+  17 checks; `tests/fractal-copies.mjs`, 19). Fractals has a second family:
+  a vault sprite copied by a few maps, generations deep — a Sierpiński
+  triangle, a carpet, a Vicsek cross, a tree, a spiral — every copy placed
+  by the maps, none at random, drawn again at print scale from the sprite's
+  pixels. And sliders over many orders run on the logarithm now
+  (`log: true`, `core/widgets.js`): the zoom is usable. `core/sprites.js`
+  moved from particles; `core/uses.js` offers sets as fractal copies.
 - **M7 has begun: the Mandelbrot set and its Julia sets on the GPU**
   (2026-09-27; `apps/fractals/`, `tests/fractal.mjs` 23 checks,
   `check-fractals` 9). One WGSL pass through the GPU kit, carried in a chain
@@ -279,7 +287,7 @@ it said is here, shorter, or in the files it points to.
 
 ## Tests
 
-Twenty-seven files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+Twenty-eight files, no runner, no dependencies — the loop in `CLAUDE.md` runs
 all of them, and all pass. Newest: `compose-time` gained the ripple, and
 with `compose-placements` a placement's time — windows, a page's end, a
 flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
