@@ -39,7 +39,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 38 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 35 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its

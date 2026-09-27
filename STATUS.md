@@ -11,7 +11,7 @@ it said is here, shorter, or in the files it points to.
 ### Newest
 
 - **Particles save** (2026-09-27, M6 brick 4; `node scripts/check-particles.mjs`,
-  38 checks). S saves the loop as a `sequence`, the sprite set its parent;
+  35 checks). S saves the loop as a `sequence`, the sprite set its parent;
   a frame saves as a still; every frame downloads as a zip for
   `frames-to-video`. The vault's replay of a frame is its render to the
   pixel, drawn again at scale 2; `?open=` brings the panels back; compose
