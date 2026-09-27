@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="particles — particles as a function of time: loops that close, frames that stand alone.">
+  <title>particles — skweeb</title>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!--
+    Three columns, as compose has: what the particles do on the left, the
+    picture between, the picture's own settings on the right. The bar under
+    all three is core's. No p5: Canvas 2D.
+  -->
+  <div class="app">
+    <main class="app-main">
+      <div class="app-side" id="emit-side"></div>
+      <section class="viewer" aria-label="particles">
+        <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+      </section>
+      <div class="app-side" id="picture-side"></div>
+    </main>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

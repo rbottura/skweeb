@@ -9,9 +9,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## The bricks
 
-1. **The model** — done 2026-09-27, `model.js`. No page yet.
-2. **The app opens and plays** — dots, no sprites: `index.html`, the schema,
-   core's player, Canvas 2D.
+1. **The model** — done 2026-09-27, `model.js`.
+2. **The app opens and plays** — done 2026-09-27: dots, no sprites.
 3. **Sprites from a set**: the stamps renderer moved from `apps/ckt/stamps.js`
    into core, a set chosen through a row in `core/uses.js`, colour, size,
    alpha and spin over a particle's life on `core/easing.js` curves.
@@ -39,17 +38,39 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   centre, y down, so print scale is a multiplication. Oldest first, the
   draw order. More than 20 000 alive keeps the newest.
 
+- **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
+  `node scripts/check-particles.mjs`, 15 checks). Three columns, as
+  compose: *particles* on the left — Emission, Launch, Life, Forces, the
+  model's recipe key for key — the picture between, *picture* on the right —
+  core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
+  `fps`, the Look: dot size, colour, a fade over life, the ground. Every
+  frame is `particlesAt(recipe, tick / fps)`. A stream's loop is set in
+  frames, so its period is whole frames and it closes on one: the frame
+  after the last is the first, pixel for pixel; a frame scrubbed to is the
+  frame stepped to; frame 1 is as full as frame 31. A burst lasts until its
+  longest life, all 120 at the emitter on its first frame. Drawn at the
+  size the viewer shows (`core/view.js`, moved there from compose); `scale`
+  multiplies the output. Rows that mean nothing in a mode hide (`when`). Opens
+  and plays served as plain files with no vault.
+
 ## Known
 
 - A slot's draws are in a fixed order — jitter, life, speed, angle, pick —
   and new ones go at the end, or saved recipes redraw differently.
 - 2D only: z and the camera are brick 6.
+- Nothing saves yet, and nothing in the page reads the vault but the
+  panel on V: brick 3 brings the first object in, brick 4 the first out.
+- A value changed keeps the frame on screen; a loop made shorter than it
+  lands on its last.
+- The defaults are a small fountain: wanted, a torch that reads at once.
 
 ## Next single step
 
-**Brick 2: the app opens and plays dots.** `apps/particles/index.html`,
-`params.js` with the model's `DEFAULTS` as a schema (core/params.js; format
-drawer from `core/frame.js`, as compose's page), `main.js` drawing
-`particlesAt(recipe, tick / fps)` as filled circles on Canvas 2D at the size
-the viewer shows, played and scrubbed by core's `Playhead` and `Transport`
-over `duration()` — ckt's `main.js` is the pattern. Opens with no vault.
+**Brick 3, first half: the stamps renderer into core, dots as sprites.**
+Move `apps/ckt/stamps.js` (and `surface.js`, which it needs) to `core/`,
+ckt importing it from there — `node scripts/check-*.mjs` has no ckt check,
+so run ckt by hand and `tests/ckt-motion.mjs`. Then a `sprite` param in the
+Look (`type: 'object'`, `accepts: ['set']`, offered through a new row in
+`core/uses.js`, `particles`), each particle drawing `set[floor(pick × n)]`
+through `stampFor` at its size. Size, alpha and spin over life on
+`core/easing.js` curves are the second half.

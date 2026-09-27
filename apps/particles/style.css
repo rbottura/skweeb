@@ -1,0 +1,13 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — particles
+
+   Everything that looks like the suite comes from core. particles says only
+   its layout: the emitter, the picture, and the picture's settings.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+@import '../../core/param-panel.css';
+@import '../../core/vault-panel.css';
+@import '../../core/sequence-viewer.css';
+
+.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }

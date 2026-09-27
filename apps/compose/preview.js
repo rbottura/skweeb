@@ -2,32 +2,11 @@
  * preview.js — what the preview adds to a page, and how large it draws it.
  *
  * None of it is ever in a render: the trim line inside the bleed, the chosen
- * placement's outline, the paint rate in the bar, and the size — the page is
- * drawn at the size the viewer shows it, as ckt's preview is, and at full
- * size only when it leaves compose.
+ * placement's outline and the paint rate in the bar. How large the page is
+ * drawn — at the size the viewer shows it — is core/view.js's.
  */
 
 import { placementMatrix, onPage } from './page.js';
-
-/**
- * Canvas pixels per page pixel: as many as the viewer holds in device pixels,
- * never more than an export makes — in steps of a twentieth, so a resize does
- * not churn the canvas.
- *
- * @param {HTMLCanvasElement} canvas   the preview, in its viewer
- * @param {{width, height}} size       the page, in page pixels
- * @param {number} scale               the page's own scale
- */
-export function viewFactor(canvas, size, scale) {
-  const box = canvas.parentElement;
-  const cs = getComputedStyle(box);
-  const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const h = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-  if (!(w > 0) || !(h > 0)) return Math.min(1, scale);
-  const dpr = window.devicePixelRatio || 1;
-  const fit = Math.min((w * dpr) / size.width, (h * dpr) / size.height);
-  return Math.min(scale, Math.ceil(fit * 20) / 20);
-}
 
 /** Where the sheet ends inside its bleed. */
 export function trimLine(ctx, size, view) {

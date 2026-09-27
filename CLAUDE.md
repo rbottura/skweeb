@@ -16,12 +16,12 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
 | `apps/compose/` | M4: objects from every app placed on one page | `apps/compose/STATUS.md` |
 | `apps/filter/` | M5: any picture or loop through a chain of GPU filters | `apps/filter/STATUS.md` |
-| `apps/particles/` | M6, begun: particles as a function of time. The model only, no page yet | `apps/particles/STATUS.md` |
+| `apps/particles/` | M6, begun: particles as a function of time — loops that close, frames that stand alone | `apps/particles/STATUS.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault | `docs/object-model.md`, *Trash, and deleting* |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs` and `check-frames.mjs` are nine, as commands. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs` and `check-particles.mjs` are ten, as commands. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/decisions.md` | what was decided before today, and why, by date | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
@@ -103,6 +103,7 @@ node scripts/check-filter-save.mjs      # …and what it saves: replayed, reopen
 node scripts/check-look.mjs             # M5's link: a look made in filter, over a placement in compose
 node scripts/check-vault.mjs            # the vault panel: kin together, folders, the lineage switch
 node scripts/check-frames.mjs           # a flipbook in compose: next frames, stepped, picked up, saved
+node scripts/check-particles.mjs        # particles: no vault, a loop closed pixel for pixel, a burst
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at

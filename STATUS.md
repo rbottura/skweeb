@@ -10,6 +10,13 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **The particles app opens and plays** (2026-09-27, M6 brick 2;
+  `node scripts/check-particles.mjs`, 15 checks). `apps/particles/`: the
+  emitter's drawers on the left, the picture on the right, dots between.
+  The frame after the last is the first, pixel for pixel; a frame scrubbed
+  to is the frame stepped to; a burst starts all at the emitter and ends.
+  Opens with no vault. `core/view.js` — how large a preview draws — moved
+  there from compose, which now imports it.
 - **M6 has begun: a particle is a function of its slot and its age**
   (2026-09-27; `apps/particles/model.js`, `tests/particles-model.mjs`, 36
   checks). Any time asked for in any order gives the same particles; `t`
@@ -215,7 +222,7 @@ hang), `gpu-filters` (the catalogue as data: licence, schema, the WGSL
 conventions, sizes at print scale) and `delete` (every kind of edge: the
 refusals, the dry plan, cutting loose, the chain; 37 checks).
 
-Nine browser checks, each a command in `CLAUDE.md`: its own server on a copy
+Ten browser checks, each a command in `CLAUDE.md`: its own server on a copy
 of the vault, headless Chrome through `scripts/chrome.mjs` — a real mouse
 included — and `scripts/check-kit.mjs` under it. Outside the loop because
 each needs Chrome and a vault with things in it; each fails when a page
@@ -286,10 +293,9 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M6, brick 2: the particles app opens and plays dots** —
-`apps/particles/STATUS.md` has it: `index.html`, the model's `DEFAULTS` as a
-schema, `particlesAt(recipe, tick / fps)` drawn as circles on Canvas 2D,
-played and scrubbed by core's player over `duration()`, with no vault.
+**M6, brick 3's first half: sprites from a set** —
+`apps/particles/STATUS.md` has it: ckt's stamps renderer moved into core,
+and a `sprite` set chosen in the Look, each particle a stamp of it.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

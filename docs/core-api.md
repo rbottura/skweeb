@@ -22,6 +22,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
 | `Bar.js` | the strip under every app: information only | **in**, 2026-09-23 |
 | `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
+| `view.js` | how large a preview draws: `viewFactor()`, the size the viewer shows, never more than an export makes | **in**, 2026-09-27, moved from compose when particles needed it |
 | `theme.css` | the suite's look: tokens, the page shell, controls | **in**, 2026-09-23 |
 | `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |
 | `panel.js` | base class: show/hide, focus, gamepad + keyboard nav | not yet; two concrete panels exist instead |

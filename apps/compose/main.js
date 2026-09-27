@@ -21,7 +21,8 @@
 
 import { pageParams, placeParams, toPlacement, PAGE_GROUPS, PLACE_GROUPS, PLACEABLE } from './params.js';
 import { paintPage, pageSize } from './page.js';
-import { viewFactor, trimLine, outline, PaintRate } from './preview.js';
+import { trimLine, outline, PaintRate } from './preview.js';
+import { viewFactor }     from '../../core/view.js';
 import { onionLayer }     from './onion.js';
 import { Placements }     from './placements.js';
 import { endOf, showsAt } from './time.js';
