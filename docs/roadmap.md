@@ -144,6 +144,12 @@ the suite's first fake 3D, and a start on the real one.
 sprites and scrubbed to any frame, and a one-shot burst, both leaving as
 sprite sheets a game engine loads. The link: `set → particles: sprites`, a use.
 
+*So far:* the model, 2026-09-27 (`apps/particles/model.js`): slots seeded
+from `k mod n`, so the picture at `t + period` is the one at `t`; slots
+before zero born too, so the first frame needs no warm-up — the roadmap's
+"one lifetime of warm-up" is paid in arithmetic, not in frames. Seven bricks
+in `apps/particles/STATUS.md`.
+
 **M7 — fractals.** Escape-time on the GPU — Mandelbrot, Julia, Burning Ship,
 multibrot, Newton, Phoenix, Lyapunov — with smooth colouring and orbit traps,
 navigated by drag and zoom, a Julia chosen by clicking the Mandelbrot. A pure

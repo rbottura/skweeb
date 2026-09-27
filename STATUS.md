@@ -10,6 +10,13 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **M6 has begun: a particle is a function of its slot and its age**
+  (2026-09-27; `apps/particles/model.js`, `tests/particles-model.mjs`, 36
+  checks). Any time asked for in any order gives the same particles; `t`
+  and `t + period` are the same picture, so a loop closes exactly; a
+  prewarmed stream is full from frame 0; a burst is over when its longest
+  life is. Launch cone, gravity, wind and drag in closed form. No page yet —
+  seven bricks planned in `apps/particles/STATUS.md`.
 - **A flipbook ripples, and has an onion skin** (2026-09-27, the author's
   ask after trying it; `node scripts/check-frames.mjs`, now 16 checks;
   `tests/compose-time.mjs`). A frame held longer in its *Time* drawer
@@ -200,7 +207,7 @@ it said is here, shorter, or in the files it points to.
 
 ## Tests
 
-Twenty-three files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+Twenty-four files, no runner, no dependencies — the loop in `CLAUDE.md` runs
 all of them, and all pass. Newest: `compose-time` gained the ripple, and
 with `compose-placements` a placement's time — windows, a page's end, a
 flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
@@ -279,17 +286,10 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M6's first brick: a particle as a function of its slot and its age**
-(`docs/roadmap.md`, M6; the author chose M6 next on 2026-09-27). One pure
-module, `apps/particles/model.js`, no DOM: a point emitter with a rate, a
-lifetime and a period; `particlesAt(recipe, t)` walks the spawn slots whose
-birth lies in the last lifetime, each seeded from the emitter's seed and its
-slot (`core/rng.js`), and places it by closed form from its birth — launch
-speed and spread, gravity, wind, drag. `tests/particles-model.mjs`: the same
-`t` gives the same particles in any order of asking; `t` and `t + period`
-are identical after one lifetime (the loop closes); none older than its
-lifetime; two seeds differ. The app, the stamps renderer moved from ckt
-into core, and sprites from a vault set are the bricks after.
+**M6, brick 2: the particles app opens and plays dots** —
+`apps/particles/STATUS.md` has it: `index.html`, the model's `DEFAULTS` as a
+schema, `particlesAt(recipe, tick / fps)` drawn as circles on Canvas 2D,
+played and scrubbed by core's player over `duration()`, with no vault.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*
