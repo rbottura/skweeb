@@ -118,9 +118,10 @@ export function pictureParams() {
     /**
      * A vault set whose members are the particles' sprites, one each by its
      * `pick` (model.js) — M6's link, `set → particles: sprites`, offered
-     * through core/uses.js. None: dots, in `color`.
+     * through core/uses.js — or one sprite, a shape or a still, for every
+     * particle. None: dots, in `color`.
      */
-    sprites: { type: 'object', accepts: ['set'], use: 'particles', label: 'sprites', group: 'look' },
+    sprites: { type: 'object', accepts: ['set', 'shape', 'still'], use: 'particles', label: 'sprites', group: 'look' },
     /** A dot's width, or a sprite's: its height follows its own shape. */
     size:   { type: 'range', min: 0.5, max: 256, step: 0.5, default: 22, label: 'size px', group: 'look' },
     color:  { type: 'color', default: '#d9481c', label: 'dot colour', group: 'look', when: { sprites: null } },

@@ -19,6 +19,8 @@
  * into depth behind a close camera, it is another picture and still a loop.
  * The guides: G switches them, the emitter and the fields' centre are dragged
  * by their handles, and a save made with them on has none in its picture.
+ * A picture from outside, dropped on the vault panel, comes in as a shape and
+ * is picked as the one sprite; an opaque one is a still, several a set too.
  */
 
 import fs   from 'node:fs';
@@ -159,7 +161,7 @@ const picked = await page.eval(`(() => {
 })()`);
 c.ok('the vault has a set to draw with', !!picked, picked || 'none');
 if (picked) {
-  await page.until(`/[0-9]+ sprites|could not/.test(${say})`, { timeout: 30000 });
+  await page.until(`/[0-9]+ sprites?|could not/.test(${say})`, { timeout: 30000 });
   const told = await page.eval(say);
   c.ok('a set chosen, its members are the sprites', /: \d+ sprites/.test(told) && !told.includes('dots'), told);
   await wait(400);
@@ -433,6 +435,58 @@ const clean = gid && await page.eval(`(async () => {
   h.dispose(); return worst;
 })()`);
 c.ok('saved with the guides on, its picture has none', clean === 0, 'worst ' + clean);
+
+// ── A picture from outside: dropped on the vault, used as the one sprite ─────
+
+await c.go(c.base + '/apps/particles/');
+await page.until(`${say}.includes('alive')`, { timeout: 20000 });
+key(' '); await wait(200);
+/** A star, drawn in the page on no ground, as a PNG File — or a square with a ground, opaque. */
+const makeFile = (name, opaque = false) => `(async () => {
+  const c = new OffscreenCanvas(64, 64), g = c.getContext('2d');
+  if (${opaque}) { g.fillStyle = '#204080'; g.fillRect(0, 0, 64, 64); }
+  // Each name its own colour, so no two files are the same bytes: the vault
+  // dedups on bytes, and hands back the first of two identical pictures.
+  let h = 0; for (const ch of ${JSON.stringify(name)}) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  g.fillStyle = ${JSON.stringify(name)} === 'star.png' ? '#e8a010' : '#' + (h & 0xffffff).toString(16).padStart(6, '0');
+  g.beginPath();
+  for (let i = 0; i < 10; i++) { const r = i % 2 ? 12 : 30, a = i * Math.PI / 5 - Math.PI / 2; g.lineTo(32 + Math.cos(a) * r, 32 + Math.sin(a) * r); }
+  g.fill();
+  return new File([await c.convertToBlob({ type: 'image/png' })], ${JSON.stringify(name)}, { type: 'image/png' });
+})()`;
+await page.click(`[...${row('sprites')}.querySelectorAll('button')].find(b => b.textContent === 'Choose…')`);
+await page.until(`!!document.querySelector('.vp--visible')`, { timeout: 20000 });
+await page.eval(`(async () => {
+  const dt = new DataTransfer(); dt.items.add(await ${makeFile('star.png')});
+  document.querySelector('.vp--visible').dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+})()`);
+await page.until(`[...document.querySelectorAll('.vp--visible .vp-cell')].some(k => k.querySelector('.vp-name')?.textContent === 'star')`,
+  { timeout: 30000 }).catch(() => {});
+const vaultNow = async () => (await (await fetch(c.base + '/api/vault')).json()).objects || [];
+const star = (await vaultNow()).find(r => r.title === 'star' && r.origin && r.origin.app === 'import');
+c.ok('a picture dropped on the vault comes in, a shape: it has see-through pixels', !!star && star.type === 'shape',
+  star ? `${star.id} ${star.type} ${JSON.stringify(star.tags)}` : 'not found');
+await page.click(`[...document.querySelectorAll('.vp--visible .vp-cell')].find(k => k.querySelector('.vp-name')?.textContent === 'star')?.querySelector('.vp-use')`);
+await page.until(`/[0-9]+ sprites?|could not/.test(${say})`, { timeout: 30000 });
+c.ok('picked in the same panel, it is every particle\'s sprite', (await page.eval(say)).includes('star: 1 sprite'), await page.eval(say));
+await scrubTo(10);
+await c.shot('11-star');
+
+// Through the importer itself: an opaque picture is a still; several are a set too; twice is once.
+const imported = await page.eval(`(async () => {
+  const { importPictures } = await import('/core/vault-import.js');
+  const one = await importPictures([await ${makeFile('tile.png', true)}]);
+  const many = await importPictures([await ${makeFile('b 2.png')}, await ${makeFile('b 10.png', true)}, await ${makeFile('b 1.png', true)}]);
+  const again = await importPictures([await ${makeFile('star.png')}]);
+  return { tile: one.objects[0].type, members: many.objects.map(o => o.title), set: many.set && many.set.recipe,
+           setType: many.set && many.set.type, again: again.objects[0].id };
+})()`);
+c.ok('an opaque picture comes in as a still', imported.tile === 'still', imported.tile);
+c.ok('several come in in their names\' order, numbers as numbers', JSON.stringify(imported.members) === '["b 1","b 2","b 10"]',
+  JSON.stringify(imported.members));
+c.ok('and make a set, a sprite family', imported.setType === 'set' && imported.set.role === 'brush-family'
+  && imported.set.members.length === 3, JSON.stringify(imported.set));
+c.ok('the same file twice is one object', imported.again === (star && star.id), imported.again);
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

@@ -37,6 +37,7 @@ import { reopenUrl, placeUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
 import { objectCard, pickableCell, fileUrl } from './vault-card.js';
 import { arrange, kinBox, columnsIn, fit, lineageOn, rememberLineage } from './vault-kin.js';
+import { wireImport } from './vault-import.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -174,7 +175,7 @@ export class VaultPanel {
       this._paint();
     });
 
-    head.append(kin, this._trashBtn, reload, close);
+    head.append(wireImport(this._root, () => this.refresh()), kin, this._trashBtn, reload, close);
     this._body = el('div', 'vp-body');
     const drawer = detailDrawer(() => this._closeDetail());
     Object.assign(this, { _detail: drawer.root, _detailTitle: drawer.title, _detailBody: drawer.body });

@@ -10,6 +10,13 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **Pictures from outside come into the vault** (2026-09-27, the author's
+  ask; `core/vault-import.js`; `check-particles`, 60 checks). *+ pictures*
+  in the vault panel's head, or a drop on it, in every app: each file a
+  `shape` when it has see-through pixels, a `still` when not, several at
+  once a sprite-family `set` too; origin `import`, a leaf. Particles take
+  one sprite as well as a set. `core/reopen.js` asks no app about a leaf
+  any more — it was a 404 for every legacy sprite's detail.
 - **Particles show what makes them** (2026-09-27, the author's ask;
   `check-particles`, 54 checks). Guides over the preview — the emitter and
   its launch, the whole field as arrows, the fields' centre, the pull —

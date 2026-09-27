@@ -26,6 +26,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `surface.js` | an off-screen canvas: OffscreenCanvas where there is one | **in**, 2026-09-27, with `stamps.js`; grid keeps its own copy |
 | `spritesheet.js` | a loop as a sprite sheet: every frame on one PNG, cropped to the box the loop reaches, and Aseprite's array JSON — rects, whole-ms durations that sum exactly, one tag (`buildSheet`; the pure parts in `tests/spritesheet.mjs`) | **in**, 2026-09-27, for particles first |
 | `noise.js` | seeded noise in JS on the GPU kit's hash — `pcg` and `randAt` bit for bit WGSL's — gradient noise with its exact slope, and its curl (`tests/noise.mjs`) | **in**, 2026-09-27, for particles' fields |
+| `vault-import.js` | pictures from outside into the vault: *+ pictures* in the panel's head, or a drop on it — each a `shape` (see-through) or a `still`, several a `set` too | **in**, 2026-09-27, the author's ask |
 | `view.js` | how large a preview draws: `viewFactor()`, the size the viewer shows, never more than an export makes | **in**, 2026-09-27, moved from compose when particles needed it |
 | `theme.css` | the suite's look: tokens, the page shell, controls | **in**, 2026-09-23 |
 | `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |

@@ -347,3 +347,6 @@
   border: var(--nb-line-sm, 2px) dashed var(--nb-ink, #111);
   font: 400 12px var(--nb-mono, monospace);
 }
+
+/* Pictures dragged over the panel (vault-import.js): it will take them. */
+.vp--drop { outline: 3px dashed var(--nb-accent, #ffd400); outline-offset: -6px; }

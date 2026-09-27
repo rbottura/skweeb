@@ -315,6 +315,16 @@ same bytes and the same null recipe dedup to one object however often it is
 copied. A family copied whole is a set in the D-pad's order, switched on as a
 material and as sprites but not as brushes: the gamepad has the original.
 
+**Pictures from outside.** A file drawn in another program comes in through
+the vault panel — *+ pictures*, or dropped on it (`core/vault-import.js`) —
+as a leaf with `origin.app: "import"`, which no app answers to, so nothing
+asks to reopen or replay it: a `shape` when any pixel is see-through, a
+`still` when none is, titled by its file's name, tagged `import`. Several
+at once come in each so, and as a `set` of them in their names' order,
+`role: "brush-family"`, so the gamepad and particles are offered it by
+default. The vault dedups on bytes: a file brought in twice, under any
+name, is the first object it made.
+
 ## The recipe contract
 
 Every app registers three functions with the core. This is the entire contract

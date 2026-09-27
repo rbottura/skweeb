@@ -42,7 +42,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 54 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 60 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -121,6 +121,12 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   those behind the camera left out. With every z at 0 the scale is exactly
   1, so a flat recipe draws as it always did; no switch. A stream in depth
   still closes its loop pixel for pixel.
+- **One sprite, or a set** (2026-09-27, the author's ask). The Look's
+  `sprites` takes a shape or a still too — one sprite for every particle.
+  And a picture from outside the suite comes in through the vault panel's
+  *+ pictures*, or dropped on it (`core/vault-import.js`) — in the very
+  picker *Choose…* opens, so a star drawn elsewhere is in and picked in
+  one place. Checked: a star PNG dropped, a shape, every particle's sprite.
 - **Guides, and handles to drag** (2026-09-27, the author's ask before M7;
   `guides.js`, `pointer.js`). Over the preview, never in a save, a frame or
   a sheet: the picture's centre; the emitter in blue — its shape through

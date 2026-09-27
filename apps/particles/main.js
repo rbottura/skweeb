@@ -140,7 +140,7 @@ async function chooseSprites(id) {
     if (ask !== asked) return;
     sprites = set.images.length ? set.images : null;
     spritesTitle = set.title;
-    bar.announce(`${set.title}: ${set.images.length} sprites`
+    bar.announce(`${set.title}: ${set.images.length} sprite${set.images.length === 1 ? '' : 's'}`
       + (set.missing ? ` — ${set.missing} would not load` : '') + (sprites ? '' : ' — drawing dots'));
   } catch (err) {
     if (ask !== asked) return;

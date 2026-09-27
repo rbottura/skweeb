@@ -27,7 +27,9 @@ const isMarks = recipe => !!recipe
  */
 export async function reopenUrl(object) {
   const app = object && object.origin && object.origin.app;
-  if (!app || isMarks(object.recipe)) return null;
+  // A leaf has no recipe to reopen, and its app — `import`, or the gamepad
+  // for a legacy sprite — need not be asked: asking is a 404 in the console.
+  if (!app || !object.recipe || isMarks(object.recipe)) return null;
   try {
     const module = await import(/* @vite-ignore */ '/apps/' + app + '/rebuild.js');
     if (typeof module.reopens !== 'function' || !module.reopens(object)) return null;
