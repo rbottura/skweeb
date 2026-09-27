@@ -7,7 +7,7 @@
  * that closes on the page when it closes on its own, a picture that holds.
  */
 
-const { moves, framesOnPage, tickAt, showsAt, endOf } = await import('../apps/compose/time.js');
+const { moves, framesOnPage, tickAt, showsAt, endOf, ripple } = await import('../apps/compose/time.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -59,6 +59,19 @@ const still = { length: 1, fps: 0 };
 ok('a still reaches a frame past its start, or as far as its length',
    [endOf({ at: 4, length: null }, still, 60), endOf({ at: 4, length: 3 }, still, 60)], [5, 7]);
 ok('a loop with no length reaches as far as its own loop', endOf({ at: 10, length: null }, gamepad, 30), 10 + 137);
+
+// A ripple: what started where one ended moves with its end, and on down the chain.
+const book = [{ at: 0, length: 1 }, { at: 1, length: 1 }, { at: 2, length: 1 }, { at: 3, length: 2 }];
+const when = blocks => blocks.map(b => [b.at, b.length]);
+ok('frame 2 held for two pushes every frame after it', when(ripple(book, 2, 1, 1)), [[0, 1], [1, 1], [3, 1], [4, 2]]);
+ok('and cut back, pulls them', when(ripple([{ at: 0, length: 3 }, { at: 3, length: 1 }], 3, -2, 0)), [[0, 3], [1, 1]]);
+ok('a frame put in after the first makes room', when(ripple(book, 1, 1)), [[0, 1], [2, 1], [3, 1], [4, 2]]);
+ok('a frame taken out closes up', when(ripple(book.filter((_, i) => i !== 1), 2, -1)), [[0, 1], [1, 1], [2, 2]]);
+const apart2 = [{ at: 0, length: 2 }, { at: 5, length: 1 }, { at: 0, length: null }];
+ok('what comes later, not touching, stays', when(ripple(apart2, 2, 1, 0)), [[0, 2], [5, 1], [0, null]]);
+ok('a chain stops at a placement with no length',
+   when(ripple([{ at: 0, length: 1 }, { at: 1, length: null }, { at: 2, length: 1 }], 1, 1, 0)), [[0, 1], [2, null], [2, 1]]);
+ok('nothing moved, the same blocks', ripple(book, 1, 0, 0) === book, true);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

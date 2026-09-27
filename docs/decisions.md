@@ -304,6 +304,19 @@ no length is given its own first, or it would show under every frame after
 it. And a press on the page picks up only what shows at the page's tick,
 since a flipbook's frames are stacked in one place.
 
+**A ripple, and an onion skin.** The author, the same day, after trying the
+flipbook: a placement's end, moved, moves the placements that started at it,
+and on down the chain — held longer, cut short, taken off, or a frame put in
+after it. Only a chain touching end to start moves, so a page that is not a
+flipbook is left as it was unless something on it happens to start exactly
+where another ends. No switch: the bar says when anything moved. And paused,
+the frames either side show faint — before in red, after in blue — preview
+only, a switch in the player drawer, on by default.
+
+**M6 next, M5's catalogue parked.** The author, 2026-09-27: after the
+flipbook, particles. M5's *Done when* was met on 2026-09-26; what it stays
+open for — the motion group, the time group, more of the catalogue — waits.
+
 **A shader carries its licence, as a font does.** Rule 5 now covers shaders. The
 filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA
 is under the Prosperity licence — noncommercial, a thirty-day commercial trial —

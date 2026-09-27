@@ -22,6 +22,7 @@
 import { pageParams, placeParams, toPlacement, PAGE_GROUPS, PLACE_GROUPS, PLACEABLE } from './params.js';
 import { paintPage, pageSize } from './page.js';
 import { viewFactor, trimLine, outline, PaintRate } from './preview.js';
+import { onionLayer }     from './onion.js';
 import { Placements }     from './placements.js';
 import { endOf, showsAt } from './time.js';
 import { Editing }        from './editing.js';
@@ -62,7 +63,7 @@ const clock = new Playhead({
   },
   onState: () => {
     if (transport) transport.state();
-    if (!clock.playing && rate) rate.stop();
+    if (!clock.playing && rate) { rate.stop(); draw(); }         // paused, the onion skin comes back
   },
 });
 
@@ -78,7 +79,7 @@ async function boot() {
   const pagePanel = new ParamPanel(page, { title: 'page', mount: document.getElementById('page-side'), groups: PAGE_GROUPS });
 
   listDrawer = placePanel.addDrawer({ id: 'list', title: 'On the page', before: 'object' });
-  editing = new Editing({ placements, place, page, refresh });
+  editing = new Editing({ placements, place, page, refresh, say: t => bar.announce(t) });
   list = new PlacedList({ mount: listDrawer.body, onAdd: () => adder.show(), onAddFrame: () => framer.show(),
                           onChoose: p => { editing.choose(p); toFrameOf(p); },
                           onRemove: () => editing.chosen && editing.takeOff(editing.chosen),
@@ -86,7 +87,8 @@ async function boot() {
   adder = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'Place this',
                            onPick: o => editing.putOn(toPlacement({ ref: o.id, ...AT_REST })) });
   framer = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'The next frame',
-                            onPick: o => { editing.putOn(nextFrame(o.id), { fit: false }); toFrameOf(editing.chosen); } });
+                            onPick: o => { const { block, over } = nextFrame(o.id);
+                                            editing.putOn(block, { fit: false, over }); toFrameOf(editing.chosen); } });
 
   // The player sits above the page's rate, in its drawer, as ckt's does.
   player = pagePanel.drawer('player');
@@ -163,15 +165,19 @@ function refresh() {
  * A flipbook's next frame: the object picked, where the chosen placement is,
  * with its look, starting where it ends and lasting as long. One that had no
  * end is given one first — its own length, a frame for a still — or it would
- * show under every frame after it.
+ * show under every frame after it. Put in after a frame that has others
+ * after it, it makes room: they move on by its length (editing.js `ripple`).
+ * It goes in the stack just over the frame it follows (`over`).
  */
 function nextFrame(ref) {
   const last = editing.chosen || placements.items[placements.length - 1];
   const lasts = last.block.length || Math.max(1, endOf({ at: 0, length: null }, last.handle, page.get('fps')));
   if (last.block.length == null) placements.update(last, { ...last.block, length: lasts });
   const t = last.block.transform;
-  return toPlacement({ ref, x: t.x, y: t.y, scale: t.scale, rot: t.rot, look: last.block.look,
-    at: (last.block.at || 0) + lasts, length: lasts });
+  const at = (last.block.at || 0) + lasts;
+  editing.ripple(at, lasts);
+  return { over: last,
+           block: toPlacement({ ref, x: t.x, y: t.y, scale: t.scale, rot: t.rot, look: last.block.look, at, length: lasts }) };
 }
 
 /** Paused, the page goes to the first frame a chosen placement shows in, when it is not showing. */
@@ -279,7 +285,8 @@ function paint() {
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
 
-  paintPage(ctx, v, placements.layers(clock.tick, v.fps), view);
+  const onion = v.onion && !clock.playing ? onionLayer(placements, clock.tick, clock.length, v, view) : null;
+  paintPage(ctx, v, [...(onion ? [onion] : []), ...placements.layers(clock.tick, v.fps)], view);
   shownView = view;
   trimLine(ctx, size, view);
   outline(ctx, editing.chosen, v, view);

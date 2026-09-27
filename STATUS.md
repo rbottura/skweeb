@@ -10,6 +10,15 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **A flipbook ripples, and has an onion skin** (2026-09-27, the author's
+  ask after trying it; `node scripts/check-frames.mjs`, now 16 checks;
+  `tests/compose-time.mjs`). A frame held longer in its *Time* drawer
+  pushes the frames after it on, cut back pulls them, taken off lets them
+  close up; *Next frame…* after a middle frame makes room and sits in the
+  stack just over the one it follows. Only a chain touching end to start
+  moves. Paused, the frame before shows as a red ghost and the one after as
+  a blue one (`apps/compose/onion.js`), a switch in the player drawer —
+  preview only.
 - **Frames in compose: a flipbook** (2026-09-27, the author's ask;
   `node scripts/check-frames.mjs`, 11 checks). A placement's `at` and
   `length` are honoured at last: its *Time* drawer says from which frame and
@@ -192,9 +201,9 @@ it said is here, shorter, or in the files it points to.
 ## Tests
 
 Twenty-three files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass. Newest: `compose-time` and `compose-placements`
-gained a placement's time — windows, a page's end, a flipbook of three
-stills — then `vault-kin` (who is kin, in what order, a cycle that must not
+all of them, and all pass. Newest: `compose-time` gained the ripple, and
+with `compose-placements` a placement's time — windows, a page's end, a
+flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
 hang), `gpu-filters` (the catalogue as data: licence, schema, the WGSL
 conventions, sizes at print scale) and `delete` (every kind of edge: the
 refusals, the dry plan, cutting loose, the chain; 37 checks).
@@ -270,10 +279,21 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**The motion group's first brick: a still becomes a loop** — `frames` and
-`fps` for a still source, and *bob*, its phase from the tick so the loop
-closes; `apps/filter/STATUS.md` has it. Flipbooks by hand are in compose
-now; bob is the first idle animation a filter makes by itself.
+**M6's first brick: a particle as a function of its slot and its age**
+(`docs/roadmap.md`, M6; the author chose M6 next on 2026-09-27). One pure
+module, `apps/particles/model.js`, no DOM: a point emitter with a rate, a
+lifetime and a period; `particlesAt(recipe, t)` walks the spawn slots whose
+birth lies in the last lifetime, each seeded from the emitter's seed and its
+slot (`core/rng.js`), and places it by closed form from its birth — launch
+speed and spread, gravity, wind, drag. `tests/particles-model.mjs`: the same
+`t` gives the same particles in any order of asking; `t` and `t + period`
+are identical after one lifetime (the loop closes); none older than its
+lifetime; two seeds differ. The app, the stamps renderer moved from ckt
+into core, and sprites from a vault set are the bricks after.
+
+Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
+a still becomes a loop, `frames` and `fps` for a still source and *bob*
+first; `apps/filter/STATUS.md` has it.
 
 Parked behind M5, still wanted: **a gamepad still drawn again at print
 scale** — the last kind M4 prints stretched. A still's recipe carries
@@ -287,6 +307,10 @@ with it.
 
 ## Parked decisions
 
+- **A flipbook ripples; M6 next** (the author, 2026-09-27): an end moved
+  moves what started at it, down the chain, with no switch; the onion skin
+  is preview only. Particles before the rest of M5's catalogue.
+  `docs/decisions.md`.
 - **A flipbook is placements in time, not a new kind** (2026-09-27): stills
   placed one after another with `at` and `length`, saved as a composition.
   No field was added. `docs/decisions.md`.

@@ -68,3 +68,36 @@ export function tickAt(pageTick, handle, fps) {
   if (handle.loop === false) return Math.max(0, Math.min(t, handle.length - 1));
   return ((t % handle.length) + handle.length) % handle.length;
 }
+
+/**
+ * A ripple: the placements that started where one ended move with its end —
+ * and the ones that started where those ended, and on — so a flipbook's
+ * frame held longer, put in, or taken out pushes or pulls the frames after
+ * it instead of stacking over them. Only a chain that touches end to start
+ * moves: what merely comes later, on its own, stays where it was. A
+ * placement with no length ends nowhere, so a chain stops at it.
+ *
+ * @param {object[]} blocks   the page's blocks
+ * @param {number} from       the page frame where the chain starts: an end, as it was
+ * @param {number} by         how far it moves, in frames — negative is earlier
+ * @param {number} [skip]     the index of the block whose end it is, left alone
+ * @returns {object[]}        the blocks, those moved replaced
+ */
+export function ripple(blocks, from, by, skip = -1) {
+  if (!by) return blocks;
+  const out = blocks.slice();
+  const moved = new Set([skip]);
+  let ends = [from];
+  while (ends.length) {
+    const next = [];
+    out.forEach((b, j) => {
+      const at = b.at || 0;
+      if (moved.has(j) || !ends.includes(at)) return;
+      moved.add(j);
+      out[j] = { ...b, at: Math.max(0, at + by) };
+      if (b.length != null) next.push(at + b.length);
+    });
+    ends = next;
+  }
+  return out;
+}

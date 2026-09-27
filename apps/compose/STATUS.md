@@ -22,6 +22,20 @@ done** (2026-09-24).
   by `scripts/check-frames.mjs`: three stills, a loop of three at 8 fps,
   each frame its own and the first again after the last, the press, the
   save, the vault's replay.
+- **The ripple** (2026-09-27, the author's word; `time.js` `ripple`). A
+  placement's end moved moves the ones that started at it, and on down the
+  chain: frame 2 held for two pushes frame 3 and after one frame on; cut
+  back, pulls them; taken off the page, the frames after it close up; and
+  *Next frame…* after a frame with others after it makes room and goes in
+  the stack just over the one it follows, so the list reads in order. Only
+  a chain that touches end to start moves — what comes later on its own
+  stays — and one with no length ends it. The bar says how many moved.
+- **The onion skin** (2026-09-27; `onion.js`). Paused, the frame before the
+  one shown is a red ghost and the frame after it a blue one, under it —
+  only what comes and goes, so a still under the whole page is not
+  doubled; before the first frame is the last. *onion skin, paused* in the
+  player drawer, on by default; preview only, never in a render. Both
+  checked by `scripts/check-frames.mjs`, 16 checks.
 
 - **A placement can carry a look** (2026-09-26, M5's link): the placement
   panel's *look* row takes a chain saved in filter, and the object's frames
@@ -156,8 +170,6 @@ The five bricks are in. What would come after them, none of it started:
   prints stretched: its recipe's `marks` are a recording's events — the same
   shape — its `canvas` the screen, and `frame.from` its crop, so core can
   replay them through the stage at `renderScale`, every mark shown, cropped.
-- **An onion skin** for a flipbook: paused, the frames before and after
-  the one shown, faint, so the next is drawn to follow — preview only.
 - **A timeline**, if the list's frame labels stop being enough: rows by
   time, dragged to move `at` and `length`.
 - **A page length set by hand**, for a post that must be exactly ten seconds.
@@ -173,12 +185,12 @@ The five bricks are in. What would come after them, none of it started:
   it says where the chosen one is; only what shows can be picked up.
 - *Next frame…* repeats a loop placed with no length once: it is given its
   own loop's length on the page before the next frame follows it.
-- **A longer frame does not push the ones after it.** Holding frame 2 for
-  two frames in its *Time* drawer leaves frame 3 starting where it did, so
-  the two overlap for a frame; the later ones are moved by hand. A ripple —
-  the frames that started where it ended move with its end — is the obvious
-  fix, and wants the author's word, since a page that is not a flipbook may
-  not want it.
+- **The ripple follows ends, not intent.** A placement on another layer
+  that happens to start where a frame ends moves with it. On a flipbook that
+  is what is meant; on a page that is not one, it is rare, and the bar says
+  when anything moved.
+- The onion skin ghosts only what comes and goes, so a loop that runs
+  through the flipbook shows no frames of its own either side.
 - Changing the page's `fps`, or anything that changes its length, starts the
   page again from its first frame.
 - A large grid dither still skips ticks while it plays: 21 ms a frame, most
@@ -188,6 +200,6 @@ The five bricks are in. What would come after them, none of it started:
   turned sprite takes it, not what shows through beneath.
 - The picker lists shapes inside their `folder:` groups, closed, so a legacy
   sprite is two clicks away.
-- `main.js` is at 342 lines, the placement editing moved to `editing.js`;
+- `main.js` is at 349 lines, the placement editing moved to `editing.js`;
   `scripts/check-compose.mjs` is at 336, and print scale has a check of its
   own.

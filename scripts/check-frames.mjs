@@ -10,7 +10,10 @@
  * frames, at the flipbook's rate; stepped, each frame shows its own still and
  * then the first again; pressed on, the page gives the frame that shows, not
  * the one stacked over it; saved, its blocks keep their time, and the vault
- * replays it three frames long.
+ * replays it three frames long. Paused, the onion skin shows the frames
+ * either side, and switched off it does not; a frame held longer pushes the
+ * ones after it on, one taken out lets them close up, and one put in after
+ * frame 1 makes room.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -107,6 +110,36 @@ if (o) {
   })()`);
   c.ok('the vault replays it, three frames', replayed === 3, replayed + ' frames');
 }
+
+// The onion skin: paused on frame 2, the frames either side show, faint; switched off, they do not.
+const row = name => `[...document.querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const onionSwitch = `${row('onion skin, paused')}?.querySelector('input')`;
+key('.'); await wait(300);
+const withOnion = await pixels();
+await page.eval(`(() => { const i = ${onionSwitch}; i.checked = false; i.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+await wait(300);
+const without = await pixels();
+c.ok('paused, the onion skin shows the frames either side', apart(withOnion, without) > 4, 'apart by ' + apart(withOnion, without));
+c.ok('switched off, frame 2 is its own still again', apart(without, seen[1]) > 4 && (await page.eval(count)) === '2 / 3',
+  'apart from the onion-skinned one by ' + apart(without, seen[1]));
+await c.shot('2-no-onion');
+
+// The ripple: frame 2 held for two pushes frame 3 on; taken out, the rest close up; one put in makes room.
+const when = () => page.eval(`${rows}.map(r => r.querySelector('.pl-sub').textContent.split(' · ').pop()).reverse().join()`);
+const choose = label => page.click(`${rows}.find(r => r.querySelector('.pl-sub').textContent.endsWith(${JSON.stringify(label)}))`);
+await choose('frame 2');
+await page.typeInto(`${row('for frames (0: its own)')}?.querySelector('.pp-num')`, '2');
+await wait(300);
+const held = await when();
+c.ok('frame 2 held for two pushes frame 3 on', held === 'frame 1,frames 2–3,frame 4', held);
+await page.click(`[...document.querySelectorAll('#place-side .pl-actions .nb-btn')].find(x => x.textContent === 'Remove')`);
+await wait(300);
+const closed = await when();
+c.ok('taken out, the frames after it close up', closed === 'frame 1,frame 2', closed);
+await choose('frame 1');
+await nextFrame(b);
+const room = await when();
+c.ok('a frame put in after frame 1 makes room', room === 'frame 1,frame 2,frame 3', room);
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

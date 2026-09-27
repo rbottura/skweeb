@@ -16,7 +16,7 @@ import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
 import { lookOver }   from '../../core/gpu/look.js';
 import { inkSize }    from './page.js';
-import { moves, tickAt, showsAt, endOf } from './time.js';
+import { moves, tickAt, showsAt, endOf, ripple } from './time.js';
 
 /**
  * An object from the vault as a preview's frames (`draft`): near exact where
@@ -61,15 +61,18 @@ export class Placements {
   blocks() { return this.items.map(p => p.block); }
 
   /**
-   * Put an object on the page, on top. The entry comes back at once; its
-   * object opens behind it (`entry.opening`).
+   * Put an object on the page, on top — or just over the entry `over`, as a
+   * flipbook's next frame goes. The entry comes back at once; its object
+   * opens behind it (`entry.opening`).
    *
    * @param {object} block   a placement block
+   * @param {object} [over]  the entry it goes just over
    */
-  add(block) {
+  add(block, over = null) {
     const p = { block, title: block.ref, type: '', thumb: null, error: null,
                 handle: null, size: null, tick: -1, image: null, loads: 0, opening: null };
-    this.items.push(p);
+    const i = this.items.indexOf(over);
+    this.items.splice(i < 0 ? this.items.length : i + 1, 0, p);
     p.opening = this.open(p);
     this.onChange();
     return p;
@@ -138,11 +141,30 @@ export class Placements {
     return Math.max(1, ...this.items.map(p => endOf(p.block, p.handle, fps)));
   }
 
-  /** What the page draws at one of its ticks: every open entry, bottom first. */
-  layers(pageTick, fps) {
+  /**
+   * The chain that started at page frame `from`, moved `by` frames, and the
+   * entry whose end it was left alone (time.js `ripple`). Their objects stay
+   * open: only when they show has changed. How many moved.
+   */
+  ripple(from, by, skip = null) {
+    const moved = ripple(this.blocks(), from, by, this.items.indexOf(skip));
+    let n = 0;
+    moved.forEach((block, i) => {
+      if (block === this.items[i].block) return;
+      this.items[i].block = block;
+      n++;
+    });
+    return n;
+  }
+
+  /**
+   * What the page draws at one of its ticks: every open entry, bottom first
+   * — or, given `only`, those of them it keeps.
+   */
+  layers(pageTick, fps, only = null) {
     const out = [];
     for (const p of this.items) {
-      if (!p.handle || !showsAt(pageTick, p.block)) continue;
+      if (!p.handle || !showsAt(pageTick, p.block) || (only && !only(p))) continue;
       const image = this.frameOf(p, tickAt(pageTick - (p.block.at || 0), p.handle, fps));
       if (image) out.push({ image, size: p.size, transform: p.block.transform });
     }

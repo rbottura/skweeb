@@ -118,10 +118,12 @@ Both clauses of *Done when* are met. M5 stays open for what the author asked
 it for, a big catalogue: twenty-nine filters — eighteen of them p5.FIP's,
 one glfx.js's,
 grain and glitch at random from a seed, and the game-asset group begun with
-an outline, a drop shadow and palette lock — is under way, not done. The
-fifth brick; motion, for idle animation, next. Frames by hand came first
-(2026-09-27): compose honours a placement's `at` and `length`, and *Next
-frame…* makes a flipbook of stills.
+an outline, a drop shadow and palette lock — is under way, not done. Frames
+by hand came first (2026-09-27): compose honours a placement's `at` and
+`length`, *Next frame…* makes a flipbook of stills, a held frame ripples
+the ones after it, and a paused page shows an onion skin. **Then the author
+chose M6 over the rest of the catalogue** (2026-09-27): motion and time
+filters are parked, not dropped.
 
 **M6 — particles.** A particle is a function of its spawn slot and its age, not
 a step in one shared simulation: seeded from its emitter and its slot, and

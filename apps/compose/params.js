@@ -46,6 +46,9 @@ export const PLACEABLE = ['still', 'sequence', 'shape', 'composition'];
  * will be. Every loop on it keeps its own speed (time.js). 60 by default,
  * because the gamepad records at 60 and ckt loops at 30: at 60 every loop in
  * the suite shows every one of its ticks.
+ *
+ * `onion` is the preview's onion skin (onion.js): paused, the frames either
+ * side of the one shown, faint. Nothing a render draws.
  */
 export function pageParams() {
   const { zoom, ...frame } = frameParams({ format: 'a4' });
@@ -55,6 +58,7 @@ export function pageParams() {
     width:  { ...frame.width, default: 1240 },
     height: { ...frame.height, default: 1754 },
     fps:    { type: 'int', min: 1, max: 60, default: 60, label: 'fps', group: 'player' },
+    onion:  { type: 'bool', default: true, label: 'onion skin, paused', group: 'player' },
     ground: { type: 'ground', default: '#ffffff', label: 'paper', group: 'ground' },
   });
 }
