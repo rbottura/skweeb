@@ -23,6 +23,7 @@ import { pageParams, placeParams, toPlacement, PAGE_GROUPS, PLACE_GROUPS, PLACEA
 import { paintPage, pageSize } from './page.js';
 import { viewFactor, trimLine, outline, PaintRate } from './preview.js';
 import { Placements }     from './placements.js';
+import { endOf, showsAt } from './time.js';
 import { Editing }        from './editing.js';
 import { PlacedList }     from './list.js';
 import { wirePointer }    from './pointer.js';
@@ -41,7 +42,7 @@ const canvas = document.getElementById('page');
 const ctx = canvas.getContext('2d');
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
 
-let page, place, bar, rate, player, transport, list, listDrawer, adder, placements, editing;
+let page, place, bar, rate, player, transport, list, listDrawer, adder, framer, placements, editing;
 const buttons = {};                // the Export drawer's: save, png, frames
 let clockFps = 0;
 let shownView = 1;                 // canvas pixels per page pixel, as last painted
@@ -78,12 +79,14 @@ async function boot() {
 
   listDrawer = placePanel.addDrawer({ id: 'list', title: 'On the page', before: 'object' });
   editing = new Editing({ placements, place, page, refresh });
-  list = new PlacedList({ mount: listDrawer.body, onAdd: () => adder.show(),
-                          onChoose: p => editing.choose(p),
+  list = new PlacedList({ mount: listDrawer.body, onAdd: () => adder.show(), onAddFrame: () => framer.show(),
+                          onChoose: p => { editing.choose(p); toFrameOf(p); },
                           onRemove: () => editing.chosen && editing.takeOff(editing.chosen),
                           onMove: by => editing.chosen && placements.move(editing.chosen, by) });
   adder = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'Place this',
                            onPick: o => editing.putOn(toPlacement({ ref: o.id, ...AT_REST })) });
+  framer = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'The next frame',
+                            onPick: o => { editing.putOn(nextFrame(o.id), { fit: false }); toFrameOf(editing.chosen); } });
 
   // The player sits above the page's rate, in its drawer, as ckt's does.
   player = pagePanel.drawer('player');
@@ -116,7 +119,7 @@ async function boot() {
 
   // The preview is drawn at the size the viewer shows it.
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
-  wirePointer({ canvas, view: () => shownView, page: () => page.values, placements,
+  wirePointer({ canvas, view: () => shownView, page: () => page.values, placements, tick: () => clock.tick,
                 chosen: () => editing.chosen, choose: p => editing.choose(p),
                 moveTo: (x, y) => place.set({ x, y }) });
   wireKeys();
@@ -157,8 +160,29 @@ function refresh() {
 }
 
 /**
- * The page lasts as long as its longest loop, at its own rate; a page with
- * nothing that moves is one frame and does not play. Reconfigured only when
+ * A flipbook's next frame: the object picked, where the chosen placement is,
+ * with its look, starting where it ends and lasting as long. One that had no
+ * end is given one first — its own length, a frame for a still — or it would
+ * show under every frame after it.
+ */
+function nextFrame(ref) {
+  const last = editing.chosen || placements.items[placements.length - 1];
+  const lasts = last.block.length || Math.max(1, endOf({ at: 0, length: null }, last.handle, page.get('fps')));
+  if (last.block.length == null) placements.update(last, { ...last.block, length: lasts });
+  const t = last.block.transform;
+  return toPlacement({ ref, x: t.x, y: t.y, scale: t.scale, rot: t.rot, look: last.block.look,
+    at: (last.block.at || 0) + lasts, length: lasts });
+}
+
+/** Paused, the page goes to the first frame a chosen placement shows in, when it is not showing. */
+function toFrameOf(p) {
+  if (!p || clock.playing || showsAt(clock.tick, p.block)) return;
+  clock.show(p.block.at || 0);
+}
+
+/**
+ * The page lasts until its last placement ends, at its own rate; a page
+ * with nothing that moves or waits its turn is one frame and does not play. Reconfigured only when
  * that changes — a change starts the page again, playing if it was.
  */
 function configureClock() {

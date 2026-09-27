@@ -42,11 +42,14 @@ export class Editing {
     });
   }
 
-  /** A new placement, on top and chosen — placed whole once its object is open. */
-  putOn(block) {
+  /**
+   * A new placement, on top and chosen — placed whole once its object is
+   * open, unless it keeps the place it was given: a flipbook's next frame.
+   */
+  putOn(block, { fit = true } = {}) {
     const p = this.placements.add(block);
     this.choose(p);
-    this.fitWhenOpen(p);
+    if (fit) this.fitWhenOpen(p);
   }
 
   /** Take a placement off the page, and choose the one that was under it. */
@@ -79,8 +82,7 @@ export class Editing {
     }
     if (!v.ref) return this.takeOff(p);
     const renamed = v.ref !== p.block.ref;
-    const { at, length } = p.block;
-    this.placements.update(p, toPlacement(v, { at, length }));
+    this.placements.update(p, toPlacement(v));
     if (renamed) this.fitWhenOpen(p);
     this.refresh();
   }

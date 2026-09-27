@@ -204,19 +204,23 @@ JavaScript to someone else's browser.
 ```
 
 - `version: "latest"` — live. Editing the definition updates this placement.
-- `version: 4` — pinned. An old composition keeps looking as it did.
+- `version: 4` — pinned. An old composition keeps looking as it did. Why
+  `version` and not `at`: `docs/decisions.md`, 2026-09-22.
 - `overrides` — per-placement param values, so two placements of one definition
   can differ. Free, because params are data.
 - `at` — **when**, in frames, measured from the composition's own start.
   `0` for something that is simply there.
 - `length` — how many frames it runs for. `null` means its natural length: for
   a sequence its own loop, played again until the page ends; for a still, the
-  whole page — a still has no time of its own, so it is simply there. A page
-  lasts as long as its longest loop, and one frame when nothing on it moves.
+  rest of the page — a still has no time of its own, so it is simply there.
   Frames are the page's, at its `fps`; a loop keeps its own speed on a page of
-  any rate. Decided by the author 2026-09-24, before a second placement went
-  on a page; until then this read "one frame for a still", which contradicted
-  `at: 0` meaning something simply there.
+  any rate, its first tick at its `at`. A page lasts until the last of its
+  placements ends: `at` plus `length`, or plus its own loop — one frame, for
+  a still. A **flipbook** is stills one after another: `at` 0, 1, 2, each
+  `length` 1. Decided by the author 2026-09-24, before a second placement
+  went on a page; until then this read "one frame for a still", which
+  contradicted `at: 0` meaning something simply there. Honoured by compose
+  since 2026-09-27.
 - `transform` — in the composition's page pixels, before its `scale`: `x` and
   `y` put the object's centre that far from the page's centre, `scale`
   multiplies the object's own size — its ink over the whole loop — and `rot`
@@ -231,14 +235,6 @@ JavaScript to someone else's browser.
   — when there is none, so a block with no look is the block it always was.
   A look is a parent of the page it is on: the page cannot be made again
   without it. Added 2026-09-26 with M5's link, `filter → compose: a look`.
-
-**Why `version` and not `at` for the pin.** This block said `at` for the
-version until 2026-09-22, which worked only while nothing in a placement had a
-time. A composition holds sequences, so a placement needs to say *when* as well
-as *which* — and `at: 4` cannot mean both "version 4" and "starts at frame 4".
-Renamed while it was still only a document and nothing had been written to
-disk in the old shape. The lesson is cheap here and would not have been later:
-a field with two plausible readings has one reading too many.
 
 **Versions.** Editing a `.skw` appends `versions/vN.json` and bumps
 `object.version`. Past versions are immutable, so a pin is a real promise.

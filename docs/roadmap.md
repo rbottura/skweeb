@@ -119,7 +119,9 @@ it for, a big catalogue: twenty-nine filters — eighteen of them p5.FIP's,
 one glfx.js's,
 grain and glitch at random from a seed, and the game-asset group begun with
 an outline, a drop shadow and palette lock — is under way, not done. The
-fifth brick; motion, for idle animation, next.
+fifth brick; motion, for idle animation, next. Frames by hand came first
+(2026-09-27): compose honours a placement's `at` and `length`, and *Next
+frame…* makes a flipbook of stills.
 
 **M6 — particles.** A particle is a function of its spawn slot and its age, not
 a step in one shared simulation: seeded from its emitter and its slot, and

@@ -47,6 +47,16 @@ receives `{ width, height, frame, rng, load }` and returns pixels, and never
 touches `Vault`, the DOM or the network itself. Keep that and sandboxing later
 is "run it in a worker", not a redesign.
 
+**The stage moved into core, and two files came out of it.** The move is
+what M1 promised and what lets a sequence be replayed by something other than
+the gamepad. Two files came *out* of it rather than going in unchanged.
+`bounds.js`, because measuring a
+clip against the registry is a question about a clip and not about the
+player's state — and it took `player.js` back under the 400-line cap. And
+`stamp.js`, because the live brush and the player must expand the same
+patterns from the same code, which `joyImage.js` stated in a comment while
+keeping both halves in one file.
+
 ## Decided since, 2026-09-22
 
 **Video is frames plus ffmpeg, and the muxer is cancelled.** A sequence's
@@ -109,6 +119,14 @@ actually painted. The gamepad's still now crops to its ink, which sequences
 have always done, and the crop goes into the recipe — the marks are in canvas
 coordinates and the render is a window onto them, so a replay without it would
 redraw the whole canvas and believe it matched.
+
+**Why `version` and not `at` for the pin.** The placement block said `at`
+for the version until 2026-09-22, which worked only while nothing in a placement had a
+time. A composition holds sequences, so a placement needs to say *when* as well
+as *which* — and `at: 4` cannot mean both "version 4" and "starts at frame 4".
+Renamed while it was still only a document and nothing had been written to
+disk in the old shape. The lesson is cheap here and would not have been later:
+a field with two plausible readings has one reading too many.
 
 ## Decided since, 2026-09-23
 
@@ -273,6 +291,18 @@ The whole vault still joins them, so two loops made from one dot-set in a
 folder sit together and name it. A `lineage` switch in the panel's head
 lays them out one by one. And a folder should not look like one more
 object: it is shorter now, a peek of its members on a small stack.
+
+**A flipbook is placements in time, not a new kind.** The author, on
+2026-09-27: idle animation wants a few frames by hand before it wants motion
+filters. The placement block has said *when* since 2026-09-22 — `at` and
+`length`, in the page's frames — and nothing honoured it; compose now does.
+So a flipbook is stills placed one after another and saved as a composition:
+a loop the vault replays and exports, each frame still its own object with
+its lineage. No field was added. *Next frame…* puts the object picked where
+the chosen one is, with its look, from where it ends, for as long; one with
+no length is given its own first, or it would show under every frame after
+it. And a press on the page picks up only what shows at the page's tick,
+since a flipbook's frames are stacked in one place.
 
 **A shader carries its licence, as a font does.** Rule 5 now covers shaders. The
 filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA

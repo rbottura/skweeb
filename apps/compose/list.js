@@ -20,13 +20,16 @@ function button(label, onClick, { primary = false, title = '' } = {}) {
   return b;
 }
 
-/** A row's second line: what it is, and how big it stands on the page. */
+/** A row's second line: what it is, how big it stands on the page, and when it shows. */
 function about(p) {
   if (p.error) return 'could not open it';
   if (!p.handle) return 'opening…';
   const s = p.block.transform.scale;
   const loop = p.handle.length > 1 ? ` · ${p.handle.length} at ${p.handle.fps} fps` : '';
-  return `${p.type} · ${Math.round(p.size.width * s)} × ${Math.round(p.size.height * s)}${loop}`;
+  const { at, length } = p.block;
+  const when = length != null ? ` · frame${length > 1 ? 's' : ''} ${at + 1}${length > 1 ? '–' + (at + length) : ''}`
+    : at ? ` · from frame ${at + 1}` : '';
+  return `${p.type} · ${Math.round(p.size.width * s)} × ${Math.round(p.size.height * s)}${loop}${when}`;
 }
 
 export class PlacedList {
@@ -35,10 +38,11 @@ export class PlacedList {
    * @param {HTMLElement} opts.mount
    * @param {(entry: object) => void} opts.onChoose
    * @param {() => void} opts.onAdd
+   * @param {() => void} opts.onAddFrame   the next frame of a flipbook
    * @param {() => void} opts.onRemove
    * @param {(by: number) => void} opts.onMove   +1 forward, -1 backward
    */
-  constructor({ mount, onChoose, onAdd, onRemove, onMove }) {
+  constructor({ mount, onChoose, onAdd, onAddFrame, onRemove, onMove }) {
     this.onChoose = onChoose;
     this.root = el('div', 'pl');
     this.rows = el('div', 'pl-rows');
@@ -46,7 +50,9 @@ export class PlacedList {
     this.up = button('↑', () => onMove(+1), { title: 'Forward: drawn over the one above it  ]' });
     this.down = button('↓', () => onMove(-1), { title: 'Backward: drawn under the one below it  [' });
     this.remove = button('Remove', onRemove, { title: 'Off the page  Del' });
-    actions.append(button('Add…', onAdd, { primary: true }), this.up, this.down, this.remove);
+    this.frame = button('Next frame…', onAddFrame,
+      { title: 'After the chosen one, in its place, for as long: a flipbook’s next frame' });
+    actions.append(button('Add…', onAdd, { primary: true }), this.frame, this.up, this.down, this.remove);
     this.root.append(this.rows, actions);
     mount.append(this.root);
   }
@@ -73,6 +79,8 @@ export class PlacedList {
     }
     const at = items.indexOf(chosen);
     this.remove.disabled = at < 0;
+    const follows = chosen || items[items.length - 1];            // how long it lasts is known once it is open
+    this.frame.disabled = !follows || !follows.handle;
     this.up.disabled = at < 0 || at === items.length - 1;
     this.down.disabled = at <= 0;
   }

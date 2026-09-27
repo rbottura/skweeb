@@ -130,6 +130,24 @@ const objects = {
   ok('taken off, its object is disposed', s.disposed, true);
 }
 
+// -- a flipbook: stills one after another, a frame each ------------------------
+{
+  const frames = {};
+  for (const f of ['one', 'two', 'three']) frames[f] = { type: 'still', make: () => fake(f) };
+  const g = gate(frames);
+  const list = new Placements({ load: g.load });
+  list.add({ ...block('one'), at: 0, length: 1 });
+  list.add({ ...block('two'), at: 1, length: 1 });
+  list.add({ ...block('three'), at: 2, length: 2 });
+  for (const f of ['one', 'two', 'three']) await g.finish(f);
+  ok('the page as long as its last frame reaches', list.frames(12), 4);
+  ok('it moves, though nothing on it does', list.moving, true);
+  ok('each frame shows alone, in turn', [0, 1, 2, 3].map(t => list.layers(t, 12).map(l => l.image.id).join()),
+     ['one', 'two', 'three', 'three']);
+  const late = new Placements({ load: gate({ pad: objects.pad }).load });
+  ok('an empty page is one frame', late.frames(60), 1);
+}
+
 // -- which of compose's objects it takes back ---------------------------------
 {
   const { reopens, places } = await import('../apps/compose/rebuild.js');

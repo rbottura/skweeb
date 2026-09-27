@@ -24,6 +24,7 @@ export const PAGE_GROUPS = {
 export const PLACE_GROUPS = {
   object:    { label: 'Object', open: true },
   transform: { label: 'Transform', open: true },
+  time:      { label: 'Time', open: false },
 };
 
 /**
@@ -72,6 +73,13 @@ export function placeParams() {
     y: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'y from centre', group: 'transform' },
     scale: { type: 'range', min: 0.01, max: 8, step: 0.01, default: 1, label: 'scale', group: 'transform' },
     rot: { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'rotation °', group: 'transform' },
+    /**
+     * When, in the page's frames: from `at`, for `length` — 0 its own, which
+     * for a still is the rest of the page and for a loop its loop, again and
+     * again. A flipbook is stills one after another, a frame or a few each.
+     */
+    at:     { type: 'int', min: 0, max: 100000, default: 0, label: 'from frame', group: 'time' },
+    length: { type: 'int', min: 0, max: 100000, default: 0, label: 'for frames (0: its own)', group: 'time' },
   });
 }
 
@@ -83,8 +91,10 @@ export function placeParams() {
  * `look` is there only when there is one, so a block with none is the block
  * it always was.
  */
-export function toPlacement(values, { at = 0, length = null } = {}) {
+export function toPlacement(values) {
   const { ref, x, y, scale, rot, look } = values;
+  const at = Math.max(0, Math.round(values.at || 0));
+  const length = values.length > 0 ? Math.round(values.length) : null;
   return { ref, version: 'latest', transform: { x, y, scale, rot }, at, length, ...(look ? { look } : {}) };
 }
 
@@ -92,7 +102,7 @@ export function toPlacement(values, { at = 0, length = null } = {}) {
 export function fromPlacement(block) {
   const t = (block && block.transform) || {};
   return { ref: (block && block.ref) || null, x: t.x, y: t.y, scale: t.scale, rot: t.rot,
-           look: (block && block.look) || null };
+           look: (block && block.look) || null, at: (block && block.at) || 0, length: (block && block.length) || 0 };
 }
 
 /**

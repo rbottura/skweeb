@@ -1,11 +1,27 @@
 # STATUS — compose
-_last touched: 2026-09-26_
+_last touched: 2026-09-27_
 
 M4's app: objects from every process placed on one page, previewed live and
 rendered out (`docs/roadmap.md`, M4). Built in five bricks, all in: **M4 is
 done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome
+
+- **Frames: a flipbook** (2026-09-27, the author's ask). A placement's `at`
+  and `length` are honoured (`time.js` `showsAt`, `endOf`): the *Time*
+  drawer of the `placed` panel says from which frame and for how many, 0
+  its own — for a still the rest of the page, for a loop its loop, again
+  and again, from its first tick at its `at`. The page lasts until the last
+  placement ends. *Next frame…*, under *On the page*, opens the picker and
+  puts the object picked where the chosen one is — the top one, if none —
+  with its look, from where it ends and for as long; one with no length is
+  given its own first. Waits for the one it follows to open, since its
+  length is known then. Paused, a row chosen in the list, or a next frame
+  added, is shown; the rows say `frame 2`, `frames 3–4`, `from frame 5`.
+  A press on the page picks up only what shows at the page's tick. Checked
+  by `scripts/check-frames.mjs`: three stills, a loop of three at 8 fps,
+  each frame its own and the first again after the last, the press, the
+  save, the vault's replay.
 
 - **A placement can carry a look** (2026-09-26, M5's link): the placement
   panel's *look* row takes a chain saved in filter, and the object's frames
@@ -140,8 +156,10 @@ The five bricks are in. What would come after them, none of it started:
   prints stretched: its recipe's `marks` are a recording's events — the same
   shape — its `canvas` the screen, and `frame.from` its crop, so core can
   replay them through the stage at `renderScale`, every mark shown, cropped.
-- **A timeline**, if the author wants one: `at` and `length` are in every
-  block and honoured by nothing yet.
+- **An onion skin** for a flipbook: paused, the frames before and after
+  the one shown, faint, so the next is drawn to follow — preview only.
+- **A timeline**, if the list's frame labels stop being enough: rows by
+  time, dragged to move `at` and `length`.
 - **A page length set by hand**, for a post that must be exactly ten seconds.
 
 ## Known
@@ -151,10 +169,10 @@ The five bricks are in. What would come after them, none of it started:
 - A print export draws its page on one canvas. Tried up to A4 at scale 2,
   2480 × 3508; a browser caps a canvas's area — about 268 million pixels in
   Chrome — and the largest sheets at scale 4 are past that. Untested there.
-- `at` and `length` are in every block and honoured by nothing yet: every
-  placement starts at the page's first frame and runs its natural length.
-  A timeline to set them is not one of the five bricks; it is the next thing
-  after them, if the author wants one.
+- The chosen placement's outline is drawn on every frame, shown or not, so
+  it says where the chosen one is; only what shows can be picked up.
+- *Next frame…* repeats a loop placed with no length once: it is given its
+  own loop's length on the page before the next frame follows it.
 - Changing the page's `fps`, or anything that changes its length, starts the
   page again from its first frame.
 - A large grid dither still skips ticks while it plays: 21 ms a frame, most
@@ -164,6 +182,6 @@ The five bricks are in. What would come after them, none of it started:
   turned sprite takes it, not what shows through beneath.
 - The picker lists shapes inside their `folder:` groups, closed, so a legacy
   sprite is two clicks away.
-- `main.js` is at 319 lines, the placement editing moved to `editing.js`;
+- `main.js` is at 342 lines, the placement editing moved to `editing.js`;
   `scripts/check-compose.mjs` is at 336, and print scale has a check of its
   own.

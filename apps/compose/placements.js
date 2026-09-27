@@ -16,7 +16,7 @@ import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
 import { lookOver }   from '../../core/gpu/look.js';
 import { inkSize }    from './page.js';
-import { moves, framesOnPage, tickAt } from './time.js';
+import { moves, tickAt, showsAt, endOf } from './time.js';
 
 /**
  * An object from the vault as a preview's frames (`draft`): near exact where
@@ -52,8 +52,10 @@ export class Placements {
 
   get length() { return this.items.length; }
 
-  /** Whether anything on the page moves. */
-  get moving() { return this.items.some(p => moves(p.handle)); }
+  /** Whether the page changes over time: a loop on it, or anything shown for a while and not for all of it. */
+  get moving() {
+    return this.items.some(p => moves(p.handle) || (p.block.at || 0) > 0 || p.block.length != null);
+  }
 
   /** The blocks, bottom first: the composition's `place` list. */
   blocks() { return this.items.map(p => p.block); }
@@ -131,17 +133,17 @@ export class Placements {
     return p;
   }
 
-  /** How long the page is, in its frames: its longest loop, or one. */
+  /** How long the page is, in its frames: until its last placement ends, or one. */
   frames(fps) {
-    return Math.max(1, ...this.items.map(p => framesOnPage(p.handle, fps)));
+    return Math.max(1, ...this.items.map(p => endOf(p.block, p.handle, fps)));
   }
 
   /** What the page draws at one of its ticks: every open entry, bottom first. */
   layers(pageTick, fps) {
     const out = [];
     for (const p of this.items) {
-      if (!p.handle) continue;
-      const image = this.frameOf(p, tickAt(pageTick, p.handle, fps));
+      if (!p.handle || !showsAt(pageTick, p.block)) continue;
+      const image = this.frameOf(p, tickAt(pageTick - (p.block.at || 0), p.handle, fps));
       if (image) out.push({ image, size: p.size, transform: p.block.transform });
     }
     return out;

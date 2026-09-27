@@ -7,7 +7,7 @@
  * that closes on the page when it closes on its own, a picture that holds.
  */
 
-const { moves, framesOnPage, tickAt } = await import('../apps/compose/time.js');
+const { moves, framesOnPage, tickAt, showsAt, endOf } = await import('../apps/compose/time.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -49,6 +49,16 @@ const odd = { length: 668, fps: 60, loop: true };
 ok('668 ticks at 60 on a 24 fps page', framesOnPage(odd, 24), 267);
 ok('never past the loop\'s last tick', Math.max(...ticks(odd, 24)), 665);
 ok('never going back', ticks(odd, 24).every((t, i, a) => !i || t >= a[i - 1]), true);
+
+// A placement's time: from `at`, for `length` — or to the page's end.
+const frame2 = { at: 2, length: 3 };
+ok('a window shows from its start, for its length', [1, 2, 4, 5].map(t => showsAt(t, frame2)), [false, true, true, false]);
+ok('with no length, from its start to the page\'s end', [0, 1, 999].map(t => showsAt(t, { at: 1, length: null })), [false, true, true]);
+ok('a block with no time at all shows throughout', showsAt(500, {}), true);
+const still = { length: 1, fps: 0 };
+ok('a still reaches a frame past its start, or as far as its length',
+   [endOf({ at: 4, length: null }, still, 60), endOf({ at: 4, length: 3 }, still, 60)], [5, 7]);
+ok('a loop with no length reaches as far as its own loop', endOf({ at: 10, length: null }, gamepad, 30), 10 + 137);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

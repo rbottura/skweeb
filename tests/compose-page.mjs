@@ -95,9 +95,17 @@ ok('a placement is the object model\'s block', block,
    { ref: 'gam_1_abc', version: 'latest', transform: { x: -40, y: 12, scale: 0.5, rot: 15 }, at: 0, length: null });
 place.reset();
 place.restore(Params.fromPlacement(block));
-ok('and comes back from it', place.values, { ref: 'gam_1_abc', look: null, x: -40, y: 12, scale: 0.5, rot: 15 });
+ok('and comes back from it', place.values, { ref: 'gam_1_abc', look: null, x: -40, y: 12, scale: 0.5, rot: 15, at: 0, length: 0 });
 place.restore(Params.fromPlacement({ ref: 'gam_2_def' }));
-ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', look: null, x: 0, y: 0, scale: 1, rot: 0 });
+ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', look: null, x: 0, y: 0, scale: 1, rot: 0, at: 0, length: 0 });
+
+// Its time: from a frame, for some — a length of 0 in the panel is null in the block, its own.
+place.set({ ref: 'gam_1_abc', at: 3, length: 2 });
+const timed = Params.toPlacement(place.values);
+ok('a placement keeps when it shows', [timed.at, timed.length], [3, 2]);
+ok('a length of 0 is its own, null', Params.toPlacement({ ...place.values, length: 0 }).length, null);
+place.restore(Params.fromPlacement(timed));
+ok('and comes back with its time', [place.values.at, place.values.length], [3, 2]);
 
 // A look over it (M5's link): in the block only when there is one.
 place.set({ ref: 'gam_1_abc', look: 'fil_1_look' });
