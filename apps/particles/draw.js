@@ -21,8 +21,40 @@ export function pictureSize(picture) {
   return { width: picture.width + bleed * 2, height: picture.height + bleed * 2 };
 }
 
+/** Nearer than this to the camera, a particle is behind it, or too close to draw. */
+const NEAR = 1;
+
 /**
- * Every particle, stacked by `order`: the newest on top — the model gives
+ * The camera: which particles are drawn, in what order, how far each is
+ * scaled. A particle `z` deep is seen `focal / (focal + z)` its size, as far
+ * from the picture's centre as that says — the picture's plane, z = 0, at
+ * 1, exactly as drawn without depth. Stacked by `order` first — the model
+ * gives them oldest first, so `over` keeps that and `under` turns it round —
+ * then, when anything has depth, the far ones first; a stable sort, so two
+ * at one depth keep the stacking. One behind the camera is left out.
+ *
+ * @param {object[]} particles   oldest first
+ * @param {string} order         'over' | 'under'
+ * @param {number} focal         px from the camera to the picture's plane
+ * @returns {Array<{p: object, k: number}>}   in draw order; `k` the scale
+ */
+export function drawOrder(particles, order, focal) {
+  const f = focal > 0 ? focal : 800;
+  const out = [];
+  let deep = false;
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[order === 'under' ? particles.length - 1 - i : i];
+    const z = p.z || 0;
+    if (z) deep = true;
+    if (f + z < NEAR) continue;
+    out.push({ p, k: f / (f + z) });
+  }
+  if (deep) out.sort((a, b) => (b.p.z || 0) - (a.p.z || 0));
+  return out;
+}
+
+/**
+ * Every particle, stacked by `order` and depth (`drawOrder`): the newest on top — the model gives
  * them oldest first — or, `under`, the newest behind, drawn newest first.
  * Redrawn whole every frame, so the order is simply the loop's; nothing
  * needs a composite operation. Each is a sprite of the set —
@@ -60,13 +92,11 @@ export function drawParticles(ctx, particles, picture, scale, sprites = null) {
   const grow = picture.grow ?? 1;
   const growing = easing(picture.growEase), fading = easing(picture.fadeEase);
   const n = sprites ? sprites.length : 0;
-  const under = picture.order === 'under';
-  for (let i = 0; i < particles.length; i++) {
-    const p = particles[under ? particles.length - 1 - i : i];
-    const w = picture.size * scale * (1 + (grow - 1) * growing(p.t));
+  for (const { p, k } of drawOrder(particles, picture.order, picture.focal)) {
+    const w = picture.size * scale * k * (1 + (grow - 1) * growing(p.t));
     const alpha = picture.fade ? 1 - fading(p.t) : 1;
     if (w <= 0 || alpha <= 0) continue;
-    const x = ox + p.x * scale, y = oy + p.y * scale;
+    const x = ox + p.x * k * scale, y = oy + p.y * k * scale;
     ctx.globalAlpha = Math.min(1, alpha);
     if (!n) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);

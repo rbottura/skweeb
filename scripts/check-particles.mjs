@@ -15,7 +15,8 @@
  * at scale 2, reopened by `?open=`, and placed on a compose page; its frames
  * zipped, and a sprite sheet with its JSON, cropped to the torch. A ring
  * aimed outward blooms; a stream through a vortex and curl noise still
- * closes its loop, and a frame of it costs less than a 60 fps frame.
+ * closes its loop, and a frame of it costs less than a 60 fps frame; tilted
+ * into depth behind a close camera, it is another picture and still a loop.
  */
 
 import fs   from 'node:fs';
@@ -24,6 +25,16 @@ import { startCheck } from './check-kit.mjs';
 
 const c = await startCheck();
 const { page } = c;
+const DL = path.join(c.dir, 'downloads');
+/** A downloaded file whose name ends so, once it has finished. */
+const downloaded = async ending => {
+  for (let i = 0; i < 100; i++) {
+    const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.endsWith(ending));
+    if (f) return path.join(DL, f);
+    await new Promise(r => setTimeout(r, 200));
+  }
+  return null;
+};
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const count = `(document.querySelector('.tp-count')?.textContent || '')`;
 const alive = async () => Number(((await page.eval(say)).match(/^(\d+) alive/) || [])[1] || -1);
@@ -236,19 +247,10 @@ if (picked) {
       still ? `${still.type}, tick ${still.recipe.tick}` : '');
 
     // Every frame, zipped: 60 PNGs and a meta.json with the rate.
-    const DL = path.join(c.dir, 'downloads');
     await page.downloadsTo(DL);
     await page.eval(`document.querySelector('.bar-say').textContent = ''`);
     await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download every frame (zip)')`);
     await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 120000 });
-    const downloaded = async ending => {
-      for (let i = 0; i < 100; i++) {
-        const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.endsWith(ending));
-        if (f) return path.join(DL, f);
-        await wait(200);
-      }
-      return null;
-    };
     const zip = await downloaded('_frames.zip');
     const entries = zip ? readZip(zip) : [];
     const metaEntry = entries.find(e => e.name === 'meta.json');
@@ -320,6 +322,17 @@ await scrubTo(12);
 c.ok('a ring aimed outward blooms', apart(await pixels(), torchAt20) > 4, 'apart by ' + apart(await pixels(), torchAt20).toFixed(1));
 await c.shot('7-ring-bloom');
 
+// The one-shot as a sprite sheet too: M6's Done when — a torch loop and a burst, both as sheets.
+await page.downloadsTo(DL);
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download a sprite sheet')`);
+await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 120000 });
+const burstZip = await downloaded('particles_burst_55f_sheet.zip');
+const burstJson = burstZip ? readZip(burstZip).find(e => e.name.endsWith('.json')) : null;
+const burstSheet = burstJson ? JSON.parse(burstJson.bytes.toString()) : null;
+c.ok('a burst leaves as a sprite sheet too, tagged as played once', !!burstSheet && burstSheet.frames.length === 55
+  && burstSheet.meta.frameTags[0].loop === false, burstSheet ? `${burstSheet.frames.length} frames, ${JSON.stringify(burstSheet.meta.frameTags[0])}` : await page.eval(say));
+
 // A stream through a vortex and curl noise: every frame still its own, the loop still closed.
 await chip('mode', 'stream');
 await chip('emitter', 'disc');
@@ -341,6 +354,25 @@ const ms = await page.eval(`(async () => {
 })()`);
 c.ok('a frame through the fields costs less than a 60 fps frame', ms < 16, ms.toFixed(1) + ' ms');
 await c.shot('8-swirl');
+
+// Depth: the cone tilted into it, a camera close in — far ones small, near ones large, and still a loop.
+await set('vortex px/s²', '0');
+await set('curl noise px/s²', '0');
+await set('into depth °', '160');
+await set('focal px', '400');
+await scrubTo(24);
+const deep = await pixels();
+await set('into depth °', '0');
+await scrubTo(24);
+const flatNow = await pixels();
+c.ok('into depth, the same stream is another picture', apart(deep, flatNow) > 2, 'apart by ' + apart(deep, flatNow).toFixed(1));
+await set('into depth °', '160');
+await scrubTo(59); key('.'); await wait(300);
+for (let i = 0; i < 24; i++) key('.');
+await wait(500);
+c.ok('in depth, the loop still closes pixel for pixel', apart(await pixels(), deep) === 0,
+  `${await page.eval(count)}, apart by ${apart(await pixels(), deep)}`);
+await c.shot('9-depth');
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

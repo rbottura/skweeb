@@ -10,6 +10,13 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **Particles have depth, and M6's *Done when* is met** (2026-09-27, brick 6;
+  `check-particles`, 48 checks; `particles-model`, 68). A z per particle —
+  the cone tilted into depth — and a camera: far ones smaller, drawn first.
+  A torch loop with a set's sprites and a one-shot burst both leave as
+  sprite sheets, the burst tagged as played once. `check-compose` no longer
+  lets a loop shorter than 2.5 s wrap before it asks whether it moved —
+  a saved particles loop, 2 s long, had shown it.
 - **Particles leave from a line, a disc or a ring, and swirl** (2026-09-27,
   M6 brick 5; `check-particles`, 45 checks; `tests/noise.mjs`). A burst
   from a ring aimed outward blooms; a vortex, an attractor and curl noise
@@ -319,8 +326,11 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M6, brick 6: depth** — `apps/particles/STATUS.md` has it: a z for each
-particle and a simple camera, far ones drawn first and smaller.
+**Point an engine at a particles sheet** — M6's last unchecked word: a
+Phaser or PixiJS page of a dozen lines in `scripts/`, loading a downloaded
+sheet and its JSON and playing it. Then the author's call between the rest
+of M6 (`apps/particles/STATUS.md`: colour over life, a shape as emitter),
+M7, and the gamepad's *newest behind*.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

@@ -165,14 +165,17 @@ try {
     const frames = Math.round((render.frames * 60) / render.fps);
     ok(`${kind}: the page lasts the loop, in time`, (await playerNote()).startsWith(frames + ' frames'),
        `${render.frames} at ${render.fps} fps → ${await playerNote()}`);
+    // Played for 2.5 s — or, for a loop shorter than that, most of it, so it
+    // cannot wrap round to a frame that looks like it never moved.
+    const ms = Math.min(2500, (frames / 60) * 1000 * 0.8);
     const first = await pixels();
     await press(' ');
-    await wait(2500);
+    await wait(ms);
     const rate = await page.eval(`document.querySelector('.bar span:nth-child(3)').textContent`);
     await press(' ');
     const at = await count();
-    ok(`${kind}: plays in real time, and moves`, at > 60 && (await pixels()) !== first,
-       `frame ${at} after 2.5 s, painting ${rate || 'nothing'}`);
+    ok(`${kind}: plays in real time, and moves`, at > (ms * 60 / 1000) * 0.4 && (await pixels()) !== first,
+       `frame ${at} after ${(ms / 1000).toFixed(1)} s, painting ${rate || 'nothing'}`);
     await press('.');
     ok(`${kind}: paused, a key steps one frame`, (await count()) === (at % frames) + 1);
   }

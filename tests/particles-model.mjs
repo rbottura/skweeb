@@ -10,6 +10,7 @@
 
 const { particlesAt, prepare, motion, slot, duration, MAX_ALIVE } = await import('../apps/particles/model.js');
 const { integrate, fieldOf, STEP } = await import('../apps/particles/forces.js');
+const { drawOrder } = await import('../apps/particles/draw.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -161,6 +162,26 @@ const turned = particlesAt({ ...still0, vortex: 300 }, 0.3)[0];
 ok('a vortex turns it clockwise: right of centre, it goes down', turned.vy > 0 && turned.y > 0, true);
 ok('its steps are 120 a second', STEP, 1 / 120);
 ok('a field is null when nothing pulls', fieldOf(prepare({ vortex: 0, attract: 0, noise: 0 })), null);
+
+// -- Depth, and the camera that turns it into size --------------------------
+
+ok('with no depth asked, every particle is in the plane', particlesAt(torch, 0.9).every(p => p.z === 0 && p.vz === 0), true);
+const deepR = { ...torch, depthSpread: 120, z: 50 };
+const deepP = particlesAt(deepR, 0.9);
+ok('tilted into depth, they spread either side', deepP.some(p => p.z > 50) && deepP.some(p => p.z < 50), true);
+ok('and still close their loop', particlesAt(deepR, 2.9).map(p => +p.z.toFixed(6)), deepP.map(p => +p.z.toFixed(6)));
+ok('depth draws nothing it drew before differently', deepP.map(p => p.pick), particlesAt(torch, 0.9).map(p => p.pick));
+const drift = particlesAt({ seed: 1, mode: 'burst', count: 1, spread: 0, speedSpread: 0, lifeSpread: 0, gravity: 0,
+                            drag: 2, speed: 100, depthSpread: 0, life: 50 }, 40)[0];
+ok('in the plane, a burst never leaves it', drift.z, 0);
+const flat3 = [{ z: 0, id: 'a' }, { z: 0, id: 'b' }, { z: 0, id: 'c' }];
+ok('the camera, with no depth: the order as stacked, all at 1', drawOrder(flat3, 'over', 800).map(d => [d.p.id, d.k]),
+   [['a', 1], ['b', 1], ['c', 1]]);
+ok('newest behind turns it round', drawOrder(flat3, 'under', 800).map(d => d.p.id), ['c', 'b', 'a']);
+const deep3 = [{ z: 0, id: 'plane' }, { z: 800, id: 'far' }, { z: -400, id: 'near' }];
+ok('with depth, far first, near last', drawOrder(deep3, 'over', 800).map(d => d.p.id), ['far', 'plane', 'near']);
+ok('as far again as the focal is half the size, and half as near twice', drawOrder(deep3, 'over', 800).map(d => d.k), [0.5, 1, 2]);
+ok('behind the camera, left out', drawOrder([{ z: -900 }, { z: 0 }], 'over', 800).length, 1);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

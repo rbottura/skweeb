@@ -19,14 +19,15 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 5. **Emitters and forces** — done 2026-09-27: a line, a disc, a ring, aimed
    outward or not; a vortex, an attractor and curl noise. A shape's alpha
    as an emitter, and a field from another object, are still to come.
-6. **Depth**: x, y and z behind a simple camera, sprites sorted by depth.
+6. **Depth** — done 2026-09-27: a z for each particle, a camera, far ones
+   drawn first and smaller.
 7. **Sprite-sheet export** — done 2026-09-27, ahead of 5 and 6
    (`core/spritesheet.js`).
 
 ## Works now
 
 - **A particle is a function of its slot and its age** (`model.js`,
-  `tests/particles-model.mjs`, now 58 checks). A stream emits `rate` a second as
+  `tests/particles-model.mjs`, now 68 checks). A stream emits `rate` a second as
   `rate × period` slots a loop; slot `k` draws everything from the seed and
   `k mod n`, so slot `k + n` is slot `k` one period on, and the picture at
   `t + period` is the picture at `t` — checked to a millionth of a pixel,
@@ -41,7 +42,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 45 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 48 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -111,19 +112,35 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   formula places them, as before. The noise is `core/noise.js`: WGSL's
   `pcg` bit for bit, gradient noise from eight directions with its exact
   slope in one pass, so a frame through the fields is 2.3 ms, not 27.
+- **Depth** (2026-09-27, brick 6). Each particle has a `z`: the emitter's
+  depth, and the cone tilted into depth by up to half of *into depth °*
+  either way — a new draw at the end of the slot; drag slows it in depth,
+  gravity and the fields stay in the plane. The picture's *Camera* drawer
+  has a focal length: a particle `z` deep is `focal / (focal + z)` its size
+  and as far from the centre (`draw.js` `drawOrder`), far ones drawn first,
+  those behind the camera left out. With every z at 0 the scale is exactly
+  1, so a flat recipe draws as it always did; no switch. A stream in depth
+  still closes its loop pixel for pixel.
+- **M6's *Done when* is met** (2026-09-27): a torch loop that closes
+  exactly, drawn with a vault set's sprites and scrubbed to any frame, and
+  a one-shot burst, both leaving as sprite sheets — the burst's tag says it
+  plays once. The JSON is Aseprite's array format; no engine has been
+  pointed at one yet.
 - **It opens on a torch**: rising, warm, shrinking as it goes — the app's
   defaults, not the model's, which stay a plain fountain.
 
 ## Known
 
 - A slot's draws are in a fixed order — jitter, life, speed, angle, pick,
-  turn, twist, spot, spot — and new ones go at the end, or saved recipes
-  redraw differently.
+  turn, twist, spot, spot, lift — and new ones go at the end, or saved
+  recipes redraw differently.
 - A field costs a particle's age in steps, each frame: a long life through
   one is the slow case — 20 s lives are 2400 steps each.
 - The fields do not move in time — a moving field would have to repeat
   with the loop to keep it closed.
-- 2D only: z and the camera are brick 6.
+- Depth has no gravity or field of its own, and the emitter's shape stays
+  in the plane: a disc is flat, facing the camera.
+- The camera looks at the picture's centre and cannot move or turn.
 - A picture carries its ground onto a compose page: an opaque square
   round the torch. For placing over other things, set the ground to none.
 - A loop's thumbnail is its whole picture, so a narrow torch on a square
@@ -140,8 +157,15 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Next single step
 
-**Brick 6: depth.** A `z` for each particle — launched in a 3D cone, the
-forces in z too — and a simple camera: a focal length and its distance, so
-a particle's drawn size and position are divided by its depth, and the
-particles drawn far first. Still a function of slot and age, so a loop
-still closes; checked the same way.
+M6's seven bricks are in and its *Done when* met. What is left of it, none
+started, in the order it would pay:
+
+- **Load a sheet in an engine** — a Phaser or PixiJS page of a dozen lines
+  in `scripts/`, pointed at a downloaded sheet, the one thing *Done when*
+  says that no check has done.
+- **Colour over life** — for dots, and a tint for sprites: a `color[]`
+  ramp run along a curve.
+- **A shape's alpha as an emitter** — a still or shape from the vault, the
+  spot drawn where its alpha is.
+- **A field from another object** — M7's link, `fractal → particles: a
+  field`, once there is a fractal to take it from.

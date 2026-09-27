@@ -30,7 +30,7 @@
  * is over when the longest of them is.
  *
  * A slot's draws are made in a fixed order — jitter, life, speed, angle,
- * pick, turn, twist, spot, spot — and a new one is only ever added at the end, so a
+ * pick, turn, twist, spot, spot, lift — and a new one is only ever added at the end, so a
  * recipe saved today draws the same particles after the model has grown.
  *
  * ── Motion ─────────────────────────────────────────────────────────────────
@@ -48,7 +48,16 @@
  * A vortex, an attractor and curl noise have no closed form: with any of
  * them on, a particle is integrated from its own birth (forces.js), which
  * keeps every promise above at the cost of its age in steps. A field from
- * another object, and depth, come in their own bricks.
+ * another object comes in its own brick.
+ *
+ * ── Depth ──────────────────────────────────────────────────────────────────
+ *
+ * A particle has a `z` too: 0 the picture's plane, more is further away. It
+ * leaves from the emitter's `z`, its cone tilted out of the plane by up to
+ * `depthSpread` / 2 degrees either way, and drag slows it in depth as in the
+ * plane; gravity, wind and the fields stay in the plane. The camera that
+ * turns depth into size and place is the picture's (draw.js); a model with
+ * no depth — the default — has every z at 0, and draws as it always did.
  *
  * ── Where it leaves from ───────────────────────────────────────────────────
  *
@@ -99,6 +108,8 @@ export const DEFAULTS = {
   attract: 0,           // px/s², towards the centre
   noise: 0,             // px/s², along curl noise
   noiseScale: 200,      // px, the noise's features
+  z: 0,                 // px, the emitter's depth: more is further away
+  depthSpread: 0,       // degrees, the cone tilted out of the plane, the whole of it
 };
 
 /**
@@ -169,16 +180,17 @@ export function slot(m, k) {
   const turn = m.turn * (rng() - 0.5) * DEG;
   const spin = m.spin * (1 + m.spinSpread * (rng() * 2 - 1)) * DEG;
   const spot = spotOf(m, rng(), rng());
+  const lift = (m.depthSpread || 0) * (rng() - 0.5) * DEG;
   const born = m.burst ? 0 : (k + m.jitter * jitter) * m.spacing;
   return { slot: own, born, life: Math.max(1e-3, life), speed,
-           angle: angle + (spot.out ?? 0), pick, turn, spin, dx: spot.dx, dy: spot.dy };
+           angle: angle + (spot.out ?? 0), pick, turn, spin, dx: spot.dx, dy: spot.dy, lift };
 }
 
 /**
  * Every particle alive at `t` seconds, oldest first — the order they are
  * drawn in, so the newest are on top. Each is where it is, how fast it goes,
  * how old it is, how it is turned and what it drew:
- * `{ slot, x, y, vx, vy, rot, age, life, t, pick }`,
+ * `{ slot, x, y, z, vx, vy, vz, rot, age, life, t, pick }`,
  * `t` its age over its life, 0 to 1, for what runs over a particle's life.
  *
  * @param {object} recipe   see DEFAULTS
@@ -203,9 +215,15 @@ export function particlesAt(recipe, t) {
     const s = slot(m, k);
     const age = t - s.born;
     if (age < 0 || age >= s.life) continue;
-    const v = { x: Math.sin(s.angle) * s.speed, y: -Math.cos(s.angle) * s.speed };
+    // Tilted out of the plane by `lift`: what goes into depth is taken from the plane.
+    const flat = Math.cos(s.lift) * s.speed;
+    const v = { x: Math.sin(s.angle) * flat, y: -Math.cos(s.angle) * flat };
     const from = { x: m.x + s.dx, y: m.y + s.dy };
     const at = m.field ? integrate(from, v, m, m.field, age) : motion(from, v, a, m.drag, age);
+    // Depth has drag and nothing else: its closed form, on either path.
+    const deep = motion({ x: m.z || 0, y: 0 }, { x: Math.sin(s.lift) * s.speed, y: 0 }, { x: 0, y: 0 }, m.drag, age);
+    at.z = deep.x;
+    at.vz = deep.vx;
     const rot = m.align ? Math.atan2(at.vx, -at.vy) : s.turn + s.spin * age;
     out.push({ slot: s.slot, ...at, rot, age, life: s.life, t: age / s.life, pick: s.pick });
   }

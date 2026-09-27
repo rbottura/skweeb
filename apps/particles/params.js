@@ -30,6 +30,7 @@ export const EMIT_GROUPS = {
   forces:   { label: 'Forces', open: true },
   fields:   { label: 'Fields', open: false },
   turning:  { label: 'Turning', open: false },
+  depth:    { label: 'Depth', open: false },
 };
 
 /** The picture panel's drawers. Format is the picture, so it starts open. */
@@ -37,6 +38,7 @@ export const PICTURE_GROUPS = {
   format: { label: 'Format', open: true },
   player: { label: 'Sequence player', open: true },
   look:   { label: 'Look', open: true },
+  camera: { label: 'Camera', open: false },
 };
 
 const D = DEFAULTS;
@@ -90,6 +92,14 @@ export function emitParams() {
     noiseScale: { type: 'range', min: 4, max: 2000, step: 1, default: D.noiseScale, label: 'noise size px',
                   group: 'fields', when: { noise: { not: 0 } } },
 
+    /**
+     * Out of the picture's plane (model.js, *Depth*): the emitter's depth,
+     * and the cone tilted into depth — the picture's camera turns it into
+     * size and place. Both 0, the particles are flat, as before.
+     */
+    z:           { type: 'int', min: -2000, max: 4000, default: D.z, label: 'emitter depth px', group: 'depth' },
+    depthSpread: { type: 'range', min: 0, max: 180, step: 1, default: D.depthSpread, label: 'into depth °', group: 'depth' },
+
     /** Facing where it goes — a spark, a streak — instead of turning on its own. */
     align:      { type: 'bool', default: D.align, label: 'face where it goes', group: 'turning' },
     turn:       { type: 'range', min: 0, max: 360, step: 1, default: D.turn, label: 'start angle spread °', group: 'turning', when: { align: false } },
@@ -127,6 +137,11 @@ export function pictureParams() {
     order: { type: 'enum', options: ['over', 'under'], default: 'over', display: 'chips',
              labels: { over: 'newest on top', under: 'newest behind' }, label: 'stacking', group: 'look' },
     ground: { type: 'ground', default: '#fffdf6', label: 'ground', group: 'look' },
+    /**
+     * px from the camera to the picture's plane: shorter is wider-angle, so
+     * depth shows more. Nothing changes while every particle is at depth 0.
+     */
+    focal:  { type: 'range', min: 100, max: 5000, step: 10, default: 800, label: 'focal px', group: 'camera' },
   });
 }
 

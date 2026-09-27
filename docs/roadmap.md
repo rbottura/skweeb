@@ -154,9 +154,12 @@ before zero born too, so the first frame needs no warm-up — the roadmap's
 plays dots or a set's sprites, sized, faded and turned over their life, and
 opens on a torch. The link, `set → particles: sprites`, is a row in
 `core/uses.js`: a brush family is offered by default. It saves a loop or a
-still, replays them to the pixel, and compose places them. Seven bricks in
-`apps/particles/STATUS.md`; the sprite sheet is next, ahead of emitters and
-depth, since *Done when* asks for it.
+still, replays them to the pixel, and compose places them; any loop leaves
+as a sprite sheet (`core/spritesheet.js`); emitters are a point, a line, a
+disc or a ring, with a vortex, an attractor and curl noise
+(`core/noise.js`); and particles have depth behind a camera. **Done when
+is met, 2026-09-27**, all seven bricks in — but for loading a sheet in an
+engine, which no check has done yet.
 
 **M7 — fractals.** Escape-time on the GPU — Mandelbrot, Julia, Burning Ship,
 multibrot, Newton, Phoenix, Lyapunov — with smooth colouring and orbit traps,
