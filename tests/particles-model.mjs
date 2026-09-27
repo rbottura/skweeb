@@ -9,7 +9,7 @@
  */
 
 const { particlesAt, prepare, motion, slot, duration, MAX_ALIVE } = await import('../apps/particles/model.js');
-const { integrate, fieldOf, STEP } = await import('../apps/particles/forces.js');
+const { integrate, fieldOf, STEP, reach } = await import('../apps/particles/forces.js');
 const { drawOrder } = await import('../apps/particles/draw.js');
 
 let fails = 0;
@@ -182,6 +182,21 @@ const deep3 = [{ z: 0, id: 'plane' }, { z: 800, id: 'far' }, { z: -400, id: 'nea
 ok('with depth, far first, near last', drawOrder(deep3, 'over', 800).map(d => d.p.id), ['far', 'plane', 'near']);
 ok('as far again as the focal is half the size, and half as near twice', drawOrder(deep3, 'over', 800).map(d => d.k), [0.5, 1, 2]);
 ok('behind the camera, left out', drawOrder([{ z: -900 }, { z: 0 }], 'over', 800).length, 1);
+
+// -- Falloff: a vortex and a pull with a reach ----------------------------------
+
+ok('no falloff: full strength at any distance', [reach(10, 0), reach(5000, 0)], [1, 1]);
+ok('with one: full at the centre, none at and past the radius', [reach(0, 200), reach(200, 200), reach(900, 200)], [1, 0, 0]);
+ok('fading on the way, never rising', [50, 100, 150, 199].map(d => reach(d, 200)).every((v, i, a) => v > 0 && v < 1 && (!i || v < a[i - 1])), true);
+ok('smooth at the edge: nearly nothing just inside it', reach(199, 200) < 1e-3, true);
+const pullAt = (falloff, x) => fieldOf(prepare({ vortex: 300, attract: 200, falloff, fx: 0, fy: 0 }))(x, 0);
+ok('past its reach a vortex and a pull do nothing', pullAt(150, 400), [0, 0]);
+ok('within it, they pull', Math.hypot(...pullAt(150, 60)) > 0, true);
+ok('and with none, as far as anywhere', Math.hypot(...pullAt(0, 4000)) > 0, true);
+const noiseFar = fieldOf(prepare({ noise: 500, falloff: 50 }))(3000, 1200);
+ok('the noise has no centre, and no falloff', Math.hypot(...noiseFar) > 0, true);
+const local = { ...torch, vortex: 800, falloff: 120, fx: 0, fy: -100 };
+ok('a local swirl still closes its loop', round(particlesAt(local, 2.6)), round(particlesAt(local, 0.6)));
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

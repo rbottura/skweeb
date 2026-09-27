@@ -14,3 +14,6 @@
 
 /* Over a guide's handle, the pointer says it can move it (pointer.js). */
 .viewer-stage canvas.can-move { cursor: move; }
+
+/* The guides' switch, over the viewer (main.js). */
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }

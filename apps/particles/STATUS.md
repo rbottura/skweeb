@@ -27,7 +27,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 ## Works now
 
 - **A particle is a function of its slot and its age** (`model.js`,
-  `tests/particles-model.mjs`, now 68 checks). A stream emits `rate` a second as
+  `tests/particles-model.mjs`, now 77 checks). A stream emits `rate` a second as
   `rate × period` slots a loop; slot `k` draws everything from the seed and
   `k mod n`, so slot `k + n` is slot `k` one period on, and the picture at
   `t + period` is the picture at `t` — checked to a millionth of a pixel,
@@ -42,7 +42,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 60 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 62 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -121,6 +121,18 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   those behind the camera left out. With every z at 0 the scale is exactly
   1, so a flat recipe draws as it always did; no switch. A stream in depth
   still closes its loop pixel for pixel.
+- **A reach for the vortex and the attractor** (2026-09-27, the author's
+  ask; `forces.js` `reach`). *reach px* in Fields: full strength at the
+  centre, `(1 − (d / reach)²)²` of it at `d`, nothing past the radius — a
+  smooth fade, its slope 0 at the edge — so a swirl can be local; 0 is
+  everywhere, as before. The noise has no centre and no reach. The guides
+  draw it as a dashed circle with a handle on it, dragged to set it.
+- **The guides are a switch over the viewer** (2026-09-27, the author's
+  ask): on, everything shows, always — the fields' centre too with no
+  field on, faint, *field · off*, so it can be placed first; off, nothing.
+  G too. How the viewer looks, not what the particles are, so it is not a
+  param and never in a recipe: remembered in this browser, as a drawer's
+  open state is.
 - **One sprite, or a set** (2026-09-27, the author's ask). The Look's
   `sprites` takes a shape or a still too — one sprite for every particle.
   And a picture from outside the suite comes in through the vault panel's
@@ -136,9 +148,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   an attractor's pull round a diamond handle; and the pull of gravity and
   wind in the corner. Drag a handle and the emitter, or the fields'
   centre, follows through the panel's own rows; an emitter in depth is
-  dragged at the camera's scale so it stays under the pointer. *Guides* in
-  the picture panel, or G. Sized in CSS pixels, so they read the same at
-  any preview size.
+  dragged at the camera's scale so it stays under the pointer. Sized in
+  CSS pixels, so they read the same at any preview size.
 - **M6's *Done when* is met** (2026-09-27): a torch loop that closes
   exactly, drawn with a vault set's sprites and scrubbed to any frame, and
   a one-shot burst, both leaving as sprite sheets — the burst's tag says it
@@ -159,9 +170,6 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 - Depth has no gravity or field of its own, and the emitter's shape stays
   in the plane: a disc is flat, facing the camera.
 - The camera looks at the picture's centre and cannot move or turn.
-- A vortex and an attractor pull as hard far away as near — the guides'
-  arrows show it, the whole picture turning. A radius they fall off over
-  would make one a local swirl.
 - A frame drawn with the guides off and on again can differ by under a
   level from the first paint: Chrome moves a canvas it has read back off
   the GPU. Only the checks see it; they allow a level there.
@@ -184,8 +192,6 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 M6's seven bricks are in and its *Done when* met. What is left of it, none
 started, in the order it would pay:
 
-- **A falloff for the vortex and the attractor** — a radius past which
-  they fade, so a swirl can be local; the guides would draw the radius.
 - **Load a sheet in an engine** — a Phaser or PixiJS page of a dozen lines
   in `scripts/`, pointed at a downloaded sheet, the one thing *Done when*
   says that no check has done.

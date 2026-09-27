@@ -10,6 +10,12 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **A local swirl, and the guides as one switch** (2026-09-27, the author's
+  ask; `check-particles`, 62 checks). The vortex and the attractor take a
+  reach — full at the centre, nothing past it, a smooth fade between —
+  drawn by the guides as a dashed circle whose handle sets it. The guides
+  are a switch over the viewer and G: on, all of it always, the fields'
+  centre too before any field is on; not a param, remembered per browser.
 - **Pictures from outside come into the vault** (2026-09-27, the author's
   ask; `core/vault-import.js`; `check-particles`, 60 checks). *+ pictures*
   in the vault panel's head, or a drop on it, in every app: each file a

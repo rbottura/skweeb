@@ -35,7 +35,6 @@ export const EMIT_GROUPS = {
 
 /** The picture panel's drawers. Format is the picture, so it starts open. */
 export const PICTURE_GROUPS = {
-  guides: { label: 'Guides', open: true },
   format: { label: 'Format', open: true },
   player: { label: 'Sequence player', open: true },
   look:   { label: 'Look', open: true },
@@ -87,6 +86,8 @@ export function emitParams() {
      */
     vortex:     { type: 'range', min: -3000, max: 3000, step: 1, default: D.vortex, label: 'vortex px/s²', group: 'fields' },
     attract:    { type: 'range', min: -3000, max: 3000, step: 1, default: D.attract, label: 'attract px/s²', group: 'fields' },
+    /** The vortex's and the pull's reach round their centre: 0 is everywhere, at full strength (forces.js `reach`). */
+    falloff:    { type: 'range', min: 0, max: 4000, step: 1, default: D.falloff, label: 'reach px (0: everywhere)', group: 'fields' },
     fx:         { type: 'int', min: -4000, max: 4000, default: D.fx, label: 'centre x', group: 'fields' },
     fy:         { type: 'int', min: -4000, max: 4000, default: D.fy, label: 'centre y', group: 'fields' },
     noise:      { type: 'range', min: 0, max: 5000, step: 1, default: D.noise, label: 'curl noise px/s²', group: 'fields' },
@@ -144,12 +145,6 @@ export function pictureParams() {
      * depth shows more. Nothing changes while every particle is at depth 0.
      */
     focal:  { type: 'range', min: 100, max: 5000, step: 10, default: 800, label: 'focal px', group: 'camera' },
-    /**
-     * The preview's guides (guides.js): the emitter, its launch, the fields
-     * and the pull, drawn over the particles, with handles to drag. Never in
-     * a save, a frame or a sheet. G switches them.
-     */
-    guides: { type: 'bool', default: true, label: 'show, preview only  [G]', group: 'guides' },
   });
 }
 

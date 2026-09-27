@@ -388,11 +388,15 @@ const guided = await pixels();
 key('g'); await wait(300);
 const bare = await pixels();
 c.ok('G takes the guides away, and the particles stay', apart(guided, bare) > 1
-  && (await page.eval(`${row('show, preview only  [G]')}?.querySelector('input')?.checked`)) === false);
+  && (await page.eval(`document.getElementById('guides').getAttribute('aria-pressed')`)) === 'false');
 key('g'); await wait(300);
 // Within a level, not to the pixel: Chrome moves a canvas read back often off
 // the GPU and draws it a hair differently after (check-frames.mjs says the same).
 c.ok('and G brings them back', apart(await pixels(), guided) <= 1, 'apart by ' + apart(await pixels(), guided).toFixed(2));
+await page.click(`document.getElementById('guides')`); await wait(300);
+c.ok('the switch over the viewer turns them off too', apart(await pixels(), bare) <= 1
+  && (await page.eval(`document.getElementById('guides').getAttribute('aria-pressed')`)) === 'false');
+await page.click(`document.getElementById('guides')`); await wait(300);
 
 /** Where a point of the picture, from its centre, is on screen. */
 const onScreen = (x, y) => page.eval(`(() => { const r = document.getElementById('stage').getBoundingClientRect();
@@ -409,12 +413,21 @@ await page.pointer(await onScreen(300, -300), await onScreen(200, -200), 4);
 await wait(200);
 c.ok('a press away from any handle moves nothing', (await value('x from centre')) === moved[0]);
 
-await set('vortex px/s²', '500');
+// The fields' centre is there before any field is on, to be placed first.
 const fgrab = await onScreen(0, 0);
 await page.pointer(fgrab, [fgrab[0] - 50, fgrab[1] + 40], 6);
 await wait(300);
 const f = [await value('centre x'), await value('centre y')];
-c.ok('the fields\' centre dragged by its handle', Math.abs(f[0] + 50 / css) <= 2 && Math.abs(f[1] - 40 / css) <= 2, `fx ${f[0]}, fy ${f[1]}`);
+c.ok('the fields\' centre, placed by its handle before a field is on', Math.abs(f[0] + 50 / css) <= 2 && Math.abs(f[1] - 40 / css) <= 2, `fx ${f[0]}, fy ${f[1]}`);
+
+// A vortex with a reach: its circle's handle pulls the radius wider.
+await set('vortex px/s²', '500');
+await set('reach px (0: everywhere)', '150');
+const rgrab = await onScreen(f[0] + 150, f[1]);
+await page.pointer(rgrab, await onScreen(f[0] + 230, f[1] + 60), 6);
+await wait(300);
+const reached = await value('reach px (0: everywhere)');
+c.ok('the reach dragged by the handle on its circle', Math.abs(reached - Math.hypot(230, 60)) <= 3, `reach ${reached}`);
 await c.shot('10-guides');
 
 // Saved, the render is the particles alone: the replay, which draws no guides, is it to the pixel.

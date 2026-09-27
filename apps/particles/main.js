@@ -37,6 +37,8 @@ const ctx = canvas.getContext('2d');
 let emit, picture, bar, transport, player;
 let clockFps = 0;
 let shownView = 1;         // canvas pixels per picture pixel, as last painted
+let guidesOn = remembered();   // the guides over the preview: the viewer's, not the recipe's
+const guidesBtn = document.getElementById('guides');
 let model = null;          // the recipe, prepared: remade when a value changes, not every frame
 let shown = [];            // the particles on screen, for the bar
 let sprites = null;        // the chosen set's images, or null: dots
@@ -76,7 +78,9 @@ async function boot() {
     else draw();
   });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
-  wirePointer({ canvas, view: () => shownView, emit, picture });
+  wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn });
+  guidesBtn.addEventListener('click', () => showGuides(!guidesOn));
+  showGuides(guidesOn);
   wireKeys();
   remake();
   if (await openRequested()) return;
@@ -220,6 +224,25 @@ function frames() {
   });
 }
 
+// ── The guides' switch ───────────────────────────────────────────────────────
+
+/**
+ * The guides on or off (guides.js): a switch over the viewer, and G. How the
+ * viewer looks, not what the particles are — so not a param, never in a
+ * recipe — and remembered in this browser, for the next visit.
+ */
+function showGuides(on) {
+  guidesOn = on;
+  guidesBtn.setAttribute('aria-pressed', String(on));
+  try { localStorage.setItem('skweeb.particles.guides', on ? '1' : '0'); } catch { /* private mode: forgotten */ }
+  if (!on) canvas.classList.remove('can-move');
+  draw();
+}
+
+function remembered() {
+  try { return localStorage.getItem('skweeb.particles.guides') !== '0'; } catch { return true; }
+}
+
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
 let pending = false;
@@ -243,7 +266,7 @@ function paint() {
   shown = particlesAt(model, clock.tick / p.fps);
   drawParticles(ctx, shown, p, view, sprites);
   shownView = view;
-  if (p.guides) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width));
+  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width));
 
   bar.output({ width: Math.round(size.width * p.scale), height: Math.round(size.height * p.scale),
                scale: p.scale, format: p.format });
@@ -269,7 +292,7 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (e.key === 'g' || e.key === 'G') picture.set('guides', !picture.get('guides'));
+    if (e.key === 'g' || e.key === 'G') showGuides(!guidesOn);
     if (e.key === 's' || e.key === 'S') save();
     if (busy || clock.length < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }

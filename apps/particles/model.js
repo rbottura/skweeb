@@ -106,6 +106,7 @@ export const DEFAULTS = {
   fx: 0, fy: 0,         // the fields' centre, from the picture's centre
   vortex: 0,            // px/s², round the centre, clockwise
   attract: 0,           // px/s², towards the centre
+  falloff: 0,           // px: the vortex's and the pull's reach; 0 is everywhere
   noise: 0,             // px/s², along curl noise
   noiseScale: 200,      // px, the noise's features
   z: 0,                 // px, the emitter's depth: more is further away

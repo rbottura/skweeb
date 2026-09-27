@@ -15,7 +15,10 @@
  *   the fields               magenta: arrows of the whole field on a grid,
  *                            sampled from the very function the particles
  *                            move through (forces.js); a vortex's turn and
- *                            an attractor's pull round the centre; a handle
+ *                            an attractor's pull round the centre; their
+ *                            reach, a dashed circle with a handle on it; and
+ *                            the centre's handle — there with no field on,
+ *                            faint, so it can be placed first
  *   the pull                 gravity and wind, one arrow in the corner
  */
 
@@ -41,16 +44,20 @@ const depthScale = (z, focal) => {
 
 /**
  * The handles, in picture pixels from its centre, as they are seen: the
- * emitter through the camera at its depth, the fields' centre in the plane.
- * `k` is how far the camera scales the handle's own moves.
+ * emitter through the camera at its depth; the fields' centre in the plane,
+ * always, so it can be placed before a field is on; and, with a falloff,
+ * the reach, on its circle to the centre's right. `k` is how far the camera
+ * scales the handle's own moves. The reach first: at a small radius it sits
+ * near the centre, and a press there means to change the radius.
  *
- * @returns {Array<{id: 'emitter' | 'field', x: number, y: number, k: number}>}
+ * @returns {Array<{id: 'emitter' | 'field' | 'reach', x: number, y: number, k: number}>}
  */
 export function handlesOf(e, p) {
   const out = [];
+  if (e.falloff > 0 && (e.vortex || e.attract)) out.push({ id: 'reach', x: e.fx + e.falloff, y: e.fy, k: 1 });
   const k = depthScale(e.z, p.focal);
   if (k > 0) out.push({ id: 'emitter', x: e.x * k, y: e.y * k, k });
-  if (hasField(e)) out.push({ id: 'field', x: e.fx, y: e.fy, k: 1 });
+  out.push({ id: 'field', x: e.fx, y: e.fy, k: 1 });
   return out;
 }
 
@@ -126,7 +133,7 @@ export function drawGuides(ctx, e, p, view, dpp = 1) {
   ctx.moveTo(ox, oy - 8); ctx.lineTo(ox, oy + 8);
   stroke(ctx, QUIET, 1);
 
-  if (hasField(e)) drawField(ctx, e, p, view, ox, oy, width, height);
+  drawField(ctx, e, p, view, ox, oy, width, height);
   drawEmitter(ctx, e, p, view, ox, oy);
   drawPull(ctx, e);
   ctx.restore();
@@ -175,8 +182,16 @@ function drawEmitter(ctx, e, p, view, ox, oy) {
 }
 
 function drawField(ctx, e, p, view, ox, oy, width, height) {
-  const m = prepare(toModel(e, p));
-  const field = fieldOf(m);
+  const x = ox + e.fx * view, y = oy + e.fy * view;
+  if (!hasField(e)) {
+    // Nothing pulls yet: the centre alone, faint, ready to be placed.
+    ctx.globalAlpha = 0.55;
+    handle(ctx, x, y, FIELD, true);
+    label(ctx, 'field · off', x + 11, y - 10, FIELD);
+    ctx.globalAlpha = 1;
+    return;
+  }
+  const field = fieldOf(prepare(toModel(e, p)));
 
   // The whole field on a grid, from the function the particles move through.
   const step = 48;
@@ -197,7 +212,19 @@ function drawField(ctx, e, p, view, ox, oy, width, height) {
   }
   ctx.globalAlpha = 1;
 
-  const x = ox + e.fx * view, y = oy + e.fy * view;
+  // Their reach, and a handle on it to pull it wider or narrower.
+  if (e.falloff > 0 && (e.vortex || e.attract)) {
+    const r = e.falloff * view;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    stroke(ctx, FIELD, 1.5, [7, 5]);
+    ctx.beginPath();
+    ctx.rect(x + r - 5, y - 5, 10, 10);
+    ctx.fillStyle = HALO;
+    ctx.fill();
+    stroke(ctx, FIELD, 2);
+    label(ctx, `reach ${Math.round(e.falloff)}`, x + r + 9, y + 4, FIELD);
+  }
   if (e.vortex) {
     // Three quarters of a turn, the way it turns: clockwise for more than 0.
     const cw = e.vortex > 0, r = 34, from = -Math.PI / 2, to = from + (cw ? 1.5 : -1.5) * Math.PI;

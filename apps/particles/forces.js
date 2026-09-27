@@ -24,7 +24,11 @@
  *             features `noiseScale` px across — a swirl that never gathers
  *
  * Near the centre the vortex and the pull fade in over `SOFT` px, so a
- * particle passing through it is not flung to infinity.
+ * particle passing through it is not flung to infinity. Far from it they
+ * reach everywhere — unless `falloff` gives them a radius: full strength at
+ * the centre, `(1 − (d / falloff)²)²` of it at `d`, none past the radius.
+ * A smooth fade, its slope 0 at the edge, so nothing jolts crossing it. The
+ * noise has no centre, and no falloff.
  */
 
 import { curl2, pcg } from '../../core/noise.js';
@@ -32,6 +36,17 @@ import { curl2, pcg } from '../../core/noise.js';
 /** Seconds a step: 120 a second, so a 60 fps frame is two. */
 export const STEP = 1 / 120;
 const SOFT = 24;
+
+/**
+ * How much of a centred pull reaches `d` px from its centre, with a
+ * `falloff` radius — 0 for none, everywhere at full strength.
+ */
+export function reach(d, falloff) {
+  if (!(falloff > 0)) return 1;
+  if (d >= falloff) return 0;
+  const q = 1 - (d / falloff) ** 2;
+  return q * q;
+}
 
 /**
  * The field's pull at a point, or null when there is none — and the closed
@@ -43,7 +58,7 @@ const SOFT = 24;
 export function fieldOf(m) {
   const vortex = m.vortex || 0, attract = m.attract || 0, noise = m.noise || 0;
   if (!vortex && !attract && !noise) return null;
-  const cx = m.fx || 0, cy = m.fy || 0;
+  const cx = m.fx || 0, cy = m.fy || 0, falloff = m.falloff || 0;
   const scale = Math.max(1, m.noiseScale || 200);
   const seed = pcg((m.seed ^ 0x51ed27) >>> 0);
   return (x, y) => {
@@ -52,7 +67,7 @@ export function fieldOf(m) {
       const dx = x - cx, dy = y - cy;
       const d = Math.hypot(dx, dy);
       if (d > 1e-9) {
-        const k = Math.min(1, d / SOFT) / d;
+        const k = (Math.min(1, d / SOFT) * reach(d, falloff)) / d;
         ax += (-dy * vortex - dx * attract) * k;
         ay += (dx * vortex - dy * attract) * k;
       }
