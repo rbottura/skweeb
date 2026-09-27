@@ -173,6 +173,12 @@ The five bricks are in. What would come after them, none of it started:
   it says where the chosen one is; only what shows can be picked up.
 - *Next frame…* repeats a loop placed with no length once: it is given its
   own loop's length on the page before the next frame follows it.
+- **A longer frame does not push the ones after it.** Holding frame 2 for
+  two frames in its *Time* drawer leaves frame 3 starting where it did, so
+  the two overlap for a frame; the later ones are moved by hand. A ripple —
+  the frames that started where it ended move with its end — is the obvious
+  fix, and wants the author's word, since a page that is not a flipbook may
+  not want it.
 - Changing the page's `fps`, or anything that changes its length, starts the
   page again from its first frame.
 - A large grid dither still skips ticks while it plays: 21 ms a frame, most
