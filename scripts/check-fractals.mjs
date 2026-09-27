@@ -13,6 +13,10 @@
  * is the format at its scale. The zoom's slider runs on the logarithm. And
  * copies: dots with no sprite, as many as copies.js says; a star brought in
  * and picked, drawn in its place; a tree; the PNG drawn again at its scale.
+ * And an idle — the author's find, a tree's twist swung −10 to +10: picked,
+ * its range filled in, played, its loop closed pixel for pixel; saved as a
+ * sequence with the star its parent, replayed to its render, a sprite sheet
+ * of every frame, reopened, and placed in compose.
  */
 
 import fs   from 'node:fs';
@@ -198,6 +202,102 @@ for (let i = 0; i < 100 && !tfile; i++) {
 }
 const tsize = tfile ? (b => [b.readUInt32BE(16), b.readUInt32BE(20)])(fs.readFileSync(tfile)) : [0, 0];
 c.ok('copies at print scale: the format at its scale, drawn again', tsize[0] === 2160 && tsize[1] === 2160, tsize.join(' × '));
+
+// ── An idle: the twist swung, a loop ────────────────────────────────────────
+
+await set('scale', '1');
+const count = `(document.querySelector('.tp-count')?.textContent || '')`;
+const scrubTo = async t => { await page.eval(`(() => { const s = document.querySelector('.tp-scrub'); s.value = ${t};
+  s.dispatchEvent(new Event('input', { bubbles: true })); })()`); await wait(300); };
+const grid = () => page.eval(`(() => { const c = document.getElementById('stage'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const n = 16, out = new Array(n * n).fill(0), k = new Array(n * n).fill(0);
+  for (let y = 0; y < c.height; y += 2) for (let x = 0; x < c.width; x += 2) { const i = (y * c.width + x) * 4, j = Math.floor(y * n / c.height) * n + Math.floor(x * n / c.width);
+    out[j] += d[i] + d[i + 1] + d[i + 2]; k[j]++; }
+  return out.map((v, j) => v / Math.max(1, k[j]) / 3); })()`);
+const apart = (p, q) => Math.max(...p.map((x, i) => Math.abs(x - q[i])));
+
+await page.eval(`(() => { const s = ${row('moving')}.querySelector('select'); s.value = 'twist';
+  s.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+await wait(500);
+c.ok('picked to move, the twist starts from ±10 round its value', (await value('from')) === -10 && (await value('to')) === 10,
+  `${await value('from')} to ${await value('to')}`);
+const at0 = await page.eval(count);
+await wait(700);
+const at1 = await page.eval(count);
+c.ok('and plays at once: a loop of its frames, moving', /^\d+ \/ 48$/.test(at1) && at1 !== at0, `${at0} → ${at1}`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))`);
+await scrubTo(0);
+const f0 = await grid();
+await scrubTo(12);
+const f12 = await grid();
+c.ok('the tree sways: a quarter in, another picture', apart(f12, f0) > 2, 'apart by ' + apart(f12, f0).toFixed(1));
+await scrubTo(47);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: '.' }))`);
+await wait(300);
+c.ok('the frame after the last is the first, pixel for pixel', (await page.eval(count)) === '1 / 48' && apart(await grid(), f0) === 0,
+  `${await page.eval(count)}, apart by ${apart(await grid(), f0)}`);
+await scrubTo(12);
+await c.shot('6-idle');
+
+// Saved: a sequence, the star its parent, replayed to its render.
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+const sid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const o = sid ? await (await fetch(c.base + '/api/vault/' + sid)).json() : null;
+const starRow = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).find(r => r.title === 'copy star');
+c.ok('saved, an idle: a sequence of its frames at its rate', !!o && o.type === 'sequence' && o.render.frames === 48 && o.render.fps === 24,
+  o ? `${o.type} ${o.render.frames} at ${o.render.fps}` : await page.eval(say));
+c.ok('the sprite it copies is its parent', !!o && !!starRow && JSON.stringify(o.parents) === JSON.stringify([starRow.id]), o && JSON.stringify(o.parents));
+if (o) {
+  const replay = await page.eval(`(async () => {
+    const { Vault } = await import('/core/vault.js');
+    const { openFrames } = await import('/core/rebuild.js');
+    const { object, url } = await Vault.load(${JSON.stringify(o.id)});
+    const h = await openFrames(object, { url });
+    const img = await createImageBitmap(await (await fetch(url)).blob());
+    const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
+    const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(h.frame(12), 0, 0);
+    const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
+    let worst = 0; for (let i = 0; i < da.length; i++) worst = Math.max(worst, Math.abs(da[i] - db[i]));
+    const big = await openFrames(object, { url, scale: 2 });
+    const out = { length: h.length, fps: h.fps, worst, missing: h.missing, big: [big.scale, big.frame(0).width, h.width] };
+    h.dispose(); big.dispose(); return out;
+  })()`);
+  c.ok('the vault replays it, 48 frames at 24', replay.length === 48 && replay.fps === 24, JSON.stringify(replay).slice(0, 100));
+  c.ok('its frame on screen is its render, pixel for pixel', replay.worst === 0, 'worst ' + replay.worst);
+  c.ok('at scale 2, drawn again at twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.big[2], JSON.stringify(replay.big));
+
+  // The sheet: every frame, for a game.
+  await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+  await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download a sprite sheet')`);
+  await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 120000 });
+  let sheetZip = null;
+  for (let i = 0; i < 100 && !sheetZip; i++) {
+    const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.endsWith('_sheet.zip'));
+    if (f) sheetZip = path.join(DL, f); else await wait(200);
+  }
+  let sheet = null;
+  if (sheetZip) {
+    const b = fs.readFileSync(sheetZip);
+    for (let off = 0; b.readUInt32LE(off) === 0x04034b50;) {
+      const size = b.readUInt32LE(off + 18), nl = b.readUInt16LE(off + 26), name = b.slice(off + 30, off + 30 + nl).toString();
+      if (name.endsWith('.json')) sheet = JSON.parse(b.slice(off + 30 + nl, off + 30 + nl + size).toString());
+      off += 30 + nl + size;
+    }
+  }
+  c.ok('a sprite sheet of every frame, two seconds long', !!sheet && sheet.frames.length === 48
+    && sheet.frames.reduce((a, f) => a + f.duration, 0) === 2000, sheet ? `${sheet.frames.length} frames` : await page.eval(say));
+
+  // Reopened, and placed on a page.
+  await c.go(c.base + '/apps/fractals/?open=' + o.id);
+  await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+  c.ok('?open= brings the idle back, its twist moving', (await page.eval(`${row('moving')}?.querySelector('select')?.value`)) === 'twist'
+    && (await value('to')) === 10, await page.eval(say));
+  await c.go(c.base + '/apps/compose/?place=' + o.id);
+  await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
+  c.ok('compose places it, a 24 fps loop of 48', (await page.eval(say)).includes('a 24 fps loop of 48'), await page.eval(say));
+}
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

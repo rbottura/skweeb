@@ -90,7 +90,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion; do
   node tests/$t.mjs || break
 done
 
@@ -106,7 +106,7 @@ node scripts/check-vault.mjs            # the vault panel: kin together, folders
 node scripts/check-frames.mjs           # a flipbook in compose: next frames, stepped, picked up, saved
 node scripts/check-particles.mjs        # particles: a loop that closes, sprites, saved, replayed, placed, a sprite sheet
 node scripts/check-sheet-engine.mjs     # that sheet loaded and played by Phaser 3, fetched into the page only
-node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag, the PNG; copies of a star
+node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag; copies of a star, an idle saved and placed
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at

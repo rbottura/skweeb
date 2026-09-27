@@ -10,6 +10,13 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **Idles from fractal copies** (2026-09-28, the author's find; `check-fractals`,
+  29 checks; `tests/fractal-motion.mjs`, 17). A Motion drawer swings one of
+  the copies' params over a loop — the tree's twist −10 to +10, there and
+  back — and plays it; the loop closes pixel for pixel. Fractals saves now,
+  both families: a still or an idle into the vault, the sprite its parent,
+  replayed to the pixel and drawn again at scale 2, every frame, a sprite
+  sheet, `?open=`, and compose places an idle.
 - **A sprite copying itself** (2026-09-28, the author's ask; `check-fractals`,
   17 checks; `tests/fractal-copies.mjs`, 19). Fractals has a second family:
   a vault sprite copied by a few maps, generations deep — a Sierpiński
@@ -287,7 +294,7 @@ it said is here, shorter, or in the files it points to.
 
 ## Tests
 
-Twenty-eight files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+Twenty-nine files, no runner, no dependencies — the loop in `CLAUDE.md` runs
 all of them, and all pass. Newest: `compose-time` gained the ripple, and
 with `compose-placements` a placement's time — windows, a page's end, a
 flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
@@ -366,9 +373,9 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M7, brick 2's first half: a fractal saves and comes back** —
-`apps/fractals/STATUS.md` has it: a still into the vault, its recipe the
-params; a `rebuild.js` drawing it again exactly at any scale; `?open=`.
+**M7: escape time moves too** — `apps/fractals/STATUS.md` has it: the
+ramp's phase once through, and a Julia `c` round a circle, as the copies'
+idles move.
 Left of M6, the author's to order (`apps/particles/STATUS.md`): colour over
 life, a shape as an emitter. The gamepad's *newest behind* stays parked.
 

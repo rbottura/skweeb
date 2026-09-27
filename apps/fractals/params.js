@@ -1,6 +1,9 @@
 /**
  * params.js — fractals' schema: which family, its params, and the format.
  *
+ * A copies picture may move one of its params over a loop — an idle — in
+ * the Motion drawer (motion.js); a still is a loop of one.
+ *
  * Two families. **Escape time** is fractal.js's: the Mandelbrot set and its
  * Julia sets on the GPU, its params the pass's own. **Copies** is
  * copies.js's: a sprite from the vault copying itself by a few maps, drawn
@@ -18,6 +21,7 @@ import { defineParams } from '../../core/params.js';
 import { frameParams, DERIVED } from '../../core/frame.js';
 import { FRACTAL_PARAMS } from './fractal.js';
 import { SHAPES } from './copies.js';
+import { MOTION_PARAMS } from './motion.js';
 
 /** The drawers. The family first: it says which of the others there are. */
 export const GROUPS = {
@@ -25,6 +29,7 @@ export const GROUPS = {
   fractal: { label: 'Fractal', open: true },
   colour:  { label: 'Colour', open: true },
   copies:  { label: 'Copies', open: true },
+  motion:  { label: 'Motion', open: true },
   format:  { label: 'Format', open: false },
 };
 
@@ -66,6 +71,7 @@ export function fractalParams() {
               labels: { escape: 'escape time', copies: 'a sprite, copied' }, group: 'family' },
     ...only(ESCAPE, FRACTAL_PARAMS),
     ...only(COPIES, COPY_PARAMS),
+    ...MOTION_PARAMS,
     ...frame,
     format: { ...frame.format, options: frame.format.options.filter(o => !DERIVED.includes(o)) },
   });

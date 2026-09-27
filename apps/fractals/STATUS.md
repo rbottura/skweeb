@@ -10,11 +10,12 @@ field`.
 
 1. **Escape time on the GPU** — done 2026-09-27: the Mandelbrot set and its
    Julia sets, smooth colouring round a ramp, dragged and wheeled.
-2. **It saves** — a still into the vault, `{ …params }` its recipe;
-   `rebuild.js` drawing it again at any scale, exactly, and `?open=`; and a
+2. **It saves** — done 2026-09-28, both families: a still or an idle into
+   the vault, `rebuild.js` drawing it again at any scale, `?open=`. Left: a
    Julia set chosen by clicking a point of the Mandelbrot set.
-3. **Loops** — palette cycling (the phase once round), a Julia `c` round a
-   circle, a turn: saved as sequences, and so as sprite sheets.
+3. **Loops** — begun 2026-09-28 with copies: one param swung over a loop,
+   an idle, saved as a sequence and so as a sprite sheet. Left: escape
+   time's — the phase once round, a Julia `c` round a circle.
 4. **More families** — Burning Ship, multibrot, Newton, Phoenix, Lyapunov;
    orbit traps.
 5. **Deeper** — two floats for one (double-float in WGSL) past a zoom of
@@ -26,6 +27,25 @@ field`.
    escape, as a field an emitter's particles follow.
 
 ## Works now
+
+- **Idles: one param swung over a loop** (2026-09-28, the author's find —
+  a tree's twist swung −10 to +10; `motion.js`, `tests/fractal-motion.mjs`
+  17 checks, `check-fractals` 29). The Motion drawer: *moving* — each copy
+  turned, branches apart, each copy ×, the whole turned or sized — *from*,
+  *to*, *there and back* (eased at each end, the loop closing on itself)
+  or *once through* (a whole turn), a curve, frames, fps. Picking what
+  moves fills in a range round its value now — the twist ±10 — and plays.
+  A frame's values come from its tick alone, so the frame after the last
+  is the first, pixel for pixel.
+- **It saves, replays and leaves** (2026-09-28; `save.js`, `frames.js`,
+  `rebuild.js`). *Save to the vault* [S]: a still, or an idle as a
+  `sequence` of its frames at its fps, its picture the frame on screen, the
+  sprite its parent; *every frame* as a zip; *a sprite sheet* cropped to
+  where the copies reach, with Aseprite's JSON; the PNG. A save and a
+  replay draw with the same code, so the vault's frame is the render to
+  the pixel, and at scale 2 it is drawn again. `?open=` brings it back;
+  compose places an idle — *a 24 fps loop of 48*. Copies replay on any
+  machine; escape time needs WebGPU, and without it shows its render.
 
 - **A sprite, copied** (2026-09-28, the author's ask; `copies.js`,
   `tests/fractal-copies.mjs` 19 checks, `check-fractals` 17). The *family*
@@ -70,27 +90,25 @@ field`.
 
 - 32-bit floats: past a zoom of about 5 × 10⁴ the picture blocks up into
   flat squares, and the bar says so. Brick 5.
-- Nothing saves to the vault yet: the PNG is a download. Brick 2.
+- One param moves at a time; two swung together — the twist and the
+  spread — would be the next step for the Motion drawer.
+- Escape time does not move yet: its Motion rows are the copies' only.
 - The iterations do not follow the zoom: deep in, raise them by hand.
 - A drag or a wheel redraws the whole picture each move; at 1080 square
   and a few hundred iterations that is quick, at thousands it is not. Tens
   of thousands of copies are slow to drag a slider over too.
 - A copy drawn larger than its sprite's own pixels is soft: a 96 px star as
   a tree's trunk. The sprite's resolution is the ceiling.
-- Copies do not move yet: a twist or a ratio run round a loop is brick 3's.
+
 
 ## Next single step
 
-**Brick 2, first half: a fractal saves, and comes back** — either family.
-`save.js`: S, or *Save to the vault* in the Export drawer — a `still`, its
-recipe the params' values, its render the picture at the format's size
-times its scale; the copies' sprite its parent, by the `object` param. `rebuild.js`: `openObject` draws it again with the runner at the
-scale asked (`redraws()` true: exact at any size) — escape time with the
-runner, `openPicture` where there is no WebGPU as filter's does; copies
-with `drawCopies` and the sprite from `core/sprites.js`, on any machine —
-and `reopens()` for `?open=`. Checked in
-`scripts/check-fractals.mjs`: saved, the vault's replay the render to
-within the GPU's rounding, drawn again at 2×, reopened, placed in compose.
+**Escape time moves too** — brick 3's other half. The Motion drawer's
+*moving* for escape time: the ramp's *phase* once through (0 to 1, a palette
+cycling that closes), and a Julia `c` round a circle (a centre and a
+radius, once round). `motion.js` grows a second list of movable params by
+family; `frames.js` already draws any frame of either. Checked as the idle
+is: the frame after the last is the first.
 
 ## Parked
 
