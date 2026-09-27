@@ -9,8 +9,10 @@
  *
  * ── The JSON ────────────────────────────────────────────────────────────────
  *
- * Aseprite's "array" export, which Phaser, Godot's importers, PixiJS and most
- * engines read: `frames`, one entry per frame in order — its rect on the
+ * Aseprite's "array" export — Phaser 3 loads it with `load.aseprite`, its
+ * tag an animation, checked (scripts/check-sheet-engine.mjs); other engines'
+ * Aseprite importers read the same format, unchecked: `frames`, one entry
+ * per frame in order — its rect on the
  * sheet, its size, its duration in whole milliseconds — and `meta`: the
  * image's file name, the sheet's size, and one tag spanning the loop, its
  * direction `forward`. Durations are whole ms, as the format wants; frame

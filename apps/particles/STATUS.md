@@ -93,8 +93,9 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   `tests/spritesheet.mjs`). *Download a sprite sheet*: every frame on one
   PNG, cropped to the one box the particles reach over the whole loop —
   the torch is 92 × 438 of a 1080 square — in a grid as square as the
-  frames allow, 2 px between cells; beside it Aseprite's array JSON, which
-  Phaser, Godot's importers and PixiJS read: each frame's rect, its
+  frames allow, 2 px between cells; beside it Aseprite's array JSON — which
+  Phaser 3 loads as it is, checked; other engines' Aseprite importers read
+  the same format, unchecked: each frame's rect, its
   duration in whole ms summing to the loop exactly (33, 34, 33… at 30 fps),
   one tag for the loop, and in `meta.skweeb` the crop and the recipe. One
   zip, `<name>.png` and `<name>.json`. Drawn on no ground, whatever the
@@ -153,8 +154,11 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 - **M6's *Done when* is met** (2026-09-27): a torch loop that closes
   exactly, drawn with a vault set's sprites and scrubbed to any frame, and
   a one-shot burst, both leaving as sprite sheets — the burst's tag says it
-  plays once. The JSON is Aseprite's array format; no engine has been
-  pointed at one yet.
+  plays once — and a game engine loads one: Phaser 3.80, in headless
+  Chrome, reads the torch's sheet as 60 frames of its crop, its tag as one
+  animation of exactly 2000 ms, and a sprite plays it in real time
+  (`node scripts/check-sheet-engine.mjs`; Phaser from jsDelivr into the
+  check's page only, nothing installed; skipped with no network).
 - **It opens on a torch**: rising, warm, shrinking as it goes — the app's
   defaults, not the model's, which stay a plain fountain.
 
@@ -192,9 +196,6 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 M6's seven bricks are in and its *Done when* met. What is left of it, none
 started, in the order it would pay:
 
-- **Load a sheet in an engine** — a Phaser or PixiJS page of a dozen lines
-  in `scripts/`, pointed at a downloaded sheet, the one thing *Done when*
-  says that no check has done.
 - **Colour over life** — for dots, and a tint for sprites: a `color[]`
   ramp run along a curve.
 - **A shape's alpha as an emitter** — a still or shape from the vault, the

@@ -10,6 +10,12 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **A game engine loads a particles sheet** (2026-09-27;
+  `node scripts/check-sheet-engine.mjs`, 8 checks). Phaser 3.80, in the
+  check's headless Chrome, reads the torch's sheet and JSON as they are:
+  60 frames of the crop, the tag one animation of exactly 2000 ms, a sprite
+  playing it in real time. M6's *Done when* has no unchecked word left.
+  Phaser comes from jsDelivr into that page only — nothing installed.
 - **A local swirl, and the guides as one switch** (2026-09-27, the author's
   ask; `check-particles`, 62 checks). The vortex and the attractor take a
   reach — full at the centre, nothing past it, a smooth fade between —
@@ -273,7 +279,7 @@ hang), `gpu-filters` (the catalogue as data: licence, schema, the WGSL
 conventions, sizes at print scale) and `delete` (every kind of edge: the
 refusals, the dry plan, cutting loose, the chain; 37 checks).
 
-Ten browser checks, each a command in `CLAUDE.md`: its own server on a copy
+Eleven browser checks, each a command in `CLAUDE.md`: its own server on a copy
 of the vault, headless Chrome through `scripts/chrome.mjs` — a real mouse
 included — and `scripts/check-kit.mjs` under it. Outside the loop because
 each needs Chrome and a vault with things in it; each fails when a page
@@ -344,11 +350,17 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**Point an engine at a particles sheet** — M6's last unchecked word: a
-Phaser or PixiJS page of a dozen lines in `scripts/`, loading a downloaded
-sheet and its JSON and playing it. Then the author's call between the rest
-of M6 (`apps/particles/STATUS.md`: colour over life, a shape as emitter),
-M7, and the gamepad's *newest behind*.
+**M7's first brick: a Mandelbrot on the GPU kit** (`docs/roadmap.md`, M7).
+`apps/fractals/`: index.html, a schema — centre x and y, zoom, iterations,
+a palette as `color[]` — and one filter-shaped WGSL pass through
+`core/gpu/runner.js` that draws escape time with smooth colouring into
+the picture, no source; drag to move, the wheel to zoom about the pointer.
+Opens with no vault; without WebGPU it says so, as filter does. Checked by
+a new `scripts/check-fractals.mjs`: a known point inside the set is the
+inside colour, one far outside escapes at once, and a zoom about the
+pointer keeps that point under it. Left of M6, the author's to order
+(`apps/particles/STATUS.md`): colour over life, a shape as an emitter.
+The gamepad's *newest behind* stays parked.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*
