@@ -22,6 +22,8 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
 | `Bar.js` | the strip under every app: information only | **in**, 2026-09-23 |
 | `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
+| `stamps.js` | a sprite drawn once at the size and angle it shows, blitted to many (`stampFor`, `blit`); the halving of a picture nearest above a size (`mipFor`) | **in**, 2026-09-27, moved from ckt when particles needed `mipFor` |
+| `surface.js` | an off-screen canvas: OffscreenCanvas where there is one | **in**, 2026-09-27, with `stamps.js`; grid keeps its own copy |
 | `view.js` | how large a preview draws: `viewFactor()`, the size the viewer shows, never more than an export makes | **in**, 2026-09-27, moved from compose when particles needed it |
 | `theme.css` | the suite's look: tokens, the page shell, controls | **in**, 2026-09-23 |
 | `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |

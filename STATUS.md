@@ -10,6 +10,14 @@ it said is here, shorter, or in the files it points to.
 
 ### Newest
 
+- **Particles draw a vault set's sprites — M6's link** (2026-09-27, brick 3;
+  `node scripts/check-particles.mjs`, 21 checks). The Look's `sprites`
+  picks a set, each particle one of its members, the same one every frame;
+  size and fade over life on easing curves, and a *Turning* drawer — spin,
+  a start spread, or facing where it goes. Loops still close pixel for
+  pixel. ckt's `stamps.js` and `surface.js` are in core now (ckt booted and
+  drew in Chrome after the move); `core/uses.js` has a `particles` row,
+  brush families offered by default. The app opens on a torch.
 - **The particles app opens and plays** (2026-09-27, M6 brick 2;
   `node scripts/check-particles.mjs`, 15 checks). `apps/particles/`: the
   emitter's drawers on the left, the picture on the right, dots between.
@@ -293,9 +301,10 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M6, brick 3's first half: sprites from a set** —
-`apps/particles/STATUS.md` has it: ckt's stamps renderer moved into core,
-and a `sprite` set chosen in the Look, each particle a stamp of it.
+**M6, brick 4: particles save** — `apps/particles/STATUS.md` has it: a
+still or a loop into the vault with `{ emit, picture }` as its recipe and
+the sprite set as a parent, and a `rebuild.js` so the vault plays it and
+compose places it.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

@@ -29,7 +29,7 @@
 
 import { raster }         from './raster.js';
 import { dotsFromPixels } from './blobs.js';
-import { surface }        from './surface.js';
+import { surface }        from '../../core/surface.js';
 
 /**
  * The strings a recipe cuts, in order. `null` for the image entry.

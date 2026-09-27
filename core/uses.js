@@ -33,6 +33,8 @@ export const USES = [
   { id: 'brushes',  app: 'gamepad', label: 'gamepad brush family', role: 'brush-family' },
   { id: 'material', app: 'grid',    label: 'grid material',        role: 'material' },
   { id: 'sprites',  app: 'ckt',     label: 'ckt sprite family',    role: null },
+  /** M6's link, `set → particles: sprites`. A brush family is sprites already, so it is offered by default. */
+  { id: 'particles', app: 'particles', label: 'particle sprites',  role: 'brush-family' },
 ];
 
 const isUseTag = t => typeof t === 'string' && t.startsWith(USE_PREFIX);

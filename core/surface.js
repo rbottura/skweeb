@@ -3,8 +3,8 @@
  *
  * OffscreenCanvas where it exists, because that is what lets a render move
  * into a worker later without being rewritten; a detached <canvas> otherwise.
- * Grid has the same ten lines in grid.js — copied rather than imported, so
- * neither app needs the other to be installed (rule 7).
+ * In core since particles needed it as well as ckt; grid still has the same
+ * ten lines in grid.js, from before.
  */
 
 export function surface(w, h) {

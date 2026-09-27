@@ -37,7 +37,9 @@ ok('ids are unique', new Set(USES.map(u => u.id)).size, USES.length);
 const family = { type: 'set', tags: ['ckt', 'brush-family'], recipe: { members: ['a'], role: 'brush-family' } };
 const material = { type: 'set', tags: ['grid'], recipe: { members: ['a'], role: 'material' } };
 
-ok('a brush family is offered as brushes', sorted(usesOf(family)), ['brushes']);
+// A brush family is sprites already: particles take one by default too (M6's link).
+ok('a brush family is offered as brushes, and as particle sprites', sorted(usesOf(family)), ['brushes', 'particles']);
+ok('a material is not offered as particle sprites until switched on', offers(material, 'particles'), false);
 ok('a material is offered as a material', sorted(usesOf(material)), ['material']);
 ok('and not as brushes', offers(material, 'brushes'), false);
 ok('a set with no role is offered nowhere', sorted(usesOf({ type: 'set', tags: [] })), []);

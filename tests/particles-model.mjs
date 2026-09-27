@@ -106,5 +106,21 @@ ok('90° goes right', [Math.round(aim(90).x), Math.round(aim(90).y)], [100, 0]);
 const flood = particlesAt({ rate: 100000, period: 1, life: 1, lifeSpread: 0 }, 0.5);
 ok('never more than MAX_ALIVE', flood.length <= MAX_ALIVE, true);
 
+// ── Turning: a start spread, a spin, or facing where it goes ────────────────
+
+const still1 = { seed: 1, mode: 'burst', count: 1, spread: 0, speedSpread: 0, lifeSpread: 0, gravity: 0, drag: 0,
+                 speed: 100, life: 4 };
+ok('no turn and no spin: as it was drawn', particlesAt(still1, 1)[0].rot, 0);
+const spun = { ...still1, spin: 90 };
+ok('spin: degrees a second, clockwise', +particlesAt(spun, 2)[0].rot.toFixed(9), +Math.PI.toFixed(9));
+const aligned = { ...still1, angle: 90, align: true };
+ok('aligned, it faces where it goes', +particlesAt(aligned, 1)[0].rot.toFixed(9), +(Math.PI / 2).toFixed(9));
+const falling = { ...still1, angle: 90, gravity: 400, align: true };
+ok('and turns as it falls', particlesAt(falling, 2)[0].rot > particlesAt(falling, 0.5)[0].rot, true);
+const spinning = { ...torch, turn: 360, spin: 180, spinSpread: 0.5 };
+ok('a turning stream still closes its loop', particlesAt(spinning, 2.4).map(p => +p.rot.toFixed(6)),
+   particlesAt(spinning, 0.4).map(p => +p.rot.toFixed(6)));
+ok('and turning draws nothing it drew before differently', round(particlesAt(spinning, 0.9)), round(particlesAt(torch, 0.9)));
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

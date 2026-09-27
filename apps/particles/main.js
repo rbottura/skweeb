@@ -1,5 +1,5 @@
 /**
- * main.js — particles, assembled. M6, brick 2: the app opens and plays dots.
+ * main.js — particles, assembled. M6: the app plays, dots or a set's sprites.
  *
  * The emitter on the left, the picture between, the picture's settings on
  * the right. Every frame is `particlesAt(recipe, tick / fps)` (model.js) —
@@ -8,13 +8,15 @@
  * closes on its last frame. Drawn by draw.js at the size the viewer shows
  * (core/view.js).
  *
- * Opens and plays with no vault (rule 7): nothing here reads one yet. Saving
- * and sprites from a set are the bricks after (STATUS.md).
+ * A set from the vault is the sprites (sprites.js), one each; with none, or
+ * no vault at all, the particles are dots and the app plays the same
+ * (rule 7). Saving is the brick after (STATUS.md).
  */
 
 import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROUPS } from './params.js';
 import { prepare, particlesAt } from './model.js';
 import { drawParticles, pictureSize } from './draw.js';
+import { loadSprites }  from './sprites.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Transport }      from '../../core/Transport.js';
@@ -31,6 +33,8 @@ let emit, picture, bar, transport, player;
 let clockFps = 0;
 let model = null;          // the recipe, prepared: remade when a value changes, not every frame
 let shown = [];            // the particles on screen, for the bar
+let sprites = null;        // the chosen set's images, or null: dots
+let asked = 0;             // the latest set asked for; an older answer is dropped
 const painted = [];        // when the last paints were, while playing
 
 /** The clock plays the picture's frames at its rate; a tick is a time, tick / fps. */
@@ -57,6 +61,7 @@ async function boot() {
   picture.on(key => {
     applyFrameEdit(picture, key);
     if (key === 'fps') remake();
+    else if (key === 'sprites') chooseSprites(picture.get('sprites'));
     else draw();
   });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
@@ -86,6 +91,25 @@ function remake() {
   draw();
 }
 
+/** A set chosen as the sprites (sprites.js): dots until it is in, and dots if it will not come. */
+async function chooseSprites(id) {
+  const ask = ++asked;
+  sprites = null;
+  draw();
+  if (!id) return;
+  try {
+    const set = await loadSprites(id);
+    if (ask !== asked) return;
+    sprites = set.images.length ? set.images : null;
+    bar.announce(`${set.title}: ${set.images.length} sprites`
+      + (set.missing ? ` — ${set.missing} would not load` : '') + (sprites ? '' : ' — drawing dots'));
+  } catch (err) {
+    if (ask !== asked) return;
+    bar.announce(`could not open the sprites: ${err.message} — drawing dots`);
+  }
+  draw();
+}
+
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
 let pending = false;
@@ -107,7 +131,7 @@ function paint() {
   if (canvas.height !== h) canvas.height = h;
 
   shown = particlesAt(model, clock.tick / p.fps);
-  drawParticles(ctx, shown, p, view);
+  drawParticles(ctx, shown, p, view, sprites);
 
   bar.output({ width: Math.round(size.width * p.scale), height: Math.round(size.height * p.scale),
                scale: p.scale, format: p.format });

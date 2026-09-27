@@ -281,7 +281,8 @@ disk are its output, run by hand before it existed.
 ### Uses — where a set is offered
 
 More than one app eats sets: the gamepad as a brush family, grid as a dither
-material, ckt as sprites for its dots. `recipe.role` says what a set was
+material, ckt as sprites for its dots, particles as sprites for its
+particles. `recipe.role` says what a set was
 *made as* — `brush-family`, `material` — and it is history. Where it is
 *offered* is a tag, `use:<id>`, one per use, switched in the vault detail;
 `core/uses.js` holds the catalogue of uses and the rule:

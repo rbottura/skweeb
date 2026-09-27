@@ -60,8 +60,8 @@
 import { place, STRIDE, loopBounds, loopFrames, spinAt, pulseAt } from './motion.js';
 import { phaseOf }      from './attractor.js';
 import { resolveFrame } from '../../core/frame.js';
-import { surface }      from './surface.js';
-import { mipFor, stampFor, freshStamp, blit } from './stamps.js';
+import { surface }      from '../../core/surface.js';
+import { mipFor, stampFor, freshStamp, blit } from '../../core/stamps.js';
 
 /**
  * A disc's diameter at size 1: the size of a typical v2 sprite, 360px, so

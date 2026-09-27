@@ -8,7 +8,9 @@
  * server: it plays; the frame after the last is the first again, pixel for
  * pixel; a frame scrubbed to is the frame stepped to; the first frame is as
  * full as any; a burst starts all at the emitter and ends; print scale makes
- * the same picture in more pixels.
+ * the same picture in more pixels; a vault set chosen, the particles are its
+ * sprites, the loop still closes, and the set is switched on as particle
+ * sprites (core/uses.js).
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -105,6 +107,59 @@ await set('scale', '2');
 const out2 = await page.eval(`document.querySelector('.bar')?.textContent || ''`);
 c.ok('scale 2 is twice the pixels out', out1.includes('1080 × 1080') && out2.includes('2160 × 2160'),
   (out2.match(/\d+ × \d+[^·]*/) || [''])[0]);
+
+// ── Sprites from a set: M6's link, set → particles ──────────────────────────
+
+await set('scale', '1');
+await scrubTo(0);
+const dots = await pixels();
+await page.click(`[...${row('sprites')}.querySelectorAll('button')].find(b => b.textContent === 'Choose…')`);
+await page.until(`!!document.querySelector('.vp--visible')`, { timeout: 20000 });
+await wait(800);
+// A vault may hold only sets made as something else: the picker says so, and shows them.
+await page.eval(`document.querySelector('.vp--visible .vp-offer .vp-btn')?.click()`);
+await wait(800);
+const picked = await page.eval(`(() => {
+  const cells = [...document.querySelectorAll('.vp--visible .vp-cell')].filter(k => k.querySelector('.vp-use'));
+  const cell = cells.find(k => k.querySelector('.vp-name')?.textContent === 'sprites (legacy grid)') || cells[0];
+  if (!cell) return null;
+  const name = cell.querySelector('.vp-name').textContent;
+  cell.querySelector('.vp-use').click();
+  return name;
+})()`);
+c.ok('the vault has a set to draw with', !!picked, picked || 'none');
+if (picked) {
+  await page.until(`/[0-9]+ sprites|could not/.test(${say})`, { timeout: 30000 });
+  const told = await page.eval(say);
+  c.ok('a set chosen, its members are the sprites', /: \d+ sprites/.test(told) && !told.includes('dots'), told);
+  await wait(400);
+  await scrubTo(0);
+  const drawn = await pixels();
+  c.ok('the particles are sprites now, not dots', apart(drawn, dots) > 2, 'apart by ' + apart(drawn, dots).toFixed(1));
+  await scrubTo(59);
+  key('.'); await wait(300);
+  c.ok('with sprites, the loop still closes pixel for pixel', apart(await pixels(), drawn) === 0);
+  const id = await page.eval(`(() => { const v = document.querySelector('.pp-row .pp-obj-id, [data-object-id]');
+    return v ? (v.dataset.objectId || v.textContent) : null; })()`);
+  const all = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
+  const set_ = all.find(r => r.type === 'set' && r.title === picked && (r.tags || []).includes('use:particles'));
+  c.ok('used as particle sprites, the set is now offered as them', !!set_, set_ ? set_.tags.join(' ') : String(id));
+  await c.shot('3-sprites');
+
+  // Over its life: bigger sprites, turning, shrinking — and the loop still closes.
+  await set('size px', '48');
+  await set('start angle spread °', '360');
+  await set('spin °/s', '240');
+  await scrubTo(12);
+  const turning = await pixels();
+  c.ok('turned and grown, a different picture', apart(turning, drawn) > 2, 'apart by ' + apart(turning, drawn).toFixed(1));
+  await scrubTo(59); key('.'); await wait(300);
+  for (let i = 0; i < 12; i++) key('.');
+  await wait(400);
+  c.ok('turning and shrinking, the loop still closes', apart(await pixels(), turning) === 0,
+    `${await page.eval(count)}, apart by ${apart(await pixels(), turning)}`);
+  await c.shot('4-turning');
+}
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

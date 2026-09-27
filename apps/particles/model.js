@@ -30,8 +30,8 @@
  * is over when the longest of them is.
  *
  * A slot's draws are made in a fixed order — jitter, life, speed, angle,
- * pick — and a new one is only ever added at the end, so a recipe saved
- * today draws the same particles after the model has grown.
+ * pick, turn, twist — and a new one is only ever added at the end, so a
+ * recipe saved today draws the same particles after the model has grown.
  *
  * ── Motion ─────────────────────────────────────────────────────────────────
  *
@@ -40,6 +40,11 @@
  * straight up, spread either way by up to `spread` / 2. Gravity pulls down,
  * wind across, both in px/s², and drag slows it by `drag` of its speed a
  * second, towards the speed the pull alone would hold it at (`motion`).
+ *
+ * A particle turns too: from a start angle spread by `turn` degrees, at
+ * `spin` degrees a second, each its own speed within `spinSpread` — or,
+ * with `align`, it faces where it is going, as a spark or a streak does.
+ * `rot` is radians, clockwise, 0 as the sprite was drawn.
  * The later forces — vortex, attractors, curl noise, a field from another
  * object — and depth come in their own bricks.
  */
@@ -70,6 +75,10 @@ export const DEFAULTS = {
   gravity: 300,         // px/s², down
   wind: 0,              // px/s², across
   drag: 0.5,            // 1/s
+  turn: 0,              // degrees, the spread of the angle it starts at
+  spin: 0,              // degrees a second, clockwise
+  spinSpread: 0,        // 0..1, either way
+  align: false,         // facing where it goes, instead of turning
 };
 
 /**
@@ -116,14 +125,17 @@ export function slot(m, k) {
   const speed = m.speed * (1 + m.speedSpread * (rng() * 2 - 1));
   const angle = (m.angle + m.spread * (rng() - 0.5)) * DEG;
   const pick = rng();
+  const turn = m.turn * (rng() - 0.5) * DEG;
+  const spin = m.spin * (1 + m.spinSpread * (rng() * 2 - 1)) * DEG;
   const born = m.burst ? 0 : (k + m.jitter * jitter) * m.spacing;
-  return { slot: own, born, life: Math.max(1e-3, life), speed, angle, pick };
+  return { slot: own, born, life: Math.max(1e-3, life), speed, angle, pick, turn, spin };
 }
 
 /**
  * Every particle alive at `t` seconds, oldest first — the order they are
  * drawn in, so the newest are on top. Each is where it is, how fast it goes,
- * how old it is and what it drew: `{ slot, x, y, vx, vy, age, life, t, pick }`,
+ * how old it is, how it is turned and what it drew:
+ * `{ slot, x, y, vx, vy, rot, age, life, t, pick }`,
  * `t` its age over its life, 0 to 1, for what runs over a particle's life.
  *
  * @param {object} recipe   see DEFAULTS
@@ -150,7 +162,8 @@ export function particlesAt(recipe, t) {
     if (age < 0 || age >= s.life) continue;
     const v = { x: Math.sin(s.angle) * s.speed, y: -Math.cos(s.angle) * s.speed };
     const at = motion({ x: m.x, y: m.y }, v, a, m.drag, age);
-    out.push({ slot: s.slot, ...at, age, life: s.life, t: age / s.life, pick: s.pick });
+    const rot = m.align ? Math.atan2(at.vx, -at.vy) : s.turn + s.spin * age;
+    out.push({ slot: s.slot, ...at, rot, age, life: s.life, t: age / s.life, pick: s.pick });
   }
   return out;
 }

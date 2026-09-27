@@ -17,7 +17,7 @@ import { framing, renderFrame } from './render.js';
 import { datasetFor, glyphOf } from './datasets.js';
 import { markFor }       from './sprites.js';
 import { plotDots }      from './dots.js';
-import { surface }       from './surface.js';
+import { surface }       from '../../core/surface.js';
 import { drawFrameInto } from '../../core/rebuild.js';
 
 /**

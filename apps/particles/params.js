@@ -3,12 +3,14 @@
  * they are drawn on.
  *
  * Two, as compose has a page and a placement, because they are two kinds of
- * thing and sit in two columns. The emitter — emission, launch, life, forces
- * — is the model's recipe (model.js), key for key, with its defaults. The
- * picture is core's Format drawer, less what has no meaning without a
- * source (no `ink` or `canvas` format, no `zoom`), with the dots' look, the
- * ground and the player's rate. `toModel()` joins them into what the model
- * reads.
+ * thing and sit in two columns. The emitter — emission, launch, life,
+ * forces, turning — is the model's recipe (model.js), key for key, with its
+ * defaults, but where the app opens on a torch — rising, warm, shrinking as
+ * it goes — rather than the model's plain fountain. The picture is core's
+ * Format drawer, less what has no meaning without a source (no `ink` or
+ * `canvas` format, no `zoom`), with the look — sprites or dots, size and
+ * fade over life — the ground and the player's rate. `toModel()` joins them
+ * into what the model reads.
  *
  * A stream's loop is set in frames and not in seconds: `frames / fps` is its
  * period, a whole number of the picture's frames, so the loop closes on a
@@ -17,6 +19,7 @@
 
 import { defineParams } from '../../core/params.js';
 import { frameParams, DERIVED } from '../../core/frame.js';
+import { easeParam } from '../../core/easing.js';
 import { DEFAULTS } from './model.js';
 
 /** The emitter panel's drawers. */
@@ -25,6 +28,7 @@ export const EMIT_GROUPS = {
   launch:   { label: 'Launch', open: true },
   life:     { label: 'Life', open: true },
   forces:   { label: 'Forces', open: true },
+  turning:  { label: 'Turning', open: false },
 };
 
 /** The picture panel's drawers. Format is the picture, so it starts open. */
@@ -41,27 +45,33 @@ const BURST = { mode: 'burst' };
 export function emitParams() {
   return defineParams('particles', {
     mode:    { type: 'enum', options: ['stream', 'burst'], default: D.mode, display: 'chips', label: 'mode', group: 'emission' },
-    rate:    { type: 'range', min: 1, max: 2000, step: 1, default: D.rate, label: 'a second', group: 'emission', when: STREAM },
+    rate:    { type: 'range', min: 1, max: 2000, step: 1, default: 90, label: 'a second', group: 'emission', when: STREAM },
     count:   { type: 'int', min: 1, max: 5000, default: D.count, label: 'at once', group: 'emission', when: BURST },
     /** A stream's loop, in the picture's frames: its period is frames / fps. */
     frames:  { type: 'int', min: 2, max: 1200, default: 60, label: 'loop, frames', group: 'emission', when: STREAM },
     prewarm: { type: 'bool', default: D.prewarm, label: 'full from the first frame', group: 'emission', when: STREAM },
     jitter:  { type: 'range', min: 0, max: 1, step: 0.01, default: D.jitter, label: 'birth jitter', group: 'emission', when: STREAM },
     x:       { type: 'int', min: -4000, max: 4000, default: D.x, label: 'x from centre', group: 'emission' },
-    y:       { type: 'int', min: -4000, max: 4000, default: 200, label: 'y from centre', group: 'emission' },
+    y:       { type: 'int', min: -4000, max: 4000, default: 260, label: 'y from centre', group: 'emission' },
     seed:    { type: 'int', min: 0, max: 999999, default: D.seed, label: 'seed', group: 'emission' },
 
-    speed:       { type: 'range', min: 0, max: 3000, step: 1, default: D.speed, label: 'speed px/s', group: 'launch' },
+    speed:       { type: 'range', min: 0, max: 3000, step: 1, default: 140, label: 'speed px/s', group: 'launch' },
     speedSpread: { type: 'range', min: 0, max: 1, step: 0.01, default: D.speedSpread, label: 'speed spread', group: 'launch' },
     angle:       { type: 'range', min: -180, max: 180, step: 1, default: D.angle, label: 'angle ° from up', group: 'launch' },
-    spread:      { type: 'range', min: 0, max: 360, step: 1, default: D.spread, label: 'cone °', group: 'launch' },
+    spread:      { type: 'range', min: 0, max: 360, step: 1, default: 36, label: 'cone °', group: 'launch' },
 
-    life:       { type: 'range', min: 0.05, max: 20, step: 0.05, default: D.life, label: 'life s', group: 'life' },
+    life:       { type: 'range', min: 0.05, max: 20, step: 0.05, default: 1.4, label: 'life s', group: 'life' },
     lifeSpread: { type: 'range', min: 0, max: 1, step: 0.01, default: D.lifeSpread, label: 'life spread', group: 'life' },
 
-    gravity: { type: 'range', min: -3000, max: 3000, step: 1, default: D.gravity, label: 'gravity px/s²', group: 'forces' },
+    gravity: { type: 'range', min: -3000, max: 3000, step: 1, default: -260, label: 'gravity px/s²', group: 'forces' },
     wind:    { type: 'range', min: -3000, max: 3000, step: 1, default: D.wind, label: 'wind px/s²', group: 'forces' },
-    drag:    { type: 'range', min: 0, max: 20, step: 0.05, default: D.drag, label: 'drag /s', group: 'forces' },
+    drag:    { type: 'range', min: 0, max: 20, step: 0.05, default: 1.2, label: 'drag /s', group: 'forces' },
+
+    /** Facing where it goes — a spark, a streak — instead of turning on its own. */
+    align:      { type: 'bool', default: D.align, label: 'face where it goes', group: 'turning' },
+    turn:       { type: 'range', min: 0, max: 360, step: 1, default: D.turn, label: 'start angle spread °', group: 'turning', when: { align: false } },
+    spin:       { type: 'range', min: -1080, max: 1080, step: 1, default: D.spin, label: 'spin °/s', group: 'turning', when: { align: false } },
+    spinSpread: { type: 'range', min: 0, max: 1, step: 0.01, default: D.spinSpread, label: 'spin spread', group: 'turning', when: { align: false } },
   });
 }
 
@@ -71,10 +81,21 @@ export function pictureParams() {
     ...frame,
     format: { ...frame.format, options: frame.format.options.filter(o => !DERIVED.includes(o)) },
     fps:    { type: 'int', min: 1, max: 60, default: 30, label: 'fps', group: 'player' },
-    size:   { type: 'range', min: 0.5, max: 64, step: 0.5, default: 6, label: 'dot size px', group: 'look' },
-    color:  { type: 'color', default: '#111111', label: 'dot colour', group: 'look' },
+    /**
+     * A vault set whose members are the particles' sprites, one each by its
+     * `pick` (model.js) — M6's link, `set → particles: sprites`, offered
+     * through core/uses.js. None: dots, in `color`.
+     */
+    sprites: { type: 'object', accepts: ['set'], use: 'particles', label: 'sprites', group: 'look' },
+    /** A dot's width, or a sprite's: its height follows its own shape. */
+    size:   { type: 'range', min: 0.5, max: 256, step: 0.5, default: 22, label: 'size px', group: 'look' },
+    color:  { type: 'color', default: '#d9481c', label: 'dot colour', group: 'look', when: { sprites: null } },
+    /** Its size at the end of its life, as a share of `size`, reached along `growEase`. */
+    grow:     { type: 'range', min: 0, max: 4, step: 0.05, default: 0.2, label: 'size at its end ×', group: 'look' },
+    growEase: easeParam({ default: 'linear', label: 'growing', group: 'look', when: { grow: { not: 1 } } }),
     /** Fading out over its life, so a particle leaves rather than blinks out. */
-    fade:   { type: 'bool', default: true, label: 'fade over its life', group: 'look' },
+    fade:     { type: 'bool', default: true, label: 'fade over its life', group: 'look' },
+    fadeEase: easeParam({ default: 'linear', label: 'fading', group: 'look', when: { fade: true } }),
     ground: { type: 'ground', default: '#fffdf6', label: 'ground', group: 'look' },
   });
 }

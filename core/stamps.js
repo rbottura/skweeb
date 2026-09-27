@@ -1,7 +1,8 @@
 /**
  * stamps.js — a mark drawn once at the size and angle it will appear at.
  *
- * The renderer's speed (render.js, *Why it is fast*): a sprite is drawn ONCE
+ * ckt's renderer's speed (apps/ckt/render.js, *Why it is fast*), moved into
+ * core when particles needed it too: a sprite is drawn ONCE
  * at the size and angle a frame shows it, and that stamp is then blitted to
  * every dot untransformed. Stamps are cached by quantised size and angle, and
  * shrunk from the nearest halving of the sprite so a 360px image reaches a 12px

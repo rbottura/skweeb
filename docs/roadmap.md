@@ -68,6 +68,8 @@ M4 `any → compose: place on a sheet` — **done, 2026-09-24**: compose's
 picker takes any object, and the vault detail offers *Place in compose ↗*.
 M5 `filter → compose: a look` — **done, 2026-09-26**: a chain saved in filter
 as a look goes over any placement, and the page keeps it in its block.
+M6 `set → particles: sprites` — **done, 2026-09-27**: a set picked in the
+particles' Look is its sprites, offered through `core/uses.js`.
 
 The next three were chosen by the author on 2026-09-26, with 3D parked: the
 suite is to make the assets of a small game — 2D first, fake 3D where it helps,
@@ -144,11 +146,15 @@ the suite's first fake 3D, and a start on the real one.
 sprites and scrubbed to any frame, and a one-shot burst, both leaving as
 sprite sheets a game engine loads. The link: `set → particles: sprites`, a use.
 
-*So far:* the model, 2026-09-27 (`apps/particles/model.js`): slots seeded
+*So far:* the model, the app, and sprites from a set — the link — all
+2026-09-27. The model (`apps/particles/model.js`): slots seeded
 from `k mod n`, so the picture at `t + period` is the one at `t`; slots
 before zero born too, so the first frame needs no warm-up — the roadmap's
-"one lifetime of warm-up" is paid in arithmetic, not in frames. Seven bricks
-in `apps/particles/STATUS.md`.
+"one lifetime of warm-up" is paid in arithmetic, not in frames. The app
+plays dots or a set's sprites, sized, faded and turned over their life, and
+opens on a torch. The link, `set → particles: sprites`, is a row in
+`core/uses.js`: a brush family is offered by default. Seven bricks in
+`apps/particles/STATUS.md`; saving is next.
 
 **M7 — fractals.** Escape-time on the GPU — Mandelbrot, Julia, Burning Ship,
 multibrot, Newton, Phoenix, Lyapunov — with smooth colouring and orbit traps,

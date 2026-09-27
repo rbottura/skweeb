@@ -19,7 +19,7 @@
  * holds no p5 instance can move to a worker.
  */
 
-import { surface } from './surface.js';
+import { surface } from '../../core/surface.js';
 
 const DEG = Math.PI / 180;
 
