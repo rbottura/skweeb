@@ -159,6 +159,17 @@ if (picked) {
   c.ok('turning and shrinking, the loop still closes', apart(await pixels(), turning) === 0,
     `${await page.eval(count)}, apart by ${apart(await pixels(), turning)}`);
   await c.shot('4-turning');
+
+  // Stacked the other way: the same particles, the newest behind — and still a loop.
+  await page.click(`[...${row('stacking')}.querySelectorAll('button')].find(b => b.textContent === 'newest behind')`);
+  await wait(300);
+  const under = await pixels();
+  c.ok('newest behind, the stack is turned over', apart(under, turning) > 1, 'apart by ' + apart(under, turning).toFixed(1));
+  await scrubTo(59); key('.'); await wait(300);
+  for (let i = 0; i < 12; i++) key('.');
+  await wait(400);
+  c.ok('and the loop still closes', apart(await pixels(), under) === 0);
+  await c.shot('5-newest-behind');
 }
 
 const noise = c.quiet();

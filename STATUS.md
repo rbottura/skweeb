@@ -17,7 +17,8 @@ it said is here, shorter, or in the files it points to.
   a start spread, or facing where it goes. Loops still close pixel for
   pixel. ckt's `stamps.js` and `surface.js` are in core now (ckt booted and
   drew in Chrome after the move); `core/uses.js` has a `particles` row,
-  brush families offered by default. The app opens on a torch.
+  brush families offered by default. The app opens on a torch. And the
+  stack turns over: *newest behind*, the author's ask.
 - **The particles app opens and plays** (2026-09-27, M6 brick 2;
   `node scripts/check-particles.mjs`, 15 checks). `apps/particles/`: the
   emitter's drawers on the left, the picture on the right, dots between.
@@ -322,6 +323,13 @@ with it.
 
 ## Parked decisions
 
+- **Newest behind, in the gamepad too** (the author's idea, 2026-09-27,
+  not started): the gamepad paints each mark once into a buffer that keeps
+  the earlier ones, so it cannot reorder — there it is the composite
+  operation, `destination-over`, set inside `_drawEvent`'s push/pop in
+  `core/stage/player.js` from a clip override, and the same on the live
+  drawing layer as you draw. The buffer is transparent until the stage
+  puts it over the ground, so behind is behind the marks, not the paper.
 - **A flipbook ripples; M6 next** (the author, 2026-09-27): an end moved
   moves what started at it, down the chain, with no switch; the onion skin
   is preview only. Particles before the rest of M5's catalogue.

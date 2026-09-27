@@ -96,6 +96,13 @@ export function pictureParams() {
     /** Fading out over its life, so a particle leaves rather than blinks out. */
     fade:     { type: 'bool', default: true, label: 'fade over its life', group: 'look' },
     fadeEase: easeParam({ default: 'linear', label: 'fading', group: 'look', when: { fade: true } }),
+    /**
+     * Which way the particles stack: the newest over the ones before it, as
+     * a spray comes towards you — or under them, as a trail or smoke does,
+     * the older ones in front.
+     */
+    order: { type: 'enum', options: ['over', 'under'], default: 'over', display: 'chips',
+             labels: { over: 'newest on top', under: 'newest behind' }, label: 'stacking', group: 'look' },
     ground: { type: 'ground', default: '#fffdf6', label: 'ground', group: 'look' },
   });
 }

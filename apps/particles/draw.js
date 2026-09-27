@@ -22,7 +22,11 @@ export function pictureSize(picture) {
 }
 
 /**
- * Every particle, oldest first: a sprite of the set — `images[floor(pick × n)]`
+ * Every particle, stacked by `order`: the newest on top — the model gives
+ * them oldest first — or, `under`, the newest behind, drawn newest first.
+ * Redrawn whole every frame, so the order is simply the loop's; nothing
+ * needs a composite operation. Each is a sprite of the set —
+ * `images[floor(pick × n)]`
  * — or a dot in the picture's colour. Its size runs from `size` to `size ×
  * grow` over its life and its alpha from 1 to 0 when it fades, each along
  * its curve (core/easing.js); a sprite is turned by its `rot`.
@@ -56,7 +60,9 @@ export function drawParticles(ctx, particles, picture, scale, sprites = null) {
   const grow = picture.grow ?? 1;
   const growing = easing(picture.growEase), fading = easing(picture.fadeEase);
   const n = sprites ? sprites.length : 0;
-  for (const p of particles) {
+  const under = picture.order === 'under';
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[under ? particles.length - 1 - i : i];
     const w = picture.size * scale * (1 + (grow - 1) * growing(p.t));
     const alpha = picture.fade ? 1 - fading(p.t) : 1;
     if (w <= 0 || alpha <= 0) continue;

@@ -39,7 +39,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 21 checks). Three columns, as
+  `node scripts/check-particles.mjs`, now 23 checks). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -70,6 +70,10 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   `drawImage`: every particle has its own size and angle, so ckt's shared
   stamps would only churn their cache. A loop that turns and shrinks still
   closes pixel for pixel.
+- **Stacking** (the author's ask, 2026-09-27): *newest on top*, or *newest
+  behind* — a trail or smoke, the older ones in front. The picture is
+  redrawn whole each frame, so it is the draw loop's order, not a composite
+  operation; checked, and the loop still closes.
 - **It opens on a torch**: rising, warm, shrinking as it goes — the app's
   defaults, not the model's, which stay a plain fountain.
 
