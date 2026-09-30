@@ -1,5 +1,5 @@
 # STATUS — particles
-_last touched: 2026-09-27_
+_last touched: 2026-09-30_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
 and *Done when* are in `docs/roadmap.md`, M6 — a torch loop that closes
@@ -194,11 +194,18 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 ## Next single step
 
 M6's seven bricks are in and its *Done when* met. What is left of it, none
-started, in the order it would pay:
+started, in the order the suite takes it (`STATUS.md`, *Next single step*):
 
+- **An emitter taken from a vault object** — a ckt dot-set's dots (the
+  author's idea, 2026-09-30, `docs/inbox.md`), or a shape's alpha sampled
+  where it is opaque. `spotOf` already takes two draws a slot: a dot picked
+  by the first keeps every saved recipe as it was, and each slot keeps its
+  dot, so a loop still closes. ckt's `datasets.js` moves to core, as
+  `stamps.js` and `sprites.js` did; the object is a parent of the save, and
+  `rebuild.js` loads it before the model. The author's to answer: one glyph
+  at a time, as ckt shows them, or a whole set laid out as a word. The link:
+  `ckt → particles: an emitter`. Eleven dot-sets in the vault to try it on.
+- **A field from another object** — M7's link, `fractal → particles: a
+  field`, taking its object in as the emitter does.
 - **Colour over life** — for dots, and a tint for sprites: a `color[]`
   ramp run along a curve.
-- **A shape's alpha as an emitter** — a still or shape from the vault, the
-  spot drawn where its alpha is.
-- **A field from another object** — M7's link, `fractal → particles: a
-  field`, once there is a fractal to take it from.

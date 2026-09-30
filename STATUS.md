@@ -1,15 +1,35 @@
 # STATUS — skweeb
-_last touched: 2026-09-27_
+_last touched: 2026-09-30_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` has the milestones, `docs/decisions.md` why things are as
 they are. Rewritten on 2026-09-27 from a 500-line log of sessions: what
-it said is here, shorter, or in the files it points to.
+it said is here, shorter, or in the files it points to. Ideas the author
+has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Works right now
 
 ### Newest
 
+- **One vault, on the laptop that travels** (the author's setup,
+  2026-09-28; `docs/decisions.md`). The laptop goes between the work PC and
+  the home tower and serves `~/skweeb-vault` behind `tailscale serve`, a
+  user service that starts at boot; the pages on both machines save into
+  it over the tailnet. 130 objects in it on 2026-09-30.
+- **A save on one machine shows on the others, live** (2026-09-30;
+  `server/events.js`, `tests/vault-events.mjs`). The server streams
+  `changed` at `/api/vault/events` whenever it rewrites the index — a save,
+  a retag, a delete, from any machine; `core/vault.js` listens once a
+  server answers and passes it on as `vault:changed`, and the vault panel
+  redraws. Before, a panel saw only the saves made in its own tab.
+- **Old vaults merge into the one that travels** (2026-09-30;
+  `node scripts/vault-merge.mjs <from> [--into ~/skweeb-vault] [--dry]`).
+  Ids are minted per machine and never collide, so a merge copies the
+  folders the target lacks: never overwriting, `cache/` left behind, each
+  renamed into place so a running server never reads half an object. The
+  same id differing, a twin under another id, a parent neither vault has:
+  reported, not resolved. Run twice, it copies nothing. Restart the server
+  after, so it rebuilds its index.
 - **Idles from fractal copies** (2026-09-28, the author's find; `check-fractals`,
   29 checks; `tests/fractal-motion.mjs`, 17). A Motion drawer swings one of
   the copies' params over a loop — the tree's twist −10 to +10, there and
@@ -294,8 +314,10 @@ it said is here, shorter, or in the files it points to.
 
 ## Tests
 
-Twenty-nine files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass. Newest: `compose-time` gained the ripple, and
+Thirty files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-09-30). Newest: `vault-events` — a save, a
+retag and a delete each heard by two listeners at once, standing for two
+machines; before it the fractals' three. Then `compose-time` gained the ripple, and
 with `compose-placements` a placement's time — windows, a page's end, a
 flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
 hang), `gpu-filters` (the catalogue as data: licence, schema, the WGSL
@@ -360,7 +382,8 @@ throws or its console is not quiet.
   renumber `brushes`: recordings store sprites by index.
 - **A server started before a change to `server.js` keeps its old API** — it
   serves the new pages from disk but answers with old code. Restart it after
-  pulling.
+  pulling — on the laptop that serves the vault,
+  `systemctl --user restart skweeb-vault`.
 - **The legacy copy is a button, not the script planned** (`scripts/` has no
   canvas for thumbnails). Heavy families copy as they are: fleurs is 18 MB on
   disk, and copying it puts 18 MB more in the vault.
@@ -376,8 +399,11 @@ throws or its console is not quiet.
 **M7: escape time moves too** — `apps/fractals/STATUS.md` has it: the
 ramp's phase once through, and a Julia `c` round a circle, as the copies'
 idles move.
-Left of M6, the author's to order (`apps/particles/STATUS.md`): colour over
-life, a shape as an emitter. The gamepad's *newest behind* stays parked.
+Then **an emitter taken from a vault object** — a ckt dot-set's dots (the
+author's idea, 2026-09-30, sorted from `docs/inbox.md`) or a shape's alpha —
+before M7's field, which takes a second object into particles the same way.
+Left of M6 besides: colour over life (`apps/particles/STATUS.md`). The
+gamepad's *newest behind* stays parked.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*
@@ -461,8 +487,9 @@ with it.
   the closed form is the motion.
 - **A port reads the original's source, never the roadmap's summary of it.**
 - Local disk vault plus a published gallery; the online skweeboteque later.
-- **The vault is shared over the author's tailnet**: one machine serves it,
-  work and home open it by link, and the `?open=` link is M4's "URL you can
+- **The vault is shared over the author's tailnet**: one machine serves it —
+  the laptop, which travels between work and home (2026-09-28) — the others
+  open it by link, and the `?open=` link is M4's "URL you can
   send" for those machines. `server.js` stays on 127.0.0.1 behind
   `tailscale serve`, or takes `--host` its tailnet address — never `0.0.0.0`.
   `docs/decisions.md`.

@@ -322,3 +322,26 @@ filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA
 is under the Prosperity licence — noncommercial, a thirty-day commercial trial —
 and Shadertoy code with no licence header is CC BY-NC-SA 3.0 by default: both
 stay out of a suite meant to make a game's assets.
+
+## Decided since, 2026-09-28
+
+**One vault, on the laptop that travels.** The author, 2026-09-28: the
+machine that serves the vault is the laptop, the smallest of the three, and it
+goes between the work PC and the home tower — so what is made at work and at
+home lands in one vault, and neither big machine has to stay on for the other.
+It serves `~/skweeb-vault` behind `tailscale serve`, a user service that
+starts at boot, and sleeps with its lid shut, on purpose: it travels in a bag.
+A save made on one machine reaches a panel open on another as it happens
+(`server/events.js`), and each machine's old `vault/` is brought over once by
+`scripts/vault-merge.mjs`, which copies and never overwrites.
+
+**Ideas between bricks wait in an inbox.** 2026-09-30: the author asked
+whether the small ideas that come daily should go to side threads, run by
+cheaper agents beside the main one. Mostly not, was the answer taken. A
+session's cost here is reading the rules, not typing, and an agent that skips
+the reading breaks what the tests do not hold — the order of a slot's draws,
+the line cap, a licence line. Threads side by side collide on `STATUS.md`,
+`CLAUDE.md` and `core/uses.js`. And an idea is often a roadmap item already:
+the first one was. So ideas wait in `docs/inbox.md` and a session sorts them;
+only a narrow kind, set out in its head, runs beside the main thread, on a
+branch that leaves the shared docs alone.

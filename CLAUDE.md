@@ -26,6 +26,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/decisions.md` | what was decided before today, and why, by date | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
+| `docs/inbox.md` | the author's ideas between bricks, not yet sorted | when the author has one, and at the end of a session |
 
 ## The one idea
 
@@ -117,3 +118,7 @@ The server serves the repo root, so an app is at `/apps/<name>/`, the kit at
 Rewrite `STATUS.md` — works now / broken / **next single step** / parked
 decisions. One concrete step, small enough to finish in 30 minutes. This is the
 file that makes the next session cost nothing to start.
+
+Then sort `docs/inbox.md` — each idea onto the plan, marked a side job, or
+parked, as its head says. An idea the author has mid-brick goes there, not
+into the brick under way.
