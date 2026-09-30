@@ -131,7 +131,9 @@ export async function openObject(object, { scale = 1, draft, url } = {}) {
 ```
 
 `draft: true` is a live preview asking: an app may answer faster and
-near-exact. At boot `main.js` restores `await requested('<name>')`
+near-exact. An app that produces a field for particles exports `fieldOf(object)`
+too — `{ at(x, y) }`, a direction per point — asked by `core/fields.js`, as
+fractals' escape time is: a link is declared by the app that produces. At boot `main.js` restores `await requested('<name>')`
 (`core/reopen.js`) with `params.restore(object.recipe)`; a listener that
 chains one value to another leaves a restore alone (`params.restoring`).
 

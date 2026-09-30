@@ -105,6 +105,25 @@ export function escape(v, x, y) {
   return v.iterations;
 }
 
+/**
+ * The escape count smoothed as the pass smooths it — `n + 1 − log₂ ln |z|` —
+ * in doubles; Infinity for a point that never leaves. It rises towards the
+ * set, so its slope is which way the set is: the field particles move
+ * through (field.js).
+ */
+export function smooth(v, x, y) {
+  let zx = 0, zy = 0, cx = x, cy = y;
+  if (v.kind === 'julia') { zx = x; zy = y; cx = v.jx; cy = v.jy; }
+  for (let i = 0; i < v.iterations; i++) {
+    const nx = zx * zx - zy * zy + cx;
+    zy = 2 * zx * zy + cy;
+    zx = nx;
+    const r2 = zx * zx + zy * zy;
+    if (r2 > BAILOUT * BAILOUT) return i + 1 - Math.log2(0.5 * Math.log(r2));
+  }
+  return Infinity;
+}
+
 /** The pass, as a filter the runner takes in a chain entry: `{ filter: FRACTAL, params: values }`. */
 export const FRACTAL = {
   id: 'fractal',

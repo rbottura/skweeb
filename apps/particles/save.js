@@ -40,13 +40,14 @@ function titleOf(emit, spritesTitle, points) {
  * @param {?Array} args.sprites       the set's images, or null for dots
  * @param {?string} args.spritesTitle the set's title, for the object's
  * @param {?object} [args.points]     an object emitter's points and title (core/points.js)
+ * @param {?object} [args.field]      a field from another object (core/fields.js)
  * @param {number} args.tick          the frame on screen
  * @param {boolean} [args.still]      one frame, not the loop
  * @returns {Promise<?object>}        the envelope, or null when there is no vault
  */
-export async function saveParticles({ emit, picture, sprites, spritesTitle, points = null, tick, still = false }) {
+export async function saveParticles({ emit, picture, sprites, spritesTitle, points = null, field = null, tick, still = false }) {
   const recipe = { emit: emit.values, picture: picture.values, ...(still ? { tick } : {}) };
-  const frames = openParticles(recipe, sprites, { points });
+  const frames = openParticles(recipe, sprites, { points, field });
   const shown = frames.frame(tick);
   const blob = await toPng(shown);
   const loop = frames.length > 1;
@@ -74,9 +75,9 @@ export async function saveParticles({ emit, picture, sprites, spritesTitle, poin
  *
  * @returns {Promise<{frames: number, fps: number, width: number, height: number}>}
  */
-export async function downloadFrames({ emit, picture, sprites, points = null, onStatus = () => {} }) {
+export async function downloadFrames({ emit, picture, sprites, points = null, field = null, onStatus = () => {} }) {
   const recipe = { emit: emit.values, picture: picture.values };
-  const frames = openParticles(recipe, sprites, { points });
+  const frames = openParticles(recipe, sprites, { points, field });
   const entries = [];
   await runFrames({
     count: frames.length,
@@ -108,9 +109,9 @@ export async function downloadFrames({ emit, picture, sprites, points = null, on
  *
  * @returns {Promise<{name, frames, width, height, box}>}
  */
-export async function downloadSheet({ emit, picture, sprites, points = null, onStatus = () => {} }) {
+export async function downloadSheet({ emit, picture, sprites, points = null, field = null, onStatus = () => {} }) {
   const recipe = { emit: emit.values, picture: { ...picture.values, ground: 'none' } };
-  const frames = openParticles(recipe, sprites, { points });
+  const frames = openParticles(recipe, sprites, { points, field });
   const name = `particles_${recipe.emit.mode}_${frames.length}f`;
   const { canvas, json, box, layout } = await buildSheet({
     count: frames.length, frame: i => frames.frame(i), fps: frames.fps, name, loop: frames.loop,

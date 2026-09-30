@@ -34,7 +34,7 @@ const QUIET = '#6b6b6b';
 const HALO = 'rgba(255, 253, 246, 0.9)';
 
 /** Whether any field pulls: then there is a centre worth a handle. */
-export const hasField = e => !!(e.vortex || e.attract || e.noise);
+export const hasField = e => !!(e.vortex || e.attract || e.noise || (e.fieldFrom && e.fieldPull));
 
 /** How far the camera scales something at depth `z` (draw.js `drawOrder`); 0 behind it. */
 const depthScale = (z, focal) => {
@@ -118,9 +118,9 @@ function handle(ctx, x, y, colour, square) {
  * @param {number} [dpp=1]  canvas pixels per CSS pixel: the guides are sized
  *                          on screen, not on the canvas, so they read the same
  *                          on any display and at any preview size
- * @param {?object} [points] an object emitter's points (core/points.js)
+ * @param {object} [given]  what the emitter names, loaded: `points`, `field`
  */
-export function drawGuides(ctx, e, p, view, dpp = 1, points = null) {
+export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = null } = {}) {
   const { width, height } = pictureSize(p);
   view /= dpp;                                  // from here on, CSS pixels
   const ox = (width / 2) * view, oy = (height / 2) * view;
@@ -134,7 +134,7 @@ export function drawGuides(ctx, e, p, view, dpp = 1, points = null) {
   ctx.moveTo(ox, oy - 8); ctx.lineTo(ox, oy + 8);
   stroke(ctx, QUIET, 1);
 
-  drawField(ctx, e, p, view, ox, oy, width, height);
+  drawField(ctx, e, p, view, ox, oy, width, height, field);
   drawEmitter(ctx, e, p, view, ox, oy, points);
   drawPull(ctx, e);
   ctx.restore();
@@ -196,7 +196,7 @@ function drawEmitter(ctx, e, p, view, ox, oy, points) {
   label(ctx, e.z ? `emitter · depth ${e.z}` : 'emitter', x + 11, y + 16, EMITTER);
 }
 
-function drawField(ctx, e, p, view, ox, oy, width, height) {
+function drawField(ctx, e, p, view, ox, oy, width, height, given) {
   const x = ox + e.fx * view, y = oy + e.fy * view;
   if (!hasField(e)) {
     // Nothing pulls yet: the centre alone, faint, ready to be placed.
@@ -206,7 +206,7 @@ function drawField(ctx, e, p, view, ox, oy, width, height) {
     ctx.globalAlpha = 1;
     return;
   }
-  const field = fieldOf(prepare(toModel(e, p)));
+  const field = fieldOf(prepare(toModel(e, p), { field: given }));
 
   // The whole field on a grid, from the function the particles move through.
   const step = 48;

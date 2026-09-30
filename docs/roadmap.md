@@ -72,7 +72,9 @@ M6 `set → particles: sprites` — **done, 2026-09-27**: a set picked in the
 particles' Look is its sprites, offered through `core/uses.js`. And one
 between milestones, the author's idea: `ckt → particles: an emitter` —
 **done, 2026-09-30**: a dot-set, or a shape's ink, is where particles leave
-from.
+from. M7 `fractal → particles: a field` — **done, 2026-09-30**: escape
+time's slope, which way the set is, pulls particles; fractals answer it in
+their rebuild.js, the producer declaring the link.
 
 The next three were chosen by the author on 2026-09-26, with 3D parked: the
 suite is to make the assets of a small game — 2D first, fake 3D where it helps,
@@ -187,8 +189,10 @@ families begun ahead of order, as the author asked. And loops: one param
 swung over a loop in either family — for escape time the ramp once round,
 or a Julia `c` round a circle. Against *Done when*: a Julia loop that
 closes, redrawn exactly at print scale — met, 2026-09-30; whose field
-steers an M6 emitter — brick 7, after particles learn to take an emitter
-from another object.
+steers an M6 emitter — met the same day, brick 7: escape time's slope in
+doubles, taken in by particles' Fields drawer. **M7's *Done when* is met,
+2026-09-30.** It stays open for the rest of its bricks, as M5 does for its
+catalogue: families, depth, point families.
 
 **Across M5–M7, for the game.** Four things serve every app rather than one:
 

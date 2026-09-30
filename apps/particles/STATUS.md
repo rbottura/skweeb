@@ -26,6 +26,15 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **A field from another object — M7's link, `fractal → particles: a
+  field`** (2026-09-30; `forces.js`, `core/fields.js`,
+  `tests/particles-model.mjs` now 92, `check-particles-links` 23). In the
+  Fields drawer, *a field from*: an object whose app makes a field — a
+  fractal's escape time, which way its set is — *its pull* px/s², and
+  *turned*: 0 towards what it points at, 180 away, 90 round it. Given
+  beside the recipe as an emitter's points are, and integrated from each
+  particle's birth as the other fields are, so a loop through it closes.
+  An object whose app makes none says so.
 - **An emitter taken from a vault object — `ckt → particles: an emitter`**
   (2026-09-30, the author's idea; `core/points.js`, `tests/points.mjs` 16
   checks, `tests/particles-model.mjs` now 86,
@@ -189,7 +198,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 - A field costs a particle's age in steps, each frame: a long life through
   one is the slow case — 20 s lives are 2400 steps each.
 - The fields do not move in time — a moving field would have to repeat
-  with the loop to keep it closed.
+  with the loop to keep it closed. A fractal loop's field is its set at
+  rest.
 - Depth has no gravity or field of its own, and the emitter's shape stays
   in the plane: a disc is flat, facing the camera.
 - The camera looks at the picture's centre and cannot move or turn.
@@ -221,12 +231,9 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Next single step
 
-M6's seven bricks are in, its *Done when* met, and the emitter from a vault
-object with them. What is left, in the order the suite takes it
-(`STATUS.md`, *Next single step*):
+M6's seven bricks are in, its *Done when* met, and with them an emitter
+and a field taken from other objects. The suite goes on to M8 (`STATUS.md`);
+what is left here waits:
 
-- **A field from another object** — M7's link, `fractal → particles: a
-  field` (`apps/fractals/STATUS.md`): a fractals object picked in the
-  Fields drawer, loaded beside the recipe as the emitter's points are.
 - **Colour over life** — for dots, and a tint for sprites: a `color[]`
   ramp run along a curve.

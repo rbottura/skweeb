@@ -16,7 +16,7 @@
 import { Vault } from './vault.js';
 
 /** A recipe that is a recording of marks: core replays these, and no app reopens them. */
-const isMarks = recipe => !!recipe
+export const isMarks = recipe => !!recipe
   && (Array.isArray(recipe.marks) || !!(recipe.sequence && Array.isArray(recipe.sequence.events)));
 
 /**

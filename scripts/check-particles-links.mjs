@@ -12,6 +12,12 @@
  * pixel of its render, and `?open=` brings the emitter back; switched back to
  * a point, the dot-set is no parent of the next save.
  *
+ * `fractal → particles: a field` (M7's link, 2026-09-30): a Julia loop saved
+ * as fractals saves one is picked as a field, and moves the particles; the
+ * loop through it still closes pixel for pixel; saved, the Julia loop is a
+ * parent and the replay is the render to the pixel; an object whose app
+ * makes no field says so. The field is in doubles: no GPU here either.
+ *
  * On its own because check-particles.mjs is past the 400-line cap. Needs no
  * GPU and brings its own objects: the vault it runs on may be empty.
  */
@@ -173,6 +179,66 @@ c.ok('born on its ink: across its middle, and not past its box', across.length >
   `${across.length} px, from ${Math.round(Math.min(...across))} to ${Math.round(Math.max(...across))}`);
 c.ok('and not in the notch under its middle', down.every(x => Math.abs(x - 540) > 20 || down.length === 0), `${down.length} px at y 700`);
 await c.shot('2-star');
+
+// ── A fractal's field: M7's link ────────────────────────────────────────────
+
+const julia = await page.eval(`(async () => {
+  const { Vault } = await import('/core/vault.js');
+  const { thumbFromBlob } = await import('/core/thumb.js');
+  const { fractalParams } = await import('/apps/fractals/params.js');
+  const recipe = { ...fractalParams().values, kind: 'julia', cx: 0, cy: 0, zoom: 1, moveEscape: 'julia', radius: 0.02,
+                   from: 0, to: 360, wave: 'through', ease: 'linear', frames: 48, fps: 24 };
+  const pic = new OffscreenCanvas(64, 64); pic.getContext('2d').fillRect(8, 8, 48, 48);
+  const blob = await pic.convertToBlob({ type: 'image/png' });
+  const o = await Vault.save({ type: 'sequence', title: 'julia loop', tags: ['fractals', 'escape', 'loop'],
+    origin: { app: 'fractals', version: '1.0.0' }, seed: null, recipe, parents: [],
+    render: { blob, ext: 'png', w: 64, h: 64, frames: 48, fps: 24, loop: true }, thumb: await thumbFromBlob(blob) });
+  await Vault.refresh();
+  return o.id; })()`);
+c.ok('a Julia loop in the vault, as fractals saves one', !!julia, julia);
+
+await c.go(c.base + '/apps/particles/');
+await page.until(`${say}.includes('alive')`, { timeout: 20000 });
+await guidesOff();
+const grid = () => page.eval(`(() => { const c = document.getElementById('stage'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const n = 16, out = new Array(n * n).fill(0), k = new Array(n * n).fill(0);
+  for (let y = 0; y < c.height; y += 2) for (let x = 0; x < c.width; x += 2) { const i = (y * c.width + x) * 4, j = Math.floor(y * n / c.height) * n + Math.floor(x * n / c.width);
+    out[j] += d[i] + d[i + 1] + d[i + 2]; k[j]++; }
+  return out.map((v, j) => v / Math.max(1, k[j]) / 3); })()`);
+const apart = (p, q) => Math.max(...p.map((v, i) => Math.abs(v - q[i])));
+const count = `(document.querySelector('.tp-count')?.textContent || '')`;
+await key(' ');                                   // the torch held still
+await scrubTo(20);
+const unpulled = await grid();
+await choose('a field from', 'julia loop');
+const fieldSay = await sayWith('julia loop: a field to move through');
+c.ok('the Julia loop picked: a field to move through', fieldSay.includes('a field to move through'), fieldSay);
+await set('its pull px/s²', 1500);
+await scrubTo(20);
+const pulled = await grid();
+c.ok('its field moves the particles', apart(pulled, unpulled) > 8, 'apart by ' + apart(pulled, unpulled).toFixed(1));
+await scrubTo(0);
+const first = await grid();
+await scrubTo(59);
+await key('.');
+c.ok('through it, the frame after the last is the first, pixel for pixel', (await page.eval(count)) === '1 / 60'
+  && apart(await grid(), first) === 0, `${await page.eval(count)}, apart by ${apart(await grid(), first)}`);
+await scrubTo(20);
+await c.shot('3-julia-field');
+
+const f = await saved();
+c.ok('saved: the Julia loop is its parent', !!f && f.parents.includes(julia) && f.recipe.emit.fieldFrom === julia,
+  f ? `parents ${JSON.stringify(f.parents)}` : await page.eval(say));
+if (f) {
+  const replay = await replayOf(f.id, 20);
+  c.ok('the vault replays it through the field: its render, pixel for pixel', replay.worst === 0 && !replay.missing.length,
+    JSON.stringify(replay));
+}
+if (o) {
+  await choose('a field from', o.title);
+  const none = await sayWith('makes no field');
+  c.ok('an object whose app makes no field says so', none.includes('makes no field'), none);
+}
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

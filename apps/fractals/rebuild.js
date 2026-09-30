@@ -10,12 +10,17 @@
  * Copies replay on any machine: Canvas 2D, and a sprite that will not open
  * said as `missing` and drawn as dots. Escape time needs WebGPU; where
  * there is none it shows as its saved render, as filter's objects do.
+ *
+ * And fractals declare a link here, as the app that produces it: an
+ * escape-time object is a field particles move through (`fieldOf`,
+ * core/fields.js) — `fractal → particles: a field`.
  */
 
 import { openFractal, chainOf } from './frames.js';
 import { loadSprites }   from '../../core/sprites.js';
 import { drawFrameInto, openPicture } from '../../core/rebuild.js';
 import { createRunner }  from '../../core/gpu/runner.js';
+import { escapeField }   from './field.js';
 
 const isFractal = object => !!(object && object.recipe && object.recipe.family);
 
@@ -24,6 +29,14 @@ export const reopens = isFractal;
 
 /** Drawn again at any scale: a fractal is a function of its params (frames.js, *Sizes*). */
 export const redraws = isFractal;
+
+/**
+ * Escape time as a field — which way the set is (field.js) — in doubles, so
+ * on any machine. Copies make none.
+ */
+export function fieldOf(object) {
+  return isFractal(object) && object.recipe.family === 'escape' ? escapeField(object.recipe) : null;
+}
 
 /**
  * @param {object} object   a vault envelope written by fractals

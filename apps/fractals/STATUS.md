@@ -24,11 +24,29 @@ field`.
 6. **Point families** — begun 2026-09-28, ahead of order, as the author
    asked: a sprite copying itself, an IFS drawn with a sprite (*copies*).
    Then strange attractors and fractal flames as density, and L-systems.
-7. **A field for particles** — M7's link: the fractal's slope, or its
-   escape, as a field an emitter's particles follow.
+7. **A field for particles** — done 2026-09-30, M7's link: escape time's
+   slope, which way the set is, a field particles move through. **M7's
+   *Done when* is met.**
 
 ## Works now
 
+- **A field for particles — `fractal → particles: a field`, M7's *Done
+  when* met** (2026-09-30; `field.js`, `tests/fractal-field.mjs` 13 checks,
+  `check-particles-links` 23). The smooth escape count (`fractal.js`
+  `smooth`, the pass's formula in doubles) rises towards the set; its
+  slope, a direction of length 1, points at it — sampled once on a grid of
+  128 along the picture's longer side, read between samples bilinearly,
+  none inside the set. In doubles, so a field needs no GPU and is the same
+  on any machine. Fractals declare the link as the producer: `rebuild.js`
+  answers `fieldOf(object)`, and `core/fields.js` asks the app that made
+  an object, by `origin.app`, as `openObject` is asked. In particles' Fields
+  drawer, *a field from* a fractal, *its pull*, *turned* — 0 towards the
+  set, 180 away, 90 round it. A loop's field is its set at its own values —
+  a Julia loop's, the set of the `c` its circle goes round — so it stays
+  still, and a stream through it closes its loop pixel for pixel. Checked
+  in Chrome: a Julia loop saved as fractals saves one bends a torch; the
+  loop closes; the Julia loop is the save's parent; the replay goes
+  through the field to its render, to the pixel.
 - **Escape time moves** (2026-09-30; `motion.js`, `tests/fractal-motion.mjs`
   34 checks, `check-fractals` 42). The Motion drawer's *moving* is the
   family's own. For escape time, *the ramp, round*: the phase from where it
@@ -120,15 +138,13 @@ field`.
 
 ## Next single step
 
-The suite's next step is in particles: an emitter taken from a vault object
-(`STATUS.md`, *Next single step*). Fractals' own, after it: **a field for
-particles** — brick 7, M7's link, and the last clause of its *Done when*,
-*whose field steers an M6 emitter*. A fractals object picked in particles'
-Fields drawer, its escape sampled in doubles by `fractal.js`'s `escape` —
-so a field needs no GPU — and its slope the force: particles pushed away
-from the set, or, the slope turned a quarter, going round it. It takes its
-object in as the emitter will. Left of brick 2 meanwhile: a Julia set
-chosen by clicking a point of the Mandelbrot set.
+M7's *Done when* is met; the suite goes on to M8, the map editor
+(`STATUS.md`). What is left here waits, none of it started, as M5's
+catalogue waits: a Julia set chosen by clicking a point of the Mandelbrot
+set (brick 2); more families and orbit traps (4); deeper, past 32 bits (5);
+strange attractors, flames and L-systems (6); and a field that moves with
+its loop — it would have to share the particles' period to keep them
+closing.
 
 ## Parked
 

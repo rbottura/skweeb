@@ -16,8 +16,8 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
 | `apps/compose/` | M4: objects from every app placed on one page | `apps/compose/STATUS.md` |
 | `apps/filter/` | M5: any picture or loop through a chain of GPU filters | `apps/filter/STATUS.md` |
-| `apps/fractals/` | M7, begun: escape time on the GPU kit, and a sprite copying itself | `apps/fractals/STATUS.md` |
-| `apps/particles/` | M6, begun: particles as a function of time — loops that close, frames that stand alone | `apps/particles/STATUS.md` |
+| `apps/fractals/` | M7: escape time on the GPU kit, a sprite copying itself, idles, and a field for particles | `apps/fractals/STATUS.md` |
+| `apps/particles/` | M6: particles as a function of time — loops that close, frames that stand alone | `apps/particles/STATUS.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault | `docs/object-model.md`, *Trash, and deleting* |
@@ -91,7 +91,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion vault-events points; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion fractal-field vault-events points; do
   node tests/$t.mjs || break
 done
 
@@ -106,7 +106,7 @@ node scripts/check-look.mjs             # M5's link: a look made in filter, over
 node scripts/check-vault.mjs            # the vault panel: kin together, folders, the lineage switch
 node scripts/check-frames.mjs           # a flipbook in compose: next frames, stepped, picked up, saved
 node scripts/check-particles.mjs        # particles: a loop that closes, sprites, saved, replayed, placed, a sprite sheet
-node scripts/check-particles-links.mjs  # particles from other apps' objects: a dot-set or a shape's ink as the emitter
+node scripts/check-particles-links.mjs  # particles from other apps' objects: a dot-set or a shape's ink as the emitter; a fractal's field
 node scripts/check-sheet-engine.mjs     # that sheet loaded and played by Phaser 3, fetched into the page only
 node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag; copies of a star; idles of both families saved and placed
 

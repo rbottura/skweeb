@@ -163,6 +163,21 @@ ok('a stream from an object closes its loop', round(particlesAt(fromWord, 2.3)),
 ok('and draws nothing else differently: the same lives', particlesAt(fromWord, 0.8).map(p => +p.life.toFixed(9)),
    particlesAt(torch, 0.8).map(p => +p.life.toFixed(9)));
 
+// ── A field from another object, given beside the recipe ────────────────────
+
+const resting = { seed: 3, mode: 'burst', count: 20, speed: 0, speedSpread: 0, gravity: 0, wind: 0, drag: 0, life: 2, lifeSpread: 0 };
+const rightward = { at: () => [1, 0] };
+const pulledRight = particlesAt(prepare({ ...resting, fieldPull: 100 }, { field: rightward }), 1);
+ok('a field\'s pull is a wind of its strength: a t² / 2 on', pulledRight.every(p => Math.abs(p.x - 50) < 1e-6 && Math.abs(p.y) < 1e-9), true);
+const pulledDown = particlesAt(prepare({ ...resting, fieldPull: 100, fieldTurn: 90 }, { field: rightward }), 1);
+ok('turned 90°, clockwise: down, as gravity', pulledDown.every(p => Math.abs(p.y - 50) < 1e-6 && Math.abs(p.x) < 1e-6), true);
+ok('no pull, no field: the closed form places them', prepare({ ...resting, fieldPull: 0 }, { field: rightward }).field, null);
+ok('a pull with no field given: none', prepare({ ...resting, fieldPull: 100 }).field, null);
+const roundField = { at: (x, y) => { const d = Math.hypot(x, y) || 1; return [-y / d, x / d]; } };
+const swirled = prepare({ ...torch, fieldPull: 200 }, { field: roundField });
+ok('a stream through a given field still closes its loop', round(particlesAt(swirled, 2.4)), round(particlesAt(swirled, 0.4)));
+ok('and the field moves it', round(particlesAt(swirled, 0.4)) === round(particlesAt(torch, 0.4)), false);
+
 // ── Fields: integrated from birth ───────────────────────────────────────────
 
 const none = () => [0, 0];

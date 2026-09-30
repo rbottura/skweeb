@@ -104,6 +104,17 @@ export function emitParams() {
     noise:      { type: 'range', min: 0, max: 5000, step: 1, default: D.noise, label: 'curl noise px/s²', group: 'fields' },
     noiseScale: { type: 'range', min: 4, max: 2000, step: 1, default: D.noiseScale, label: 'noise size px',
                   group: 'fields', when: { noise: { not: 0 } } },
+    /**
+     * A field from another object, asked of the app that made it
+     * (core/fields.js) — M7's link, `fractal → particles: a field`: escape
+     * time points at its set. Its pull, and turned: 0 towards what it points
+     * at, 180 away, 90 round it.
+     */
+    fieldFrom: { type: 'object', accepts: ['still', 'sequence'], label: 'a field from', group: 'fields' },
+    fieldPull: { type: 'range', min: -3000, max: 3000, step: 1, default: 300, label: 'its pull px/s²', group: 'fields',
+                 when: { fieldFrom: { not: null } } },
+    fieldTurn: { type: 'range', min: -180, max: 180, step: 1, default: D.fieldTurn, label: 'its pull turned °',
+                 group: 'fields', when: { fieldFrom: { not: null } } },
 
     /**
      * Out of the picture's plane (model.js, *Depth*): the emitter's depth,

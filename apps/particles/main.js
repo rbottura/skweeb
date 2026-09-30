@@ -11,7 +11,8 @@
  * A set from the vault is the sprites (sprites.js), one each; with none, or
  * no vault at all, the particles are dots and the app plays the same
  * (rule 7). An emitter may be an object from the vault — a dot-set, a
- * shape — its points loaded beside the recipe (core/points.js). S saves the loop (save.js), and the vault plays it back through
+ * shape — and a field may come from one — a fractal: its points, its field,
+ * loaded beside the recipe (core/points.js, core/fields.js). S saves the loop (save.js), and the vault plays it back through
  * rebuild.js; `?open=<id>` brings a saved one back to work on.
  */
 
@@ -20,6 +21,7 @@ import { prepare, particlesAt } from './model.js';
 import { drawParticles, pictureSize } from './draw.js';
 import { loadSprites }  from '../../core/sprites.js';
 import { loadPoints }   from '../../core/points.js';
+import { loadField }    from '../../core/fields.js';
 import { saveParticles, downloadFrames, downloadSheet } from './save.js';
 import { requested }      from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
@@ -48,10 +50,9 @@ let spritesTitle = '';     // and its title, for a saved object's
 let loading = false;       // a set is on its way in: nothing saves until it is
 let spritesIn = Promise.resolve();   // the set on its way in, for a reopen to wait on
 let asked = 0;             // the latest set asked for; an older answer is dropped
-let points = null;         // an object emitter's points (core/points.js), or null: its centre
-let pointsIn = Promise.resolve();    // they are on their way in, for a reopen to wait on
-let pointsAsked = 0;       // the latest asked for, as `asked` is
-let pointsLoading = false;
+const given = { points: null, field: null };   // what the emitter names, loaded beside the recipe
+const asking = { points: 0, field: 0 };        // the latest asked for, as `asked` is
+const coming = new Set();  // loads on their way in, for a reopen and a save to wait on
 let busy = false;          // a save or a download is drawing; nothing else starts
 const painted = [];        // when the last paints were, while playing
 
@@ -77,7 +78,8 @@ async function boot() {
   buildExport(side);
 
   emit.on(key => {
-    if (key === 'shape' || key === 'from' || key === 'glyph') pointsIn = choosePoints();
+    if (key === 'shape' || key === 'from' || key === 'glyph') bring('points');
+    else if (key === 'fieldFrom') bring('field');
     else remake();
   });
   picture.on(key => {
@@ -110,7 +112,7 @@ async function openRequested() {
     emit.restore(recipe.emit);
     picture.restore(recipe.picture);
     await spritesIn;
-    await pointsIn;
+    await Promise.all([...coming]);
     clock.show(Math.min(Number.isInteger(recipe.tick) ? recipe.tick : 0, clock.length - 1));
     bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
     return true;
@@ -126,7 +128,7 @@ async function openRequested() {
  */
 function remake() {
   const e = emit.values, p = picture.values;
-  model = prepare(toModel(e, p), { points });
+  model = prepare(toModel(e, p), given);
   const length = framesOf(e, p, model.longest);
   if (length !== clock.length || p.fps !== clockFps) {
     const was = clock.playing, at = clock.tick;
@@ -165,31 +167,33 @@ async function chooseSprites(id) {
 }
 
 /**
- * The emitter's object as points (core/points.js) — a dot-set's glyph, a
- * shape's ink. The particles leave from its centre until they are in, and
- * from there if they will not come.
+ * Load what the emitter names beside the recipe: the object it leaves from
+ * (core/points.js), the field it moves through (core/fields.js). Until it is
+ * in, and if it will not come, the particles do without — from the emitter's
+ * centre, with no such pull; an older answer is dropped for a newer ask.
  */
-async function choosePoints() {
-  const ask = ++pointsAsked;
-  const { shape, from, glyph } = emit.values;
-  points = null;
-  pointsLoading = shape === 'object' && !!from;
+function bring(what) {
+  const ask = ++asking[what];
+  const e = emit.values;
+  const id = what === 'points' ? (e.shape === 'object' ? e.from : null) : e.fieldFrom;
+  given[what] = null;
   remake();
-  if (!pointsLoading) return;
-  try {
-    const got = await loadPoints(from, { glyph });
-    if (ask !== pointsAsked) return;
-    points = got.list.length ? got : null;
-    const n = got.list.length;
-    bar.announce(`${got.title}: ${n.toLocaleString('en')} point${n === 1 ? '' : 's'} to leave from`
-      + (got.glyphs > 1 ? ` · glyph ${got.glyph + 1} of ${got.glyphs}` : '') + (points ? '' : ' — none: from its centre'));
-  } catch (err) {
-    if (ask !== pointsAsked) return;
-    bar.announce(`could not open the emitter's object: ${err.message} — leaving from its centre`);
-  }
-  pointsLoading = false;
-  remake();
+  if (!id) return;
+  const done = (what === 'points' ? loadPoints(id, { glyph: e.glyph }) : loadField(id)).then(got => {
+    if (ask !== asking[what]) return;
+    given[what] = got;
+    bar.announce(what === 'field' ? `${got.title}: a field to move through` : pointsSaid(got));
+  }, err => {
+    if (ask === asking[what]) bar.announce(`could not open ${what === 'field' ? 'the field' : "the emitter's object"}: ${err.message}`);
+  }).finally(() => {
+    coming.delete(done);
+    if (ask === asking[what]) remake();
+  });
+  coming.add(done);
 }
+
+const pointsSaid = got => `${got.title}: ${got.list.length.toLocaleString('en')} point${got.list.length === 1 ? '' : 's'} to leave from`
+  + (got.glyphs > 1 ? ` · glyph ${got.glyph + 1} of ${got.glyphs}` : '');
 
 // ── Leaving: a loop, a still, the frames ─────────────────────────────────────
 
@@ -216,7 +220,7 @@ function buildExport(side) {
 /** One way out for all three: the player held still, nothing else started meanwhile. */
 async function leave(action) {
   if (busy) return;
-  if (loading || pointsLoading) return bar.announce('the sprites or the emitter are still loading — a moment');
+  if (loading || coming.size) return bar.announce('the sprites, the emitter or the field are still loading — a moment');
   busy = true;
   clock.pause();
   try {
@@ -236,7 +240,7 @@ function save({ still = false } = {}) {
   return leave(async () => {
     bar.say('saving…');
     const tick = clock.tick;
-    const object = await saveParticles({ emit, picture, sprites, spritesTitle, points, tick, still });
+    const object = await saveParticles({ emit, picture, sprites, spritesTitle, ...given, tick, still });
     if (!object) return 'no vault — downloaded instead';
     return still ? `saved ${object.id} — frame ${tick + 1}, a still`
       : `saved ${object.id} — ${object.render.frames} frames at ${object.render.fps} fps, its picture frame ${tick + 1}`;
@@ -246,7 +250,7 @@ function save({ still = false } = {}) {
 /** The loop as a sprite sheet and its JSON, cropped to where the particles reach (save.js). */
 function sheet() {
   return leave(async () => {
-    const out = await downloadSheet({ emit, picture, sprites, points, onStatus: t => bar.say(t) });
+    const out = await downloadSheet({ emit, picture, sprites, ...given, onStatus: t => bar.say(t) });
     return `downloaded ${out.name} — ${out.frames} frames of ${out.box.w} × ${out.box.h} on a `
       + `${out.width} × ${out.height} sheet, and its JSON`;
   });
@@ -255,7 +259,7 @@ function sheet() {
 /** Every frame, zipped with its rate (save.js). */
 function frames() {
   return leave(async () => {
-    const out = await downloadFrames({ emit, picture, sprites, points, onStatus: t => bar.say(t) });
+    const out = await downloadFrames({ emit, picture, sprites, ...given, onStatus: t => bar.say(t) });
     return `downloaded ${out.frames} frames at ${out.fps} fps, ${out.width} × ${out.height} px — `
       + 'node scripts/frames-to-video.mjs makes the video';
   });
@@ -303,7 +307,7 @@ function paint() {
   shown = particlesAt(model, clock.tick / p.fps);
   drawParticles(ctx, shown, p, view, sprites);
   shownView = view;
-  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), points);
+  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), given);
 
   bar.output({ width: Math.round(size.width * p.scale), height: Math.round(size.height * p.scale),
                scale: p.scale, format: p.format });

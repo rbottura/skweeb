@@ -11,6 +11,18 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ### Newest
 
+- **M7's *Done when* is met: a fractal's field steers particles —
+  `fractal → particles: a field`** (2026-09-30; `apps/fractals/field.js`,
+  `core/fields.js`, `tests/fractal-field.mjs` 13 checks,
+  `check-particles-links` 23). Escape time's slope — which way the set is —
+  in doubles, so no GPU and the same on any machine; fractals answer
+  `fieldOf` in their `rebuild.js`, the producer declaring the link, and
+  core asks by `origin.app`. Particles take *a field from* in their Fields
+  drawer, pulled towards the set, away, or round it; a loop through it
+  still closes pixel for pixel, and the replay is its render to the pixel.
+  With escape time moving (the Julia loop that closes, redrawn at print
+  scale), every clause of M7's is met. M7 finished first, the author's
+  call; M8 is next.
 - **Particles leave from a vault object — `ckt → particles: an emitter`**
   (2026-09-30, the author's idea from the inbox; `core/points.js`,
   `check-particles-links`, 16 checks). A ckt dot-set — a word is one glyph
@@ -338,8 +350,9 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Thirty-one files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-09-30). Newest: `points` — an object as
+Thirty-two files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-09-30). Newest: `fractal-field` — escape
+time as a field, pure, pointing at the set; `points` — an object as
 points to leave from; `particles-model` grew the object emitter, and
 `params` a hidden row's object that is no parent. Before them `fractal-motion` grew
 escape time's idles, and `params` a `when` that is a list; `vault-events` —
@@ -427,17 +440,21 @@ There, too, `check-particles` fails two checks of the machine's: an empty
 
 ## Next single step
 
-**M7's field — `fractal → particles: a field`** (`apps/fractals/STATUS.md`,
-*Next single step*), its first step the field itself: in fractals, the
-smooth escape count on a grid over the picture, in doubles, and its slope —
-a pure function of a fractals object's recipe, answered by fractals'
-`rebuild.js` as it answers `openObject`, since a link is declared by the app
-that produces. Held in a test: the same recipe, the same field; pointing
-away from the set outside it; nothing inside. Then particles take it in
-their Fields drawer, as they take an emitter object, and M7's *Done when* is
-met — finished first, the author's call. Then **M8, the map editor, and a room first**
-(`docs/roadmap.md`): its first brick, `apps/map/` opening on a grid. Left
-of M6 besides: colour over life. The gamepad's *newest behind* stays parked.
+**M8, brick 1, its first step: `apps/map/` opens on an empty grid**
+(`docs/roadmap.md`, M8). The folder the `skweeb-app` skill lays out: a
+schema with the map's size in tiles and its tile size in the map's own px —
+assets are made large and baked small, so the editor's tile is large, 64 to
+start, and the bake's is the pixel size — and core's Format drawer; a
+canvas drawing the grid at the size the viewer shows; opening as plain
+files with no vault (rule 7); `CLAUDE.md`'s map with its row. Then, in
+brick 1: a tileset — a set with `role: 'tileset'`, offered through
+`core/uses.js` — painted into cells with the mouse; vault objects placed on
+the grid, drawn back to front by where they stand; and the map saved as a
+`map`, a row in `docs/object-model.md`'s types table first.
+
+Left of M7 and M6, waiting (their STATUS files): a Julia set by clicking
+the Mandelbrot set, more families, deeper zoom, point families; colour over
+life. The gamepad's *newest behind* stays parked.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

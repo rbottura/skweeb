@@ -29,6 +29,12 @@
  * the centre, `(1 − (d / falloff)²)²` of it at `d`, none past the radius.
  * A smooth fade, its slope 0 at the edge, so nothing jolts crossing it. The
  * noise has no centre, and no falloff.
+ *
+ * And a field from another object (2026-09-30, M7's link, `fractal →
+ * particles: a field`): at each point a direction, asked of the app that
+ * made it (core/fields.js) — escape time's points at its set — times
+ * `fieldPull`, turned `fieldTurn` degrees clockwise: 0 towards what it
+ * points at, 180 away, 90 round it. It stays still, as the others do.
  */
 
 import { curl2, pcg } from '../../core/noise.js';
@@ -36,6 +42,7 @@ import { curl2, pcg } from '../../core/noise.js';
 /** Seconds a step: 120 a second, so a 60 fps frame is two. */
 export const STEP = 1 / 120;
 const SOFT = 24;
+const DEG = Math.PI / 180;
 
 /**
  * How much of a centred pull reaches `d` px from its centre, with a
@@ -57,7 +64,9 @@ export function reach(d, falloff) {
  */
 export function fieldOf(m) {
   const vortex = m.vortex || 0, attract = m.attract || 0, noise = m.noise || 0;
-  if (!vortex && !attract && !noise) return null;
+  const pull = m.fieldPull || 0, other = pull && m.external ? m.external : null;
+  if (!vortex && !attract && !noise && !other) return null;
+  const turn = (m.fieldTurn || 0) * DEG, cos = Math.cos(turn), sin = Math.sin(turn);
   const cx = m.fx || 0, cy = m.fy || 0, falloff = m.falloff || 0;
   const scale = Math.max(1, m.noiseScale || 200);
   const seed = pcg((m.seed ^ 0x51ed27) >>> 0);
@@ -76,6 +85,11 @@ export function fieldOf(m) {
       const [nx, ny] = curl2(x / scale, y / scale, seed);
       ax += nx * noise;
       ay += ny * noise;
+    }
+    if (other) {
+      const [ux, uy] = other.at(x, y);
+      ax += (ux * cos - uy * sin) * pull;
+      ay += (ux * sin + uy * cos) * pull;
     }
     return [ax, ay];
   };

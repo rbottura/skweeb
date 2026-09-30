@@ -26,12 +26,13 @@ import { surface }              from '../../core/surface.js';
  * @param {object} [opts]
  * @param {number} [opts.scale=1]    pixels per pixel of its own size
  * @param {?object} [opts.points]    an object emitter's points (core/points.js)
+ * @param {?object} [opts.field]     a field from another object (core/fields.js)
  * @returns {{length, fps, loop, width, height, scale, frame(i): OffscreenCanvas|HTMLCanvasElement}}
  *          `frame` hands out one canvas, drawn again on every call — borrowed
  */
-export function openParticles(recipe, sprites, { scale = 1, points = null } = {}) {
+export function openParticles(recipe, sprites, { scale = 1, points = null, field = null } = {}) {
   const { emit, picture } = recipe;
-  const model = prepare(toModel(emit, picture), { points });
+  const model = prepare(toModel(emit, picture), { points, field });
   const size = pictureSize(picture);
   const own = picture.scale || 1;
   const px = own * scale;

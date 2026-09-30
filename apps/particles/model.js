@@ -47,8 +47,9 @@
  * `rot` is radians, clockwise, 0 as the sprite was drawn.
  * A vortex, an attractor and curl noise have no closed form: with any of
  * them on, a particle is integrated from its own birth (forces.js), which
- * keeps every promise above at the cost of its age in steps. A field from
- * another object comes in its own brick.
+ * keeps every promise above at the cost of its age in steps. So does a field
+ * from another object, given beside the recipe as an object emitter's points
+ * are: a fractal's, which way its set is.
  *
  * ── Depth ──────────────────────────────────────────────────────────────────
  *
@@ -117,6 +118,8 @@ export const DEFAULTS = {
   falloff: 0,           // px: the vortex's and the pull's reach; 0 is everywhere
   noise: 0,             // px/s², along curl noise
   noiseScale: 200,      // px, the noise's features
+  fieldPull: 0,         // px/s², along a field from another object, given beside the recipe
+  fieldTurn: 0,         // degrees, that field turned clockwise: 180 away, 90 round
   z: 0,                 // px, the emitter's depth: more is further away
   depthSpread: 0,       // degrees, the cone tilted out of the plane, the whole of it
 };
@@ -128,14 +131,16 @@ export const DEFAULTS = {
  * @param {object} [recipe]              see DEFAULTS
  * @param {object} [given]
  * @param {?{list, cell}} [given.points] an `object` emitter's points (core/points.js)
+ * @param {?{at}} [given.field]          a field from another object (core/fields.js)
  */
-export function prepare(recipe = {}, { points = null } = {}) {
+export function prepare(recipe = {}, { points = null, field = null } = {}) {
   const r = { ...DEFAULTS, ...recipe };
   const burst = r.mode === 'burst';
   const n = burst ? Math.max(0, Math.round(r.count)) : Math.max(1, Math.round(r.rate * r.period));
   const m = { ...r, prepared: true, burst, n, spacing: burst ? 0 : r.period / n,
               longest: r.life * (1 + Math.max(0, r.lifeSpread)), seed: seedFrom(r.seed) };
   m.points = r.shape === 'object' && points && points.list && points.list.length ? points : null;
+  m.external = field && typeof field.at === 'function' ? field : null;
   m.field = fieldOf(m);
   return m;
 }
