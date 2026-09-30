@@ -11,19 +11,24 @@
 
 <body>
   <!--
-    The map's panel on the left, the map between; the bar under both is
-    core's. No p5: Canvas 2D.
+    The map's panel on the left, the map between, the things on it on the
+    right; the bar under all three is core's. No p5: Canvas 2D.
   -->
   <div class="app">
     <main class="app-main">
       <div class="app-side" id="map-side"></div>
       <section class="viewer" aria-label="map">
         <div class="viewer-head">
-          <button class="nb-btn" id="grid" type="button" aria-pressed="true"
-                  title="The grid over the map — never in anything saved [G]">grid</button>
+          <button class="nb-btn" id="tool-tiles" type="button" aria-pressed="true"
+                  title="A press paints the chosen tile [1]">tiles</button>
+          <button class="nb-btn" id="tool-things" type="button" aria-pressed="false"
+                  title="A press picks up the thing under it, a drag moves it [2]">things</button>
+          <button class="nb-btn" id="guides" type="button" aria-pressed="true"
+                  title="The grid, and the chosen thing's box — never in anything saved [G]">guides</button>
         </div>
         <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
       </section>
+      <div class="app-side" id="things-side"></div>
     </main>
   </div>
 

@@ -1,65 +1,83 @@
 /**
  * main.js — the map editor, assembled. M8: a map on a grid, a room first.
  *
- * The map's panel on the left, the map between (docs/roadmap.md, M8). A
- * tileset's members are painted into its cells — a press, a drag — from
- * the palette in the Tiles drawer; things placed on it and a save come
- * brick by brick (STATUS.md). Drawn at the size the viewer shows
- * (core/view.js); the grid is a guide over it — G, or its switch — and
- * never in anything saved.
+ * The map's panel on the left, the map between, the things on it on the
+ * right (docs/roadmap.md, M8). Two tools over the map: *tiles* — a
+ * tileset's members painted into its cells from the palette — and *things*
+ * — objects from the vault standing on cells, picked up and moved. Loops
+ * standing on the map play by its clock, each at its own speed
+ * (core/playback.js). Drawn at the size the viewer shows (core/view.js);
+ * the grid and the chosen thing's box are guides over it — one switch, G —
+ * never saved.
  *
  * Opens with no vault (rule 7).
  */
 
 import { mapParams, MAP_GROUPS } from './params.js';
 import { mapSize, indexOf, resize } from './grid.js';
-import { drawMap }    from './draw.js';
-import { drawGrid }   from './guides.js';
-import { Palette }    from './palette.js';
-import { wirePainting } from './pointer.js';
-import { loadSprites } from '../../core/sprites.js';
-import { ParamPanel } from '../../core/ParamPanel.js';
-import { VaultPanel } from '../../core/VaultPanel.js';
-import { Bar }        from '../../core/Bar.js';
-import { Vault }      from '../../core/vault.js';
-import { viewFactor } from '../../core/view.js';
+import { drawMap }      from './draw.js';
+import { drawGrid, drawChosen } from './guides.js';
+import { Palette }      from './palette.js';
+import { Editing }      from './editing.js';
+import { wirePointer }  from './pointer.js';
+import { loadSprites }  from '../../core/sprites.js';
+import { ParamPanel }   from '../../core/ParamPanel.js';
+import { VaultPanel }   from '../../core/VaultPanel.js';
+import { Playhead }     from '../../core/playback.js';
+import { Bar }          from '../../core/Bar.js';
+import { Vault }        from '../../core/vault.js';
+import { viewFactor }   from '../../core/view.js';
 
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
-const gridBtn = document.getElementById('grid');
+const guidesBtn = document.getElementById('guides');
+const toolBtns = { tiles: document.getElementById('tool-tiles'), things: document.getElementById('tool-things') };
 
-let map, bar, palette;
-let gridOn = remembered();     // the grid over the preview: the viewer's, not the map's
+let map, bar, palette, editing;
+let guidesOn = remembered();   // the guides over the preview: the viewer's, not the map's
+let tool = 'tiles';            // what a press on the map does: the editor's, never saved
 let cells = [];                // a tile index a cell, row after row; -1 empty — the map's, beside its values
 let shape = { cols: 0, rows: 0 };   // the grid the cells were laid out for
 let tiles = null;              // the tileset's images, or null: nothing to paint with
 let tilesTitle = '';
 let asked = 0;                 // the latest tileset asked for; an older answer is dropped
+let clockFps = 0;              // the rate the clock was fitted to
+
+/** The map's clock: its loops play, each at its own speed. */
+const clock = new Playhead({ onShow: () => draw() });
 
 function boot() {
-  bar = new Bar({ app: 'map', mount: document.querySelector('.app'), keys: 'G grid · V vault' });
+  bar = new Bar({ app: 'map', mount: document.querySelector('.app'),
+                  keys: '1 tiles · 2 things · G guides · space play · Del remove · V vault' });
   map = mapParams();
   const panel = new ParamPanel(map, { title: 'map', mount: document.getElementById('map-side'), groups: MAP_GROUPS });
   palette = new Palette(panel.drawer('tiles').body, () => draw());
+  editing = new Editing({ mount: document.getElementById('things-side'), map: () => map.values,
+                          onChange: () => { fitClock(); draw(); } });
   fitCells();
   map.on(key => {
     if (key === 'cols' || key === 'rows') fitCells();
     if (key === 'tileset') chooseTileset(map.get('tileset'));
+    if (key === 'fps') fitClock();
     draw();
   });
-  wirePainting({
+  wirePointer({
     canvas,
     map: () => map.values,
+    tool: () => tool,
     chosen: () => palette.chosen,
     paint: (list, tile) => {
       const m = map.values;
       for (const { col, row } of list) cells[indexOf(m, col, row)] = tile;
       draw();
     },
+    things: { at: (x, y) => editing.at(x, y), choose: p => editing.choose(p), move: (p, col, row) => editing.move(p, col, row) },
   });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
-  gridBtn.addEventListener('click', () => showGrid(!gridOn));
-  showGrid(gridOn);
+  guidesBtn.addEventListener('click', () => showGuides(!guidesOn));
+  for (const [name, b] of Object.entries(toolBtns)) b.addEventListener('click', () => useTool(name));
+  showGuides(guidesOn);
+  useTool('tiles');
   wireKeys();
   draw();
 }
@@ -69,6 +87,16 @@ function fitCells() {
   const { cols, rows } = map.values;
   cells = resize(cells, shape, { cols, rows });
   shape = { cols, rows };
+}
+
+/** The clock fitted to the map's longest loop at its rate; playing while anything moves. */
+function fitClock() {
+  const fps = map.values.fps, length = editing.things.length(fps);
+  if (length !== clock.length || fps !== clockFps) {
+    clock.configure({ length, fps, loop: true });
+    clockFps = fps;
+    if (length > 1) clock.play();
+  }
 }
 
 /** A tileset's members as the tiles (core/sprites.js): nothing to paint with until they are in. */
@@ -92,18 +120,28 @@ async function chooseTileset(id) {
   draw();
 }
 
-// ── The grid's switch ────────────────────────────────────────────────────────
+// ── The viewer's switches: the tool, the guides ──────────────────────────────
 
-/** How the viewer looks, not what the map is: not a param, remembered in this browser. */
-function showGrid(on) {
-  gridOn = on;
-  gridBtn.setAttribute('aria-pressed', String(on));
-  try { localStorage.setItem('skweeb.map.grid', on ? '1' : '0'); } catch { /* private mode: forgotten */ }
+function useTool(name) {
+  tool = name;
+  for (const [n, b] of Object.entries(toolBtns)) b.setAttribute('aria-pressed', String(n === name));
+  canvas.classList.toggle('things', name === 'things');
+  draw();
+}
+
+/**
+ * The grid and the chosen thing's box, on or off together — how the viewer
+ * looks, not what the map is: not a param, remembered in this browser.
+ */
+function showGuides(on) {
+  guidesOn = on;
+  guidesBtn.setAttribute('aria-pressed', String(on));
+  try { localStorage.setItem('skweeb.map.guides', on ? '1' : '0'); } catch { /* private mode: forgotten */ }
   draw();
 }
 
 function remembered() {
-  try { return localStorage.getItem('skweeb.map.grid') !== '0'; } catch { return true; }
+  try { return localStorage.getItem('skweeb.map.guides') !== '0'; } catch { return true; }
 }
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
@@ -123,12 +161,19 @@ function paint() {
   const w = Math.max(1, Math.round(size.width * view)), h = Math.max(1, Math.round(size.height * view));
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
-  drawMap(ctx, m, view, { cells, tiles });
-  if (gridOn) drawGrid(ctx, m, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width));
+  const dpp = canvas.width / Math.max(1, canvas.getBoundingClientRect().width);
+  drawMap(ctx, m, view, { cells, tiles, layers: editing.things.layers(clock.tick, m) });
+  if (guidesOn) {
+    drawGrid(ctx, m, view, dpp);
+    const chosen = tool === 'things' && editing.chosenBox();
+    if (chosen) drawChosen(ctx, chosen.box, chosen.cell, m.tile, view, dpp);
+  }
+
   bar.output({ width: size.width, height: size.height, scale: 1 });
-  const painted = cells.filter(t => t >= 0).length;
+  const painted = cells.filter(t => t >= 0).length, n = editing.things.items.length;
   bar.say(`${m.cols} × ${m.rows} tiles of ${m.tile} px · ${painted} painted`
-    + (tiles ? ` from ${tilesTitle}` : ' · choose a tileset to paint with'));
+    + (tiles ? ` from ${tilesTitle}` : ' · choose a tileset to paint with')
+    + ` · ${n} thing${n === 1 ? '' : 's'}` + (clock.length > 1 ? `, frame ${clock.tick + 1} of ${clock.length}` : ''));
 }
 
 // ── Keys, the vault ──────────────────────────────────────────────────────────
@@ -139,7 +184,11 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (e.key === 'g' || e.key === 'G') showGrid(!gridOn);
+    if (e.key === 'g' || e.key === 'G') showGuides(!guidesOn);
+    if (e.key === '1') useTool('tiles');
+    if (e.key === '2') useTool('things');
+    if ((e.key === 'Delete' || e.key === 'Backspace') && tool === 'things') editing.remove();
+    if (e.key === ' ' && clock.length > 1) { e.preventDefault(); clock.toggle(); }
   });
   Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
 }

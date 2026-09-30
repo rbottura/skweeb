@@ -13,21 +13,11 @@
  * than judged by watching.
  */
 
-/** Whether a handle moves at all: more than one tick, at a rate. A picture does not. */
-export const moves = handle => !!handle && handle.length > 1 && handle.fps > 0;
-
-/**
- * How many of the page's frames a loop lasts: its own length, as time, at the
- * page's rate — rounded, when the two rates do not divide, to the nearest
- * frame. One for something that does not move.
- *
- * @param {object} handle   { length, fps }
- * @param {number} fps      the page's rate
- */
-export function framesOnPage(handle, fps) {
-  if (!moves(handle)) return 1;
-  return Math.max(1, Math.round((handle.length * fps) / handle.fps));
-}
+// How a loop keeps its own speed on a page of its own rate — `moves`,
+// `framesOnPage`, `tickAt` — is core's since the map editor needed it too
+// (core/playback.js); compose's own questions of time follow.
+import { moves, framesOnPage, tickAt } from '../../core/playback.js';
+export { moves, framesOnPage, tickAt };
 
 /**
  * Whether a placement shows at a tick of the page: from its `at`, for its
@@ -52,21 +42,6 @@ export function showsAt(pageTick, block) {
 export function endOf(block, handle, fps) {
   const at = (block && block.at) || 0;
   return at + (block && block.length != null ? block.length : framesOnPage(handle, fps));
-}
-
-/**
- * The object's own tick at a tick of the page: the one showing at that
- * moment. A loop wraps; a sequence that does not loop holds its last tick.
- *
- * @param {number} pageTick
- * @param {object} handle   { length, fps, loop }
- * @param {number} fps      the page's rate
- */
-export function tickAt(pageTick, handle, fps) {
-  if (!moves(handle)) return 0;
-  const t = Math.floor((pageTick * handle.fps) / fps);
-  if (handle.loop === false) return Math.max(0, Math.min(t, handle.length - 1));
-  return ((t % handle.length) + handle.length) % handle.length;
 }
 
 /**

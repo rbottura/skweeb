@@ -132,3 +132,41 @@ export class Playhead {
 
   dispose() { this.pause(); }
 }
+
+// ── A loop on a page of its own rate ─────────────────────────────────────────
+//
+// A page — compose's, or a map — has a rate of its own, and a loop placed on
+// it keeps its own speed in real time: what the two share is seconds, not
+// ticks. Moved here from compose's time.js on 2026-09-30, when the map
+// editor needed the same; tests/compose-time.mjs still holds them.
+
+/** Whether a handle moves at all: more than one tick, at a rate. A picture does not. */
+export const moves = handle => !!handle && handle.length > 1 && handle.fps > 0;
+
+/**
+ * How many of the page's frames a loop lasts: its own length, as time, at the
+ * page's rate — rounded, when the two rates do not divide, to the nearest
+ * frame. One for something that does not move.
+ *
+ * @param {object} handle   { length, fps }
+ * @param {number} fps      the page's rate
+ */
+export function framesOnPage(handle, fps) {
+  if (!moves(handle)) return 1;
+  return Math.max(1, Math.round((handle.length * fps) / handle.fps));
+}
+
+/**
+ * The object's own tick at a tick of the page: the one showing at that
+ * moment. A loop wraps; a sequence that does not loop holds its last tick.
+ *
+ * @param {number} pageTick
+ * @param {object} handle   { length, fps, loop }
+ * @param {number} fps      the page's rate
+ */
+export function tickAt(pageTick, handle, fps) {
+  if (!moves(handle)) return 0;
+  const t = Math.floor((pageTick * handle.fps) / fps);
+  if (handle.loop === false) return Math.max(0, Math.min(t, handle.length - 1));
+  return ((t % handle.length) + handle.length) % handle.length;
+}

@@ -92,7 +92,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion fractal-field vault-events points map-grid; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things; do
   node tests/$t.mjs || break
 done
 
@@ -110,7 +110,7 @@ node scripts/check-particles.mjs        # particles: a loop that closes, sprites
 node scripts/check-particles-links.mjs  # particles from other apps' objects: a dot-set or a shape's ink as the emitter; a fractal's field
 node scripts/check-sheet-engine.mjs     # that sheet loaded and played by Phaser 3, fetched into the page only
 node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag; copies of a star; idles of both families saved and placed
-node scripts/check-map.mjs              # M8's map editor: its grid, with no vault and on the server
+node scripts/check-map.mjs              # M8's map editor: its grid, tiles painted from a tileset, things placed and moved
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips
 # its GPU half, unless Chrome is given the flags:

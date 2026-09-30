@@ -2,16 +2,16 @@
    style.css — map
 
    Everything that looks like the suite comes from core. map says only its
-   layout: the map's panel, then the map.
+   layout: the map's panel, the map, the things on it.
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
 @import '../../core/param-panel.css';
 @import '../../core/vault-panel.css';
 
-.app-main { --app-columns: var(--nb-side) minmax(0, 1fr); }
+.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
 
-/* The grid's switch, over the viewer (main.js). */
+/* The tools and the guides' switch, over the viewer (main.js). */
 .viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
 
 /* Tiles are drawn square and sharp as they are. */
@@ -41,3 +41,41 @@
 
 /* A press on the map paints (pointer.js). */
 .viewer-stage canvas { cursor: crosshair; touch-action: none; }
+
+/* With the things tool, a press picks a thing up (pointer.js). */
+.viewer-stage canvas.things { cursor: grab; }
+
+/* The things on the map, the nearest first (list.js). */
+.mp-rows { display: grid; gap: 6px; max-height: 300px; overflow: auto; padding: 2px 4px 4px 2px; margin: 6px 0 4px; }
+
+.mp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  background: var(--nb-paper);
+  color: var(--nb-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mp-row:hover { background: #fff3b0; }
+.mp-row--on { background: var(--nb-accent); box-shadow: 2px 2px 0 var(--nb-ink); }
+
+.mp-thumb {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  object-fit: contain;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 10px 10px;
+}
+
+.mp-meta { min-width: 0; }
+.mp-title { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mp-sub { font: 400 11px var(--nb-mono); color: var(--nb-muted); }
+.mp-actions { display: flex; gap: 8px; margin-top: 10px; }
+.mp-actions .nb-btn { flex: 1; padding: 0 8px; }
+.mp-actions .nb-btn:first-child { flex: 2; }
