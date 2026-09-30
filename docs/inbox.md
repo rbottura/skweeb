@@ -21,18 +21,16 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-- **2026-09-30 — the suite as a game editor, a room first.** "Using these
-  apps as vfx and assets editor for a little game, so also game editor with
-  map editor, some physics, something like pokewebkit but not for editing
-  rom but game objects here, surely to display in my personnal playground on
-  my website … a space editor where i can create my room at home, place
-  items, allow interaction with them like posters, pc, toys etc." A
-  direction, not an item: discussed the same day, and to become M8 in
-  `docs/roadmap.md` once the author settles movement, look, where the room is
-  published, its name, and whether M7 is parked first.
+Nothing waiting.
 
 ## Sorted
 
+- **2026-09-30 — the suite as a game editor, a room first.** "Using these
+  apps as vfx and assets editor for a little game, so also game editor with
+  map editor, some physics, something like pokewebkit … a space editor where
+  i can create my room at home, place items, allow interaction with them
+  like posters, pc, toys etc." → M8 in `docs/roadmap.md`, the map editor,
+  after M7 is finished; settled the same day (`docs/decisions.md`).
 - **2026-09-30 — ckt dot-sets as particle emitters.** "A bridge between ckt
   dots sets objects and use them as emitters sets in particles." → M6's
   leftover *a shape's alpha as an emitter*, widened to an emitter taken from a

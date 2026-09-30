@@ -205,6 +205,80 @@ And fake 3D where it is cheap: particles in depth (M6); a sprite lit through
 its normal map by a moving light, and a spin (M5's motion filters); parallax
 by depth in compose; a sprite stack — a set of slices turned as one object.
 
+M8 is where the last three are needed: its bake draws at a pixel size, cleans
+to a palette, and lays floors that tile.
+
+**M8 — the map editor, and a room first.** Chosen by the author on
+2026-09-30, after M7's third brick, M7 to be finished first: the suite as a
+game editor as well as the maker of a game's assets — PokéWebKit's kind of
+tool, for the suite's own objects rather than a ROM. The first thing it makes
+is the author's room at home: posters, a PC, toys, each answering when it is
+used, shown on the author's website.
+
+`apps/map/`, the **map editor**, makes a `map`: the field's word for it — the
+unit of Pokémon's own data, of RPG Maker, of Tiled, and of Porymap, the map
+editor for pokeemerald. "Level" is the industry's general word but leans to
+stages; "terrain" is heightmapped ground; "scene" is an engine's container
+for anything, menus included; "room" is GameMaker's, and one interior. A room
+is a map; a house is maps joined by warps; a game's maps together will be a
+**world**, LDtk's word, when there are several. Grid's *mapping* stays grid's
+verb.
+
+Pokémon's rules first, the model its maps are made of: a grid of tiles, each
+walkable or not; objects placed on it; an avatar moving tile by tile and
+answered by what it faces; and events — a **sign**, used and something shows
+(a poster, the PC), an **object**, a **warp** to another map, a **trigger**.
+ZQSD to move and E to use, on the author's AZERTY: bound by the key's place,
+not its letter (`event.code`), so a visitor's QWERTY moves with WASD; arrows
+and a gamepad besides; on a phone, tap to walk and tap to use.
+
+**A map is an object like any other**: its recipe is its tiles, its
+placements, what can be walked and what answers. Any frame of it draws on its
+own at any scale — every loop placed on it plays by the clock — so compose
+can place a map and the vault shows one. **The playable map is an export of
+it**, as video is a loop's: where the avatar stands, what is open, a toy
+rolling — state that grows with a player's input — live only in the player
+and never in a recipe. That keeps every promise the suite makes.
+
+- **Assets are made large and baked small.** The apps make high-resolution
+  objects; publishing draws each placement again at the map's pixel size
+  (`openFrames(…, { scale })`) and cleans what scaling leaves rough with a
+  look — palette lock, outline, alpha cleanup — so a grid poster, a fractal
+  and a sprite drawn by hand sit in one style. Pixel art at a small tile, or
+  smooth at a larger one, is the bake's setting, not the map's: one map tries
+  both.
+- **A tileset and a character are sets with a role**, as a material is —
+  `role: 'tileset'` with its tile size, `role: 'character'` with its walk
+  loops by direction — offered through `core/uses.js`. `map` is the one new
+  type.
+- **The player is the suite's own**: Canvas 2D at a whole-number scale, baked
+  sheets and a `map.json`, no dependency, and no WebGPU — a visitor's GPU is
+  anyone's, and the laptop's Intel has none by default — so what the GPU made
+  is baked into frames.
+- **Physics comes later and stays small**: a thing pushed a tile at a time, as
+  Pokémon's boulders are; then a few bodies that roll against the walls,
+  stepped at a fixed rate in the player.
+- **Where it runs**: a site of its own for the player, where a larger game
+  can grow; the author's portfolio frames the room in an iframe, in a minimal
+  mode — the room and its showcase, nothing else. So the player has an embed
+  mode, takes the keyboard when clicked, and lets that one site frame it.
+
+The bricks, in order: **(1)** the map app opens — tiles painted from a
+tileset, vault objects placed, drawn back to front by where they stand; saved
+as a `map`, replayed, placed in compose. **(2)** Walkable, and events — signs,
+warps, the spawn — each edited through a schema (rule 1). **(3)** The player,
+point and click: hovered, used, shown — already a showcase. **(4)** An
+avatar: a character set, grid movement, the keys, tap to walk. **(5)** Baked
+and published: placements drawn at the map's size and cleaned, sheets packed,
+a bundle a static site serves, the embed mode. **(6)** Toys: pushed, then
+rolled.
+
+*Done when:* the author's room, made of the suite's own objects — a poster
+from grid, a fractal on the PC's screen, a particle lamp — walked and used in
+the portfolio's iframe, on a phone as on a laptop, with no vault and no
+WebGPU. The link: `any → map: a thing in the room`; tilesets and characters
+are uses.
+
 **3D, parked.** It was M5. When it returns it starts from the GPU kit:
 ray-marched shapes and 3D fractals are shader work and come first, as a family
 of M7; an app with the `model` and `material` types only when the game needs

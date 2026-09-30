@@ -428,8 +428,10 @@ dot-set is one glyph at a time or a word — the object a parent of the
 save, `rebuild.js` loading it first, the guides drawing the points.
 
 After it, **M7's field** (`apps/fractals/STATUS.md`), which takes a second
-object into particles the same way, and M7's *Done when* is met. Left of M6
-besides: colour over life. The gamepad's *newest behind* stays parked.
+object into particles the same way, and M7's *Done when* is met — finished
+first, the author's call. Then **M8, the map editor, and a room first**
+(`docs/roadmap.md`): its first brick, `apps/map/` opening on a grid. Left
+of M6 besides: colour over life. The gamepad's *newest behind* stays parked.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*
@@ -447,6 +449,11 @@ with it.
 
 ## Parked decisions
 
+- **M8 is a map editor, and a room first** (the author, 2026-09-30): the
+  suite as a game editor too — `apps/map/` makes a `map`, Pokémon's rules,
+  ZQSD and E by key place, assets baked down from high resolution, the
+  player on a site of its own framed by the portfolio. A map is pure; the
+  playable map is its export. M7 finished first. `docs/roadmap.md`, M8.
 - **Newest behind, in the gamepad too** (the author's idea, 2026-09-27,
   not started): the gamepad paints each mark once into a buffer that keeps
   the earlier ones, so it cannot reorder — there it is the composite

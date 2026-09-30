@@ -345,3 +345,18 @@ the line cap, a licence line. Threads side by side collide on `STATUS.md`,
 the first one was. So ideas wait in `docs/inbox.md` and a session sorts them;
 only a narrow kind, set out in its head, runs beside the main thread, on a
 branch that leaves the shared docs alone.
+
+**M8 is a map editor, and a room first.** The author, 2026-09-30, after M7's
+third brick: the suite as a game editor as well as the maker of a game's
+assets — a map editor, some physics, a room with posters, a PC and toys to
+use, shown on the author's website; PokéWebKit's kind of tool, for the
+suite's own objects rather than a ROM. Settled with it: Pokémon's rules for
+now — top-down, a grid, tile by tile — with ZQSD to move and E to use, keys
+bound by place so a QWERTY moves with WASD; assets made at high resolution
+and baked down, cleaned by a look where scaling leaves them rough, pixel art
+or smooth to be tried both ways; M7 finished first; the player on a site of
+its own, for a larger game later, the portfolio framing the room, minimal;
+and the name, `map`, the field's word — its reasons in M8 in
+`docs/roadmap.md`. What keeps it in the suite: a map is an object like any
+other, pure; the playable map is its export, as video is a loop's, and a
+player's state never enters a recipe.
