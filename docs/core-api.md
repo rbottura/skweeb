@@ -274,9 +274,11 @@ Lint for it before it spreads.
 
 Moved from the gamepad unchanged: recorder to clip to player to stage to
 transport, with one clock deriving every layer's position rather than each
-accumulating its own. The reasoning is written up in the `sequence-stage` skill
-— **read that skill rather than re-deriving it**, and in particular before
-touching `createGraphics`, `tint`, canvas filters, or anything exporting frames.
+accumulating its own. The reasoning is in the headers of `player.js` (`step()`
+never reads a clock), `transport.js` (one clock) and `stage.js` (placement is
+the layer's, not the clip's) — **read those rather than re-deriving it**, and
+the files themselves before touching `createGraphics`, `tint`, canvas
+filters, or anything exporting frames.
 
 ## export.js — two exporters, different jobs
 
@@ -301,8 +303,8 @@ for (let frame = 0; frame < frames; frame++) {
 Same recipe and seed, same bytes, every time, at any size. Most of the hard part
 already exists: the gamepad's transport derives every position from one master
 tick rather than accumulating, and `SequencePlayer.step()` already refuses to
-read a clock. That discipline is exactly what this needs — see the
-`sequence-stage` skill.
+read a clock. That discipline is exactly what this needs — see the header of
+`core/stage/player.js`.
 
 | | p5.capture | `core/export.js` |
 |---|---|---|
@@ -384,20 +386,27 @@ this exact link's output, produced by hand years before the link existed. See
 
 ## Writing an app against core
 
+The working procedure is the `skweeb-app` skill; the shape, in short:
+
 ```
 apps/<name>/
-  index.html      loads core, then main.js. Opens and works on its own.
-  main.js         defineParams, registerApp, the sketch
-  params.js       the schema, if it earns its own file
-  manifest.json   generated: assets, never a runtime directory scan
+  index.html      the page, main.js as a module. Opens and works on its own.
+  main.js         boot: the schema into a ParamPanel, the Bar, the player, ?open=
+  params.js       the schema, with its drawers
+  frames.js       a recipe as frames: what a save draws and a replay draws
+  save.js         Vault.save, its parents from consumedObjectIds()
   rebuild.js      what core asks about your objects: openObject() replays
-                  one, reopens(object) says which ?open=<id> can bring back
+                  one, reopens(object) says which ?open=<id> can bring back,
+                  redraws(object) which are drawn again at a scale
   STATUS.md
 ```
 
-Then the three functions from `docs/object-model.md`: `serialize`, `restore`,
-`render`. That is the whole integration. Everything else — panels, vault,
-gallery, lineage, thumbnails, publishing — is inherited.
+The recipe contract of `docs/object-model.md` is met so: `serialize` is
+`params.values`, `restore` is `params.restore(recipe)`, and `render` is
+`rebuild.js`'s `openObject()` — frames drawn from the recipe alone. There is
+no `registerApp`: core imports `/apps/<app>/rebuild.js`, by the object's
+`origin.app`, when it needs it. Everything else — panels, vault, gallery,
+lineage, publishing — is inherited.
 
 An app that can take its objects back reads `requested('<app>')` from
 `core/reopen.js` at boot and restores what it gets; the vault's detail then

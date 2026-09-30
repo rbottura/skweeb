@@ -346,6 +346,12 @@ registerApp("grid", {
 });
 ```
 
+**How it is met.** No `registerApp` was needed in the end: `serialize` is the
+schema's `params.values`, `restore` is `params.restore(recipe)`, and `render`
+is the app's `rebuild.js` — `openObject(object, { scale })` hands back frames
+drawn from the recipe alone, and core finds it by `origin.app`
+(`docs/core-api.md`, *Writing an app against core*).
+
 `load(id)` inside `render` resolves a parent or a ref, so a grid dither can be
 rebuilt at print size *from its source* rather than from a scaled-up copy of
 what it looked like on screen. It is also how a placed `.skw` draws itself.
