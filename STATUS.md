@@ -20,6 +20,12 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
   compose — the first clause of M7's *Done when*. The Motion rows serve both
   families because core's `when` may now be a list, any one of which is
   enough (`docs/core-api.md`).
+- **A check that throws takes its Chrome with it** (2026-09-30;
+  `scripts/check-kit.mjs`). A check stopped before `finish()` — a timeout,
+  an error, Ctrl-C — used to leave its server and headless Chrome running:
+  one had been for two days. And `CHROME_FLAGS` adds to Chrome's flags, so
+  the laptop's Intel, which Chrome keeps WebGPU from, runs a GPU check's GPU
+  half too (`CLAUDE.md`, *Running*).
 - **One vault, on the laptop that travels** (the author's setup,
   2026-09-28; `docs/decisions.md`). The laptop goes between the work PC and
   the home tower and serves `~/skweeb-vault` behind `tailscale serve`, a
@@ -338,7 +344,8 @@ Twelve browser checks, each a command in `CLAUDE.md`: its own server on a copy
 of the vault, headless Chrome through `scripts/chrome.mjs` — a real mouse
 included — and `scripts/check-kit.mjs` under it. Outside the loop because
 each needs Chrome and a vault with things in it; each fails when a page
-throws or its console is not quiet.
+throws or its console is not quiet. On the laptop, Chrome keeps WebGPU from
+its Intel: a GPU check there skips its GPU half unless given `CHROME_FLAGS`.
 
 ## Broken / half-done
 

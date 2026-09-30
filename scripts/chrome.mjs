@@ -8,7 +8,10 @@
  * twice; here so a browser check is a command (`scripts/check-compose.mjs`).
  *
  * No dependencies: Node 22 has WebSocket, and the protocol is JSON over it.
- * Chrome is found where it installs, or wherever `CHROME` says.
+ * Chrome is found where it installs, or wherever `CHROME` says, and
+ * `CHROME_FLAGS` adds to its flags: `--enable-unsafe-webgpu
+ * --enable-features=Vulkan` gives WebGPU to a GPU Chrome keeps it from —
+ * the laptop's Intel, whose GPU checks otherwise skip their GPU half.
  *
  * Selectors are JavaScript expressions evaluated in the page, not CSS
  * strings, so a check can say "the row whose label is scale" in one line.
@@ -51,7 +54,8 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
   const proc = spawn(chrome, [
     '--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`,
     `--window-size=${width},${height}`, '--force-device-scale-factor=1',
-    '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', 'about:blank',
+    '--no-first-run', '--no-default-browser-check', '--hide-scrollbars',
+    ...(process.env.CHROME_FLAGS || '').split(/\s+/).filter(Boolean), 'about:blank',
   ], { stdio: 'ignore' });
 
   let targets = null;
@@ -204,5 +208,7 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
       proc.kill();
       await sleep(300);
     },
+    /** At once, for a process on its way out: close() has to wait on Chrome. */
+    kill() { proc.kill(); },
   };
 }

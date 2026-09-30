@@ -65,7 +65,12 @@ export async function startCheck({ keep = false } = {}) {
     try { if ((await fetch(base + '/api/vault')).ok) break; } catch { /* not up yet */ }
     await new Promise(r => setTimeout(r, 100));
   }
-  const { page, close } = await launch({ port: await freePort(), profile: path.join(work, 'profile') });
+  const { page, close, kill } = await launch({ port: await freePort(), profile: path.join(work, 'profile') });
+
+  // A check that throws, or is stopped, never reaches finish(): the server and
+  // Chrome go with it, rather than living on in the background for days.
+  process.once('exit', () => { server.kill(); kill(); });
+  for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => process.exit(1));
 
   let fails = 0;
   const noise = [];

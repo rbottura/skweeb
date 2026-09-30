@@ -108,6 +108,10 @@ node scripts/check-frames.mjs           # a flipbook in compose: next frames, st
 node scripts/check-particles.mjs        # particles: a loop that closes, sprites, saved, replayed, placed, a sprite sheet
 node scripts/check-sheet-engine.mjs     # that sheet loaded and played by Phaser 3, fetched into the page only
 node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag; copies of a star; idles of both families saved and placed
+
+# On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips
+# its GPU half, unless Chrome is given the flags:
+CHROME_FLAGS="--enable-unsafe-webgpu --enable-features=Vulkan" node scripts/check-fractals.mjs
 ```
 
 The server serves the repo root, so an app is at `/apps/<name>/`, the kit at

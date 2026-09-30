@@ -48,15 +48,19 @@ const onScreen = (px, py) => page.eval(`(() => { const r = document.getElementBy
 
 // ── Rule 7 ──────────────────────────────────────────────────────────────────
 
+// With no WebGPU the app opens and says so — "no escape time here" — and the
+// rest of this check, which needs the GPU, is skipped.
+const opened = `${say}.includes('mandelbrot') || ${say}.includes('no escape time')`;
 await c.go(c.plain + '/apps/fractals/');
-await page.until(`${say}.includes('mandelbrot') || ${say}.includes('no fractals')`, { timeout: 20000 });
-const gpu = !(await page.eval(say)).includes('no fractals');
-c.ok('opens with no vault, and draws', gpu, await page.eval(say));
+await page.until(opened, { timeout: 20000 });
+const firstSay = await page.eval(say);
+const gpu = !firstSay.includes('no escape time');
+c.ok('opens with no vault, and draws — or says why it cannot', /mandelbrot|no escape time/.test(firstSay), firstSay);
 
 await c.go(c.base + '/apps/fractals/');
 const plainNoise = c.quiet().filter(e => !(e.url || '').endsWith('/api/vault'));
 c.ok('with no vault it said nothing else', !plainNoise.length, JSON.stringify(plainNoise).slice(0, 300));
-await page.until(`${say}.includes('mandelbrot') || ${say}.includes('no fractals')`, { timeout: 20000 });
+await page.until(opened, { timeout: 20000 });
 if (!gpu) {
   console.log('no WebGPU in this Chrome: the rest needs it');
   await c.finish();
