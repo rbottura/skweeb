@@ -1,6 +1,6 @@
 ---
 name: skweeb-object
-description: Save, load or extend the objects in the skweeb vault — the envelope every still, loop, dataset, shape, font and parameter set is stored in, plus lineage, seeds, recipes, thumbnails and publishing. Use when adding save or load to an app, when one app has to consume what another made, when adding a new object type, or when touching vault.js, index.json, the gallery, or anything named object.json.
+description: Save, load or extend the objects in the skweeb vault — the envelope every still, loop, dataset, shape, set and parameter set is stored in, plus lineage, seeds, recipes, thumbnails, tags, the trash and publishing. Use when adding save or load to an app, when one app has to consume what another made, when adding a new object type or set role, or when touching vault.js, server.js, index.json, the gallery, or anything named object.json.
 ---
 
 # Objects in the vault
@@ -13,81 +13,101 @@ the envelope; this skill is the working procedure, not a summary of it.
 Never write `object.json` by hand and never build the folder yourself.
 
 ```js
-const id = await Vault.save({
-  type:    "sequence",
-  render:  { blob, w, h, frames, fps, loop: true },
-  recipe:  App.serialize(),
-  seed:    App.seed,
-  parents: Params.consumedObjectIds(),   // usually automatic, see below
-  title:   "band loop 3",
-  tags:    ["loop"],
+const object = await Vault.save({          // the envelope — or null: no server, it downloaded instead
+  type:    loop ? 'sequence' : 'still',
+  title:   'torch · 60 frames',
+  tags:    ['particles', 'loop'],
+  origin:  { app: 'particles', version: '1.0.0' },   // core/rebuild.js dispatches on origin.app
+  seed,                                    // null only when nothing in the render is random
+  recipe:  params.values,                  // plus what the panel does not hold: a still's tick
+  parents: params.consumedObjectIds(),     // automatic, from `type: 'object'` params
+  render:  { blob, ext: 'png', w, h, frames, fps, loop: true },
+  thumb:   await thumbFromBlob(blob),      // core/thumb.js — the server makes none
 });
 ```
 
-`Vault.save` writes the folder, hashes the render, makes the thumbnail, updates
-`index.json` and emits `vault:saved`. Four things are easy to get wrong:
+The server writes the folder, checks the bytes, hashes the render, dedups —
+the same bytes and recipe return the old object, as `vault:duplicate` — and
+rewrites `index.json`, which every open page hears as `vault:changed`, from
+any machine on the vault. Four things are easy to get wrong:
 
-- **`seed` is not optional.** Without it the object cannot be re-rendered, which
-  is most of why it is an object and not a file.
-- **`parents` is lineage, not history.** It lists what this was *made from*, not
-  what the user looked at. A param of `type: "object"` records itself
-  automatically — if lineage is being assembled by hand, that is usually the
-  bug.
-- **An object is never edited in place** — except `skw`, which versions, and
-  any object's tags, which `Vault.retag(id, { add, remove })` changes (a
-  set's `use:` switches, a folder). A change to anything else makes a new
-  object whose parent is the old one.
-- **`recipe: null` is legal** for something that genuinely cannot be re-rendered.
-  Say so explicitly rather than saving an incomplete recipe; a half-recipe fails
+- **`seed` is the promise of a replay.** Whatever is random draws from
+  `makeRng(seed)` (`core/rng.js`); a save with randomness and no seed cannot
+  be re-rendered, which is most of why it is an object and not a file.
+- **`parents` is lineage, not history.** It lists what this was *made from*,
+  not what the user looked at. A param of `type: 'object'` records itself —
+  if lineage is being assembled by hand, that is usually the bug.
+- **An object is never edited in place** — except its tags:
+  `Vault.retag(id, { add, remove })` (a set's `use:` switches, a `folder:`,
+  the trash). Anything else makes a new object whose parent is the old one.
+- **`recipe: null` is legal** for something that genuinely cannot be
+  re-rendered — a picture from outside is one (`origin.app: 'import'`, a
+  leaf). Say so rather than saving half a recipe; a half-recipe fails
   silently three months later.
 
 ## Loading
 
 ```js
-const rows = await Vault.list({ type: "sequence" });   // index.json only, no blobs
-const { object, blob, url } = await Vault.load(id);    // one folder
+const rows = await Vault.list({ type: 'sequence' });   // index rows: no recipes, no blobs; never the trash
+const { object, url, thumbUrl } = await Vault.load(id); // one envelope; its render at `url`
+const frames = await openFrames(object, { url, scale, draft });   // core/rebuild.js
 ```
 
-Loading something made by another app: use `object.render` and treat `recipe` as
-opaque. Only the origin app interprets its own recipe — the one exception is
-`render()` called through the core to rebuild a parent at a different size.
+To draw something another app made, go through `openFrames()`: it replays a
+sequence or a moving composition, shows a picture as itself, and hands the
+rest to the origin app's `rebuild.js`. Never read another app's recipe — only
+the app that wrote it knows what it means. `draft: true` asks for a live
+preview's frames; `scale` asks for more pixels, drawn again where the app
+`redraws()` it and stretched, and said so by `handle.scale`, where not.
+
+## Sets, roles and uses
+
+A new kind of thing is often a **set with a role**, not a new type: a
+material is a set with `role: 'material'`, a brush family one with
+`role: 'brush-family'`. Where a set is *offered* is tags — `use:<id>`,
+switched in the vault's detail — with `core/uses.js` as the catalogue: an app
+that learns to eat sets is one row in `USES`, and its param says
+`use: '<id>'`. Folders are `folder:<name>` tags. Rules in
+`docs/object-model.md`, *Sets* and *Uses*.
+
+## The trash, and deleting
+
+`Vault.trash(ids)` is a tag — nothing breaks, `restore(ids)` undoes it.
+`Vault.remove(ids, { dependents, dry })` deletes for good, from the trash
+only, and first asks what else names what is going: the chain goes too
+(`'delete'`), or they are cut loose (`'detach'`). `server/delete.js` is the
+one way out of the vault. Rules in `docs/object-model.md`, *Trash, and
+deleting*.
 
 ## Adding a type
 
-Four edits, in this order, and nothing else in the suite should need to know:
+Edits in this order, and nothing else in the suite should need to know:
 
-1. a row in the types table in `docs/object-model.md`,
-2. a thumbnailer in `core/thumb.js` — every type has a `thumb.webp`, including
-   fonts (a specimen), datasets (a dot plot) and 3D (a render),
-3. the gallery type filter,
-4. `accepts:` on whatever param is meant to eat it.
+1. a row in the types table in `docs/object-model.md`;
+2. its thumbnail, made by the saving app — `thumbFromCanvas`,
+   `thumbFromBlob`, or `thumbFromLabel` for data with nothing to photograph;
+3. what shows it where its render is not a picture — the vault's card and
+   detail (`core/vault-card.js`, `core/vault-detail.js`), as a dataset's JSON;
+4. `accepts:` on whatever param is meant to eat it, and a `rebuild.js` in the
+   app that replays it.
 
 If a type needs a new envelope field, stop: that is a design change, and the
-answer is almost always a new type or a key inside `recipe` instead.
+answer is almost always a new type, a set role, or a key inside `recipe`.
 
-## Publishing
+## Specified, not built
 
-`Vault.publish(id)` copies vault to gallery and flips `published`. It does not
-commit. Compress before committing — `oxipng -o4 --strip safe` — because the
-gallery is in git forever and its ancestor reached 33 MB for 41 images.
-
-## Smart objects
-
-`skw` is the one mutable type and the one that carries `refs`. Three things to
-get right, all in `docs/object-model.md`:
-
-- **Editing appends a version.** `versions/vN.json`, bump `object.version`,
-  emit `vault:updated`. Never overwrite a past version: something may be pinned
-  to it, and a pin is a promise.
-- **`refs` is not `parents`.** A placement that tracks the definition goes in
-  `refs` and invalidates the cache when the definition moves. A flattened copy
-  goes in `parents` and never changes again. Putting a live dependency in
-  `parents` is the bug to watch for — it fails silently, months later, as a
-  render that never updates.
-- **`standalone` is executable code.** A `bound` skw names an installed app and
-  is safe. A `standalone` skw carries a module. It runs locally; it does not go
-  in the public gallery without a sandbox decision in writing.
-
-Before implementing anything that places a skw, re-read *Smart objects* in
-`docs/object-model.md` — placement, pinning, overrides, flattening and cycle
-refusal are all specified there, and none of them should be reinvented.
+- **Publishing.** `docs/object-model.md` specifies `Vault.publish(id)`: copy
+  an object into `gallery/`, which is in git and deploys, and flip
+  `published`. The client has no such call yet. When it lands, compress
+  before committing — `oxipng -o4 --strip safe` — because the gallery is in
+  git forever and its ancestor reached 33 MB for 41 images.
+- **Smart objects.** `skw` — the one mutable type, versioned, the one that
+  carries `refs` — is specified in *Smart objects* and not built: the server
+  writes no versions. Before building anything that places one, read that
+  section whole — placement, pinning, overrides, flattening and cycle
+  refusal are specified there, and none of them should be reinvented. Two
+  things to hold from the start: editing appends a version and never
+  overwrites one, since something may be pinned to it; and `refs` is not
+  `parents` — a live dependency put in `parents` fails silently, months
+  later, as a render that never updates. A `standalone` skw carries code: it
+  does not go in the public gallery without a sandbox decision in writing.

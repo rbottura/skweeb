@@ -280,66 +280,48 @@ the layer's, not the clip's) — **read those rather than re-deriving it**, and
 the files themselves before touching `createGraphics`, `tint`, canvas
 filters, or anything exporting frames.
 
-## export.js — two exporters, different jobs
+## export.js — frames out, exactly
 
-**p5.capture stays.** It is already in grid and ckt, it costs nothing, and it is
-the right tool for the draft button: hit record, do the thing, get a file. Its
-limit is structural, not a bug — it captures the *live* canvas at its *display*
-size, driven by the live `draw()` loop. Its zip formats are frame-locked; its
-webm goes through MediaRecorder and is realtime, so it drops and duplicates
-frames under load. It cannot give you frame 437 at 7000 px without first running
-frames 0 to 436 on screen at that size.
-
-**`core/export.js` is the other one.** Given `render()`, it is a bare loop with
-no clock in it:
+Given an app's frames — its `frames.js`, the code its save and its replay
+draw with — an export is a bare loop with no clock in it:
 
 ```js
-for (let frame = 0; frame < frames; frame++) {
-  App.render(recipe, { width, height, frame, rng: makeRng(seed), load });
-  await encoder.add(canvas);
-}
+await runFrames({ count: frames.length, frame: async i => entries.push(await entry(frameName(i, frames.length), frames.frame(i))) });
+download(zipStore(entries), name);
 ```
 
-Same recipe and seed, same bytes, every time, at any size. Most of the hard part
-already exists: the gamepad's transport derives every position from one master
-tick rather than accumulating, and `SequencePlayer.step()` already refuses to
-read a clock. That discipline is exactly what this needs — see the header of
-`core/stage/player.js`.
+Same recipe and seed, same bytes, every time, at any size. The discipline is
+the stage's: the gamepad's transport derives every position from one master
+tick, and `step()` refuses to read a clock — the header of
+`core/stage/player.js`. A capture of the live canvas — p5.capture, say, or
+MediaRecorder — is the wrong tool for anything that becomes an object: it
+cannot give frame 437 at 7000 px without running frames 0 to 436 on screen
+first, and a realtime recorder drops frames under load.
 
-| | p5.capture | `core/export.js` |
-|---|---|---|
-| captures | the live canvas | `render()` in a loop |
-| size | whatever is on screen | anything, 7000 px included |
-| determinism | none in webm, partial in zip | exact |
-| cost | zero, already there | about 60 lines |
-| for | drafts, screen recordings | anything entering the vault or going to print |
+**What exists.** `runFrames({ count, frame, onProgress, signal })` runs the
+loop and keeps nothing — grid dithering a sequence runs every frame and keeps
+one; `captureFrames({ count, draw })` collects PNG blobs; `toPng(canvas)`;
+`zipStore(entries)` packs a store-only zip whose entries may be Blobs, by
+reference — PNGs are already deflated, so compressing again costs time and
+saves nothing; `frameName(i, total)` pads so an alphabetical sort is a
+numeric one; `download(blob, name)` hands it to the browser.
+`tests/export.mjs` covers the loop indexing and the zip. A loop leaves as a
+sprite sheet too (`spritesheet.js`).
 
-**What exists.** `captureFrames({count, draw, onProgress})` runs the loop and
-collects PNG blobs; `zipStore(entries)` packs them into a store-only zip —
-PNGs are already deflated, so compressing again costs time and saves nothing,
-and store-only is forty lines rather than a dependency; `frameName(i, total)`
-pads so an alphabetical sort is a numeric one; `download(blob, name)` hands it
-to the browser. `tests/export.mjs` covers the loop indexing and the zip.
+**Video is the zip plus ffmpeg** (settled 2026-09-22, `docs/decisions.md`):
+`scripts/frames-to-video.mjs` makes the file. No muxer is written in
+JavaScript.
 
-**What does not exist: video.** A sequence object's render is currently a
-single PNG, and the frames come out as a zip on request. Which frame is a
-decision, not a detail: `representativeTick()` in `sequenceClip.js` asks the
-window rule which tick shows the most marks. It is never the last one — `sweep`
-and `build` end on a blank tick by design and `bounce` ends on its first two
-marks, so keeping frame N-1 kept a transparent PNG for half the rules. Writing a
-webm needs a muxer — WebCodecs encodes frames but does not container them —
-which means either vendoring one or writing one, and that is a decision rather
-than an afternoon. MediaRecorder is not the answer: it is realtime and drops
-frames, which is the whole thing this file exists to avoid.
+**A sequence's picture** is one of its frames, and which is a decision, not a
+detail. For a recording, `representativeTick()` (`stage/clip.js`) asks the
+window rule which tick shows the most marks — never the last: `sweep` and
+`build` end on a blank tick by design and `bounce` on its first two marks, so
+keeping frame N-1 kept a transparent PNG for half the rules. For the other
+apps' loops it is the frame on screen when the loop was saved.
 
 **Resolution.** Export is the only place print scale appears. The live loop
-stays at screen size with `density` as a parameter; `export.js` re-runs
-`render()` once at the scale asked for, for the frames asked for. A print
-export is one pass, not a loop to sit through.
-
-**The rule.** p5.capture for drafts, `export.js` for anything that becomes an
-object. The vault's promise is that an object can be rebuilt; a screen recording
-cannot keep that promise.
+stays at screen size; an export draws the frames it needs again at the scale
+asked for, once. A print export is one pass, not a loop to sit through.
 
 ## links.js — apps that know about each other, one way at a time
 
