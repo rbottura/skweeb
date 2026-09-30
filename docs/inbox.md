@@ -21,7 +21,15 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing waiting.
+- **2026-09-30 — the suite as a game editor, a room first.** "Using these
+  apps as vfx and assets editor for a little game, so also game editor with
+  map editor, some physics, something like pokewebkit but not for editing
+  rom but game objects here, surely to display in my personnal playground on
+  my website … a space editor where i can create my room at home, place
+  items, allow interaction with them like posters, pc, toys etc." A
+  direction, not an item: discussed the same day, and to become M8 in
+  `docs/roadmap.md` once the author settles movement, look, where the room is
+  published, its name, and whether M7 is parked first.
 
 ## Sorted
 
