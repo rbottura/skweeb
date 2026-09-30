@@ -11,6 +11,15 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ### Newest
 
+- **Escape time moves — M7's third brick done** (2026-09-30;
+  `apps/fractals/motion.js`, `tests/fractal-motion.mjs` 34 checks,
+  `check-fractals` 42). Each family has its own *moving*: for escape time,
+  the ramp once round — a palette cycling — or a Julia `c` round a circle of
+  a radius about the `c` chosen. Both close pixel for pixel; a Julia loop
+  saves, replays to its render, is drawn again at scale 2 and is placed in
+  compose — the first clause of M7's *Done when*. The Motion rows serve both
+  families because core's `when` may now be a list, any one of which is
+  enough (`docs/core-api.md`).
 - **One vault, on the laptop that travels** (the author's setup,
   2026-09-28; `docs/decisions.md`). The laptop goes between the work PC and
   the home tower and serves `~/skweeb-vault` behind `tailscale serve`, a
@@ -315,9 +324,10 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 ## Tests
 
 Thirty files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-09-30). Newest: `vault-events` — a save, a
-retag and a delete each heard by two listeners at once, standing for two
-machines; before it the fractals' three. Then `compose-time` gained the ripple, and
+all of them, and all pass (2026-09-30). Newest: `fractal-motion` grew
+escape time's idles, and `params` a `when` that is a list; `vault-events` —
+a save, a retag and a delete each heard by two listeners at once, standing
+for two machines. Before them the fractals' three. Then `compose-time` gained the ripple, and
 with `compose-placements` a placement's time — windows, a page's end, a
 flipbook of three stills — then `vault-kin` (who is kin, in what order, a cycle that must not
 hang), `gpu-filters` (the catalogue as data: licence, schema, the WGSL
@@ -396,14 +406,23 @@ throws or its console is not quiet.
 
 ## Next single step
 
-**M7: escape time moves too** — `apps/fractals/STATUS.md` has it: the
-ramp's phase once through, and a Julia `c` round a circle, as the copies'
-idles move.
-Then **an emitter taken from a vault object** — a ckt dot-set's dots (the
-author's idea, 2026-09-30, sorted from `docs/inbox.md`) or a shape's alpha —
-before M7's field, which takes a second object into particles the same way.
-Left of M6 besides: colour over life (`apps/particles/STATUS.md`). The
-gamepad's *newest behind* stays parked.
+**Particles: an emitter taken from a vault object — its first step, the
+model** (the author's idea, 2026-09-30, sorted from `docs/inbox.md`;
+`apps/particles/STATUS.md`). `model.js`'s `spotOf` takes the points an
+emitter is given — offsets from its centre, px at scale 1, passed in beside
+the recipe and never in it, since the recipe names the object — and its
+first spot draw picks one, `floor(a × n)`, the second left for a jitter
+round it: no slot draws anything new, so every saved recipe redraws as it
+did. Held in `tests/particles-model.mjs`: every birth on a point; a loop
+through them still closes, `t + period` the picture at `t`; a recipe with
+no points unchanged. Then the app: ckt's `datasets.js` into core, a
+dot-set or a shape picked in Emission — the author to say whether a
+dot-set is one glyph at a time or a word — the object a parent of the
+save, `rebuild.js` loading it first, the guides drawing the points.
+
+After it, **M7's field** (`apps/fractals/STATUS.md`), which takes a second
+object into particles the same way, and M7's *Done when* is met. Left of M6
+besides: colour over life. The gamepad's *newest behind* stays parked.
 
 Parked with M5's catalogue (the author, 2026-09-27): **the motion group** —
 a still becomes a loop, `frames` and `fps` for a still source and *bob*

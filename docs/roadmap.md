@@ -174,11 +174,18 @@ field, filters displace by one.
 *Done when:* a Julia loop that closes, redrawn exactly at print scale, whose
 field steers an M6 emitter. The link: `fractal → particles: a field`.
 
-*So far:* brick 1 of seven, 2026-09-27 (`apps/fractals/STATUS.md`): the
-Mandelbrot set and its Julia sets as one WGSL pass through the GPU kit,
-smooth colouring round a ramp, dragged and wheeled about the pointer, the
-picture a function of its params — a PNG at print scale is drawn again,
-not enlarged. Held to the escape count in doubles.
+*So far:* bricks 1 to 3 of seven, and 6 begun, 2026-09-27 to -30
+(`apps/fractals/STATUS.md`). The Mandelbrot set and its Julia sets as one
+WGSL pass through the GPU kit, smooth colouring round a ramp, dragged and
+wheeled about the pointer, the picture a function of its params — a PNG at
+print scale is drawn again, not enlarged; held to the escape count in
+doubles. Both families save and replay. A sprite copying itself, the point
+families begun ahead of order, as the author asked. And loops: one param
+swung over a loop in either family — for escape time the ramp once round,
+or a Julia `c` round a circle. Against *Done when*: a Julia loop that
+closes, redrawn exactly at print scale — met, 2026-09-30; whose field
+steers an M6 emitter — brick 7, after particles learn to take an emitter
+from another object.
 
 **Across M5–M7, for the game.** Four things serve every app rather than one:
 

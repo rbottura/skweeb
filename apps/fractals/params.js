@@ -1,8 +1,8 @@
 /**
  * params.js — fractals' schema: which family, its params, and the format.
  *
- * A copies picture may move one of its params over a loop — an idle — in
- * the Motion drawer (motion.js); a still is a loop of one.
+ * Either family may move one of its params over a loop — an idle — in the
+ * Motion drawer (motion.js); a still is a loop of one.
  *
  * Two families. **Escape time** is fractal.js's: the Mandelbrot set and its
  * Julia sets on the GPU, its params the pass's own. **Copies** is

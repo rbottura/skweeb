@@ -1,5 +1,5 @@
 # STATUS — fractals
-_last touched: 2026-09-28_
+_last touched: 2026-09-30_
 
 M7's app: fractals — escape time on the GPU kit, and a sprite copying
 itself. The plan and *Done when* are in `docs/roadmap.md`, M7 — a Julia loop that closes, redrawn exactly at print
@@ -13,9 +13,10 @@ field`.
 2. **It saves** — done 2026-09-28, both families: a still or an idle into
    the vault, `rebuild.js` drawing it again at any scale, `?open=`. Left: a
    Julia set chosen by clicking a point of the Mandelbrot set.
-3. **Loops** — begun 2026-09-28 with copies: one param swung over a loop,
-   an idle, saved as a sequence and so as a sprite sheet. Left: escape
-   time's — the phase once round, a Julia `c` round a circle.
+3. **Loops** — done 2026-09-30: one param swung over a loop, an idle,
+   saved as a sequence and so as a sprite sheet — copies' first
+   (2026-09-28), then escape time's: the ramp once round, a Julia `c` round
+   a circle.
 4. **More families** — Burning Ship, multibrot, Newton, Phoenix, Lyapunov;
    orbit traps.
 5. **Deeper** — two floats for one (double-float in WGSL) past a zoom of
@@ -28,6 +29,19 @@ field`.
 
 ## Works now
 
+- **Escape time moves** (2026-09-30; `motion.js`, `tests/fractal-motion.mjs`
+  34 checks, `check-fractals` 42). The Motion drawer's *moving* is the
+  family's own. For escape time, *the ramp, round*: the phase from where it
+  is, once round, evenly — a palette cycling, its last frame a step short of
+  its first. Or *julia c, round a circle*: the Julia set's `c` taken round a
+  circle of *radius round c* — 0.02 to start, on a log slider — about the
+  `c` chosen, `from` and `to` then its degrees; picked on the Mandelbrot
+  set, it makes the set a Julia set, since a Julia `c` moves nothing else.
+  The rows under it — from, to, loop, curve, frames, fps — are the copies',
+  shown for whichever family moves: core's `when` takes a list now, any one
+  of which is enough. Both loops close pixel for pixel in Chrome; the Julia
+  one saves as a sequence of 48 at 24, titled *c round 0.02*, replays to
+  its render, is drawn again at scale 2, reopens and is placed in compose.
 - **Idles: one param swung over a loop** (2026-09-28, the author's find —
   a tree's twist swung −10 to +10; `motion.js`, `tests/fractal-motion.mjs`
   17 checks, `check-fractals` 29). The Motion drawer: *moving* — each copy
@@ -92,7 +106,10 @@ field`.
   flat squares, and the bar says so. Brick 5.
 - One param moves at a time; two swung together — the twist and the
   spread — would be the next step for the Motion drawer.
-- Escape time does not move yet: its Motion rows are the copies' only.
+- The two families share one range: from, to, loop, curve, frames and fps
+  are one set of rows. A family switched to, with something moving in it,
+  refits from and to round what moves there — so a range set by hand in the
+  other family is not kept.
 - The iterations do not follow the zoom: deep in, raise them by hand.
 - A drag or a wheel redraws the whole picture each move; at 1080 square
   and a few hundred iterations that is quick, at thousands it is not. Tens
@@ -103,12 +120,15 @@ field`.
 
 ## Next single step
 
-**Escape time moves too** — brick 3's other half. The Motion drawer's
-*moving* for escape time: the ramp's *phase* once through (0 to 1, a palette
-cycling that closes), and a Julia `c` round a circle (a centre and a
-radius, once round). `motion.js` grows a second list of movable params by
-family; `frames.js` already draws any frame of either. Checked as the idle
-is: the frame after the last is the first.
+The suite's next step is in particles: an emitter taken from a vault object
+(`STATUS.md`, *Next single step*). Fractals' own, after it: **a field for
+particles** — brick 7, M7's link, and the last clause of its *Done when*,
+*whose field steers an M6 emitter*. A fractals object picked in particles'
+Fields drawer, its escape sampled in doubles by `fractal.js`'s `escape` —
+so a field needs no GPU — and its slope the force: particles pushed away
+from the set, or, the slope turned a quarter, going round it. It takes its
+object in as the emitter will. Left of brick 2 meanwhile: a Julia set
+chosen by clicking a point of the Mandelbrot set.
 
 ## Parked
 

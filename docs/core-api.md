@@ -114,8 +114,9 @@ to put a button into a param drawer.
 Three more schema keys, all data:
 
 - `when` — the row shows only when it applies: `{ path: 'point' }`,
-  `{ input: ['text', 'glyphs'] }`, `{ mark: { not: 'dot' } }`. Its value stays
-  in the recipe while hidden (params.js `applies`).
+  `{ input: ['text', 'glyphs'] }`, `{ mark: { not: 'dot' } }`, or a list of
+  those, any one of which is enough — fractals' Motion rows serve two families
+  so. Its value stays in the recipe while hidden (params.js `applies`).
 - `type: 'sprite'` — an index into the family named by `family: '<param>'`,
   picked from a grid of that family's own images.
 - `type: 'ground'` — a colour or `none`; one value, so a recipe cannot say

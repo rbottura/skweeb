@@ -254,6 +254,10 @@ ok('an empty ground falls back to its default', every.get('j'), '#ffffff');
   ok('anything but', applies({ when: { mark: { not: 'dot' } } }, { mark: 'dot' }), false);
   ok('every entry must hold',
      applies({ when: { a: 1, b: 2 } }, { a: 1, b: 3 }), false);
+  const either = { when: [{ family: 'copies', move: ['twist', 'turn'] }, { family: 'escape', moveEscape: 'phase' }] };
+  ok('a list: the first holding is enough', applies(either, { family: 'copies', move: 'turn' }), true);
+  ok('a list: so is the second', applies(either, { family: 'escape', moveEscape: 'phase', move: 'none' }), true);
+  ok('a list: none holding, it does not apply', applies(either, { family: 'escape', moveEscape: 'none', move: 'twist' }), false);
 }
 ok('and its values round trip', JSON.parse(JSON.stringify(every.values)), every.values);
 every.set('b', 2.7);

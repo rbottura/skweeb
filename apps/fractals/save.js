@@ -15,6 +15,7 @@
  */
 
 import { openFractal }   from './frames.js';
+import { moverOf }       from './motion.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { buildSheet }    from '../../core/spritesheet.js';
@@ -24,10 +25,12 @@ export const APP = { app: 'fractals', version: '1.0.0' };
 
 /** What it is, in words. */
 function titleOf(v, spriteTitle) {
+  const what = moverOf(v);
+  const moving = !what ? '' : what === 'julia' ? ` · c round ${+v.radius.toPrecision(3)}`
+    : ` · ${what} ${+v.from.toFixed(2)} ↔ ${+v.to.toFixed(2)}`;
   if (v.family !== 'copies') {
-    return v.kind === 'julia' ? `julia ${v.jx.toPrecision(4)}, ${v.jy.toPrecision(4)}` : `mandelbrot ×${Math.round(v.zoom)}`;
+    return (v.kind === 'julia' ? `julia ${v.jx.toPrecision(4)}, ${v.jy.toPrecision(4)}` : `mandelbrot ×${Math.round(v.zoom)}`) + moving;
   }
-  const moving = v.move && v.move !== 'none' ? ` · ${v.move} ${+v.from.toFixed(2)} ↔ ${+v.to.toFixed(2)}` : '';
   return `${spriteTitle || 'dots'} · ${v.shape} ${v.depth}${moving}`;
 }
 

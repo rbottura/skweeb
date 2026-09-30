@@ -127,9 +127,10 @@ export const PARAM_TYPES = Object.keys(TYPES);
  *   { path: 'point' }                 only for that value
  *   { input: ['text', 'glyphs'] }     for any of these
  *   { mark: { not: 'dot' } }          for anything but
+ *   [{ a: 1 }, { b: 2 }]              a list: when any one of them holds
  *
- * Every entry must hold. A row that does not apply is hidden, never cleared —
- * its value stays in the recipe, so switching back finds it as it was.
+ * In one, every entry must hold. A row that does not apply is hidden, never
+ * cleared — its value stays in the recipe, so switching back finds it as it was.
  *
  * @param {object} spec    the param's declaration
  * @param {object} values  the current values
@@ -137,6 +138,11 @@ export const PARAM_TYPES = Object.keys(TYPES);
 export function applies(spec, values) {
   const when = spec && spec.when;
   if (!when) return true;
+  return Array.isArray(when) ? when.some(one => holds(one, values)) : holds(when, values);
+}
+
+/** Whether every entry of one `when` holds. */
+function holds(when, values) {
   for (const [key, want] of Object.entries(when)) {
     const have = values[key];
     if (want && typeof want === 'object' && !Array.isArray(want) && 'not' in want) {

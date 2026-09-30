@@ -16,7 +16,9 @@
  * And an idle — the author's find, a tree's twist swung −10 to +10: picked,
  * its range filled in, played, its loop closed pixel for pixel; saved as a
  * sequence with the star its parent, replayed to its render, a sprite sheet
- * of every frame, reopened, and placed in compose.
+ * of every frame, reopened, and placed in compose. And escape time moving:
+ * the ramp once round, then a Julia c round a circle, each played and its
+ * loop closed pixel for pixel; the second saved, replayed, reopened, placed.
  */
 
 import fs   from 'node:fs';
@@ -249,21 +251,23 @@ const starRow = ((await (await fetch(c.base + '/api/vault')).json()).objects || 
 c.ok('saved, an idle: a sequence of its frames at its rate', !!o && o.type === 'sequence' && o.render.frames === 48 && o.render.fps === 24,
   o ? `${o.type} ${o.render.frames} at ${o.render.fps}` : await page.eval(say));
 c.ok('the sprite it copies is its parent', !!o && !!starRow && JSON.stringify(o.parents) === JSON.stringify([starRow.id]), o && JSON.stringify(o.parents));
+/** A saved loop as the vault replays it: its length and rate, how far its frame 12 is from its render, and at scale 2. */
+const replayOf = id => page.eval(`(async () => {
+  const { Vault } = await import('/core/vault.js');
+  const { openFrames } = await import('/core/rebuild.js');
+  const { object, url } = await Vault.load(${JSON.stringify(id)});
+  const h = await openFrames(object, { url });
+  const img = await createImageBitmap(await (await fetch(url)).blob());
+  const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
+  const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(h.frame(12), 0, 0);
+  const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
+  let worst = 0; for (let i = 0; i < da.length; i++) worst = Math.max(worst, Math.abs(da[i] - db[i]));
+  const big = await openFrames(object, { url, scale: 2 });
+  const out = { length: h.length, fps: h.fps, worst, missing: h.missing, big: [big.scale, big.frame(0).width, h.width] };
+  h.dispose(); big.dispose(); return out;
+})()`);
 if (o) {
-  const replay = await page.eval(`(async () => {
-    const { Vault } = await import('/core/vault.js');
-    const { openFrames } = await import('/core/rebuild.js');
-    const { object, url } = await Vault.load(${JSON.stringify(o.id)});
-    const h = await openFrames(object, { url });
-    const img = await createImageBitmap(await (await fetch(url)).blob());
-    const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
-    const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(h.frame(12), 0, 0);
-    const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
-    let worst = 0; for (let i = 0; i < da.length; i++) worst = Math.max(worst, Math.abs(da[i] - db[i]));
-    const big = await openFrames(object, { url, scale: 2 });
-    const out = { length: h.length, fps: h.fps, worst, missing: h.missing, big: [big.scale, big.frame(0).width, h.width] };
-    h.dispose(); big.dispose(); return out;
-  })()`);
+  const replay = await replayOf(o.id);
   c.ok('the vault replays it, 48 frames at 24', replay.length === 48 && replay.fps === 24, JSON.stringify(replay).slice(0, 100));
   c.ok('its frame on screen is its render, pixel for pixel', replay.worst === 0, 'worst ' + replay.worst);
   c.ok('at scale 2, drawn again at twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.big[2], JSON.stringify(replay.big));
@@ -295,6 +299,66 @@ if (o) {
   c.ok('?open= brings the idle back, its twist moving', (await page.eval(`${row('moving')}?.querySelector('select')?.value`)) === 'twist'
     && (await value('to')) === 10, await page.eval(say));
   await c.go(c.base + '/apps/compose/?place=' + o.id);
+  await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
+  c.ok('compose places it, a 24 fps loop of 48', (await page.eval(say)).includes('a 24 fps loop of 48'), await page.eval(say));
+}
+
+// ── Escape time moves: the ramp once round, a Julia c round a circle ────────
+
+const key = async k => { await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ${JSON.stringify(k)} }))`); await wait(300); };
+/** The row of that name that shows: both families have a *moving*. */
+const shown = name => `[...document.querySelectorAll('.pp-row')].find(r => !r.hidden && r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const moving = async what => { await page.eval(`(() => { const s = ${shown('moving')}.querySelector('select'); s.value = ${JSON.stringify(what)};
+  s.dispatchEvent(new Event('change', { bubbles: true })); })()`); await wait(500); };
+/** Playing at once; held, a quarter in another picture; the frame after the last the first. */
+const closes = async label => {
+  const a = await page.eval(count); await wait(700); const b = await page.eval(count);
+  c.ok(`${label}: plays at once, a loop of 48`, /^\d+ \/ 48$/.test(b) && a !== b, `${a} → ${b}`);
+  await key('.');
+  await scrubTo(0); const g0 = await grid();
+  await scrubTo(12); const g12 = await grid();
+  c.ok(`${label}: a quarter in, another picture`, apart(g12, g0) > 2, 'apart by ' + apart(g12, g0).toFixed(1));
+  await scrubTo(47); await key('.');
+  c.ok(`${label}: the frame after the last is the first, pixel for pixel`, (await page.eval(count)) === '1 / 48' && apart(await grid(), g0) === 0,
+    `${await page.eval(count)}, apart by ${apart(await grid(), g0)}`);
+};
+
+await c.go(c.base + '/apps/fractals/');
+await page.until(`${say}.includes('mandelbrot')`, { timeout: 20000 });
+await moving('phase');
+c.ok('the ramp picked to move: once round from its phase', (await value('from')) === 0 && (await value('to')) === 1,
+  `${await value('from')} to ${await value('to')}`);
+await closes('the ramp round');
+await c.shot('7-ramp-round');
+
+await moving('julia');
+const juliaSay = await sayWith('julia of');
+c.ok('the Julia c picked to move: a Julia set, its c once round a circle', juliaSay.includes('julia of') && (await value('to')) === 360
+  && (await page.eval(`!!${shown('radius round c')}`)), juliaSay);
+await set('zoom', '1');
+await set('centre x', '0');
+await set('centre y', '0');
+await closes('the Julia c round');
+await scrubTo(12);
+await c.shot('8-julia-round');
+
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await key('S');
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+const eid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const e = eid ? await (await fetch(c.base + '/api/vault/' + eid)).json() : null;
+c.ok('saved, the Julia c round: a sequence of 48 at 24', !!e && e.type === 'sequence' && e.render.frames === 48 && e.render.fps === 24
+  && e.recipe.moveEscape === 'julia', e ? `${e.type} ${e.render.frames} · ${e.title}` : await page.eval(say));
+if (e) {
+  const replay = await replayOf(e.id);
+  c.ok('the vault replays it, its frame on screen its render, pixel for pixel', replay.length === 48 && replay.worst === 0,
+    JSON.stringify(replay).slice(0, 100));
+  c.ok('at scale 2, drawn again at twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.big[2], JSON.stringify(replay.big));
+  await c.go(c.base + '/apps/fractals/?open=' + e.id);
+  await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+  c.ok('?open= brings it back, its c going round', (await page.eval(`${shown('moving')}?.querySelector('select')?.value`)) === 'julia'
+    && Math.abs((await value('radius round c')) - 0.02) < 1e-12, await page.eval(say));
+  await c.go(c.base + '/apps/compose/?place=' + e.id);
   await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
   c.ok('compose places it, a 24 fps loop of 48', (await page.eval(say)).includes('a 24 fps loop of 48'), await page.eval(say));
 }

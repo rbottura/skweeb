@@ -20,7 +20,7 @@
 
 import { fractalParams, GROUPS } from './params.js';
 import { drawCopies, SHAPES } from './copies.js';
-import { loopOf, valuesAt, rangeAround } from './motion.js';
+import { loopOf, valuesAt, rangeAround, moverOf } from './motion.js';
 import { chainOf } from './frames.js';
 import { saveFractal, downloadFrames, downloadSheet } from './save.js';
 import { wirePointer }    from './pointer.js';
@@ -75,10 +75,14 @@ async function boot() {
     applyFrameEdit(params, key);
     if (!params.restoring) {
       // A shape picked starts from its own ratio, twist and depth; a param
-      // picked to move from a range round its value now. A recipe arriving keeps its own.
+      // picked to move from a range round its value now — and so does the
+      // other family's, switched to, since the two share the range. The
+      // Julia c moves a Julia set. A recipe arriving keeps its own.
       if (key === 'shape') params.set(SHAPES[params.get('shape')].start);
-      if (key === 'move' && params.get('move') !== 'none') {
-        params.set(rangeAround(params.get('move'), params.get(params.get('move'))));
+      if (key === 'moveEscape' && params.get('moveEscape') === 'julia') params.set({ kind: 'julia' });
+      const what = ['move', 'moveEscape', 'family'].includes(key) && moverOf(params.values);
+      if (what) {
+        params.set(rangeAround(what, params.get(what)));
         fitClock();               // the range may be what it was, and announce nothing: fit before playing
         clock.play();
       }
@@ -201,12 +205,14 @@ function paint() {
   bar.say(describe(v));
 }
 
-/** The bar's line: which set, where, how deep — and when 32 bits have run out. */
+/** The bar's line: which set, where, how deep, what moves — and when 32 bits have run out. */
 function describe(v) {
   const where = `${v.cx.toPrecision(8)}, ${v.cy.toPrecision(8)}`;
   const set = v.kind === 'julia' ? `julia of ${v.jx.toPrecision(4)}, ${v.jy.toPrecision(4)}` : 'mandelbrot';
+  const what = clock.length > 1 && moverOf(v);
+  const moving = !what ? '' : ` · ${what === 'julia' ? 'c round a circle' : `phase ${+v.phase.toFixed(3)}`}, frame ${clock.tick + 1} of ${clock.length}`;
   const deep = v.zoom > DEEPEST ? ' · past 32-bit precision: the picture blocks up' : '';
-  return `${set} · ${v.zoom < 10 ? v.zoom.toFixed(2) : Math.round(v.zoom).toLocaleString('en')}× at ${where} · ${v.iterations} iterations${deep}`;
+  return `${set} · ${v.zoom < 10 ? v.zoom.toFixed(2) : Math.round(v.zoom).toLocaleString('en')}× at ${where} · ${v.iterations} iterations${moving}${deep}`;
 }
 
 // ── Leaving ──────────────────────────────────────────────────────────────────
