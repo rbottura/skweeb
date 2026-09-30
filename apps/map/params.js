@@ -24,6 +24,8 @@ export const MAP_GROUPS = {
 
 export function mapParams() {
   return defineParams('map', {
+    /** What it is called: its title in the vault, and later what a warp names. */
+    name:   { type: 'text', default: 'a room', label: 'name', group: 'map' },
     cols:   { type: 'int', min: 1, max: 128, default: 12, label: 'columns', group: 'map' },
     rows:   { type: 'int', min: 1, max: 128, default: 10, label: 'rows', group: 'map' },
     /** A tile's side in the map's own pixels: large, as the assets are. */

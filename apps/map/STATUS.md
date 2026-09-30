@@ -7,9 +7,9 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## The bricks
 
-1. **The map app opens** — begun 2026-09-30: an empty grid, tiles painted
-   from a tileset, and things from the vault standing on it, drawn back to
-   front by where they stand. Left: saved as a `map`, replayed, placed in
+1. **The map app opens** — done 2026-09-30: an empty grid, tiles painted
+   from a tileset, things from the vault standing on it, drawn back to front
+   by where they stand; saved as a `map`, replayed, reopened, placed in
    compose.
 2. **Walkable, and events** — signs, warps, the spawn, each through a
    schema.
@@ -20,6 +20,18 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## Works now
 
+- **A map saves, replays, reopens, and compose places it** (2026-09-30;
+  `frames.js`, `save.js`, `rebuild.js`; `check-map` 34). A new type,
+  `map`, a row in `docs/object-model.md`: its recipe `{ map, cells, place }`
+  — the panel's values, a tile index a cell, the things' blocks — and its
+  picture the map at its own pixels, drawn by frames.js, the code a replay
+  draws with, every loop on it at the frame on screen. With a loop standing
+  on it, it saves with the loop's frames and rate, as a page that moves
+  does. Its tileset and every thing on it are its parents; its title is its
+  *name*. The vault's replay of a frame is its render, pixel for pixel; at
+  scale 2 it is drawn again, its things by the apps that made them;
+  `?open=` brings the values, the tiles and the things back; compose
+  places a map and plays it. *Download the picture (PNG)* too.
 - **Things stand on the map** (2026-09-30; `things.js`, `editing.js`,
   `list.js`; `tests/map-things.mjs` 8 checks, `check-map` 28). The things
   tool (2, or its switch): *Place…* picks any still, loop, shape or page
@@ -63,18 +75,22 @@ is a loop's, and nothing a player does enters a recipe.
 - Tiles are drawn square, stretched to the cell: a tileset's members are
   expected square. One layer: no tiles over the avatar yet — a tree's top,
   a door's frame. No undo.
-- Nothing saves yet: a reload loses the cells and the things.
 - A thing carries its picture's ground: a particles loop saved on a cream
   ground is a cream square on the map. Save it on no ground to stand it
   over the tiles, as on a compose page.
 - A thing stands on a cell, not between two; no mirror, no turn yet.
+- A map's things open once each on a replay: a map with many heavy loops
+  on it is as slow to open as they are, and a print is drawn with each one
+  again at its scale.
 
 ## Next single step
 
-**The map saves.** A `map` row in `docs/object-model.md`'s types table
-first; then S saves `{ map, cells, place }` — its picture the map at its
-own pixels, drawn by the code a replay draws with, every loop on it at the
-frame on screen; the tileset and every thing on it its parents. Its
-`rebuild.js` replays it — a map with loops on it plays, as a moving page
-does — `?open=` brings the cells and the things back, and compose places
-a map.
+**Brick 2, its first step: what can be walked.** A *walls* tool (3): a
+press marks a cell as not walkable, a drag a line of them, the right button
+walkable again — a list beside the cells, `walls`, one flag a cell, as
+Pokémon's maps keep a permission a cell apart from the tile drawn there —
+shown as a guide, hatched, never in the picture. A thing gets *solid* in
+its panel: its feet cell not walkable. Held in a test: the walkable cells
+of a map, asked as the avatar will ask them (`walkable(recipe, col, row)`).
+Then the events: a sign on a thing — what shows when it is used — and the
+spawn.

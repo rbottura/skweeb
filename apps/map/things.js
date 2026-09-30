@@ -3,7 +3,8 @@
  *
  * Each thing is a block, as the map's recipe keeps it — `{ ref, col, row,
  * width }`, the part that is saved — and the object that block names,
- * opened into a preview's frames (core/rebuild.js `openFrames`, `draft`).
+ * opened into frames (core/rebuild.js `openFrames`): a preview's drafts in
+ * the editor, exact ones for a save and a replay (frames.js).
  * Its size is its ink, as on a compose page; it stands with its feet at its
  * cell's bottom middle, `width` tiles wide, as tall as its shape makes it,
  * so something tall rises over the cells above — a lamp over the wall.
@@ -52,10 +53,17 @@ export function thingAt(items, x, y, tile) {
 }
 
 export class Things {
-  /** @param {{onChange: () => void}} opts   the list, or an object in it, changed */
-  constructor({ onChange }) {
+  /**
+   * @param {object} opts
+   * @param {() => void} opts.onChange   the list, or an object in it, changed
+   * @param {boolean} [opts.draft=true]  a preview's frames; a save and a replay ask for exact ones
+   * @param {number} [opts.scale=1]      pixels per pixel of each thing's own size, for a print
+   */
+  constructor({ onChange, draft = true, scale = 1 }) {
     this.items = [];
     this.onChange = onChange;
+    this.draft = draft;
+    this.scale = scale;
   }
 
   /** The blocks, as the map's recipe keeps them. */
@@ -130,7 +138,7 @@ export class Things {
       p.title = object.title || object.id;
       p.type = object.type;
       p.thumb = thumbUrl;
-      p.handle = await openFrames(object, { url, draft: true });
+      p.handle = await openFrames(object, { url, draft: this.draft, scale: this.scale });
       p.size = sizeOf(p.handle);
     } catch (err) {
       p.error = err.message;

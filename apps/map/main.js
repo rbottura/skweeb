@@ -10,7 +10,9 @@
  * the grid and the chosen thing's box are guides over it — one switch, G —
  * never saved.
  *
- * Opens with no vault (rule 7).
+ * S saves the map (save.js) — `{ map, cells, place }`, its picture drawn by
+ * the code a replay draws with — and `?open=<id>` brings one back. Opens
+ * with no vault (rule 7).
  */
 
 import { mapParams, MAP_GROUPS } from './params.js';
@@ -20,6 +22,8 @@ import { drawGrid, drawChosen } from './guides.js';
 import { Palette }      from './palette.js';
 import { Editing }      from './editing.js';
 import { wirePointer }  from './pointer.js';
+import { saveMap, downloadPicture } from './save.js';
+import { requested }    from '../../core/reopen.js';
 import { loadSprites }  from '../../core/sprites.js';
 import { ParamPanel }   from '../../core/ParamPanel.js';
 import { VaultPanel }   from '../../core/VaultPanel.js';
@@ -42,16 +46,18 @@ let tiles = null;              // the tileset's images, or null: nothing to pain
 let tilesTitle = '';
 let asked = 0;                 // the latest tileset asked for; an older answer is dropped
 let clockFps = 0;              // the rate the clock was fitted to
+let busy = false;              // a save or a download is drawing; nothing else starts
 
 /** The map's clock: its loops play, each at its own speed. */
 const clock = new Playhead({ onShow: () => draw() });
 
 function boot() {
   bar = new Bar({ app: 'map', mount: document.querySelector('.app'),
-                  keys: '1 tiles · 2 things · G guides · space play · Del remove · V vault' });
+                  keys: '1 tiles · 2 things · G guides · space play · Del remove · S save · V vault' });
   map = mapParams();
   const panel = new ParamPanel(map, { title: 'map', mount: document.getElementById('map-side'), groups: MAP_GROUPS });
   palette = new Palette(panel.drawer('tiles').body, () => draw());
+  buildExport(panel);
   editing = new Editing({ mount: document.getElementById('things-side'), map: () => map.values,
                           onChange: () => { fitClock(); draw(); } });
   fitCells();
@@ -80,6 +86,24 @@ function boot() {
   useTool('tiles');
   wireKeys();
   draw();
+  openRequested();
+}
+
+/** `?open=<id>`: a saved map back to work on (core/reopen.js) — its values, its cells, its things. */
+async function openRequested() {
+  try {
+    const opened = await requested('map');
+    if (!opened) return;
+    const { recipe } = opened.object;
+    map.restore(recipe.map);
+    shape = { cols: recipe.map.cols, rows: recipe.map.rows };
+    cells = resize(recipe.cells || [], shape, shape);
+    await editing.things.load(recipe.place || []);
+    editing.choose(null);
+    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+  } catch (err) {
+    bar.announce('could not open it: ' + err.message);
+  }
 }
 
 /** The cells laid out again for the map's grid: each where it was, what is new empty. */
@@ -118,6 +142,55 @@ async function chooseTileset(id) {
     if (ask === asked) bar.announce(`could not open the tileset: ${err.message}`);
   }
   draw();
+}
+
+// ── Leaving: the vault, a picture ────────────────────────────────────────────
+
+function buildExport(panel) {
+  const exp = panel.addDrawer({ id: 'export', title: 'Export' });
+  const actions = document.createElement('div');
+  actions.className = 'pp-actions';
+  const button = (label, onClick, primary = false) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
+    b.textContent = label;
+    b.addEventListener('click', onClick);
+    actions.append(b);
+  };
+  button('Save to the vault  [S]', save, true);
+  button('Download the picture (PNG)', () => leave(async () => {
+    const out = await downloadPicture({ map, cells, place: editing.things.blocks(), tick: clock.tick });
+    return `downloaded ${out.width} × ${out.height} px`;
+  }));
+  exp.body.append(actions);
+}
+
+/** One way out: the clock held still, nothing else started, what happened said. */
+async function leave(action) {
+  if (busy) return;
+  busy = true;
+  clock.pause();
+  try {
+    bar.announce(await action());
+  } catch (err) {
+    console.error('[map] failed:', err);
+    bar.announce('failed: ' + err.message);
+  } finally {
+    busy = false;
+    Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+    draw();
+  }
+}
+
+/** The map into the vault, its picture the frame on screen (save.js). */
+function save() {
+  return leave(async () => {
+    bar.say('saving…');
+    const object = await saveMap({ map, cells, place: editing.things.blocks(), tick: clock.tick });
+    if (!object) return 'no vault — downloaded instead';
+    return `saved ${object.id} — ${object.title}` + (object.render.frames ? `, ${object.render.frames} frames at ${object.render.fps} fps` : '');
+  });
 }
 
 // ── The viewer's switches: the tool, the guides ──────────────────────────────
@@ -185,6 +258,7 @@ function wireKeys() {
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 'g' || e.key === 'G') showGuides(!guidesOn);
+    if (e.key === 's' || e.key === 'S') save();
     if (e.key === '1') useTool('tiles');
     if (e.key === '2') useTool('things');
     if ((e.key === 'Delete' || e.key === 'Backspace') && tool === 'things') editing.remove();

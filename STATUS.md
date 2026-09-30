@@ -11,6 +11,16 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ### Newest
 
+- **M8 has begun: the map editor, brick 1 done** (2026-09-30;
+  `apps/map/`, `tests/map-grid.mjs` 14, `tests/map-things.mjs` 8,
+  `check-map` 34). A map is `cols` × `rows` tiles of `tile` px, large, as
+  assets are; a tileset — any set, offered as a *map tileset* through
+  `core/uses.js` — is a palette, painted into cells with no gaps; things
+  from the vault stand on cells, feet at the bottom middle, drawn back to
+  front by row, dragged cell to cell, loops playing by the map's clock
+  (`moves`, `framesOnPage`, `tickAt` moved into `core/playback.js`). A new
+  type, `map` — `{ map, cells, place }` — saves, replays to the pixel,
+  draws again at scale 2, reopens, and compose places it and plays it.
 - **M7's *Done when* is met: a fractal's field steers particles —
   `fractal → particles: a field`** (2026-09-30; `apps/fractals/field.js`,
   `core/fields.js`, `tests/fractal-field.mjs` 13 checks,
@@ -440,17 +450,11 @@ There, too, `check-particles` fails two checks of the machine's: an empty
 
 ## Next single step
 
-**M8, brick 1, its first step: `apps/map/` opens on an empty grid**
-(`docs/roadmap.md`, M8). The folder the `skweeb-app` skill lays out: a
-schema with the map's size in tiles and its tile size in the map's own px —
-assets are made large and baked small, so the editor's tile is large, 64 to
-start, and the bake's is the pixel size — and core's Format drawer; a
-canvas drawing the grid at the size the viewer shows; opening as plain
-files with no vault (rule 7); `CLAUDE.md`'s map with its row. Then, in
-brick 1: a tileset — a set with `role: 'tileset'`, offered through
-`core/uses.js` — painted into cells with the mouse; vault objects placed on
-the grid, drawn back to front by where they stand; and the map saved as a
-`map`, a row in `docs/object-model.md`'s types table first.
+**M8, brick 2, its first step: what can be walked** (`apps/map/STATUS.md`).
+A *walls* tool: a flag a cell, apart from the tile drawn there, as Pokémon's
+maps keep a permission a cell; a thing made *solid* blocks its feet cell;
+shown as a guide, never in the picture; held in a test as the avatar will
+ask it. Then signs on things, and the spawn — brick 2's events.
 
 Left of M7 and M6, waiting (their STATUS files): a Julia set by clicking
 the Mandelbrot set, more families, deeper zoom, point families; colour over

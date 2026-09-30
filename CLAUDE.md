@@ -18,7 +18,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/filter/` | M5: any picture or loop through a chain of GPU filters | `apps/filter/STATUS.md` |
 | `apps/fractals/` | M7: escape time on the GPU kit, a sprite copying itself, idles, and a field for particles | `apps/fractals/STATUS.md` |
 | `apps/particles/` | M6: particles as a function of time — loops that close, frames that stand alone | `apps/particles/STATUS.md` |
-| `apps/map/` | M8, begun: the map editor — a room on a grid of tiles, things placed on it | `apps/map/STATUS.md` |
+| `apps/map/` | M8, begun: the map editor — a room on a grid of tiles, things placed on it, saved as a `map` | `apps/map/STATUS.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault | `docs/object-model.md`, *Trash, and deleting* |
@@ -110,7 +110,7 @@ node scripts/check-particles.mjs        # particles: a loop that closes, sprites
 node scripts/check-particles-links.mjs  # particles from other apps' objects: a dot-set or a shape's ink as the emitter; a fractal's field
 node scripts/check-sheet-engine.mjs     # that sheet loaded and played by Phaser 3, fetched into the page only
 node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag; copies of a star; idles of both families saved and placed
-node scripts/check-map.mjs              # M8's map editor: its grid, tiles painted from a tileset, things placed and moved
+node scripts/check-map.mjs              # M8's map editor: tiles painted, things placed and moved; saved, replayed, reopened, placed in compose
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips
 # its GPU half, unless Chrome is given the flags:

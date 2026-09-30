@@ -286,6 +286,14 @@ the portfolio's iframe, on a phone as on a laptop, with no vault and no
 WebGPU. The link: `any → map: a thing in the room`; tilesets and characters
 are uses.
 
+*So far:* brick 1 of six, 2026-09-30 (`apps/map/STATUS.md`): the map app
+opens on a grid of large tiles; a tileset — any set, offered through
+`core/uses.js` — painted into cells; things from the vault standing on
+cells, back to front by row, their loops playing by the map's clock; a
+`map` saved, replayed to the pixel, drawn again at scale 2, reopened, and
+placed in compose, where it plays. The link, `any → map: a thing in the
+room`, works; the tileset use with it.
+
 **3D, parked.** It was M5. When it returns it starts from the GPU kit:
 ray-marched shapes and 3D fractals are shader work and come first, as a family
 of M7; an app with the `model` and `material` types only when the game needs

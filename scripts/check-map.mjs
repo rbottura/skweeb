@@ -14,9 +14,12 @@
  * where it was. Things: one placed stands on the middle cell; dragged, it
  * moves cell to cell and its panel follows; made wider, it is drawn wider;
  * of two that overlap the nearer — the lower row — is drawn over, either
- * way round; a particles loop placed plays by the map's clock; Del takes the
- * chosen one off. Needs no GPU, and brings what it needs: the vault it runs
- * on may be empty.
+ * way round; a particles loop placed plays by the map's clock. Saved: a
+ * `map`, its cells and its things, with the loop's frames and rate, its
+ * tileset and things its parents; the vault's replay is its render to the
+ * pixel, and at scale 2 is drawn again; `?open=` brings the tiles and the
+ * things back, and Del takes one off; compose places the map, and it plays.
+ * Needs no GPU, and brings what it needs: the vault it runs on may be empty.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -175,10 +178,59 @@ const frameSay = await page.until(`/frame \\d+ of 60/.test(${say})`, { timeout: 
 c.ok('a loop standing on the map plays by its clock', moved > 0 && frameSay, `${moved} values moved · ${await page.eval(say)}`);
 await c.shot('3-things');
 
-await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete' }))`);
-await wait(300);
-c.ok('Del takes the chosen thing off the map', (await page.eval(`document.querySelectorAll('.mp-row').length`)) === 2,
-  String(await page.eval(`document.querySelectorAll('.mp-row').length`)));
+// ── Saved, replayed, reopened, placed ───────────────────────────────────────
+
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))`);      // held still
+await page.until(`/frame \\d+ of 60/.test(${say})`, { timeout: 8000 }).catch(() => {});
+const tick = Number(((await page.eval(say)).match(/frame (\d+) of 60/) || [])[1] || 1) - 1;
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+const mid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const saved = mid ? await (await fetch(c.base + '/api/vault/' + mid)).json() : null;
+c.ok('saved: a map — its cells, its things, the loop\'s frames and rate', !!saved && saved.type === 'map'
+  && saved.recipe.cells.length === 120 && saved.recipe.place.length === 3 && saved.render.frames === 60 && saved.render.fps === 30,
+  saved ? `${saved.type} · ${saved.title} · ${saved.recipe.place.length} things · ${saved.render.frames} frames` : await page.eval(say));
+const index = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
+const tilesetId = (index.find(r => r.title === setName) || {}).id;
+c.ok('its tileset and every thing on it are its parents', !!saved && [tilesetId, things.orange, things.purple, things.torch]
+  .every(id => saved.parents.includes(id)), saved && JSON.stringify(saved.parents));
+if (saved) {
+  const replay = await page.eval(`(async () => {
+    const { Vault } = await import('/core/vault.js');
+    const { openFrames } = await import('/core/rebuild.js');
+    const { object, url } = await Vault.load(${JSON.stringify(mid)});
+    const h = await openFrames(object, { url });
+    const img = await createImageBitmap(await (await fetch(url)).blob());
+    const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
+    const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(h.frame(${tick}), 0, 0);
+    const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
+    let worst = 0; for (let k = 0; k < da.length; k++) worst = Math.max(worst, Math.abs(da[k] - db[k]));
+    const big = await openFrames(object, { url, scale: 2 });
+    const out = { length: h.length, worst, missing: h.missing, big: [big.scale, big.frame(0).width, h.width] };
+    h.dispose(); big.dispose(); return out; })()`);
+  c.ok('the vault replays it: the frame on screen is its render, pixel for pixel', replay.length === 60 && replay.worst === 0
+    && !replay.missing.length, JSON.stringify(replay).slice(0, 120));
+  c.ok('at scale 2, drawn again at twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.big[2], JSON.stringify(replay.big));
+
+  await c.go(c.base + '/apps/map/?open=' + mid);
+  await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+  await page.until(`document.querySelectorAll('.mp-row').length === 3 && document.querySelectorAll('.mp-tile').length === 4`, { timeout: 20000 }).catch(() => {});
+  c.ok('?open= brings the tiles and the things back', colour(await pixel(cellMid(3), cellMid(3), 768), BLUE)
+    && colour(await pixel(cellMid(0), cellMid(5), 768), RED) && (await page.eval(`document.querySelectorAll('.mp-row').length`)) === 3,
+    await page.eval(say));
+  await page.click(`document.getElementById('tool-things')`);
+  await page.click(`document.querySelector('.mp-row')`);
+  await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete' }))`);
+  await wait(300);
+  c.ok('Del takes the chosen thing off the map', (await page.eval(`document.querySelectorAll('.mp-row').length`)) === 2,
+    String(await page.eval(`document.querySelectorAll('.mp-row').length`)));
+
+  await c.go(c.base + '/apps/compose/?place=' + mid);
+  await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
+  c.ok('compose places the map, and it plays: a 30 fps loop of 60', (await page.eval(say)).includes('a 30 fps loop of 60'),
+    await page.eval(say));
+}
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

@@ -117,8 +117,8 @@ ok('a block with no look has no look key', 'look' in Params.toPlacement({ ...pla
 ok('a look is a parent of its page, once',
   Params.parentsOf({ place: [looked, { ...looked, ref: 'gam_2_def' }] }), ['gam_1_abc', 'fil_1_look', 'gam_2_def']);
 place.reset();
-ok('a placement takes what core gives frames of, pages too', place.spec('ref').accepts,
-   ['still', 'sequence', 'shape', 'composition']);
+ok('a placement takes what core gives frames of, pages and maps too', place.spec('ref').accepts,
+   ['still', 'sequence', 'shape', 'composition', 'map']);
 
 // -- a composition's lineage -------------------------------------------------
 

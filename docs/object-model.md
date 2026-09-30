@@ -141,10 +141,12 @@ turn — the same reason tags change in place.
 | `font` | otf/ttf in `source/` | no | imported | ckt, grid |
 | `params` | the recipe *is* the object; its render a picture of what it does — a look, the chain on the frame it was made on | yes | all | its own app; a filter look, compose on a placement |
 | `composition` | png/pdf, rendered at export scale | yes | the page app, M4 | all |
+| `map` | png, the map at its own pixels; with frames and a rate when loops stand on it | yes: `{ map, cells, place }` — the panel's values, a tile index a cell, the things standing on it | the map editor, M8 | compose; the player, M8 |
 | `model` `material` | **deferred**, 3D, when a 3D process exists | | | |
 
-Adding a type means a row here, a thumbnailer in `core/thumb.js`, and a line in
-the gallery type filter. Nothing else in the suite knows about types.
+Adding a type means a row here, a thumbnail made by the app that saves it
+(`core/thumb.js`), and — where its render is not a picture — what shows it in
+the vault. Nothing else in the suite knows about types.
 
 ## Two kinds of edge
 
