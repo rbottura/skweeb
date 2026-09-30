@@ -85,12 +85,11 @@ export class VaultPanel {
       for (const box of this._kins) fit(box, cols);
     }).observe(this._body);
 
-    // A save while the panel is open should appear without being asked for.
+    // A save while the panel is open should appear without being asked for; a
+    // retag can move an object into a folder, or out of what a picker offers;
+    // and `changed` is either made elsewhere — another tab, another machine.
     const live = () => { if (this._open && !this._busy) this.refresh(); };
-    document.addEventListener('vault:saved', live);
-    document.addEventListener('vault:duplicate', live);
-    // A retag can move an object into a folder, or out of what a picker offers.
-    document.addEventListener('vault:retagged', live);
+    for (const e of ['saved', 'duplicate', 'retagged', 'changed']) document.addEventListener('vault:' + e, live);
 
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape' || !this._open) return;

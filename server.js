@@ -14,6 +14,7 @@
  *   PATCH /api/vault/<id>     <- { add: [tag], remove: [tag] }
  *                             -> { status: 'updated', object }
  *   POST /api/vault/delete    <- { ids, dependents? }   — server/delete.js
+ *   GET  /api/vault/events    -> a stream: `changed` each time the index is rewritten — server/events.js
  *
  * Files are served by server/static.js; this file owns the vault.
  *
@@ -31,6 +32,7 @@ const path   = require('path');
 const crypto = require('crypto');
 const staticHost  = require('./server/static.js');
 const deleteRoute = require('./server/delete.js');
+const vaultEvents = require('./server/events.js')();
 
 const argv  = process.argv.slice(2);
 const argOf = (name, fallback) => {
@@ -144,6 +146,7 @@ function rebuildIndex() {
   fs.mkdirSync(VAULT_DIR, { recursive: true });
   fs.writeFileSync(INDEX_FILE,
     JSON.stringify({ generated: new Date().toISOString(), count: objects.length, objects }, null, 1));
+  vaultEvents.notify(objects.length);
   return objects;
 }
 
@@ -303,6 +306,10 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'GET')  return apiList(res);
       if (req.method === 'POST') return await apiCreate(req, res);
       return sendJson(res, 405, { error: 'GET or POST' });
+    }
+    if (urlPath === '/api/vault/events') {
+      if (req.method === 'GET') return vaultEvents.handle(req, res);
+      return sendJson(res, 405, { error: 'GET' });
     }
     if (urlPath === '/api/vault/delete') {
       if (req.method === 'POST') return await apiDelete(req, res);

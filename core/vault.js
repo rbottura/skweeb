@@ -18,6 +18,8 @@
  *   'vault:offline'  { filename }   — saved to disk by download instead
  *   'vault:retagged' { id, tags }   — an object's tags changed
  *   'vault:removed'  { id }         — an object left the vault for good
+ *   'vault:changed'  { count, at }  — the index was rewritten, by anyone, on
+ *                                     any machine on this vault; read it again
  *
  * The trash is a tag (docs/object-model.md, *Trash*): what carries it is
  * still on disk and still loads — a composition placing it still draws it —
@@ -32,6 +34,22 @@ export const isTrashed = row => !!row && (row.tags || []).includes(TRASH);
 
 let _available = false;
 let _index = [];
+let _events = null;
+
+/**
+ * Hear about changes made anywhere — another tab, another machine on the same
+ * vault. Opened once, when a server first answers; EventSource reconnects on
+ * its own. Only a nudge: whoever cares reads the index again.
+ */
+function listen() {
+  if (_events || typeof EventSource === 'undefined') return;
+  _events = new EventSource(API + '/events');
+  _events.addEventListener('changed', e => {
+    let detail = {};
+    try { detail = JSON.parse(e.data); } catch {}
+    document.dispatchEvent(new CustomEvent('vault:changed', { detail }));
+  });
+}
 
 export const Vault = {
   /** True when a server with the write API answered the last refresh(). */
@@ -48,6 +66,7 @@ export const Vault = {
       const body = await res.json();
       _index = body.objects || [];
       _available = true;
+      listen();
     } catch {
       _index = [];
       _available = false;
