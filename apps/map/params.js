@@ -7,13 +7,18 @@
  * `tile` px, in the map's own pixels, large, since assets are made large and
  * baked small. So core's Format drawer is not here; what the map is drawn
  * at for the web is the bake's, a later brick.
+ *
+ * The cells are not here either: a list, one tile index a cell, row after
+ * row, kept beside these values as compose keeps its placements beside its
+ * page — the map's recipe is `{ map, cells }`.
  */
 
 import { defineParams } from '../../core/params.js';
 
 /** The drawers. */
 export const MAP_GROUPS = {
-  map: { label: 'Map', open: true },
+  map:   { label: 'Map', open: true },
+  tiles: { label: 'Tiles', open: true },
 };
 
 export function mapParams() {
@@ -24,5 +29,10 @@ export function mapParams() {
     tile:   { type: 'int', min: 8, max: 512, default: 64, label: 'tile px', group: 'map' },
     /** What an empty cell shows: a colour, or nothing at all. */
     ground: { type: 'ground', default: '#fffdf6', label: 'ground', group: 'map' },
+    /**
+     * A set whose members are the tiles, in its order — offered through
+     * core/uses.js as a map tileset. The cells name them by their place.
+     */
+    tileset: { type: 'object', accepts: ['set'], use: 'tileset', label: 'tileset', group: 'tiles' },
   });
 }

@@ -7,8 +7,12 @@
  * Served as plain files with no vault, it opens and draws its grid
  * (rule 7). On the server: the bar says the map's size in tiles; the grid is
  * drawn over the ground, each cell's middle the ground's colour; a map made
- * wider is drawn wider; the grid's switch takes it away. Needs no GPU, and
- * brings what it needs: the vault it runs on may be empty.
+ * wider is drawn wider; the grid's switch takes it away. Tiles: three
+ * pictures dropped in are a set, picked as the tileset — its members the
+ * palette; a press paints a cell, a drag a row with no gaps, another tile
+ * another colour, the eraser empties one, and a map made wider keeps each
+ * where it was. Needs no GPU, and brings what it needs: the vault it runs
+ * on may be empty.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -47,6 +51,52 @@ await page.click(`document.getElementById('grid')`);
 await wait(300);
 c.ok('the grid\'s switch takes it away', ground(await pixel(128, 96, 1280)), JSON.stringify(await pixel(128, 96, 1280)));
 await c.shot('1-grid');
+
+// ── Tiles from a tileset ────────────────────────────────────────────────────
+
+await set('columns', 12);
+const onScreen = (x, y, mapWidth) => page.eval(`(() => { const r = document.getElementById('stage').getBoundingClientRect();
+  return [Math.round(r.left + ${x} * r.width / ${mapWidth}), Math.round(r.top + ${y} * r.width / ${mapWidth})]; })()`);
+const cellMid = n => n * 64 + 32;
+const colour = (p, [r, g, b]) => Math.abs(p[0] - r) + Math.abs(p[1] - g) + Math.abs(p[2] - b) < 12;
+const RED = [216, 52, 42], BLUE = [42, 98, 216];
+
+await page.click(`[...${row('tileset')}.querySelectorAll('button')].find(b => b.textContent === 'Choose…')`);
+await page.until(`!!document.querySelector('.vp--visible')`, { timeout: 20000 });
+await page.eval(`(async () => { const dt = new DataTransfer();
+  for (const [name, fill] of [['tile 1 red', '#d8342a'], ['tile 2 green', '#2a9d4b'], ['tile 3 blue', '#2a62d8']]) {
+    const c = new OffscreenCanvas(64, 64), g = c.getContext('2d'); g.fillStyle = fill; g.fillRect(0, 0, 64, 64);
+    dt.items.add(new File([await c.convertToBlob({ type: 'image/png' })], name + '.png', { type: 'image/png' })); }
+  document.querySelector('.vp--visible').dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true })); })()`);
+const setName = 'tile 1 red … tile 3 blue (3)';
+const setCell = `[...document.querySelectorAll('.vp--visible .vp-cell')].find(k => k.querySelector('.vp-name')?.textContent === ${JSON.stringify(setName)})`;
+await page.until(`!!document.querySelector('.vp--visible .vp-offer .vp-btn') || !!${setCell}`, { timeout: 30000 }).catch(() => {});
+if (!(await page.eval(`!!${setCell}`))) await page.eval(`document.querySelector('.vp--visible .vp-offer .vp-btn')?.click()`);
+await page.until(`!!${setCell}`, { timeout: 20000 }).catch(() => {});
+await page.click(`${setCell}?.querySelector('.vp-use')`);
+await page.until(`document.querySelectorAll('.mp-tile').length === 4`, { timeout: 20000 }).catch(() => {});
+c.ok('three pictures dropped in, picked as the tileset: three tiles and the eraser',
+  (await page.eval(`document.querySelectorAll('.mp-tile').length`)) === 4, await page.eval(say));
+
+await page.pointer(await onScreen(cellMid(2), cellMid(2), 768));
+c.ok('a press paints the cell under it', colour(await pixel(cellMid(2), cellMid(2), 768), RED), JSON.stringify(await pixel(cellMid(2), cellMid(2), 768)));
+await page.pointer(await onScreen(cellMid(0), cellMid(5), 768), await onScreen(cellMid(6), cellMid(5), 768), 2);
+const along = [];
+for (let col = 0; col <= 6; col++) along.push(colour(await pixel(cellMid(col), cellMid(5), 768), RED));
+c.ok('a fast drag paints every cell it crosses, no gaps', along.every(Boolean), JSON.stringify(along));
+await page.click(`document.querySelector('.mp-tile[data-tile="2"]')`);
+await page.pointer(await onScreen(cellMid(3), cellMid(3), 768));
+c.ok('another tile, another cell', colour(await pixel(cellMid(3), cellMid(3), 768), BLUE), JSON.stringify(await pixel(cellMid(3), cellMid(3), 768)));
+await page.click(`document.querySelector('.mp-tile--erase')`);
+await page.pointer(await onScreen(cellMid(2), cellMid(2), 768));
+c.ok('the eraser empties a cell', ground(await pixel(cellMid(2), cellMid(2), 768)), JSON.stringify(await pixel(cellMid(2), cellMid(2), 768)));
+const counted = await page.until(`${say}.includes(${JSON.stringify(`8 painted from ${setName}`)})`, { timeout: 8000 }).then(() => true, () => false);
+c.ok('the bar counts what is painted, and from what', counted, await page.eval(say));
+await set('columns', 14);
+c.ok('made wider, each cell stays where it was', colour(await pixel(cellMid(3), cellMid(3), 896), BLUE)
+  && colour(await pixel(cellMid(6), cellMid(5), 896), RED) && ground(await pixel(cellMid(13), cellMid(5), 896)),
+  JSON.stringify(await pixel(cellMid(3), cellMid(3), 896)));
+await c.shot('2-tiles');
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

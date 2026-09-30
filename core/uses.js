@@ -37,6 +37,8 @@ export const USES = [
   { id: 'particles', app: 'particles', label: 'particle sprites',  role: 'brush-family' },
   /** A sprite copying itself in fractals. A brush family is sprites already. */
   { id: 'copies',   app: 'fractals',  label: 'fractal copies',     role: 'brush-family' },
+  /** M8's map editor: a set's members as the tiles a map's cells are painted with. */
+  { id: 'tileset',  app: 'map',       label: 'map tileset',        role: 'tileset' },
 ];
 
 const isUseTag = t => typeof t === 'string' && t.startsWith(USE_PREFIX);

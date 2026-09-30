@@ -4,10 +4,10 @@
  * Covers apps/map/grid.js: a map's grid. The promises — its size is its
  * tiles; a point is in the cell whose box holds it, and past the edge in
  * none; a cell's place in the list is row after row; a map that changes size
- * keeps each cell where it was.
+ * keeps each cell where it was; a drag's line of cells has no gaps.
  */
 
-const { mapSize, cellAt, indexOf, resize } = await import('../apps/map/grid.js');
+const { mapSize, cellAt, indexOf, resize, cellsBetween } = await import('../apps/map/grid.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -30,6 +30,15 @@ ok('grown, each cell where it was, the new ones empty', resize(cells, { cols: 3,
    [0, 1, 2, -1, 3, 4, 5, -1, -1, -1, -1, -1]);
 ok('shrunk, what falls off the edge is gone', resize(cells, { cols: 3, rows: 2 }, { cols: 2, rows: 1 }), [0, 1]);
 ok('what is not a tile index is empty', resize([0, 'x', null, 2.5], { cols: 2, rows: 2 }, { cols: 2, rows: 2 }), [0, -1, -1, -1]);
+
+const line = (a, b) => cellsBetween(a, b).map(c => [c.col, c.row]);
+ok('a line of one cell is that cell', line({ col: 2, row: 2 }, { col: 2, row: 2 }), [[2, 2]]);
+ok('along a row, every cell', line({ col: 0, row: 1 }, { col: 3, row: 1 }), [[0, 1], [1, 1], [2, 1], [3, 1]]);
+ok('a diagonal, one step each way', line({ col: 0, row: 0 }, { col: 2, row: 2 }), [[0, 0], [1, 1], [2, 2]]);
+ok('backwards, ending where it was told', line({ col: 3, row: 1 }, { col: 0, row: 1 }).at(-1), [0, 1]);
+const steep = line({ col: 0, row: 0 }, { col: 2, row: 7 });
+ok('a steep one has no gaps: each cell next to the last', steep.slice(1).every(([c, r], i) =>
+  Math.abs(c - steep[i][0]) <= 1 && Math.abs(r - steep[i][1]) <= 1) && steep.length === 8, true);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

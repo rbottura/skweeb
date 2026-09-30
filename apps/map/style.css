@@ -16,3 +16,28 @@
 
 /* Tiles are drawn square and sharp as they are. */
 .viewer-stage canvas { image-rendering: auto; }
+
+/* The tiles to paint with, and the eraser (palette.js). */
+.mp-palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 44px);
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+
+.mp-tile {
+  width: 44px;
+  height: 44px;
+  padding: 1px;
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 10px 10px;
+  cursor: pointer;
+}
+
+.mp-tile canvas { display: block; width: 100%; height: 100%; }
+.mp-tile--on { outline: 3px solid var(--nb-accent); outline-offset: 1px; box-shadow: 2px 2px 0 var(--nb-ink); }
+.mp-tile--erase { background: var(--nb-paper); color: var(--nb-ink); font: 700 16px var(--nb-mono); }
+.mp-note { margin: 4px 0 0; font: 400 11px var(--nb-mono); color: var(--nb-muted); }
+
+/* A press on the map paints (pointer.js). */
+.viewer-stage canvas { cursor: crosshair; touch-action: none; }

@@ -48,3 +48,26 @@ export function resize(cells, from, to) {
   }
   return out;
 }
+
+/**
+ * The cells on a straight line from one to another, both ends in — so a
+ * fast drag paints no gaps between the moves it was told about.
+ *
+ * @param {{col, row}} a
+ * @param {{col, row}} b
+ * @returns {Array<{col: number, row: number}>}
+ */
+export function cellsBetween(a, b) {
+  const out = [];
+  let col = a.col, row = a.row;
+  const dx = Math.abs(b.col - col), dy = -Math.abs(b.row - row);
+  const sx = col < b.col ? 1 : -1, sy = row < b.row ? 1 : -1;
+  let err = dx + dy;
+  for (;;) {
+    out.push({ col, row });
+    if (col === b.col && row === b.row) return out;
+    const e2 = 2 * err;
+    if (e2 >= dy) { err += dy; col += sx; }
+    if (e2 <= dx) { err += dx; row += sy; }
+  }
+}
