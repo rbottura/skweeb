@@ -66,6 +66,14 @@
  * not crowded at its centre — or a `ring` on its edge. On a disc or a ring
  * the launch can `aim` `outward`: the cone turned to point away from the
  * centre, for a burst that blooms. The spot is two more draws of the slot.
+ *
+ * Or it is an `object` from the vault (2026-09-30, the author's idea): a
+ * dot-set's dots, or where a picture has ink (core/points.js), `extent` px
+ * along its longer side. The recipe names the object; its points come to
+ * `prepare()` beside it, never in it. The first spot draw picks a point, the
+ * second jitters round it within a picture's sample — dots are exact — and
+ * `outward` points away from the object's centre: a word that bursts. Until
+ * the points are in, it is a point.
  */
 
 import { makeRng, seedFrom } from '../../core/rng.js';
@@ -99,10 +107,10 @@ export const DEFAULTS = {
   spin: 0,              // degrees a second, clockwise
   spinSpread: 0,        // 0..1, either way
   align: false,         // facing where it goes, instead of turning
-  shape: 'point',       // 'point' | 'line' | 'disc' | 'ring'
-  extent: 100,          // px: a line's length, a disc's or a ring's radius
+  shape: 'point',       // 'point' | 'line' | 'disc' | 'ring' | 'object'
+  extent: 100,          // px: a line's length, a disc's or a ring's radius, an object's longer side
   lineAngle: 0,         // degrees clockwise from level
-  aim: 'fixed',         // 'fixed' | 'outward', on a disc or a ring
+  aim: 'fixed',         // 'fixed' | 'outward', on a disc, a ring or an object
   fx: 0, fy: 0,         // the fields' centre, from the picture's centre
   vortex: 0,            // px/s², round the centre, clockwise
   attract: 0,           // px/s², towards the centre
@@ -116,13 +124,18 @@ export const DEFAULTS = {
 /**
  * The recipe with its defaults, and the numbers the model needs derived once.
  * Every function here takes either; a frame drawn many times prepares once.
+ *
+ * @param {object} [recipe]              see DEFAULTS
+ * @param {object} [given]
+ * @param {?{list, cell}} [given.points] an `object` emitter's points (core/points.js)
  */
-export function prepare(recipe = {}) {
+export function prepare(recipe = {}, { points = null } = {}) {
   const r = { ...DEFAULTS, ...recipe };
   const burst = r.mode === 'burst';
   const n = burst ? Math.max(0, Math.round(r.count)) : Math.max(1, Math.round(r.rate * r.period));
   const m = { ...r, prepared: true, burst, n, spacing: burst ? 0 : r.period / n,
               longest: r.life * (1 + Math.max(0, r.lifeSpread)), seed: seedFrom(r.seed) };
+  m.points = r.shape === 'object' && points && points.list && points.list.length ? points : null;
   m.field = fieldOf(m);
   return m;
 }
@@ -142,6 +155,15 @@ export function spotOf(m, a, b) {
     const phi = b * Math.PI * 2;
     const dx = Math.cos(phi) * r, dy = Math.sin(phi) * r;
     return { dx, dy, out: m.aim === 'outward' ? Math.atan2(Math.cos(phi), -Math.sin(phi)) : null };
+  }
+  if (m.points) {
+    // A point by the first draw; the second, and its low bits for the other
+    // axis, jitter within a picture's sample — nothing new is drawn.
+    const { list, cell } = m.points;
+    const [px, py] = list[Math.min(list.length - 1, Math.floor(a * list.length))];
+    const jx = cell ? (b - 0.5) * cell : 0, jy = cell ? (((b * 4096) % 1) - 0.5) * cell : 0;
+    const dx = (px + jx) * m.extent, dy = (py + jy) * m.extent;
+    return { dx, dy, out: m.aim === 'outward' ? Math.atan2(dx, -dy) : null };
   }
   return { dx: 0, dy: 0, out: null };
 }

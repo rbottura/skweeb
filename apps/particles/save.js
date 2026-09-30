@@ -24,10 +24,11 @@ import { buildSheet }    from '../../core/spritesheet.js';
 
 export const APP = { app: 'particles', version: '1.0.0' };
 
-/** What it is, in words: its mode and rate, and what it is drawn with. */
-function titleOf(emit, spritesTitle) {
+/** What it is, in words: its mode and rate, what it leaves from, and what it is drawn with. */
+function titleOf(emit, spritesTitle, points) {
   const what = emit.mode === 'burst' ? `a burst of ${emit.count}` : `${emit.rate} a second`;
-  return `particles · ${what} · ${spritesTitle || 'dots'}`;
+  const from = emit.shape === 'object' && points ? ` · from ${points.title}` : '';
+  return `particles · ${what}${from} · ${spritesTitle || 'dots'}`;
 }
 
 /**
@@ -38,20 +39,21 @@ function titleOf(emit, spritesTitle) {
  * @param {object} args.picture       the picture's Params
  * @param {?Array} args.sprites       the set's images, or null for dots
  * @param {?string} args.spritesTitle the set's title, for the object's
+ * @param {?object} [args.points]     an object emitter's points and title (core/points.js)
  * @param {number} args.tick          the frame on screen
  * @param {boolean} [args.still]      one frame, not the loop
  * @returns {Promise<?object>}        the envelope, or null when there is no vault
  */
-export async function saveParticles({ emit, picture, sprites, spritesTitle, tick, still = false }) {
+export async function saveParticles({ emit, picture, sprites, spritesTitle, points = null, tick, still = false }) {
   const recipe = { emit: emit.values, picture: picture.values, ...(still ? { tick } : {}) };
-  const frames = openParticles(recipe, sprites);
+  const frames = openParticles(recipe, sprites, { points });
   const shown = frames.frame(tick);
   const blob = await toPng(shown);
   const loop = frames.length > 1;
 
   return Vault.save({
     type: loop ? 'sequence' : 'still',
-    title: titleOf(recipe.emit, spritesTitle) + (loop ? ` ×${frames.length}` : ` · frame ${tick + 1}`),
+    title: titleOf(recipe.emit, spritesTitle, points) + (loop ? ` ×${frames.length}` : ` · frame ${tick + 1}`),
     tags: ['particles', ...(loop ? ['loop'] : []), ...(recipe.emit.mode === 'burst' ? ['burst'] : [])],
     origin: APP,
     seed: recipe.emit.seed,
@@ -72,9 +74,9 @@ export async function saveParticles({ emit, picture, sprites, spritesTitle, tick
  *
  * @returns {Promise<{frames: number, fps: number, width: number, height: number}>}
  */
-export async function downloadFrames({ emit, picture, sprites, onStatus = () => {} }) {
+export async function downloadFrames({ emit, picture, sprites, points = null, onStatus = () => {} }) {
   const recipe = { emit: emit.values, picture: picture.values };
-  const frames = openParticles(recipe, sprites);
+  const frames = openParticles(recipe, sprites, { points });
   const entries = [];
   await runFrames({
     count: frames.length,
@@ -106,9 +108,9 @@ export async function downloadFrames({ emit, picture, sprites, onStatus = () => 
  *
  * @returns {Promise<{name, frames, width, height, box}>}
  */
-export async function downloadSheet({ emit, picture, sprites, onStatus = () => {} }) {
+export async function downloadSheet({ emit, picture, sprites, points = null, onStatus = () => {} }) {
   const recipe = { emit: emit.values, picture: { ...picture.values, ground: 'none' } };
-  const frames = openParticles(recipe, sprites);
+  const frames = openParticles(recipe, sprites, { points });
   const name = `particles_${recipe.emit.mode}_${frames.length}f`;
   const { canvas, json, box, layout } = await buildSheet({
     count: frames.length, frame: i => frames.frame(i), fps: frames.fps, name, loop: frames.loop,

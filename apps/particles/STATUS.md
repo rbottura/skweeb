@@ -26,6 +26,25 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **An emitter taken from a vault object — `ckt → particles: an emitter`**
+  (2026-09-30, the author's idea; `core/points.js`, `tests/points.mjs` 16
+  checks, `tests/particles-model.mjs` now 86,
+  `node scripts/check-particles-links.mjs` 16). The emitter's fifth chip,
+  *object*: a ckt dot-set — one cut from text is a single glyph laid out
+  as the word, so a word needs nothing more; *glyph* picks one of a legacy
+  font set — or a shape or a still, its ink sampled on a grid of at most
+  128 a side. Every particle is born on one of its points, *size px* along
+  its longer side, and *outward* launches away from its centre: a word
+  that bursts. The slot's first spot draw picks the point, the second
+  jitters it within a picture's sample — dots are exact — so nothing new is
+  drawn and every saved recipe redraws as it did; a loop still closes. The
+  recipe keeps only the object's id; its points are loaded beside it, by
+  the app and by `rebuild.js` alike, and the object is the save's parent.
+  The guides draw its points. Checked in Chrome: born on the dots and
+  nowhere between, a glyph its own emitter, a dropped star's ink, the
+  vault's replay its render to the pixel, `?open=`. ckt's `datasets.js`
+  stayed in ckt: particles reads a vault dot-set in core/points.js's few
+  lines and never the nine shipped with ckt.
 - **A particle is a function of its slot and its age** (`model.js`,
   `tests/particles-model.mjs`, now 77 checks). A stream emits `rate` a second as
   `rate × period` slots a loop; slot `k` draws everything from the seed and
@@ -190,22 +209,24 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   dots and a tint for sprites, is not in yet.
 - A sprite's size is its width; its height follows its own shape, so a
   tall sprite in a set of round ones stands taller.
+- An object emitter's points are its ink, evenly — a still with no
+  see-through pixels is its whole rectangle; darker-is-more is not in. The
+  *glyph* row counts to 999 whatever the dot-set holds; the index wraps.
+- On the laptop, `check-particles` fails two checks that are the machine's,
+  not the code's: its copy of `./vault` is empty there — no set to draw
+  with — and a frame through the fields takes 17–22 ms on its i7-8565U,
+  before this brick and after, against a 16.7 ms budget set on the tower.
+- `scripts/check-particles.mjs` is 506 lines, past the cap; new checks of
+  the app go in `check-particles-links.mjs` until it is split.
 
 ## Next single step
 
-M6's seven bricks are in and its *Done when* met. What is left of it, none
-started, in the order the suite takes it (`STATUS.md`, *Next single step*):
+M6's seven bricks are in, its *Done when* met, and the emitter from a vault
+object with them. What is left, in the order the suite takes it
+(`STATUS.md`, *Next single step*):
 
-- **An emitter taken from a vault object** — a ckt dot-set's dots (the
-  author's idea, 2026-09-30, `docs/inbox.md`), or a shape's alpha sampled
-  where it is opaque. `spotOf` already takes two draws a slot: a dot picked
-  by the first keeps every saved recipe as it was, and each slot keeps its
-  dot, so a loop still closes. ckt's `datasets.js` moves to core, as
-  `stamps.js` and `sprites.js` did; the object is a parent of the save, and
-  `rebuild.js` loads it before the model. The author's to answer: one glyph
-  at a time, as ckt shows them, or a whole set laid out as a word. The link:
-  `ckt → particles: an emitter`. Eleven dot-sets in the vault to try it on.
 - **A field from another object** — M7's link, `fractal → particles: a
-  field`, taking its object in as the emitter does.
+  field` (`apps/fractals/STATUS.md`): a fractals object picked in the
+  Fields drawer, loaded beside the recipe as the emitter's points are.
 - **Colour over life** — for dots, and a tint for sprites: a `color[]`
   ramp run along a curve.

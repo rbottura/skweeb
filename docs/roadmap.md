@@ -69,7 +69,10 @@ picker takes any object, and the vault detail offers *Place in compose ↗*.
 M5 `filter → compose: a look` — **done, 2026-09-26**: a chain saved in filter
 as a look goes over any placement, and the page keeps it in its block.
 M6 `set → particles: sprites` — **done, 2026-09-27**: a set picked in the
-particles' Look is its sprites, offered through `core/uses.js`.
+particles' Look is its sprites, offered through `core/uses.js`. And one
+between milestones, the author's idea: `ckt → particles: an emitter` —
+**done, 2026-09-30**: a dot-set, or a shape's ink, is where particles leave
+from.
 
 The next three were chosen by the author on 2026-09-26, with 3D parked: the
 suite is to make the assets of a small game — 2D first, fake 3D where it helps,

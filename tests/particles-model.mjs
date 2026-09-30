@@ -141,6 +141,28 @@ const bloom = particlesAt({ seed: 4, mode: 'burst', count: 60, shape: 'ring', ai
 ok('aimed outward, every one leaves away from the centre', bloom.every(p => Math.abs(Math.hypot(p.x, p.y) - 90) < 1e-6), true);
 ok('a point is where it was', born({ shape: 'point' }).every(p => p.x === 10 && p.y === -20), true);
 
+// ── …or an object from the vault: its points, given beside the recipe ───────
+
+const bornFrom = (points, more = {}) => particlesAt(prepare({ seed: 4, mode: 'burst', count: 300, speed: 0, speedSpread: 0,
+  gravity: 0, drag: 0, life: 1, lifeSpread: 0, x: 10, y: -20, extent: 200, shape: 'object', ...more }, { points }), 0);
+const dots = { list: [[-0.5, -0.1], [0.5, 0.1], [0, 0]], cell: 0 };
+const onDots = bornFrom(dots);
+ok('an object: every one born on a point, at its size', onDots.every(p => dots.list.some(([u, v]) =>
+  Math.abs(p.x - (10 + u * 200)) < 1e-9 && Math.abs(p.y - (-20 + v * 200)) < 1e-9)), true);
+ok('and every point used', new Set(onDots.map(p => `${p.x},${p.y}`)).size, 3);
+ok('its points not in yet: the emitter\'s centre', bornFrom(null).every(p => p.x === 10 && p.y === -20), true);
+const inCell = bornFrom({ list: [[0, 0]], cell: 0.1 });
+ok('a picture\'s sample: each within its cell', inCell.every(p => Math.abs(p.x - 10) <= 10 + 1e-9 && Math.abs(p.y + 20) <= 10 + 1e-9), true);
+ok('spread across it, both ways', [new Set(inCell.map(p => p.x.toFixed(2))).size > 100, new Set(inCell.map(p => p.y.toFixed(2))).size > 100], [true, true]);
+ok('points given to another emitter are not used', bornFrom(dots, { shape: 'point' }).every(p => p.x === 10 && p.y === -20), true);
+const burstOut = particlesAt(prepare({ seed: 4, mode: 'burst', count: 60, shape: 'object', aim: 'outward', extent: 200, spread: 0,
+  speed: 100, speedSpread: 0, gravity: 0, drag: 0, life: 1, lifeSpread: 0 }, { points: { list: [[0.5, 0], [-0.5, 0], [0, 0.5]], cell: 0 } }), 0.5);
+ok('aimed outward: away from the object\'s centre', burstOut.every(p => Math.abs(Math.hypot(p.x, p.y) - 150) < 1e-6), true);
+const fromWord = prepare({ ...torch, shape: 'object', extent: 300 }, { points: dots });
+ok('a stream from an object closes its loop', round(particlesAt(fromWord, 2.3)), round(particlesAt(fromWord, 0.3)));
+ok('and draws nothing else differently: the same lives', particlesAt(fromWord, 0.8).map(p => +p.life.toFixed(9)),
+   particlesAt(torch, 0.8).map(p => +p.life.toFixed(9)));
+
 // ── Fields: integrated from birth ───────────────────────────────────────────
 
 const none = () => [0, 0];

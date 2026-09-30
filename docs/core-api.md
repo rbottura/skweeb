@@ -28,6 +28,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `noise.js` | seeded noise in JS on the GPU kit's hash — `pcg` and `randAt` bit for bit WGSL's — gradient noise with its exact slope, and its curl (`tests/noise.mjs`) | **in**, 2026-09-27, for particles' fields |
 | `vault-import.js` | pictures from outside into the vault: *+ pictures* in the panel's head, or a drop on it — each a `shape` (see-through) or a `still`, several a `set` too | **in**, 2026-09-27, the author's ask |
 | `sprites.js` | a vault set, shape or still as images to draw with (`loadSprites`) | **in**, 2026-09-28, moved from particles when fractals needed it |
+| `points.js` | an object as points to leave from: a dot-set's glyph, a picture's ink, centred, its longer side 1 (`loadPoints`) | **in**, 2026-09-30, for particles' object emitter |
 | `view.js` | how large a preview draws: `viewFactor()`, the size the viewer shows, never more than an export makes | **in**, 2026-09-27, moved from compose when particles needed it |
 | `theme.css` | the suite's look: tokens, the page shell, controls | **in**, 2026-09-23 |
 | `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |

@@ -58,14 +58,25 @@ export function emitParams() {
     y:       { type: 'int', min: -4000, max: 4000, default: 260, label: 'y from centre', group: 'emission' },
     seed:    { type: 'int', min: 0, max: 999999, default: D.seed, label: 'seed', group: 'emission' },
     /** Where on the emitter a particle leaves from (model.js, *Where it leaves from*). */
-    shape:     { type: 'enum', options: ['point', 'line', 'disc', 'ring'], default: D.shape, display: 'chips',
+    shape:     { type: 'enum', options: ['point', 'line', 'disc', 'ring', 'object'], default: D.shape, display: 'chips',
                  label: 'emitter', group: 'emission' },
-    extent:    { type: 'range', min: 1, max: 2000, step: 1, default: D.extent, label: 'length / radius px',
+    /**
+     * An object's dots, or where it has ink (core/points.js): a ckt dot-set —
+     * one cut from text is the word, one glyph — a shape, a still. Its points
+     * are loaded beside the recipe, which keeps only the id: the link
+     * `ckt → particles: an emitter`.
+     */
+    from:      { type: 'object', accepts: ['dataset', 'shape', 'still'], label: 'emitter object',
+                 group: 'emission', when: { shape: 'object' } },
+    glyph:     { type: 'int', min: 0, max: 999, default: 0, label: 'glyph, of a dot-set', group: 'emission',
+                 when: { shape: 'object' } },
+    extent:    { type: 'range', min: 1, max: 2000, step: 1, default: D.extent, label: 'length · radius · size px',
                  group: 'emission', when: { shape: { not: 'point' } } },
     lineAngle: { type: 'range', min: -180, max: 180, step: 1, default: D.lineAngle, label: 'line angle °',
                  group: 'emission', when: { shape: 'line' } },
     aim:       { type: 'enum', options: ['fixed', 'outward'], default: D.aim, display: 'chips', label: 'launch',
-                 labels: { fixed: 'as the angle', outward: 'outward' }, group: 'emission', when: { shape: ['disc', 'ring'] } },
+                 labels: { fixed: 'as the angle', outward: 'outward' }, group: 'emission',
+                 when: { shape: ['disc', 'ring', 'object'] } },
 
     speed:       { type: 'range', min: 0, max: 3000, step: 1, default: 140, label: 'speed px/s', group: 'launch' },
     speedSpread: { type: 'range', min: 0, max: 1, step: 0.01, default: D.speedSpread, label: 'speed spread', group: 'launch' },

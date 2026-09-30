@@ -9,9 +9,9 @@
  *
  *   the picture's centre     a small grey cross, what x and y count from
  *   the emitter              blue: its shape — a point, a line, a disc
- *                            dashed, a ring — through the camera at its
- *                            depth; its launch cone, or arrows outward; a
- *                            handle to drag it by
+ *                            dashed, a ring, an object's points — through
+ *                            the camera at its depth; its launch cone, or
+ *                            arrows outward; a handle to drag it by
  *   the fields               magenta: arrows of the whole field on a grid,
  *                            sampled from the very function the particles
  *                            move through (forces.js); a vortex's turn and
@@ -118,8 +118,9 @@ function handle(ctx, x, y, colour, square) {
  * @param {number} [dpp=1]  canvas pixels per CSS pixel: the guides are sized
  *                          on screen, not on the canvas, so they read the same
  *                          on any display and at any preview size
+ * @param {?object} [points] an object emitter's points (core/points.js)
  */
-export function drawGuides(ctx, e, p, view, dpp = 1) {
+export function drawGuides(ctx, e, p, view, dpp = 1, points = null) {
   const { width, height } = pictureSize(p);
   view /= dpp;                                  // from here on, CSS pixels
   const ox = (width / 2) * view, oy = (height / 2) * view;
@@ -134,12 +135,15 @@ export function drawGuides(ctx, e, p, view, dpp = 1) {
   stroke(ctx, QUIET, 1);
 
   drawField(ctx, e, p, view, ox, oy, width, height);
-  drawEmitter(ctx, e, p, view, ox, oy);
+  drawEmitter(ctx, e, p, view, ox, oy, points);
   drawPull(ctx, e);
   ctx.restore();
 }
 
-function drawEmitter(ctx, e, p, view, ox, oy) {
+/** At most this many of an object's points are drawn: enough to see its shape. */
+const SHOWN = 900;
+
+function drawEmitter(ctx, e, p, view, ox, oy, points) {
   const k = depthScale(e.z, p.focal);
   if (!k) return;
   const x = ox + e.x * k * view, y = oy + e.y * k * view;
@@ -158,10 +162,21 @@ function drawEmitter(ctx, e, p, view, ox, oy) {
     ctx.arc(x, y, Math.max(1, r), 0, Math.PI * 2);
     stroke(ctx, EMITTER, e.shape === 'ring' ? 2 : 1.5, e.shape === 'disc' ? [6, 4] : []);
   }
+  const list = e.shape === 'object' && points ? points.list : [];
+  if (list.length) {
+    const every = Math.max(1, Math.ceil(list.length / SHOWN));
+    ctx.fillStyle = EMITTER;
+    for (let i = 0; i < list.length; i += every) ctx.fillRect(x + list[i][0] * r - 1, y + list[i][1] * r - 1, 2, 2);
+  }
 
   // The launch: arrows outward round a disc or a ring, or the cone.
   const len = Math.max(36, Math.min(90, (e.speed || 0) * 0.3 * view));
-  if ((e.shape === 'disc' || e.shape === 'ring') && e.aim === 'outward') {
+  if (list.length && e.aim === 'outward') {
+    for (let i = 0; i < 12; i++) {
+      const [u, v] = list[Math.floor((i / 12) * list.length)];
+      arrow(ctx, x + u * r, y + v * r, Math.atan2(u, -v), 22, EMITTER);
+    }
+  } else if ((e.shape === 'disc' || e.shape === 'ring') && e.aim === 'outward') {
     for (let i = 0; i < 12; i++) {
       const phi = (i / 12) * Math.PI * 2;
       const a = Math.atan2(Math.cos(phi), -Math.sin(phi));

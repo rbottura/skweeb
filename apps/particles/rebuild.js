@@ -4,16 +4,19 @@
  * The other end of core/rebuild.js's dispatch: the vault's player, compose
  * placing a loop, a print export. A particles object's recipe is the two
  * panels' values, `{ emit, picture }`, and `tick` for a still, so replaying
- * it is opening its sprite set, if it has one, and drawing frames with
+ * it is opening its sprite set, if it has one, and the object its emitter
+ * leaves from, if it is one (core/points.js), and drawing frames with
  * frames.js — the code its save drew with. No GPU, no random that was not
  * seeded: the replay is the render, on any machine.
  *
  * A sprite set that will not open is said, as `missing`, and the particles
- * are dots — drawn all the same, as the app draws with no vault.
+ * are dots; an emitter object that will not, and they leave from its centre —
+ * drawn all the same, as the app draws with no vault.
  */
 
 import { openParticles } from './frames.js';
 import { loadSprites }   from '../../core/sprites.js';
+import { loadPoints }    from '../../core/points.js';
 import { drawFrameInto } from '../../core/rebuild.js';
 
 const isParticles = object => !!(object && object.recipe && object.recipe.emit && object.recipe.picture);
@@ -55,7 +58,17 @@ export async function openObject(object, opts = {}) {
     }
   }
 
-  const frames = openParticles(recipe, sprites, { scale: opts.scale > 0 ? opts.scale : 1 });
+  let points = null;
+  const { shape, from, glyph } = recipe.emit;
+  if (shape === 'object' && from) {
+    try {
+      points = await loadPoints(from, { glyph });
+    } catch {
+      missing.push(from);
+    }
+  }
+
+  const frames = openParticles(recipe, sprites, { scale: opts.scale > 0 ? opts.scale : 1, points });
   const box = { x: 0, y: 0, w: frames.width, h: frames.height };
 
   return {

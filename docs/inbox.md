@@ -31,10 +31,3 @@ Nothing waiting.
   i can create my room at home, place items, allow interaction with them
   like posters, pc, toys etc." → M8 in `docs/roadmap.md`, the map editor,
   after M7 is finished; settled the same day (`docs/decisions.md`).
-- **2026-09-30 — ckt dot-sets as particle emitters.** "A bridge between ckt
-  dots sets objects and use them as emitters sets in particles." → M6's
-  leftover *a shape's alpha as an emitter*, widened to an emitter taken from a
-  vault object — a dataset's dots, or a shape's alpha
-  (`apps/particles/STATUS.md`, *Next single step*). After M7's escape time
-  moves, before M7's field, which brings a second object into particles the
-  same way. A new link when it lands: `ckt → particles: an emitter`.

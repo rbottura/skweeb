@@ -11,6 +11,15 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ### Newest
 
+- **Particles leave from a vault object — `ckt → particles: an emitter`**
+  (2026-09-30, the author's idea from the inbox; `core/points.js`,
+  `check-particles-links`, 16 checks). A ckt dot-set — a word is one glyph
+  — or a shape's ink is the emitter: every particle born on one of its
+  points, at the emitter's size, *outward* bursting from its centre. No new
+  draw per slot, so every saved recipe redraws as it did; the object is the
+  save's parent and its points load beside the recipe, in the app and the
+  replay alike. And a hidden row's object is no parent any more
+  (`core/params.js`): a save named what it never drew.
 - **Escape time moves — M7's third brick done** (2026-09-30;
   `apps/fractals/motion.js`, `tests/fractal-motion.mjs` 34 checks,
   `check-fractals` 42). Each family has its own *moving*: for escape time,
@@ -329,8 +338,10 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Thirty files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-09-30). Newest: `fractal-motion` grew
+Thirty-one files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-09-30). Newest: `points` — an object as
+points to leave from; `particles-model` grew the object emitter, and
+`params` a hidden row's object that is no parent. Before them `fractal-motion` grew
 escape time's idles, and `params` a `when` that is a list; `vault-events` —
 a save, a retag and a delete each heard by two listeners at once, standing
 for two machines. Before them the fractals' three. Then `compose-time` gained the ripple, and
@@ -340,12 +351,15 @@ hang), `gpu-filters` (the catalogue as data: licence, schema, the WGSL
 conventions, sizes at print scale) and `delete` (every kind of edge: the
 refusals, the dry plan, cutting loose, the chain; 37 checks).
 
-Twelve browser checks, each a command in `CLAUDE.md`: its own server on a copy
+Thirteen browser checks, each a command in `CLAUDE.md`: its own server on a copy
 of the vault, headless Chrome through `scripts/chrome.mjs` — a real mouse
 included — and `scripts/check-kit.mjs` under it. Outside the loop because
 each needs Chrome and a vault with things in it; each fails when a page
 throws or its console is not quiet. On the laptop, Chrome keeps WebGPU from
 its Intel: a GPU check there skips its GPU half unless given `CHROME_FLAGS`.
+There, too, `check-particles` fails two checks of the machine's: an empty
+`./vault` to copy, and its fields frame over a budget set on the tower
+(`apps/particles/STATUS.md`, *Known*).
 
 ## Broken / half-done
 
@@ -380,7 +394,7 @@ its Intel: a GPU check there skips its GPU half unless given `CHROME_FLAGS`.
   nothing loads one back into its timeline to go on drawing. Its params are
   still not on `core/params.js`, so its panels are its own; it has the theme,
   not the drawers. Its GALLERY panel still shows IndexedDB.
-- **Files over the 400-line cap**, all the gamepad's: `ui/hud.css` (721),
+- **Files over the 400-line cap** — `scripts/check-particles.mjs` (506), and the gamepad's: `ui/hud.css` (721),
   `sketch/gamepadSketch.js` (572), `ui/TimelinePanel.js` (547),
   `ui/ParamPanel.js` (500). `core/VaultPanel.js` is at 399: the next thing it
   learns needs a split first.
@@ -413,23 +427,15 @@ its Intel: a GPU check there skips its GPU half unless given `CHROME_FLAGS`.
 
 ## Next single step
 
-**Particles: an emitter taken from a vault object — its first step, the
-model** (the author's idea, 2026-09-30, sorted from `docs/inbox.md`;
-`apps/particles/STATUS.md`). `model.js`'s `spotOf` takes the points an
-emitter is given — offsets from its centre, px at scale 1, passed in beside
-the recipe and never in it, since the recipe names the object — and its
-first spot draw picks one, `floor(a × n)`, the second left for a jitter
-round it: no slot draws anything new, so every saved recipe redraws as it
-did. Held in `tests/particles-model.mjs`: every birth on a point; a loop
-through them still closes, `t + period` the picture at `t`; a recipe with
-no points unchanged. Then the app: ckt's `datasets.js` into core, a
-dot-set or a shape picked in Emission — the author to say whether a
-dot-set is one glyph at a time or a word — the object a parent of the
-save, `rebuild.js` loading it first, the guides drawing the points.
-
-After it, **M7's field** (`apps/fractals/STATUS.md`), which takes a second
-object into particles the same way, and M7's *Done when* is met — finished
-first, the author's call. Then **M8, the map editor, and a room first**
+**M7's field — `fractal → particles: a field`** (`apps/fractals/STATUS.md`,
+*Next single step*), its first step the field itself: in fractals, the
+smooth escape count on a grid over the picture, in doubles, and its slope —
+a pure function of a fractals object's recipe, answered by fractals'
+`rebuild.js` as it answers `openObject`, since a link is declared by the app
+that produces. Held in a test: the same recipe, the same field; pointing
+away from the set outside it; nothing inside. Then particles take it in
+their Fields drawer, as they take an emitter object, and M7's *Done when* is
+met — finished first, the author's call. Then **M8, the map editor, and a room first**
 (`docs/roadmap.md`): its first brick, `apps/map/` opening on a grid. Left
 of M6 besides: colour over life. The gamepad's *newest behind* stays parked.
 

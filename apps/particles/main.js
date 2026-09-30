@@ -10,7 +10,8 @@
  *
  * A set from the vault is the sprites (sprites.js), one each; with none, or
  * no vault at all, the particles are dots and the app plays the same
- * (rule 7). S saves the loop (save.js), and the vault plays it back through
+ * (rule 7). An emitter may be an object from the vault — a dot-set, a
+ * shape — its points loaded beside the recipe (core/points.js). S saves the loop (save.js), and the vault plays it back through
  * rebuild.js; `?open=<id>` brings a saved one back to work on.
  */
 
@@ -18,6 +19,7 @@ import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROU
 import { prepare, particlesAt } from './model.js';
 import { drawParticles, pictureSize } from './draw.js';
 import { loadSprites }  from '../../core/sprites.js';
+import { loadPoints }   from '../../core/points.js';
 import { saveParticles, downloadFrames, downloadSheet } from './save.js';
 import { requested }      from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
@@ -46,6 +48,10 @@ let spritesTitle = '';     // and its title, for a saved object's
 let loading = false;       // a set is on its way in: nothing saves until it is
 let spritesIn = Promise.resolve();   // the set on its way in, for a reopen to wait on
 let asked = 0;             // the latest set asked for; an older answer is dropped
+let points = null;         // an object emitter's points (core/points.js), or null: its centre
+let pointsIn = Promise.resolve();    // they are on their way in, for a reopen to wait on
+let pointsAsked = 0;       // the latest asked for, as `asked` is
+let pointsLoading = false;
 let busy = false;          // a save or a download is drawing; nothing else starts
 const painted = [];        // when the last paints were, while playing
 
@@ -70,7 +76,10 @@ async function boot() {
   transport = new Transport({ clock, mount: holder, busy: () => busy });
   buildExport(side);
 
-  emit.on(() => remake());
+  emit.on(key => {
+    if (key === 'shape' || key === 'from' || key === 'glyph') pointsIn = choosePoints();
+    else remake();
+  });
   picture.on(key => {
     applyFrameEdit(picture, key);
     if (key === 'fps') remake();
@@ -101,6 +110,7 @@ async function openRequested() {
     emit.restore(recipe.emit);
     picture.restore(recipe.picture);
     await spritesIn;
+    await pointsIn;
     clock.show(Math.min(Number.isInteger(recipe.tick) ? recipe.tick : 0, clock.length - 1));
     bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
     return true;
@@ -116,7 +126,7 @@ async function openRequested() {
  */
 function remake() {
   const e = emit.values, p = picture.values;
-  model = prepare(toModel(e, p));
+  model = prepare(toModel(e, p), { points });
   const length = framesOf(e, p, model.longest);
   if (length !== clock.length || p.fps !== clockFps) {
     const was = clock.playing, at = clock.tick;
@@ -154,6 +164,33 @@ async function chooseSprites(id) {
   draw();
 }
 
+/**
+ * The emitter's object as points (core/points.js) — a dot-set's glyph, a
+ * shape's ink. The particles leave from its centre until they are in, and
+ * from there if they will not come.
+ */
+async function choosePoints() {
+  const ask = ++pointsAsked;
+  const { shape, from, glyph } = emit.values;
+  points = null;
+  pointsLoading = shape === 'object' && !!from;
+  remake();
+  if (!pointsLoading) return;
+  try {
+    const got = await loadPoints(from, { glyph });
+    if (ask !== pointsAsked) return;
+    points = got.list.length ? got : null;
+    const n = got.list.length;
+    bar.announce(`${got.title}: ${n.toLocaleString('en')} point${n === 1 ? '' : 's'} to leave from`
+      + (got.glyphs > 1 ? ` · glyph ${got.glyph + 1} of ${got.glyphs}` : '') + (points ? '' : ' — none: from its centre'));
+  } catch (err) {
+    if (ask !== pointsAsked) return;
+    bar.announce(`could not open the emitter's object: ${err.message} — leaving from its centre`);
+  }
+  pointsLoading = false;
+  remake();
+}
+
 // ── Leaving: a loop, a still, the frames ─────────────────────────────────────
 
 /** The Export drawer, under the picture's settings. */
@@ -179,7 +216,7 @@ function buildExport(side) {
 /** One way out for all three: the player held still, nothing else started meanwhile. */
 async function leave(action) {
   if (busy) return;
-  if (loading) return bar.announce('the sprites are still loading — a moment');
+  if (loading || pointsLoading) return bar.announce('the sprites or the emitter are still loading — a moment');
   busy = true;
   clock.pause();
   try {
@@ -199,7 +236,7 @@ function save({ still = false } = {}) {
   return leave(async () => {
     bar.say('saving…');
     const tick = clock.tick;
-    const object = await saveParticles({ emit, picture, sprites, spritesTitle, tick, still });
+    const object = await saveParticles({ emit, picture, sprites, spritesTitle, points, tick, still });
     if (!object) return 'no vault — downloaded instead';
     return still ? `saved ${object.id} — frame ${tick + 1}, a still`
       : `saved ${object.id} — ${object.render.frames} frames at ${object.render.fps} fps, its picture frame ${tick + 1}`;
@@ -209,7 +246,7 @@ function save({ still = false } = {}) {
 /** The loop as a sprite sheet and its JSON, cropped to where the particles reach (save.js). */
 function sheet() {
   return leave(async () => {
-    const out = await downloadSheet({ emit, picture, sprites, onStatus: t => bar.say(t) });
+    const out = await downloadSheet({ emit, picture, sprites, points, onStatus: t => bar.say(t) });
     return `downloaded ${out.name} — ${out.frames} frames of ${out.box.w} × ${out.box.h} on a `
       + `${out.width} × ${out.height} sheet, and its JSON`;
   });
@@ -218,7 +255,7 @@ function sheet() {
 /** Every frame, zipped with its rate (save.js). */
 function frames() {
   return leave(async () => {
-    const out = await downloadFrames({ emit, picture, sprites, onStatus: t => bar.say(t) });
+    const out = await downloadFrames({ emit, picture, sprites, points, onStatus: t => bar.say(t) });
     return `downloaded ${out.frames} frames at ${out.fps} fps, ${out.width} × ${out.height} px — `
       + 'node scripts/frames-to-video.mjs makes the video';
   });
@@ -266,7 +303,7 @@ function paint() {
   shown = particlesAt(model, clock.tick / p.fps);
   drawParticles(ctx, shown, p, view, sprites);
   shownView = view;
-  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width));
+  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), points);
 
   bar.output({ width: Math.round(size.width * p.scale), height: Math.round(size.height * p.scale),
                scale: p.scale, format: p.format });
