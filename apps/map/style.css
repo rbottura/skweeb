@@ -1,0 +1,18 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — map
+
+   Everything that looks like the suite comes from core. map says only its
+   layout: the map's panel, then the map.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+@import '../../core/param-panel.css';
+@import '../../core/vault-panel.css';
+
+.app-main { --app-columns: var(--nb-side) minmax(0, 1fr); }
+
+/* The grid's switch, over the viewer (main.js). */
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+
+/* Tiles are drawn square and sharp as they are. */
+.viewer-stage canvas { image-rendering: auto; }
