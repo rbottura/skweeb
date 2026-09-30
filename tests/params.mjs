@@ -258,6 +258,18 @@ ok('an empty ground falls back to its default', every.get('j'), '#ffffff');
   ok('a list: the first holding is enough', applies(either, { family: 'copies', move: 'turn' }), true);
   ok('a list: so is the second', applies(either, { family: 'escape', moveEscape: 'phase', move: 'none' }), true);
   ok('a list: none holding, it does not apply', applies(either, { family: 'escape', moveEscape: 'none', move: 'twist' }), false);
+
+  // What a hidden row names is kept, and is no parent: it draws nothing.
+  const { defineParams } = await import('../core/params.js');
+  const kept = defineParams('lineage-test', {
+    family: { type: 'enum', options: ['escape', 'copies'], default: 'copies' },
+    sprite: { type: 'object', accepts: ['shape'], when: { family: 'copies' } },
+    ground: { type: 'object', accepts: ['still'] },
+  });
+  kept.set({ sprite: 'shp_1', ground: 'stl_2' });
+  ok('the objects a picture is made of are its parents', kept.consumedObjectIds(), ['shp_1', 'stl_2']);
+  kept.set('family', 'escape');
+  ok('a hidden row\'s object is kept, and is no parent', [kept.get('sprite'), kept.consumedObjectIds()], ['shp_1', ['stl_2']]);
 }
 ok('and its values round trip', JSON.parse(JSON.stringify(every.values)), every.values);
 every.set('b', 2.7);

@@ -318,12 +318,15 @@ export function defineParams(app, schema) {
      * Every vault object this app is currently made from — the `parents` of
      * whatever it saves next. Automatic, and deliberately so: an app that
      * builds lineage by hand gets it wrong in a way that only shows up months
-     * later, as a render that cannot explain where it came from.
+     * later, as a render that cannot explain where it came from. A row that
+     * does not apply keeps its value but draws nothing, so what it names is
+     * no parent: an escape-time fractal is not made of the sprite its copies
+     * would use.
      */
     consumedObjectIds() {
       const ids = [];
       for (const key of keys) {
-        if (schema[key].type !== 'object') continue;
+        if (schema[key].type !== 'object' || !applies(schema[key], values)) continue;
         const id = values[key];
         if (id && !ids.includes(id)) ids.push(id);
       }
