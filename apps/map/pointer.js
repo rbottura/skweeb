@@ -6,6 +6,10 @@
  * `cellsBetween`), so a fast stroke leaves no gaps. The right button, or the
  * eraser, empties them.
  *
+ * With *walls*: as with tiles, a flag rather than a tile — a press or a
+ * drag marks the cells it crosses as not walkable, the right button makes
+ * them walkable again.
+ *
  * With *things*: the nearest thing under it is chosen and follows a drag,
  * cell to cell, keeping where it was taken hold of, and never past the
  * map's edge; a press on nothing chooses nothing.
@@ -17,13 +21,14 @@ import { cellAt, cellsBetween, mapSize } from './grid.js';
  * @param {object} opts
  * @param {HTMLCanvasElement} opts.canvas
  * @param {() => object} opts.map                   the map's values
- * @param {() => 'tiles' | 'things'} opts.tool
+ * @param {() => 'tiles' | 'walls' | 'things'} opts.tool
  * @param {() => ?number} opts.chosen               the palette's tile, -1 the eraser, null none
- * @param {(cells: Array<{col, row}>, tile: number) => void} opts.paint
+ * @param {(cells: Array<{col, row}>, value: number, kind: string) => void} opts.paint
+ *        a tile index into the cells, or a wall's flag into the walls: `kind`, the tool the press began with
  * @param {object} opts.things                      { at(x, y), choose(p), move(p, col, row) }
  */
 export function wirePointer({ canvas, map, tool, chosen, paint, things }) {
-  let last = null, tile = null, grab = null;
+  let last = null, value = null, kind = null, grab = null;
 
   /** Where the pointer is on the map, in its own pixels. */
   const pointOf = e => {
@@ -43,13 +48,15 @@ export function wirePointer({ canvas, map, tool, chosen, paint, things }) {
       canvas.setPointerCapture(e.pointerId);
       return;
     }
-    tile = e.button === 2 ? -1 : chosen();
-    if (tile == null) return;                       // no tileset: nothing to paint with
+    kind = tool();
+    if (kind === 'walls') value = e.button === 2 ? 0 : 1;
+    else value = e.button === 2 ? -1 : chosen();
+    if (value == null) return;                      // no tileset: nothing to paint with
     const at = cellAt(m, pt.x, pt.y);
     if (!at) return;
     canvas.setPointerCapture(e.pointerId);
     last = at;
-    paint([at], tile);
+    paint([at], value, kind);
   });
   canvas.addEventListener('pointermove', e => {
     const pt = pointOf(e), m = map();
@@ -62,7 +69,7 @@ export function wirePointer({ canvas, map, tool, chosen, paint, things }) {
     if (!last) return;
     const at = cellAt(m, pt.x, pt.y);
     if (!at || (at.col === last.col && at.row === last.row)) return;
-    paint(cellsBetween(last, at), tile);
+    paint(cellsBetween(last, at), value, kind);
     last = at;
   });
   const end = () => { last = null; grab = null; };

@@ -141,7 +141,7 @@ turn — the same reason tags change in place.
 | `font` | otf/ttf in `source/` | no | imported | ckt, grid |
 | `params` | the recipe *is* the object; its render a picture of what it does — a look, the chain on the frame it was made on | yes | all | its own app; a filter look, compose on a placement |
 | `composition` | png/pdf, rendered at export scale | yes | the page app, M4 | all |
-| `map` | png, the map at its own pixels; with frames and a rate when loops stand on it | yes: `{ map, cells, place }` — the panel's values, a tile index a cell, the things standing on it | the map editor, M8 | compose; the player, M8 |
+| `map` | png, the map at its own pixels; with frames and a rate when loops stand on it — never its walls or events | yes: `{ map, cells, walls, place }` — the panel's values, a tile index a cell, a flag a cell that cannot be walked, the things standing on it and what each does: solid, a sign, a warp to a map by its name, the spawn (`apps/map/params.js`) | the map editor, M8 | compose; the player, M8 |
 | `model` `material` | **deferred**, 3D, when a 3D process exists | | | |
 
 Adding a type means a row here, a thumbnail made by the app that saves it
@@ -219,10 +219,7 @@ JavaScript to someone else's browser.
   any rate, its first tick at its `at`. A page lasts until the last of its
   placements ends: `at` plus `length`, or plus its own loop — one frame, for
   a still. A **flipbook** is stills one after another: `at` 0, 1, 2, each
-  `length` 1. Decided by the author 2026-09-24, before a second placement
-  went on a page; until then this read "one frame for a still", which
-  contradicted `at: 0` meaning something simply there. Honoured by compose
-  since 2026-09-27.
+  `length` 1. Decided by the author 2026-09-24 (`apps/compose/STATUS.md`).
 - `transform` — in the composition's page pixels, before its `scale`: `x` and
   `y` put the object's centre that far from the page's centre, `scale`
   multiplies the object's own size — its ink over the whole loop — and `rot`
@@ -271,14 +268,11 @@ contact sheet, which doubles as the thumbnail. Members stay ordinary objects
 with their own lineage — a set is a view over them, not a container that owns
 them.
 
-**This is not hypothetical, and the set is only half of what it shows.**
-`gamepad_sprites/GaramondI/Garam_blue` and `Minipax/minipax_white` are
-letterforms generated in ColorKineType with a pattern applied, exported by hand
-and imported into the gamepad as a folder. A `set` is the shape of that output.
-The more useful reading is the direction: ckt has a capability, *produce a
-gamepad brush family*, that knows what the gamepad expects. That is a **link**,
-it points one way, and it is specified in `docs/core-api.md`. The folders on
-disk are its output, run by hand before it existed.
+**Not hypothetical.** `gamepad_sprites/GaramondI/Garam_blue` and
+`Minipax/minipax_white` are letterforms made in ColorKineType, exported by hand
+and imported into the gamepad as folders: a `set` is the shape of that output,
+and the folders are what ckt's *produce a gamepad brush family* — a **link**,
+one way, `docs/core-api.md` — makes, run by hand before it existed.
 
 ### Uses — where a set is offered
 
@@ -329,30 +323,16 @@ name, is the first object it made.
 
 ## The recipe contract
 
-Every app registers three functions with the core. This is the entire contract
-between an app and the suite, and it is what makes `.skw` possible at all.
-
-```js
-registerApp("grid", {
-  version: "2.0.0",
-
-  // live app state to plain JSON. Goes into object.recipe.
-  serialize() { return { ...params.values } },
-
-  // recipe to live app state. The user sees the thing come back.
-  restore(recipe) { params.set(recipe) },
-
-  // headless render. No clock, no DOM, no Math.random. This is what makes a
-  // still re-printable at A2 and a loop re-exportable at any frame rate.
-  render(recipe, { width, height, frame, rng, load }) { }
-});
-```
-
-**How it is met.** No `registerApp` was needed in the end: `serialize` is the
-schema's `params.values`, `restore` is `params.restore(recipe)`, and `render`
-is the app's `rebuild.js` — `openObject(object, { scale })` hands back frames
-drawn from the recipe alone, and core finds it by `origin.app`
-(`docs/core-api.md`, *Writing an app against core*).
+Three things are the entire contract between an app and the suite, and what
+makes `.skw` possible at all. Live state to plain JSON, which goes into
+`object.recipe`: the schema's `params.values`. A recipe back to live state, the
+user seeing the thing come back: `params.restore(recipe)`. And a headless
+render — no clock, no DOM, no `Math.random()`, which is what makes a still
+re-printable at A2 and a loop re-exportable at any rate: the app's
+`rebuild.js`, whose `openObject(object, { scale })` hands back frames drawn
+from the recipe alone, found by core through `origin.app` (`docs/core-api.md`,
+*Writing an app against core*). The plan had a `registerApp(name, { serialize,
+restore, render })`; none was needed.
 
 `load(id)` inside `render` resolves a parent or a ref, so a grid dither can be
 rebuilt at print size *from its source* rather than from a scaled-up copy of

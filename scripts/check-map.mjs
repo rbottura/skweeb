@@ -14,12 +14,18 @@
  * where it was. Things: one placed stands on the middle cell; dragged, it
  * moves cell to cell and its panel follows; made wider, it is drawn wider;
  * of two that overlap the nearer — the lower row — is drawn over, either
- * way round; a particles loop placed plays by the map's clock. Saved: a
- * `map`, its cells and its things, with the loop's frames and rate, its
- * tileset and things its parents; the vault's replay is its render to the
- * pixel, and at scale 2 is drawn again; `?open=` brings the tiles and the
- * things back, and Del takes one off; compose places the map, and it plays.
- * Needs no GPU, and brings what it needs: the vault it runs on may be empty.
+ * way round; a particles loop placed plays by the map's clock. Walls: the
+ * tool marks a cell, a drag a row, the right button clears one, hatched
+ * while the tool is in hand or the guides are on and never otherwise; the
+ * bar counts what cannot be walked, a solid thing's feet with it. Events: a
+ * map keeps one spawn, a mark — a thing with nothing to see — is a warp to a
+ * map by its name, a thing is a sign showing another object. Saved: a
+ * `map`, its cells, walls and things, with the loop's frames and rate, its
+ * tileset, things and what a sign shows its parents; the vault's replay is
+ * its render to the pixel, walls and events never in it, and at scale 2 is
+ * drawn again; `?open=` brings the tiles, walls and things back, and Del
+ * takes one off; compose places the map, and it plays. Needs no GPU, and
+ * brings what it needs: the vault it runs on may be empty.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -122,10 +128,12 @@ const things = await page.eval(`(async () => {
   const torch = (await Vault.save({ type: 'sequence', title: 'a torch', tags: ['particles', 'loop'],
     origin: { app: 'particles', version: '1.0.0' }, seed: 1, recipe: { emit: emitParams().values, picture: pictureParams().values },
     parents: [], render: { blob: pblob, ext: 'png', w: 64, h: 64, frames: 60, fps: 30, loop: true }, thumb: await thumbFromBlob(pblob) })).id;
-  const out = { orange: await dot('orange dot', '#f28c28'), purple: await dot('purple dot', '#7b2cbf'), torch };
+  const out = { orange: await dot('orange dot', '#f28c28'), purple: await dot('purple dot', '#7b2cbf'), torch,
+                poster: await dot('a poster', '#2a9d4b') };
   await Vault.refresh();
   return out; })()`);
-c.ok('two dots and a torch loop in the vault to place', !!(things.orange && things.purple && things.torch), JSON.stringify(things));
+c.ok('three dots and a torch loop in the vault to place', !!(things.orange && things.purple && things.torch && things.poster),
+  JSON.stringify(things));
 
 await set('columns', 12);
 await page.click(`document.getElementById('tool-things')`);
@@ -178,6 +186,80 @@ const frameSay = await page.until(`/frame \\d+ of 60/.test(${say})`, { timeout: 
 c.ok('a loop standing on the map plays by its clock', moved > 0 && frameSay, `${moved} values moved · ${await page.eval(say)}`);
 await c.shot('3-things');
 
+// ── What can be walked, and what answers ────────────────────────────────────
+
+const reddish = p => p[0] - p[1] > 24 && p[0] - p[2] > 24;
+const counts = n => page.until(`${say}.includes(${JSON.stringify(`${n} not walkable`)})`, { timeout: 8000 }).then(() => true, () => false);
+const wallAt = async (col, row) => reddish(await pixel(cellMid(col), cellMid(row), 768));
+
+// The guides were switched off above: the walls tool shows its walls anyway.
+await page.click(`document.getElementById('tool-walls')`);
+await page.pointer(await onScreen(cellMid(9), cellMid(1), 768));
+c.ok('the walls tool marks the cell pressed, hatched, with the guides off', await wallAt(9, 1),
+  JSON.stringify(await pixel(cellMid(9), cellMid(1), 768)));
+await page.pointer(await onScreen(cellMid(7), cellMid(9), 768), await onScreen(cellMid(11), cellMid(9), 768), 2);
+const wallRow = [];
+for (let col = 7; col <= 11; col++) wallRow.push(await wallAt(col, 9));
+c.ok('a fast drag marks every cell it crosses', wallRow.every(Boolean), JSON.stringify(wallRow));
+await page.pointer(await onScreen(cellMid(9), cellMid(9), 768), undefined, 6, { button: 'right' });
+c.ok('the right button makes one walkable again', !(await wallAt(9, 9)) && await wallAt(10, 9),
+  JSON.stringify(await pixel(cellMid(9), cellMid(9), 768)));
+c.ok('the bar counts what cannot be walked', await counts(5), await page.eval(say));
+await page.click(`document.getElementById('tool-things')`);
+await wait(300);
+c.ok('with another tool and the guides off, the walls are not drawn', ground(await pixel(cellMid(9), cellMid(1), 768)),
+  JSON.stringify(await pixel(cellMid(9), cellMid(1), 768)));
+await page.click(`document.getElementById('guides')`);
+await wait(300);
+c.ok('with the guides on, they are, whatever the tool', await wallAt(9, 1), JSON.stringify(await pixel(cellMid(9), cellMid(1), 768)));
+
+const chooseRow = title => page.click(`[...document.querySelectorAll('.mp-row')].find(r => r.querySelector('.mp-title')?.textContent === ${JSON.stringify(title)})`);
+const pick = async (name, value) => { await page.typeInto(`${row(name)}?.querySelector('select')`, value); await wait(250); };
+const write = async (name, value) => { await page.typeInto(`${row(name)}?.querySelector('.pp-text')`, value, 'input'); await wait(250); };
+const titles = () => page.eval(`[...document.querySelectorAll('.mp-row .mp-title')].map(t => t.textContent)`);
+const subOf = title => page.eval(`[...document.querySelectorAll('.mp-row')].find(r => r.querySelector('.mp-title')?.textContent === ${JSON.stringify(title)})?.querySelector('.mp-sub')?.textContent || ''`);
+const mark = async () => { await page.click(`[...document.querySelectorAll('.mp-actions .nb-btn')].find(b => b.textContent === 'Mark')`); await wait(300); };
+
+await chooseRow('orange dot');
+await wait(250);
+await page.eval(`${row('solid')}?.querySelector('input[type=checkbox]')?.click()`);
+c.ok('a thing made solid: the cell under its feet cannot be walked', await counts(6) && (await subOf('orange dot')).includes('solid'),
+  await page.eval(say));
+
+// The spawn: a mark — a thing with nothing to see — and one a map.
+await mark();
+await pick('event', 'spawn');
+await mark();
+await pick('event', 'spawn');
+await pick('facing', 'left');
+await set('column', 1);
+await set('row', 1);
+const afterSpawns = await titles();
+c.ok('a map has one spawn: a thing made the spawn takes it from the other',
+  afterSpawns.filter(t => t.startsWith('the spawn')).length === 1 && afterSpawns.includes('the spawn, facing left')
+  && afterSpawns.includes('a mark, doing nothing'), JSON.stringify(afterSpawns));
+
+await chooseRow('a mark, doing nothing');
+await wait(250);
+await pick('event', 'warp');
+await write('to the map', 'the hall');
+c.ok('a mark with nothing to see, made a warp to a map by its name', (await titles()).includes('a warp to the hall'),
+  JSON.stringify(await titles()));
+
+await chooseRow('purple dot');
+await wait(250);
+await pick('event', 'sign');
+await write('says', 'hello from the room');
+await page.click(`[...${row('shows')}.querySelectorAll('button')].find(b => b.textContent === 'Choose…')`);
+await page.until(`!!document.querySelector('.vp--visible')`, { timeout: 20000 });
+const posterCell = `[...document.querySelectorAll('.vp--visible .vp-cell')].find(k => k.querySelector('.vp-name')?.textContent === 'a poster')`;
+await page.until(`!!${posterCell}`, { timeout: 20000 }).catch(() => {});
+await page.click(`${posterCell}?.querySelector('.vp-use')`);
+await wait(400);
+c.ok('a thing made a sign, showing another object', (await subOf('purple dot')).includes('a sign')
+  && (await page.eval(`${row('shows')}?.querySelector('.pp-object-name')?.textContent`)) === 'a poster', await subOf('purple dot'));
+await c.shot('4-walls-and-events');
+
 // ── Saved, replayed, reopened, placed ───────────────────────────────────────
 
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))`);      // held still
@@ -189,12 +271,24 @@ await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
 const mid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
 const saved = mid ? await (await fetch(c.base + '/api/vault/' + mid)).json() : null;
 c.ok('saved: a map — its cells, its things, the loop\'s frames and rate', !!saved && saved.type === 'map'
-  && saved.recipe.cells.length === 120 && saved.recipe.place.length === 3 && saved.render.frames === 60 && saved.render.fps === 30,
+  && saved.recipe.cells.length === 120 && saved.recipe.place.length === 5 && saved.render.frames === 60 && saved.render.fps === 30,
   saved ? `${saved.type} · ${saved.title} · ${saved.recipe.place.length} things · ${saved.render.frames} frames` : await page.eval(say));
+const blocks = saved ? saved.recipe.place : [];
+const spawnsSaved = blocks.filter(b => b.event === 'spawn'), warp = blocks.find(b => b.event === 'warp');
+const sign = blocks.find(b => b.event === 'sign'), solid = blocks.find(b => b.solid);
+c.ok('its walls, a flag a cell beside its tiles', !!saved && saved.recipe.walls.length === 120
+  && saved.recipe.walls.filter(Boolean).length === 5 && saved.recipe.walls[1 * 12 + 9] === 1 && saved.recipe.walls[9 * 12 + 9] === 0,
+  saved && JSON.stringify(saved.recipe.walls.map((v, i) => (v ? i : -1)).filter(i => i >= 0)));
+c.ok('what its things do: solid, one spawn, a warp with nothing to see, a sign', !!solid && solid.ref === things.orange
+  && spawnsSaved.length === 1 && spawnsSaved[0].face === 'left' && spawnsSaved[0].col === 1 && spawnsSaved[0].row === 1
+  && !!warp && warp.ref === null && warp.to === 'the hall'
+  && !!sign && sign.ref === things.purple && sign.says === 'hello from the room' && sign.shows === things.poster,
+  JSON.stringify(blocks.map(b => [b.ref && b.ref.slice(0, 3), b.event, b.solid])));
 const index = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
 const tilesetId = (index.find(r => r.title === setName) || {}).id;
-c.ok('its tileset and every thing on it are its parents', !!saved && [tilesetId, things.orange, things.purple, things.torch]
-  .every(id => saved.parents.includes(id)), saved && JSON.stringify(saved.parents));
+c.ok('its tileset, every thing on it and what a sign shows are its parents', !!saved
+  && [tilesetId, things.orange, things.purple, things.torch, things.poster].every(id => saved.parents.includes(id))
+  && saved.parents.length === 5, saved && JSON.stringify(saved.parents));
 if (saved) {
   const replay = await page.eval(`(async () => {
     const { Vault } = await import('/core/vault.js');
@@ -215,15 +309,18 @@ if (saved) {
 
   await c.go(c.base + '/apps/map/?open=' + mid);
   await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
-  await page.until(`document.querySelectorAll('.mp-row').length === 3 && document.querySelectorAll('.mp-tile').length === 4`, { timeout: 20000 }).catch(() => {});
+  await page.until(`document.querySelectorAll('.mp-row').length === 5 && document.querySelectorAll('.mp-tile').length === 4`, { timeout: 20000 }).catch(() => {});
   c.ok('?open= brings the tiles and the things back', colour(await pixel(cellMid(3), cellMid(3), 768), BLUE)
-    && colour(await pixel(cellMid(0), cellMid(5), 768), RED) && (await page.eval(`document.querySelectorAll('.mp-row').length`)) === 3,
+    && colour(await pixel(cellMid(0), cellMid(5), 768), RED) && (await page.eval(`document.querySelectorAll('.mp-row').length`)) === 5,
     await page.eval(say));
+  const back = await titles();
+  c.ok('…and the walls, and what the things do', await wallAt(9, 1) && await counts(6) && back.includes('the spawn, facing left')
+    && back.includes('a warp to the hall') && (await subOf('purple dot')).includes('a sign'), JSON.stringify(back));
   await page.click(`document.getElementById('tool-things')`);
   await page.click(`document.querySelector('.mp-row')`);
   await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete' }))`);
   await wait(300);
-  c.ok('Del takes the chosen thing off the map', (await page.eval(`document.querySelectorAll('.mp-row').length`)) === 2,
+  c.ok('Del takes the chosen thing off the map', (await page.eval(`document.querySelectorAll('.mp-row').length`)) === 4,
     String(await page.eval(`document.querySelectorAll('.mp-row').length`)));
 
   await c.go(c.base + '/apps/compose/?place=' + mid);

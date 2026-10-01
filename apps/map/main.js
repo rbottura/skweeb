@@ -2,15 +2,18 @@
  * main.js — the map editor, assembled. M8: a map on a grid, a room first.
  *
  * The map's panel on the left, the map between, the things on it on the
- * right (docs/roadmap.md, M8). Two tools over the map: *tiles* — a
- * tileset's members painted into its cells from the palette — and *things*
- * — objects from the vault standing on cells, picked up and moved. Loops
+ * right (docs/roadmap.md, M8). Three tools over the map: *tiles* — a
+ * tileset's members painted into its cells from the palette — *walls* —
+ * cells marked as not walkable, a flag a cell beside the tiles — and
+ * *things* — objects from the vault standing on cells, picked up and moved,
+ * and what they do when used: a sign, a warp, the spawn. Loops
  * standing on the map play by its clock, each at its own speed
  * (core/playback.js). Drawn at the size the viewer shows (core/view.js);
- * the grid and the chosen thing's box are guides over it — one switch, G —
- * never saved.
+ * the grid, what cannot be walked, the events and the chosen thing's box
+ * are guides over it — one switch, G — never in the picture; the walls show
+ * whenever their tool is in hand.
  *
- * S saves the map (save.js) — `{ map, cells, place }`, its picture drawn by
+ * S saves the map (save.js) — `{ map, cells, walls, place }`, its picture drawn by
  * the code a replay draws with — and `?open=<id>` brings one back. Opens
  * with no vault (rule 7).
  */
@@ -18,7 +21,8 @@
 import { mapParams, MAP_GROUPS } from './params.js';
 import { mapSize, indexOf, resize } from './grid.js';
 import { drawMap }      from './draw.js';
-import { drawGrid, drawChosen } from './guides.js';
+import { drawGrid, drawChosen, drawBlocked, drawEvents } from './guides.js';
+import { walkGrid, walkable, spawnOf } from './walk.js';
 import { Palette }      from './palette.js';
 import { Editing }      from './editing.js';
 import { wirePointer }  from './pointer.js';
@@ -35,12 +39,14 @@ import { viewFactor }   from '../../core/view.js';
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 const guidesBtn = document.getElementById('guides');
-const toolBtns = { tiles: document.getElementById('tool-tiles'), things: document.getElementById('tool-things') };
+const toolBtns = { tiles: document.getElementById('tool-tiles'), walls: document.getElementById('tool-walls'),
+                   things: document.getElementById('tool-things') };
 
 let map, bar, palette, editing;
 let guidesOn = remembered();   // the guides over the preview: the viewer's, not the map's
 let tool = 'tiles';            // what a press on the map does: the editor's, never saved
 let cells = [];                // a tile index a cell, row after row; -1 empty — the map's, beside its values
+let walls = [];                // a flag a cell: 1 cannot be walked — beside the cells
 let shape = { cols: 0, rows: 0 };   // the grid the cells were laid out for
 let tiles = null;              // the tileset's images, or null: nothing to paint with
 let tilesTitle = '';
@@ -53,7 +59,7 @@ const clock = new Playhead({ onShow: () => draw() });
 
 function boot() {
   bar = new Bar({ app: 'map', mount: document.querySelector('.app'),
-                  keys: '1 tiles · 2 things · G guides · space play · Del remove · S save · V vault' });
+                  keys: '1 tiles · 2 things · 3 walls · G guides · space play · Del remove · S save · V vault' });
   map = mapParams();
   const panel = new ParamPanel(map, { title: 'map', mount: document.getElementById('map-side'), groups: MAP_GROUPS });
   palette = new Palette(panel.drawer('tiles').body, () => draw());
@@ -72,9 +78,9 @@ function boot() {
     map: () => map.values,
     tool: () => tool,
     chosen: () => palette.chosen,
-    paint: (list, tile) => {
-      const m = map.values;
-      for (const { col, row } of list) cells[indexOf(m, col, row)] = tile;
+    paint: (list, value, kind) => {
+      const m = map.values, into = kind === 'walls' ? walls : cells;
+      for (const { col, row } of list) into[indexOf(m, col, row)] = value;
       draw();
     },
     things: { at: (x, y) => editing.at(x, y), choose: p => editing.choose(p), move: (p, col, row) => editing.move(p, col, row) },
@@ -98,6 +104,7 @@ async function openRequested() {
     map.restore(recipe.map);
     shape = { cols: recipe.map.cols, rows: recipe.map.rows };
     cells = resize(recipe.cells || [], shape, shape);
+    walls = resize(recipe.walls || [], shape, shape, 0);
     await editing.things.load(recipe.place || []);
     editing.choose(null);
     bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
@@ -106,10 +113,11 @@ async function openRequested() {
   }
 }
 
-/** The cells laid out again for the map's grid: each where it was, what is new empty. */
+/** The cells and the walls laid out again for the map's grid: each where it was, what is new empty. */
 function fitCells() {
   const { cols, rows } = map.values;
   cells = resize(cells, shape, { cols, rows });
+  walls = resize(walls, shape, { cols, rows }, 0);
   shape = { cols, rows };
 }
 
@@ -160,7 +168,7 @@ function buildExport(panel) {
   };
   button('Save to the vault  [S]', save, true);
   button('Download the picture (PNG)', () => leave(async () => {
-    const out = await downloadPicture({ map, cells, place: editing.things.blocks(), tick: clock.tick });
+    const out = await downloadPicture({ map, cells, walls, place: editing.things.blocks(), tick: clock.tick });
     return `downloaded ${out.width} × ${out.height} px`;
   }));
   exp.body.append(actions);
@@ -187,7 +195,7 @@ async function leave(action) {
 function save() {
   return leave(async () => {
     bar.say('saving…');
-    const object = await saveMap({ map, cells, place: editing.things.blocks(), tick: clock.tick });
+    const object = await saveMap({ map, cells, walls, place: editing.things.blocks(), tick: clock.tick });
     if (!object) return 'no vault — downloaded instead';
     return `saved ${object.id} — ${object.title}` + (object.render.frames ? `, ${object.render.frames} frames at ${object.render.fps} fps` : '');
   });
@@ -236,16 +244,22 @@ function paint() {
   if (canvas.height !== h) canvas.height = h;
   const dpp = canvas.width / Math.max(1, canvas.getBoundingClientRect().width);
   drawMap(ctx, m, view, { cells, tiles, layers: editing.things.layers(clock.tick, m) });
+  const recipe = { map: m, walls, place: editing.things.blocks() };
+  if (guidesOn) drawGrid(ctx, m, view, dpp);
+  if (guidesOn || tool === 'walls') drawBlocked(ctx, m, view, dpp, recipe);
   if (guidesOn) {
-    drawGrid(ctx, m, view, dpp);
+    const spawn = spawnOf(recipe);
+    drawEvents(ctx, m, view, dpp, recipe.place, spawn, walkable(recipe, spawn.col, spawn.row));
     const chosen = tool === 'things' && editing.chosenBox();
     if (chosen) drawChosen(ctx, chosen.box, chosen.cell, m.tile, view, dpp);
   }
 
   bar.output({ width: size.width, height: size.height, scale: 1 });
   const painted = cells.filter(t => t >= 0).length, n = editing.things.items.length;
+  const blocked = walkGrid(recipe).filter(ok => !ok).length;
   bar.say(`${m.cols} × ${m.rows} tiles of ${m.tile} px · ${painted} painted`
     + (tiles ? ` from ${tilesTitle}` : ' · choose a tileset to paint with')
+    + (blocked ? ` · ${blocked} not walkable` : '')
     + ` · ${n} thing${n === 1 ? '' : 's'}` + (clock.length > 1 ? `, frame ${clock.tick + 1} of ${clock.length}` : ''));
 }
 
@@ -261,6 +275,7 @@ function wireKeys() {
     if (e.key === 's' || e.key === 'S') save();
     if (e.key === '1') useTool('tiles');
     if (e.key === '2') useTool('things');
+    if (e.key === '3') useTool('walls');
     if ((e.key === 'Delete' || e.key === 'Backspace') && tool === 'things') editing.remove();
     if (e.key === ' ' && clock.length > 1) { e.preventDefault(); clock.toggle(); }
   });

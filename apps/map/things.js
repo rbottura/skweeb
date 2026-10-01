@@ -13,6 +13,10 @@
  * they were placed (`drawOrder`): lower on the map is nearer. A loop keeps
  * its own speed on the map's rate (core/playback.js `tickAt`), and a frame
  * is asked for once a tick.
+ *
+ * A block may name no object: an event with nothing to see — an exit, the
+ * spawn (params.js `EVENTS`). It opens nothing, draws nothing, and is a
+ * tile square where a press finds it.
  */
 
 import { Vault }      from '../../core/vault.js';
@@ -71,7 +75,7 @@ export class Things {
 
   /** A thing on the map, opened; it shows as soon as its frames are in. */
   add(block) {
-    const p = { block: { ...block }, title: '…', thumb: null, handle: null, size: null, error: null, tick: -1, image: null };
+    const p = { block: { ...block }, title: block.ref ? '…' : '', thumb: null, handle: null, size: null, error: null, tick: -1, image: null };
     this.items.push(p);
     this.onChange();
     p.opening = this._open(p);
@@ -90,8 +94,9 @@ export class Things {
     p.block = { ...block };
     if (other) {
       if (p.handle && p.handle.dispose) p.handle.dispose();
-      Object.assign(p, { handle: null, size: null, error: null, tick: -1, image: null, title: '…' });
-      if (block.ref) p.opening = this._open(p);
+      Object.assign(p, { handle: null, size: null, error: null, tick: -1, image: null,
+                         title: block.ref ? '…' : '', thumb: null, type: null });
+      p.opening = this._open(p);
     }
     this.onChange();
   }
@@ -133,6 +138,7 @@ export class Things {
   }
 
   async _open(p) {
+    if (!p.block.ref) return this.onChange();     // an event with nothing to see
     try {
       const { object, url, thumbUrl } = await Vault.load(p.block.ref);
       p.title = object.title || object.id;

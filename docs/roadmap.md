@@ -293,7 +293,11 @@ opens on a grid of large tiles; a tileset — any set, offered through
 cells, back to front by row, their loops playing by the map's clock; a
 `map` saved, replayed to the pixel, drawn again at scale 2, reopened, and
 placed in compose, where it plays. The link, `any → map: a thing in the
-room`, works; the tileset use with it.
+room`, works; the tileset use with it. Brick 2, 2026-10-02: walls painted
+apart from the tiles, solid things; events as RPG Maker has them, on the
+things — a sign, a warp to a map by its name, the spawn — a thing with no
+object an event alone; `walkable`, the spawn and a warp's arrival held in a
+test, for the avatar to ask.
 
 **M9 — the rig: a character's bones, and its walk.** Chosen by the author on
 2026-10-02, from the inbox, to come **between M8's bricks 3 and 4**: by then

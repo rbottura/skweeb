@@ -1,5 +1,5 @@
 # STATUS — map
-_last touched: 2026-09-30_
+_last touched: 2026-10-02_
 
 M8's app: the map editor, and a room first (`docs/roadmap.md`, M8). A map
 is the field's word for a level; the playable map is its export, as video
@@ -11,15 +11,44 @@ is a loop's, and nothing a player does enters a recipe.
    from a tileset, things from the vault standing on it, drawn back to front
    by where they stand; saved as a `map`, replayed, reopened, placed in
    compose.
-2. **Walkable, and events** — signs, warps, the spawn, each through a
-   schema.
+2. **Walkable, and events** — done 2026-10-02: walls, solid things; signs,
+   warps, the spawn, each a thing's event, edited through its schema.
 3. **The player, point and click.**
+   Then M9, the rig (`docs/roadmap.md`): the avatar's body, and its walk.
 4. **An avatar** — grid movement, ZQSD / WASD / arrows, E, tap to walk.
 5. **Baked and published** — a static bundle, the embed mode.
 6. **Toys** — pushed, then rolled.
 
 ## Works now
 
+- **Things do something, RPG Maker's way** (2026-10-02; `params.js`,
+  `editing.js`, `list.js`, `guides.js`; `check-map` 44). A thing's
+  panel has an *Event* drawer: none, a **sign** — what it *says*, and what
+  it *shows*: another object, or nothing for the thing itself — a **warp**
+  — *to the map* of that name, its latest, so a door survives the map it
+  leads to being saved again — or the **spawn**, where the avatar appears,
+  *facing* one way. One spawn a map: a thing made the spawn takes it from
+  the other. *Mark* puts down a thing with no object, an event and nothing
+  to see — an exit, the spawn; a thing whose object is cleared is one too.
+  With the guides on, a sign or a warp is tagged on its cell, a mark is a
+  dashed square, and the spawn an arrow the way it faces — faint while it
+  falls to the middle, red on a cell that cannot be walked. What a sign
+  shows is a parent of the map. The list says what each thing does.
+- **What can be walked** (2026-10-02; `walk.js`, `pointer.js`;
+  `tests/map-walk.mjs` 24 checks, `check-map` 44). The *walls* tool (3):
+  a press marks a cell as not walkable, a drag a line of them, the right
+  button clears — a list beside the cells, `walls`, a flag a cell, kept
+  where they were when the map changes size, as Pokémon keeps a cell's
+  permission apart from its tile. A thing made *solid* blocks the cells
+  under its feet: its own, and on its row those its width covers more
+  than half of — one at a width of one or two, three at three or four.
+  Hatched — walls red, a solid thing's feet blue — while the tool is in
+  hand or the guides are on, never in the picture; the bar counts what
+  cannot be walked. `walkable(recipe, col, row)` is what the avatar will
+  ask before each step; `spawnOf` where it starts; `arrival` where it
+  lands through a warp — on the warp back to the map it left, as Pokémon
+  pairs its doors, or at the spawn. A map saved before walls is walkable
+  all over. The recipe is `{ map, cells, walls, place }`.
 - **A map saves, replays, reopens, and compose places it** (2026-09-30;
   `frames.js`, `save.js`, `rebuild.js`; `check-map` 34). A new type,
   `map`, a row in `docs/object-model.md`: its recipe `{ map, cells, place }`
@@ -82,15 +111,18 @@ is a loop's, and nothing a player does enters a recipe.
 - A map's things open once each on a replay: a map with many heavy loops
   on it is as slow to open as they are, and a print is drawn with each one
   again at its scale.
+- A warp names a map by its name, unchecked: a map renamed leaves the doors
+  to it leading nowhere, and two maps of one name are one place, the
+  latest. A solid thing blocks one row: a deep bed needs its other rows
+  walled. No *trigger* yet — a cell that answers when stepped on.
 
 ## Next single step
 
-**Brick 2, its first step: what can be walked.** A *walls* tool (3): a
-press marks a cell as not walkable, a drag a line of them, the right button
-walkable again — a list beside the cells, `walls`, one flag a cell, as
-Pokémon's maps keep a permission a cell apart from the tile drawn there —
-shown as a guide, hatched, never in the picture. A thing gets *solid* in
-its panel: its feet cell not walkable. Held in a test: the walkable cells
-of a map, asked as the avatar will ask them (`walkable(recipe, col, row)`).
-Then the events: a sign on a thing — what shows when it is used — and the
-spawn.
+**Brick 3, its first step: the player opens a map.** A page of its own,
+`apps/map/play/`, no panels: `?map=<id>` opens a saved map from the vault
+and draws it with frames.js, fitted to the window — at a whole-number
+scale once the bake makes maps small (brick 5) — its loops playing by the
+map's clock; with no vault, or no map, it says so. Then what makes it
+a showcase: a thing that answers is outlined under the pointer; a sign,
+clicked, shows what it says and what it shows over the map; a warp opens
+the latest map of its name, arriving by `arrival`.

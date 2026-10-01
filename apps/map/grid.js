@@ -31,19 +31,21 @@ export const indexOf = (m, col, row) => row * m.cols + col;
 
 /**
  * The cells a map keeps when it changes size: each where it was, by column
- * and row, what is new empty (-1), what falls off the edge gone.
+ * and row, what is new empty, what falls off the edge gone. The tiles' list
+ * is empty at -1; the walls', a flag a cell, at 0 — walkable.
  *
  * @param {number[]} cells    the old list, `from.cols` wide
  * @param {{cols, rows}} from
  * @param {{cols, rows}} to
+ * @param {number} [empty=-1] what a new cell, or one that held no whole number, holds
  * @returns {number[]}
  */
-export function resize(cells, from, to) {
-  const out = new Array(to.cols * to.rows).fill(-1);
+export function resize(cells, from, to, empty = -1) {
+  const out = new Array(to.cols * to.rows).fill(empty);
   for (let row = 0; row < Math.min(from.rows, to.rows); row++) {
     for (let col = 0; col < Math.min(from.cols, to.cols); col++) {
       const v = cells[row * from.cols + col];
-      out[row * to.cols + col] = Number.isInteger(v) ? v : -1;
+      out[row * to.cols + col] = Number.isInteger(v) ? v : empty;
     }
   }
   return out;
