@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A map from the suite, played: point at what answers, and use it.">
+  <title>a map — skweeb</title>
+
+  <link rel="stylesheet" href="./play.css">
+</head>
+
+<body>
+  <!--
+    The player: the map and nothing else — no panels, no bar. What answers
+    is outlined under the pointer; a sign shows over the map, a warp leads to
+    another. M8's third brick; the avatar comes in its fourth.
+  -->
+  <main class="play">
+    <canvas id="room" width="480" height="300" aria-label="the map"></canvas>
+    <p class="play-note" id="note" hidden></p>
+    <div class="play-sign" id="sign" hidden>
+      <figure class="play-sign-card">
+        <canvas class="play-sign-picture" width="1" height="1"></canvas>
+        <figcaption class="play-sign-says"></figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

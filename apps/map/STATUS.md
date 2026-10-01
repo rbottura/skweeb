@@ -13,7 +13,8 @@ is a loop's, and nothing a player does enters a recipe.
    compose.
 2. **Walkable, and events** — done 2026-10-02: walls, solid things; signs,
    warps, the spawn, each a thing's event, edited through its schema.
-3. **The player, point and click.**
+3. **The player, point and click** — done 2026-10-02: `play/`, what answers
+   outlined under the pointer, a sign shown over the map, a warp followed.
    Then M9, the rig (`docs/roadmap.md`): the avatar's body, and its walk.
 4. **An avatar** — grid movement, ZQSD / WASD / arrows, E, tap to walk.
 5. **Baked and published** — a static bundle, the embed mode.
@@ -21,6 +22,20 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## Works now
 
+- **The player, point and click** (2026-10-02; `play/`; `tests/map-play.mjs`
+  8 checks, `check-map-play` 16). A page of its own, no panels:
+  `play/?map=<id>` opens a saved map, `play/?name=<name>` the latest map so
+  called. Drawn by the editor's own code (frames.js `openParts`, draw.js,
+  things.js) fitted to the window, in as many pixels as the screen shows
+  it with, framed in ink on the suite's ground, its loops playing. A thing
+  that answers is outlined under the pointer, the pointer a hand; a press
+  on a **sign** shows over the map what it shows — another object, or the
+  thing itself, a loop playing by its own clock, at most four times its
+  size — and what it says; a click or Escape puts it away. A **warp**
+  opens the latest map of its name, pushed onto the browser's history, so
+  Back comes back. With no vault, no map asked for, or a name no map has,
+  it says so. The editor's Export drawer has *Play the last save ↗*, once
+  a map is saved or opened.
 - **Things do something, RPG Maker's way** (2026-10-02; `params.js`,
   `editing.js`, `list.js`, `guides.js`; `check-map` 44). A thing's
   panel has an *Event* drawer: none, a **sign** — what it *says*, and what
@@ -111,6 +126,10 @@ is a loop's, and nothing a player does enters a recipe.
 - A map's things open once each on a replay: a map with many heavy loops
   on it is as slow to open as they are, and a print is drawn with each one
   again at its scale.
+- The player reads the vault: a visitor without the author's tailnet sees
+  nothing until the bake (brick 5). Its things are drafts, as the editor's
+  are. A mark that answers is invisible until pointed at: an exit wants a
+  door's picture to be found.
 - A warp names a map by its name, unchecked: a map renamed leaves the doors
   to it leading nowhere, and two maps of one name are one place, the
   latest. A solid thing blocks one row: a deep bed needs its other rows
@@ -118,11 +137,6 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## Next single step
 
-**Brick 3, its first step: the player opens a map.** A page of its own,
-`apps/map/play/`, no panels: `?map=<id>` opens a saved map from the vault
-and draws it with frames.js, fitted to the window — at a whole-number
-scale once the bake makes maps small (brick 5) — its loops playing by the
-map's clock; with no vault, or no map, it says so. Then what makes it
-a showcase: a thing that answers is outlined under the pointer; a sign,
-clicked, shows what it says and what it shows over the map; a warp opens
-the latest map of its name, arriving by `arrival`.
+**M9 comes first** (`docs/roadmap.md`): the rig gives the avatar of brick 4
+a body that walks. Its first step is in the root `STATUS.md`. Brick 4
+resumes from here once M9's walk is saved as a character set.

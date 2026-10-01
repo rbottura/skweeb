@@ -2,12 +2,13 @@
  * frames.js — a map's recipe as frames: what a save draws and what a replay
  * draws, the same code, so the two cannot drift.
  *
- * A recipe is `{ map, cells, place }` — the panel's values, a tile index a
- * cell, the things standing on it. Opening one brings in its tileset
- * (core/sprites.js) and its things (things.js, through core/rebuild.js) —
- * exact frames, unless a preview asks for drafts. Frame `i` is the map at
- * its tick `i`, every loop on it at its own speed; with nothing moving on
- * it, a map is one frame.
+ * A recipe is `{ map, cells, walls, place }` — the panel's values, a tile
+ * index a cell, a flag a cell that cannot be walked, the things standing on
+ * it. Opening one brings in its tileset (core/sprites.js) and its things
+ * (things.js, through core/rebuild.js) — exact frames, unless a preview asks
+ * for drafts. Frame `i` is the map at its tick `i`, every loop on it at its
+ * own speed; with nothing moving on it, a map is one frame. Its walls and
+ * its events are never drawn: they are what the map does, not how it looks.
  *
  * ── Sizes ──────────────────────────────────────────────────────────────────
  *
@@ -23,14 +24,14 @@ import { loadSprites } from '../../core/sprites.js';
 import { surface }     from '../../core/surface.js';
 
 /**
- * @param {object} recipe            `{ map, cells, place }`
- * @param {object} [opts]
- * @param {number} [opts.scale=1]    pixels per pixel of the map's own size
- * @param {boolean} [opts.draft]     a preview's frames, for things that have faster ones
- * @returns {Promise<{length, fps, loop, width, height, scale, missing, frame(i), dispose()}>}
- *          `frame` lends one canvas, drawn again on every call
+ * What a map is drawn from, opened: its tileset's images and its things —
+ * for a replay here, and for the player, which draws at the size it shows.
+ *
+ * @param {object} recipe            `{ map, cells, walls, place }`
+ * @param {object} [opts]            { scale, draft } — as openMap's
+ * @returns {Promise<{tiles: ?Array, things: Things, missing: string[]}>}
  */
-export async function openMap(recipe, { scale = 1, draft = false } = {}) {
+export async function openParts(recipe, { scale = 1, draft = false } = {}) {
   const m = recipe.map;
   const missing = [];
   let tiles = null;
@@ -46,6 +47,20 @@ export async function openMap(recipe, { scale = 1, draft = false } = {}) {
   const things = new Things({ onChange() {}, draft, scale });
   await things.load(recipe.place || []);
   for (const p of things.items) if (p.error) missing.push(p.block.ref);
+  return { tiles, things, missing };
+}
+
+/**
+ * @param {object} recipe            `{ map, cells, walls, place }`
+ * @param {object} [opts]
+ * @param {number} [opts.scale=1]    pixels per pixel of the map's own size
+ * @param {boolean} [opts.draft]     a preview's frames, for things that have faster ones
+ * @returns {Promise<{length, fps, loop, width, height, scale, missing, frame(i), dispose()}>}
+ *          `frame` lends one canvas, drawn again on every call
+ */
+export async function openMap(recipe, { scale = 1, draft = false } = {}) {
+  const m = recipe.map;
+  const { tiles, things, missing } = await openParts(recipe, { scale, draft });
 
   const { width, height } = mapSize(m);
   const canvas = surface(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));

@@ -1,0 +1,71 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   play.css — the player
+
+   The map and what it shows, nothing else: the suite's faces and colours from
+   core's theme, the map centred on the page, a sign as a card over it.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../../core/theme.css';
+
+.play {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Sized by main.js to fit the window, in the screen's own pixels. Framed by
+   an outline, not a border, so its box is the map's and nothing else. */
+#room {
+  display: block;
+  touch-action: manipulation;
+  outline: var(--nb-line) solid var(--nb-ink);
+  box-shadow: 7px 7px 0 var(--nb-ink);
+}
+#room.answers { cursor: pointer; }
+
+.play-note {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  margin: 0;
+  padding: 6px 10px;
+  background: var(--nb-paper);
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+  font: 400 12px var(--nb-mono);
+}
+
+/* A sign, used: its picture and its words over the map; a click puts it away. */
+.play-sign {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(17, 17, 17, 0.45);
+  cursor: pointer;
+}
+
+.play-sign[hidden], .play-note[hidden], .play-sign [hidden] { display: none; }
+
+.play-sign-card {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  max-width: min(92vw, 720px);
+  padding: 14px;
+  background: var(--nb-paper);
+  border: var(--nb-line) solid var(--nb-ink);
+  box-shadow: var(--nb-shadow);
+}
+
+.play-sign-picture {
+  display: block;
+  margin: 0 auto;
+  background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 12px 12px;
+}
+
+.play-sign-says { font: 500 15px/1.45 var(--nb-font); white-space: pre-wrap; }

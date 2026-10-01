@@ -53,6 +53,8 @@ let tilesTitle = '';
 let asked = 0;                 // the latest tileset asked for; an older answer is dropped
 let clockFps = 0;              // the rate the clock was fitted to
 let busy = false;              // a save or a download is drawing; nothing else starts
+let savedId = null;            // the map last saved or opened: what Play opens
+let playBtn = null;
 
 /** The map's clock: its loops play, each at its own speed. */
 const clock = new Playhead({ onShow: () => draw() });
@@ -107,6 +109,7 @@ async function openRequested() {
     walls = resize(recipe.walls || [], shape, shape, 0);
     await editing.things.load(recipe.place || []);
     editing.choose(null);
+    playable(opened.object.id);
     bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
@@ -165,13 +168,23 @@ function buildExport(panel) {
     b.textContent = label;
     b.addEventListener('click', onClick);
     actions.append(b);
+    return b;
   };
   button('Save to the vault  [S]', save, true);
+  playBtn = button('Play the last save ↗', () => window.open(`./play/?map=${encodeURIComponent(savedId)}`, '_blank'));
+  playBtn.title = 'The player, in a tab of its own: what answers outlined, signs shown, warps followed';
+  playable(null);
   button('Download the picture (PNG)', () => leave(async () => {
     const out = await downloadPicture({ map, cells, walls, place: editing.things.blocks(), tick: clock.tick });
     return `downloaded ${out.width} × ${out.height} px`;
   }));
   exp.body.append(actions);
+}
+
+/** The map the player opens: the one last saved or opened, none before. */
+function playable(id) {
+  savedId = id;
+  if (playBtn) playBtn.disabled = !id;
 }
 
 /** One way out: the clock held still, nothing else started, what happened said. */
@@ -197,6 +210,7 @@ function save() {
     bar.say('saving…');
     const object = await saveMap({ map, cells, walls, place: editing.things.blocks(), tick: clock.tick });
     if (!object) return 'no vault — downloaded instead';
+    playable(object.id);
     return `saved ${object.id} — ${object.title}` + (object.render.frames ? `, ${object.render.frames} frames at ${object.render.fps} fps` : '');
   });
 }

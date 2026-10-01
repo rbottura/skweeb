@@ -297,7 +297,9 @@ room`, works; the tileset use with it. Brick 2, 2026-10-02: walls painted
 apart from the tiles, solid things; events as RPG Maker has them, on the
 things — a sign, a warp to a map by its name, the spawn — a thing with no
 object an event alone; `walkable`, the spawn and a warp's arrival held in a
-test, for the avatar to ask.
+test, for the avatar to ask. Brick 3, the same day: the player, `play/`,
+point and click — what answers outlined, a sign shown over the map, a warp
+followed to the latest map of its name, Back coming back.
 
 **M9 — the rig: a character's bones, and its walk.** Chosen by the author on
 2026-10-02, from the inbox, to come **between M8's bricks 3 and 4**: by then
