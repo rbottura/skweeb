@@ -1,0 +1,21 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — rig
+
+   Everything that looks like the suite comes from core. rig says only its
+   layout — the viewer, then one column of drawers — and that a joint is
+   taken hold of.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+@import '../../core/param-panel.css';
+@import '../../core/vault-panel.css';
+
+.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+
+/* The bones' switch over the viewer (main.js). */
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+
+/* A joint under the pointer is taken hold of; held, it turns its bone (pointer.js). */
+.viewer-stage canvas { touch-action: none; }
+.viewer-stage canvas.joint { cursor: grab; }
+.viewer-stage canvas.dragging { cursor: grabbing; }

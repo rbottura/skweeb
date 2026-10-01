@@ -11,10 +11,16 @@
  *
  * No vault, or an object that will not open, is the caller's to meet: both
  * apps draw dots or nothing instead, and go on (rule 7).
+ *
+ * And one recorded mark's picture (`familySprite`): the sprite a gamepad
+ * mark names by family and index, without p5 — for the rig, which draws a
+ * drawing again from its marks.
  */
 
 import { Vault }         from './vault.js';
-import { familyFromSet } from './registry.js';
+import { familyFromSet, loadManifest, getSpriteUrl } from './registry.js';
+
+const GAMEPAD_MANIFEST = '/apps/gamepad/brush-manifest.json';
 
 const _images = new Map();         // url → Promise<?ImageBitmap>
 
@@ -52,4 +58,34 @@ export async function loadSprites(id) {
   const loaded = await Promise.all(family.urls.map(image));
   const images = loaded.filter(Boolean);
   return { title: object.title || id, images, missing: loaded.length - images.length };
+}
+
+/**
+ * The picture of one recorded mark: sprite `index` of the family `familyId` —
+ * a family of the gamepad's manifest, or a vault set the gamepad drew with,
+ * which a mark names by the set's id (core/registry.js `familyFromSet`). Null
+ * when neither has it: the family is not on this disk, or the set is gone.
+ *
+ * @param {string} familyId
+ * @param {number} index
+ * @returns {Promise<?ImageBitmap>}
+ */
+export async function familySprite(familyId, index) {
+  let url = '';
+  try {
+    await loadManifest(GAMEPAD_MANIFEST);
+    url = getSpriteUrl(familyId, index);
+  } catch {
+    // No manifest to read: only a vault set can answer.
+  }
+  if (!url && /_\d+_[0-9a-z]+$/.test(String(familyId))) {
+    try {
+      const { object } = await Vault.load(familyId);
+      const family = object.type === 'set' ? familyFromSet(object, Vault.index || []) : null;
+      url = (family && family.urls[index]) || '';
+    } catch {
+      url = '';
+    }
+  }
+  return url ? image(url) : null;
 }

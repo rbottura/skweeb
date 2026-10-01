@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="rig — a drawing made of marks, rigged at its marks: its strokes are its bones.">
+  <title>rig — skweeb</title>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!--
+    The shell from core/theme.css: the viewer, one column of drawers, and the
+    bar below. The drawing is drawn again from its marks with Canvas 2D; no p5.
+  -->
+  <div class="app">
+    <main class="app-main">
+      <section class="viewer" aria-label="the rigged drawing">
+        <div class="viewer-head">
+          <button class="nb-btn" id="bones" type="button" aria-pressed="true"
+                  title="The bones over the drawing, a joint at each end — never in anything saved [B]">bones</button>
+          <button class="nb-btn" id="rest" type="button"
+                  title="Every bone back where it was drawn [R]">rest</button>
+        </div>
+        <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+      </section>
+      <div class="app-side" id="side"></div>
+    </main>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -287,19 +287,13 @@ the portfolio's iframe, on a phone as on a laptop, with no vault and no
 WebGPU. The link: `any → map: a thing in the room`; tilesets and characters
 are uses.
 
-*So far:* brick 1 of six, 2026-09-30 (`apps/map/STATUS.md`): the map app
-opens on a grid of large tiles; a tileset — any set, offered through
-`core/uses.js` — painted into cells; things from the vault standing on
-cells, back to front by row, their loops playing by the map's clock; a
-`map` saved, replayed to the pixel, drawn again at scale 2, reopened, and
-placed in compose, where it plays. The link, `any → map: a thing in the
-room`, works; the tileset use with it. Brick 2, 2026-10-02: walls painted
-apart from the tiles, solid things; events as RPG Maker has them, on the
-things — a sign, a warp to a map by its name, the spawn — a thing with no
-object an event alone; `walkable`, the spawn and a warp's arrival held in a
-test, for the avatar to ask. Brick 3, the same day: the player, `play/`,
-point and click — what answers outlined, a sign shown over the map, a warp
-followed to the latest map of its name, Back coming back.
+*So far:* bricks 1 to 3 of six (`apps/map/STATUS.md`). 2026-09-30: tiles
+painted from any set offered as a tileset; things from the vault on cells,
+back to front by row, loops playing; a `map` saved, replayed to the pixel,
+reopened, placed in compose — the link, `any → map: a thing in the room`.
+2026-10-02: walls apart from the tiles, solid things; events on things as
+RPG Maker has them — a sign, a warp to a map by its name, the spawn; and
+the player, `play/`, point and click — a sign shown, a warp followed.
 
 **M9 — the rig: a character's bones, and its walk.** Chosen by the author on
 2026-10-02, from the inbox, to come **between M8's bricks 3 and 4**: by then
@@ -354,6 +348,10 @@ records a sequence.
 *Done when:* the author's slug walks the room in four directions, its stamps
 sliding over each other like scales. The links: `gamepad → rig: a drawing's
 strokes as limbs`; `rig → map: a character`, a use.
+
+*So far:* brick 1 of four, 2026-10-02 (`apps/rig/STATUS.md`): the slug opens
+in the rig as seven strokes and fifteen bones, drawn again from its marks
+as it was saved; a joint dragged bends it, the stamps fanning at the joints.
 
 **3D, parked.** It was M5. When it returns it starts from the GPU kit:
 ray-marched shapes and 3D fractals are shader work and come first, as a family
