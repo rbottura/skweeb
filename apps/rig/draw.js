@@ -21,6 +21,27 @@ export function stageOf(drawing) {
 }
 
 /**
+ * The room a pose's stamps could reach, in the picture's pixels: each
+ * bounded by half its sprite's diagonal, as core/stage/bounds.js bounds a
+ * mark, whichever way it is turned — or null with nothing to draw.
+ *
+ * @returns {?{x: number, y: number, w: number, h: number}}
+ */
+export function reachOf(drawing, places, images) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  drawing.stamps.forEach((stamp, i) => {
+    const image = images.get(stamp.key);
+    if (!image) return;
+    const r = 0.5 * Math.hypot(image.width, image.height) * Math.abs(stamp.scale), p = places[i];
+    x0 = Math.min(x0, p.x - r); y0 = Math.min(y0, p.y - r);
+    x1 = Math.max(x1, p.x + r); y1 = Math.max(y1, p.y + r);
+  });
+  if (!Number.isFinite(x0)) return null;
+  const x = Math.floor(x0), y = Math.floor(y0);
+  return { x, y, w: Math.max(1, Math.ceil(x1) - x), h: Math.max(1, Math.ceil(y1) - y) };
+}
+
+/**
  * @param {CanvasRenderingContext2D} ctx   a canvas the stage's size times `view`
  * @param {object} drawing                 drawing.js `drawingOf`
  * @param {Array<{x, y, rotation}>} places each stamp's place, skin.js `placeOf`

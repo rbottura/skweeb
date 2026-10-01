@@ -11,9 +11,14 @@
  * the gamepad paints a mark. The rig finds three strokes and three bones; at
  * rest it draws the still again as it was saved; the bones are drawn over
  * it, and B takes them away; the forearm's handle, dragged, swings the
- * forearm and leaves the body be; R puts it back to the pixel; a shorter
- * longest bone cuts more bones; a still with no marks is said to have none.
- * Needs no GPU, and brings what it needs: the brushes family is in git.
+ * forearm and leaves the body be. S saves the pose — a still the rig made,
+ * its bones whole, its turns, its drawing its parent — which replays to its
+ * render to the pixel, and at scale 2 is drawn again from the marks; R puts
+ * every bone back to the pixel; a shorter longest bone cuts more bones; a
+ * still with no marks is said to have none. `?open=` brings the pose back;
+ * the vault offers the drawing to the rig and the pose back to it; compose
+ * places the pose. Needs no GPU, and brings what it needs: the brushes
+ * family is in git.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -116,6 +121,11 @@ await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'b' 
 await wait(300);
 
 const atRest = await page.eval(`[...document.getElementById('stage').getContext('2d').getImageData(0, 0, document.getElementById('stage').width, document.getElementById('stage').height).data]`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'b' }))`);
+await wait(300);
+const restStage = await page.eval(`[...document.getElementById('stage').getContext('2d').getImageData(0, 0, document.getElementById('stage').width, document.getElementById('stage').height).data]`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'b' }))`);
+await wait(300);
 const bodyBefore = await box(150, 280, 100, 60), foreBefore = await box(300, 150, 40, 80);
 await page.pointer(await onScreen(320, 150), await onScreen(390, 240), 10);
 await wait(300);
@@ -125,8 +135,44 @@ c.ok('the forearm\'s handle, dragged, swings the forearm', (await page.eval(say)
 c.ok('and leaves the body be', differ(bodyBefore, bodyAfter) === 0, String(differ(bodyBefore, bodyAfter)));
 await c.shot('1-bent');
 
+// ── The pose saved, replayed, reopened, placed ──────────────────────────────
+
+const whole = `[...document.getElementById('stage').getContext('2d').getImageData(0, 0, document.getElementById('stage').width, document.getElementById('stage').height).data]`;
+const press = async key => { await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ${JSON.stringify(key)} }))`); await wait(300); };
+await press('b');
+const posedStage = await page.eval(whole);
+await press('b');
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await press('S');
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+const pid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const pose = pid ? await (await fetch(c.base + '/api/vault/' + pid)).json() : null;
+c.ok('S saves the pose: a still the rig made, its bones whole, a turn each, its drawing its parent', !!pose && pose.type === 'still'
+  && pose.origin.app === 'rig' && pose.recipe.bones.length === 3 && pose.recipe.turns.length === 3
+  && pose.recipe.turns[2] !== 0 && pose.recipe.turns[0] === 0 && JSON.stringify(pose.parents) === JSON.stringify([made.still])
+  && pose.title === 'a figure · posed', pose ? `${pose.title} · ${JSON.stringify(pose.recipe.turns)} · ${JSON.stringify(pose.parents)}` : await page.eval(say));
+if (pose) {
+  const replay = await page.eval(`(async () => {
+    const { Vault } = await import('/core/vault.js');
+    const { openFrames } = await import('/core/rebuild.js');
+    const { object, url } = await Vault.load(${JSON.stringify(pid)});
+    const h = await openFrames(object, { url });
+    const img = await createImageBitmap(await (await fetch(url)).blob());
+    const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
+    const rebuilt = await (await import('/apps/rig/rebuild.js')).openObject(object);
+    const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(rebuilt.frame(0), 0, 0);
+    const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
+    let worst = 0; for (let k = 0; k < da.length; k++) worst = Math.max(worst, Math.abs(da[k] - db[k]));
+    const big = await openFrames(object, { url, scale: 2 });
+    return { worst, size: [img.width, img.height], drawn: [rebuilt.width, rebuilt.height], big: [big.scale, big.frame(0).width, h.width] }; })()`);
+  c.ok('replayed from its recipe, it is its render, pixel for pixel', replay.worst === 0
+    && replay.size.join() === replay.drawn.join(), JSON.stringify(replay));
+  c.ok('at scale 2, drawn again from the marks at twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.big[2],
+    JSON.stringify(replay.big));
+}
+
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }))`);
-await wait(300);
+await page.until(`${say}.includes('at rest')`, { timeout: 8000 }).catch(() => {});   // past a save's few seconds on the bar
 const back = await page.eval(`[...document.getElementById('stage').getContext('2d').getImageData(0, 0, document.getElementById('stage').width, document.getElementById('stage').height).data]`);
 c.ok('R puts every bone back, to the pixel', back.length === atRest.length && differ(back, atRest) === 0
   && (await page.eval(say)).includes('at rest'), String(differ(back, atRest)));
@@ -139,6 +185,36 @@ c.ok('a shorter longest bone cuts more bones', (await page.eval(say)).includes('
 await c.go(c.base + '/apps/rig/?drawing=' + made.flat);
 await page.until(`${say}.includes('no marks')`, { timeout: 20000 }).catch(() => {});
 c.ok('a still with no marks is said to have none to rig', (await page.eval(say)).includes('no marks to rig'), await page.eval(say));
+
+if (pose) {
+  await c.go(c.base + '/apps/rig/?open=' + pid);
+  await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 }).catch(() => {});
+  await wait(500);
+  await press('b');
+  const back = await page.eval(whole);
+  const near = differ(back, posedStage), far = differ(back, restStage);
+  await c.shot('2-reopened');
+  c.ok('?open= brings the pose back, its bones as they were', (await page.eval(say)).includes('opened')
+    && back.length === posedStage.length && near * 10 < far, `${near} values from the pose saved, ${far} from the rest`);
+  await press('b');
+
+  await press('V');
+  const card = title => `[...document.querySelectorAll('.vp--visible .vp-card')].find(c => c.querySelector('.vp-name')?.textContent === ${JSON.stringify(title)})`;
+  const link = label => page.eval(`[...document.querySelectorAll('.vp-btn')].find(b => b.textContent === ${JSON.stringify(label)})?.title || ''`);
+  await page.until(`!!${card('a figure')}`, { timeout: 20000 }).catch(() => {});
+  await page.click(card('a figure'));
+  await page.until(`[...document.querySelectorAll('.vp-btn')].some(b => b.textContent === 'Rig this ↗')`, { timeout: 20000 }).catch(() => {});
+  c.ok('the vault offers a gamepad drawing to the rig — the M9 link', (await link('Rig this ↗')) === '/apps/rig/?drawing=' + made.still,
+    await link('Rig this ↗') || 'no link');
+  await page.click(card('a figure · posed'));
+  await page.until(`[...document.querySelectorAll('.vp-btn')].some(b => b.textContent === 'Open in rig ↗')`, { timeout: 20000 }).catch(() => {});
+  c.ok('and a pose back to the rig', (await link('Open in rig ↗')) === '/apps/rig/?open=' + pid && !(await link('Rig this ↗')),
+    await link('Open in rig ↗') || 'no link');
+
+  await c.go(c.base + '/apps/compose/?place=' + pid);
+  await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 }).catch(() => {});
+  c.ok('compose places the pose', (await page.eval(say)).includes('a figure · posed'), await page.eval(say));
+}
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

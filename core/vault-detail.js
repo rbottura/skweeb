@@ -233,6 +233,14 @@ function actions(o, urls, hooks) {
     row.append(place);
   }
 
+  // Into the rig, its strokes as bones: M9's link, `gamepad → rig`.
+  if (urls.rig && !hooks.pick) {
+    const rig = el('button', 'vp-btn', 'Rig this ↗');
+    rig.title = urls.rig;
+    rig.addEventListener('click', () => window.open(urls.rig, '_blank', 'noopener'));
+    row.append(rig);
+  }
+
   const open = el('button', 'vp-btn', 'Open render ↗');
   open.addEventListener('click', () => window.open(renderUrl, '_blank', 'noopener'));
 

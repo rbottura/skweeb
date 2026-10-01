@@ -74,7 +74,9 @@ between milestones, the author's idea: `ckt → particles: an emitter` —
 **done, 2026-09-30**: a dot-set, or a shape's ink, is where particles leave
 from. M7 `fractal → particles: a field` — **done, 2026-09-30**: escape
 time's slope, which way the set is, pulls particles; fractals answer it in
-their rebuild.js, the producer declaring the link.
+their rebuild.js, the producer declaring the link. M9 `gamepad → rig: a
+drawing's strokes as limbs` — **done, 2026-10-02**: the vault offers a
+gamepad still to the rig, *Rig this ↗*.
 
 The next three were chosen by the author on 2026-09-26, with 3D parked: the
 suite is to make the assets of a small game — 2D first, fake 3D where it helps,
@@ -349,9 +351,10 @@ records a sequence.
 sliding over each other like scales. The links: `gamepad → rig: a drawing's
 strokes as limbs`; `rig → map: a character`, a use.
 
-*So far:* brick 1 of four, 2026-10-02 (`apps/rig/STATUS.md`): the slug opens
-in the rig as seven strokes and fifteen bones, drawn again from its marks
-as it was saved; a joint dragged bends it, the stamps fanning at the joints.
+*So far:* bricks 1 and 2 of four, 2026-10-02 (`apps/rig/STATUS.md`): the slug
+opens in the rig as seven strokes and fifteen bones, drawn again from its
+marks as it was saved; a joint dragged bends it, the stamps fanning at the
+joints; a pose saved as a still, its bones whole, drawn again at any scale.
 
 **3D, parked.** It was M5. When it returns it starts from the GPU kit:
 ray-marched shapes and 3D fractals are shader work and come first, as a family

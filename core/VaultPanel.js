@@ -33,7 +33,7 @@ import { paintBar, deleteFlow } from './vault-trash.js';
 import { paintDetail, detailDrawer } from './vault-detail.js';
 import { folder, folderOf } from './vault-folder.js';
 export { folderOf };
-import { reopenUrl, placeUrl } from './reopen.js';
+import { reopenUrl, placeUrl, rigUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
 import { objectCard, pickableCell, fileUrl } from './vault-card.js';
 import { arrange, kinBox, columnsIn, fit, lineageOn, rememberLineage } from './vault-kin.js';
@@ -370,11 +370,11 @@ export class VaultPanel {
       return;
     }
     if (this._current !== id) return;         // clicked away while loading
-    const [reopen, place] = await Promise.all([reopenUrl(loaded.object), placeUrl(loaded.object)]);
+    const [reopen, place, rig] = await Promise.all([reopenUrl(loaded.object), placeUrl(loaded.object), rigUrl(loaded.object)]);
     if (this._current !== id) return;
 
     this._loaded = loaded.object;
-    this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl, reopen, place });
+    this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl, reopen, place, rig });
     this._markCurrent();
   }
 

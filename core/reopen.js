@@ -60,6 +60,26 @@ export async function placeUrl(object) {
 }
 
 /**
+ * The link that rigs `object` — a drawing's strokes as its bones, M9's link
+ * `gamepad → rig: a drawing's strokes as limbs` — or null when the rig does
+ * not take it. Which objects it takes is the rig's to say (`rigs()` in its
+ * rebuild.js): a still that keeps its marks.
+ *
+ * @param {object} object   a vault envelope
+ * @returns {Promise<?string>}
+ */
+export async function rigUrl(object) {
+  if (!object || !object.id || !isMarks(object.recipe)) return null;
+  try {
+    const module = await import(/* @vite-ignore */ '/apps/rig/rebuild.js');
+    if (typeof module.rigs !== 'function' || !module.rigs(object)) return null;
+  } catch {
+    return null;
+  }
+  return '/apps/rig/?drawing=' + encodeURIComponent(object.id);
+}
+
+/**
  * The object this page was asked to open, loaded — or null when it was not
  * asked. Throws, with a message fit for the bar, when the id is unknown or
  * belongs to another app.

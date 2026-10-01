@@ -11,8 +11,9 @@ M8's bricks 3 and 4, to give the map's avatar a body that walks.
 1. **The rig opens a gamepad still and proposes its bones** — done
    2026-10-02: strokes found, joints at corners, a joint dragged bends and
    the stamps follow.
-2. **A rig saved** — the drawing it rigs and its bones; replayed, reopened,
-   placed in compose.
+2. **A rig saved** — done 2026-10-02: a pose, a still the rig made, its
+   bones whole; replayed and drawn again at any scale, reopened, placed in
+   compose; the vault offers a gamepad drawing to the rig.
 3. **Motion** — each bone a wave, the phase lagging down a chain; an idle
    saved as a loop that closes.
 4. **A walk, and a character** — a back and a side drawn the same way, the
@@ -20,6 +21,24 @@ M8's bricks 3 and 4, to give the map's avatar a body that walks.
 
 ## Works now
 
+- **A pose saved** (2026-10-02; `frames.js`, `save.js`, `rebuild.js`;
+  `check-rig` 21). S saves the drawing as posed: a still, `origin.app:
+  'rig'`, titled *the drawing · posed* or *· at rest*, its recipe
+  `{ rig, bones, turns, box }` — the panel's values, the bones kept whole
+  rather than proposed again, so a pose replays as it was if proposals
+  change or a bone is one day moved by hand, a turn a bone, and the box its
+  ink fills, found as the gamepad trims a still (core/trim.js) — its
+  parent the drawing. frames.js `openPose` draws it, for the save and the
+  replay alike: the vault's replay is its render to the pixel, and at
+  scale 2 it is drawn again from the marks, sharp, where a gamepad still
+  is stretched. `?open=` brings back its values, its bones and its turns;
+  the vault offers *Open in rig ↗* for it, and compose places it. *Download
+  the pose (PNG)* too.
+- **`gamepad → rig: a drawing's strokes as limbs`** (2026-10-02;
+  `core/reopen.js` `rigUrl`, `core/vault-detail.js`). The vault offers
+  *Rig this ↗* for a still with marks — the rig's `rebuild.js` says which
+  it takes (`rigs`), as compose's says which it places — and the rig opens
+  on it, `?drawing=<id>`.
 - **A gamepad still, rigged at its marks** (2026-10-02; `drawing.js`,
   `strokes.js`, `bones.js`, `skin.js`, `draw.js`, `guides.js`,
   `pointer.js`; `tests/rig-strokes.mjs` 18, `tests/rig-bones.mjs` 18,
@@ -47,7 +66,9 @@ M8's bricks 3 and 4, to give the map's avatar a body that walks.
 
 ## Known
 
-- Nothing is saved: a pose is the editor's, gone on reload.
+- A pose keeps its bones by number, its turns beside them: a correction by
+  hand will have to keep those numbers, or carry the turns across.
+- A pose saved on a white ground is white across its whole box.
 - The proposal cannot yet be corrected by hand — a joint added or taken
   away, a chain hung elsewhere — and a bone has no name of its own.
 - A chain hangs from its stroke's first mark: an arm drawn from the hand
@@ -61,10 +82,12 @@ M8's bricks 3 and 4, to give the map's avatar a body that walks.
 
 ## Next single step
 
-**Brick 2, its first step: a pose saved.** S saves the drawing as posed —
-a still, `origin.app: 'rig'`, its recipe the panel's values and the turns,
-its parent the drawing — and a `rebuild.js` that draws it again from the
-marks at any scale, so it prints sharp where a gamepad still is stretched;
-`?open=` brings the pose back; compose places it. Then a link in the vault
-for a gamepad still with marks, *Rig this ↗* — `gamepad → rig: a drawing's
-strokes as limbs`.
+**Brick 3, its first step: a bone moves by itself.** In a *Motion* drawer,
+for the chosen bone — its handle pressed, as now — a turn that swings:
+*amplitude*, degrees, and *phase*; the loop *length* in frames and its
+*fps*, every bone's swing a whole number of cycles a loop so frame
+`length` is frame 0. Played by a `Playhead` (core/playback.js), each
+frame a pure function of its index (frames.js, as `openPose` is): no
+clock, no state. Held in a test: a loop closes, pixel for pixel. Then the
+phase lagging down a chain, so a stalk follows its base, and an idle saved
+as a `sequence`.
