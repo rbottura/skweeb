@@ -13,7 +13,7 @@
  * chain of three takes on a 1024 × 1024 picture.
  *
  * Needs a GPU: WebGPU has no software fallback here, where WebGL had one
- * (docs/roadmap.md, *Still open* 4). Not in the tests loop, for that reason.
+ * (docs/decisions.md, *The GPU kit is WebGPU*). Not in the tests loop, for that reason.
  */
 
 import { startCheck } from './check-kit.mjs';

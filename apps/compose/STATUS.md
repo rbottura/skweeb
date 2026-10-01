@@ -203,3 +203,118 @@ The five bricks are in. What would come after them, none of it started:
 - `main.js` is at 349 lines, the placement editing moved to `editing.js`;
   `scripts/check-compose.mjs` is at 336, and print scale has a check of its
   own.
+
+## Decided as it was built — M4, 2026-09-24
+
+Moved here from `docs/roadmap.md` on 2026-10-02, word for word, when the
+roadmap passed the 400-line cap: the plan compose was built to, and what
+each brick settled. `docs/decisions.md` keeps the days before and after.
+
+### The plan it was built to: the page, and what print resolution means
+
+Resolution is an **export** concern, never a live one. The live loop runs at
+screen size with a `density` parameter, as it does today. When a composition is
+right, export re-runs `render()` once, at scale, for the frames it needs — one
+pass, not a loop you have to watch.
+
+That makes a `composition` an object like any other, and a nearly free one,
+because placement is already specified for `.skw`:
+
+```json
+{
+  "type": "composition",
+  "recipe": {
+    "page": { "format": "A3", "mm": [297, 420], "bleed": 3 },
+    "place": [
+      { "ref": "gmp_…k3f9", "version": "latest", "at": 0,  "length": null,
+        "transform": { "x": 20, "y": 30, "scale": 1 } },
+      { "ref": "grd_…88f0", "version": 4, "at": 60, "length": 240,
+        "transform": { "x": 120, "y": 30, "scale": 0.5 } }
+    ]
+  }
+}
+```
+
+Its `render(recipe, { width, height, frame, rng, load })` walks `place`, calls
+`load()` on each ref and draws it at the transform. Export passes a `width` in
+pixels derived from the page size and the target dpi; nothing else changes.
+A3 at 300 dpi is about 3500 x 4960, so this is the moment `render()` has to be
+real — and the only moment.
+
+This is also where `sketch-2-print`'s print half could rejoin: paged.js, the
+A5 to A1 formats and the PDF export already solve the second half of M4.
+
+### What the bricks settled
+
+**M4 has begun: `apps/compose/` places one object on a page.** The first
+brick of five — the rest, in order, are in `apps/compose/STATUS.md`: the page
+plays, many placements, a composition in the vault, export at print scale. It
+settled four things the specification had left open.
+
+- **Two schemas, a page and a placement.** The page is core's frame group,
+  less the derived formats — a page has no one source to take its size from —
+  and less `zoom`, since every placement has its own scale. A placement is an
+  object and a transform, and its panel edits one entry of `place[]`: the list
+  is values, and no param type had to be invented for it.
+- **A transform is in page pixels from the page's centre**, before the page's
+  `scale`, turning clockwise about the object's centre
+  (`docs/object-model.md`, *Placement*). Pixels and not millimetres because the
+  page's size is pixels; millimetres are the dpi readout's business.
+- **An object's size on a page is its ink** — the bounds its loop reaches. A
+  gamepad loop replays onto the whole screen it was drawn on; placed by that,
+  it was centred and fitted by empty space.
+- **Frame N of anything is `openFrames()`**, in `core/rebuild.js`. The last
+  STATUS said rebuild.js already gave frame N of anything; it gave frame N of
+  a sequence, and a gamepad still, a shape or a set had no way through it. A
+  sequence is replayed, a picture is its render, and data goes to its app.
+
+**The second brick, the page plays, settled two more.**
+
+- **A page has its own rate, and a loop keeps its own speed.** What they
+  share is seconds, not ticks (`apps/compose/time.js`): a placement's `at`
+  and `length` are the page's frames, at the page's `fps`. It is 60 by
+  default because the gamepad records at 60 and ckt loops at 30, so at 60
+  every loop in the suite shows every one of its ticks.
+- **A preview asks for a preview's frames.** `openFrames(…, { draft: true })`
+  lets the app that made an object answer faster and near-exact, as its own
+  preview does; an export will not ask. It is the live half of "resolution is
+  an export concern", and it was needed at once: grid's exact growth made a
+  placed dither paint 2 frames a second, and its draft 43.
+
+**The third, many placements, waited on one answer from the author**, and
+got it the same day: on a page that moves, a still with no length is there
+for the whole page, a loop with no length plays again until the page ends,
+and the page lasts as long as its longest loop (`docs/object-model.md`,
+*Placement*). The object model had said a still lasts one frame, against its
+own "`at: 0` for something that is simply there". And a placement is picked
+up on the page by its box, not its ink, as a sheet of glass would be.
+
+**The fourth, a composition in the vault, left M4 one clause short.** A
+composition saves as `{ page, place }` with every placed object a parent,
+its render drawn from exact frames; compose's `rebuild.js` answers core's
+dispatch, so the vault plays a page that moves, `?open=<id>` restores one,
+and a page can be placed on a page. Against *Done when*: a sheet of objects
+from all three apps, one of them moving, previews live — yes; one object has
+a URL you can send — the `?open=` link, on the author's tailnet — yes;
+renders at print scale — the fifth brick. Core replays anything with a
+recipe and more than one frame now, not only a `sequence`.
+
+**The fifth, print scale, finished M4.** An object's size is its render's —
+every handle reports that, whatever it is asked — and `scale` asks for its
+frames at more pixels: a recording's marks at `renderScale`, grid's tiles
+at the cell's size times it, ckt's whole picture, a page's objects each at
+theirs. An app says which of its stills it can draw again (`redraws()`, as
+`reopens()`); a picture no app can draw again stays its pixels, says so
+(`handle.scale`), and the export names it before anyone prints. On a grid
+dither at 2x, drawn again keeps eleven times the fine detail of stretched.
+The export writes a PNG and a frames zip — the author's call, no PDF for
+now — and the zip holds its frames by reference, one frame's bytes at a time.
+
+**Side note, between M4's fourth and fifth bricks: the original grid's
+materials are in the vault.** grid_sketch loaded seven folders as mapping
+material — degz, trames, sprites, myFace, shapes, tiles, stones — and only
+tiles and trames had come across, as ramps grid boots with.
+`scripts/import-legacy-grid.mjs` put all seven into the vault as legacy grid
+materials, in the sketch's own order, offered to grid by their role; a dither
+with `tiles (legacy grid)` is pixel-identical to the shipped ramp. Done on a
+side branch, `grid/legacy-materials`, rebased onto main after.

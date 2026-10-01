@@ -380,7 +380,8 @@ A3 at 300 dpi is about 3500 x 4960 — for the frames actually wanted. It is
 never run at print scale in a loop you have to sit through.
 
 A composition is the case this exists for: many objects placed on a sheet,
-previewed live, exported once. See `docs/roadmap.md`.
+previewed live, exported once. See *Placement*, above, and the plan compose
+was built to, in `apps/compose/STATUS.md`.
 
 ## Frames are a cache, not an archive
 

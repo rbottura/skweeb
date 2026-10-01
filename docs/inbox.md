@@ -31,3 +31,12 @@ Nothing waiting.
   i can create my room at home, place items, allow interaction with them
   like posters, pc, toys etc." → M8 in `docs/roadmap.md`, the map editor,
   after M7 is finished; settled the same day (`docs/decisions.md`).
+- **2026-10-02 — a character, rigged: the slug.** Asked on 2026-09-27 —
+  "can we do armature or 2d sprites to animate them like in 3d with weight
+  calculation like in blender etc. ?" — and completed: "a caracter (and later
+  characters) that is like a snail slug human shaped character … it has
+  articulated arms and legs and 2 long eyes, i like that each part is compose
+  of multiple layers of brush 8 so the movement of body and body parts is
+  like scales parts of a reptile" — drawn as `gam_1790893329227_77f756`.
+  → M9 in `docs/roadmap.md`, the rig, rigged at its marks, between M8's
+  bricks 3 and 4; settled the same day (`docs/decisions.md`).

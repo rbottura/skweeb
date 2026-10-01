@@ -259,7 +259,10 @@ software fallback adapter besides. Nothing is cut to fit a machine without it. W
 apps still open, an app that makes GPU objects says why, and a GPU object
 shows as its saved render; a flag lifts the browser's list where the GPU is
 merely unlisted. The kit's API speaks canvases, chains and schemas, never GPU
-objects, so a second backend stays possible and is not built.
+objects, so a second backend stays possible and is not built. The probe ran
+on Chrome 154 and a Radeon RX 7600; WebGL2's case was that it runs anywhere,
+in software too, and takes the GLSL literature almost as it is — with no
+compute, and no new features coming.
 
 **A GPU render replays close, not bit for bit.** The author's answer, before
 the first GPU object was saved: a small difference between two machines is
@@ -360,3 +363,20 @@ and the name, `map`, the field's word — its reasons in M8 in
 `docs/roadmap.md`. What keeps it in the suite: a map is an object like any
 other, pure; the playable map is its export, as video is a loop's, and a
 player's state never enters a recipe.
+
+## Decided since, 2026-10-02
+
+**M9 is the rig, between M8's bricks 3 and 4.** The author, 2026-10-02,
+taking the slot proposed for an idea in the inbox: the armatures asked about
+on 2026-09-27, "with weight calculation like in blender", completed by a
+drawing — a slug shaped like a person (`gam_1790893329227_77f756`), whose
+parts are layers of one gamepad brush, to move "like scales parts of a
+reptile". After brick 3 the room is a showcase with no avatar; brick 4 is the
+avatar, the first thing in the suite that needs a body that walks. Settled
+with it: a drawing made of marks is rigged at its marks — a stroke a chain of
+bones, a stamp riding its own stroke's and staying whole — not its pixels,
+which would stretch the scales; the mesh and Blender's heat weights wait for
+a picture with no marks. *Armature* is Blender's word for the skeleton; the
+app takes the field's wider one, the *rig*. And no physics in it: what
+follows a move is a phase lagging down a chain, so a loop still closes;
+springs, stepped, belong to M8's player, as its toys do.
