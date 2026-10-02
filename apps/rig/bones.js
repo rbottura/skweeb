@@ -75,18 +75,20 @@ export function proposeBones(drawing, { corner = 30, longest = 200, least = 4 } 
 
 /**
  * Where every bone is, turned: `{ x, y, a }`, its joint and the way it
- * points. At rest — no turns — each is where it was drawn.
+ * points. At rest — no turns — each is where it was drawn. `lift` raises
+ * the whole drawing, px: its roots, and all that hangs from them.
  *
  * @param {object[]} bones
  * @param {number[]} [turns]   radians, by bone id; missing is 0
+ * @param {number} [lift=0]    px up
  * @returns {Array<{x: number, y: number, a: number}>}
  */
-export function posed(bones, turns = []) {
+export function posed(bones, turns = [], lift = 0) {
   const out = [];
   for (const b of bones) {
     const d = turns[b.id] || 0;
     if (b.parent == null) {
-      out.push({ x: b.x, y: b.y, a: b.angle + d });
+      out.push({ x: b.x, y: b.y - lift, a: b.angle + d });
       continue;
     }
     const p = bones[b.parent], t = out[b.parent];

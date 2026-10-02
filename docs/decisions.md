@@ -380,3 +380,15 @@ a picture with no marks. *Armature* is Blender's word for the skeleton; the
 app takes the field's wider one, the *rig*. And no physics in it: what
 follows a move is a phase lagging down a chain, so a loop still closes;
 springs, stepped, belong to M8's player, as its toys do.
+
+**Few human shapes, many worms.** The author, the same day, after seeing the
+rig's first loops: walking presets for a basic human-like skeleton, but few
+human shapes for now — rather many slugs and worms, moving like a snake
+following a path, undulating. So a chain is named a *part* — body, head, arm,
+leg, tail — guessed from how it hangs and corrected by hand, and a preset
+sets waves by part, so one walk drives any drawing named the same. And a
+worm crawls: its first stroke is a spine, every stamp carried with it — a
+wave down it in place, Hirose's serpenoid, or the body following its head
+round a closed path, slithering through a wiggle laid on the ground — whole
+ripples and whole laps, so a loop still closes; a function of the frame,
+never a simulation.

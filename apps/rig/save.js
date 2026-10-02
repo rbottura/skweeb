@@ -12,6 +12,7 @@
 
 import { openRig, framesOf } from './frames.js';
 import { isStill }       from './motion.js';
+import { crawls }        from './crawl.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { toPng, download } from '../../core/export.js';
@@ -22,13 +23,14 @@ export const APP = { app: 'rig', version: '1.0.0' };
  * A rig's recipe from the editor: its values, its bones whole, a turn a bone,
  * a wave a bone when any swings, and the box its ink fills.
  *
- * @param {object} args   { params, opened, bones, turns, waves } — `opened` frames.js `openDrawing`'s
+ * @param {object} args   { params, opened, bones, turns, waves, drawn } — `opened` frames.js
+ *                        `openDrawing`'s, `drawn` a drawn path's points (`openPathFrom`'s)
  */
-export function recipeOf({ params, opened, bones, turns, waves }) {
+export function recipeOf({ params, opened, bones, turns, waves, drawn = null }) {
   const recipe = { rig: params.values, bones: bones.map(b => ({ ...b })), turns: bones.map(b => turns[b.id] || 0) };
   const swinging = bones.map(b => (isStill(waves[b.id]) ? null : { ...waves[b.id] }));
   if (swinging.some(Boolean)) recipe.waves = swinging;
-  recipe.box = framesOf(recipe, opened).ink();
+  recipe.box = framesOf(recipe, opened, drawn).ink();
   return recipe;
 }
 
@@ -45,7 +47,7 @@ export async function saveRig(args) {
   const turned = recipe.turns.some(t => t);
   return Vault.save({
     type: loop ? 'sequence' : 'still',
-    title: `${args.title || 'a drawing'} · ${loop ? 'moving' : turned ? 'posed' : 'at rest'}`,
+    title: `${args.title || 'a drawing'} · ${crawls(recipe.rig) ? 'crawling' : loop ? 'moving' : turned ? 'posed' : 'at rest'}`,
     tags: ['rig', ...(loop ? ['loop'] : [])],
     origin: APP,
     seed: null,

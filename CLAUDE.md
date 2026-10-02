@@ -19,7 +19,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/fractals/` | M7: escape time on the GPU kit, a sprite copying itself, idles, and a field for particles | `apps/fractals/STATUS.md` |
 | `apps/particles/` | M6: particles as a function of time — loops that close, frames that stand alone | `apps/particles/STATUS.md` |
 | `apps/map/` | M8, begun: the map editor — a room on a grid of tiles, things placed on it, what can be walked and what answers, saved as a `map`; and its player, `play/`, point and click | `apps/map/STATUS.md` |
-| `apps/rig/` | M9, begun: a drawing made of marks, rigged at its marks — its strokes its bones, a joint dragged bends it | `apps/rig/STATUS.md` |
+| `apps/rig/` | M9, begun: a drawing made of marks, rigged at its marks — its strokes its bones; poses, swings, walks by part, worms crawling | `apps/rig/STATUS.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault | `docs/object-model.md`, *Trash, and deleting* |
@@ -93,7 +93,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl; do
   node tests/$t.mjs || break
 done
 
@@ -113,7 +113,7 @@ node scripts/check-sheet-engine.mjs     # that sheet loaded and played by Phaser
 node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag; copies of a star; idles of both families saved and placed
 node scripts/check-map.mjs              # M8's map editor: tiles, walls, things and their events; saved, replayed, reopened, placed in compose
 node scripts/check-map-play.mjs         # M8's player: what answers outlined, a sign shown, a warp followed and back
-node scripts/check-rig.mjs              # M9's rig: strokes found, bones proposed, the still again at rest, a joint bent and back
+node scripts/check-rig.mjs              # M9's rig: bones from strokes, a pose and a loop saved, presets by part, a crawl round a path
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips
 # its GPU half, unless Chrome is given the flags:

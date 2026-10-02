@@ -4,7 +4,8 @@ _last touched: 2026-10-02_
 M9's app (`docs/roadmap.md`, M9): a drawing made of marks, rigged at its
 marks. Its strokes are its bones; each stamp rides its own stroke's and
 stays whole, so a bend crowds and fans them like scales. It comes between
-M8's bricks 3 and 4, to give the map's avatar a body that walks.
+M8's bricks 3 and 4, to give the map's avatar a body that walks — and, the
+author's direction, many slugs and worms that crawl.
 
 ## The bricks
 
@@ -16,11 +17,40 @@ M8's bricks 3 and 4, to give the map's avatar a body that walks.
    compose; the vault offers a gamepad drawing to the rig.
 3. **Motion** — done 2026-10-02: each bone a wave, the phase lagging down
    a chain; a loop saved, replayed, closing to the pixel, placed.
-4. **A walk, and a character** — a back and a side drawn the same way, the
-   same bones' names; a set, `role: 'character'`, for M8's avatar.
+4. **Parts and presets** — done 2026-10-02: each chain named, a walk, a
+   waddle, an idle set by part, a rise.
+5. **Crawling** — done 2026-10-02: the body a spine, undulating in place or
+   following its head round a path.
+6. **Views and a character** — a back and a side drawn as the front, named
+   the same; a set, `role: 'character'`, for M8's avatar.
 
 ## Works now
 
+- **Worms crawl** (2026-10-02; `crawl.js`, `tests/rig-crawl.mjs` 30,
+  `check-rig` 35). The Crawl drawer moves the body — the first stroke, its
+  root chain's — as a spine, every stamp carried with it at the point
+  nearest it, its offset and its turn kept, so the scales turn with the
+  body and a stalk past the head stays on it. *In place*: a wave down the
+  body — *undulate* degrees, a *wavelength*, *ripples* a loop, head to tail —
+  its middle kept where it was drawn. *Along a path*: the head runs round a
+  *circle*, *ellipse* or *eight* (*path width*, *height*), or a *drawn*
+  path — a gamepad still, its first stroke, closed — *laps* a loop, either
+  *way round*; a *wiggle* laid on the path, *wiggles* round it, fixed to the
+  ground, makes the body slither through it, each point passing where the
+  head passed. The stage widens to the path, drawn dashed. Whole ripples
+  and laps close every loop to the bit; saved as `· crawling`, replayed to
+  its render. On the author's snake: it writhes in place, and slithers
+  round an ellipse; the slug scuttles round an eight.
+- **Parts, and presets by part** (2026-10-02; `parts.js`, `presets.js`,
+  `drawers.js`). Every chain is named — body, head, arm, leg, tail, left
+  and right as seen — guessed from where it hangs on the body and which way
+  it points, and changed in the chosen bone's *part*, for its whole chain:
+  on the slug, all seven guessed right. The Motion drawer's presets — *Walk*,
+  from the side; *Waddle*, from the front; *Idle*, breathing; *Still* —
+  set a wave on each named chain's first bone, the chain following, legs
+  against each other and each arm against its leg, and a *rise* of the
+  whole drawing, a share of its body's length, *rises* times a loop. The bar
+  says which parts move. What a preset sets is ordinary waves, edited after.
 - **Bones that swing by themselves** (2026-10-02; `motion.js`,
   `chosen.js`, `tests/rig-motion.mjs` 13, `check-rig` 27). A handle
   pressed chooses its bone — a drag still turns it — and the column on the
@@ -94,18 +124,21 @@ M8's bricks 3 and 4, to give the map's avatar a body that walks.
   a long limb swung far can leave it.
 - A family not on this disk draws nothing, and says how many sprites
   would not load (rule 6 keeps the heavy families out of git).
-- A walk needs a body that rises and falls: waves only turn, so far.
-- A wave is kept by bone number, as a turn is: another drawing's bones
-  are other numbers.
+- A wave is kept by bone number, as a turn is: a preset applied again to
+  another drawing is what carries a walk across, by part.
+- A crawl's spine is the first stroke: draw a worm's body first, from its
+  tail to its head — the last stamp, on top, is its face — and anything
+  else after, from the body out. A body much longer than its path overlaps
+  itself round it.
+- While crawling the bones are not drawn and no handle is taken: a crawl
+  is set in its drawer, a swing before it, crawl none.
+- The walk is a side view's; on a drawing from the front it reads as a
+  stomp — the waddle is the front's.
 
 ## Next single step
 
-**Brick 4, its first step: a walk, on the front.** Waves kept by a bone's
-place — its stroke, and its place along the chain — not its number, so a
-walk made on one drawing drives another drawn in the same order; a *rise*
-on the root's wave, so the body bobs; and the slug's walk set by hand:
-legs against each other, arms against the legs, the body rising twice a
-step. **Waiting on the author:** the slug drawn from the back and from the
-side, in the gamepad, each stroke from the body out and in the front's
-order — body, left stalk, right stalk, left arm, right arm, left leg,
-right leg — so one walk drives all three; the left is the side mirrored.
+**Brick 6 waits on the author: the slug's back and side**, drawn in the
+gamepad as the front was. A worm stands on the map already — a crawling
+loop placed as a thing goes round inside its own box. What comes next for
+the worms is M8's: a path drawn on the map, that a thing follows across
+the room.

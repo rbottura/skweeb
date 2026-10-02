@@ -10,14 +10,19 @@
  */
 
 /**
- * The stage round a picture, in its pixels: the picture and a margin a
- * quarter of its longer side on every side.
+ * The stage round a picture, in its pixels: the picture — and `also`, a
+ * path a crawl goes round — with a margin a quarter of its longer side on
+ * every side.
  *
+ * @param {object} drawing
+ * @param {?{x, y, w, h}} [also]
  * @returns {{x: number, y: number, width: number, height: number}}
  */
-export function stageOf(drawing) {
-  const pad = Math.round(0.25 * Math.max(drawing.width, drawing.height));
-  return { x: -pad, y: -pad, width: drawing.width + 2 * pad, height: drawing.height + 2 * pad };
+export function stageOf(drawing, also = null) {
+  let x0 = 0, y0 = 0, x1 = drawing.width, y1 = drawing.height;
+  if (also) { x0 = Math.min(x0, also.x); y0 = Math.min(y0, also.y); x1 = Math.max(x1, also.x + also.w); y1 = Math.max(y1, also.y + also.h); }
+  const pad = Math.round(0.25 * Math.max(x1 - x0, y1 - y0));
+  return { x: Math.floor(x0) - pad, y: Math.floor(y0) - pad, width: Math.ceil(x1 - x0) + 2 * pad, height: Math.ceil(y1 - y0) + 2 * pad };
 }
 
 /**

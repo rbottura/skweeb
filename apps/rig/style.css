@@ -12,7 +12,11 @@
 
 .app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
 
-/* What to do with no bone chosen, and what the chosen one is (chosen.js). */
+/* The presets at the head of the Motion drawer (drawers.js). */
+.rg-presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 4px 0 10px; }
+.rg-presets .nb-btn { padding: 0 6px; font-size: 12px; }
+
+/* What to do with no bone chosen, what the chosen one is, what a preset does. */
 .rg-note { margin: 4px 0 2px; font: 400 12px/1.45 var(--nb-mono); color: var(--nb-muted); }
 
 /* The bones' switch and the loop's, over the viewer (main.js). */

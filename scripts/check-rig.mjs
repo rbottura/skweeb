@@ -15,9 +15,14 @@
  * its bones whole, its turns, its drawing its parent — which replays to its
  * render to the pixel, and at scale 2 is drawn again from the marks; R puts
  * every bone back to the pixel; a shorter longest bone cuts more bones; a
- * still with no marks is said to have none. `?open=` brings the pose back;
- * the vault offers the drawing to the rig and the pose back to it; compose
- * places the pose. Needs no GPU, and brings what it needs: the brushes
+ * still with no marks is said to have none. A bone that swings makes a loop
+ * that plays, saves, replays and closes. The chosen bone's chain is named a
+ * part; a preset — a walk — moves the named chains, a chain renamed by hand
+ * takes its part's wave, and Still takes them off. Crawling along a path
+ * widens the stage to the path and goes round it; saved, the crawl replays
+ * to its render and closes. `?open=` brings the pose back; the vault offers
+ * the drawing to the rig and the pose back to it; compose places the pose
+ * and plays the loop. Needs no GPU, and brings what it needs: the brushes
  * family is in git.
  */
 
@@ -228,6 +233,69 @@ await num('swing, degrees', 0);
 await page.until(`!${say}.includes('a loop of')`, { timeout: 8000 }).catch(() => {});
 c.ok('no swing, no loop', !(await page.eval(say)).includes('a loop of')
   && await page.eval(`document.getElementById('play').disabled`), await page.eval(say));
+
+// ── Parts, presets, and crawling as a worm ──────────────────────────────────
+
+const pickIn = async (scope, name, value) => {
+  await page.typeInto(`[...document.querySelectorAll('${scope} .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})?.querySelector('select')`, value);
+  await wait(300);
+};
+const presetBtn = label => `[...document.querySelectorAll('.rg-presets .nb-btn')].find(b => b.textContent.startsWith(${JSON.stringify(label)}))`;
+c.ok('the chosen bone\'s chain is named: the arm, on the right as seen', (await page.eval(`[...document.querySelectorAll('#bone-side .pp-row')]
+  .find(r => r.querySelector('.pp-name')?.textContent === 'part')?.querySelector('select')?.value`)) === 'arm-right',
+  await page.eval(`[...document.querySelectorAll('#bone-side select')].map(s => s.value).join()`));
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.click(presetBtn('Walk'));
+await wait(400);
+c.ok('a preset sets the named chains moving, its loop and its rise', (await page.eval(say)).startsWith('walk: body, arm-right moving — a loop of 24 at 24 fps')
+  && Number(await page.eval(`${row('rise, px')}?.querySelector('.pp-num')?.value`)) > 0, await page.eval(say));
+await pickIn('#bone-side', 'part', 'leg-left');
+await page.click(presetBtn('Walk'));
+await wait(400);
+c.ok('a chain named by hand takes the part\'s wave', (await page.eval(say)).startsWith('walk: body, leg-left moving'), await page.eval(say));
+await page.click(presetBtn('Still'));
+await wait(400);
+c.ok('Still takes every wave and the rise off', await page.eval(`document.getElementById('play').disabled`)
+  && Number(await page.eval(`${row('rise, px')}?.querySelector('.pp-num')?.value`)) === 0, await page.eval(say));
+
+await pickIn('#side', 'crawl', 'along a path');
+await num('loop, frames', 40);
+await page.until(`${say}.includes('crawling along a path')`, { timeout: 8000 }).catch(() => {});
+const grown = await page.eval(`document.getElementById('stage').width / document.getElementById('stage').height`);
+const c1 = await page.eval(whole);
+await wait(500);
+const c2 = await page.eval(whole);
+c.ok('crawling along a path: the stage takes the path, and the body goes round it', (await page.eval(say)).includes('crawling along a path')
+  && Math.abs(grown - 1) > 0.05 && differ(c1, c2) > 200, `${grown.toFixed(2)} wide a high · ${differ(c1, c2)} values moved · ${await page.eval(say)}`);
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await press('S');
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 120000 });
+const cid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const crawlObject = cid ? await (await fetch(c.base + '/api/vault/' + cid)).json() : null;
+c.ok('saved: a loop, crawling', !!crawlObject && crawlObject.type === 'sequence' && crawlObject.title === 'a figure · crawling'
+  && crawlObject.render.frames === 40 && crawlObject.recipe.rig.crawl === 'along a path', crawlObject ? crawlObject.title : await page.eval(say));
+if (crawlObject) {
+  const crawled = await page.eval(`(async () => {
+    const { Vault } = await import('/core/vault.js');
+    const { openFrames } = await import('/core/rebuild.js');
+    const { object, url } = await Vault.load(${JSON.stringify(cid)});
+    const h = await openFrames(object, { url });
+    const img = await createImageBitmap(await (await fetch(url)).blob());
+    const grab = c => { const g = new OffscreenCanvas(img.width, img.height).getContext('2d'); g.drawImage(c, 0, 0);
+      return g.getImageData(0, 0, img.width, img.height).data; };
+    const saved = grab(img);
+    let best = Infinity;
+    for (let i = 0; i < h.length; i++) { const d = grab(h.frame(i)); let w = 0; for (let k = 0; k < d.length; k++) w = Math.max(w, Math.abs(d[k] - saved[k])); best = Math.min(best, w); }
+    const a = grab(h.frame(0)), b = grab(h.frame(h.length)), half = grab(h.frame(h.length / 2));
+    let closes = 0, apart = 0;
+    for (let k = 0; k < a.length; k++) closes = Math.max(closes, Math.abs(a[k] - b[k]));
+    for (let k = 3; k < a.length; k += 4) if (Math.abs(a[k] - half[k]) > 128) apart++;
+    return { length: h.length, best, closes, apart, size: [img.width, img.height] }; })()`);
+  c.ok('the crawl replays to its render, and closes: frame 40 is frame 0, to the pixel', crawled.length === 40 && crawled.best === 0
+    && crawled.closes === 0, JSON.stringify(crawled));
+  c.ok('halfway round, the body is elsewhere', crawled.apart > 500, JSON.stringify(crawled));
+}
+await pickIn('#side', 'crawl', 'none');
 
 await page.typeInto(`${row('longest bone, px')}?.querySelector('.pp-num')`, 50);
 await page.until(`${say}.includes('bones')`, { timeout: 8000 }).catch(() => {});

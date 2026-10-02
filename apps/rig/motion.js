@@ -58,5 +58,19 @@ export function turnsAt(bones, pose, waves, frame, length) {
   return out;
 }
 
-/** Whether anything moves: a wave with a swing on a bone that is there. */
-export const moves = (bones, waves) => bones.some(b => !isStill(waves[b.id]));
+/** Whether anything moves: a wave with a swing on a bone that is there, or the drawing rising. */
+export const moves = (bones, waves, values = {}) => bones.some(b => !isStill(waves[b.id])) || !!values.rise;
+
+/**
+ * How far the whole drawing rises at a frame, px — up is less y: `rise`
+ * either way, `rises` whole times a loop, so a walk bobs twice a stride and
+ * still closes.
+ *
+ * @param {{rise?: number, rises?: number}} values   the panel's
+ */
+export function riseAt({ rise = 0, rises = 1 } = {}, frame, length) {
+  if (!rise || !(length > 0)) return 0;
+  const times = Math.max(1, Math.round(rises || 1));
+  const step = ((times * Math.round(frame)) % length + length) % length;
+  return rise * Math.sin((2 * Math.PI * step) / length);
+}

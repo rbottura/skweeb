@@ -4,32 +4,39 @@
  *
  * A gamepad still is chosen — in the Drawing drawer, or `?drawing=<id>` —
  * and its strokes become its bones (bones.js), each stamp carried by its own
- * stroke's (skin.js). The drawing is drawn again from its marks (draw.js),
- * the bones over it (guides.js, B). A bone's far end, pressed, chooses it;
- * dragged, turns it, and the stamps follow, whole, crowding and fanning at
- * the joints. R puts every bone back where it was drawn. With no vault it
- * opens, empty, and says so (rule 7).
+ * stroke's (skin.js), each chain named a part (parts.js). The drawing is
+ * drawn again from its marks (draw.js), the bones over it (guides.js, B). A
+ * bone's far end, pressed, chooses it; dragged, turns it. R puts every bone
+ * back where it was drawn. With no vault it opens, empty, and says so
+ * (rule 7).
  *
- * The chosen bone swings by itself through its wave, edited in the column on
- * the left (chosen.js, motion.js): the loop plays by a Playhead — space stops
- * it — and each frame is the pose and the waves at that frame, nothing else.
+ * The chosen bone's wave and its chain's part are edited on the left
+ * (chosen.js); a preset sets every wave by part — a walk, a waddle, an idle
+ * (presets.js); the whole drawing may rise and fall; and the body may crawl
+ * as a worm's, in place or round a path (crawl.js). The loop plays by a
+ * Playhead — space stops it — every frame drawn by frames.js `framesOf`, as
+ * a save and a replay draw it.
  *
- * S saves (save.js): a pose, a still — or a loop, when a bone swings — its
- * recipe the values, the bones whole, their turns and waves, drawn by the
- * code a replay draws with (frames.js); `?open=<id>` brings one back.
+ * S saves (save.js): a pose, a still — or a loop, when anything moves — its
+ * recipe the values, the bones whole, their turns and waves; `?open=<id>`
+ * brings one back.
  */
 
 import { rigParams, GROUPS } from './params.js';
 import { drawingOf } from './drawing.js';
 import { proposeBones, posed, tipOf, turnToward } from './bones.js';
-import { bind, placeOf } from './skin.js';
-import { turnsAt, moves } from './motion.js';
-import { drawRig, stageOf } from './draw.js';
-import { drawBones } from './guides.js';
+import { bind } from './skin.js';
+import { turnsAt, moves, riseAt } from './motion.js';
+import { crawls } from './crawl.js';
+import { withParts } from './parts.js';
+import { preset } from './presets.js';
+import { drawRig, stageOf, reachOf } from './draw.js';
+import { drawBones, drawPath } from './guides.js';
 import { wireJoints } from './pointer.js';
 import { ChosenBone } from './chosen.js';
-import { openDrawing } from './frames.js';
-import { saveRig, downloadRig } from './save.js';
+import { buildDrawers } from './drawers.js';
+import { openDrawing, framesOf, openPathFrom, centreOf } from './frames.js';
+import { ways }         from './leaving.js';
 import { requested }    from '../../core/reopen.js';
 import { ParamPanel }   from '../../core/ParamPanel.js';
 import { VaultPanel }   from '../../core/VaultPanel.js';
@@ -47,8 +54,8 @@ const REACH = 14;              // CSS pixels: how near a handle a press takes ho
 let params, bar, chosenPanel;
 let opened = null;             // the drawing, opened (frames.js openDrawing): its recipe and its sprites
 let reopened = null;           // a rig reopened: its bones, turns and waves, for the drawing to take once open
-let busy = false;              // a save or a download is drawing; nothing else starts
-let drawing = null, bones = [], binds = [];
+let drawn = null;              // a drawn path's points, when the crawl follows one
+let drawing = null, bones = [], frames = null;
 let turns = [];                // the pose: a turn a bone, radians
 let waves = [];                // a wave a bone, or null where it keeps still (motion.js)
 let at = [];                   // the bones, posed at the frame on screen
@@ -58,8 +65,9 @@ let showBones = true;
 let asked = 0;                 // the latest drawing asked for; an older answer is dropped
 let view = 1, stage = { x: 0, y: 0, width: 1, height: 1 };
 let clockFps = 0;              // the rate the clock was fitted to
+let save = () => {};           // into the vault (leaving.js), once booted
 
-/** The loop's clock: what swings, swings by it. */
+/** The loop's clock: what moves, moves by it. */
 const clock = new Playhead({ onShow: () => repose(), onState: () => playBtn.setAttribute('aria-pressed', String(clock.playing)) });
 
 function boot() {
@@ -67,14 +75,10 @@ function boot() {
                   keys: 'drag a joint · B bones · R rest · space play · S save · V vault' });
   params = rigParams();
   const panel = new ParamPanel(params, { title: 'rig', mount: document.getElementById('side'), groups: GROUPS });
-  const pose = panel.addDrawer({ id: 'pose', title: 'Pose', before: 'motion' });
-  const rest = document.createElement('button');
-  rest.type = 'button';
-  rest.className = 'nb-btn nb-btn--wide';
-  rest.textContent = 'Back to rest  [R]';
-  rest.addEventListener('click', toRest);
-  pose.body.append(rest);
-  buildExport(panel);
+  const out = ways({ bar, clock, args: () => (drawing ? { params, opened, bones, turns, waves, drawn,
+                                                          title: opened.object.title || params.get('drawing'), tick: clock.tick } : null) });
+  save = out.save;
+  buildDrawers(panel, { rest: toRest, preset: applyPreset, still: toStill, save, download: out.download });
   chosenPanel = new ChosenBone({ mount: document.getElementById('bone-side'), onWave });
 
   params.on(key => {
@@ -83,7 +87,8 @@ function boot() {
     if (key === 'jump') rebuild('drawing');
     else if (key === 'corner' || key === 'longest') rebuild('bones');
     else if (key === 'bend') rebuild('skin');
-    else if (key === 'length' || key === 'fps') fitClock();
+    else if (key === 'path' || key === 'pathFrom' || key === 'crawl') loadPath();
+    else refresh();
   });
   wireJoints({ canvas, pictureOf, handleAt, choose, turn, hover: bone => { hot = bone; draw(); } });
   bonesBtn.addEventListener('click', () => toggleBones());
@@ -121,8 +126,8 @@ async function load() {
   const id = params.get('drawing');
   opened = null;
   drawing = null;
+  frames = null;
   bones = [];
-  binds = [];
   turns = [];
   waves = [];
   at = [];
@@ -138,6 +143,7 @@ async function load() {
     opened = was;
     if (was.missing) bar.announce(`${was.missing} of its sprites would not load: their family is not on this disk`);
     rebuild('drawing');
+    loadPath();
   } catch (err) {
     if (ask !== asked) return;
     bar.say(/no marks/.test(err.message)
@@ -153,40 +159,59 @@ function rebuild(from) {
   const v = params.values;
   if (from === 'drawing') drawing = drawingOf(opened.recipe, { jump: v.jump });
   if (reopened) {
-    bones = reopened.bones.map(b => ({ ...b }));
+    bones = withParts(reopened.bones);
     turns = reopened.turns.slice();
     waves = reopened.waves.slice();
     reopened = null;
   } else if (from !== 'skin') {
-    bones = proposeBones(drawing, { corner: v.corner, longest: v.longest });
+    bones = withParts(proposeBones(drawing, { corner: v.corner, longest: v.longest }));
     turns = [];
     waves = [];
     hot = null;
     choose(null);
   }
-  binds = bind(drawing, bones, { bend: v.bend });
-  fitClock();
-  repose();
+  refresh();
 }
 
-/** Every bone where it was drawn — the waves swing on about it — and no handle lit until the pointer finds one. */
+/** A drawn path, when the crawl follows one: its points, loaded, and everything again. */
+async function loadPath() {
+  drawn = null;
+  if (drawing) {
+    try {
+      drawn = await openPathFrom(params.values, centreOf(drawing));
+    } catch (err) {
+      bar.announce('could not follow that path: ' + err.message);
+    }
+  }
+  refresh();
+}
+
+/** Every frame's drawing made again for what is now: values, bones, waves (frames.js, as a save draws). */
+function refresh() {
+  frames = drawing ? framesOf({ rig: params.values, bones, turns, waves }, opened, drawn) : null;
+  fitClock();
+}
+
+/** Every bone where it was drawn — what moves moves on about it — and no handle lit until the pointer finds one. */
 function toRest() {
   turns = [];
   hot = null;
-  repose();
+  refresh();
 }
 
-/** Whether anything swings, and the loop it swings in. */
-const moving = () => !!drawing && moves(bones, waves);
+/** Whether anything moves, and the loop it moves in. */
+const crawling = () => !!drawing && crawls(params.values);
+const moving = () => !!drawing && (moves(bones, waves, params.values) || crawling());
 const loopLength = () => (moving() ? params.get('length') : 1);
 
-/** The bones where the pose and the waves put them at the frame on screen, and the drawing again. */
+/** The bones where the pose, the waves and the rise put them at the frame on screen, and the drawing again. */
 function repose() {
-  at = posed(bones, moving() ? turnsAt(bones, turns, waves, clock.tick, loopLength()) : turns);
+  const length = loopLength(), t = clock.tick;
+  at = posed(bones, moving() ? turnsAt(bones, turns, waves, t, length) : turns, moving() ? riseAt(params.values, t, length) : 0);
   draw();
 }
 
-/** The clock fitted to the loop: playing while anything swings. */
+/** The clock fitted to the loop: playing while anything moves. */
 function fitClock() {
   const length = loopLength(), fps = params.get('fps');
   if (length !== clock.length || fps !== clockFps) {
@@ -199,72 +224,39 @@ function fitClock() {
   repose();
 }
 
-// ── The chosen bone, and its wave ───────────────────────────────────────────
+// ── The chosen bone, its wave and its part; the presets ─────────────────────
 
 function choose(bone) {
   chosen = bone;
   const b = bone == null ? null : bones[bone];
-  chosenPanel.show(bone, b ? waves[bone] : null, b ? `Bone ${bone + 1} of ${bones.length}, on stroke ${b.stroke + 1}` : '');
+  chosenPanel.show(bone, b ? waves[bone] : null, b ? `Bone ${bone + 1} of ${bones.length}, on stroke ${b.stroke + 1}` : '', b ? b.part : 'none');
   draw();
 }
 
-function onWave(bone, values) {
-  waves[bone] = { ...values };
-  fitClock();
+function onWave(bone, { part, ...wave }) {
+  const stroke = bones[bone].stroke;
+  if (part !== bones[bone].part) bones = bones.map(b => (b.stroke === stroke ? { ...b, part } : b));
+  waves[bone] = wave;
+  refresh();
 }
 
-// ── Leaving: the vault, a picture ───────────────────────────────────────────
-
-function buildExport(panel) {
-  const exp = panel.addDrawer({ id: 'export', title: 'Export' });
-  const actions = document.createElement('div');
-  actions.className = 'pp-actions';
-  const button = (label, onClick, primary = false) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
-    b.textContent = label;
-    b.addEventListener('click', onClick);
-    actions.append(b);
-  };
-  button('Save to the vault  [S]', save, true);
-  button('Download the frame (PNG)', () => leave(async () => {
-    const out = await downloadRig(rigArgs());
-    return `downloaded ${out.width} × ${out.height} px`;
-  }));
-  exp.body.append(actions);
+/** A preset's waves on every named chain, its loop and its rise in the panel. */
+function applyPreset(name) {
+  if (!drawing) return bar.announce('choose a drawing first');
+  const out = preset(name, bones);
+  waves = out.waves;
+  params.set(out.values);
+  refresh();
+  choose(chosen);
+  const parts = [...new Set(bones.filter(b => out.waves[b.id]).map(b => b.part))];
+  bar.announce(`${name}: ${parts.join(', ') || 'no part named'} moving — a loop of ${out.values.length} at ${out.values.fps} fps`);
 }
 
-const rigArgs = () => ({ params, opened, bones, turns, waves, title: opened.object.title || params.get('drawing'), tick: clock.tick });
-
-/** One way out: the clock held still, nothing else started, what happened said. */
-async function leave(action) {
-  if (busy) return;
-  if (!drawing) return bar.announce('nothing to save: choose a drawing first');
-  busy = true;
-  const was = clock.playing;
-  clock.pause();
-  try {
-    bar.announce(await action());
-  } catch (err) {
-    console.error('[rig] failed:', err);
-    bar.announce('failed: ' + err.message);
-  } finally {
-    busy = false;
-    if (was) clock.play();
-    Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
-  }
-}
-
-/** A pose or a loop into the vault (save.js). */
-function save() {
-  return leave(async () => {
-    bar.say('saving…');
-    const object = await saveRig(rigArgs());
-    if (!object) return 'no vault — downloaded instead';
-    return `saved ${object.id} — ${object.title}, ${object.render.w} × ${object.render.h} px`
-      + (object.render.frames ? `, ${object.render.frames} frames at ${object.render.fps} fps` : '');
-  });
+function toStill() {
+  waves = [];
+  params.set({ rise: 0 });
+  refresh();
+  choose(chosen);
 }
 
 // ── Taking hold of a joint ──────────────────────────────────────────────────
@@ -277,9 +269,9 @@ function pictureOf(e) {
            y: stage.y + ((e.clientY - r.top) / r.height) * stage.height };
 }
 
-/** The bone whose far end is nearest q, within reach — or null. */
+/** The bone whose far end is nearest q, within reach — or null; none while the body crawls. */
 function handleAt(q) {
-  if (!showBones || !bones.length) return null;
+  if (!showBones || !bones.length || crawling()) return null;
   const perCss = stage.width / Math.max(1, canvas.getBoundingClientRect().width);
   let best = null, d = REACH * perCss;
   for (const b of bones) {
@@ -312,26 +304,35 @@ function draw() {
   requestAnimationFrame(() => { pending = false; paint(); });
 }
 
+/** The room a path needs: its box, and the reach of the drawing's widest stamp round it. */
+function pathRoom() {
+  if (!frames || !frames.path) return null;
+  const xs = frames.path.points.map(p => p.x), ys = frames.path.points.map(p => p.y);
+  const reach = reachOf(drawing, drawing.stamps.map(s => ({ x: 0, y: 0, rotation: s.rotation })), opened.images);
+  const r = reach ? Math.max(-reach.x, -reach.y) : 0;
+  return { x: Math.min(...xs) - r, y: Math.min(...ys) - r, w: Math.max(...xs) - Math.min(...xs) + 2 * r, h: Math.max(...ys) - Math.min(...ys) + 2 * r };
+}
+
 function paint() {
-  if (!drawing) {
+  if (!drawing || !frames) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     return;
   }
-  stage = stageOf(drawing);
+  stage = stageOf(drawing, pathRoom());
   view = viewFactor(canvas, stage, 1);
   const w = Math.max(1, Math.round(stage.width * view)), h = Math.max(1, Math.round(stage.height * view));
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
-  const places = drawing.stamps.map((s, i) => placeOf(s, binds[i], bones, at));
-  drawRig(ctx, drawing, places, opened.images, view, stage);
+  drawRig(ctx, drawing, frames.placesAt(moving() ? clock.tick : 0), opened.images, view, stage);
   const dpp = canvas.width / Math.max(1, canvas.getBoundingClientRect().width);
-  if (showBones) drawBones(ctx, bones, at, view, stage, dpp, [hot, chosen]);
+  if (showBones && frames.path) drawPath(ctx, frames.path, view, stage, dpp);
+  if (showBones && !crawling()) drawBones(ctx, bones, at, view, stage, dpp, [hot, chosen]);
 
   const turned = turns.some(t => t);
   bar.output({ width: drawing.width, height: drawing.height, scale: 1 });
   bar.say(`${drawing.strokes.length} strokes · ${bones.length} bones · ${drawing.stamps.length} stamps`
-    + (turned ? ' · posed' : ' · at rest')
+    + (crawling() ? ` · crawling ${params.get('crawl')}` : turned ? ' · posed' : ' · at rest')
     + (moving() ? ` · a loop of ${clock.length} at ${params.get('fps')} fps, frame ${clock.tick + 1}` : '')
     + (showBones && bones.length && !moving() ? ' — drag a joint to bend it' : ''));
 }

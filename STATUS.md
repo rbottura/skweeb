@@ -13,7 +13,7 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 - **M9 is the rig, between M8's bricks 3 and 4** (the author's idea from
   the inbox, `docs/roadmap.md`, M9): a drawing made of marks rigged at its
-  marks. Three of its four bricks done the same day (`apps/rig/STATUS.md`):
+  marks. Five of its six bricks done the same day (`apps/rig/STATUS.md`):
   - **Strokes are bones** (`check-rig` 27; `tests/rig-strokes.mjs` 18,
     `rig-bones` 18). A gamepad still's marks become stamps; strokes found
     where the brush jumped, never where it paused; a stroke jointed at its
@@ -32,6 +32,14 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
     wave — swing, cycles, phase — the chain following a lag later, so a
     stalk whips; whole cycles close every loop to the bit. Saved as a
     `sequence`, replayed, placed in compose and played.
+  - **Walks by part, and worms that crawl** — the author's direction, few
+    human shapes and many worms (`tests/rig-crawl.mjs` 30, `check-rig` 35).
+    Every chain named — body, head, arm, leg, tail — by guess, all seven
+    of the slug's right, and by hand; *Walk*, *Waddle*, *Idle* set waves by
+    part, with a rise. A worm's first stroke is its spine: a wave down it in
+    place, or the body following its head round a circle, an ellipse, an
+    eight or a drawn path, slithering through wiggles fixed to the ground;
+    every loop closes.
   - `core/sprites.js` `familySprite`: a recorded mark's picture without p5.
 - **M8, bricks 2 and 3** (`apps/map/STATUS.md`):
   - **Walls, and things that answer** (`check-map` 44, `tests/map-walk.mjs`
@@ -160,16 +168,17 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Thirty-nine files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-10-02). Newest: `rig-strokes`, `rig-bones`
-and `rig-motion` — strokes, corners, bones, the skin's promises, waves that
-close; `map-walk` — what can be walked, the spawn, a warp's arrival;
+Forty files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-10-02). Newest: `rig-crawl` — a spine that
+carries, undulates and follows a path, closing; parts and presets;
+`rig-strokes`, `rig-bones` and `rig-motion` — strokes, corners, bones, the
+skin's promises, waves that close; `map-walk` — what can be walked, the spawn, a warp's arrival;
 `map-play` — what answers, a sign's picture, the latest map of a name.
 
 Sixteen browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-rig` (27),
+throws or its console is not quiet. Newest: `check-rig` (35),
 `check-map-play` (16); `check-map` grew to 44. On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
@@ -219,13 +228,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M9, brick 4, its first step: a walk on the front** (`apps/rig/STATUS.md`).
-Waves kept by a bone's place — its stroke, and its place along its chain —
-rather than its number, so a walk made on one drawing drives another drawn
-in the same order; a *rise* on the root, so the body bobs; the slug's walk
-set by hand, legs against each other, arms against the legs. **Waiting on
-the author**: the slug drawn from the back and from the side, strokes in
-the front's order. Then M8's brick 4, the avatar, walks it.
+**Waiting on the author: the slug from the back and from the side**, drawn
+in the gamepad as the front was — M9's last brick, a character set by
+direction, for M8's avatar (`apps/rig/STATUS.md`). Meanwhile, for the
+worms: **a path drawn on the map that a thing follows across the room** —
+M8's, beside the avatar — so a crawling worm goes about the room and not
+only round its own box.
 
 Waiting elsewhere (their STATUS files): a Julia set by clicking the
 Mandelbrot set, more fractal families, deeper zoom; colour over life in

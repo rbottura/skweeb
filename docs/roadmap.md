@@ -297,64 +297,52 @@ reopened, placed in compose — the link, `any → map: a thing in the room`.
 RPG Maker has them — a sign, a warp to a map by its name, the spawn; and
 the player, `play/`, point and click — a sign shown, a warp followed.
 
-**M9 — the rig: a character's bones, and its walk.** Chosen by the author on
-2026-10-02, from the inbox, to come **between M8's bricks 3 and 4**: by then
-the room is a showcase, point and click, and its avatar is the first thing in
-the suite that needs a body that walks. Asked first on 2026-09-27 — "armature
-or 2d sprites to animate them like in 3d with weight calculation like in
-blender" — and completed with a drawing: a slug shaped like a person,
-`gam_1790893329227_77f756`, 610 stamps of the brushes' `sprite(9).png` (#9 in
-the panel), its body, arms, legs and two long eye stalks each made of layers
-of them, so that what moves moves "like scales parts of a reptile".
+**M9 — the rig: bones, walks, and worms.** Chosen by the author on
+2026-10-02, from the inbox, to come **between M8's bricks 3 and 4**: the
+avatar is the first thing in the suite that needs a body that walks. Asked
+on 2026-09-27 — "armature or 2d sprites to animate them like in 3d with
+weight calculation like in blender" — and completed with a drawing: a slug
+shaped like a person, `gam_1790893329227_77f756`, 610 stamps of the brushes'
+`sprite(9).png` (#9 in the panel), its parts layers of them, to move "like
+scales parts of a reptile". The same day, after trying it, the author's
+direction: few human shapes for now, and **many slugs and worms**, crawling
+round paths and undulating (`docs/decisions.md`).
 
-`apps/rig/`, the **rig**: the field's word for a skeleton and what it moves.
-Blender calls the skeleton an *armature* — the sculptor's word for the wire
-inside the clay — and so does DragonBones; Spine and Godot say *skeleton*.
-Neither means physics, which is laid on top: a *ragdoll*, or springs on a few
-bones for what follows a move.
+`apps/rig/`, the **rig**: the field's word for a skeleton and what it moves —
+Blender's *armature*, Spine's and Godot's *skeleton*; physics would be laid
+on top. The suite's own way in: **a drawing made of marks is rigged at its
+marks, not its pixels.** A gamepad still keeps every stamp in the order
+drawn; where the brush jumped the pen was lifted, so its strokes are found
+again, and a stroke drawn from the body out is a limb's line. A stroke is a
+chain of bones, jointed at its corners; a stamp rides its own stroke's bones
+and stays whole, so a bend fans the stamps like scales, where skinning
+pixels would stretch them. Canvas 2D from the marks: no p5, no mesh, no GPU.
 
-The suite's own way in: **a drawing made of marks is rigged at its marks, not
-its pixels.** A gamepad still keeps every stamp in its recipe, in the order
-drawn; a pause between two is the pen lifted, so its strokes are found again,
-and a stroke drawn from the body out is a limb's line. The slug's are seven —
-a body, two stalks, two arms, two legs — each limb drawn from the body to its
-tip, its elbows, knee and bends corners in it.
+The bricks: **(1)** a gamepad still opened, its bones proposed, a joint
+dragged. **(2)** A pose saved, drawn again at any scale; `?open=`; placed.
+**(3)** Motion: a wave a bone, the phase lagging down a chain so a stalk
+follows its base, every loop closing. **(4)** Parts and presets: each chain
+named — body, head, arm, leg, tail — guessed from how it hangs, corrected by
+hand; a walk, a waddle, an idle set by part, and a rise, so one walk drives
+any drawing named the same. **(5)** Crawling, for worms: the body's stroke a
+spine, a wave running down it in place, or the body following its head round
+a path — a circle, an ellipse, an eight, or a stroke drawn in the gamepad —
+slithering through wiggles laid on the ground. **(6)** Views and a character:
+a back and a side drawn as the front, named the same, the left the side
+mirrored — a set, `role: 'character'`, walks by direction, for M8's avatar.
 
-- **A stroke is a chain of bones**, jointed at its corners, hung from the
-  part it starts on: proposed from the drawing, corrected by hand.
-- **A stamp rides its own stroke's bones**, never the nearest, and stays
-  whole: a bend crowds the stamps inside it and fans those outside — the
-  scales — where skinning pixels would stretch them. Blended over the few
-  stamps either side of a joint, a bend is a fan, not a hinge.
-- **Canvas 2D from the marks**: no p5 (rule 8), no mesh, no GPU. The parts
-  are drawn in the strokes' order — the limbs over the body, as drawn —
-  which the rig may change.
+Later, past *Done when*: pictures with no marks — a mesh from their alpha,
+Blender's heat weights, skinning on the GPU kit; IK; keyframes on core's
+easing; the gamepad as a puppeteer.
 
-The bricks, in order: **(1)** the rig app opens a gamepad still, finds its
-strokes and proposes its bones; a joint dragged bends, the stamps follow.
-**(2)** A rig saved — the drawing it rigs and its bones — replayed, reopened,
-placed in compose. **(3)** Motion: each bone a wave — a turn, an amplitude, a
-phase, whole cycles a loop — the phase lagging down a chain, so a stalk
-follows its base and every loop closes; an idle saved as a loop. **(4)** A
-walk, and a character: legs against each other, arms against the legs, the
-body bobbing twice a step; a back and a side drawn the same way, with the same
-bones' names, so one walk drives every view, the left the side mirrored —
-saved as a set, `role: 'character'`, its walks by direction, for M8's avatar.
+*Done when:* the author's slug walks the room in four directions, and worms
+crawl about it on their paths, their stamps sliding like scales. The links:
+`gamepad → rig: a drawing's strokes as limbs`; `rig → map: a character`.
 
-Later, past *Done when*: pictures with no marks — a mesh traced from their
-alpha, Blender's automatic weights as heat spread inside the shape, skinning
-on the GPU kit, the plan of 2026-09-27; IK; keyframes on core's easing; parts
-from the vault; the gamepad as a puppeteer, a performance recorded as it
-records a sequence.
-
-*Done when:* the author's slug walks the room in four directions, its stamps
-sliding over each other like scales. The links: `gamepad → rig: a drawing's
-strokes as limbs`; `rig → map: a character`, a use.
-
-*So far:* bricks 1 to 3 of four, 2026-10-02 (`apps/rig/STATUS.md`): the slug
-is seven strokes and fifteen bones, drawn again from its marks as saved; a
-joint dragged bends it, the stamps fanning; a pose saved, sharp at any scale;
-bones swinging, stalks whipping, a loop that closes. Brick 4 waits on views.
+*So far:* bricks 1 to 5 of six, 2026-10-02 (`apps/rig/STATUS.md`). The slug
+is seven strokes and fifteen bones, its chains named rightly by guess; it
+walks, waddles, idles; a snake undulates in place and slithers round a path;
+every loop closes. Brick 6 waits on the author's views.
 
 **3D, parked.** It was M5. When it returns it starts from the GPU kit:
 ray-marched shapes and 3D fractals are shader work and come first, as a family
