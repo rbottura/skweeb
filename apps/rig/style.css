@@ -2,17 +2,20 @@
    style.css — rig
 
    Everything that looks like the suite comes from core. rig says only its
-   layout — the viewer, then one column of drawers — and that a joint is
-   taken hold of.
+   layout — the chosen bone, the viewer, the rig's drawers — and that a joint
+   is taken hold of.
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
 @import '../../core/param-panel.css';
 @import '../../core/vault-panel.css';
 
-.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
 
-/* The bones' switch over the viewer (main.js). */
+/* What to do with no bone chosen, and what the chosen one is (chosen.js). */
+.rg-note { margin: 4px 0 2px; font: 400 12px/1.45 var(--nb-mono); color: var(--nb-muted); }
+
+/* The bones' switch and the loop's, over the viewer (main.js). */
 .viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
 
 /* A joint under the pointer is taken hold of; held, it turns its bone (pointer.js). */

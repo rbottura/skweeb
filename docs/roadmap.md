@@ -351,10 +351,10 @@ records a sequence.
 sliding over each other like scales. The links: `gamepad → rig: a drawing's
 strokes as limbs`; `rig → map: a character`, a use.
 
-*So far:* bricks 1 and 2 of four, 2026-10-02 (`apps/rig/STATUS.md`): the slug
-opens in the rig as seven strokes and fifteen bones, drawn again from its
-marks as it was saved; a joint dragged bends it, the stamps fanning at the
-joints; a pose saved as a still, its bones whole, drawn again at any scale.
+*So far:* bricks 1 to 3 of four, 2026-10-02 (`apps/rig/STATUS.md`): the slug
+is seven strokes and fifteen bones, drawn again from its marks as saved; a
+joint dragged bends it, the stamps fanning; a pose saved, sharp at any scale;
+bones swinging, stalks whipping, a loop that closes. Brick 4 waits on views.
 
 **3D, parked.** It was M5. When it returns it starts from the GPU kit:
 ray-marched shapes and 3D fractals are shader work and come first, as a family

@@ -173,9 +173,61 @@ if (pose) {
 
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }))`);
 await page.until(`${say}.includes('at rest')`, { timeout: 8000 }).catch(() => {});   // past a save's few seconds on the bar
-const back = await page.eval(`[...document.getElementById('stage').getContext('2d').getImageData(0, 0, document.getElementById('stage').width, document.getElementById('stage').height).data]`);
-c.ok('R puts every bone back, to the pixel', back.length === atRest.length && differ(back, atRest) === 0
-  && (await page.eval(say)).includes('at rest'), String(differ(back, atRest)));
+await press('b');                                  // the drawing alone: the chosen bone's handle stays lit
+const back = await page.eval(whole);
+await press('b');
+c.ok('R puts every bone back, to the pixel', back.length === restStage.length && differ(back, restStage) === 0
+  && (await page.eval(say)).includes('at rest'), String(differ(back, restStage)));
+
+// ── A bone that swings by itself: a loop ────────────────────────────────────
+
+const num = (name, value) => page.typeInto(`${row(name)}?.querySelector('.pp-num')`, value);
+c.ok('the bone last pressed is chosen, its wave beside the drawing', (await page.eval(`document.querySelector('#bone-side .rg-note')?.textContent || ''`))
+  .startsWith('Bone 3 of 3'), await page.eval(`document.querySelector('#bone-side .rg-note')?.textContent || ''`));
+await num('swing, degrees', 30);
+await page.until(`${say}.includes('a loop of 60 at 30 fps')`, { timeout: 8000 }).catch(() => {});
+const t1 = await page.eval(whole);
+await wait(400);
+const t2 = await page.eval(whole);
+c.ok('a swing, and the loop plays by itself', (await page.eval(say)).includes('a loop of 60 at 30 fps') && differ(t1, t2) > 100,
+  `${differ(t1, t2)} values moved · ${await page.eval(say)}`);
+await num('loop, frames', 30);
+await page.until(`${say}.includes('a loop of 30')`, { timeout: 8000 }).catch(() => {});
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await press('S');
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 90000 });
+const lid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const loop = lid ? await (await fetch(c.base + '/api/vault/' + lid)).json() : null;
+c.ok('saved: a loop, its frames and rate, the swinging bone\'s wave and no other', !!loop && loop.type === 'sequence'
+  && loop.render.frames === 30 && loop.render.fps === 30 && loop.title === 'a figure · moving'
+  && loop.recipe.waves[2].swing === 30 && loop.recipe.waves[0] === null && loop.recipe.waves[1] === null,
+  loop ? `${loop.type} · ${loop.title} · ${loop.render.frames} at ${loop.render.fps} · ${JSON.stringify(loop.recipe.waves)}` : await page.eval(say));
+if (loop) {
+  const replayed = await page.eval(`(async () => {
+    const { Vault } = await import('/core/vault.js');
+    const { openFrames } = await import('/core/rebuild.js');
+    const { object, url } = await Vault.load(${JSON.stringify(lid)});
+    const h = await openFrames(object, { url });
+    const img = await createImageBitmap(await (await fetch(url)).blob());
+    const grab = c => { const g = new OffscreenCanvas(img.width, img.height).getContext('2d'); g.drawImage(c, 0, 0);
+      return g.getImageData(0, 0, img.width, img.height).data; };
+    const saved = grab(img);
+    let best = Infinity;
+    for (let i = 0; i < h.length; i++) { const d = grab(h.frame(i)); let w = 0; for (let k = 0; k < d.length; k++) w = Math.max(w, Math.abs(d[k] - saved[k])); best = Math.min(best, w); }
+    const first = grab(h.frame(0)), after = grab(h.frame(h.length));
+    let closes = 0; for (let k = 0; k < first.length; k++) closes = Math.max(closes, Math.abs(first[k] - after[k]));
+    const mid = grab(h.frame(Math.floor(h.length / 4)));
+    let moved = 0; for (let k = 0; k < first.length; k += 4) if (Math.abs(first[k + 3] - mid[k + 3]) > 24) moved++;
+    return { length: h.length, best, closes, moved }; })()`);
+  c.ok('the vault replays it: one of its frames is its render, pixel for pixel', replayed.length === 30 && replayed.best === 0,
+    JSON.stringify(replayed));
+  c.ok('and the loop closes: frame 30 is frame 0, to the pixel, and a quarter in it has moved', replayed.closes === 0
+    && replayed.moved > 100, JSON.stringify(replayed));
+}
+await num('swing, degrees', 0);
+await page.until(`!${say}.includes('a loop of')`, { timeout: 8000 }).catch(() => {});
+c.ok('no swing, no loop', !(await page.eval(say)).includes('a loop of')
+  && await page.eval(`document.getElementById('play').disabled`), await page.eval(say));
 
 await page.typeInto(`${row('longest bone, px')}?.querySelector('.pp-num')`, 50);
 await page.until(`${say}.includes('bones')`, { timeout: 8000 }).catch(() => {});
@@ -214,6 +266,11 @@ if (pose) {
   await c.go(c.base + '/apps/compose/?place=' + pid);
   await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 }).catch(() => {});
   c.ok('compose places the pose', (await page.eval(say)).includes('a figure · posed'), await page.eval(say));
+}
+if (loop) {
+  await c.go(c.base + '/apps/compose/?place=' + lid);
+  await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 }).catch(() => {});
+  c.ok('and the loop, and it plays: a 30 fps loop of 30', (await page.eval(say)).includes('a 30 fps loop of 30'), await page.eval(say));
 }
 
 const noise = c.quiet();

@@ -14,13 +14,28 @@ M8's bricks 3 and 4, to give the map's avatar a body that walks.
 2. **A rig saved** — done 2026-10-02: a pose, a still the rig made, its
    bones whole; replayed and drawn again at any scale, reopened, placed in
    compose; the vault offers a gamepad drawing to the rig.
-3. **Motion** — each bone a wave, the phase lagging down a chain; an idle
-   saved as a loop that closes.
+3. **Motion** — done 2026-10-02: each bone a wave, the phase lagging down
+   a chain; a loop saved, replayed, closing to the pixel, placed.
 4. **A walk, and a character** — a back and a side drawn the same way, the
    same bones' names; a set, `role: 'character'`, for M8's avatar.
 
 ## Works now
 
+- **Bones that swing by themselves** (2026-10-02; `motion.js`,
+  `chosen.js`, `tests/rig-motion.mjs` 13, `check-rig` 27). A handle
+  pressed chooses its bone — a drag still turns it — and the column on the
+  left edits its wave: *swing*, degrees either way, *cycles* a loop, its
+  *phase*, and whether *the chain follows*, each bone below it in its
+  stroke a *lag* later: a stalk whips, its tip last. The waves add to the
+  pose. Whole cycles, counted in whole frames before the sine, close every
+  loop: frame `length` is frame 0, to the bit. The loop — *loop, frames*
+  and *fps* in the Motion drawer — plays by a `Playhead` as soon as a
+  bone swings; space stops it. S saves a loop as a `sequence` with its
+  frames and rate, titled *· moving*, the waves in its recipe beside the
+  pose, its box the ink of every frame so it never jitters; the vault's
+  replay has its render among its frames to the pixel, and compose plays
+  it. On the author's slug: both stalks whipping out of step, the arms
+  waving against each other, the body swaying.
 - **A pose saved** (2026-10-02; `frames.js`, `save.js`, `rebuild.js`;
   `check-rig` 21). S saves the drawing as posed: a still, `origin.app:
   'rig'`, titled *the drawing · posed* or *· at rest*, its recipe
@@ -79,15 +94,18 @@ M8's bricks 3 and 4, to give the map's avatar a body that walks.
   a long limb swung far can leave it.
 - A family not on this disk draws nothing, and says how many sprites
   would not load (rule 6 keeps the heavy families out of git).
+- A walk needs a body that rises and falls: waves only turn, so far.
+- A wave is kept by bone number, as a turn is: another drawing's bones
+  are other numbers.
 
 ## Next single step
 
-**Brick 3, its first step: a bone moves by itself.** In a *Motion* drawer,
-for the chosen bone — its handle pressed, as now — a turn that swings:
-*amplitude*, degrees, and *phase*; the loop *length* in frames and its
-*fps*, every bone's swing a whole number of cycles a loop so frame
-`length` is frame 0. Played by a `Playhead` (core/playback.js), each
-frame a pure function of its index (frames.js, as `openPose` is): no
-clock, no state. Held in a test: a loop closes, pixel for pixel. Then the
-phase lagging down a chain, so a stalk follows its base, and an idle saved
-as a `sequence`.
+**Brick 4, its first step: a walk, on the front.** Waves kept by a bone's
+place — its stroke, and its place along the chain — not its number, so a
+walk made on one drawing drives another drawn in the same order; a *rise*
+on the root's wave, so the body bobs; and the slug's walk set by hand:
+legs against each other, arms against the legs, the body rising twice a
+step. **Waiting on the author:** the slug drawn from the back and from the
+side, in the gamepad, each stroke from the body out and in the front's
+order — body, left stalk, right stalk, left arm, right arm, left leg,
+right leg — so one walk drives all three; the left is the side mirrored.

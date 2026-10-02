@@ -19,9 +19,9 @@ const INK = '#111111', PAPER = '#fffdf6', HOT = '#ffd60a';
  * @param {number} view                 canvas pixels per picture pixel
  * @param {{x, y}} stage                draw.js `stageOf`
  * @param {number} dpp                  canvas pixels per CSS pixel
- * @param {?number} hot                 the bone whose handle is under the pointer, or held
+ * @param {Array<?number>} [lit]        the bones whose handles light: under the pointer, held, chosen
  */
-export function drawBones(ctx, bones, at, view, stage, dpp, hot = null) {
+export function drawBones(ctx, bones, at, view, stage, dpp, lit = []) {
   const px = p => ({ x: (p.x - stage.x) * view, y: (p.y - stage.y) * view });
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -41,7 +41,7 @@ export function drawBones(ctx, bones, at, view, stage, dpp, hot = null) {
   for (const b of bones) {
     const a = px(at[b.id]), z = px(tipOf(b, at[b.id]));
     dot(ctx, a, 3.5 * dpp, INK, INK, dpp);
-    dot(ctx, z, 6 * dpp, b.id === hot ? HOT : PAPER, HUES[b.stroke % HUES.length], dpp);
+    dot(ctx, z, 6 * dpp, lit.includes(b.id) ? HOT : PAPER, HUES[b.stroke % HUES.length], dpp);
   }
   ctx.restore();
 }

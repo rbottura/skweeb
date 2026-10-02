@@ -1,25 +1,31 @@
 /**
- * frames.js — a rig's recipe as a picture: what a save draws and a replay
+ * frames.js — a rig's recipe as frames: what a save draws and a replay
  * draws, the same code, so the two cannot drift.
  *
- * A pose's recipe is `{ rig, bones, turns, box }`: the panel's values — the
- * drawing it rigs among them — the bones as they were when it was saved,
- * kept whole rather than proposed again, so a pose replays as it was even
- * once proposals change or a bone has been moved by hand; the turn of each
- * bone; and `box`, the part of the picture its ink fills, in the drawing's
- * pixels. Drawn again from the marks at any scale, so it prints sharp.
+ * A rig's recipe is `{ rig, bones, turns, waves, box }`: the panel's values —
+ * the drawing it rigs among them, and a loop's length and rate — the bones
+ * as they were when it was saved, kept whole rather than proposed again, so
+ * it replays as it was even once proposals change or a bone has been moved
+ * by hand; the pose, a turn a bone; the waves, a bone's each or null
+ * (motion.js); and `box`, the part of the picture its ink fills, in the
+ * drawing's pixels — over every frame of a loop, so a loop never jitters.
+ * With no wave that swings it is one frame: a pose. Frame `i` is the pose
+ * and the waves at `i`, and nothing else: no clock, no state, and frame
+ * `length` is frame 0. Drawn again from the marks at any scale, so it
+ * prints sharp.
  */
 
 import { Vault }        from '../../core/vault.js';
 import { familySprite } from '../../core/sprites.js';
 import { surface }      from '../../core/surface.js';
-import { alphaBounds }  from '../../core/trim.js';
+import { alphaBounds, union } from '../../core/trim.js';
 import { drawingOf, hasMarks, spritesOf } from './drawing.js';
 import { posed }        from './bones.js';
 import { bind, placeOf } from './skin.js';
+import { turnsAt, moves } from './motion.js';
 import { drawRig, reachOf } from './draw.js';
 
-/** Whether a recipe is a pose the rig saved. */
+/** Whether a recipe is one the rig saved: a pose, or a loop of one. */
 export const isPose = recipe => !!recipe && !!recipe.rig && Array.isArray(recipe.bones) && Array.isArray(recipe.turns);
 
 /**
@@ -62,28 +68,52 @@ export function inkOf(drawing, places, images) {
 }
 
 /**
- * @param {object} recipe            a pose's: { rig, bones, turns, box }
- * @param {object} [opts]
- * @param {number} [opts.scale=1]    pixels per pixel of the pose's own size
- * @returns {Promise<{length, fps, loop, width, height, scale, missing, frame(i), dispose()}>}
+ * A rig's recipe, ready to draw any frame of: its drawing, how its stamps
+ * ride, and where every stamp is at frame `i`.
+ *
+ * @param {object} recipe   `{ rig, bones, turns, waves }`
+ * @param {object} opened   openDrawing's, of `recipe.rig.drawing`
  */
-export async function openPose(recipe, { scale = 1 } = {}) {
-  const { rig, bones, turns, box } = recipe;
-  const opened = await openDrawing(rig.drawing);
+export function framesOf(recipe, opened) {
+  const { rig, bones, turns } = recipe, waves = recipe.waves || [];
   const drawing = drawingOf(opened.recipe, { jump: rig.jump });
-  const places = placesOf(drawing, bones, bind(drawing, bones, { bend: rig.bend }), turns);
-  const at = box || inkOf(drawing, places, opened.images);
+  const binds = bind(drawing, bones, { bend: rig.bend });
+  const loop = moves(bones, waves), length = loop ? Math.max(2, rig.length) : 1;
+  const placesAt = i => placesOf(drawing, bones, binds, loop ? turnsAt(bones, turns, waves, i, length) : turns);
+  /** The box every frame's ink is in. */
+  const ink = () => {
+    let box = null;
+    for (let i = 0; i < length; i++) box = union(box, inkOf(drawing, placesAt(i), opened.images));
+    return box;
+  };
+  return { drawing, loop, length, fps: loop ? rig.fps : 0, placesAt, ink };
+}
+
+/**
+ * @param {object} recipe            a rig's: { rig, bones, turns, waves, box }
+ * @param {object} [opts]
+ * @param {number} [opts.scale=1]    pixels per pixel of its own size
+ * @returns {Promise<{length, fps, loop, width, height, scale, missing, frame(i), dispose()}>}
+ *          `frame` lends one canvas, drawn again on every call
+ */
+export async function openRig(recipe, { scale = 1 } = {}) {
+  const opened = await openDrawing(recipe.rig.drawing);
+  const f = framesOf(recipe, opened);
+  const at = recipe.box || f.ink();
   const canvas = surface(Math.max(1, Math.round(at.w * scale)), Math.max(1, Math.round(at.h * scale)));
-  drawRig(canvas.getContext('2d'), drawing, places, opened.images, scale, at);
+  const ctx = canvas.getContext('2d');
   return {
-    length: 1,
-    fps: 0,
-    loop: false,
+    length: f.length,
+    fps: f.fps,
+    loop: f.loop,
     width: at.w,
     height: at.h,
     scale,
-    missing: opened.missing ? [`${opened.missing} sprites of ${opened.object.title || rig.drawing}`] : [],
-    frame() { return canvas; },
+    missing: opened.missing ? [`${opened.missing} sprites of ${opened.object.title || recipe.rig.drawing}`] : [],
+    frame(i) {
+      drawRig(ctx, f.drawing, f.placesAt(Math.round(i) % f.length), opened.images, scale, at);
+      return canvas;
+    },
     dispose() {},
   };
 }

@@ -11,17 +11,21 @@
 
 <body>
   <!--
-    The shell from core/theme.css: the viewer, one column of drawers, and the
-    bar below. The drawing is drawn again from its marks with Canvas 2D; no p5.
+    The shell from core/theme.css: the chosen bone on the left, the viewer,
+    the rig's drawers on the right, and the bar below. The drawing is drawn
+    again from its marks with Canvas 2D; no p5.
   -->
   <div class="app">
     <main class="app-main">
+      <div class="app-side" id="bone-side"></div>
       <section class="viewer" aria-label="the rigged drawing">
         <div class="viewer-head">
           <button class="nb-btn" id="bones" type="button" aria-pressed="true"
                   title="The bones over the drawing, a joint at each end — never in anything saved [B]">bones</button>
           <button class="nb-btn" id="rest" type="button"
                   title="Every bone back where it was drawn [R]">rest</button>
+          <button class="nb-btn" id="play" type="button" aria-pressed="false" disabled
+                  title="The loop, playing — once a bone swings [space]">play</button>
         </div>
         <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
       </section>
