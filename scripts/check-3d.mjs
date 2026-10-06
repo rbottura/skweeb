@@ -385,6 +385,48 @@ for (let i = 0; i < 100 && !file; i++) {
 const size = file ? (b => [b.readUInt32BE(16), b.readUInt32BE(20)])(fs.readFileSync(file)) : [0, 0];
 c.ok('the PNG is the format at its scale', size[0] === 2160 && size[1] === 2160, size.join(' × '));
 
+// ── A print, in tiles ───────────────────────────────────────────────────────
+
+const tiling = await page.eval(`(async () => {
+  const { printModel } = await import('/apps/3d/print.js');
+  const { openModel } = await import('/apps/3d/frames.js');
+  const { openRenderer } = await import('/apps/3d/renderer.js');
+  const { modelParams, OPENING } = await import('/apps/3d/params.js');
+  const recipe = { ...modelParams().values, toon: 3, outline: 6, shadows: true, width: 600, height: 880, scale: 1,
+                   shapes: OPENING.map(s => ({ ...s, modifiers: s.id === 'box' ? [{ id: 'subdivide', params: {} }, { id: 'twist', params: {} }] : [] })) };
+  const renderer = await openRenderer();
+  const read = (src, w, h) => { const x = new OffscreenCanvas(w, h).getContext('2d'); x.drawImage(src, 0, 0); return x.getImageData(0, 0, w, h).data; };
+  const blob = await printModel({ recipe, renderer, width: 600, height: 880, tile: 256, sharpen: false });
+  const bmp = await createImageBitmap(blob);
+  const tiled = read(bmp, 600, 880);
+  const whole = openModel(recipe, { renderer });
+  const one = read(whole.frame(0), 600, 880);
+  whole.dispose();
+  let worst = 0, off = 0, sum = 0;
+  for (let i = 0; i < one.length; i++) { const d = Math.abs(one[i] - tiled[i]); worst = Math.max(worst, d); sum += d; if (d > 8) off++; }
+  return { size: [bmp.width, bmp.height], worst, off: off / one.length, mean: sum / one.length };
+})()`);
+c.ok('a print in twelve tiles is the model drawn whole: no seam, the outline and shadows meeting',
+  tiling.size.join() === '600,880' && tiling.off < 0.002 && tiling.mean < 0.3, JSON.stringify(tiling));
+
+await page.click(`document.querySelector('.pp-chip[title="120x176"]')`);
+await page.typeInto(`${panelRow('dpi')}?.querySelector('.pp-num')`, '50');
+await wait(300);
+const printNote = await page.eval(`document.querySelector('.td-note')?.textContent || ''`);
+c.ok('the 120×176 sheet at 50 dpi: its pixels and its tiles, said', printNote === '120×176 at 50 dpi: 2362 × 3465 px, drawn in 4 tiles', printNote);
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.click(`document.querySelector('.td-print')`);
+await page.until(`/^printed|failed/.test(${say})`, { timeout: 120000 });
+let printed = null;
+for (let i = 0; i < 100 && !printed; i++) {
+  const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => /^model_120x176_50dpi/.test(n) && n.endsWith('.png'));
+  if (f) printed = path.join(DL, f); else await wait(200);
+}
+const head = printed ? fs.readFileSync(printed) : Buffer.alloc(0);
+const physAt = head.indexOf('pHYs');
+c.ok('printed: a PNG the sheet\'s size, saying its 50 dpi', !!printed && head.readUInt32BE(16) === 2362 && head.readUInt32BE(20) === 3465
+  && physAt > 0 && head.readUInt32BE(physAt + 4) === Math.round(50 / 0.0254), `${await page.eval(say)} · ${printed && path.basename(printed)}`);
+
 // ── With no WebGPU: three falls back to WebGL2, as on the laptop's Intel ────
 
 const stub = await page.beforeLoad(`Object.defineProperty(navigator, 'gpu', { value: undefined, configurable: true });`);

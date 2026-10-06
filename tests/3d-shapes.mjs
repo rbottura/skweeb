@@ -6,10 +6,13 @@
  * schema its form then the place and look every shape has, a recipe from
  * before the stretches standing as it did; each geometry is the size its
  * params say, the same for the same values, and rounder for more segments; a
- * shape added from the menu starts beside the last, in the next colour.
+ * shape added from the menu starts beside the last, in the next colour. For a
+ * print, a smooth round shape is made with at least the print's segments —
+ * a torus round its tube too — never fewer than it had; a flat one keeps its
+ * facets.
  */
 
-const { SHAPES, PLACE, SHAPE_GROUPS, shapeSchema, formKeys, startOf, COLOURS } = await import('../apps/3d/shapes.js');
+const { SHAPES, PLACE, SHAPE_GROUPS, shapeSchema, formKeys, startOf, COLOURS, finer } = await import('../apps/3d/shapes.js');
 const { defineParams, valuesFor } = await import('../core/params.js');
 const { Box3 } = await import('../core/libs/three/three.core.js');
 
@@ -70,6 +73,15 @@ ok('a size is held to its row', valuesFor(shapeSchema('box'), { width: 999, heig
 ok('side by side: the middle, right, left, further right', [0, 1, 2, 3, 4].map(n => startOf(n).x), [0, 1.6, -1.6, 3.2, -3.2]);
 ok('each in the next colour, round', [0, 1, COLOURS.length].map(n => startOf(n).colour), [COLOURS[0], COLOURS[1], COLOURS[0]]);
 ok('the middle is 0, not -0', Object.is(startOf(0).x, 0), true);
+
+// ── Rounder for a print ──────────────────────────────────────────────────────
+
+const ball = valuesFor(shapeSchema('sphere'), {});
+ok('a print\'s detail: a smooth sphere made with at least that many segments', finer('sphere', ball, 321).segments, 321);
+ok('…a torus round its tube too', [finer('torus', valuesFor(shapeSchema('torus'), {}), 200).segments, finer('torus', valuesFor(shapeSchema('torus'), {}), 200).sides], [200, 200]);
+ok('…never fewer than it had', finer('sphere', { ...ball, segments: 128 }, 90).segments, 128);
+ok('a flat shape keeps its facets, a box has none to add, no detail changes nothing', [finer('sphere', { ...ball, shading: 'flat' }, 321).segments,
+  JSON.stringify(finer('box', valuesFor(shapeSchema('box'), {}), 321)) === JSON.stringify(valuesFor(shapeSchema('box'), {})), finer('sphere', ball, 0) === ball], [48, true, true]);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

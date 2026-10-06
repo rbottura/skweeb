@@ -118,6 +118,22 @@ export function shapeSchema(id) {
 /** The keys that make a shape's geometry: change one and the mesh is made again. */
 export const formKeys = id => Object.keys(SHAPES[id].params);
 
+/** The keys that say how round a round shape is: its segments, and a torus's round its tube. */
+const ROUNDNESS = ['segments', 'sides'];
+
+/**
+ * A shape's values made rounder for a print: its segments raised to at least
+ * `n`, so a silhouette many times the preview's size stays round — π√R
+ * segments keep a circle R pixels across within half a pixel of true. A flat
+ * shape keeps its facets: they are its look, not a want of pixels.
+ */
+export function finer(id, values, n) {
+  if (!(n > 0) || values.shading === 'flat') return values;
+  const out = { ...values };
+  for (const key of ROUNDNESS) if (key in SHAPES[id].params) out[key] = Math.max(values[key], Math.ceil(n));
+  return out;
+}
+
 /** Colours a shape added from the menu takes in turn — a convenience, kept in the recipe like any value. */
 export const COLOURS = ['#ffd60a', '#2a62d8', '#d8342a', '#1b998b', '#f4a259', '#6a4c93', '#111111', '#fffdf6'];
 

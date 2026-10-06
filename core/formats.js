@@ -66,6 +66,9 @@ export const FORMATS = [
   { id: 'a3', label: 'A3', group: 'print', mm: [297, 420] },
   { id: 'a2', label: 'A2', group: 'print', mm: [420, 594] },
   { id: 'a1', label: 'A1', group: 'print', mm: [594, 841] },
+  // The street poster: a bus shelter's, 120 × 176 cm. At 300 dpi it is 14173 ×
+  // 20787 px, past any canvas, so an app prints it in tiles (core/png.js).
+  { id: '120x176', label: '120×176', group: 'print', mm: [1200, 1760] },
 ];
 
 const BY_ID = new Map(FORMATS.map(f => [f.id, f]));

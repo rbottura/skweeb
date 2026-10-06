@@ -9,7 +9,8 @@
  * the list, the skipped counted; an update that changes only a place or a
  * colour keeps the geometry, one that changes the form makes it again and
  * frees the old, and what goes is freed; the sun comes from where its angles
- * say; the bounds are every shape's; a title counts the shapes.
+ * say; the bounds are every shape's; a title counts the shapes; for a print,
+ * a sphere is made with the print's segments.
  */
 
 const { Model, shapesOf, unknownIn, LIGHT_PARAMS } = await import('../apps/3d/scene.js');
@@ -103,6 +104,8 @@ ok('disposed: every geometry and material freed', [all, disposing.count], [4, 0]
 
 ok('a title counts the shapes', titleOf([{ id: 'box' }, { id: 'sphere' }, { id: 'sphere' }, { id: 'torus', on: false }]), 'box, sphere ×2');
 ok('an empty model says so', titleOf([]), 'an empty model');
+const printed = new Model().update({ shapes: [{ id: 'sphere', params: {} }] }, { detail: 100 });
+ok('for a print, a sphere made with a hundred segments round', printed.parts[0].mesh.geometry.attributes.position.count, 101 * 51);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

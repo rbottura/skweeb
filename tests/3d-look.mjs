@@ -13,7 +13,8 @@
  * proportions; a click picks the shape, never its hull; at 0 it hides.
  * Shadows: the sun casts, every shape casts and receives, the sun's way kept
  * and its shadow camera round the model; a catcher of nothing but shadows
- * just under the model's foot, never a part; off, all of it undone.
+ * just under the model's foot, never a part; off, all of it undone; a
+ * print's shadow map larger than the preview's 2048.
  */
 
 const { Model } = await import('../apps/3d/scene.js');
@@ -111,6 +112,8 @@ ok('…a catcher just under the model\'s foot, under its middle, flat', [lit.cat
 ok('…nothing but shadows, and never a part', [lit.catcher.material.type, lit.parts.some(p => p.mesh === lit.catcher)], ['ShadowMaterial', false]);
 lit.update(sunny(false));
 ok('shadows off: the catcher hidden, nothing casts, the sun as it was', [lit.catcher.visible, lit.sun.castShadow, way(lit)], [false, false, sunWay]);
+ok('a print\'s shadow map larger, the preview\'s 2048', [new Model().update(sunny(true), { shadowMap: 4096 }).sun.shadow.mapSize.x,
+  new Model().update(sunny(true)).sun.shadow.mapSize.x], [4096, 2048]);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

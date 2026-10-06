@@ -21,7 +21,7 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing waiting.
+- **2026-10-06 — the smart object, soon.** "we'll soon to tackle the link \"smart\" object between apps very soon." Not yet sorted: it is the `skw` type in `docs/object-model.md`, *Smart objects*, specified and not built; that section, eighty lines, should move to a file of its own first, since the object model is at the cap.
 
 ## Sorted
 

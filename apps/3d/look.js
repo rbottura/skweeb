@@ -178,10 +178,11 @@ export const shadowsOf = recipe => !!(recipe && recipe.shadows === true);
  * shadow camera fitted round the model from where the sun is, and a catcher
  * under the model — a ground made only of the shadows on it, so a model on a
  * ground of `none` still has its shadow, a sprite's. The sun keeps its way;
- * only where it stands moves, to the model's middle. The shadow map is the
- * same size at any print scale, so a print is the same picture.
+ * only where it stands moves, to the model's middle. The shadow map is
+ * `side` texels a side — 2048, and a print's larger (print.js), its edges
+ * sharper where a texel would cover many of its pixels.
  */
-export function shade(model, on) {
+export function shade(model, on, side = 2048) {
   for (const p of model.parts) {
     p.mesh.castShadow = on;
     p.mesh.receiveShadow = on;
@@ -204,7 +205,7 @@ export function shade(model, on) {
   cam.near = r * 0.5;
   cam.far = r * 5 + (c.y - box.min.y) / Math.max(0.1, way.y);
   cam.updateProjectionMatrix();
-  model.sun.shadow.mapSize.set(2048, 2048);
+  model.sun.shadow.mapSize.set(side, side);
   model.sun.shadow.bias = -0.0005;
   model.sun.shadow.normalBias = r * 0.004;
   if (!model.catcher) {

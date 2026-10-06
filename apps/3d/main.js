@@ -33,6 +33,10 @@ import { wirePointer }    from './pointer.js';
 import { pick }           from './pick.js';
 import { boxOnPicture, drawChosen } from './guides.js';
 import { wireChosen }     from './chosen.js';
+import { PRINT_PARAMS, printModel, sheetOf, tilesOf } from './print.js';
+import { defineParams }   from '../../core/params.js';
+import { download }       from '../../core/export.js';
+import { labelOf }        from '../../core/frame.js';
 import { Cards }          from '../../core/Cards.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -198,6 +202,41 @@ function buildExport(panel) {
     })),
   );
   exp.body.append(actions);
+  buildPrint(exp);
+}
+
+/**
+ * A print (print.js): the format's sheet at a dpi, drawn in tiles into a PNG
+ * that carries its dpi — no preview, one file. Its dpi is its own panel's,
+ * never the recipe's.
+ */
+function buildPrint(exp) {
+  const print = defineParams('3d-print', PRINT_PARAMS);
+  new ParamPanel(print, { title: 'print', mount: exp.body });
+  const note = document.createElement('p');
+  note.className = 'td-note';
+  const go = button('Print it — a PNG at the sheet\'s size', () => leave(async () => {
+    const v = params.values, dpi = print.values.dpi;
+    const px = sheetOf(v.format, dpi);
+    if (!px) return 'a print needs a print format';
+    const started = performance.now();
+    const blob = await printModel({ recipe: { ...v, shapes: cards.recipe() }, renderer, width: px[0], height: px[1], dpi,
+      onTile: (i, n) => bar.say(`printing… tile ${i} of ${n}`) });
+    download(blob, `model_${v.format}_${dpi}dpi_${px[0]}x${px[1]}.png`);
+    return `printed ${px[0]} × ${px[1]} px at ${dpi} dpi — ${(blob.size / 1e6).toFixed(1)} MB in ${Math.round((performance.now() - started) / 1000)} s`;
+  }));
+  go.classList.add('td-print');
+  exp.body.append(note, go);
+  const say = () => {
+    const px = sheetOf(params.values.format, print.values.dpi);
+    note.textContent = px
+      ? `${labelOf(params.values.format)} at ${print.values.dpi} dpi: ${px[0]} × ${px[1]} px, drawn in ${tilesOf(px)} tiles`
+      : 'A print takes a print format — A5 to A1, or 120×176 — for its sheet.';
+    go.disabled = !px;
+  };
+  print.on(say);
+  params.on(key => { if (key === 'format') say(); });
+  say();
 }
 
 /** One way out: nothing else started, what happened said. */

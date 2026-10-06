@@ -22,7 +22,7 @@
 import {
   Scene, Mesh, MeshStandardMaterial, DirectionalLight, AmbientLight, Box3, Sphere,
 } from '../../core/libs/three/three.core.js';
-import { SHAPES, shapeSchema, formKeys } from './shapes.js';
+import { SHAPES, shapeSchema, formKeys, finer } from './shapes.js';
 import { MODIFIERS, modify } from './modifiers.js';
 import { dress, bandsOf, outline, outlineOf, inkOf, inkUp, shade, shadowsOf } from './look.js';
 import { direction } from './camera.js';
@@ -95,16 +95,20 @@ export class Model {
   /**
    * Bring the scene into step with a recipe.
    * @param {object} recipe   the app's values and `shapes: [{ id, params, on, modifiers }]`
+   * @param {object} [print]  for a print (print.js): `detail`, the fewest segments a
+   *                          smooth round shape is made with (shapes.js `finer`), and
+   *                          `shadowMap`, the side of the sun's shadow map
    * @returns {Model} this
    */
-  update(recipe) {
+  update(recipe, { detail = 0, shadowMap = 2048 } = {}) {
     const shapes = shapesOf(recipe);
     const bands = bandsOf(recipe);
     const lined = outlineOf(recipe) > 0;
     if (lined && !this.ink) this.ink = inkOf();
     if (this.ink) inkUp(this.ink, recipe);
     shapes.forEach(({ id, values, index, stack }, i) => {
-      const form = formOf(id, values, stack);
+      const made = finer(id, values, detail);
+      const form = formOf(id, made, stack);
       let part = this.parts[i];
       if (!part) {
         part = this.parts[i] = { mesh: new Mesh(undefined, new MeshStandardMaterial()), form: '', index };
@@ -113,7 +117,7 @@ export class Model {
       part.index = index;
       if (part.form !== form) {
         if (part.mesh.geometry) part.mesh.geometry.dispose();
-        part.mesh.geometry = modify(SHAPES[id].geometry(values), stack);
+        part.mesh.geometry = modify(SHAPES[id].geometry(made), stack);
         part.form = form;
       }
       place(part.mesh, values);
@@ -132,7 +136,7 @@ export class Model {
     this.sun.target.position.set(0, 0, 0);
     this.sun.intensity = num(v.sun, LIGHT_PARAMS.sun.default);
     this.fill.intensity = num(v.ambient, LIGHT_PARAMS.ambient.default);
-    shade(this, shadowsOf(recipe));
+    shade(this, shadowsOf(recipe), shadowMap);
     this.scene.updateMatrixWorld(true);
     return this;
   }

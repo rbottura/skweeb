@@ -23,3 +23,7 @@
 .viewer-stage canvas.on-handle { cursor: move; }
 
 .td-frame { margin-top: 8px; }
+
+/* The print: what the sheet comes to, then its button (main.js, print.js). */
+.td-note { margin: 8px 0 6px; font: 400 12px/1.45 var(--nb-mono); color: var(--nb-muted); }
+.td-print { width: 100%; }
