@@ -25,7 +25,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault | `docs/object-model.md`, *Trash, and deleting* |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs` and `check-3d.mjs` are seventeen, as commands. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs` and `check-3d.mjs` are seventeen, as commands. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned, with the add-ons the 3D app uses — its handles. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/decisions.md` | what was decided before today, and why, by date — the newest days; its head lists the files the older ones moved to, `docs/decisions-<from>-to-<to>.md` | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
@@ -95,7 +95,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick 3d-handles; do
   node tests/$t.mjs || break
 done
 
@@ -116,7 +116,7 @@ node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, 
 node scripts/check-map.mjs              # M8's map editor: tiles, walls, things and their events; saved, replayed, reopened, placed in compose
 node scripts/check-map-play.mjs         # M8's player: what answers outlined, a sign shown, a warp followed and back
 node scripts/check-rig.mjs              # M9's rig: bones from strokes, a pose and a loop saved, presets by part, a crawl round a path
-node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click; a model saved, drawn again at scale 2, placed
+node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click and moved by handles; a model saved, drawn again at scale 2, placed
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips
 # its GPU half, unless Chrome is given the flags:

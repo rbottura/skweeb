@@ -311,12 +311,15 @@ closes, is saved, drawn again at print scale, placed in compose and stood in
 the room; and drawn from four sides as a set M8's avatar could wear. The
 link: `model → map: a character from every side`.
 
-*So far:* brick 1 of six, 2026-10-06 (`apps/3d/STATUS.md`). Seven of
-three's primitives, each a card from its schema in core's cards — the list
-filter's chain moved into for it; an orbit view by hand, perspective or
+*So far:* bricks 1 and 2 of six, 2026-10-06 (`apps/3d/STATUS.md`). Seven
+of three's primitives, each a card from its schema in core's cards — the
+list filter's chain moved into for it; an orbit view by hand, perspective or
 orthographic; one sun and a fill. three r186 draws on the page's GPU
 device, WebGL2 where there is none; a `model` saves, replays to the pixel,
-is drawn again at scale 2, reopens, and compose places it.
+is drawn again at scale 2, reopens, and compose places it. A click chooses
+a shape, its card the one open; three's handles move, turn, size and
+stretch it by axis, writing into its card; D duplicates it, Delete takes it
+out.
 
 ## Decided before, 2026-09-21 to -23
 

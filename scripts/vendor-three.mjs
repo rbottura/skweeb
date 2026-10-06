@@ -36,8 +36,8 @@ const PINNED = '0.186.1';
 /** The build: three.webgpu.js imports './three.core.js', so the two travel together. */
 const BUILD = ['three.core.js', 'three.webgpu.js'];
 
-/** Add-ons from examples/jsm/, as `<folder>/<file>`. None yet: brick 2 brings the handles. */
-const ADDONS = [];
+/** Add-ons from examples/jsm/, as `<folder>/<file>`: the handles on a chosen shape (apps/3d/handles.js). */
+const ADDONS = ['controls/TransformControls.js'];
 
 const version = process.argv[2] || PINNED;
 const cdn = file => `https://cdn.jsdelivr.net/npm/three@${version}/${file}`;

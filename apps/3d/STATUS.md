@@ -14,8 +14,8 @@ call, 2026-10-06 (`docs/decisions.md`).
 1. **The app opens** — done 2026-10-06: primitives from a menu, each a
    card from its schema; an orbit camera, one light, flat or smooth; a
    `model` saved, replayed, drawn again at print scale, placed in compose.
-2. **Handled in the view**: picked by a click — done 2026-10-06 — moved,
-   turned and scaled by handles, duplicated, deleted.
+2. **Handled in the view** — done 2026-10-06: picked by a click, moved,
+   turned, sized and stretched by handles, duplicated, deleted.
 3. **Modifiers** on a shape, in order: subdivide, displace by seeded noise,
    twist, bend, mirror, array.
 4. **A look**: toon shading on a ramp, shadows, an outline.
@@ -27,14 +27,32 @@ call, 2026-10-06 (`docs/decisions.md`).
 ## Works now
 
 - **Primitives, made from their params** (2026-10-06; `shapes.js`,
-  `tests/3d-shapes.mjs` 23). Box, sphere, cylinder, cone, torus, plane and
+  `tests/3d-shapes.mjs` 24). Box, sphere, cylinder, cone, torus, plane and
   capsule — three's own geometries, each a catalogue entry like a filter:
   an id, a label, a schema, the geometry its values make. A card's drawers:
   *Form*, the shape's own; *Place*, where it stands, turned about each axis
-  in degrees, its size; *Look*, its colour, smooth or flat. A shape added
-  from the menu starts beside the last — 0, right, left, further right — in
-  the next of eight colours. The cards are core's (`core/Cards.js`), the
-  list filter's chain is too: shown or hidden, taken out.
+  in degrees, its size, and a stretch along each of its own axes — a recipe
+  from before them stands as it did; *Look*, its colour, smooth or flat. A
+  shape added from the menu starts beside the last — 0, right, left,
+  further right — in the next of eight colours. The cards are core's
+  (`core/Cards.js`), the list filter's chain is too: shown or hidden, taken
+  out.
+- **Handles** (2026-10-06, brick 2's second half; `handles.js`, `chosen.js`,
+  `tests/3d-handles.mjs` 18). The chosen shape wears three's
+  TransformControls: arrows and squares that move it, rings that turn it,
+  cubes that stretch it along one of its own axes or, the middle one, size
+  it — move, turn and size over the view, or W, E, R. What a handle does
+  goes back into the card, only what its mode changes (scene.js `placeOf`):
+  the card stays the recipe, the bounds of its rows the handles' bounds.
+  pointer.js asks the handles first, through three's own pointer calls, so
+  a press on a handle is never a turn of the view nor a pick. The gizmo is
+  a scene of its own drawn over the picture, never in a save. D duplicates
+  the chosen shape, right after it in the list and beside it in the world,
+  the copy chosen; Delete takes it out; the buttons over the view do both,
+  and are off with nothing chosen. In Node, with three's own controls: a
+  drag along the x arrow moves the shape exactly as far as the pointer went,
+  the ring facing the eye turns it by the angle swept, a cube stretches it
+  as far as the pointer went out.
 - **Chosen by a click** (2026-10-06, brick 2's first half; `pick.js`,
   `guides.js`, `tests/3d-pick.mjs` 19). A click — a press that never moved
   four pixels, so a drag never picks — sends a ray from the eye through the
@@ -57,7 +75,7 @@ call, 2026-10-06 (`docs/decisions.md`).
   under the pointer staying under it; the wheel comes nearer; F frames
   every shape from where it is seen. Only the picture's shape counts:
   twice the pixels is the same picture.
-- **The scene kept in step** (`scene.js`, `tests/3d-model.mjs` 26). A
+- **The scene kept in step** (`scene.js`, `tests/3d-model.mjs` 28). A
   move or a colour keeps a shape's geometry; a change of form makes it
   again and frees the old; a shape taken out is freed. One sun, fixed in
   the world — turning round shows the dark side — and an ambient fill, in
@@ -71,7 +89,8 @@ call, 2026-10-06 (`docs/decisions.md`).
   it draws with WebGL2 by itself, the bar saying so — checked with WebGPU
   taken away, the same opening drawn; its one line about falling back is
   kept off the console.
-- **Saved, replayed, placed** (`save.js`, `rebuild.js`, `check-3d` 30). S
+- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 48 with
+  all the above, a real mouse on the handles). S
   saves a `model`: its recipe the panel's values and `shapes: [{ id,
   params, on }]`, titled by its shapes — *box, sphere, torus* — its render
   the format drawn again by `frames.js`. The vault shows the render; asked
@@ -93,16 +112,22 @@ call, 2026-10-06 (`docs/decisions.md`).
 - **The laptop's Intel** should draw with WebGL2 unless Chrome's flags are
   on — the fallback is checked here with WebGPU taken away, not yet seen on
   the laptop itself.
+- **The handles turn about the world's axes**, never the shape's own; three
+  has a `local` space, Q in its examples, not offered yet. And their size is
+  three's: a fixed share of the picture, small on a small screen.
+- **Nothing is undone.** Delete, or Backspace as the map editor has it,
+  takes the chosen shape out for good — as a card's ✕ always did.
 
 ## Next single step
 
-**Brick 2's second half: handles on the chosen shape.** three's
-`TransformControls`, vendored by adding it to `ADDONS` in
-`scripts/vendor-three.mjs`; its gizmo in the preview's scene only, on the
-chosen shape's mesh, a drag on it writing back into the card's x, y, z,
-turns and size — and stretched by axis, the parked `sx`, `sy`, `sz`. A
-press on a handle is the handle's, never a turn of the view or a pick.
-Then duplicated and deleted by key.
+**Brick 3's first: a stack of modifiers on a shape, and subdivide.** A
+shape's entry gains `modifiers: [{ id, params, on }]`, in order, each a
+card inside the shape's card — core's cards holding a list inside each
+card, its recipe beside the entry's `params`. `modifiers.js` a catalogue as
+`shapes.js` is; its first, subdivide: each triangle into four, n times,
+flat, so the twist, bend and displacement after it have vertices to move.
+The geometry made again when its form or its modifiers change (scene.js
+`formOf`). Twist next.
 
 ## Parked
 
@@ -110,5 +135,3 @@ Then duplicated and deleted by key.
   models share one.
 - **Distance fields** can come back as a family of M7, or as one more way
   to make a mesh.
-- **Per-axis size** — `sx`, `sy`, `sz` — waits for the handles, which
-  stretch by axis; a box has its own width, height and depth meanwhile.

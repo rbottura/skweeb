@@ -3,7 +3,8 @@
 
    Everything that looks like the suite comes from core, the shapes' cards
    included (core/Cards.js). The 3D app says only its layout — the viewer,
-   then one column of drawers — and that the model is turned and slid by hand.
+   then one column of drawers — that the model is turned and slid by hand,
+   and that a handle is taken hold of.
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
@@ -12,8 +13,13 @@
 
 .app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
 
+/* The handles' mode, and what else the chosen shape can have done, over the viewer (chosen.js). */
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+.td-spacer { flex: 1; }
+
 .viewer-stage canvas { cursor: grab; touch-action: none; }
 .viewer-stage canvas.turning { cursor: grabbing; }
-.viewer-stage canvas.sliding { cursor: move; }
+.viewer-stage canvas.sliding,
+.viewer-stage canvas.on-handle { cursor: move; }
 
 .td-frame { margin-top: 8px; }

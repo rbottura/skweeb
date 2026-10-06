@@ -3,10 +3,10 @@
  *
  * Covers apps/3d/shapes.js, on three.js's core, which Node runs. The
  * promises — every shape is a catalogue entry a card can be drawn from, its
- * schema its form then the place and look every shape has; each geometry is
- * the size its params say, the same for the same values, and rounder for
- * more segments; a shape added from the menu starts beside the last, in the
- * next colour.
+ * schema its form then the place and look every shape has, a recipe from
+ * before the stretches standing as it did; each geometry is the size its
+ * params say, the same for the same values, and rounder for more segments; a
+ * shape added from the menu starts beside the last, in the next colour.
  */
 
 const { SHAPES, PLACE, SHAPE_GROUPS, shapeSchema, formKeys, startOf, COLOURS } = await import('../apps/3d/shapes.js');
@@ -35,7 +35,8 @@ ok('seven shapes, in the menu\'s order', Object.keys(SHAPES), ['box', 'sphere', 
 ok('each entry says its own id', Object.entries(SHAPES).every(([k, s]) => s.id === k && typeof s.label === 'string'), true);
 ok('every schema declares, as a card will', Object.keys(SHAPES).every(id => !!defineParams('3d:' + id, shapeSchema(id))), true);
 ok('a schema is the form, then place and look', Object.keys(shapeSchema('sphere')),
-   ['radius', 'segments', 'x', 'y', 'z', 'turnX', 'turnY', 'turnZ', 'size', 'colour', 'shading']);
+   ['radius', 'segments', 'x', 'y', 'z', 'turnX', 'turnY', 'turnZ', 'size', 'sx', 'sy', 'sz', 'colour', 'shading']);
+ok('a recipe from before the stretches stands as it did: each 1', ['sx', 'sy', 'sz'].map(k => valuesFor(shapeSchema('box'), { size: 2 })[k]), [1, 1, 1]);
 ok('every row is in a card\'s drawer', Object.keys(SHAPES).every(id =>
   Object.values(shapeSchema(id)).every(spec => spec.group in SHAPE_GROUPS)), true);
 ok('form rows are the form\'s, place and look every shape\'s', Object.values(SHAPES).every(s =>

@@ -12,6 +12,7 @@ and may change what a recipe draws.
 |---|---|---|---|
 | `three.core.js` | `build/three.core.js` | 1424 KB | `9edde002b066a9a0…` |
 | `three.webgpu.js` | `build/three.webgpu.js` | 2231 KB | `15cfce5c65354170…` |
+| `addons/controls/TransformControls.js` | `examples/jsm/controls/TransformControls.js` | 51 KB | `56ebde3c659ed1da…` |
 
 Only `apps/3d/` imports these. `three.webgpu.js` is the WebGPU renderer and
 everything `three.core.js` has; geometry and scenes can import

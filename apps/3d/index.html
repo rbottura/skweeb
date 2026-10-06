@@ -13,11 +13,25 @@
   <!--
     The shell from core/theme.css: the viewer, one column of drawers, and the
     bar below. The model is drawn by three.js (core/libs/three/) on the
-    page's GPU device and shown on a Canvas 2D; no p5.
+    page's GPU device and shown on a Canvas 2D; no p5. Over the viewer, what
+    the chosen shape's handles do, and what else can be done to it (chosen.js).
   -->
   <div class="app">
     <main class="app-main">
       <section class="viewer" aria-label="model">
+        <div class="viewer-head">
+          <button class="nb-btn" id="handle-move" type="button" aria-pressed="true"
+                  title="The chosen shape's handles move it: along an arrow, or in a square's plane [W]">move</button>
+          <button class="nb-btn" id="handle-turn" type="button" aria-pressed="false"
+                  title="Its handles turn it: about an axis by its ring, or freely inside them [E]">turn</button>
+          <button class="nb-btn" id="handle-size" type="button" aria-pressed="false"
+                  title="Its handles size it: stretched along one of its axes by its cube, or whole by the middle one [R]">size</button>
+          <span class="td-spacer"></span>
+          <button class="nb-btn" id="duplicate" type="button" disabled
+                  title="Another of the chosen shape, beside it, chosen [D]">duplicate</button>
+          <button class="nb-btn" id="remove" type="button" disabled
+                  title="Take the chosen shape out of the model [Delete]">remove</button>
+        </div>
         <div class="viewer-stage"><canvas id="stage" width="480" height="480"></canvas></div>
       </section>
       <div class="app-side" id="side"></div>

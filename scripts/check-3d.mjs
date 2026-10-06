@@ -12,7 +12,10 @@
  * the view and nowhere else — a click on nothing chooses nothing, a click on
  * a card's name chooses that, Escape none; a shape added from the menu is
  * drawn and chosen, a hidden one is not drawn nor picked, a card's value
- * moves its shape, and one taken out goes; a drag that starts on a shape
+ * moves its shape, and one taken out goes; the chosen shape has handles, and
+ * a drag up its y arrow raises it, its card saying so, the view unturned;
+ * E, R and W say which handles; D duplicates it beside itself, Delete takes
+ * it out; a drag that starts on a shape
  * turns round the model by as much as camera.js says and chooses nothing,
  * the right button slides it, the wheel comes nearer, F frames it. Saved: a `model`
  * whose recipe is its shapes and whose render is the format; drawn again by
@@ -152,6 +155,47 @@ c.ok('taken out: three cards again, the sphere back', (await page.eval(`${cards}
 await page.typeInto(`${cardRow(1, 'radius')}?.querySelector('.pp-num')`, '0.6');
 await wait(300);
 
+// ── Handles on the chosen shape ─────────────────────────────────────────────
+
+const disabled = id => page.eval(`document.getElementById(${JSON.stringify(id)}).disabled`);
+const pressed = () => page.eval(`['move', 'turn', 'size'].filter(m => document.getElementById('handle-' + m).getAttribute('aria-pressed') === 'true').join()`);
+const key = k => page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ${JSON.stringify(k)} }))`).then(() => wait(300));
+/** The y arrow's pure green on the preview: how much, and its topmost pixel, as fractions of the picture. */
+const green = () => page.eval(`(() => { const c = document.getElementById('stage'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let n = 0, top = null;
+  for (let i = 0; i < d.length; i += 4) if (d[i + 1] > 200 && d[i] < 80 && d[i + 2] < 80) { n++; if (!top) top = [(i / 4) % c.width / c.width, Math.floor(i / 4 / c.width) / c.height]; }
+  return n ? { n, top: top.map(v => +v.toFixed(3)) } : null; })()`);
+c.ok('nothing chosen: nothing to duplicate or remove, no handles', (await disabled('duplicate')) && (await disabled('remove')) && !(await green()));
+await press(0.5, 0.5);
+const arrow = await green();
+c.ok('the chosen sphere has handles: its y arrow, green, above its middle', !!arrow && Math.abs(arrow.top[0] - 0.5) < 0.03 && arrow.top[1] < 0.45,
+  JSON.stringify(arrow));
+const [gx, gy] = arrow ? [arrow.top[0], 0.5 + 0.7 * (arrow.top[1] - 0.5)] : [0.5, 0.42];
+const yaw2 = await value('turned °');
+await page.pointer(await onStage(gx, gy), await onStage(gx, gy - 0.08), 8);
+await wait(300);
+const raised = await page.eval(`Number(${cardRow(1, 'y — up')}?.querySelector('.pp-num')?.value)`);
+c.ok('a drag up the arrow raises the sphere, written in its card', raised > 0.3 && (await choice()) === 'folded chosen folded', `y ${raised}`);
+c.ok('…the view unturned, the arrow gone up with it', (await value('turned °')) === yaw2 && ((await green()) || { top: [0, 1] }).top[1] < arrow.top[1] - 0.05,
+  JSON.stringify(await green()));
+await page.typeInto(`${cardRow(1, 'y — up')}?.querySelector('.pp-num')`, '0');
+await c.shot('1c-moved');
+await key('E');
+const turnMode = await pressed();
+await c.shot('1d-turn-handles');
+await key('R');
+const sizeMode = await pressed();
+await c.shot('1e-size-handles');
+await key('W');
+c.ok('E turns, R sizes, W moves: the button pressed says which', [turnMode, sizeMode, await pressed()].join(' ') === 'turn size move', `${turnMode} ${sizeMode}`);
+await key('D');
+c.ok('D duplicates it: right after it, beside it, and chosen', (await page.eval(`${cards}.length`)) === 4 && (await choice()) === 'folded folded chosen folded'
+  && Math.abs((await page.eval(`Number(${cardRow(2, 'x')}?.querySelector('.pp-num')?.value)`)) - 1.5) < 0.01
+  && (await page.eval(say)).startsWith('box, sphere ×2, torus'), `${await choice()} · ${await page.eval(say)}`);
+await key('Delete');
+c.ok('Delete takes it out: three again, nothing chosen', (await page.eval(`${cards}.length`)) === 3 && (await choice()) === 'folded folded folded'
+  && (await disabled('remove')), await choice());
+
 // ── The view, by hand ───────────────────────────────────────────────────────
 
 const yaw0 = await value('turned °'), pitch0 = await value('raised °');
@@ -272,7 +316,7 @@ const fallback = await page.eval(say);
 c.ok('no WebGPU: drawn with WebGL2, and the bar says so', fallback.endsWith('WebGL2'), fallback);
 c.ok('…the same opening: the sphere blue in the middle, the corners ground', isBlue(await pixelAt(0.5, 0.5)) && isGround(await pixelAt(0.02, 0.02)));
 await press(0.5, 0.5);
-c.ok('…and a click chooses the sphere there too', (await choice()) === 'folded chosen folded', await choice());
+c.ok('…and a click chooses the sphere there too, its handles drawn', (await choice()) === 'folded chosen folded' && !!(await green()), await choice());
 await c.shot('5-webgl2');
 await page.forget(stub);
 

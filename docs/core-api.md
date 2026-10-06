@@ -20,7 +20,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
 | `widgets.js` | one widget per param type, split out of ParamPanel | **in** |
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
-| `Cards.js` | a list of small param panels, each from its own catalogue entry's schema — filter's chain, a model's shapes; `recipe()` is `[{ id, params, on }]`; `choose()` marks one card, and with `fold` it is the only one open, the others a line each | **in**, 2026-10-06, moved from filter when the 3D app needed it; `fold` the same day, for a model's shapes |
+| `Cards.js` | a list of small param panels, each from its own catalogue entry's schema — filter's chain, a model's shapes; `recipe()` is `[{ id, params, on }]`; `choose()` marks one card, and with `fold` it is the only one open, the others a line each; `duplicate()` puts an entry again after itself | **in**, 2026-10-06, moved from filter when the 3D app needed it; `fold` the same day, for a model's shapes |
 | `Bar.js` | the strip under every app: information only | **in**, 2026-09-23 |
 | `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
 | `stamps.js` | a sprite drawn once at the size and angle it shows, blitted to many (`stampFor`, `blit`); the halving of a picture nearest above a size (`mipFor`) | **in**, 2026-09-27, moved from ckt when particles needed `mipFor` |

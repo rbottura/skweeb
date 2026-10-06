@@ -16,8 +16,9 @@
  * — what the 3D app does when a shape is clicked in its view. With `fold`
  * the chosen card is the only one open, the others folded to their head on
  * one line, so a long list stays short; a click on a card's name chooses it,
- * and on the chosen one's folds it. One added from the menu is chosen.
- * Choosing is the list's state, not a value: nothing saves it.
+ * and on the chosen one's folds it. One added from the menu is chosen, and
+ * one `duplicate` puts right after its original. Choosing is the list's
+ * state, not a value: nothing saves it.
  *
  * DOM and params only; core/param-panel.css draws `.pp-cards` and `.pp-card`.
  */
@@ -127,12 +128,13 @@ export class Cards {
   }
 
   /**
-   * Add an entry at the end.
+   * Add an entry, at the end unless told where.
    * @param {string} id
    * @param {object} [values]   as a recipe has them; coerced, missing ones default
    * @param {boolean} [on]
+   * @param {number} [at]       its place in the list
    */
-  add(id, values = {}, on = true) {
+  add(id, values = {}, on = true, at = this.entries.length) {
     const item = this.catalogue[id];
     if (!item) throw new Error(`${this.app}: no "${id}" in the catalogue`);
     const params = defineParams(`${this.app}:${id}`, this.schemaOf(id));
@@ -159,12 +161,22 @@ export class Cards {
     panel.head.append(headButton('✕', this.words.out, () => this.remove(entry)));
     params.on(() => this.onChange());
 
-    this.entries.push(entry);
-    this.cards.append(card);
+    const next = this.entries[at];
+    this.entries.splice(at, 0, entry);
+    this.cards.insertBefore(card, next ? next.card : null);
     this.mark(entry);
     this.paint();
     this.onChange();
     return entry;
+  }
+
+  /** An entry again, right after it: its values as they are, `change` over them — chosen, with `fold`. */
+  duplicate(entry, change = {}) {
+    const i = this.entries.indexOf(entry);
+    if (i < 0) return null;
+    const copy = this.add(entry.item.id, { ...entry.params.values, ...change }, entry.on, i + 1);
+    if (this.fold) this.choose(copy);
+    return copy;
   }
 
   move(entry, by) {

@@ -90,12 +90,19 @@ export const SHAPES = {
 const place = 'place';
 const at = axis => ({ type: 'range', min: -50, max: 50, step: 'any', default: 0, label: axis, group: place });
 const turn = axis => ({ type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: `turned about ${axis} °`, group: place });
+const times = label => ({ type: 'range', min: 0.05, max: 20, step: 'any', log: true, default: 1, label, group: place });
 
-/** What every shape has besides its form: a place in the world, and a look. */
+/**
+ * What every shape has besides its form: a place in the world, and a look.
+ * Its size is `size` times a stretch along each of its own axes, before it is
+ * turned — what a handle by one axis changes (handles.js); a sphere stretched
+ * along y is an egg.
+ */
 export const PLACE = {
   x: at('x'), y: at('y — up'), z: at('z'),
   turnX: turn('x'), turnY: turn('y'), turnZ: turn('z'),
-  size: { type: 'range', min: 0.05, max: 20, step: 'any', log: true, default: 1, label: 'size ×', group: place },
+  size: times('size ×'),
+  sx: times('stretched along x ×'), sy: times('stretched along y ×'), sz: times('stretched along z ×'),
   colour: { type: 'color', default: '#ffd60a', label: 'colour', group: 'look' },
   /** Smooth reads as round; flat shows the facets the segments make. */
   shading: { type: 'enum', options: ['smooth', 'flat'], default: 'smooth', display: 'chips', label: 'shading', group: 'look' },

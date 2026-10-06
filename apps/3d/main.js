@@ -10,7 +10,9 @@
  * ground. A drag turns round it, shift or the right button slides it, the
  * wheel comes nearer (pointer.js); F frames every shape. A click chooses the
  * shape under it (pick.js) — its card the one open, its box dashed over the
- * picture (guides.js) — and on nothing, or Escape, chooses none.
+ * picture (guides.js) — and on nothing, or Escape, chooses none. The chosen
+ * shape has handles, drawn over the picture from a scene of their own, and
+ * can be duplicated or taken out (chosen.js, handles.js).
  *
  * What leaves (save.js) is drawn again by frames.js at the format's size
  * times its scale: a `model` into the vault, S, or a PNG. rebuild.js replays
@@ -30,6 +32,7 @@ import { saveModel, downloadPicture, titleOf } from './save.js';
 import { wirePointer }    from './pointer.js';
 import { pick }           from './pick.js';
 import { boxOnPicture, drawChosen } from './guides.js';
+import { wireChosen }     from './chosen.js';
 import { Cards }          from '../../core/Cards.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -44,7 +47,7 @@ const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 const model = new Model();
 
-let params, bar, cards, shapesDrawer;
+let params, bar, cards, shapesDrawer, chosen;
 let renderer = null;     // renderer.js's, once three has a backend
 let failing = '';        // why nothing draws, while nothing does
 let busy = false;        // a save or a download is drawing; nothing else starts
@@ -57,6 +60,7 @@ async function boot() {
 
   shapesDrawer = panel.addDrawer({ id: 'shapes', title: 'Shapes', before: 'view' });
   cards = new Cards({ ...SHAPE_CARDS, mount: shapesDrawer.body, onChange: draw, onChoose: draw });
+  chosen = wireChosen({ cards, model, onChange: draw });
   const frame = button('Frame the model  [F]', frameAll);
   frame.classList.add('td-frame');
   panel.drawer('view').body.append(frame);
@@ -67,7 +71,7 @@ async function boot() {
     draw();
   });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
-  wirePointer({ canvas, params, onClick: chooseAt });
+  wirePointer({ canvas, params, onClick: chooseAt, handles: chosen.handles });
   wireKeys();
   for (const s of OPENING) cards.add(s.id, s.params);
 
@@ -120,16 +124,26 @@ function paint() {
   const { on, all } = cards.counts;
   shapesDrawer.note(all ? (on === all ? `${all}` : `${on} of ${all} shown`) : '');
   bar.output({ width: Math.round(v.width * v.scale), height: Math.round(v.height * v.scale), scale: v.scale, format: v.format });
+  chosen.paint();
   if (!renderer) {
     ctx.clearRect(0, 0, w, h);
     if (failing) bar.say('nothing draws here — ' + failing);
     return;
   }
   model.update({ ...v, shapes });
-  const camera = drawModel(ctx, renderer, model, v, w, h);
-  const chosen = model.partAt(cards.chosenIndex);
-  const box = chosen && boxOnPicture(chosen.mesh, camera, w, h);
+  const camera = cameraFor(v, w, h);
+  const part = model.partAt(cards.chosenIndex);
+  const { handles } = chosen;
+  handles.attach(part && part.mesh);
+  handles.see(camera);
+  drawModel(ctx, renderer, model, v, w, h, camera);
+  const box = part && boxOnPicture(part.mesh, camera, w, h);
   if (box) drawChosen(ctx, box, w / Math.max(1, canvas.getBoundingClientRect().width));
+  if (handles.shown) {
+    const gizmo = renderer.draw(handles.scene, camera, w, h);
+    ctx.drawImage(gizmo, 0, 0);
+    gizmo.close();
+  }
   bar.say(describe(v, shapes));
 }
 
@@ -222,6 +236,7 @@ function wireKeys() {
   document.addEventListener('keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!vault.isOpen && chosen.key(e)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (e.key === 'f' || e.key === 'F') frameAll();

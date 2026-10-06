@@ -139,11 +139,32 @@ export class Model {
   }
 }
 
-/** Where a shape stands, how it is turned, how big. */
+/** Where a shape stands, how it is turned, how big: its size times its stretch along each of its axes. */
 function place(mesh, v) {
   mesh.position.set(v.x, v.y, v.z);
   mesh.rotation.set(v.turnX * RAD, v.turnY * RAD, v.turnZ * RAD);
-  mesh.scale.setScalar(v.size);
+  mesh.scale.set(v.size * v.sx, v.size * v.sy, v.size * v.sz);
+}
+
+/**
+ * The other way: a mesh moved by a handle (handles.js) as the values of the
+ * shape it was — only those its `mode` changes, so a move never writes a turn
+ * a rounding away from the card's. Stretched by `XYZ`, every axis alike, it is
+ * the size; by one axis or two, their stretches, the size kept.
+ *
+ * @param {object} mesh
+ * @param {object} values                    the shape's values before
+ * @param {'translate'|'rotate'|'scale'} mode
+ * @param {string} [axis='XYZ']              the handle's: X, Y, Z, XY, YZ, XZ or XYZ
+ * @returns {object}                         values to set on its card
+ */
+export function placeOf(mesh, values, mode, axis = 'XYZ') {
+  if (mode === 'translate') return { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z };
+  if (mode === 'rotate') return { turnX: mesh.rotation.x / RAD, turnY: mesh.rotation.y / RAD, turnZ: mesh.rotation.z / RAD };
+  if (axis === 'XYZ') return { size: mesh.scale.x / values.sx };
+  const out = {};
+  for (const a of 'xyz') if (axis.includes(a.toUpperCase())) out['s' + a] = mesh.scale[a] / values.size;
+  return out;
 }
 
 /** Its colour and shading; a plane is seen from both sides. */

@@ -220,3 +220,18 @@ when it breaks. The recipe stays the suite's data, never three's own JSON,
 whose ids are random (rule 2) and whose shape is three's version's. The
 name is the author's: `3d`, lowercase as every app is, since the laptop's
 server tells `3D` from `3d`.
+
+**The handles are three's, driven by the app.** Brick 2, the same day.
+three's TransformControls is the gizmo, vendored as an add-on, but never
+given the canvas: pointer.js owns the pointer and hands it a press first,
+through the add-on's own public calls, so a press on a handle is never a
+turn of the view nor a pick, whichever listener came first. Its gizmo is a
+scene of its own, drawn over the model's picture as the chosen shape's
+dashed box is: a save never has it, and a mesh the model lets go of is never
+left held. What a handle does goes back into the shape's card, only what its
+mode changes, so the card stays what the recipe keeps. And the per-axis
+size parked with brick 1 is taken, since the handles stretch by axis: every
+shape's place has `sx`, `sy`, `sz`, a stretch along its own axes times its
+`size`, each 1 unless set, so a recipe from before draws as it did. Chosen
+by a click, a shape's card is the one open and the rest fold to a line —
+core's cards learned `fold` for it; filter's chain does not fold.
