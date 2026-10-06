@@ -219,6 +219,8 @@ const replayed = object => !!object && !!object.recipe
  * @returns {Promise<Rebuilt>}
  */
 export async function openFrames(object, opts = {}) {
+  // A smart object is the object it binds, drawn by its app (core/smart.js).
+  if (object && object.type === 'skw') return (await import('./smart.js')).openSmart(object, opts);
   const file = object && object.render && object.render.file;
   const picture = !!file && PICTURE.test(file);
   if (replayed(object)) return openSequence(object, opts);

@@ -134,7 +134,7 @@ turn — the same reason tags change in place.
 |---|---|---|---|---|
 | `still` | png/webp | yes | all | all |
 | `sequence` | webm, frames cached | yes | gamepad, grid, ckt | grid, ckt |
-| `skw` | preview webm/png | **yes, versioned** | all | all |
+| `skw` | png, its picture | **yes, versioned**: the bound form, `{ kind, app, type, recipe, seed }` (`docs/smart-objects.md`) | the app it binds, bound (core/vault.js `bind`) | all, as the object it binds |
 | `dataset` | json, `[char][point][x,y]` | yes | ckt | ckt |
 | `shape` | png with alpha | maybe | gamepad | gamepad, ckt, grid |
 | `set` | contact sheet | yes, an ordered member list | all | gamepad as a brush family, ckt as a sprite library |

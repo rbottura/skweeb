@@ -15,13 +15,16 @@ Photoshop smart object, with the difference that a placement may override.
 **Two forms, one envelope.**
 
 ```json
-{ "kind": "bound",      "app": "gamepad", "recipe": {}, "seed": 19387 }
+{ "kind": "bound",      "app": "particles", "type": "sequence", "recipe": {}, "seed": 19387 }
 { "kind": "standalone", "module": "source/sketch.js" }
 ```
 
-`bound` names a registered app and carries a recipe. It is nearly free: the
-app's `render()` already exists, so this form works the day the contract does.
-It needs that app to be installed.
+`bound` names a registered app, the kind of object it made — its replay
+takes each kind its own way — and carries its recipe and seed. It is the
+`skw`'s recipe, in an ordinary envelope round it: `origin.app` the app,
+`render` its picture. Drawn or reopened, it is that object (core/smart.js
+`unwrap`). It is nearly free: the app's replay already exists, so this form
+works the day the contract does. It needs that app to be installed.
 
 `standalone` carries its own ES module exporting `params` and `render()`. It
 needs no origin app and travels anywhere — the fuller reading of "a whole
@@ -87,14 +90,28 @@ JavaScript to someone else's browser.
 - `live` — a window's id, in place of `ref`: a block of the live stack, never
   saved (*The live stack*, below).
 
-**Versions.** Editing a `.skw` appends `versions/vN.json` and bumps
-`object.version`. Past versions are immutable, so a pin is a real promise.
-Nothing else in the vault has versions, because nothing else is meant to be
-edited after the fact.
+**Saving one.** A `skw` is saved by the app that makes it, through its own
+save: the window is bound into it (core/vault.js `bind`) — reopened in its
+app (`?open=skw_…`), or asked to save for what will hold it, as a window
+filter follows is — and bound, the app's saves of the kind it binds are that
+object, saved again. A look saved in filter stays a look. An object that
+places a smart object lists it in `refs` as well as `parents`, the app
+saying nothing: the id says what it is.
 
-**Invalidation.** Saving a `.skw` emits `vault:updated { id, version }`. Every
-object whose `refs` contain that id drops its cache and is marked stale. Cache
-is disposable; recipes never are.
+**Versions.** Editing a `.skw` appends `versions/vN.json` and bumps
+`object.version` — `PUT /api/vault/<id>` (server/versions.js), what it was
+kept with its picture of then, `versions/vN.<ext>`, and `updated` the time
+of the version it is at; its index row carries `version`. Past versions are
+immutable, so a pin is a real promise. Nothing else in the vault has
+versions, because nothing else is meant to be edited after the fact.
+
+**Invalidation.** Saving a `.skw` emits `vault:updated { id, version }` — on
+every page of the vault, the server's event stream naming it (core/vault.js
+says it once). What is the object or holds it in its `refs` opens again:
+filter's source, compose's placements, the stack's layers. Cache is
+disposable; recipes never are. Pins (`version: N`) draw what was kept
+(core/smart.js `innerOf`); a placement that carries one comes with compose
+editing the stack (M11, brick 6), and so do flatten and refusing a cycle.
 
 **Flatten.** Turning a live placement into a frozen one: render at the pinned
 version, save as an ordinary object with `parents: ["skw_…@v4"]` and no `refs`.

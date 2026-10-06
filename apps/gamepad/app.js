@@ -91,7 +91,10 @@ async function boot() {
     printBox = new PrintBox();
     // A window of the stack (core/live.js): the drawing on the canvas, as its print has it.
     const live = joinLive({ app: 'gamepad', layer: () => printBox.printing.object() });
-    live.answer('save', () => savedBy(() => document.dispatchEvent(new CustomEvent('gallery:saveCanvas'))));
+    live.answer('save', ({ smart }) => {
+      if (smart && !Vault.bound) Vault.bind({});      // for what will hold it: a smart object (core/smart.js)
+      return savedBy(() => document.dispatchEvent(new CustomEvent('gallery:saveCanvas')));
+    });
 
     // 6. Restore previously saved images from IndexedDB
     await ImageStore.ready;

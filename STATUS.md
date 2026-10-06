@@ -55,6 +55,15 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
     the vault's id the answer (`savedBy`) — names what it kept as its source
     and parent, and follows it again. A window asks another for what it
     answers to: `live.ask`, `live.answer`.
+  - **Brick 5, smart objects** (2026-10-07; `core/smart.js`,
+    `server/versions.js`; `tests/vault.mjs` now with versions, `smart` 7,
+    `check-smart` 10): a `skw` — `skw_…`, its recipe the bound form, the
+    app, the kind, its recipe and seed — saved by its app through its own
+    save, the window bound (`Vault.bind`): a window filter follows, saved
+    for filter; one reopened in its app. Saved again, a version: what it
+    was kept in `versions/`, `vault:updated` on every page; filter's
+    source, compose's placements and the stack's layers that are it or hold
+    it are drawn again. `refs` fill in for what places one.
 - **M10 is 3D, and four of its six bricks work** (`apps/3d/STATUS.md`, its
   detail; `check-3d` 58, seven unit files): primitives from a catalogue,
   each a card; an orbit view; three r186 on core's GPU device, WebGL2 where
@@ -301,13 +310,13 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M11's brick 5, its first step: the `skw` in the vault** (`docs/smart-objects.md`,
-*Smart objects*; `docs/roadmap.md`, M11). `server.js` keeps a `skw`'s
-versions — `versions/vN.json`, `object.version` bumped — the one object
-edited after the fact; `Vault.save` of a `skw` with an id appends a
-version and says `vault:updated { id, version }`; `tests/vault.mjs` holds
-it to that. Then `openFrames` of a `skw` (its app, its recipe), and a
-window followed saved as one.
+**M11's brick 6, its first step: opacity and blend on compose's placements**
+(`docs/roadmap.md`, M11; `docs/smart-objects.md`, *Placement*). The two
+rows in compose's placed panel (`apps/compose/params.js`), kept in the block
+when they say something, as the stack keeps them, and `paintPage` drawing
+each with `globalAlpha` and `compositeOf(blend)` (core/blend.js) — so a
+page's export and print show them. Then compose opening the live stack as
+its page, its windows smart objects when the page is saved.
 
 **Waiting on the author first: how a moving model saves.** M10's brick 5
 is motion — a turntable, then a shape swung as the rig swings a bone — and

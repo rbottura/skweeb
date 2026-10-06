@@ -15,7 +15,7 @@
  * filter saves over what it kept, then follows the window again.
  */
 
-import { fromLayer } from './source.js';
+import { fromLayer, fromVault } from './source.js';
 
 /**
  * @param {object} ctx
@@ -28,6 +28,21 @@ import { fromLayer } from './source.js';
 export function followWindows({ live, params, setSource, source, say }) {
   let followed = null;             // { windowId, stop }
   let asked = 0;
+
+  // A smart object held as the source took a new version — saved again in its own window, or
+  // anywhere on this vault: drawn again, the player where it was (core/smart.js).
+  document.addEventListener('vault:updated', async ({ detail }) => {
+    const now = source();
+    if (!now || now.id !== detail.id) return;
+    try {
+      const next = await fromVault(detail.id);
+      if (!source() || source().id !== detail.id) return next.dispose();
+      setSource(next, { keep: true });
+      say(`its source took version ${detail.version}: drawn again`);
+    } catch (err) {
+      say(`its source took a version that would not open: ${err.message}`);
+    }
+  });
 
   /** Follow window `windowId`: its layer as the source, now and whenever it changes. */
   function take(windowId) {
@@ -77,7 +92,7 @@ export function followWindows({ live, params, setSource, source, say }) {
     if (!followed || (now && now.id)) return null;
     const windowId = followed.windowId;
     say('saving its source first, in its own window…');
-    const id = await live.ask(windowId, 'save');
+    const id = await live.ask(windowId, 'save', { smart: true });
     if (!id) throw new Error('its source window kept nothing');
     stop();
     params.set('source', id);

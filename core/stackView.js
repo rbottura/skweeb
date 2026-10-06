@@ -108,7 +108,7 @@ export function stackView({ live, stack, canvas: find }) {
       entry.pending = text;
       const opening = block.live
         ? openFrames(JSON.parse(text), { draft: true })
-        : Vault.load(block.ref).then(({ object, url }) => openFrames(object, { url, draft: true }));
+        : Vault.load(block.ref).then(({ object, url }) => { entry.refs = object.refs || []; return openFrames(object, { url, draft: true }); });
       opening.then(handle => {
         if (entry.pending !== text) { if (handle.dispose) handle.dispose(); return; }
         if (entry.handle && entry.handle.dispose) entry.handle.dispose();
@@ -198,7 +198,15 @@ export function stackView({ live, stack, canvas: find }) {
 
   function schedule() { if (!raf) raf = requestAnimationFrame(draw); }
 
-  const stops = [stack.on(schedule), live.on(schedule)];
+  // A smart object took a new version: a layer that is it, or holds it, opened again (core/smart.js).
+  const stale = ({ detail }) => {
+    for (const [key, entry] of drawn) {
+      if (key === 'ref:' + detail.id || (entry.refs || []).includes(detail.id)) entry.text = null;
+    }
+    schedule();
+  };
+  document.addEventListener('vault:updated', stale);
+  const stops = [stack.on(schedule), live.on(schedule), () => document.removeEventListener('vault:updated', stale)];
   const sized = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
   schedule();
 

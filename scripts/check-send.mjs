@@ -9,7 +9,8 @@
  * wants — opens a filter window beside it whose source is particles, live:
  * it draws them through its chain, and a rate changed in particles is in
  * filter's own layer a moment later, carried whole. Saved in filter,
- * particles is asked to save itself first, in its own window; the filter
+ * particles is asked to save itself first, in its own window — as a smart
+ * object, since filter will hold it (core/smart.js); the filter
  * saved names what particles kept as its source and its parent, and goes
  * on following particles after. Sent again, the filter window open takes it
  * without another opening. And no page said anything wrong. Needs WebGPU,
@@ -69,7 +70,7 @@ const now = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).
 const kept = now.find(o => o.origin && o.origin.app === 'particles');
 const made = now.find(o => o.origin && o.origin.app === 'filter');
 const full = made ? await (await fetch(c.base + '/api/vault/' + made.id)).json() : null;
-c.ok('saved in filter: particles saves itself first, in its own window', !!kept && kept.type === 'sequence', kept ? `${kept.id} ${kept.type}` : await filter.eval(barSay));
+c.ok('saved in filter: particles saves itself first, in its own window — a smart object', !!kept && kept.type === 'skw', kept ? `${kept.id} ${kept.type}` : await filter.eval(barSay));
 c.ok('…and the filter saved names what particles kept, its source and its parent', !!full && !!kept && full.recipe.source === kept.id
   && full.parents.includes(kept.id), full ? `${full.id} source ${full.recipe.source} parents ${JSON.stringify(full.parents)}` : await filter.eval(barSay));
 

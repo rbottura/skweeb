@@ -20,6 +20,11 @@
  *   'vault:removed'  { id }         — an object left the vault for good
  *   'vault:changed'  { count, at }  — the index was rewritten, by anyone, on
  *                                     any machine on this vault; read it again
+ *   'vault:updated'  { id, version } — a smart object took a new version, here or
+ *                                     anywhere: what places it draws it again
+ *
+ * A page may be bound into a smart object (`bind`, core/smart.js): its saves
+ * of the kind it binds are that object, saved again — its next version.
  *
  * The trash is a tag (docs/object-model.md, *Trash*): what carries it is
  * still on disk and still loads — a composition placing it still draws it —
@@ -35,6 +40,16 @@ export const isTrashed = row => !!row && (row.tags || []).includes(TRASH);
 let _available = false;
 let _index = [];
 let _events = null;
+let _bound = null;     // the smart object this page's saves bind into: { id, type }
+let _heard = '';       // the last new version said, so one is said once
+
+/** A smart object's new version, said once on the page however it is heard. */
+function updated(detail) {
+  const key = detail.id + '@' + detail.version;
+  if (key === _heard) return;
+  _heard = key;
+  document.dispatchEvent(new CustomEvent('vault:updated', { detail }));
+}
 
 /**
  * Hear about changes made anywhere — another tab, another machine on the same
@@ -48,6 +63,7 @@ function listen() {
     let detail = {};
     try { detail = JSON.parse(e.data); } catch {}
     document.dispatchEvent(new CustomEvent('vault:changed', { detail }));
+    if (detail.updated) updated(detail.updated);
   });
 }
 
@@ -88,6 +104,24 @@ export const Vault = {
       (!filter.tag  || (row.tags || []).includes(filter.tag)));
   },
 
+  /** The smart object this page edits, if any: `{ id, type }` — id null until its first save. */
+  get bound() { return _bound; },
+
+  /**
+   * Bind this page's saves into a smart object — `{ id, type }` to edit one,
+   * `{}` for a new one made by the next save — or `null` to save ordinary
+   * objects again. Only a save of the kind it binds: a look saved in filter
+   * stays a look.
+   */
+  bind(bound) { _bound = bound ? { id: bound.id || null, type: bound.type || null } : null; },
+
+  /** What a smart object was at version `n` (server/versions.js): kept, as it was. */
+  async version(id, n) {
+    const res = await fetch('/vault/objects/' + encodeURIComponent(id) + '/versions/v' + n + '.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('vault: ' + id + ' has no version ' + n);
+    return res.json();
+  },
+
   /** One object, envelope and all. */
   async load(id) {
     const res = await fetch(API + '/' + encodeURIComponent(id), { cache: 'no-store' });
@@ -114,16 +148,21 @@ export const Vault = {
    * @returns {Promise<object|null>} the envelope, or null when offline
    */
   async save(spec) {
+    // Bound into a smart object, a save of its kind is that object, saved again (core/smart.js).
+    const smart = !!_bound && (!_bound.type || _bound.type === spec.type);
+    const recipe = spec.recipe === undefined ? null : spec.recipe;
+    const parents = spec.parents || [];
     const body = {
-      type: spec.type,
+      type: smart ? 'skw' : spec.type,
       title: spec.title || '',
       note: spec.note || '',
       tags: spec.tags || [],
       origin: spec.origin,
-      recipe: spec.recipe === undefined ? null : spec.recipe,
+      recipe: smart ? { kind: 'bound', app: spec.origin && spec.origin.app, type: spec.type, recipe, seed: spec.seed ?? null } : recipe,
       seed: spec.seed,
-      parents: spec.parents || [],
-      refs: spec.refs || [],
+      parents,
+      // What a smart object places, it depends on: one among its parents is a ref too.
+      refs: [...new Set([...(spec.refs || []), ...parents.filter(id => String(id).startsWith('skw_'))])],
       render: {
         ext: spec.render.ext,
         w: spec.render.w, h: spec.render.h,
@@ -136,8 +175,9 @@ export const Vault = {
 
     let res;
     try {
-      res = await fetch(API, {
-        method: 'POST',
+      const again = smart && _bound.id;
+      res = await fetch(again ? API + '/' + encodeURIComponent(_bound.id) : API, {
+        method: again ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
@@ -151,9 +191,15 @@ export const Vault = {
 
     _available = true;
     const object = out.object;
+    if (smart) _bound = { id: object.id, type: spec.type };
     dispatch(out.status === 'duplicate' ? 'vault:duplicate' : 'vault:saved',
              { id: object.id, type: object.type });
-    if (out.status !== 'duplicate') _index.unshift(object);
+    if (out.status === 'updated') {
+      _index = _index.map(row => (row.id === object.id ? { ...row, version: object.version, render: object.render } : row));
+      updated({ id: object.id, version: object.version });
+    } else if (out.status !== 'duplicate') {
+      _index.unshift(object);
+    }
     return object;
   },
 

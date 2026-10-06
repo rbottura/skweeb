@@ -322,3 +322,14 @@ laptop's windows share saved smart objects through the vault, never what is
 unsaved. And every placement gains `opacity` and `blend`, CSS's blend
 modes by name — one spec with canvas's, so a window shows a layer as a save
 will draw it. Written into `docs/smart-objects.md`, the spec's own file now.
+
+**A smart object binds the kind of thing it is, and a window binds into
+one.** M11's brick 5, 2026-10-07. The bound form carries the `type` its app
+made — a loop, a page, a model — since each app replays each kind its own
+way, and the spec's form had no room for it. A `skw` is saved by the app
+that makes it, through its own save: the window is bound, and its next save
+of that kind is the next version, so its title, lineage and picture are the
+app's as ever. A window filter follows, asked to save, saves as one; one
+reopened in its app binds that window. `refs` fill in by themselves: a
+`skw_` id among the parents is a dependency too. Pins, flatten and
+refusing a cycle wait for compose's placements to carry a version.

@@ -45,6 +45,12 @@ export class Placements {
    */
   constructor({ onChange = () => {}, say = () => {}, load = fromVault } = {}) {
     this.items = [];
+    // A smart object took a new version: what places it, or holds it, is opened again (core/smart.js).
+    document.addEventListener('vault:updated', ({ detail }) => {
+      const stale = this.items.filter(p => p.block.ref === detail.id || (p.refs || []).includes(detail.id));
+      for (const p of stale) p.opening = this.open(p).then(() => this.onChange());
+      if (stale.length) this.say(`${stale.map(p => p.title).join(', ')}: drawn again, version ${detail.version}`);
+    });
     this.onChange = onChange;
     this.say = say;
     this.load = load;
@@ -123,7 +129,7 @@ export class Placements {
       if (token !== p.loads) { handle.dispose(); return p; }
       if (!handle.length) { handle.dispose(); throw new Error('it rebuilt to no frames'); }
       Object.assign(p, { title: object.title || object.id, type: object.type, thumb,
-                         handle, size: inkSize(handle) });
+                         handle, size: inkSize(handle), refs: object.refs || [] });
       const missing = handle.missing || [];
       if (missing.length) this.say(`${p.title} is drawn without ${missing.join(', ')}: not on this machine`);
     } catch (err) {

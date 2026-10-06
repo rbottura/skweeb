@@ -314,6 +314,46 @@ try {
   const rows2 = (await (await fetch(BASE + '/api/vault')).json()).objects;
   ok('a set with no role carries null — not an older index', rows2.find(r => r.id === roleless.out.object.id).role, null);
 
+  // ── Smart objects: the one object saved again (server/versions.js) ─────────
+  const bound = rate => ({ kind: 'bound', app: 'particles', type: 'sequence', recipe: { emit: { rate } }, seed: null });
+  const smartPng = rgb => ({ ext: 'png', w: 6, h: 6, data: png(6, 6, rgb).toString('base64') });
+  const made = await post(sequence({ type: 'skw', title: 'smoke', origin: { app: 'particles', version: '1.0.0' },
+    recipe: bound(90), render: smartPng([1, 2, 3, 255]) }));
+  const skw = made.out.object;
+  ok('a smart object: its id says so, version 1', [made.code, skw.id.startsWith('skw_'), skw.version], [201, true, 1]);
+  const put = async (id, body) => {
+    const res = await fetch(BASE + '/api/vault/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    return { code: res.status, out: await res.json().catch(() => ({})) };
+  };
+  // The pages hear which object took a new version, and which version.
+  const stream = await fetch(BASE + '/api/vault/events');
+  const reader = stream.body.getReader();
+  let heard = '';
+  const hearing = (async () => {
+    const end = Date.now() + 5000;
+    while (Date.now() < end && !heard.includes('"updated"')) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      heard += Buffer.from(value).toString('utf8');
+    }
+  })();
+  const again = await put(skw.id, { recipe: bound(151), render: smartPng([9, 8, 7, 255]) });
+  ok('saved again: version 2, the recipe it has now', [again.code, again.out.object.version, again.out.object.recipe.recipe.emit.rate], [200, 2, 151]);
+  await hearing;
+  reader.cancel().catch(() => {});
+  const said = (heard.match(/"updated":(\{[^}]*\})/) || [])[1];
+  ok('…and the pages hear which, and its version', said && JSON.parse(said), { id: skw.id, version: 2 });
+  const v1 = await (await fetch(BASE + '/vault/objects/' + skw.id + '/versions/v1.json')).json();
+  ok('what it was is kept as version 1', [v1.version, v1.recipe.recipe.emit.rate, v1.title], [1, 90, 'smoke']);
+  const then = await fetch(BASE + '/vault/objects/' + skw.id + '/versions/' + v1.render.file);
+  ok('…with its picture of then beside it', [then.status, Buffer.from(await then.arrayBuffer()).equals(png(6, 6, [1, 2, 3, 255]))], [200, true]);
+  const now = await fetch(BASE + '/vault/objects/' + skw.id + '/' + again.out.object.render.file);
+  ok('its picture is the new one', Buffer.from(await now.arrayBuffer()).equals(png(6, 6, [9, 8, 7, 255])), true);
+  const smartRow = (await (await fetch(BASE + '/api/vault')).json()).objects.find(r => r.id === skw.id);
+  ok('its row says its version, without opening it', smartRow.version, 2);
+  ok('an ordinary object takes no version', (await put(o.id, { recipe: {}, render: smartPng([0, 0, 0, 255]) })).code, 409);
+  ok('nor does one that is not there', (await put('skw_1700000000000_abcdef', { render: smartPng([0, 0, 0, 255]) })).code, 404);
+
   // ── Method routing ─────────────────────────────────────────────────────────
   ok('PUT on the collection is refused',
      (await fetch(BASE + '/api/vault', { method: 'PUT' })).status, 405);

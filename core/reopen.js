@@ -26,6 +26,8 @@ export const isMarks = recipe => !!recipe
  * @returns {Promise<?string>}
  */
 export async function reopenUrl(object) {
+  // A smart object reopens as the object it binds, its own id in the link (core/smart.js).
+  if (object && object.type === 'skw') object = { ...(await import('./smart.js')).unwrap(object), id: object.id };
   const app = object && object.origin && object.origin.app;
   // A leaf has no recipe to reopen, and its app — `import`, or the gamepad
   // for a legacy sprite — need not be asked: asking is a 404 in the console.
@@ -90,7 +92,13 @@ export async function rigUrl(object) {
 export async function requested(app) {
   const id = new URLSearchParams(location.search).get('open');
   if (!id) return null;
-  const loaded = await Vault.load(id);
+  let loaded = await Vault.load(id);
+  // A smart object: the object it binds to work on, this window bound to it — its saves are its versions.
+  if (loaded.object.type === 'skw') {
+    const object = (await import('./smart.js')).unwrap(loaded.object);
+    loaded = { ...loaded, object };
+    Vault.bind({ id, type: object.type });
+  }
   const made = loaded.object.origin && loaded.object.origin.app;
   if (made !== app) throw new Error(`${id} was made by ${made || 'nothing known'}, not ${app}`);
   return loaded;

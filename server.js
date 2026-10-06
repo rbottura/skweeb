@@ -33,6 +33,7 @@ const crypto = require('crypto');
 const staticHost  = require('./server/static.js');
 const deleteRoute = require('./server/delete.js');
 const vaultEvents = require('./server/events.js')();
+const versionRoute = require('./server/versions.js');
 
 const argv  = process.argv.slice(2);
 const argOf = (name, fallback) => {
@@ -135,18 +136,21 @@ function indexRow(o) {
       frames: o.render.frames, bytes: o.render.bytes, sha256: o.render.sha256,
     },
     parents: o.parents, refs: o.refs, published: o.published,
+    // A smart object's version, so a page knows when it changed without opening it.
+    ...(o.type === 'skw' ? { version: o.version || 1 } : {}),
     // What a set was made as — null for none — so a picker can tell a material
     // from a brush family without opening every folder (core/uses.js).
     ...(o.type === 'set' ? { role: o.recipe && typeof o.recipe.role === 'string' ? o.recipe.role : null } : {}),
   };
 }
 
-function rebuildIndex() {
+/** `said`: what the pages hear besides the count — a smart object's new version (server/versions.js). */
+function rebuildIndex(said = {}) {
   const objects = allObjects().map(indexRow);
   fs.mkdirSync(VAULT_DIR, { recursive: true });
   fs.writeFileSync(INDEX_FILE,
     JSON.stringify({ generated: new Date().toISOString(), count: objects.length, objects }, null, 1));
-  vaultEvents.notify(objects.length);
+  vaultEvents.notify(objects.length, said);
   return objects;
 }
 
@@ -218,7 +222,8 @@ async function apiCreate(req, res) {
     stableStringify(o.recipe === undefined ? null : o.recipe) === recipeKey);
   if (twin) return sendJson(res, 200, { status: 'duplicate', object: twin });
 
-  const app = (payload.origin && payload.origin.app) || 'obj';
+  // A smart object's id says what it is (docs/object-model.md, *The envelope*).
+  const app = payload.type === 'skw' ? 'skw' : (payload.origin && payload.origin.app) || 'obj';
   const id  = newId(app);
   const dir = path.join(OBJECTS_DIR, id);
   fs.mkdirSync(dir, { recursive: true });
@@ -248,6 +253,7 @@ async function apiCreate(req, res) {
     },
     thumb: thumb ? 'thumb' + thumb.ext : null,
     published: false,
+    ...(payload.type === 'skw' ? { version: 1 } : {}),
   };
 
   fs.writeFileSync(path.join(dir, 'object.json'), JSON.stringify(envelope, null, 1));
@@ -295,6 +301,7 @@ async function apiRetag(req, res, id) {
 }
 
 const apiDelete   = deleteRoute({ objectsDir: OBJECTS_DIR, allObjects, rebuildIndex, safeId, readBody, sendJson });
+const apiVersion  = versionRoute({ objectsDir: OBJECTS_DIR, readEnvelope, safeId, readBody, sendJson, decodeAsset, rebuildIndex, maxUpload: MAX_UPLOAD });
 const serveStatic = staticHost({ root: ROOT, vault: VAULT_DIR });
 
 // -- Routing -----------------------------------------------------------------
@@ -319,7 +326,8 @@ const server = http.createServer(async (req, res) => {
       const id = urlPath.slice('/api/vault/'.length);
       if (req.method === 'GET')   return apiGet(res, id);
       if (req.method === 'PATCH') return await apiRetag(req, res, id);
-      return sendJson(res, 405, { error: 'GET or PATCH' });
+      if (req.method === 'PUT')   return await apiVersion(req, res, id);
+      return sendJson(res, 405, { error: 'GET, PATCH or PUT' });
     }
     if (urlPath.startsWith('/api/')) return sendJson(res, 404, { error: 'no such endpoint' });
     serveStatic(req, res, urlPath);

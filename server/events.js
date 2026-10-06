@@ -9,7 +9,9 @@
  * cheap and already the only way it learns anything.
  *
  * server.js calls `notify()` wherever it rewrites index.json, so a save, a
- * retag and a delete all announce themselves, from whichever machine.
+ * retag and a delete all announce themselves, from whichever machine — and a
+ * smart object's new version says which, and which version (`updated`), so
+ * what places it draws it again (server/versions.js).
  */
 
 const KEEPALIVE_MS = 25000;   // under the idle timeout of a proxy in front, tailscale serve's included
@@ -30,8 +32,8 @@ module.exports = function events() {
     req.on('close', () => { clearInterval(beat); clients.delete(res); });
   }
 
-  function notify(count) {
-    const msg = 'event: changed\ndata: ' + JSON.stringify({ count, at: new Date().toISOString() }) + '\n\n';
+  function notify(count, said = {}) {
+    const msg = 'event: changed\ndata: ' + JSON.stringify({ count, at: new Date().toISOString(), ...said }) + '\n\n';
     for (const res of clients) res.write(msg);
   }
 

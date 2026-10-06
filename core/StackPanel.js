@@ -93,7 +93,8 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
   const sends = el('div', 'pp-stack-sends');
   sends.append(...sendButtons(live, app, { button, say: text => { said.textContent = text; } }));
   drawer.body.append(note, list, rows, adds, sends, said);
-  if (save) live.answer('save', () => savedBy(save));
+  // Asked to save for something that will hold it: as a smart object, made once and then versioned.
+  if (save) live.answer('save', ({ smart }) => { if (smart && !Vault.bound) Vault.bind({}); return savedBy(save); });
   if (take) takeWhenAsked(live, take);
 
   const values = defineParams(app + '-stack-layer', LAYER_PARAMS);
