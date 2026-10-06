@@ -35,7 +35,10 @@ sprite sheet too (`spritesheet.js`).
 
 **Video is the zip plus ffmpeg** (settled 2026-09-22, `docs/decisions.md`):
 `scripts/frames-to-video.mjs` makes the file. No muxer is written in
-JavaScript.
+JavaScript. It reads the zip a frame at a time, never whole — Node reads no
+file past 2 GiB into memory, and a loop at print scale passes that (the first
+was 2.65 GiB). A zip holds 4 GiB and 65535 files without ZIP64, which nothing
+here writes: past that, `zipStore` says so rather than wrap its numbers.
 
 **A sequence's picture** is one of its frames, and which is a decision, not a
 detail. For a recording, `representativeTick()` (`stage/clip.js`) asks the

@@ -55,6 +55,9 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
   core's), and the gamepad prints its canvas: E. `check-print` (16) holds
   every app's print to its object drawn whole, a seam measured apart; map
   and compose print in their own checks (`docs/core-export.md`).
+- **`frames-to-video` reads a zip past 2 GiB** — a frame at a time; the
+  author's 2.65 GiB loop could not be read whole (`ERR_FS_FILE_TOO_LARGE`).
+  Past 4 GiB a zip cannot hold the frames, and the export says so.
 - **core/noise.js `noise3`**: gradient noise in 3D on the suite's hash, JS
   only, for a displaced shape.
 - **`check-map` measures its replay** now, as the note under *Tests* says a

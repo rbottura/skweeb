@@ -152,6 +152,12 @@ export function zipStore(entries) {
 
   let centralSize = 0;
   for (const c of central) centralSize += c.length;
+  // A zip without ZIP64 counts in 32 bits: past 4 GiB, or 65535 entries, its numbers would wrap and
+  // leave a file nothing can open. Said, rather than written broken.
+  if (offset + centralSize + 22 > 0xffffffff || entries.length > 0xffff) {
+    throw new Error(`these frames come to ${(offset / 2 ** 30).toFixed(2)} GiB in ${entries.length} files — `
+      + 'past what a zip holds (4 GiB, 65535 files): export fewer frames, or at a smaller scale');
+  }
 
   const end = new DataView(new ArrayBuffer(22));
   end.setUint32(0, 0x06054b50, true);

@@ -37,8 +37,8 @@
 import { spawnSync } from 'node:child_process';
 import { inflateRawSync } from 'node:zlib';
 import {
-  existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync,
-  rmSync, statSync, writeFileSync,
+  closeSync, existsSync, fstatSync, mkdirSync, mkdtempSync, openSync, readdirSync,
+  readFileSync, readSync, rmSync, statSync, writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -94,7 +94,7 @@ let temp = null;
 if (statSync(input).isFile()) {
   temp = mkdtempSync(path.join(tmpdir(), 'skweeb-frames-'));
   say(`extracting ${path.basename(input)}…`);
-  unzip(readFileSync(path.resolve(input)), temp);
+  unzip(path.resolve(input), temp);
   framesDir = temp;
 }
 
@@ -176,7 +176,13 @@ function defaultOut() {
 }
 
 /**
- * Extract a zip into a directory.
+ * Extract a zip into a directory, a member at a time.
+ *
+ * Read by offset, never whole: Node reads no file past 2 GiB into one buffer,
+ * and a frame zip at print scale is past that — the first was 2.65 GiB. So
+ * the end record and the central directory are read on their own, then each
+ * member from its own local header; memory holds one frame. A zip is good to
+ * 4 GiB (core/export.js says so rather than wrap); ZIP64 is not read.
  *
  * Read through the central directory rather than by scanning for local
  * headers: the central directory is the authoritative index, and it is the
@@ -189,23 +195,30 @@ function defaultOut() {
  * oldest trick there is, and a frame zip has no business writing outside the
  * folder it was asked to fill.
  */
-function unzip(buf, dest) {
-  const eocd = findEOCD(buf);
+function unzip(file, dest) {
+  const fd = openSync(file, 'r');
+  const size = fstatSync(fd).size;
+  const from = Math.max(0, size - 22 - 0xffff);
+  const tail = readAt(fd, from, size - from);
+  const eocd = findEOCD(tail);
   if (eocd < 0) fail('not a zip file: no end-of-central-directory record');
 
-  const count = buf.readUInt16LE(eocd + 10);
-  let p = buf.readUInt32LE(eocd + 16);
+  const count = tail.readUInt16LE(eocd + 10);
+  const dirAt = tail.readUInt32LE(eocd + 16);
+  if (count === 0xffff || dirAt === 0xffffffff) fail('a ZIP64 zip: past 4 GiB, and past what this reads');
+  const dir = readAt(fd, dirAt, tail.readUInt32LE(eocd + 12));
+  let p = 0;
 
   for (let i = 0; i < count; i++) {
-    if (buf.readUInt32LE(p) !== 0x02014b50) fail(`bad central directory entry at ${p}`);
+    if (dir.readUInt32LE(p) !== 0x02014b50) fail(`bad central directory entry at ${dirAt + p}`);
 
-    const method   = buf.readUInt16LE(p + 10);
-    const compSize = buf.readUInt32LE(p + 20);
-    const nameLen  = buf.readUInt16LE(p + 28);
-    const extraLen = buf.readUInt16LE(p + 30);
-    const commLen  = buf.readUInt16LE(p + 32);
-    const localAt  = buf.readUInt32LE(p + 42);
-    const name     = buf.toString('utf8', p + 46, p + 46 + nameLen);
+    const method   = dir.readUInt16LE(p + 10);
+    const compSize = dir.readUInt32LE(p + 20);
+    const nameLen  = dir.readUInt16LE(p + 28);
+    const extraLen = dir.readUInt16LE(p + 30);
+    const commLen  = dir.readUInt16LE(p + 32);
+    const localAt  = dir.readUInt32LE(p + 42);
+    const name     = dir.toString('utf8', p + 46, p + 46 + nameLen);
 
     p += 46 + nameLen + extraLen + commLen;
 
@@ -218,10 +231,9 @@ function unzip(buf, dest) {
 
     // The local header repeats the name and may carry a different extra field,
     // so the data offset has to be read from it and not from the directory.
-    const lNameLen  = buf.readUInt16LE(localAt + 26);
-    const lExtraLen = buf.readUInt16LE(localAt + 28);
-    const start = localAt + 30 + lNameLen + lExtraLen;
-    const raw = buf.subarray(start, start + compSize);
+    const local = readAt(fd, localAt, 30);
+    const start = localAt + 30 + local.readUInt16LE(26) + local.readUInt16LE(28);
+    const raw = readAt(fd, start, compSize);
 
     let bytes;
     if (method === 0)      bytes = raw;
@@ -231,6 +243,18 @@ function unzip(buf, dest) {
     mkdirSync(path.dirname(out), { recursive: true });
     writeFileSync(out, bytes);
   }
+  closeSync(fd);
+}
+
+/** `length` bytes of an open file from `position`; a zip that ends sooner is cut short. */
+function readAt(fd, position, length) {
+  const buf = Buffer.alloc(length);
+  for (let done = 0; done < length;) {
+    const n = readSync(fd, buf, done, length - done, position + done);
+    if (!n) fail(`the zip ends early: ${length} bytes wanted at ${position}`);
+    done += n;
+  }
+  return buf;
 }
 
 /**
