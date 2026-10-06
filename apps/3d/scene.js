@@ -8,7 +8,8 @@
  * (modifiers.js) — so a drag that turns a box does not rebuild it, and lets
  * three free what goes. A shape or a modifier that is off is not drawn; one
  * its catalogue does not know is named (`unknownIn`), never thrown on, so an
- * old recipe still opens in a newer app and the other way round.
+ * old recipe still opens in a newer app and the other way round. How each
+ * shape is dressed — its material, under the model's style — is look.js's.
  *
  * The light: a sun, from a direction fixed in the world — so turning round
  * the model shows its dark side — and an ambient fill. Its intensities are
@@ -19,11 +20,11 @@
  */
 
 import {
-  Scene, Mesh, MeshStandardMaterial, DirectionalLight, AmbientLight,
-  DoubleSide, FrontSide, Box3, Sphere,
+  Scene, Mesh, MeshStandardMaterial, DirectionalLight, AmbientLight, Box3, Sphere,
 } from '../../core/libs/three/three.core.js';
 import { SHAPES, shapeSchema, formKeys } from './shapes.js';
 import { MODIFIERS, modify } from './modifiers.js';
+import { dress, bandsOf, outline, outlineOf, inkOf, inkUp, shade, shadowsOf } from './look.js';
 import { direction } from './camera.js';
 import { valuesFor } from '../../core/params.js';
 
@@ -78,6 +79,9 @@ export class Model {
     this.scene.add(this.sun, this.sun.target, this.fill);
     /** One per shape drawn, in the recipe's order: { mesh, form, index } — `index` its place in the recipe's list. */
     this.parts = [];
+    /** The outline's material and its uniforms, and the shadows' catcher, once asked for (look.js). */
+    this.ink = null;
+    this.catcher = null;
   }
 
   /** How many shapes are drawn. */
@@ -95,6 +99,10 @@ export class Model {
    */
   update(recipe) {
     const shapes = shapesOf(recipe);
+    const bands = bandsOf(recipe);
+    const lined = outlineOf(recipe) > 0;
+    if (lined && !this.ink) this.ink = inkOf();
+    if (this.ink) inkUp(this.ink, recipe);
     shapes.forEach(({ id, values, index, stack }, i) => {
       const form = formOf(id, values, stack);
       let part = this.parts[i];
@@ -109,7 +117,8 @@ export class Model {
         part.form = form;
       }
       place(part.mesh, values);
-      look(part.mesh.material, id, values);
+      dress(part.mesh, id, values, bands);
+      outline(part.mesh, id, lined ? this.ink : null);
     });
     for (const part of this.parts.splice(shapes.length)) {
       this.scene.remove(part.mesh);
@@ -120,8 +129,10 @@ export class Model {
     const v = recipe || {};
     const d = direction(num(v.sunYaw, LIGHT_PARAMS.sunYaw.default), num(v.sunPitch, LIGHT_PARAMS.sunPitch.default));
     this.sun.position.set(d[0] * 10, d[1] * 10, d[2] * 10);
+    this.sun.target.position.set(0, 0, 0);
     this.sun.intensity = num(v.sun, LIGHT_PARAMS.sun.default);
     this.fill.intensity = num(v.ambient, LIGHT_PARAMS.ambient.default);
+    shade(this, shadowsOf(recipe));
     this.scene.updateMatrixWorld(true);
     return this;
   }
@@ -148,6 +159,11 @@ export class Model {
       part.mesh.material.dispose();
     }
     this.parts = [];
+    if (this.ink) this.ink.material.dispose();
+    if (this.catcher) {
+      this.catcher.geometry.dispose();
+      this.catcher.material.dispose();
+    }
   }
 }
 
@@ -177,20 +193,6 @@ export function placeOf(mesh, values, mode, axis = 'XYZ') {
   const out = {};
   for (const a of 'xyz') if (axis.includes(a.toUpperCase())) out['s' + a] = mesh.scale[a] / values.size;
   return out;
-}
-
-/** Its colour and shading; a plane is seen from both sides. */
-function look(material, id, v) {
-  material.color.set(v.colour);
-  material.roughness = 0.75;
-  material.metalness = 0;
-  const flat = v.shading === 'flat';
-  const side = id === 'plane' ? DoubleSide : FrontSide;
-  if (material.flatShading !== flat || material.side !== side) {
-    material.flatShading = flat;
-    material.side = side;
-    material.needsUpdate = true;
-  }
 }
 
 const num = (x, d) => (typeof x === 'number' && Number.isFinite(x) ? x : d);

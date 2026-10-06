@@ -18,7 +18,8 @@ call, 2026-10-06 (`docs/decisions.md`).
    turned, sized and stretched by handles, duplicated, deleted.
 3. **Modifiers** on a shape, in order — done 2026-10-06: subdivide,
    displace by seeded noise, twist, bend, mirror, array.
-4. **A look**: toon shading on a ramp, shadows, an outline.
+4. **A look** — done 2026-10-06: toon shading on a ramp, shadows, an
+   outline.
 5. **Motion**: a turntable, or a transform swung as the rig swings a bone,
    every loop closing.
 6. **For the game**: a model drawn from four or eight sides, a set by
@@ -65,6 +66,22 @@ call, 2026-10-06 (`docs/decisions.md`).
   a row is cut shorter, a mirror left out, the same way every time. A
   model twisted and displaced saves, replays to the pixel, draws again at
   scale 2 and reopens with its stack; F frames by every vertex.
+- **A style** (2026-10-06, brick 4; `look.js`, `tests/3d-look.mjs` 28), the
+  model's, in its Style drawer — a shape keeps its colour and its flat or
+  smooth:
+  - *bands of light* — 0 is three's physical shading as before; 1 to 6 a
+    MeshToonMaterial on a ramp of that many steps, each at its band's
+    middle, nearest-read, one ramp shared by every model;
+  - *outline* — thousandths of the picture's height, and its colour: a hull
+    of each shape behind it, its back faces pushed out on the picture along
+    normals smoothed where a box's edge splits them, so no corner opens; a
+    share of the picture, so scale 2 is the same line; none for a plane;
+  - *shadows* — the shapes cast and receive, the sun's shadow camera round
+    the model, a catcher under its foot that is nothing but shadows, so a
+    model on a ground of `none` keeps its shadow.
+
+  All three draw under WebGPU and WebGL2, save, replay to the pixel and draw
+  again at scale 2 the same picture (mean 0.07 of 255).
 - **Handles** (2026-10-06, brick 2's second half; `handles.js`, `chosen.js`,
   `tests/3d-handles.mjs` 18). The chosen shape wears three's
   TransformControls: arrows and squares that move it, rings that turn it,
@@ -117,7 +134,7 @@ call, 2026-10-06 (`docs/decisions.md`).
   it draws with WebGL2 by itself, the bar saying so — checked with WebGPU
   taken away, the same opening drawn; its one line about falling back is
   kept off the console.
-- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 53 with
+- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 58 with
   all the above, a real mouse on the handles). S
   saves a `model`: its recipe the panel's values and `shapes: [{ id,
   params, on }]`, titled by its shapes — *box, sphere, torus* — its render
@@ -137,6 +154,9 @@ call, 2026-10-06 (`docs/decisions.md`).
   A-size sheet is under it.
 - **No tone mapping.** Colours stay as typed, so a face square to a strong
   sun clips to white: sun 2.6 and ambient 1 keep the opening under it.
+- **The style's fixed parts**: a shadow's darkness (0.35) and its map
+  (2048 a side) are not rows yet; a long, low shadow can leave its map's
+  reach and be cut. A plane has no outline.
 - **The laptop's Intel** should draw with WebGL2 unless Chrome's flags are
   on — the fallback is checked here with WebGPU taken away, not yet seen on
   the laptop itself.
@@ -148,14 +168,14 @@ call, 2026-10-06 (`docs/decisions.md`).
 
 ## Next single step
 
-**Brick 4's first: toon shading on a ramp.** The model's look, beside its
-light: `toon`, its steps — none, the physical shading as now, or two to six
-bands — every shape then a `MeshToonMaterial` with a ramp of that many
-steps as its gradient map (a small DataTexture, nearest-filtered), flat or
-smooth still the shape's own. Saved, replayed to the pixel; a check that a
-sphere's shading falls into exactly that many levels. Then the outline —
-an inverted hull, its width a param — and shadows, a catcher under the
-model so a shadow lies on a ground of `none` too.
+**Brick 5's first: a turntable.** A Motion drawer: turns a loop — 0 still,
+±1, ±2 — its length in frames and its rate; frame i seen from the yaw plus
+360° × turns × i / length, so frame `length` is frame 0 to the bit.
+frames.js's `openModel` gives that many frames at that rate; core's
+Playhead plays them in the view, space to stop, the handles hidden while
+it plays. S saves a `sequence`, as the rig's loops are — its recipe the
+model's and its motion — replayed by rebuild.js; compose plays it. Then a
+shape's place swung on a wave, as the rig swings a bone.
 
 ## Parked
 

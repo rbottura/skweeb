@@ -58,6 +58,9 @@ async function create() {
     alpha: true,
   });
   renderer.setPixelRatio(1);
+  // On from the first: a shadow costs only where a model's sun casts one (look.js
+  // `shade`), and turning the map on later would rebuild every lit material.
+  renderer.shadowMap.enabled = true;
   await renderer.init();
   renderer.setClearColor(0x000000, 0);
 

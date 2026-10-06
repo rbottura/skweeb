@@ -226,6 +226,48 @@ await c.shot('1g-displaced');
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
 await wait(300);
 
+// ── The style ───────────────────────────────────────────────────────────────
+
+/** Down the middle of the preview, through the sphere: how many blues, and how many of its pixels the four commonest hold. */
+const blues = () => page.eval(`(() => { const c = document.getElementById('stage'), x = Math.round(c.width / 2);
+  const d = c.getContext('2d').getImageData(x, 0, 1, c.height).data, seen = new Map(); let all = 0;
+  for (let y = 0; y < c.height; y++) { const r = d[y * 4], g = d[y * 4 + 1], b = d[y * 4 + 2]; if (!(b > r + 40 && b > g)) continue;
+    all++; const k = r + ',' + g + ',' + b; seen.set(k, (seen.get(k) || 0) + 1); }
+  const top = [...seen.values()].sort((a, b) => b - a).slice(0, 4).reduce((a, b) => a + b, 0);
+  return { colours: seen.size, share: all ? top / all : 0 }; })()`);
+const smoothBlues = await blues();
+await page.typeInto(`${panelRow('bands of light — 0, smooth')}?.querySelector('.pp-num')`, '3');
+await wait(500);
+const toonBlues = await blues();
+c.ok('three bands of light: the sphere in a few flat blues, where smooth had dozens', smoothBlues.colours > 30 && toonBlues.share > 0.9,
+  `smooth ${smoothBlues.colours} blues, toon: four hold ${(toonBlues.share * 100).toFixed(1)}%`);
+await c.shot('1h-toon');
+/** Right from the sphere's middle along the middle row: the first pixel not its blue, and how many dark ones run from there. */
+const pastSphere = () => page.eval(`(() => { const c = document.getElementById('stage'), y = Math.round(c.height / 2);
+  const d = c.getContext('2d').getImageData(0, y, c.width, 1).data, dark = x => d[x * 4] < 80 && d[x * 4 + 1] < 80 && d[x * 4 + 2] < 80;
+  for (let x = Math.round(c.width / 2); x < c.width; x++) { const r = d[x * 4], g = d[x * 4 + 1], b = d[x * 4 + 2];
+    if (b > r + 40 && b > g) continue;
+    let run = 0; while (x + run < c.width && dark(x + run)) run++;
+    return { rgb: [r, g, b], run, height: c.height }; }
+  return null; })()`);
+const bare = await pastSphere();
+await page.typeInto(`${panelRow('outline, thousandths of its height')}?.querySelector('.pp-num')`, '6');
+await wait(500);
+const inked = await pastSphere();
+c.ok('an outline of six thousandths: past the sphere, ink where the ground was', !!bare && !!inked && bare.rgb.every(v => v > 180)
+  && inked.run >= 2 && Math.abs(inked.run - 0.006 * inked.height) <= 3, `${JSON.stringify(bare)} → ${JSON.stringify(inked)}`);
+await c.shot('1i-outline');
+await keep();
+await page.click(`${panelRow('shadows, on a ground of their own')}?.querySelector('input')`);
+await wait(600);
+const shadowed = await page.eval(`(() => { const c = document.getElementById('stage'), a = window.__kept;
+  const b = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let darker = 0, lighter = 0;
+  for (let i = 0; i < b.length; i += 4) { const d = (b[i] + b[i + 1] + b[i + 2]) - (a.data[i] + a.data[i + 1] + a.data[i + 2]);
+    if (d < -30) darker++; else if (d > 30) lighter++; }
+  return { darker: darker / (c.width * c.height), lighter: lighter / (c.width * c.height) }; })()`);
+c.ok('shadows: the picture darker where they fall, nowhere lighter', shadowed.darker > 0.01 && shadowed.lighter < 0.001, JSON.stringify(shadowed));
+await c.shot('1j-shadows');
+
 // ── The view, by hand ───────────────────────────────────────────────────────
 
 const yaw0 = await value('turned °'), pitch0 = await value('raised °');
@@ -276,6 +318,7 @@ c.ok('its recipe: the view and its shapes, no vertices', !!o && o.recipe.shapes.
 const kept = o && o.recipe.shapes[0].modifiers;
 c.ok('…the box\'s stack kept with it, in order', !!kept && kept.map(m => `${m.id}:${m.on}`).join() === 'subdivide:true,twist:true,displace:true'
   && kept[1].params.angle === 90, JSON.stringify(kept));
+c.ok('…and its style, three bands, an outline, shadows', !!o && o.recipe.toon === 3 && o.recipe.outline === 6 && o.recipe.shadows === true, o && `${o.recipe.toon} ${o.recipe.outline} ${o.recipe.shadows}`);
 c.ok('its render: the format, 1080 square', !!o && o.render.w === 1080 && o.render.h === 1080 && o.render.file === 'render.png',
   o && `${o.render.w} × ${o.render.h} ${o.render.file}`);
 
@@ -314,7 +357,8 @@ if (o) {
   c.ok('?open= brings its shapes back, folded, the box\'s stack too', (await page.eval(`${cards}.length`)) === 3
     && (await page.eval(`Number(${cardRow(1, 'radius')}?.querySelector('.pp-num')?.value)`)) === 0.6
     && Math.abs((await value('distance')) - o.recipe.distance) < 1e-9 && (await choice()) === 'folded folded folded'
-    && (await page.eval(`${modCards(0)}.map(m => m.querySelector('.pp-title').textContent).join()`)) === 'subdivide,twist,displace', await page.eval(say));
+    && (await page.eval(`${modCards(0)}.map(m => m.querySelector('.pp-title').textContent).join()`)) === 'subdivide,twist,displace'
+    && (await value('bands of light — 0, smooth')) === 3 && (await value('outline, thousandths of its height')) === 6, await page.eval(say));
 
   await c.go(c.base + '/apps/compose/?place=' + o.id);
   await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
@@ -351,6 +395,15 @@ c.ok('no WebGPU: drawn with WebGL2, and the bar says so', fallback.endsWith('Web
 c.ok('…the same opening: the sphere blue in the middle, the corners ground', isBlue(await pixelAt(0.5, 0.5)) && isGround(await pixelAt(0.02, 0.02)));
 await press(0.5, 0.5);
 c.ok('…and a click chooses the sphere there too, its handles drawn', (await choice()) === 'folded chosen folded' && !!(await green()), await choice());
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
+await wait(300);
+await keep();
+await page.typeInto(`${panelRow('bands of light — 0, smooth')}?.querySelector('.pp-num')`, '3');
+await page.typeInto(`${panelRow('outline, thousandths of its height')}?.querySelector('.pp-num')`, '6');
+await page.click(`${panelRow('shadows, on a ground of their own')}?.querySelector('input')`);
+await wait(800);
+const glStyle = [await blues(), await pastSphere()];
+c.ok('…and the style there too: toon bands, ink round the sphere', glStyle[0].share > 0.9 && glStyle[1] && glStyle[1].run >= 2, JSON.stringify(glStyle));
 await c.shot('5-webgl2');
 await page.forget(stub);
 

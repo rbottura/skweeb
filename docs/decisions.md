@@ -253,3 +253,19 @@ an arc, end to end, as the twist turns; a mirror reflects across a plane a
 distance from the shape's middle, since a primitive is centred and would
 mirror onto itself; a row keeps its middle where the shape was, so it
 turns and frames about it.
+
+**A model's style is the model's; a shape's colour its own.** Brick 4, the
+same day: bands of light, an outline and shadows are rows of the model's
+Style drawer, since a look is the whole picture's — a game's sprites share
+one — while a shape keeps its colour and its flat or smooth. Toon is
+three's MeshToonMaterial on a ramp whose steps sit at their bands'
+middles, so its brightest stays under white where physical shading would.
+The outline is an inverted hull, as three's toon outline pass draws one,
+but a mesh of each shape's own rather than a pass, so it draws in the same
+call as the model; its push is a share of the picture's height, never
+pixels, so a print at scale 2 is the same line, and its normals are
+smoothed where a box's edge splits them, so no corner opens. Shadows fall
+on a catcher of nothing but shadows under the model, so a model on no
+ground keeps its shadow as a sprite's; the shadow map is one size at every
+scale, and three's map is on from the start, since turning it on later
+would rebuild every lit material.

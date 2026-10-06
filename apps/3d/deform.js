@@ -155,7 +155,7 @@ export function displace(geometry, { amount, size, detail, seed }) {
 }
 
 /** Vertices at one place, each place's indices: where a seam or an edge splits a point. */
-function copiesOf(geometry) {
+export function copiesOf(geometry) {
   const pos = geometry.attributes.position;
   const e = extent(geometry);
   const q = 1e-6 * Math.max(e.x[1] - e.x[0], e.y[1] - e.y[0], e.z[1] - e.z[0], 1e-6);

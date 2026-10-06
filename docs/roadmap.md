@@ -311,7 +311,7 @@ closes, is saved, drawn again at print scale, placed in compose and stood in
 the room; and drawn from four sides as a set M8's avatar could wear. The
 link: `model → map: a character from every side`.
 
-*So far:* bricks 1 to 3 of six, 2026-10-06 (`apps/3d/STATUS.md`). Seven
+*So far:* bricks 1 to 4 of six, 2026-10-06 (`apps/3d/STATUS.md`). Seven
 of three's primitives, each a card from its schema in core's cards — the
 list filter's chain moved into for it; an orbit view by hand, perspective or
 orthographic; one sun and a fill. three r186 draws on the page's GPU
@@ -321,7 +321,8 @@ a shape, its card the one open; three's handles move, turn, size and
 stretch it by axis, writing into its card; D duplicates it, Delete takes it
 out. Each shape has a stack of modifiers in its card — subdivide, displace
 by seeded noise, twist, bend, mirror, array — the normals carried by the
-deformation, nothing cracking.
+deformation, nothing cracking. And a style: toon bands, an outline, shadows
+on a catcher of their own — the same picture at any print scale.
 
 ## Decided before, 2026-09-21 to -23
 
