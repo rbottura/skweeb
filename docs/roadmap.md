@@ -363,6 +363,10 @@ live layer`.
 Later, and for fun: a window as a lens — where it sits on the screen, the
 part of the stack under it, bgstaal's own trick.
 
+*So far:* bricks 0 and 1, 2026-10-06. The spec has its own file; every app
+joins the windows of its browser with what is on screen, and lists them in a
+Stack drawer — the gamepad, with no drawer, in the others'.
+
 ## Decided before, 2026-09-21 to -23
 
 In `docs/decisions-2026-09-21-to-23.md`, with their reasoning: the `.skw`
@@ -383,13 +387,10 @@ plan it was built to, is in `apps/compose/STATUS.md`.
 2. **The online skweeboteque.** Wanted, not now — it needs a server, and it is
    also what turns sandboxing from theory into work. Nothing in the local design
    blocks it; the vault interface is the seam it would go behind.
-3. ~~**M10's renderer, and the app's name**~~ **Answered 2026-10-06** —
-   three.js, pinned in `core/libs/three/`; the app is `apps/3d/`. See
-   `docs/decisions.md`.
-
 Closed, their reasoning by date in the decisions: video output (2026-09-22,
 frames plus ffmpeg — no muxer); WebGPU over WebGL2 for the GPU kit, and a GPU
-render replaying within a tolerance across machines (both 2026-09-26).
+render replaying within a tolerance across machines (both 2026-09-26); M10's
+renderer, three.js, and its app, `apps/3d/` (2026-10-06).
 
 ## Migration facts
 

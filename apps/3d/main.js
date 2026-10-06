@@ -34,6 +34,7 @@ import { pick }           from './pick.js';
 import { boxOnPicture, drawChosen } from './guides.js';
 import { wireChosen }     from './chosen.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
+import { stackDrawer }    from '../../core/StackPanel.js';
 import { Cards }          from '../../core/Cards.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -199,7 +200,9 @@ function buildExport(panel) {
     })),
   );
   exp.body.append(actions);
-  buildPrint(exp);
+  const printing = buildPrint(exp);
+  // A window of the stack (core/live.js): what is on screen, as its print has it.
+  stackDrawer(panel, { app: '3d', layer: () => printing.object() });
 }
 
 /**
@@ -217,6 +220,7 @@ function buildPrint(exp) {
     }),
   });
   params.on(key => { if (key === 'format') printing.follow(params.values.format); });
+  return printing;
 }
 
 /** One way out: nothing else started, what happened said. */

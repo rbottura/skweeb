@@ -24,6 +24,7 @@ import { Growth }                  from './growth.js';
 import { fromFile, fromVault }     from './source.js';
 import { saveStill, saveSequence, APP } from './save.js';
 import { PrintPanel }              from '../../core/PrintPanel.js';
+import { stackDrawer }             from '../../core/StackPanel.js';
 import { ParamPanel }              from '../../core/ParamPanel.js';
 import { VaultPanel }              from '../../core/VaultPanel.js';
 import { Transport }               from '../../core/Transport.js';
@@ -160,6 +161,7 @@ function buildDrawers() {
       const v = params.values, f = resolveFrame(v, source.content, source), z = Math.max(0.01, v.scale || 1);
       return { type: 'still', origin: APP, recipe: v, render: { w: Math.max(1, Math.round(f.width * z)), h: Math.max(1, Math.round(f.height * z)) } };
     } });
+  stackDrawer(panel, { app: 'grid', layer: () => printing.object() });     // a window of the stack (core/live.js)
 
   showLoopControls();
 }

@@ -65,7 +65,7 @@ export async function startCheck({ keep = false } = {}) {
     try { if ((await fetch(base + '/api/vault')).ok) break; } catch { /* not up yet */ }
     await new Promise(r => setTimeout(r, 100));
   }
-  const { page, close, kill } = await launch({ port: await freePort(), profile: path.join(work, 'profile') });
+  const { page, open, find, close, kill } = await launch({ port: await freePort(), profile: path.join(work, 'profile') });
 
   // A check that throws, or is stopped, never reaches finish(): the server and
   // Chrome go with it, rather than living on in the background for days.
@@ -74,7 +74,8 @@ export async function startCheck({ keep = false } = {}) {
 
   let fails = 0;
   const noise = [];
-  const listen = () => noise.push(...page.errors().filter(e => !(e.url || e.text).includes('favicon.ico')));
+  const tabs = [page];                 // the first, and every other a check opens or finds
+  const listen = () => { for (const t of tabs) noise.push(...t.errors().filter(e => !(e.url || e.text).includes('favicon.ico'))); };
 
   return {
     page,
@@ -90,6 +91,21 @@ export async function startCheck({ keep = false } = {}) {
     },
 
     async go(url, opts) { listen(); await page.goto(url, opts); },
+
+    /** Another window of the suite in this browser, at `url`: what one tab sends, another hears. */
+    async tab(url, opts) {
+      const t = await open();
+      tabs.push(t);
+      if (url) await t.goto(url, opts);
+      return t;
+    },
+
+    /** A window a page opened itself, found by a test of its address. */
+    async found(test, opts) {
+      const t = await find(test, opts);
+      tabs.push(t);
+      return t;
+    },
 
     /** What every page so far said that it should not have, a missing favicon aside. */
     quiet() { listen(); return noise.splice(0); },

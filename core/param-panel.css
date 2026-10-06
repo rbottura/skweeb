@@ -371,3 +371,15 @@ textarea.pp-text { resize: vertical; }
 /* A print (core/PrintPanel.js): what the sheet comes to, then its button. */
 .pp-print-note { margin: 8px 0 6px; font: 400 12px/1.45 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
 .pp-print { width: 100%; }
+
+/* The Stack drawer (core/StackPanel.js): the windows of the suite open in this browser. */
+.pp-stack-note { margin: 4px 0 8px; font: 400 12px/1.45 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
+.pp-stack { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pp-stack-row { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: baseline;
+  padding: 6px 8px; border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111); background: var(--nb-paper, #fff); }
+.pp-stack-row--mine { background: var(--nb-accent, #ffd60a); }
+.pp-stack-app { font-weight: 700; }
+.pp-stack-what { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 400 12px/1.4 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
+.pp-stack-row--mine .pp-stack-what { color: var(--nb-ink, #111); }
+.pp-stack-tag { font-size: 11px; }

@@ -24,6 +24,7 @@ import { Playhead }     from '../../core/playback.js';
 import { Transport }    from '../../core/Transport.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { PrintPanel }   from '../../core/PrintPanel.js';
+import { stackDrawer }  from '../../core/StackPanel.js';
 
 const DATA   = new Set(['dataset', 'made']);
 const ANCHOR = new Set(['dataset', 'made', 'glyph', 'width', 'height']);
@@ -118,6 +119,8 @@ export class MotionStage {
         return { type: 'still', origin: APP, recipe, render: { w: f.width, h: f.height } };
       },
     });
+    // A window of the stack (core/live.js): what is on screen, as its print has it.
+    this.live = stackDrawer(this.panel, { app: 'ckt', layer: () => this.printing.object() });
   }
 
   async init() {

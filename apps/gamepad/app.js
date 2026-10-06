@@ -16,6 +16,7 @@ import { GalleryPanel }        from './ui/GalleryPanel.js';
 import { TimelinePanel }       from './ui/TimelinePanel.js';
 import { VaultPanel }          from '../../core/VaultPanel.js';
 import { PrintBox }            from './ui/PrintBox.js';
+import { joinLive }            from '../../core/live.js';
 import { Vault }               from '../../core/vault.js';
 import { offers }              from '../../core/uses.js';
 import { createSketch,
@@ -88,6 +89,8 @@ async function boot() {
 
     // The drawing at a sheet's size: drawn again from its marks, a tile at a time.
     printBox = new PrintBox();
+    // A window of the stack (core/live.js): the drawing on the canvas, as its print has it.
+    joinLive({ app: 'gamepad', layer: () => printBox.printing.object() });
 
     // 6. Restore previously saved images from IndexedDB
     await ImageStore.ready;

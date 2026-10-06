@@ -116,7 +116,10 @@ screen: its **layer**, the envelope a save would write, made and never saved
 (the print's, `core/PrintPanel.js`), so with no id. Envelopes, never pixels:
 a recipe is small, and any window draws any layer with `core/rebuild.js`, as
 it draws any object. A window alone, or a browser with no channel, is the
-app as it was (rule 7).
+app as it was (rule 7). Until brick 3 a layer is the one the print draws —
+the frame on screen, a still; drawn in other windows, a loop must come as a
+loop, its recipe without a tick and its render with its frames, so that
+every window plays it on its own clock.
 
 **The stack** is one live composition per browser: a page and its
 placements, bottom first, as a composition's recipe is — `{ page, place }` —

@@ -8,6 +8,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `vault.js` | save / load / list; the client for `server.js` | **in** |
 | `thumb.js` | one thumbnailer per object type | **in** |
 | `export.js` | deterministic frame export, and a store-only zip whose entries may be Blobs, by reference; `png.js` beside it writes a PNG band by band, its dpi in a pHYs, for a picture no canvas holds — a 120×176 poster at 300 dpi | **in**; video is the zip plus `scripts/frames-to-video.mjs`; `png.js` 2026-10-06, for the 3D app's print — `docs/core-export.md` |
+| `live.js` | the windows of the suite open in this browser, over one BroadcastChannel: each says who it is and its layer — what is on screen, as the envelope a save would write — and hears the others come, change and go (`joinLive`); `StackPanel.js` lists them in a drawer, one line an app adds (`stackDrawer`) | **in**, 2026-10-06, M11's first brick — `docs/smart-objects.md`, *The live stack* |
 | `print.js` | any object at a sheet's size and dpi, in tiles, each a `window` of its frame asked of its handle; `windowed.js` lets an app's drawing code draw one window unchanged; `PrintPanel.js` is the print in an Export drawer | **in**, 2026-10-06, every app — `docs/core-export.md` |
 | `rng.js` | seeded random, the only random in the suite | **in**, 32 checks |
 | `params.js` | **the param schema** — see below | **in**, 43 checks |

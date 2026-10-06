@@ -45,7 +45,7 @@ export function findChrome() {
  * @param {string} opts.profile     a throwaway user-data folder
  * @param {number} [opts.width=1600]
  * @param {number} [opts.height=1000]
- * @returns {Promise<{page: object, close: () => Promise<void>}>}
+ * @returns {Promise<{page: object, open: () => Promise<object>, find: Function, close: () => Promise<void>}>}
  */
 export async function launch({ port, profile, width = 1600, height = 1000 }) {
   const chrome = findChrome();
@@ -66,7 +66,52 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
   const target = targets && targets.find(t => t.type === 'page');
   if (!target) { proc.kill(); throw new Error('Chrome never offered a page on ' + port); }
 
-  const ws = new WebSocket(target.webSocketDebuggerUrl);
+  const attached = new Set([target.id]);
+  const first = await attach(target.webSocketDebuggerUrl);
+  const page = first.page;
+
+  return {
+    page,
+
+    /** Another tab, its page as `page` is: two windows of the suite that talk to each other. */
+    async open() {
+      const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+      attached.add(t.id);
+      return (await attach(t.webSocketDebuggerUrl)).page;
+    },
+
+    /**
+     * A tab a page opened itself (`window.open`), found by its address: a
+     * test of the URL, waited for while it opens.
+     */
+    async find(test, { timeout = 10000 } = {}) {
+      const end = Date.now() + timeout;
+      while (Date.now() < end) {
+        const tabs = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+        const t = tabs.find(x => x.type === 'page' && test(x.url) && !attached.has(x.id));
+        if (t) {
+          attached.add(t.id);
+          return (await attach(t.webSocketDebuggerUrl)).page;
+        }
+        await sleep(200);
+      }
+      throw new Error('no tab opened whose address matches');
+    },
+
+    async close() {
+      try { await first.send('Browser.close'); } catch { /* already gone */ }
+      first.ws.close();
+      proc.kill();
+      await sleep(300);
+    },
+    /** At once, for a process on its way out: close() has to wait on Chrome. */
+    kill() { proc.kill(); },
+  };
+}
+
+/** A tab's page, from its DevTools socket: run code in it, wait on it, press it, hear its console. */
+async function attach(wsUrl) {
+  const ws = new WebSocket(wsUrl);
   await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; });
 
   let last = 0;
@@ -200,17 +245,14 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
     errors() {
       return log.filter(e => e.kind === 'error' || e.kind === 'exception' || e.kind === 'log-error');
     },
+
+    /** Close this tab — not the browser. */
+    async closeTab() {
+      try { await send('Page.close'); } catch { /* already gone */ }
+      ws.close();
+    },
   };
 
-  return {
-    page,
-    async close() {
-      try { await send('Browser.close'); } catch { /* already gone */ }
-      ws.close();
-      proc.kill();
-      await sleep(300);
-    },
-    /** At once, for a process on its way out: close() has to wait on Chrome. */
-    kill() { proc.kill(); },
-  };
+
+  return { page, send, ws };
 }

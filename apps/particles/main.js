@@ -24,6 +24,7 @@ import { loadPoints }   from '../../core/points.js';
 import { loadField }    from '../../core/fields.js';
 import { saveParticles, downloadFrames, downloadSheet, APP } from './save.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
+import { stackDrawer }    from '../../core/StackPanel.js';
 import { requested }      from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -226,6 +227,8 @@ function buildExport(side) {
     },
   });
   picture.on(key => { if (key === 'format') printing.follow(picture.get('format')); });
+  // A window of the stack (core/live.js): what is on screen, as its print has it.
+  stackDrawer(side, { app: 'particles', layer: () => printing.object() });
 }
 
 /** One way out for all three: the player held still, nothing else started meanwhile. */

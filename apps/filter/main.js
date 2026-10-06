@@ -17,6 +17,7 @@ import { Chain }                from './chain.js';
 import { fromVault, fromFile }  from './source.js';
 import { save as saveObject, saveLook, APP } from './save.js';
 import { PrintPanel }           from '../../core/PrintPanel.js';
+import { stackDrawer }          from '../../core/StackPanel.js';
 import { requested }            from '../../core/reopen.js';
 import { ParamPanel }           from '../../core/ParamPanel.js';
 import { VaultPanel }           from '../../core/VaultPanel.js';
@@ -113,13 +114,15 @@ function buildDrawers() {
   actions.append(buttons.save, buttons.frames, buttons.look);
   exp.body.append(actions);
   // A print, the chain run over the source a window at a time (core/PrintPanel.js) — a source in the vault only.
-  new PrintPanel({ mount: exp.body, app: 'filter', leave, say: t => bar.say(t), tick: () => clock.tick,
+  const printing = new PrintPanel({ mount: exp.body, app: 'filter', leave, say: t => bar.say(t), tick: () => clock.tick,
     object: () => {
       if (!source || !source.id || !runner) return null;
       const list = chain.recipe(), room = params.get('edges') !== 'keep' ? reachOf(list) : 0;
       return { type: 'still', origin: APP, recipe: { ...params.values, chain: list },
                render: { w: source.width + 2 * room, h: source.height + 2 * room } };
     } });
+  // A window of the stack (core/live.js): what is on screen, as its print has it.
+  stackDrawer(panel, { app: 'filter', layer: () => printing.object() });
   showLoopControls();
 }
 

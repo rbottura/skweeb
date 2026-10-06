@@ -24,6 +24,7 @@ import { loopOf, valuesAt, rangeAround, moverOf } from './motion.js';
 import { chainOf } from './frames.js';
 import { saveFractal, downloadFrames, downloadSheet, APP } from './save.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
+import { stackDrawer }    from '../../core/StackPanel.js';
 import { wirePointer }    from './pointer.js';
 import { loadSprites }    from '../../core/sprites.js';
 import { mipFor }         from '../../core/stamps.js';
@@ -250,6 +251,8 @@ function buildExport(panel) {
     },
   });
   params.on(key => { if (key === 'format') printing.follow(params.get('format')); });
+  // A window of the stack (core/live.js): what is on screen, as its print has it.
+  stackDrawer(panel, { app: 'fractals', layer: () => printing.object() });
 }
 
 /** One way out: the player held still, nothing else started, what happened said. */

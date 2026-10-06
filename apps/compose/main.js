@@ -31,6 +31,7 @@ import { PlacedList }     from './list.js';
 import { wirePointer }    from './pointer.js';
 import { saveComposition, APP } from './save.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
+import { stackDrawer }    from '../../core/StackPanel.js';
 import { exportPng, exportFrames } from './export.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -123,6 +124,8 @@ async function boot() {
                render: { w: Math.max(1, Math.round(size.width * own)), h: Math.max(1, Math.round(size.height * own)) } };
     },
   });
+  // A window of the stack (core/live.js): what is on screen, as its print has it.
+  stackDrawer(pagePanel, { app: 'compose', layer: () => printing.object() });
 
   // The frame chain keeps the format and the box in step (core/frame.js).
   page.on(key => {

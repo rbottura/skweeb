@@ -11,6 +11,22 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ### Newest — 2026-10-06
 
+- **M11 begun: the live stack and smart objects** (the author's, after a
+  week of making things with the suite: "we really need the smart objects
+  and a new 'layer' system"; `docs/roadmap.md`, M11). The author's calls:
+  every app its own window, the windows one stack each draws round its own
+  layer; opacity and blend on every placement; live within one browser.
+  - **Brick 0, the spec**: `docs/smart-objects.md` — the `skw` moved out of
+    the object model, the live stack written in, a placement's `opacity`,
+    `blend` and runtime-only `live`.
+  - **Brick 1, windows that know each other** (`core/live.js`,
+    `core/StackPanel.js`; `tests/live.mjs` 14, `check-live` 9): every
+    app joins one BroadcastChannel with what is on screen — the envelope its
+    print draws — and lists the windows open in its Stack drawer, itself
+    first, each with what it has or why it has nothing; a change heard in
+    another tab within a second; a tab closed leaves every list, a crashed
+    one after three missed calls. The gamepad joins with no drawer of its
+    own. `chrome.mjs` opens more tabs than one.
 - **M10 is 3D, and four of its six bricks work** (the author: "a simple
   thing to generate and manipulate some real basic primitives"; meshes over
   distance fields, three.js over a renderer of the suite's own —
@@ -66,57 +82,17 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
   days are `docs/decisions-2026-09-21-to-23.md`, listed at its head — and
   the roadmap's finished milestones cut to what proved them.
 
-### 2026-10-02
+### M9 — the rig (`apps/rig/STATUS.md`, five bricks of six, 2026-10-02)
 
-- **M9 is the rig, between M8's bricks 3 and 4** (the author's idea from
-  the inbox, `docs/roadmap.md`, M9): a drawing made of marks rigged at its
-  marks. Five of its six bricks done the same day (`apps/rig/STATUS.md`):
-  - **Strokes are bones** (`check-rig` 27; `tests/rig-strokes.mjs` 18,
-    `rig-bones` 18). A gamepad still's marks become stamps; strokes found
-    where the brush jumped, never where it paused; a stroke jointed at its
-    corners, a long run cut; a chain hung from the nearest bone drawn before
-    it. A stamp rides its own stroke's bones, shared near a joint, and stays
-    whole, so a bend fans the stamps like scales. Drawn again from the
-    marks with Canvas 2D: the author's slug — seven strokes, fifteen bones —
-    comes back within 0.04 of 255 of its saved render. A handle dragged
-    bends a joint; R back to rest.
-  - **A pose saved**: a still the rig made, its bones kept whole, its turns,
-    its drawing its parent; replayed to the pixel, drawn again from the marks
-    at any scale — sharp, where a gamepad still prints stretched; `?open=`;
-    compose places it. The link `gamepad → rig: a drawing's strokes as
-    limbs`: the vault offers *Rig this ↗* (`core/reopen.js` `rigUrl`).
-  - **Bones that swing by themselves** (`tests/rig-motion.mjs` 13): a bone's
-    wave — swing, cycles, phase — the chain following a lag later, so a
-    stalk whips; whole cycles close every loop to the bit. Saved as a
-    `sequence`, replayed, placed in compose and played.
-  - **Walks by part, and worms that crawl** — the author's direction, few
-    human shapes and many worms (`tests/rig-crawl.mjs` 30, `check-rig` 35).
-    Every chain named — body, head, arm, leg, tail — by guess, all seven
-    of the slug's right, and by hand; *Walk*, *Waddle*, *Idle* set waves by
-    part, with a rise. A worm's first stroke is its spine: a wave down it in
-    place, or the body following its head round a circle, an ellipse, an
-    eight or a drawn path, slithering through wiggles fixed to the ground;
-    every loop closes.
-  - `core/sprites.js` `familySprite`: a recorded mark's picture without p5.
-- **M8, bricks 2 and 3** (`apps/map/STATUS.md`):
-  - **Walls, and things that answer** (`check-map` 44, `tests/map-walk.mjs`
-    24). The walls tool (3): a flag a cell apart from its tile, as Pokémon
-    keeps it; a solid thing blocks the cells under its feet. Events on
-    things, RPG Maker's way — a sign (what it says, what it shows), a warp to
-    a map by its name, the spawn — a thing with no object an event alone.
-    `walk.js` answers what the avatar will ask: `walkable`, the spawn, where
-    a warp lands. Guides only, never in the picture. The recipe is
-    `{ map, cells, walls, place }`.
-  - **The player, point and click** (`apps/map/play/`, `check-map-play` 16,
-    `tests/map-play.mjs` 8). A saved map, or the latest of a name, fitted to
-    the window: what answers outlined under the pointer, a sign shown over
-    the map, a warp followed, Back coming back. The editor's *Play the last
-    save ↗*.
-- **The docs back under the cap**: M4's build-time decisions moved from the
-  roadmap to `apps/compose/STATUS.md`; the object model trimmed. And
-  `scripts/chrome.mjs`'s pointer can press the right button.
+- **A drawing made of marks, rigged at its marks**: a gamepad still's
+  strokes as its bones — found where the brush jumped, jointed at corners —
+  each stamp riding its stroke's bones like a scale; handles bend joints.
+  Poses saved as stills, swings and walks by part as loops that close,
+  worms crawling round a path; replayed to the pixel, drawn again from the
+  marks at any scale, placed in compose. The vault offers *Rig this ↗*.
+  Brick 6, the slug from every side, waits on the author's drawings.
 
-### M8 — the map editor (`apps/map/STATUS.md`, three bricks of six)
+### M8 — the map editor (`apps/map/STATUS.md`, three bricks of six; the player)
 
 - **A map on a grid of large tiles** (2026-09-30): a tileset — any set,
   offered as a *map tileset* (`core/uses.js`) — painted into cells with no
@@ -124,6 +100,10 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
   front by row, dragged, their loops playing by the map's clock. A new type,
   `map`, saves, replays to the pixel, draws again at scale 2, reopens, and
   compose places and plays it: `any → map: a thing in the room`.
+- **Walls, and things that answer** (2026-10-02): a wall a flag a cell; a
+  sign, a warp to a map by its name, the spawn, RPG Maker's way. **The
+  player** (`play/`): a saved map, point and click — what answers outlined,
+  a sign shown, a warp followed and back.
 
 ### M7 — fractals (`apps/fractals/STATUS.md`, done 2026-09-30)
 
@@ -228,8 +208,9 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Fifty files, no runner, no dependencies — the loop in `CLAUDE.md` runs all
-of them, and all pass (2026-10-06). Newest: `windowed` — a window's corner
+Fifty-one files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-10-06). Newest: `live` — windows on Node's
+own BroadcastChannel hearing each other come, change and go; `windowed` — a window's corner
 moving every absolute transform and pixel, and nothing else; `stage-still`
 — a gamepad still's marks as stamps, framed, mirrored, clipped, drawn;
 `png` — a PNG
@@ -241,10 +222,11 @@ normals true to the surface, no crack, the caps; `3d-look` — ramps, hulls,
 shadows; before them `3d-shapes`, `3d-camera`, `3d-model`, and the rig's
 four.
 
-Nineteen browser checks, each a command in `CLAUDE.md`: its own server on a
+Twenty browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-print` (16), every app's
+throws or its console is not quiet. Newest: `check-live` (9), windows in
+tabs of one browser listing each other; `check-print` (16), every app's
 print against its object drawn whole, and the gamepad's box drawn on with a
 pad that is not there; `check-3d-poster` (8), the
 300 dpi poster printed whole and read back; `check-3d` (61), on this
@@ -279,10 +261,10 @@ compares two pages' canvases measures, never demands the pixel.
   in `check-print`), and
   the gamepad's `ui/hud.css` (721), `sketch/gamepadSketch.js` (572),
   `ui/TimelinePanel.js` (547), `ui/ParamPanel.js` (500). At it:
-  `core/VaultPanel.js` (399) and `docs/object-model.md` (399) — the next
-  thing either learns needs a split first: the object model's `.skw`
-  section, eighty lines and not yet built, is the natural one to move out,
-  as the core API's export and print went to `docs/core-export.md`.
+  `core/VaultPanel.js` (399) and `docs/roadmap.md` (400) — the next thing
+  either learns needs a split first: the roadmap's finished milestones are
+  the natural cut, as the object model's `.skw` went to
+  `docs/smart-objects.md`.
 - **A 3D model is a still until brick 5**; its handles turn about the
   world's axes only; nothing in it is undone; a shadow's darkness and map
   are fixed; not yet seen on the laptop itself, where it should draw with
@@ -306,6 +288,14 @@ compares two pages' canvases measures, never demands the pixel.
   4000 px opens clamped.
 
 ## Next single step
+
+**M11's brick 2, its first half: the stack as data** (`docs/roadmap.md`,
+M11; `docs/smart-objects.md`, *The live stack*). `core/stack.js`: one live
+composition per browser, `{ page, place }`, its blocks `live` (a window's
+id) or `ref`, each with its transform, `opacity` and `blend`; kept in every
+window, a change sent with a count, the latest winning; a closed window's
+block dropped. Node-tested on two channels, as `tests/live.mjs` is. Then
+its rows in the Stack drawer, then brick 3 draws it.
 
 **Waiting on the author first: how a moving model saves.** M10's brick 5
 is motion — a turntable, then a shape swung as the rig swings a bone — and
