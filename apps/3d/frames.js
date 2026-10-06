@@ -55,14 +55,19 @@ export function openModel(recipe, { renderer, scale = 1 }) {
   };
 }
 
-/** The model seen by the recipe's camera, over its ground, filling `ctx`'s `w` × `h`. */
+/**
+ * The model seen by the recipe's camera, over its ground, filling `ctx`'s
+ * `w` × `h`. Returns that camera, for what the preview draws over it.
+ */
 export function drawModel(ctx, renderer, model, values, w, h) {
   ctx.clearRect(0, 0, w, h);
   if (values.ground && values.ground !== 'none') {
     ctx.fillStyle = values.ground;
     ctx.fillRect(0, 0, w, h);
   }
-  const picture = renderer.draw(model.scene, cameraFor(values, w, h), w, h);
+  const camera = cameraFor(values, w, h);
+  const picture = renderer.draw(model.scene, camera, w, h);
   ctx.drawImage(picture, 0, 0);
   picture.close();
+  return camera;
 }

@@ -5,10 +5,11 @@
  * — a recipe's shapes become meshes in its order, placed, turned, sized and
  * coloured as their values say; values are coerced by their shape's schema,
  * so an old or hand-made recipe draws; a shape that is off is not drawn, one
- * the catalogue lacks is named and skipped; an update that changes only a
- * place or a colour keeps the geometry, one that changes the form makes it
- * again and frees the old, and what goes is freed; the sun comes from where
- * its angles say; the bounds are every shape's; a title counts the shapes.
+ * the catalogue lacks is named and skipped, and each part knows its place in
+ * the list, the skipped counted; an update that changes only a place or a
+ * colour keeps the geometry, one that changes the form makes it again and
+ * frees the old, and what goes is freed; the sun comes from where its angles
+ * say; the bounds are every shape's; a title counts the shapes.
  */
 
 const { Model, shapesOf, unknownIn, LIGHT_PARAMS } = await import('../apps/3d/scene.js');
@@ -35,6 +36,8 @@ const model = new Model().update(recipe([
 
 ok('the shapes that are on and known, in order', model.parts.map(p => p.form.split(':')[0]), ['box', 'torus']);
 ok('drawn as many', model.count, 2);
+ok('each knows its place in the list, the skipped counted', model.parts.map(p => p.index), [0, 3]);
+ok('…so a card finds its shape, and a hidden one none', [model.partAt(3) === model.parts[1], model.partAt(1)], [true, null]);
 const [box, torus] = model.parts.map(p => p.mesh);
 ok('placed where its values say', box.position.toArray(), [1, 2, 3]);
 ok('turned, degrees to radians', r3(box.rotation.y), r3(Math.PI / 2));

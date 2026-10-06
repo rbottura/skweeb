@@ -35,12 +35,16 @@ export function modelParams() {
   });
 }
 
-/** How core's cards are told about shapes (core/Cards.js). */
+/**
+ * How core's cards are told about shapes (core/Cards.js): folded, so the
+ * chosen shape's card — clicked in the view, or by its name — is the one open.
+ */
 export const SHAPE_CARDS = {
   catalogue: SHAPES,
   app: '3d',
   schemaOf: shapeSchema,
   groups: SHAPE_GROUPS,
+  fold: true,
   start: (id, entries) => startOf(entries.length),
   words: {
     add: 'add a shape…',

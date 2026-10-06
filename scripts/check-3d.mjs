@@ -6,11 +6,15 @@
  *
  * Served as plain files with no vault, it opens and draws its box, sphere
  * and torus (rule 7) — with WebGPU, or WebGL2 where Chrome gives no WebGPU,
- * and the bar says which. On the server: the sphere in the middle is blue
- * and lit, the corners the ground; a shape added from the menu is drawn, a
- * hidden one is not, a card's value moves its shape, and one taken out goes;
- * a drag turns round the model by as much as camera.js says, the right
- * button slides it, the wheel comes nearer, F frames it. Saved: a `model`
+ * which the bar then says. On the server: the sphere in the middle is blue
+ * and lit, the corners the ground; the cards fold to a line each; a click on
+ * the sphere chooses it — its card the one open, its box dashed round it in
+ * the view and nowhere else — a click on nothing chooses nothing, a click on
+ * a card's name chooses that, Escape none; a shape added from the menu is
+ * drawn and chosen, a hidden one is not drawn nor picked, a card's value
+ * moves its shape, and one taken out goes; a drag that starts on a shape
+ * turns round the model by as much as camera.js says and chooses nothing,
+ * the right button slides it, the wheel comes nearer, F frames it. Saved: a `model`
  * whose recipe is its shapes and whose render is the format; drawn again by
  * its app it is its render; at scale 2 it is drawn again at twice the
  * pixels, the same picture; `?open=` brings its shapes back; compose places
@@ -49,6 +53,21 @@ const drawn = `/box, sphere, torus|nothing draws/.test(${say})`;
 const isBlue = ([r, g, b]) => b > r + 40 && b > g;
 const GROUND = [255, 253, 246];
 const isGround = p => apart(p.slice(0, 3), GROUND) <= 2;
+/** Each card as the choice has it. */
+const choice = () => page.eval(`${cards}.map(c => c.classList.contains('pp-card--chosen') ? 'chosen' : c.classList.contains('pp-card--folded') ? 'folded' : 'open').join(' ')`);
+const press = async (fx, fy) => { await page.pointer(await onStage(fx, fy)); await wait(300); };
+/** The preview kept in the page, and later where it changed since: what a guide adds. */
+const keep = () => page.eval(`(c => { window.__kept = c.getContext('2d').getImageData(0, 0, c.width, c.height); return true; })(document.getElementById('stage'))`);
+const changed = () => page.eval(`(() => { const c = document.getElementById('stage'), a = window.__kept;
+  const b = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+  if (!a || a.width !== b.width || a.height !== b.height) return null;
+  let n = 0, x0 = 1, y0 = 1, x1 = 0, y1 = 0;
+  for (let i = 0; i < b.data.length; i += 4) {
+    if (Math.abs(a.data[i] - b.data[i]) + Math.abs(a.data[i + 1] - b.data[i + 1]) + Math.abs(a.data[i + 2] - b.data[i + 2]) < 24) continue;
+    const x = (i / 4) % c.width / c.width, y = Math.floor(i / 4 / c.width) / c.height;
+    n++; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+  }
+  return { share: n / (c.width * c.height), box: n ? [x0, y0, x1, y1].map(v => +v.toFixed(3)) : null }; })()`);
 
 // ── Rule 7 ──────────────────────────────────────────────────────────────────
 
@@ -56,7 +75,7 @@ await c.go(c.plain + '/apps/3d/');
 await page.until(drawn, { timeout: 30000 });
 const firstSay = await page.eval(say);
 c.ok('opens with no vault, and draws its box, sphere and torus', firstSay.startsWith('box, sphere, torus'), firstSay);
-const backend = (firstSay.match(/(WebGPU|WebGL2)$/) || [])[1] || 'none';
+const backend = /nothing draws/.test(firstSay) ? 'nothing' : /WebGL2$/.test(firstSay) ? 'WebGL2' : 'WebGPU';
 console.log(`     drawn with ${backend}`);
 
 await c.go(c.base + '/apps/3d/');
@@ -75,7 +94,33 @@ const lit = await pixelAt(0.5, 0.42), shade = await pixelAt(0.5, 0.58);
 c.ok('lit from above: the top of the sphere brighter than its foot', lit[2] > shade[2], `${lit[2]} over ${shade[2]}`);
 c.ok('three cards, the shapes drawer says 3', (await page.eval(`${cards}.length`)) === 3
   && (await page.eval(`document.querySelector('.dr-note')?.textContent`)) === '3');
+const tallest = await page.eval(`Math.max(...${cards}.map(c => c.getBoundingClientRect().height))`);
+c.ok('the cards fold: none chosen, a line each', (await choice()) === 'folded folded folded' && tallest < 48, `${await choice()}, ${tallest} px`);
 await c.shot('1-opening');
+
+// ── Chosen by a click ───────────────────────────────────────────────────────
+
+await keep();
+await press(0.5, 0.5);
+c.ok('a click on the sphere chooses its card: marked, the one open', (await choice()) === 'folded chosen folded'
+  && (await page.eval(`${cards}[1].querySelector('.pp-body').getBoundingClientRect().height`)) > 100, await choice());
+const marked = await changed();
+const [mx0, my0, mx1, my1] = (marked && marked.box) || [0, 0, 0, 0];
+c.ok('…and the view draws its box round it, an outline', !!marked && marked.share > 0 && marked.share < 0.03
+  && Math.abs((mx0 + mx1) / 2 - 0.5) < 0.03 && Math.abs((my0 + my1) / 2 - 0.5) < 0.03 && mx1 - mx0 > 0.2 && mx1 - mx0 < 0.4,
+  JSON.stringify(marked));
+await c.shot('1b-chosen');
+await press(0.03, 0.03);
+c.ok('a click on nothing chooses nothing: folded, no box', (await choice()) === 'folded folded folded'
+  && (await changed()).share === 0, `${await choice()}, ${JSON.stringify(await changed())}`);
+await page.click(`${cards}[2].querySelector('.pp-title')`);
+await wait(300);
+const torusBox = (await changed()).box || [0, 0, 0, 0];
+c.ok('a click on a card\'s name chooses it, and its shape is marked', (await choice()) === 'folded folded chosen'
+  && (torusBox[0] + torusBox[2]) / 2 > 0.6, `${await choice()}, ${JSON.stringify(torusBox)}`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
+await wait(300);
+c.ok('Escape chooses none', (await choice()) === 'folded folded folded' && (await changed()).share === 0, await choice());
 
 // ── Shapes by hand ──────────────────────────────────────────────────────────
 
@@ -83,6 +128,7 @@ await page.typeInto(`document.querySelector('.pp-cards-add')`, 'cone');
 await page.until(`${say}.startsWith('box, sphere, torus, cone')`, { timeout: 10000 }).catch(() => {});
 c.ok('a cone added from the menu is drawn, and named', (await page.eval(say)).startsWith('box, sphere, torus, cone')
   && (await page.eval(`${cards}.length`)) === 4, await page.eval(say));
+c.ok('…and chosen, its card the one open', (await choice()) === 'folded folded folded chosen', await choice());
 c.ok('…beside the others, in the next colour', (await page.eval(`Number(${cardRow(3, 'x')}?.querySelector('.pp-num')?.value)`)) === 3.2
   && (await page.eval(`${cardRow(3, 'colour')}?.querySelector('input')?.value`)) === '#1b998b');
 
@@ -96,6 +142,8 @@ await page.click(headButton(1, 'shown'));
 await wait(400);
 c.ok('hidden: the sphere is not drawn, nor named', isGround(await pixelAt(0.5, 0.5)) && !(await page.eval(say)).includes('sphere')
   && (await page.eval(`document.querySelector('.dr-note')?.textContent`)) === '3 of 4 shown', await page.eval(say));
+await press(0.5, 0.5);
+c.ok('…nor picked: a click where it was chooses nothing', (await choice()) === 'folded folded folded folded', await choice());
 await page.click(headButton(1, 'hidden'));
 await page.click(headButton(3, '✕'));
 await wait(400);
@@ -117,6 +165,7 @@ const wantYaw = yaw0 - (bx - ax) * TURN / h, wantPitch = pitch0 + (by - ay) * TU
 c.ok('a drag turns round the model, as far as the pointer went', Math.abs(yaw1 - wantYaw) < 0.01 && Math.abs(pitch1 - wantPitch) < 0.01,
   `yaw ${yaw0} → ${yaw1.toFixed(2)} (${wantYaw.toFixed(2)}), pitch ${pitch0} → ${pitch1.toFixed(2)} (${wantPitch.toFixed(2)})`);
 c.ok('…and the picture turned', apart(await grid(), turned) > 20);
+c.ok('…and a drag that started on the sphere chose nothing', (await choice()) === 'folded folded folded', await choice());
 await c.shot('2-turned');
 
 const tx0 = await value('looking at x'), ty0 = await value('looking at y');
@@ -185,9 +234,9 @@ if (o) {
 
   await c.go(c.base + '/apps/3d/?open=' + o.id);
   await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
-  c.ok('?open= brings its shapes back', (await page.eval(`${cards}.length`)) === 3
+  c.ok('?open= brings its shapes back, folded', (await page.eval(`${cards}.length`)) === 3
     && (await page.eval(`Number(${cardRow(1, 'radius')}?.querySelector('.pp-num')?.value)`)) === 0.6
-    && Math.abs((await value('distance')) - o.recipe.distance) < 1e-9, await page.eval(say));
+    && Math.abs((await value('distance')) - o.recipe.distance) < 1e-9 && (await choice()) === 'folded folded folded', await page.eval(say));
 
   await c.go(c.base + '/apps/compose/?place=' + o.id);
   await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
@@ -222,6 +271,8 @@ await page.until(drawn, { timeout: 30000 });
 const fallback = await page.eval(say);
 c.ok('no WebGPU: drawn with WebGL2, and the bar says so', fallback.endsWith('WebGL2'), fallback);
 c.ok('…the same opening: the sphere blue in the middle, the corners ground', isBlue(await pixelAt(0.5, 0.5)) && isGround(await pixelAt(0.02, 0.02)));
+await press(0.5, 0.5);
+c.ok('…and a click chooses the sphere there too', (await choice()) === 'folded chosen folded', await choice());
 await c.shot('5-webgl2');
 await page.forget(stub);
 

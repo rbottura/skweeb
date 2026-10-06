@@ -345,6 +345,18 @@ textarea.pp-text { resize: vertical; }
 .pp-card--off .pp-loose,
 .pp-card--off .dr { opacity: 0.5; }
 
+/* Chosen: its head in the accent. Folding (Cards' `fold`): every head on one
+   line — the name, cut short if it must be, then its buttons — the others
+   their head alone, and the name, marked as a drawer's head is, opens one. */
+.pp-card--chosen > .pp > .pp-head { background: var(--nb-accent, #ffd60a); color: var(--nb-ink, #111); }
+.pp-card--chosen > .pp > .pp-head .pp-btn { border-color: var(--nb-ink, #111); }
+.pp-card--foldable .pp-title { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.pp-card--foldable .pp-title::before { content: '▾'; display: inline-block; width: 1.1em; letter-spacing: 0; }
+.pp-card--folded .pp-title::before { content: '▸'; }
+.pp-card--foldable .pp-title:focus-visible { outline: var(--nb-line-sm, 2px) solid currentColor; outline-offset: 2px; }
+.pp-card--foldable .pp-spacer { display: none; }
+.pp-card--folded > .pp > .pp-body { display: none; }
+
 .pp-cards-empty { margin: 2px 0 10px; color: var(--nb-muted); font-style: italic; }
 .pp-cards-empty[hidden] { display: none; }
 .pp-cards-add { width: 100%; margin-top: 12px; }

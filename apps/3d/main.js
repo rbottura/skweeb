@@ -8,7 +8,9 @@
  * (scene.js) and drawn by three.js on the page's one GPU device
  * (renderer.js), at the size the viewer shows (core/view.js), over the
  * ground. A drag turns round it, shift or the right button slides it, the
- * wheel comes nearer (pointer.js); F frames every shape.
+ * wheel comes nearer (pointer.js); F frames every shape. A click chooses the
+ * shape under it (pick.js) — its card the one open, its box dashed over the
+ * picture (guides.js) — and on nothing, or Escape, chooses none.
  *
  * What leaves (save.js) is drawn again by frames.js at the format's size
  * times its scale: a `model` into the vault, S, or a PNG. rebuild.js replays
@@ -22,10 +24,12 @@
 import { modelParams, GROUPS, SHAPE_CARDS, OPENING } from './params.js';
 import { Model }          from './scene.js';
 import { drawModel }      from './frames.js';
-import { frameAround }    from './camera.js';
+import { frameAround, cameraFor } from './camera.js';
 import { openRenderer }   from './renderer.js';
 import { saveModel, downloadPicture, titleOf } from './save.js';
 import { wirePointer }    from './pointer.js';
+import { pick }           from './pick.js';
+import { boxOnPicture, drawChosen } from './guides.js';
 import { Cards }          from '../../core/Cards.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -47,12 +51,12 @@ let busy = false;        // a save or a download is drawing; nothing else starts
 
 async function boot() {
   bar = new Bar({ app: '3d', mount: document.querySelector('.app'),
-                  keys: 'drag turn · shift-drag slide · wheel nearer · F frame · S save · V vault' });
+                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · F frame · S save · V vault' });
   params = modelParams();
   const panel = new ParamPanel(params, { title: '3d', mount: document.getElementById('side'), groups: GROUPS });
 
   shapesDrawer = panel.addDrawer({ id: 'shapes', title: 'Shapes', before: 'view' });
-  cards = new Cards({ ...SHAPE_CARDS, mount: shapesDrawer.body, onChange: draw });
+  cards = new Cards({ ...SHAPE_CARDS, mount: shapesDrawer.body, onChange: draw, onChoose: draw });
   const frame = button('Frame the model  [F]', frameAll);
   frame.classList.add('td-frame');
   panel.drawer('view').body.append(frame);
@@ -63,7 +67,7 @@ async function boot() {
     draw();
   });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
-  wirePointer({ canvas, params });
+  wirePointer({ canvas, params, onClick: chooseAt });
   wireKeys();
   for (const s of OPENING) cards.add(s.id, s.params);
 
@@ -122,15 +126,29 @@ function paint() {
     return;
   }
   model.update({ ...v, shapes });
-  drawModel(ctx, renderer, model, v, w, h);
+  const camera = drawModel(ctx, renderer, model, v, w, h);
+  const chosen = model.partAt(cards.chosenIndex);
+  const box = chosen && boxOnPicture(chosen.mesh, camera, w, h);
+  if (box) drawChosen(ctx, box, w / Math.max(1, canvas.getBoundingClientRect().width));
   bar.say(describe(v, shapes));
 }
 
-/** The bar's line: what the model is, and where it is seen from. */
+/** The bar's line: what the model is, where it is seen from, and WebGL2 when that is what draws. */
 function describe(v, shapes) {
   const lens = v.lens === 'orthographic' ? 'orthographic' : `${v.fov}° lens`;
   return `${titleOf(shapes)} · turned ${Math.round(v.yaw)}°, raised ${Math.round(v.pitch)}°, `
-    + `${+v.distance.toPrecision(3)} away · ${lens} · ${renderer.backend}`;
+    + `${+v.distance.toPrecision(3)} away · ${lens}` + (renderer.backend === 'WebGPU' ? '' : ` · ${renderer.backend}`);
+}
+
+/**
+ * A click on the picture: the shape under it chosen — its card open, the
+ * shapes drawer too — or none, on nothing. Seen as it was last drawn.
+ */
+function chooseAt([x, y]) {
+  if (!renderer) return;
+  const hit = pick(model, cameraFor(params.values, canvas.width, canvas.height), x, y);
+  if (hit) shapesDrawer.open = true;
+  cards.choose(hit ? hit.index : null);
 }
 
 /** Every shape in view, from where it is seen now. */
@@ -198,14 +216,18 @@ function save() {
 // ── Keys ─────────────────────────────────────────────────────────────────────
 
 function wireKeys() {
-  const vault = new VaultPanel();
+  let vault = null;
+  // Heard before the vault panel's own keys, so an Escape that closes the
+  // panel is seen as that, and lets go of no shape.
   document.addEventListener('keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (e.key === 'f' || e.key === 'F') frameAll();
+    if (e.key === 'Escape' && !vault.isOpen) cards.choose(null);
   });
+  vault = new VaultPanel();
   Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
 }
 

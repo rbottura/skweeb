@@ -14,8 +14,8 @@ call, 2026-10-06 (`docs/decisions.md`).
 1. **The app opens** — done 2026-10-06: primitives from a menu, each a
    card from its schema; an orbit camera, one light, flat or smooth; a
    `model` saved, replayed, drawn again at print scale, placed in compose.
-2. **Handled in the view**: picked by a click, moved, turned and scaled by
-   handles, duplicated, deleted.
+2. **Handled in the view**: picked by a click — done 2026-10-06 — moved,
+   turned and scaled by handles, duplicated, deleted.
 3. **Modifiers** on a shape, in order: subdivide, displace by seeded noise,
    twist, bend, mirror, array.
 4. **A look**: toon shading on a ramp, shadows, an outline.
@@ -35,6 +35,19 @@ call, 2026-10-06 (`docs/decisions.md`).
   from the menu starts beside the last — 0, right, left, further right — in
   the next of eight colours. The cards are core's (`core/Cards.js`), the
   list filter's chain is too: shown or hidden, taken out.
+- **Chosen by a click** (2026-10-06, brick 2's first half; `pick.js`,
+  `guides.js`, `tests/3d-pick.mjs` 19). A click — a press that never moved
+  four pixels, so a drag never picks — sends a ray from the eye through the
+  point, by the camera the picture was drawn with, and the first shape it
+  meets is chosen: its card the one open, its head in the accent, the others
+  folded to a line each (core's cards, `fold`), and its outline's box dashed
+  round it in the view, as the map editor marks its chosen thing — never in
+  a save. A click on nothing, or Escape, chooses none; a card's name chooses
+  its shape too, and a shape added from the menu is chosen. What is drawn is
+  what is picked: a hidden shape is not, a plane is from behind, and what an
+  orthographic eye draws behind itself is — three starts that ray at the
+  eye, this one at the near plane. The answer is the shape's place in the
+  list, hidden ones counted, so a card and its shape always agree.
 - **Seen from anywhere** (`camera.js`, `pointer.js`, `tests/3d-camera.mjs`
   23). The View drawer is an orbit — turned, raised, a distance, the point
   looked at — and a lens: perspective by its field of view, or
@@ -70,9 +83,6 @@ call, 2026-10-06 (`docs/decisions.md`).
 
 ## Known
 
-- **Cards are tall.** A card's Place drawer starts closed; with many
-  shapes the panel still runs long. Brick 2's choosing by a click is the
-  fix: the chosen shape's card open, the others one line.
 - **A model is a still.** No loop until brick 5; the Format drawer has no
   rate.
 - **A print past the GPU's side throws** — 16384 here, a WebGL2 fallback
@@ -86,13 +96,13 @@ call, 2026-10-06 (`docs/decisions.md`).
 
 ## Next single step
 
-**Brick 2's first half: a click picks a shape.** Raycast from the pointer
-into `model.parts` (three's `Raycaster`, the camera of `cameraFor`), the
-picked shape's card scrolled to and marked, the others' drawers closed —
-the tall cards' fix — and a click on nothing picks nothing. Then the
-handles: three's `TransformControls`, vendored by adding it to `ADDONS` in
-`scripts/vendor-three.mjs`, writing back into the card's x, y, z, turns
-and size.
+**Brick 2's second half: handles on the chosen shape.** three's
+`TransformControls`, vendored by adding it to `ADDONS` in
+`scripts/vendor-three.mjs`; its gizmo in the preview's scene only, on the
+chosen shape's mesh, a drag on it writing back into the card's x, y, z,
+turns and size — and stretched by axis, the parked `sx`, `sy`, `sz`. A
+press on a handle is the handle's, never a turn of the view or a pick.
+Then duplicated and deleted by key.
 
 ## Parked
 

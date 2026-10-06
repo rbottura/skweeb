@@ -12,6 +12,13 @@
  * `recipe()` is the list as a recipe holds it — `[{ id, params, on }]`, what
  * core/gpu's runner takes for a chain and what a model keeps for its shapes.
  *
+ * One entry can be chosen (`choose`): its card marked and brought into view
+ * — what the 3D app does when a shape is clicked in its view. With `fold`
+ * the chosen card is the only one open, the others folded to their head on
+ * one line, so a long list stays short; a click on a card's name chooses it,
+ * and on the chosen one's folds it. One added from the menu is chosen.
+ * Choosing is the list's state, not a value: nothing saves it.
+ *
  * DOM and params only; core/param-panel.css draws `.pp-cards` and `.pp-card`.
  */
 
@@ -46,9 +53,12 @@ export class Cards {
    * @param {boolean} [opts.order=false]       ↑ and ↓ on each card: the order means something
    * @param {(id: string, entries: object[]) => object} [opts.start]  the values a card added from the menu starts with
    * @param {object} [opts.words]              what the menu, the empty list and the buttons say
+   * @param {boolean} [opts.fold=false]        only the chosen card open, the others one line each
    * @param {() => void} [opts.onChange]       an entry came or went, moved, or changed a value
+   * @param {(index: number) => void} [opts.onChoose]   another entry chosen — its index, or -1 for none
    */
-  constructor({ mount, catalogue, app, schemaOf = null, groups = null, order = false, start = null, words = {}, onChange = () => {} }) {
+  constructor({ mount, catalogue, app, schemaOf = null, groups = null, order = false, start = null, words = {},
+                fold = false, onChange = () => {}, onChoose = () => {} }) {
     this.catalogue = catalogue;
     this.app = app;
     this.schemaOf = schemaOf || (id => catalogue[id].params || {});
@@ -56,8 +66,11 @@ export class Cards {
     this.order = order;
     this.start = start;
     this.words = { ...WORDS, ...words };
+    this.fold = fold;
     this.onChange = onChange;
+    this.onChoose = onChoose;
     this.entries = [];
+    this.chosen = null;
 
     this.cards = el('div', 'pp-cards');
     this.empty = el('p', 'pp-cards-empty', this.words.empty);
@@ -68,7 +81,9 @@ export class Cards {
     this.menu.addEventListener('change', () => {
       const id = this.menu.value;
       this.menu.value = '';
-      if (id) this.add(id, this.start ? this.start(id, this.entries) : {});
+      if (!id) return;
+      const entry = this.add(id, this.start ? this.start(id, this.entries) : {});
+      if (this.fold) this.choose(entry);
     });
     mount.append(this.cards, this.empty, this.menu);
   }
@@ -81,6 +96,34 @@ export class Cards {
   /** How many entries are on, of how many. */
   get counts() {
     return { on: this.entries.filter(e => e.on).length, all: this.entries.length };
+  }
+
+  /** Where the chosen entry is in the list, or -1. */
+  get chosenIndex() {
+    return this.chosen ? this.entries.indexOf(this.chosen) : -1;
+  }
+
+  /**
+   * Choose an entry — itself, or its index — or none (null, -1): its card
+   * marked and brought into view, and with `fold` the only one open.
+   */
+  choose(which) {
+    const entry = typeof which === 'number' ? (this.entries[which] || null) : (which || null);
+    if (entry && !this.entries.includes(entry)) return;
+    const changed = entry !== this.chosen;
+    this.chosen = entry;
+    for (const e of this.entries) this.mark(e);
+    if (entry) reveal(entry);
+    if (changed) this.onChoose(this.chosenIndex);
+  }
+
+  /** A card as the choice has it: marked or not, open or folded. */
+  mark(entry) {
+    const chosen = entry === this.chosen;
+    entry.card.classList.toggle('pp-card--chosen', chosen);
+    if (!this.fold) return;
+    entry.card.classList.toggle('pp-card--folded', !chosen);
+    entry.title.setAttribute('aria-expanded', String(chosen));
   }
 
   /**
@@ -97,7 +140,8 @@ export class Cards {
 
     const card = el('div', 'pp-card');
     const panel = new ParamPanel(params, { title: item.label, mount: card, ...(this.groups ? { groups: this.groups } : {}) });
-    const entry = { item, params, on, card, panel };
+    const entry = { item, params, on, card, panel, title: panel.head.querySelector('.pp-title') };
+    if (this.fold) foldable(entry, () => this.choose(this.chosen === entry ? null : entry));
 
     const toggle = headButton(on ? this.words.on : this.words.off, this.words.toggle, () => {
       entry.on = !entry.on;
@@ -117,6 +161,7 @@ export class Cards {
 
     this.entries.push(entry);
     this.cards.append(card);
+    this.mark(entry);
     this.paint();
     this.onChange();
     return entry;
@@ -138,14 +183,16 @@ export class Cards {
     if (i < 0) return;
     this.entries.splice(i, 1);
     entry.card.remove();
+    if (entry === this.chosen) this.choose(null);
     this.paint();
     this.onChange();
   }
 
-  /** Put a whole list back, as a recipe has it. An entry not in the catalogue is named, not thrown. */
+  /** Put a whole list back, as a recipe has it, nothing chosen. An entry not in the catalogue is named, not thrown. */
   restore(list = []) {
     for (const e of this.entries) e.card.remove();
     this.entries = [];
+    this.choose(null);
     const unknown = [];
     for (const item of list || []) {
       if (item && this.catalogue[item.id]) this.add(item.id, item.params, item.on !== false);
@@ -173,4 +220,28 @@ function headButton(label, title, onClick) {
   b.title = title;
   b.addEventListener('click', onClick);
   return b;
+}
+
+/** A card's name made the way to open it, by a click or a key, as a drawer's head is. */
+function foldable(entry, toggle) {
+  const name = entry.title;
+  entry.card.classList.add('pp-card--foldable');
+  name.setAttribute('role', 'button');
+  name.tabIndex = 0;
+  name.title = 'Open it and fold the others, or fold it';
+  name.addEventListener('click', toggle);
+  name.addEventListener('keydown', ev => {
+    if (ev.key !== 'Enter' && ev.key !== ' ') return;
+    ev.preventDefault();
+    toggle();
+  });
+}
+
+/**
+ * The chosen card into view in the column that scrolls it: whole if it fits,
+ * its head at the top if it is taller than the column.
+ */
+function reveal(entry) {
+  entry.card.scrollIntoView({ block: 'nearest' });
+  entry.panel.head.scrollIntoView({ block: 'nearest' });
 }

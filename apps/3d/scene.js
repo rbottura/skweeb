@@ -38,13 +38,16 @@ export const LIGHT_PARAMS = {
 
 const RAD = Math.PI / 180;
 
-/** The shapes a recipe draws, in order, each with its values coerced by its schema. */
+/**
+ * The shapes a recipe draws, in order, each with its values coerced by its
+ * schema and its `index` in the recipe's list — its card's, hidden ones counted.
+ */
 export function shapesOf(recipe) {
   const out = [];
-  for (const entry of (recipe && recipe.shapes) || []) {
-    if (!entry || entry.on === false || !SHAPES[entry.id]) continue;
-    out.push({ id: entry.id, values: valuesFor(shapeSchema(entry.id), entry.params || {}) });
-  }
+  ((recipe && recipe.shapes) || []).forEach((entry, index) => {
+    if (!entry || entry.on === false || !SHAPES[entry.id]) return;
+    out.push({ id: entry.id, values: valuesFor(shapeSchema(entry.id), entry.params || {}), index });
+  });
   return out;
 }
 
@@ -62,12 +65,17 @@ export class Model {
     this.sun = new DirectionalLight(0xffffff, LIGHT_PARAMS.sun.default);
     this.fill = new AmbientLight(0xffffff, LIGHT_PARAMS.ambient.default);
     this.scene.add(this.sun, this.sun.target, this.fill);
-    /** One per shape drawn, in the recipe's order: { mesh, form }. */
+    /** One per shape drawn, in the recipe's order: { mesh, form, index } — `index` its place in the recipe's list. */
     this.parts = [];
   }
 
   /** How many shapes are drawn. */
   get count() { return this.parts.length; }
+
+  /** The part drawn for the recipe's `index`-th shape, or null — hidden, unknown, or not there. */
+  partAt(index) {
+    return this.parts.find(p => p.index === index) || null;
+  }
 
   /**
    * Bring the scene into step with a recipe.
@@ -76,13 +84,14 @@ export class Model {
    */
   update(recipe) {
     const shapes = shapesOf(recipe);
-    shapes.forEach(({ id, values }, i) => {
+    shapes.forEach(({ id, values, index }, i) => {
       const form = formOf(id, values);
       let part = this.parts[i];
       if (!part) {
-        part = this.parts[i] = { mesh: new Mesh(undefined, new MeshStandardMaterial()), form: '' };
+        part = this.parts[i] = { mesh: new Mesh(undefined, new MeshStandardMaterial()), form: '', index };
         this.scene.add(part.mesh);
       }
+      part.index = index;
       if (part.form !== form) {
         if (part.mesh.geometry) part.mesh.geometry.dispose();
         part.mesh.geometry = SHAPES[id].geometry(values);
