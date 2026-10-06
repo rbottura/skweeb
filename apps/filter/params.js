@@ -21,11 +21,12 @@ export function filterParams() {
     /**
      * Anything with a picture, still or moving: a still or a shape as its
      * render, a sequence or a composition that moves replayed (core/rebuild.js,
-     * openFrames). A file off disk comes in by the Source drawer or a drop.
+     * openFrames), a model as its picture. A file off disk comes in by the
+     * Source drawer or a drop.
      */
     source: {
       type: 'object',
-      accepts: ['still', 'shape', 'sequence', 'composition'],
+      accepts: ['still', 'shape', 'sequence', 'composition', 'model'],
       label: 'source',
       group: 'source',
     },

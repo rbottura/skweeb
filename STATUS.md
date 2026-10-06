@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-10-02_
+_last touched: 2026-10-06_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` has the milestones, `docs/decisions.md` why things are as
@@ -9,7 +9,31 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Works right now
 
-### Newest — 2026-10-02
+### Newest — 2026-10-06
+
+- **M10 is 3D, and its first brick works** (the author: "a simple thing to
+  generate and manipulate some real basic primitives"; meshes over distance
+  fields, three.js over a renderer of the suite's own — `docs/decisions.md`).
+  `apps/3d/` (`apps/3d/STATUS.md`; `check-3d` 30, `tests/3d-shapes.mjs`
+  23, `3d-camera` 23, `3d-model` 26):
+  - Box, sphere, cylinder, cone, torus, plane, capsule — three's
+    geometries as a catalogue, each shape a card from its schema: form,
+    place, look. A model keeps their values, never a vertex.
+  - An orbit view by hand — a drag turns, the right button slides, the
+    wheel comes nearer, F frames — perspective or orthographic, the same
+    picture at any pixels. One sun, fixed in the world, and a fill.
+  - three r186 (`core/libs/three/`, pinned by `scripts/vendor-three.mjs`)
+    draws on core's one GPU device, WebGL2 where there is none — checked
+    with WebGPU taken away.
+  - A new type, `model`: saved, replayed to the pixel, drawn again at
+    scale 2, reopened, placed in compose; map and filter take one too.
+- **Core's cards** (`core/Cards.js`): filter's chain moved into core when
+  the 3D app's shapes needed the same list; filter's three checks pass on it.
+- **The docs under the cap**: `docs/decisions.md` split — its first three
+  days are `docs/decisions-2026-09-21-to-23.md`, listed at its head — and
+  the roadmap's finished milestones cut to what proved them.
+
+### 2026-10-02
 
 - **M9 is the rig, between M8's bricks 3 and 4** (the author's idea from
   the inbox, `docs/roadmap.md`, M9): a drawing made of marks rigged at its
@@ -168,18 +192,20 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Forty files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-10-02). Newest: `rig-crawl` — a spine that
+Forty-three files, no runner, no dependencies — the loop in `CLAUDE.md`
+runs all of them, and all pass (2026-10-06). Newest: `3d-shapes`, `3d-camera`
+and `3d-model` — primitives as big as their params, the view's promises,
+the scene kept in step; `rig-crawl` — a spine that
 carries, undulates and follows a path, closing; parts and presets;
 `rig-strokes`, `rig-bones` and `rig-motion` — strokes, corners, bones, the
 skin's promises, waves that close; `map-walk` — what can be walked, the spawn, a warp's arrival;
 `map-play` — what answers, a sign's picture, the latest map of a name.
 
-Sixteen browser checks, each a command in `CLAUDE.md`: its own server on a
+Seventeen browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-rig` (35),
-`check-map-play` (16); `check-map` grew to 44. On the laptop Chrome keeps
+throws or its console is not quiet. Newest: `check-3d` (30), on this
+machine's WebGPU; `check-rig` (35), `check-map-play` (16). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
 (`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
@@ -206,8 +232,16 @@ compares two pages' canvases measures, never demands the pixel.
 - **Files over the 400-line cap**: `scripts/check-particles.mjs` (506), and
   the gamepad's `ui/hud.css` (721), `sketch/gamepadSketch.js` (572),
   `ui/TimelinePanel.js` (547), `ui/ParamPanel.js` (500). At it:
-  `core/VaultPanel.js` (399) and `docs/roadmap.md` (400) — the next thing
-  either learns needs a split, or a move to `docs/decisions.md`, first.
+  `core/VaultPanel.js` (399), `docs/core-api.md` (399) and
+  `docs/object-model.md` (399) — the next thing either learns needs a split
+  first: the object model's `.skw` section, eighty lines and not yet built,
+  is the natural one to move out.
+- **`check-map` failed once in two runs on 2026-10-06** — its replay "pixel
+  for pixel" at worst 121, passing on the rerun. It demands the pixel of a
+  read-back canvas, which the note under *Tests* says a check must measure.
+- **The 3D app's cards are tall**, and a model is a still until brick 5;
+  not yet seen on the laptop itself, where it should draw with WebGL2
+  (`apps/3d/STATUS.md`, *Known*).
 - **Trashed brush sets still show in the gamepad and in ckt**; a cut-loose
   set or page keeps its old picture until saved again.
 - **`detached` is a new envelope field**, for cutting loose — written up as
@@ -228,12 +262,18 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
+**M10's brick 2, its first half: a click picks a shape** (`apps/3d/
+STATUS.md`, *Next*). Raycast from the pointer into the model's meshes with
+the camera `cameraFor` makes; the picked shape's card marked and scrolled
+to, the others' drawers closed — the fix for tall cards. The handles come
+after, three's `TransformControls` added to `scripts/vendor-three.mjs`.
+
 **Waiting on the author: the slug from the back and from the side**, drawn
 in the gamepad as the front was — M9's last brick, a character set by
-direction, for M8's avatar (`apps/rig/STATUS.md`). Meanwhile, for the
-worms: **a path drawn on the map that a thing follows across the room** —
-M8's, beside the avatar — so a crawling worm goes about the room and not
-only round its own box.
+direction, for M8's avatar (`apps/rig/STATUS.md`). And for the worms,
+when M8 resumes: **a path drawn on the map that a thing follows across the
+room**, so a crawling worm goes about the room and not only round its own
+box.
 
 Waiting elsewhere (their STATUS files): a Julia set by clicking the
 Mandelbrot set, more fractal families, deeper zoom; colour over life in
@@ -247,6 +287,12 @@ asked for a scale above 1, could draw them the same way, and
 
 ## Parked decisions
 
+- **M10 is 3D, and it is meshes, drawn by three.js** (the author,
+  2026-10-06): primitives generated from their params, never stored as
+  vertices; `model` a type, its pictures `still` and `sequence`;
+  `material` still deferred; three r186 pinned in `core/libs/three/`, its
+  WebGPU renderer on core's device; the app is `apps/3d/`. Distance fields
+  can come back as a family of M7. `docs/decisions.md`.
 - **M9 is the rig, between M8's bricks 3 and 4** (the author, 2026-10-02):
   a drawing made of marks rigged at its marks — never its pixels, which
   would stretch the scales; the mesh and Blender's heat weights wait for a

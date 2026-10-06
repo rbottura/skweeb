@@ -2,63 +2,35 @@
 
 ## Milestones
 
-**M1 — core + gamepad moved in.** Extract `core/` while porting the app it comes
-from, so the kit is shaped by real use instead of guesswork.
-*Done when:* you draw, record a loop, and it lands in `vault/` with its recipe,
-its thumbnail and its seed, from `skweeb/` and not from `sketch-2-print/`.
-*Prerequisite:* the timeline work in `sketch-2-print` is committed first.
+Done milestones keep what they were and what proved them; how they were
+built is in their apps' `STATUS.md`, and why in `docs/decisions.md`.
 
-**M2 — grid v2 on core.** A rewrite of the 700-line sketch, straight onto the
-kit. The honest test: the core was extracted from the gamepad, so only a foreign
-app proves it generalises. Grid also has no save or load at all today, so it
-gains the most.
-*Done when:* you load any vault object, dither it, and save the result back with
-the source recorded as its parent.
+**M1 — core + gamepad moved in.** `core/` extracted while porting the app it
+came from, so the kit was shaped by use, not guesswork. *Done when:* a loop
+drawn and recorded lands in `vault/` with its recipe, its thumbnail and its
+seed, from `skweeb/` and not from `sketch-2-print/` — done.
 
-**M3 — ckt v3.** Text, grid, dots, sprites, motion. No Matter. Ships with the 9
-existing datasets; new ones are cut in the browser by `apps/ckt/blobs.js`, a
-flood fill with no dependency, so the 8 MB `opencv.js` is gone rather than
-moved. **Done 2026-09-23** — see `docs/decisions.md`, 2026-09-23.
-*Done when:* a shape from the gamepad can be the sprite on a ckt dot field —
-and, the stronger test, when ckt can **regenerate a family like `Garam_blue`**:
-letterforms with a pattern on them, emitted as a `set` the gamepad loads as a
-brush family. Those folders are that exact chain, run by hand and frozen. M3 is
-done when it runs itself and keeps its lineage.
+**M2 — grid v2 on core.** The 700-line sketch rewritten onto the kit: the
+honest test of a core extracted from the gamepad. *Done when:* any vault
+object is dithered and saved back with its source as its parent — **done
+2026-09-22**.
 
-**M4 — compose: the fourth app, and the master render.** Not a page and not a
-mode bolted onto the others — an app, `apps/compose/`, where objects from all
-three processes are placed, timed, previewed live and rendered out. A small
-image and video editor whose material is the vault: stills, sequences and
-`.skw` smart objects, mixed on one surface.
+**M3 — ckt v3.** Text, grid, dots, sprites, motion; no Matter, and no
+`opencv.js` — datasets are cut in the browser by `apps/ckt/blobs.js`. *Done
+when:* ckt regenerates a family like `Garam_blue` — letterforms with a
+pattern on them, emitted as a `set` the gamepad loads as a brush family —
+running itself and keeping its lineage: **done 2026-09-23**.
 
-The part that changes the other three: **compose becomes where a finished
-output is made.** Export in the gamepad, grid and ckt stays, but its job is
-demoted from "how you make work" to **a shortcut for producing an asset** —
-you export from grid because you want a dithered sequence in the vault, not
-because it is the last step. Anything with more than one element in it goes
-through compose. That is what makes it the master rendering environment rather
-than a fourth way to save a PNG.
-
-*Done when:* a sheet carrying objects from all three apps — at least one of
-them moving — previews live, renders at print scale, and one object has a URL
-you can send. **Done 2026-09-24**, in five bricks — see *Decided since,
-2026-09-24*.
-
-Three consequences, recorded here because each of them is work:
-
-1. **Video output is frames plus ffmpeg, not a muxer.** Settled 2026-09-22 —
-   see `docs/decisions.md`. A composition renders a numbered PNG sequence
-   into a zip exactly as the gamepad and grid already do, and `scripts/` turns
-   that into a file. Nothing is blocked and nothing has to be written in
-   JavaScript that a mature C program does better.
-2. **Placement needs a time axis — done, in the document.** The `place[]`
-   entry used `at` to pin a `.skw` *version*, and a composition of sequences
-   also needs *when* each element starts. `at: 4` cannot mean both. The pin is
-   now `version`; `at` and `length` are time, in frames. Renamed on 2026-09-22
-   while it was still only a document — see `docs/object-model.md`.
-3. **`render()` finally has to be real.** It is the one moment the roadmap
-   already named, and compose is that moment: A3 at 300dpi is about
-   3500 x 4960 and every placed object has to redraw itself at that size.
+**M4 — compose: the fourth app, and the master render.** An app where objects
+from every process are placed, timed, previewed live and rendered out — and
+**where a finished output is made**: export in the other apps is demoted to a
+shortcut for producing an asset, and anything with more than one element in
+it goes through compose. *Done when:* a sheet of objects from three apps, one
+of them moving, previews live, renders at print scale, and one object has a
+URL you can send — **done 2026-09-24**, in five bricks
+(`apps/compose/STATUS.md`). What it cost — video as frames plus ffmpeg, a
+pin named `version` apart from time's `at`, `render()` made real — is in the
+decisions of 2026-09-22 and `docs/object-model.md`.
 
 Each milestone after M1 should also leave **one link** behind, since the
 catalogue of links is the only real measure of whether this is a suite:
@@ -84,25 +56,17 @@ real 3D later. Each stands on one new piece of core, the GPU kit.
 
 **M5 — filters, and the GPU kit under them.** The fifth process, and the test
 M5 was always meant to be: a new app should cost a folder, a schema and three
-functions. Under it, a kit in `core/` that M6 and M7 stand on too:
+functions. Under it, a kit in `core/gpu/` that M6, M7 and M10 stand on too:
+one WebGPU device for the page, however many objects are on it; filters of
+several passes, on textures used in turns; a filter as data — an id, a
+schema, its shader, its passes — and seeded noise, the same function in WGSL
+and in JS (rule 2).
 
-- **one GPU device or context for the page**, however many objects are on it —
-  compose places many, and browsers cap WebGL contexts at about sixteen;
-- **filters of several passes**, on textures used in turns, so a blur is
-  separable and stays linear in its radius at print scale;
-- **a filter is data** — an id, a param schema, its shader, its passes — so its
-  panel is rule 1's and a chain of them is a recipe;
-- **seeded noise**, the same function in the shader language and in JS (rule 2).
-
-The API is WebGPU (*Still open*, 4 — closed 2026-09-26).
-
-The app opens any object — a still, a loop, a composition — and stacks filters
-on it, each a drawer from its schema. It saves a still or a loop with the
-source as its parent and `{ source, chain }` as its recipe; its `rebuild.js`
-replays the source through `openFrames()` and runs the chain, as grid's does.
-A filter's sizes are in the source's pixels, so print scale draws it again
-exactly instead of stretching it. A chain saved alone is a **look**, a `params`
-object, and compose applies a look to a placement or to a page.
+The app stacks filters on any object, each a drawer from its schema, and
+saves with the source as its parent and `{ source, chain }` as its recipe; a
+filter's sizes are in the source's pixels, so print scale draws it again. A
+chain saved alone is a **look**, a `params` object compose lays over a
+placement.
 
 The catalogue starts from p5.FIP (MIT, 45 effects, each one pass) and grows from
 glfx.js (MIT) and GPUImage (BSD, about 125): tone and colour, blur and sharpen,
@@ -119,54 +83,24 @@ previewed live on the GPU, saves with its source as its parent, replays, and
 redraws at print scale; and a look made there is applied to a placement in
 compose. The link: `filter → compose: a look`.
 
-*So far:* the kit, the app, saving, and the look — 2026-09-26, in four
-bricks (`apps/filter/STATUS.md`). A still or a loop filtered, saved with its
-source as its parent, replayed and drawn again at print scale; a look made
-in filter over a placement in compose, the page saved with it and replayed.
-Both clauses of *Done when* are met. M5 stays open for what the author asked
-it for, a big catalogue: twenty-nine filters — eighteen of them p5.FIP's,
-one glfx.js's,
-grain and glitch at random from a seed, and the game-asset group begun with
-an outline, a drop shadow and palette lock — is under way, not done. Frames
-by hand came first (2026-09-27): compose honours a placement's `at` and
-`length`, *Next frame…* makes a flipbook of stills, a held frame ripples
-the ones after it, and a paused page shows an onion skin. **Then the author
-chose M6 over the rest of the catalogue** (2026-09-27): motion and time
-filters are parked, not dropped.
+*So far:* *Done when* met 2026-09-26, in four bricks
+(`apps/filter/STATUS.md`). M5 stays open for the big catalogue the author
+asked for: twenty-nine filters — eighteen from p5.FIP, one from glfx.js,
+grain and glitch from a seed, and the game-asset group begun with an
+outline, a drop shadow and palette lock. Frames by hand came first, a
+flipbook in compose (2026-09-27); then the author chose M6 over the rest of
+the catalogue, and motion and time filters are parked, not dropped.
 
-**M6 — particles.** A particle is a function of its spawn slot and its age, not
-a step in one shared simulation: seeded from its emitter and its slot, and
-integrated from its own birth. So any frame renders on its own; emission that
-repeats with the loop's period closes the loop exactly, after one lifetime of
-warm-up; and a frame draws again at any size. Particles that interact —
-flocking, collisions — break all three, and wait for a mode that caches.
-Canvas 2D first: ckt already stamps thousands of turned sprites at 60 fps
-(`apps/ckt/stamps.js`), and that renderer moves into core. Sprites come from
-vault sets through one row in `core/uses.js`; an emitter is a point, a line, a
-circle or a shape's alpha; forces are gravity, wind, drag, vortex, attractors,
-seeded curl noise and a field taken from another object; colour, size, alpha
-and spin run over a particle's life on `core/easing.js` curves. Particles live
-in x, y and z behind a simple camera and are drawn as sprites sorted by depth —
-the suite's first fake 3D, and a start on the real one.
-
-*Done when:* a torch loop that closes exactly, drawn with a vault set's
-sprites and scrubbed to any frame, and a one-shot burst, both leaving as
-sprite sheets a game engine loads. The link: `set → particles: sprites`, a use.
-
-*So far:* the model, the app, and sprites from a set — the link — all
-2026-09-27. The model (`apps/particles/model.js`): slots seeded
-from `k mod n`, so the picture at `t + period` is the one at `t`; slots
-before zero born too, so the first frame needs no warm-up — the roadmap's
-"one lifetime of warm-up" is paid in arithmetic, not in frames. The app
-plays dots or a set's sprites, sized, faded and turned over their life, and
-opens on a torch. The link, `set → particles: sprites`, is a row in
-`core/uses.js`: a brush family is offered by default. It saves a loop or a
-still, replays them to the pixel, and compose places them; any loop leaves
-as a sprite sheet (`core/spritesheet.js`); emitters are a point, a line, a
-disc or a ring, with a vortex, an attractor and curl noise
-(`core/noise.js`); and particles have depth behind a camera. **Done when
-is met, 2026-09-27**, all seven bricks in — but for loading a sheet in an
-engine, which no check has done yet.
+**M6 — particles.** A particle is a function of its spawn slot and its age,
+not a step in one shared simulation: so any frame renders on its own, a loop
+whose emission repeats with its period closes exactly, and a frame draws
+again at any size. Particles that interact — flocking, collisions — break
+all three, and wait for a mode that caches. *Done when:* a torch loop that
+closes, drawn with a vault set's sprites and scrubbed to any frame, and a
+one-shot burst, both leave as sprite sheets a game engine loads — **done
+2026-09-27**, in seven bricks (`apps/particles/STATUS.md`), Phaser 3 loading
+the torch's sheet (`check-sheet-engine`). The link: `set → particles:
+sprites`, a use. Open still: colour over life.
 
 **M7 — fractals.** Escape-time on the GPU — Mandelbrot, Julia, Burning Ship,
 multibrot, Newton, Phoenix, Lyapunov — with smooth colouring and orbit traps,
@@ -181,27 +115,17 @@ field, filters displace by one.
 *Done when:* a Julia loop that closes, redrawn exactly at print scale, whose
 field steers an M6 emitter. The link: `fractal → particles: a field`.
 
-*So far:* bricks 1 to 3 of seven, and 6 begun, 2026-09-27 to -30
-(`apps/fractals/STATUS.md`). The Mandelbrot set and its Julia sets as one
-WGSL pass through the GPU kit, smooth colouring round a ramp, dragged and
-wheeled about the pointer, the picture a function of its params — a PNG at
-print scale is drawn again, not enlarged; held to the escape count in
-doubles. Both families save and replay. A sprite copying itself, the point
-families begun ahead of order, as the author asked. And loops: one param
-swung over a loop in either family — for escape time the ramp once round,
-or a Julia `c` round a circle. Against *Done when*: a Julia loop that
-closes, redrawn exactly at print scale — met, 2026-09-30; whose field
-steers an M6 emitter — met the same day, brick 7: escape time's slope in
-doubles, taken in by particles' Fields drawer. **M7's *Done when* is met,
-2026-09-30.** It stays open for the rest of its bricks, as M5 does for its
-catalogue: families, depth, point families.
+*So far:* *Done when* met 2026-09-30 (`apps/fractals/STATUS.md`): the
+Mandelbrot set and its Julia sets in one WGSL pass, held to doubles; a
+sprite copying itself, the point families begun ahead of order; loops of the
+ramp once round or a Julia `c` round a circle; escape time's slope a field
+for particles. It stays open for the rest of its bricks: a Julia set by
+clicking the Mandelbrot set, more families, deeper zoom.
 
 **Across M5–M7, for the game.** Four things serve every app rather than one:
 
-- **sprite-sheet export** for any loop — the frames on one sheet with an
-  Aseprite-style JSON of frame rects, durations and tags. `core/sheet.js`
-  already lays out a set's contact sheet; this is its sibling. It needs
-  nothing new and can land any time, at the latest with M6;
+- **sprite-sheet export** for any loop, with an Aseprite-style JSON — done
+  with M6 (`core/spritesheet.js`);
 - **a `palette` type** — a game has one, and palette lock, gradient maps,
   colour over life and fractal colouring all read it. A row in the object
   model, not a field;
@@ -344,17 +268,63 @@ is seven strokes and fifteen bones, its chains named rightly by guess; it
 walks, waddles, idles; a snake undulates in place and slithers round a path;
 every loop closes. Brick 6 waits on the author's views.
 
-**3D, parked.** It was M5. When it returns it starts from the GPU kit:
-ray-marched shapes and 3D fractals are shader work and come first, as a family
-of M7; an app with the `model` and `material` types only when the game needs
-models.
+**M10 — 3D: meshes, from primitives up.** Chosen by the author on
+2026-10-06, while M9's last brick waits on the slug's views: "a simple thing
+to generate and manipulate some real basic primitives". Meshes, not the
+ray-marched distance fields planned when 3D was parked, for what meshes open
+(`docs/decisions.md`, 2026-10-06); distance fields can come back as a family
+of M7, or as one more way to make a mesh.
+
+**A model is an object like any other.** `model`, the type deferred since
+2026-09-21, is what a model is made of: each shape a primitive, its params,
+a transform, a colour; the camera and the light. Never its vertices — the
+params make them again — so a frame draws on its own at any size, and a
+print is drawn again, not enlarged. Compose places a model, a map stands one
+in the room, filter takes its picture; its stills and loops are `still` and
+`sequence`, the model their parent. `material` stays deferred: a colour is a
+shape's param until two models share one.
+
+three.js draws it (the author, 2026-10-06), in `apps/3d/`: its WebGPU
+renderer on the page's one GPU device, WebGL2 where there is none, a
+picture handed back in the call as the kit does; the recipe stays the
+suite's data, never three's. The game's player stays
+Canvas 2D: what 3D makes is baked into frames, as all the GPU makes is.
+
+The bricks: **(1)** the app opens — box, sphere, cylinder, cone, torus,
+plane and capsule added from a menu, each a drawer from its schema; an orbit
+camera, one light, flat or smooth; a `model` saved, replayed, drawn again at
+print scale, placed in compose. **(2)** Handled in the view: picked by a
+click, moved, turned and scaled by handles, duplicated, deleted.
+**(3)** Modifiers on a shape, in order: subdivide, displace by seeded noise,
+twist, bend, mirror, array. **(4)** A look: toon shading on a ramp, shadows,
+an outline. **(5)** Motion: a turntable, or a transform swung as the rig
+swings a bone, every loop closing. **(6)** For the game: a model drawn from
+four or eight sides, a set by direction, `role: 'character'`.
+
+Then, each a link of its own: a gamepad stroke turned on a lathe or swept as
+a tube; type extruded from the suite's fonts; a fractal or a dither as a
+height field; OBJ and glTF out, and in — a mesh from outside keeping its
+file in `source/`, as a font does.
+
+*Done when:* a model of primitives, modified, lit and turning in a loop that
+closes, is saved, drawn again at print scale, placed in compose and stood in
+the room; and drawn from four sides as a set M8's avatar could wear. The
+link: `model → map: a character from every side`.
+
+*So far:* brick 1 of six, 2026-10-06 (`apps/3d/STATUS.md`). Seven of
+three's primitives, each a card from its schema in core's cards — the list
+filter's chain moved into for it; an orbit view by hand, perspective or
+orthographic; one sun and a fill. three r186 draws on the page's GPU
+device, WebGL2 where there is none; a `model` saves, replays to the pixel,
+is drawn again at scale 2, reopens, and compose places it.
 
 ## Decided before, 2026-09-21 to -23
 
-In `docs/decisions.md`, with their reasoning: the `.skw` smart object,
-`sketch-2-print` keeping its gamepad, export as two tools, the loop format,
-print resolution as an export concern, 3D as M5 (parked since, 2026-09-26),
-the font audit, `render()` staying pure; video as frames plus ffmpeg, M2 done,
+In `docs/decisions-2026-09-21-to-23.md`, with their reasoning: the `.skw`
+smart object, `sketch-2-print` keeping its gamepad, export as two tools, the
+loop format, print resolution as an export concern, 3D as M5 (parked
+2026-09-26, back as M10 on 2026-10-06), the font audit, `render()` staying
+pure, and the name; video as frames plus ffmpeg, M2 done,
 replay as a dispatch, framing as one idea, trim measured; M3 done and ckt
 ported twice, the UI pass from the author's brief, an object reopening in its
 app, and the tailnet. What M4's bricks settled as compose was built, with the
@@ -368,21 +338,16 @@ plan it was built to, is in `apps/compose/STATUS.md`.
 2. **The online skweeboteque.** Wanted, not now — it needs a server, and it is
    also what turns sandboxing from theory into work. Nothing in the local design
    blocks it; the vault interface is the seam it would go behind.
+3. ~~**M10's renderer, and the app's name**~~ **Answered 2026-10-06** —
+   three.js, pinned in `core/libs/three/`; the app is `apps/3d/`. See
+   `docs/decisions.md`.
 
-Closed, their reasoning in `docs/decisions.md`: video output (2026-09-22,
+Closed, their reasoning by date in the decisions: video output (2026-09-22,
 frames plus ffmpeg — no muxer); WebGPU over WebGL2 for the GPU kit, and a GPU
 render replaying within a tolerance across machines (both 2026-09-26).
 
 ## Migration facts
 
 What the three ancestors measured on 2026-09-20, and what a port must know
-first, now live in `docs/migration.md`.
-
-## Where the name came from
-
-`playground` was already doing four jobs on the portfolio: the tagline
-("building playground tools for graphics and print"), the bio, a project section
-called "Playground projects", and an empty nav slot called "Personal
-Playground", plus a tier of done in `methodology.md`. The suite fills that empty
-slot; it should not also be named after the category. Hence **skweeb**, and
-`.skw` for the process object.
+first, now live in `docs/migration.md`. Where the name came from is with the
+first days' decisions, `docs/decisions-2026-09-21-to-23.md`.

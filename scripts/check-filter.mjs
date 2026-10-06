@@ -20,12 +20,12 @@ const c = await startCheck();
 const { page } = c;
 const APP = c.base + '/apps/filter/';
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
-const cards = `[...document.querySelectorAll('.fl-card')]`;
+const cards = `[...document.querySelectorAll('.pp-card')]`;
 const titles = () => page.eval(`${cards}.map(k => k.querySelector('.pp-title').textContent)`);
 const headButton = (i, label) => `(${cards}[${i}] && [...${cards}[${i}].querySelectorAll('.pp-head .pp-btn')].find(b => b.textContent === ${JSON.stringify(label)}))`;
 const pixel = (x, y) => page.eval(`Array.from(document.getElementById('stage').getContext('2d').getImageData(${x}, ${y}, 1, 1).data)`);
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const addMenu = `document.querySelector('.fl-add')`;
+const addMenu = `document.querySelector('.pp-cards-add')`;
 
 /** Drop a 64 × 48 picture on the page: grey 100 with a red square, as a person would drop a file. */
 const drop = () => page.eval(`(async () => {
@@ -79,10 +79,10 @@ await page.click(headButton(1, 'on'));
 await page.until(`${say}.includes('1 of 2 filters on')`);
 await page.until(`(() => { const d = document.getElementById('stage').getContext('2d').getImageData(5, 5, 1, 1).data; return Math.abs(d[0] - 100) <= 2; })()`);
 c.ok('switched off, brightness no longer runs', true, 'back to ' + (await pixel(5, 5))[0]);
-c.ok('its card says it is off', await page.eval(`${cards}[1].classList.contains('fl-card--off') && ${headButton(1, 'off')} !== undefined`));
+c.ok('its card says it is off', await page.eval(`${cards}[1].classList.contains('pp-card--off') && ${headButton(1, 'off')} !== undefined`));
 await page.click(headButton(1, '✕'));
 await page.click(headButton(0, '✕'));
-await page.until(`${cards}.length === 0 && !document.querySelector('.fl-empty').hidden && ${say}.includes('no filters yet')`);
+await page.until(`${cards}.length === 0 && !document.querySelector('.pp-cards-empty').hidden && ${say}.includes('no filters yet')`);
 c.ok('taken out, the chain is empty and says so', true, await page.eval(say));
 await c.shot('1-empty-again');
 

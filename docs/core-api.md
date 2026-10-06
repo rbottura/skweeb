@@ -20,6 +20,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
 | `widgets.js` | one widget per param type, split out of ParamPanel | **in** |
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
+| `Cards.js` | a list of small param panels, each from its own catalogue entry's schema — filter's chain, a model's shapes; `recipe()` is `[{ id, params, on }]` | **in**, 2026-10-06, moved from filter when the 3D app needed it |
 | `Bar.js` | the strip under every app: information only | **in**, 2026-09-23 |
 | `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
 | `stamps.js` | a sprite drawn once at the size and angle it shows, blitted to many (`stampFor`, `blit`); the halving of a picture nearest above a size (`mipFor`) | **in**, 2026-09-27, moved from ckt when particles needed `mipFor` |
@@ -32,13 +33,11 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `fields.js` | an object as a field, asked of the app that made it — its rebuild.js's `fieldOf` (`loadField`) | **in**, 2026-09-30, M7's link |
 | `view.js` | how large a preview draws: `viewFactor()`, the size the viewer shows, never more than an export makes | **in**, 2026-09-27, moved from compose when particles needed it |
 | `theme.css` | the suite's look: tokens, the page shell, controls | **in**, 2026-09-23 |
-| `bus.js` | DOM CustomEvents on `document`, namespaced | not yet; apps dispatch directly |
-| `panel.js` | base class: show/hide, focus, gamepad + keyboard nav | not yet; two concrete panels exist instead |
+| `bus.js`, `panel.js`, `input.js` | namespaced DOM events on `document`; a base panel — show/hide, focus, gamepad and keyboard nav; gamepad and keyboard mapping | not yet: apps dispatch directly; panels are concrete; `gamepad/core/inputManager.js` |
 | `links.js` | the named one-way links between apps | not yet, see below |
 | `uses.js` | what a set can be used as, and where each set is offered | **in**, 2026-09-23 |
 | `easing.js` | the suite's easing curves, and the param that offers one | **in**, 2026-09-24 |
-| `input.js` | gamepad + keyboard mapping | not yet; `gamepad/core/inputManager.js` |
-| `libs/` | one p5, shared by every app | not yet; 1.5.0 sits in `apps/gamepad/libs/`. Grid uses none. |
+| `libs/` | p5 1.5.0, for the gamepad and core's replay of its recordings; three.js r186, for the 3D app — `libs/three/README.md`, copied by `scripts/vendor-three.mjs` | **in**; three since 2026-10-06 |
 
 `registry.js` now takes a manifest URL. It used to `fetch('brush-manifest.json')`
 with no path at all, which resolves against the *page* — invisible while the
@@ -106,7 +105,7 @@ three seconds; what was said meanwhile shows when they are up.
 
 A panel docks into a layout column (`new ParamPanel(params, { mount })`) and
 is made of drawers. A small panel can also be a card inside another's drawer
-— one per filter in filter's chain — with `panel.head` for an app's buttons
+— a list of them is `Cards.js`: filter's chain, a model's shapes — with `panel.head` for an app's buttons
 beside Reset and `panel.remove()` to take it off the page. A param's `group` names its drawer; `format` is core's
 own group, so the frame section is the same in every app. Things that are not
 parameters get drawers too: `panel.addDrawer({ id, title })` for the sequence

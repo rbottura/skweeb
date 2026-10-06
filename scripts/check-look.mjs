@@ -19,7 +19,7 @@ import { startCheck } from './check-kit.mjs';
 const c = await startCheck();
 const { page } = c;
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
-const cards = `[...document.querySelectorAll('.fl-card')]`;
+const cards = `[...document.querySelectorAll('.pp-card')]`;
 const api = async id => (await fetch(c.base + '/api/vault/' + id)).json();
 const settled = `(() => { const t = ${say}; return t.includes(' on the page') || t.includes('could not'); })()`;
 const onPage = async () => (await page.eval(say)).match(/(\d+) × (\d+) on the page/);
@@ -39,10 +39,10 @@ await page.click(`[...document.querySelectorAll('.vp--visible .vp-cell')].find(k
   k.querySelector('.vp-name')?.textContent === ${JSON.stringify(still.title)}
   && k.querySelector('.vp-sub')?.textContent.includes(${JSON.stringify(still.render.w + '×' + still.render.h)}))?.querySelector('.vp-use')`);
 await page.until(`${say}.startsWith(${JSON.stringify(still.title + ' · ')})`, { timeout: 60000 });
-await page.typeInto(`document.querySelector('.fl-add')`, 'blur');
+await page.typeInto(`document.querySelector('.pp-cards-add')`, 'blur');
 await page.until(`${cards}.length === 1`);
 await page.typeInto(`${cards}[0].querySelector('.pp-num')`, '3');
-await page.typeInto(`document.querySelector('.fl-add')`, 'brightness');
+await page.typeInto(`document.querySelector('.pp-cards-add')`, 'brightness');
 await page.until(`${cards}.length === 2`);
 await page.typeInto(`${cards}[1].querySelector('.pp-num')`, '0.2');
 const grown = [still.render.w + 18, still.render.h + 18];

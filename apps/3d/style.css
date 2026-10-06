@@ -1,0 +1,19 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — 3d
+
+   Everything that looks like the suite comes from core, the shapes' cards
+   included (core/Cards.js). The 3D app says only its layout — the viewer,
+   then one column of drawers — and that the model is turned and slid by hand.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+@import '../../core/param-panel.css';
+@import '../../core/vault-panel.css';
+
+.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+
+.viewer-stage canvas { cursor: grab; touch-action: none; }
+.viewer-stage canvas.turning { cursor: grabbing; }
+.viewer-stage canvas.sliding { cursor: move; }
+
+.td-frame { margin-top: 8px; }

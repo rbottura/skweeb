@@ -45,7 +45,7 @@ export function mapParams() {
 }
 
 /** What can stand on a map: anything compose places. */
-export const PLACEABLE = ['still', 'sequence', 'shape', 'composition'];
+export const PLACEABLE = ['still', 'sequence', 'shape', 'composition', 'model'];
 
 /** The chosen thing's drawers. */
 export const THING_GROUPS = {

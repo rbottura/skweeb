@@ -29,9 +29,10 @@ export const PLACE_GROUPS = {
 
 /**
  * What a page takes: anything core gives frames of (core/rebuild.js
- * `openFrames`) — another page included, replayed by compose's rebuild.js.
+ * `openFrames`) — another page included, replayed by compose's rebuild.js;
+ * a model, M10's, as its picture, drawn again at print scale.
  */
-export const PLACEABLE = ['still', 'sequence', 'shape', 'composition', 'map'];
+export const PLACEABLE = ['still', 'sequence', 'shape', 'composition', 'map', 'model'];
 
 /**
  * The page: the frame group as a sheet, and the paper under everything.

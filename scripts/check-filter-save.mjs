@@ -28,8 +28,8 @@ const DL = path.join(c.dir, 'downloads');
 await page.downloadsTo(DL);
 
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
-const cards = `[...document.querySelectorAll('.fl-card')]`;
-const addMenu = `document.querySelector('.fl-add')`;
+const cards = `[...document.querySelectorAll('.pp-card')]`;
+const addMenu = `document.querySelector('.pp-cards-add')`;
 const api = async id => (await fetch(c.base + '/api/vault/' + id)).json();
 
 // Objects to filter: loose (in no folder, not trashed) and unmistakable in the picker.
