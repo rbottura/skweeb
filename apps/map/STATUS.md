@@ -22,6 +22,10 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## Works now
 
+- **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
+  the Export drawer, `docs/core-export.md`): the map on screen, a window at
+  a time through `core/windowed.js`, the torch at the frame shown — 30
+  tiles against the map drawn whole, to the pixel (`check-map`).
 - **The player, point and click** (2026-10-02; `play/`; `tests/map-play.mjs`
   8 checks, `check-map-play` 16). A page of its own, no panels:
   `play/?map=<id>` opens a saved map, `play/?name=<name>` the latest map so

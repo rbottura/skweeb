@@ -7,6 +7,11 @@ luminance picking a member of an ordered ramp of tiles. Ported from
 `docs/migration.md` for what came across and what did not.
 
 ## Works right now — seen in Chrome
+- **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
+  the Export drawer, `docs/core-export.md`): a dither in tiles, its cells
+  worked out once a frame and each window drawn through them
+  (`core/windowed.js`) — 105 tiles against the dither drawn whole
+  (`check-print`). A source in the vault only.
 - **The original sketch's seven materials are in the vault** (2026-09-24, a
   side note between M4's fourth and fifth bricks). grid_sketch's `preload()`
   loaded seven folders "as mapping material" — degz 6, trames 8, sprites 13,

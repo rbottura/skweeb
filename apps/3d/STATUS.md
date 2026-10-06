@@ -143,8 +143,9 @@ call, 2026-10-06 (`docs/decisions.md`).
   sharper (mean difference 0.02 of 255 once halved); its own replay at
   scale 1 is its render to the pixel on the same machine. `?open=` brings
   the cards back; compose, map and filter take a model.
-- **A print at a sheet's size and a dpi** (2026-10-06; `print.js`,
-  core/png.js, `tests/png.mjs` 10, `check-3d-poster` 8). On a print format
+- **A print at a sheet's size and a dpi** (2026-10-06; core's `print.js` and
+  `PrintPanel.js` — this app's own print moved into core the same day, for
+  every app — core/png.js, `tests/png.mjs` 10, `check-3d-poster` 8). On a print format
   — A5 to A1, or the new 120×176 — the Export drawer's print panel takes a
   dpi and says what it comes to; *Print it* draws the model at the sheet's
   pixels in tiles of 2048, each a window of the whole sheet's camera, the
@@ -162,9 +163,10 @@ call, 2026-10-06 (`docs/decisions.md`).
 - **A model is a still.** No loop until brick 5; the Format drawer has no
   rate.
 - **A replay asked for a scale draws in one piece**: compose placing a
-  model and printing its page at scale 4 asks rebuild.js, which throws past
-  the GPU's side — 16384 here, 8192 under WebGL2 — with the size in words.
-  Only the app's own print tiles; a print's file sizes are measured on a
+  model and exporting its page as one PNG at scale 4 asks rebuild.js for the
+  whole frame, which throws past the GPU's side — 16384 here, 8192 under
+  WebGL2 — with the size in words. A print asks for windows (`frames.js`
+  `window`), in compose too; a print's file sizes are measured on a
   model with ground round it, and a picture filling the sheet will be
   larger.
 - **No tone mapping.** Colours stay as typed, so a face square to a strong

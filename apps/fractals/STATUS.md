@@ -30,6 +30,12 @@ field`.
 
 ## Works now
 
+- **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
+  the Export drawer, `docs/core-export.md`): escape time by the plane's own
+  window (`fractal.js` `windowOf`, `tests/fractal.mjs`), each tile its
+  part of the plane — on the set's edge a point or two rounds the other way
+  in 32-bit floats, 0.15% of values; copies through `core/windowed.js`
+  (`check-print`).
 - **A field for particles — `fractal → particles: a field`, M7's *Done
   when* met** (2026-09-30; `field.js`, `tests/fractal-field.mjs` 13 checks,
   `check-particles-links` 23). The smooth escape count (`fractal.js`

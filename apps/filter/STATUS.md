@@ -25,6 +25,18 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 
 ## Works now
 
+- **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
+  the Export drawer, `docs/core-export.md`): the chain over its part of the
+  source and as far round it as the chain reads — a filter that reads
+  further than it spreads says so, `reads`: pixelate, dots, halftone,
+  erode, unsharp, emboss, sharpen — read from the source's own window
+  (`core/gpu/window.js`), and run as that part of the whole: the GPU
+  prelude says where it lies, so a vignette, a halftone's grid and grain
+  land as they would whole. Two chains over a gamepad still, 15 and 8
+  tiles, match the chain run whole to 0.0001 of 255; taking only the reach,
+  the second came apart on every seam (`check-print`). A zoom blur reads
+  from anywhere, so a chain with one is printed whole. A source in the
+  vault only.
 - **For game assets** (the suite's own, 2026-09-26): an *outline* round a
   sprite — its width and colour, measured by an exact distance in two passes,
   its corners round; a *drop shadow* — moved, softened, coloured, faded; and

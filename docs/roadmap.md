@@ -323,7 +323,10 @@ out. Each shape has a stack of modifiers in its card — subdivide, displace
 by seeded noise, twist, bend, mirror, array — the normals carried by the
 deformation, nothing cracking. And a style: toon bands, an outline, shadows
 on a catcher of their own — the same picture at any print scale. A print
-at a sheet's size and a dpi, in tiles: the 120×176 poster at 300 dpi.
+at a sheet's size and a dpi, in tiles: the 120×176 poster at 300 dpi — and
+the same day the print moved into core, for every app: each handle draws a
+window of its frame, a gamepad still is drawn again from its marks
+(`docs/core-export.md`).
 
 **Next, the author's: the smart object.** "we'll soon tackle the link
 'smart' object between apps" (2026-10-06, `docs/inbox.md`). The `skw` type —

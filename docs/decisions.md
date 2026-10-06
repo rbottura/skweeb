@@ -282,5 +282,30 @@ not the vault's: it is a file for a printer, and the model saves as
 before. And it is drawn again sharper, never enlarged: a smooth round
 shape gets π√R segments for the sheet, since 48 round a sphere five
 thousand pixels across is five pixels off a circle; a flat shape keeps its
-facets, its look; the shadow map is 4096 a side. Compose's own print still
-draws its page on one canvas.
+facets, its look; the shadow map is 4096 a side.
+
+**Every app prints, a window at a time.** The author, the same day: "can we
+open / add that new print format and image creation process to all our
+suite apps?" So the print is core's — the picture fitted whole on the
+sheet, the paper round it — and every app's Export drawer has the same
+panel: the sheet, the dpi, the paper. What a print asks of an object is
+one thing more of its handle, `window(i, win)`: a part of a frame at the
+handle's scale, so no app ever draws the whole sheet. Most draw it with
+their own drawing code through a context moved by the window's corner; the
+3D app with its camera's view offset; escape time with the plane's own
+window; a chain of filters over its part of the source and as far round it
+as the chain reads — a pixelation reads a block and spreads nowhere, so a
+filter says each — run as that part of the whole, the GPU prelude taught
+where a run lies, so a vignette's middle and a halftone's grid land where
+they would;
+compose asks each placement for its part. A gamepad still, its picture at
+any size until now, is drawn again from its marks by core, each sprite
+from its own pixels — the stamps the rig rigs, moved into core so the two
+cannot drift; at its own size its sprites resample as the gamepad's canvas
+did, which is how its render was made. A gamepad loop, replayed by p5, has
+no window yet: drawn whole as large as a canvas allows, enlarged into the
+tiles, and the print says by how much. The gamepad's print is a box of its
+own, E — a mouse's and a keyboard's, since a print is chosen once, sitting
+down. A print is never saved: it is what a save would write, drawn again.
+How each kind meets the window is in `docs/core-export.md`, moved out of
+the core API's file, which stood at its cap.

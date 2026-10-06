@@ -8,6 +8,10 @@ v2 was wrong once and a whole port was built on it.
 
 ## Works now — all of it seen running in Chrome
 
+- **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
+  the motion side's Export, `docs/core-export.md`): the frame on screen, a
+  window at a time through `core/windowed.js` — 209 tiles against the loop
+  drawn whole (`check-print`).
 - **Three columns**: dots on the left, motion on the right, the viewer between
   with a dots / motion toggle (keys 1 and 2). Both panels are core drawers;
   rows show only when they apply.

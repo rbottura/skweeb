@@ -26,6 +26,12 @@ author's direction, many slugs and worms that crawl.
 
 ## Works now
 
+- **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
+  the Export drawer, `docs/core-export.md`): the pose on screen, drawn again
+  from its marks a window at a time through `core/windowed.js`, the bones
+  never on it — sixteen tiles against the pose drawn whole (`check-rig`).
+  Its drawing's stamps are core's now (`core/stage/still.js`), the same
+  ones a gamepad still is printed with; its strokes are its own.
 - **Worms crawl** (2026-10-02; `crawl.js`, `tests/rig-crawl.mjs` 30,
   `check-rig` 35). The Crawl drawer moves the body — the first stroke, its
   root chain's — as a spine, every stamp carried with it at the point

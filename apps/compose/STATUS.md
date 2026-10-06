@@ -7,6 +7,16 @@ done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome
 
+- **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
+  the Export drawer, `docs/core-export.md`): the page at the tick on screen
+  in tiles, each placement asked for its part of each in its own pixels, a
+  pixel round it (`placements.js` `windowLayers`) — or for its whole frame
+  where its app draws no window, as a gamepad loop's; a look runs over its
+  part (`core/gpu/window.js`). A part is mapped by its frame's own pixels,
+  as the page draws them: by the scale alone, a box of no whole size drifted
+  a fraction across the page. 35 tiles against the page drawn whole, 0.005
+  of 255, nothing on a seam (`check-compose`). The PNG export beside it
+  still draws on one canvas.
 - **Frames: a flipbook** (2026-09-27, the author's ask). A placement's `at`
   and `length` are honoured (`time.js` `showsAt`, `endOf`): the *Time*
   drawer of the `placed` panel says from which frame and for how many, 0

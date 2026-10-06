@@ -40,13 +40,21 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
   the 3D app's shapes needed the same list; then `choose` and `fold` — one
   card open, the rest a line each — `duplicate`, and `inner`, a list inside
   each card. Filter does not fold, and its three checks pass on it.
-- **A print at a sheet's size and a dpi** (the author's ask, 2026-10-06:
-  120 × 176 cm at 300 dpi, "just one export"): the 120×176 sheet is a print
-  format in core's table, and the 3D app prints a model at its format's
-  sheet and a dpi — 14173 × 20787 px in 77 tiles of 2048, each a window of
-  one camera, written band by band into a PNG with its dpi (core/png.js),
-  in 12 s, 3–5 MB, sharper than the preview: round shapes get the segments
-  the sheet needs (`apps/3d/STATUS.md`; `check-3d-poster` 8).
+- **A print at a sheet's size and a dpi, in every app** (the author's asks,
+  2026-10-06: 120 × 176 cm at 300 dpi, "just one export" — then "to all our
+  suite apps"): 14173 × 20787 px in 77 tiles of 2048, written band by band
+  into a PNG with its dpi (core/png.js). First the 3D app — 12 s, 3–5 MB,
+  round shapes given the segments the sheet needs (`check-3d-poster` 8) —
+  then core's `print.js` and `PrintPanel.js` in every Export drawer: each
+  handle draws a `window` of its frame, so nothing holds the sheet. Rig,
+  particles, map, grid, ckt and fractals' copies through their own drawing
+  code on a moved context (`core/windowed.js`); escape time by the plane's
+  window; filter and looks by `core/gpu/window.js`, the GPU prelude knowing
+  where a run lies; compose by each placement's part. A gamepad still is
+  drawn again from its marks (`core/stage/still.js`, the rig's stamps now
+  core's), and the gamepad prints its canvas: E. `check-print` (16) holds
+  every app's print to its object drawn whole, a seam measured apart; map
+  and compose print in their own checks (`docs/core-export.md`).
 - **core/noise.js `noise3`**: gradient noise in 3D on the suite's hash, JS
   only, for a displaced shape.
 - **`check-map` measures its replay** now, as the note under *Tests* says a
@@ -200,7 +208,10 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 - The page fits above the timeline, scaled — a view only. A still saves on
   a transparent ground by default; G, or the Save Ground row, makes it
-  white. Its stills keep their marks: the rig draws them again.
+  white. Its stills keep their marks: the rig draws them again, and core
+  does past their own size (`core/stage/still.js`) — within 0.001 of 255 of
+  their renders on one rasterizer. E prints the drawing on the canvas, what
+  S would save, at a sheet's size (`ui/PrintBox.js`).
 
 ### Across the suite
 
@@ -214,8 +225,11 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Forty-eight files, no runner, no dependencies — the loop in `CLAUDE.md`
-runs all of them, and all pass (2026-10-06). Newest: `png` — a PNG
+Fifty files, no runner, no dependencies — the loop in `CLAUDE.md` runs all
+of them, and all pass (2026-10-06). Newest: `windowed` — a window's corner
+moving every absolute transform and pixel, and nothing else; `stage-still`
+— a gamepad still's marks as stamps, framed, mirrored, clipped, drawn;
+`png` — a PNG
 written band by band, read back by zlib to the byte; `3d-pick` — a ray's
 answer is a card's place, what is drawn is what is picked; `3d-handles` —
 three's own controls driven in Node, a drag along the x arrow moving a box
@@ -224,10 +238,12 @@ normals true to the surface, no crack, the caps; `3d-look` — ramps, hulls,
 shadows; before them `3d-shapes`, `3d-camera`, `3d-model`, and the rig's
 four.
 
-Eighteen browser checks, each a command in `CLAUDE.md`: its own server on a
+Nineteen browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-3d-poster` (8), the
+throws or its console is not quiet. Newest: `check-print` (16), every app's
+print against its object drawn whole, and the gamepad's box drawn on with a
+pad that is not there; `check-3d-poster` (8), the
 300 dpi poster printed whole and read back; `check-3d` (61), on this
 machine's WebGPU and with WebGPU taken away; `check-rig` (35), `check-map-play` (16). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
@@ -238,14 +254,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Broken / half-done
 
-- **A gamepad still prints stretched from its pixels**, as a shape does, and
-  the export names them. A rig's pose is drawn again from the same marks,
-  so the fix is near: core's replay of a still's marks at a scale (*Next*).
+- **A gamepad loop prints enlarged where it is large**: p5 replays it with
+  no window, so it is drawn whole as large as a canvas allows — most loops
+  fit a 120×176 sheet at 300 dpi, a tall one is enlarged a little, and the
+  print says by how much. A shape, or a picture from outside, has only its
+  pixels. The gamepad's print box is not on the pad.
 - **A blur's taps stop at 512 a side**; past that it wants a smaller picture.
-- **Compose's print export draws its page on one canvas**, tried up to
-  2480 × 3508; the largest sheets at scale 4 are past a browser's canvas
-  cap. The 3D app's print draws in tiles into core/png.js, which compose
-  could use the same way.
+- **Compose's PNG export still draws its page on one canvas**, tried up to
+  2480 × 3508 — its print beside it draws any sheet in tiles.
 - **grid's own player opens its source exact**, so it cannot ask for drafts
   as compose does; and **grid still stutters now and then** while a loop
   plays — measure first, as ckt was (`bar.rate`).
@@ -255,13 +271,15 @@ compares two pages' canvases measures, never demands the pixel.
   the canvas and the world the glyph sits in.
 - **The gamepad cannot reopen its recordings**; its params are not on
   `core/params.js`, its panels its own; its GALLERY panel shows IndexedDB.
-- **Files over the 400-line cap**: `scripts/check-particles.mjs` (506), and
+- **Files over the 400-line cap**: `scripts/check-particles.mjs` (506),
+  `scripts/check-3d.mjs` (454, since brick 4 — its print section would sit
+  in `check-print`), and
   the gamepad's `ui/hud.css` (721), `sketch/gamepadSketch.js` (572),
   `ui/TimelinePanel.js` (547), `ui/ParamPanel.js` (500). At it:
-  `core/VaultPanel.js` (399), `docs/core-api.md` (399) and
-  `docs/object-model.md` (399) — the next thing either learns needs a split
-  first: the object model's `.skw` section, eighty lines and not yet built,
-  is the natural one to move out.
+  `core/VaultPanel.js` (399) and `docs/object-model.md` (399) — the next
+  thing either learns needs a split first: the object model's `.skw`
+  section, eighty lines and not yet built, is the natural one to move out,
+  as the core API's export and print went to `docs/core-export.md`.
 - **A 3D model is a still until brick 5**; its handles turn about the
   world's axes only; nothing in it is undone; a shadow's darkness and map
   are fixed; not yet seen on the laptop itself, where it should draw with
@@ -315,12 +333,6 @@ box.
 Waiting elsewhere (their STATUS files): a Julia set by clicking the
 Mandelbrot set, more fractal families, deeper zoom; colour over life in
 particles; filter's motion group — *bob* first — parked with M5's catalogue.
-
-Still wanted, and nearer now: **a gamepad still drawn again at print
-scale**. Its recipe's `marks` are drawn by the rig already (`apps/rig/
-draw.js`, from a still's `canvas` and `frame.from`); core's `openFrames`,
-asked for a scale above 1, could draw them the same way, and
-`scripts/check-compose-export.mjs`'s gamepad row would say *drawn again*.
 
 ## Parked decisions
 

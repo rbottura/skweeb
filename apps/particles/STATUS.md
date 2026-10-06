@@ -26,6 +26,10 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
+  the Export drawer, `docs/core-export.md`): the frame on screen, drawn
+  again a window at a time through `core/windowed.js` — 81 tiles against
+  the loop drawn whole (`check-print`).
 - **A field from another object — M7's link, `fractal → particles: a
   field`** (2026-09-30; `forces.js`, `core/fields.js`,
   `tests/particles-model.mjs` now 92, `check-particles-links` 23). In the
