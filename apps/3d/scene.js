@@ -4,10 +4,11 @@
  * A model is its shapes and one light (docs/object-model.md, `model`). This
  * builds the scene those make and keeps it: `update(recipe)` again moves,
  * turns and recolours what is there, and makes a shape's geometry again only
- * when its form changed — a drag that turns a box does not rebuild it — and
- * lets three free what goes. A shape that is off is not drawn; one the
- * catalogue does not know is named (`unknownIn`), never thrown on, so an old
- * recipe still opens in a newer app and the other way round.
+ * when its form changed — its own params or its stack of modifiers
+ * (modifiers.js) — so a drag that turns a box does not rebuild it, and lets
+ * three free what goes. A shape or a modifier that is off is not drawn; one
+ * its catalogue does not know is named (`unknownIn`), never thrown on, so an
+ * old recipe still opens in a newer app and the other way round.
  *
  * The light: a sun, from a direction fixed in the world — so turning round
  * the model shows its dark side — and an ambient fill. Its intensities are
@@ -22,6 +23,7 @@ import {
   DoubleSide, FrontSide, Box3, Sphere,
 } from '../../core/libs/three/three.core.js';
 import { SHAPES, shapeSchema, formKeys } from './shapes.js';
+import { MODIFIERS, modify } from './modifiers.js';
 import { direction } from './camera.js';
 import { valuesFor } from '../../core/params.js';
 
@@ -40,24 +42,33 @@ const RAD = Math.PI / 180;
 
 /**
  * The shapes a recipe draws, in order, each with its values coerced by its
- * schema and its `index` in the recipe's list — its card's, hidden ones counted.
+ * schema, its `index` in the recipe's list — its card's, hidden ones counted
+ * — and its stack: the modifiers on and known, in order, theirs coerced too.
  */
 export function shapesOf(recipe) {
   const out = [];
   ((recipe && recipe.shapes) || []).forEach((entry, index) => {
     if (!entry || entry.on === false || !SHAPES[entry.id]) return;
-    out.push({ id: entry.id, values: valuesFor(shapeSchema(entry.id), entry.params || {}), index });
+    const stack = (Array.isArray(entry.modifiers) ? entry.modifiers : [])
+      .filter(m => m && m.on !== false && MODIFIERS[m.id])
+      .map(m => ({ id: m.id, values: valuesFor(MODIFIERS[m.id].params, m.params || {}) }));
+    out.push({ id: entry.id, values: valuesFor(shapeSchema(entry.id), entry.params || {}), index, stack });
   });
   return out;
 }
 
-/** The ids a recipe names that the catalogue does not have. */
+/** The ids a recipe names that the catalogues do not have — shapes, and modifiers on the shapes known. */
 export function unknownIn(recipe) {
-  return ((recipe && recipe.shapes) || []).filter(e => !e || !SHAPES[e.id]).map(e => (e && e.id) || '?');
+  const out = [];
+  for (const e of (recipe && recipe.shapes) || []) {
+    if (!e || !SHAPES[e.id]) { out.push((e && e.id) || '?'); continue; }
+    for (const m of Array.isArray(e.modifiers) ? e.modifiers : []) if (!m || !MODIFIERS[m.id]) out.push((m && m.id) || '?');
+  }
+  return out;
 }
 
-/** What a shape's geometry is made from: equal keys, the same mesh kept. */
-const formOf = (id, values) => id + ':' + JSON.stringify(formKeys(id).map(k => values[k]));
+/** What a shape's geometry is made from — its form's values and its stack: equal, the same mesh kept. */
+const formOf = (id, values, stack) => id + ':' + JSON.stringify([formKeys(id).map(k => values[k]), stack]);
 
 export class Model {
   constructor() {
@@ -79,13 +90,13 @@ export class Model {
 
   /**
    * Bring the scene into step with a recipe.
-   * @param {object} recipe   the app's values and `shapes: [{ id, params, on }]`
+   * @param {object} recipe   the app's values and `shapes: [{ id, params, on, modifiers }]`
    * @returns {Model} this
    */
   update(recipe) {
     const shapes = shapesOf(recipe);
-    shapes.forEach(({ id, values, index }, i) => {
-      const form = formOf(id, values);
+    shapes.forEach(({ id, values, index, stack }, i) => {
+      const form = formOf(id, values, stack);
       let part = this.parts[i];
       if (!part) {
         part = this.parts[i] = { mesh: new Mesh(undefined, new MeshStandardMaterial()), form: '', index };
@@ -94,7 +105,7 @@ export class Model {
       part.index = index;
       if (part.form !== form) {
         if (part.mesh.geometry) part.mesh.geometry.dispose();
-        part.mesh.geometry = SHAPES[id].geometry(values);
+        part.mesh.geometry = modify(SHAPES[id].geometry(values), stack);
         part.form = form;
       }
       place(part.mesh, values);
@@ -123,7 +134,8 @@ export class Model {
    */
   bounds() {
     const box = new Box3();
-    for (const part of this.parts) box.expandByObject(part.mesh);
+    // By every vertex: a twisted box's own box, turned, would frame it loose.
+    for (const part of this.parts) box.expandByObject(part.mesh, true);
     if (box.isEmpty()) return null;
     const sphere = box.getBoundingSphere(new Sphere());
     return { centre: sphere.center.toArray(), radius: sphere.radius };

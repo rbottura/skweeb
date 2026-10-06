@@ -17,7 +17,8 @@ call, 2026-10-06 (`docs/decisions.md`).
 2. **Handled in the view** — done 2026-10-06: picked by a click, moved,
    turned, sized and stretched by handles, duplicated, deleted.
 3. **Modifiers** on a shape, in order: subdivide, displace by seeded noise,
-   twist, bend, mirror, array.
+   twist, bend, mirror, array — begun 2026-10-06: the stack, subdivide and
+   twist.
 4. **A look**: toon shading on a ramp, shadows, an outline.
 5. **Motion**: a turntable, or a transform swung as the rig swings a bone,
    every loop closing.
@@ -37,6 +38,21 @@ call, 2026-10-06 (`docs/decisions.md`).
   further right — in the next of eight colours. The cards are core's
   (`core/Cards.js`), the list filter's chain is too: shown or hidden, taken
   out.
+- **A stack of modifiers** (2026-10-06, brick 3 begun; `modifiers.js`,
+  `tests/3d-modifiers.mjs` 24). A shape's card holds, after its form, a list
+  of modifier cards — core's cards inside a card, `inner` — in order, each on
+  or off, earlier or later; its recipe entry keeps them as `modifiers: [{ id,
+  params, on }]`, and the geometry is made again when they change, kept when
+  they do not. They work in the shape's own space, before its place.
+  *Subdivide*: every triangle into four, flat, one to four times, each
+  edge's midpoint shared, stopping short of half a million triangles the
+  same way every time — nothing changes to the eye, what bends after it has
+  vertices to bend. *Twist*: about the shape's x, y or z, the whole angle
+  from one end to the other, the middle still. A deformation carries each
+  normal by the cofactor of its Jacobian, so a twisted face's normals are
+  the surface's and a box's top keeps its own. A twisted model saves,
+  replays to the pixel, draws again at scale 2 and reopens with its stack;
+  F frames by every vertex, so a twisted, turned box is framed tight.
 - **Handles** (2026-10-06, brick 2's second half; `handles.js`, `chosen.js`,
   `tests/3d-handles.mjs` 18). The chosen shape wears three's
   TransformControls: arrows and squares that move it, rings that turn it,
@@ -89,7 +105,7 @@ call, 2026-10-06 (`docs/decisions.md`).
   it draws with WebGL2 by itself, the bar saying so — checked with WebGPU
   taken away, the same opening drawn; its one line about falling back is
   kept off the console.
-- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 48 with
+- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 52 with
   all the above, a real mouse on the handles). S
   saves a `model`: its recipe the panel's values and `shapes: [{ id,
   params, on }]`, titled by its shapes — *box, sphere, torus* — its render
@@ -120,14 +136,14 @@ call, 2026-10-06 (`docs/decisions.md`).
 
 ## Next single step
 
-**Brick 3's first: a stack of modifiers on a shape, and subdivide.** A
-shape's entry gains `modifiers: [{ id, params, on }]`, in order, each a
-card inside the shape's card — core's cards holding a list inside each
-card, its recipe beside the entry's `params`. `modifiers.js` a catalogue as
-`shapes.js` is; its first, subdivide: each triangle into four, n times,
-flat, so the twist, bend and displacement after it have vertices to move.
-The geometry made again when its form or its modifiers change (scene.js
-`formOf`). Twist next.
+**Brick 3's next: bend.** A modifier in `modifiers.js` as twist is: the
+shape's x, y or z bent into an arc of a whole angle, end to end, about an
+axis square to it, its middle where it was — Blender's simple deform, its
+pivot at the radius the angle makes. Through `deform`, so its normals ride
+the Jacobian; a test that a bend of 180° makes a half ring whose ends point
+back. Then displace by seeded noise, which wants a 3D noise in
+core/noise.js first — it has 2D only — and a direction shared where a
+seam or an edge splits a vertex, so a box does not crack open.
 
 ## Parked
 

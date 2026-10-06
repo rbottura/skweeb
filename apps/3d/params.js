@@ -17,6 +17,7 @@ import { frameParams, DERIVED } from '../../core/frame.js';
 import { VIEW_PARAMS } from './camera.js';
 import { LIGHT_PARAMS } from './scene.js';
 import { SHAPES, SHAPE_GROUPS, shapeSchema, startOf } from './shapes.js';
+import { MODIFIERS } from './modifiers.js';
 
 /** The drawers, top to bottom. `shapes` holds the cards, and no params. */
 export const GROUPS = {
@@ -37,7 +38,9 @@ export function modelParams() {
 
 /**
  * How core's cards are told about shapes (core/Cards.js): folded, so the
- * chosen shape's card — clicked in the view, or by its name — is the one open.
+ * chosen shape's card — clicked in the view, or by its name — is the one
+ * open; and in each card, after its form, its stack of modifiers, in order
+ * (modifiers.js), kept in its entry as `modifiers`.
  */
 export const SHAPE_CARDS = {
   catalogue: SHAPES,
@@ -52,6 +55,21 @@ export const SHAPE_CARDS = {
     on: 'shown', off: 'hidden',
     toggle: 'Hide this shape, or show it again',
     out: 'Take it out of the model',
+  },
+  inner: {
+    key: 'modifiers',
+    title: 'Modifiers',
+    before: 'place',
+    catalogue: MODIFIERS,
+    app: '3d',
+    order: true,
+    words: {
+      add: 'add a modifier…',
+      empty: 'None: the shape as it is made.',
+      toggle: 'Switch this modifier off, or on again',
+      up: 'Sooner in the stack', down: 'Later in the stack',
+      out: 'Take it off the shape',
+    },
   },
 };
 

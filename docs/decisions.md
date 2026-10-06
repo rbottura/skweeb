@@ -235,3 +235,14 @@ shape's place has `sx`, `sy`, `sz`, a stretch along its own axes times its
 `size`, each 1 unless set, so a recipe from before draws as it did. Chosen
 by a click, a shape's card is the one open and the rest fold to a line —
 core's cards learned `fold` for it; filter's chain does not fold.
+
+**A shape's modifiers are a stack in its own entry.** Brick 3, begun the
+same day: `modifiers: [{ id, params, on }]` beside a shape's `params`, run
+in order on its geometry in its own space before its place, as Blender's
+stack runs — a list of cards inside the shape's card (core's cards,
+`inner`). Not a list for the whole model: a twist belongs to the shape it
+twists, and travels with it when it is duplicated. A deformation carries
+the normals with the vertices, by the cofactor of its Jacobian, rather
+than making them again, so a box's edges stay hard and a sphere's seam
+stays smooth. Subdividing stops short of half a million triangles, the same
+way every time, since a recipe must draw the same everywhere it opens.

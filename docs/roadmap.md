@@ -319,7 +319,8 @@ device, WebGL2 where there is none; a `model` saves, replays to the pixel,
 is drawn again at scale 2, reopens, and compose places it. A click chooses
 a shape, its card the one open; three's handles move, turn, size and
 stretch it by axis, writing into its card; D duplicates it, Delete takes it
-out.
+out. Brick 3 begun: a stack of modifiers in each shape's card — subdivide
+and twist so far, the normals carried by the deformation.
 
 ## Decided before, 2026-09-21 to -23
 

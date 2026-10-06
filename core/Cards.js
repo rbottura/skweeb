@@ -20,6 +20,10 @@
  * one `duplicate` puts right after its original. Choosing is the list's
  * state, not a value: nothing saves it.
  *
+ * A card can hold a list of its own (`inner`) — a shape's modifiers — in a
+ * drawer of the card, its changes the outer list's, kept in the entry's
+ * recipe under its key: `[{ id, params, on, modifiers: [{ id, params, on }] }]`.
+ *
  * DOM and params only; core/param-panel.css draws `.pp-cards` and `.pp-card`.
  */
 
@@ -55,11 +59,13 @@ export class Cards {
    * @param {(id: string, entries: object[]) => object} [opts.start]  the values a card added from the menu starts with
    * @param {object} [opts.words]              what the menu, the empty list and the buttons say
    * @param {boolean} [opts.fold=false]        only the chosen card open, the others one line each
+   * @param {object} [opts.inner]              a list inside each card: `{ key, title, before }` and the
+   *                                           options of its own Cards; its recipe under `key`
    * @param {() => void} [opts.onChange]       an entry came or went, moved, or changed a value
    * @param {(index: number) => void} [opts.onChoose]   another entry chosen — its index, or -1 for none
    */
   constructor({ mount, catalogue, app, schemaOf = null, groups = null, order = false, start = null, words = {},
-                fold = false, onChange = () => {}, onChoose = () => {} }) {
+                fold = false, inner = null, onChange = () => {}, onChoose = () => {} }) {
     this.catalogue = catalogue;
     this.app = app;
     this.schemaOf = schemaOf || (id => catalogue[id].params || {});
@@ -68,6 +74,7 @@ export class Cards {
     this.start = start;
     this.words = { ...WORDS, ...words };
     this.fold = fold;
+    this.inner = inner;
     this.onChange = onChange;
     this.onChoose = onChoose;
     this.entries = [];
@@ -89,9 +96,10 @@ export class Cards {
     mount.append(this.cards, this.empty, this.menu);
   }
 
-  /** The list as a recipe holds it. */
+  /** The list as a recipe holds it, each entry's inner list under its key. */
   recipe() {
-    return this.entries.map(e => ({ id: e.item.id, params: e.params.values, on: e.on }));
+    return this.entries.map(e => ({ id: e.item.id, params: e.params.values, on: e.on,
+                                    ...(e.inner ? { [this.inner.key]: e.inner.recipe() } : {}) }));
   }
 
   /** How many entries are on, of how many. */
@@ -144,6 +152,7 @@ export class Cards {
     const panel = new ParamPanel(params, { title: item.label, mount: card, ...(this.groups ? { groups: this.groups } : {}) });
     const entry = { item, params, on, card, panel, title: panel.head.querySelector('.pp-title') };
     if (this.fold) foldable(entry, () => this.choose(this.chosen === entry ? null : entry));
+    if (this.inner) entry.inner = this.innerOf(panel);
 
     const toggle = headButton(on ? this.words.on : this.words.off, this.words.toggle, () => {
       entry.on = !entry.on;
@@ -170,13 +179,26 @@ export class Cards {
     return entry;
   }
 
-  /** An entry again, right after it: its values as they are, `change` over them — chosen, with `fold`. */
+  /** An entry again, right after it: its values as they are, `change` over them, its inner list — chosen, with `fold`. */
   duplicate(entry, change = {}) {
     const i = this.entries.indexOf(entry);
     if (i < 0) return null;
     const copy = this.add(entry.item.id, { ...entry.params.values, ...change }, entry.on, i + 1);
+    if (copy.inner) copy.inner.restore(entry.inner.recipe());
     if (this.fold) this.choose(copy);
     return copy;
+  }
+
+  /** The list inside a card: a drawer of its own, its count beside its title, its changes the outer list's. */
+  innerOf(panel) {
+    const { key, title, before = null, ...opts } = this.inner;
+    const drawer = panel.addDrawer({ id: key, title, before });
+    const inner = new Cards({ ...opts, mount: drawer.body, onChange: () => {
+      const { on, all } = inner.counts;
+      drawer.note(all ? (on === all ? `${all}` : `${on} of ${all} on`) : '');
+      this.onChange();
+    } });
+    return inner;
   }
 
   move(entry, by) {
@@ -200,15 +222,19 @@ export class Cards {
     this.onChange();
   }
 
-  /** Put a whole list back, as a recipe has it, nothing chosen. An entry not in the catalogue is named, not thrown. */
+  /**
+   * Put a whole list back, as a recipe has it, inner lists too, nothing
+   * chosen. What a catalogue lacks is named, not thrown — the inner lists' too.
+   */
   restore(list = []) {
     for (const e of this.entries) e.card.remove();
     this.entries = [];
     this.choose(null);
     const unknown = [];
     for (const item of list || []) {
-      if (item && this.catalogue[item.id]) this.add(item.id, item.params, item.on !== false);
-      else unknown.push(item && item.id);
+      if (!item || !this.catalogue[item.id]) { unknown.push(item && item.id); continue; }
+      const entry = this.add(item.id, item.params, item.on !== false);
+      if (entry.inner) unknown.push(...entry.inner.restore(item[this.inner.key]));
     }
     this.paint();
     this.onChange();
