@@ -22,7 +22,8 @@
  * map by its name, a thing is a sign showing another object. Saved: a
  * `map`, its cells, walls and things, with the loop's frames and rate, its
  * tileset, things and what a sign shows its parents; the vault's replay is
- * its render to the pixel, walls and events never in it, and at scale 2 is
+ * its render, measured — a read-back canvas can be drawn in software a
+ * little differently — walls and events never in it, and at scale 2 is
  * drawn again; `?open=` brings the tiles, walls and things back, and Del
  * takes one off; compose places the map, and it plays. Needs no GPU, and
  * brings what it needs: the vault it runs on may be empty.
@@ -299,12 +300,15 @@ if (saved) {
     const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
     const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(h.frame(${tick}), 0, 0);
     const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
-    let worst = 0; for (let k = 0; k < da.length; k++) worst = Math.max(worst, Math.abs(da[k] - db[k]));
+    let worst = 0, off = 0, sum = 0;
+    for (let k = 0; k < da.length; k++) { const d = Math.abs(da[k] - db[k]); worst = Math.max(worst, d); sum += d; if (d > 8) off++; }
     const big = await openFrames(object, { url, scale: 2 });
-    const out = { length: h.length, worst, missing: h.missing, big: [big.scale, big.frame(0).width, h.width] };
+    const out = { length: h.length, worst, off: off / da.length, mean: sum / da.length, missing: h.missing, big: [big.scale, big.frame(0).width, h.width] };
     h.dispose(); big.dispose(); return out; })()`);
-  c.ok('the vault replays it: the frame on screen is its render, pixel for pixel', replay.length === 60 && replay.worst === 0
-    && !replay.missing.length, JSON.stringify(replay).slice(0, 120));
+  // Measured, never the pixel demanded: a canvas read back often enough is drawn by
+  // Chrome in software afterwards, a little differently at a sprite's edge (STATUS, *Tests*).
+  c.ok('the vault replays it: the frame on screen is its render', replay.length === 60 && replay.off < 0.002 && replay.mean < 0.5
+    && !replay.missing.length, JSON.stringify(replay).slice(0, 160));
   c.ok('at scale 2, drawn again at twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.big[2], JSON.stringify(replay.big));
 
   await c.go(c.base + '/apps/map/?open=' + mid);
