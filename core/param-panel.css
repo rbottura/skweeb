@@ -372,14 +372,17 @@ textarea.pp-text { resize: vertical; }
 .pp-print-note { margin: 8px 0 6px; font: 400 12px/1.45 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
 .pp-print { width: 100%; }
 
-/* The Stack drawer (core/StackPanel.js): the windows of the suite open in this browser. */
+/* The Stack drawer (core/StackPanel.js): this browser's live stack, top first, and what can go on it. */
 .pp-stack-note { margin: 4px 0 8px; font: 400 12px/1.45 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
-.pp-stack { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.pp-stack-row { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: baseline;
-  padding: 6px 8px; border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111); background: var(--nb-paper, #fff); }
+.pp-stack { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.pp-stack-row { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 8px; cursor: pointer;
+  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111); background: var(--nb-paper, #fff); }
 .pp-stack-row--mine { background: var(--nb-accent, #ffd60a); }
-.pp-stack-app { font-weight: 700; }
-.pp-stack-what { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.pp-stack-row--chosen { box-shadow: var(--nb-shadow-sm, 3px 3px 0 #111); }
+.pp-stack-app { font-weight: 700; white-space: nowrap; }
+.pp-stack-what { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font: 400 12px/1.4 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
 .pp-stack-row--mine .pp-stack-what { color: var(--nb-ink, #111); }
-.pp-stack-tag { font-size: 11px; }
+.pp-stack-tag { font-size: 11px; white-space: nowrap; }
+.pp-stack-btn { min-width: 26px; padding: 2px 6px; }
+.pp-stack-adds { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }

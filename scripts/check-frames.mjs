@@ -112,7 +112,7 @@ if (o) {
 }
 
 // The onion skin: paused on frame 2, the frames either side show, faint; switched off, they do not.
-const row = name => `[...document.querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const row = name => `[...document.querySelectorAll('.pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const onionSwitch = `${row('onion skin, paused')}?.querySelector('input')`;
 key('.'); await wait(300);
 const withOnion = await pixels();

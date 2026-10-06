@@ -29,7 +29,7 @@ const { page } = c;
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const key = async k => { await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ${JSON.stringify(k)} }))`); await wait(300); };
-const row = name => `[...document.querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const row = name => `[...document.querySelectorAll('.pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const set = async (name, value) => { await page.typeInto(`${row(name)}?.querySelector('.pp-num')`, value); await wait(250); };
 const chip = async (name, text) => { await page.click(`[...${row(name)}.querySelectorAll('button')].find(b => b.textContent === ${JSON.stringify(text)})`); await wait(300); };
 const chipOn = (name, text) => page.eval(`!![...${row(name)}.querySelectorAll('.pp-chip--on')].find(b => b.textContent === ${JSON.stringify(text)})`);

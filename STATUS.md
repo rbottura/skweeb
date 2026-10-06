@@ -27,6 +27,15 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
     another tab within a second; a tab closed leaves every list, a crashed
     one after three missed calls. The gamepad joins with no drawer of its
     own. `chrome.mjs` opens more tabs than one.
+  - **Brick 2, the stack** (`core/stack.js`, `core/blend.js`; `tests/stack.mjs`
+    18, `check-live` 14): one live composition the windows share — a layer
+    from a window or the vault put on, moved up or down, taken off, its
+    opacity and blend (CSS's seventeen, `plus-lighter` as add) and place set
+    in the drawer's rows, from any window; the newest change wins in every
+    window, two crossed changes end on one stack; a window opening late is
+    handed it; a closed window's layer leaves it. Putting a layer on from a
+    window not yet stacked puts that window over it — a look tried over what
+    it will join.
 - **M10 is 3D, and four of its six bricks work** (the author: "a simple
   thing to generate and manipulate some real basic primitives"; meshes over
   distance fields, three.js over a renderer of the suite's own —
@@ -289,13 +298,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M11's brick 2, its first half: the stack as data** (`docs/roadmap.md`,
-M11; `docs/smart-objects.md`, *The live stack*). `core/stack.js`: one live
-composition per browser, `{ page, place }`, its blocks `live` (a window's
-id) or `ref`, each with its transform, `opacity` and `blend`; kept in every
-window, a change sent with a count, the latest winning; a closed window's
-block dropped. Node-tested on two channels, as `tests/live.mjs` is. Then
-its rows in the Stack drawer, then brick 3 draws it.
+**M11's brick 3: the stack drawn round every canvas** (`docs/roadmap.md`,
+M11). Written, not yet wired: `core/place.js` (compose's placement math,
+moved), `core/stackView.js` (the layers under an app's canvas on one canvas,
+each over it on its own, its own canvas given its opacity and blend by CSS,
+in its own frame), `tests/place.mjs`; wiring them is the script
+`brick3-wire` would be — `loopOf` in live.js, the Playhead's `fps`,
+compose's page.js handing on the math, `clock` from each app — then
+`check-live` proving pixels: filter's loop behind particles, moving.
 
 **Waiting on the author first: how a moving model saves.** M10's brick 5
 is motion — a turntable, then a shape swung as the rig swings a bone — and

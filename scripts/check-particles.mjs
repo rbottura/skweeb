@@ -44,7 +44,7 @@ const count = `(document.querySelector('.tp-count')?.textContent || '')`;
 const alive = async () => Number(((await page.eval(say)).match(/^(\d+) alive/) || [])[1] || -1);
 const key = k => page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ${JSON.stringify(k)} }))`);
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const row = name => `[...document.querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const row = name => `[...document.querySelectorAll('.pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const set = async (name, value) => { await page.typeInto(`${row(name)}?.querySelector('.pp-num')`, value); await wait(300); };
 const scrubTo = async tick => {
   await page.eval(`(() => { const s = document.querySelector('.tp-scrub'); s.value = ${tick};

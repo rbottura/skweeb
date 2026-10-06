@@ -31,7 +31,7 @@ const c = await startCheck();
 const { page } = c;
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const row = name => `[...document.querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const row = name => `[...document.querySelectorAll('.pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const set = async (name, value) => { await page.typeInto(`${row(name)}?.querySelector('.pp-num')`, value); await wait(300); };
 /** The bar's line once it says `text`: an announcement holds the bar a few seconds first. */
 const sayWith = text => page.until(`${say}.includes(${JSON.stringify(text)})`, { timeout: 10000 }).then(() => page.eval(say), () => page.eval(say));

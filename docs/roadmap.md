@@ -363,9 +363,10 @@ live layer`.
 Later, and for fun: a window as a lens — where it sits on the screen, the
 part of the stack under it, bgstaal's own trick.
 
-*So far:* bricks 0 and 1, 2026-10-06. The spec has its own file; every app
-joins the windows of its browser with what is on screen, and lists them in a
-Stack drawer — the gamepad, with no drawer, in the others'.
+*So far:* bricks 0 to 2, 2026-10-06. The spec has its own file; every app
+joins the windows of its browser with what is on screen, and shares one
+stack with them in a Stack drawer — a window or a vault object added, moved,
+taken off, its opacity and blend set, from any window.
 
 ## Decided before, 2026-09-21 to -23
 
