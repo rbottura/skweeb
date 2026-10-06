@@ -11,8 +11,9 @@
  * lattice point by the hash, quintic fade), its exact slope in the same
  * pass, and its curl: the field a particle follows so it
  * swirls without ever gathering or thinning out, since a curl has no
- * divergence. Pure: no DOM, no Math.random — a seed and a point in, a number
- * out, so a particle's path through it is the same every time it is drawn.
+ * divergence. And in 3D (`noise3`), for a surface displaced in space. Pure:
+ * no DOM, no Math.random — a seed and a point in, a number out, so a
+ * particle's path through it is the same every time it is drawn.
  */
 
 /** WGSL's pcg, on u32s. */
@@ -85,4 +86,32 @@ export function noise2(x, y, seed) {
 export function curl2(x, y, seed) {
   const [, nx, ny] = noiseGrad2(x, y, seed);
   return [ny, -nx];
+}
+
+/**
+ * Twelve gradients for 3D — the cube's edge middles, Perlin's improved set —
+ * four of them twice, so a hash's low four bits pick one with no remainder.
+ */
+const G3 = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0], [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1],
+            [0, 1, 1], [0, -1, 1], [0, 1, -1], [0, -1, -1], [1, 1, 0], [-1, 1, 0], [0, -1, 1], [0, -1, -1]];
+
+/** A lattice point's gradient in 3D: the same hash, one link longer, its low four bits. */
+const grad3 = (ix, iy, iz, seed) =>
+  G3[pcg((pcg((pcg((pcg(((ix | 0) ^ seed) >>> 0) ^ (iy | 0)) >>> 0) ^ (iz | 0)) >>> 0) ^ 0x9e3779b9) >>> 0) & 15];
+
+/**
+ * Gradient noise at (x, y, z), in lattice units: Perlin's improved noise on
+ * the suite's hash — about −1 to 1, zero on every lattice point, smooth
+ * between. JS only: nothing on the GPU wants it yet. What a surface is
+ * displaced by in 3D (apps/3d/deform.js), where 2D noise would streak.
+ */
+export function noise3(x, y, z, seed) {
+  const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+  const fx = x - ix, fy = y - iy, fz = z - iz;
+  const dot = (dx, dy, dz) => { const g = grad3(ix + dx, iy + dy, iz + dz, seed); return g[0] * (fx - dx) + g[1] * (fy - dy) + g[2] * (fz - dz); };
+  const u = fade(fx), v = fade(fy), w = fade(fz);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const x00 = lerp(dot(0, 0, 0), dot(1, 0, 0), u), x10 = lerp(dot(0, 1, 0), dot(1, 1, 0), u);
+  const x01 = lerp(dot(0, 0, 1), dot(1, 0, 1), u), x11 = lerp(dot(0, 1, 1), dot(1, 1, 1), u);
+  return lerp(lerp(x00, x10, v), lerp(x01, x11, v), w);
 }

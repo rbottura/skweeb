@@ -92,6 +92,7 @@ export class Cards {
       if (!id) return;
       const entry = this.add(id, this.start ? this.start(id, this.entries) : {});
       if (this.fold) this.choose(entry);
+      else reveal(entry);
     });
     mount.append(this.cards, this.empty, this.menu);
   }

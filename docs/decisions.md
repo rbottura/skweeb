@@ -245,4 +245,11 @@ twists, and travels with it when it is duplicated. A deformation carries
 the normals with the vertices, by the cofactor of its Jacobian, rather
 than making them again, so a box's edges stay hard and a sphere's seam
 stays smooth. Subdividing stops short of half a million triangles, the same
-way every time, since a recipe must draw the same everywhere it opens.
+way every time, since a recipe must draw the same everywhere it opens — and
+so does a row cut shorter, a mirror left out. The rest of the six the same
+day: a displacement by 3D noise carries its seed among its params (rule 2),
+moving a point's copies together so nothing cracks; a bend lays an axis on
+an arc, end to end, as the twist turns; a mirror reflects across a plane a
+distance from the shape's middle, since a primitive is centred and would
+mirror onto itself; a row keeps its middle where the shape was, so it
+turns and frames about it.

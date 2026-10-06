@@ -4,10 +4,11 @@
  * Covers core/noise.js. The promises — `pcg` is WGSL's, bit for bit (held
  * against the same arithmetic in BigInt, which wraps as a u32 does and
  * nothing else); a seed is a field and another seed another; the noise is
- * smooth and zero on its lattice; its curl turns without gathering.
+ * smooth and zero on its lattice; its curl turns without gathering; in 3D,
+ * seeded, zero on its lattice, smooth, about −1 to 1, and changing along z.
  */
 
-const { pcg, randAt, noise2, noiseGrad2, curl2 } = await import('../core/noise.js');
+const { pcg, randAt, noise2, noiseGrad2, curl2, noise3 } = await import('../core/noise.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -53,6 +54,17 @@ const div = (x, y) => (curl2(x + h, y, 4)[0] - curl2(x - h, y, 4)[0]) / (2 * h)
                     + (curl2(x, y + h, 4)[1] - curl2(x, y - h, 4)[1]) / (2 * h);
 ok('its curl does not gather: divergence near zero', [0.3, 1.7, 4.2].every(p => Math.abs(div(p, p * 0.6)) < 0.01), true);
 ok('and it moves', Math.hypot(...curl2(0.4, 0.8, 4)) > 0.01, true);
+
+// ── In 3D ────────────────────────────────────────────────────────────────────
+
+const samples = Array.from({ length: 4000 }, (_, i) => [((i * 0.7548) % 17) - 8, ((i * 0.5698) % 13) - 6, ((i * 0.3127) % 11) - 5]);
+const n3 = samples.map(([x, y, z]) => noise3(x, y, z, 9));
+ok('noise3: the same seed, the same field', samples.slice(0, 50).map(([x, y, z]) => noise3(x, y, z, 9)), n3.slice(0, 50));
+ok('…another seed another', samples.slice(0, 50).some(([x, y, z], i) => noise3(x, y, z, 10) !== n3[i]), true);
+ok('…zero on its lattice', [[0, 0, 0], [3, -2, 5], [-7, 1, -1]].map(([x, y, z]) => noise3(x, y, z, 9)), [0, 0, 0]);
+ok('…within −1.1 and 1.1, and reaching past ±0.5', [n3.every(v => Math.abs(v) <= 1.1), n3.some(v => v > 0.5) && n3.some(v => v < -0.5)], [true, true]);
+ok('…smooth: a step of a thousandth moves it little', samples.slice(0, 200).every(([x, y, z]) => Math.abs(noise3(x + 1e-3, y, z, 9) - noise3(x, y, z, 9)) < 0.01), true);
+ok('…and it changes along z, as 2D noise cannot', samples.slice(0, 200).filter(([x, y, z]) => Math.abs(noise3(x, y, z + 0.5, 9) - noise3(x, y, z, 9)) > 0.05).length > 100, true);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

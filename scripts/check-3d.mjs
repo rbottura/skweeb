@@ -216,6 +216,13 @@ await page.click(`[...${modCards(0)}[1].querySelectorAll('.pp-head .pp-btn')].fi
 await wait(400);
 c.ok('the twist switched off: the box as it was, subdivided changes nothing seen', (await changed()).share < 0.001, JSON.stringify(await changed()));
 await page.click(`[...${modCards(0)}[1].querySelectorAll('.pp-head .pp-btn')].find(b => b.textContent === 'off')`);
+await wait(400);
+await keep();
+await page.typeInto(modMenu, 'displace');
+await wait(400);
+const bumps = await changed();
+c.ok('displaced after: the twisted box made rough, by its seed', !!bumps.box && bumps.share > 0.001 && bumps.box[2] < 0.42, JSON.stringify(bumps));
+await c.shot('1g-displaced');
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
 await wait(300);
 
@@ -267,7 +274,7 @@ c.ok('saved: a model, made by 3d, titled by its shapes', !!o && o.type === 'mode
 c.ok('its recipe: the view and its shapes, no vertices', !!o && o.recipe.shapes.length === 3 && o.recipe.shapes[1].id === 'sphere'
   && o.recipe.shapes[1].params.radius === 0.6 && typeof o.recipe.yaw === 'number' && !JSON.stringify(o.recipe).includes('position'));
 const kept = o && o.recipe.shapes[0].modifiers;
-c.ok('…the box\'s stack kept with it, in order', !!kept && kept.map(m => `${m.id}:${m.on}`).join() === 'subdivide:true,twist:true'
+c.ok('…the box\'s stack kept with it, in order', !!kept && kept.map(m => `${m.id}:${m.on}`).join() === 'subdivide:true,twist:true,displace:true'
   && kept[1].params.angle === 90, JSON.stringify(kept));
 c.ok('its render: the format, 1080 square', !!o && o.render.w === 1080 && o.render.h === 1080 && o.render.file === 'render.png',
   o && `${o.render.w} × ${o.render.h} ${o.render.file}`);
@@ -307,7 +314,7 @@ if (o) {
   c.ok('?open= brings its shapes back, folded, the box\'s stack too', (await page.eval(`${cards}.length`)) === 3
     && (await page.eval(`Number(${cardRow(1, 'radius')}?.querySelector('.pp-num')?.value)`)) === 0.6
     && Math.abs((await value('distance')) - o.recipe.distance) < 1e-9 && (await choice()) === 'folded folded folded'
-    && (await page.eval(`${modCards(0)}.map(m => m.querySelector('.pp-title').textContent).join()`)) === 'subdivide,twist', await page.eval(say));
+    && (await page.eval(`${modCards(0)}.map(m => m.querySelector('.pp-title').textContent).join()`)) === 'subdivide,twist,displace', await page.eval(say));
 
   await c.go(c.base + '/apps/compose/?place=' + o.id);
   await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });

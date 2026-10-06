@@ -12,28 +12,35 @@
  *
  * A modifier works in the shape's own space, before its place: a twist about
  * y turns round the shape's own up, wherever it stands and however turned.
+ * The six, in the roadmap's order:
  *
  * - **subdivide** cuts every triangle into four, flat, n times. Nothing
- *   changes to the eye; what bends after it has vertices to bend. It stops
- *   short of a level that would pass MAX_TRIANGLES, the same way every time.
- * - **twist** turns the shape about one of its axes by an angle growing along
- *   it: the whole angle from one end of the shape to the other, the middle
- *   where it was.
+ *   changes to the eye; what bends after it has vertices to bend.
+ * - **displace** pushes the surface along its normals by seeded noise in
+ *   3D, its own seed among its params (rule 2) — bumps, a rock, a blob.
+ * - **twist** turns the shape about one of its axes, the whole angle from
+ *   one end to the other, the middle where it was.
+ * - **bend** lays one of its axes on an arc of a whole angle, end to end.
+ * - **mirror** adds its reflection across a plane a distance from its middle.
+ * - **array** makes it a row of itself, the row's middle where it was.
  *
- * A deformation moves the vertices and carries their normals with them, by
- * the cofactor of its Jacobian measured in small steps (`deform`): a hard
- * edge stays hard, a seam smooth, and nothing is made again.
+ * The three that move vertices are deform.js's; the two that copy are
+ * repeat.js's. Nothing a stack makes passes MAX_TRIANGLES: subdivide stops a
+ * level short, a row is cut shorter, a mirror left out — the same way every
+ * time, since a recipe draws the same wherever it opens.
  *
  * Only three.core.js: Node runs it (tests/3d-modifiers.mjs).
  */
 
-import { BufferGeometry, Float32BufferAttribute, Box3 } from '../../core/libs/three/three.core.js';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/libs/three/three.core.js';
+import { deform, twist, bend, displace } from './deform.js';
+import { mirror, array } from './repeat.js';
 
-/** No more triangles than this from subdividing: past it, a browser stops answering. */
+/** No more triangles than this from a stack: past it, a browser stops answering. */
 export const MAX_TRIANGLES = 1 << 19;
 
-const RAD = Math.PI / 180;
 const axis = (d, label) => ({ type: 'enum', options: ['x', 'y', 'z'], default: d, display: 'chips', label });
+const along = label => ({ type: 'range', min: -50, max: 50, step: 'any', default: 0, label });
 
 /** The catalogue, in the order the add menu offers it. */
 export const MODIFIERS = {
@@ -42,6 +49,16 @@ export const MODIFIERS = {
     params: { levels: { type: 'int', min: 1, max: 4, default: 2, label: 'levels, each a triangle into four' } },
     apply: (geometry, v) => subdivide(geometry, v.levels),
   },
+  displace: {
+    id: 'displace', label: 'displace',
+    params: {
+      amount: { type: 'range', min: -2, max: 2, step: 'any', default: 0.12, label: 'how far, at the noise\'s height' },
+      size: { type: 'range', min: 0.02, max: 20, step: 'any', log: true, default: 0.4, label: 'bumps, how wide' },
+      detail: { type: 'int', min: 1, max: 5, default: 2, label: 'detail, each half the last' },
+      seed: { type: 'int', min: 0, max: 99999, default: 1, label: 'seed' },
+    },
+    apply: (geometry, v) => displace(geometry, v),
+  },
   twist: {
     id: 'twist', label: 'twist',
     params: {
@@ -49,6 +66,32 @@ export const MODIFIERS = {
       angle: { type: 'range', min: -1080, max: 1080, step: 1, default: 90, label: 'degrees, end to end' },
     },
     apply: (geometry, v) => deform(geometry, twist(geometry, v.axis, v.angle)),
+  },
+  bend: {
+    id: 'bend', label: 'bend',
+    params: {
+      axis: axis('x', 'along its'),
+      angle: { type: 'range', min: -360, max: 360, step: 1, default: 90, label: 'degrees, end to end — up; along y, to +x' },
+    },
+    apply: (geometry, v) => deform(geometry, bend(geometry, v.axis, v.angle)),
+  },
+  mirror: {
+    id: 'mirror', label: 'mirror',
+    params: {
+      axis: axis('x', 'across its'),
+      offset: { ...along('the mirror, this far from its middle'), min: -20, max: 20, default: 0.6 },
+    },
+    apply: (geometry, v) => mirror(geometry, v.axis, v.offset, MAX_TRIANGLES),
+  },
+  array: {
+    id: 'array', label: 'array',
+    params: {
+      count: { type: 'int', min: 2, max: 64, default: 3, label: 'how many' },
+      dx: { ...along('each this far along x'), default: 1.5 },
+      dy: along('…along y'),
+      dz: along('…along z'),
+    },
+    apply: (geometry, v) => array(geometry, v.count, [v.dx, v.dy, v.dz], MAX_TRIANGLES),
   },
 };
 
@@ -117,64 +160,4 @@ function quarter(geometry) {
   }
   out.setIndex(tris);
   return out;
-}
-
-// ── Deformations ─────────────────────────────────────────────────────────────
-
-/** Where a geometry reaches along x, y and z: [low, high] each. */
-function extent(geometry) {
-  const box = new Box3().setFromBufferAttribute(geometry.attributes.position);
-  return { x: [box.min.x, box.max.x], y: [box.min.y, box.max.y], z: [box.min.z, box.max.z] };
-}
-
-/** A point turned about an axis through the origin, by `a` radians, the right hand's way. */
-function turned(along, a, x, y, z) {
-  const c = Math.cos(a), s = Math.sin(a);
-  if (along === 'x') return [x, y * c - z * s, y * s + z * c];
-  if (along === 'y') return [x * c + z * s, y, -x * s + z * c];
-  return [x * c - y * s, x * s + y * c, z];
-}
-
-/** The twist of a geometry: `degrees` from one end to the other along `along`, its middle still. */
-export function twist(geometry, along, degrees) {
-  const [lo, hi] = extent(geometry)[along];
-  const span = hi - lo || 1, mid = (lo + hi) / 2;
-  const k = (degrees * RAD) / span;
-  const at = { x: 0, y: 1, z: 2 }[along];
-  return (x, y, z) => turned(along, ([x, y, z][at] - mid) * k, x, y, z);
-}
-
-/**
- * Every vertex moved by `f` — (x, y, z) to [x, y, z] — and its normal carried
- * as a surface's is: by the cofactor of f's Jacobian there, its columns
- * measured by steps a ten-thousandth of the geometry's size. In place.
- */
-export function deform(geometry, f) {
-  const pos = geometry.attributes.position, nor = geometry.attributes.normal;
-  const e = extent(geometry);
-  const h = 1e-4 * Math.max(e.x[1] - e.x[0], e.y[1] - e.y[0], e.z[1] - e.z[0], 1e-6);
-  const column = (x, y, z, d) => {
-    const p = f(x + (d === 0 ? h : 0), y + (d === 1 ? h : 0), z + (d === 2 ? h : 0));
-    const m = f(x - (d === 0 ? h : 0), y - (d === 1 ? h : 0), z - (d === 2 ? h : 0));
-    return [p[0] - m[0], p[1] - m[1], p[2] - m[2]];
-  };
-  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-    if (nor) {
-      const jx = column(x, y, z, 0), jy = column(x, y, z, 1), jz = column(x, y, z, 2);
-      const cx = cross(jy, jz), cy = cross(jz, jx), cz = cross(jx, jy);
-      const nx = nor.getX(i), ny = nor.getY(i), nz = nor.getZ(i);
-      const v = [0, 1, 2].map(c => nx * cx[c] + ny * cy[c] + nz * cz[c]);
-      const l = Math.hypot(v[0], v[1], v[2]);
-      if (l > 0) nor.setXYZ(i, v[0] / l, v[1] / l, v[2] / l);
-    }
-    const [X, Y, Z] = f(x, y, z);
-    pos.setXYZ(i, X, Y, Z);
-  }
-  pos.needsUpdate = true;
-  if (nor) nor.needsUpdate = true;
-  geometry.boundingBox = null;          // made again when asked: picking reads the sphere
-  geometry.boundingSphere = null;
-  return geometry;
 }
