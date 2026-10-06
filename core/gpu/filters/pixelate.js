@@ -10,6 +10,7 @@ export default {
   label: 'pixelate',
   source: 'skweeb',
   licence: 'MIT',
+  reads: v => v.size,                 // the block's pixel it shows, a block away at most
   params: {
     size: { type: 'int', min: 1, max: 256, default: 8, label: 'block' },
   },

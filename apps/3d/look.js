@@ -179,7 +179,7 @@ export const shadowsOf = recipe => !!(recipe && recipe.shadows === true);
  * under the model — a ground made only of the shadows on it, so a model on a
  * ground of `none` still has its shadow, a sprite's. The sun keeps its way;
  * only where it stands moves, to the model's middle. The shadow map is
- * `side` texels a side — 2048, and a print's larger (print.js), its edges
+ * `side` texels a side — 2048, and larger drawn above its own size (frames.js `sharper`), its edges
  * sharper where a texel would cover many of its pixels.
  */
 export function shade(model, on, side = 2048) {

@@ -26,7 +26,8 @@ import { walkGrid, walkable, spawnOf } from './walk.js';
 import { Palette }      from './palette.js';
 import { Editing }      from './editing.js';
 import { wirePointer }  from './pointer.js';
-import { saveMap, downloadPicture } from './save.js';
+import { saveMap, downloadPicture, recipeOf, APP } from './save.js';
+import { PrintPanel } from '../../core/PrintPanel.js';
 import { requested }    from '../../core/reopen.js';
 import { loadSprites }  from '../../core/sprites.js';
 import { ParamPanel }   from '../../core/ParamPanel.js';
@@ -179,6 +180,12 @@ function buildExport(panel) {
     return `downloaded ${out.width} × ${out.height} px`;
   }));
   exp.body.append(actions);
+  // A print of the room, drawn again at the sheet's size a window at a time, fitted on it (core/PrintPanel.js).
+  new PrintPanel({ mount: exp.body, app: 'map', leave, say: t => bar.say(t), tick: () => clock.tick,
+    object: () => {
+      const { width, height } = mapSize(map.values);
+      return { type: 'still', origin: APP, recipe: recipeOf(map, cells, walls, editing.things.blocks()), render: { w: width, h: height } };
+    } });
 }
 
 /** The map the player opens: the one last saved or opened, none before. */

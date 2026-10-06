@@ -3,6 +3,7 @@
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
+@import '../../core/param-panel.css';
 @import './ui/hud.css';
 @import './ui/bsel.css';
 @import './ui/timeline.css';
@@ -308,4 +309,20 @@ body {
 @media (max-width: 600px) {
   .gp-nopad { gap: 8px; font-size: 10px; flex-wrap: wrap; }
   .gp-nopad__text { white-space: normal; }
+}
+
+/* ── The print (ui/PrintBox.js): core's print panel in a HUD panel ──────────── */
+.gp-print {
+  top: 24px;
+  left: 24px;
+  width: min(360px, 92vw);
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+}
+
+.gp-print__say {
+  min-height: 1.45em;
+  margin-top: 10px;
+  font: 400 12px/1.45 var(--nb-mono, monospace);
+  color: var(--hud-subtle);
 }

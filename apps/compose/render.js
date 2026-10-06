@@ -70,6 +70,8 @@ export async function openComposition(recipe, { depth = 0, draft = false, scale 
       && (p.handle.scale || 1) < asked(p.block) - 1e-9).map(p => p.title),
     /** The page at one of its ticks, onto a context the page's size times `scale`. */
     draw(ctx, tick, scale) { paintPage(ctx, page, list.layers(tick, page.fps), scale); },
+    /** One window of it, through a windowed context (core/windowed.js): each object asked for its part there. */
+    drawWindow(ctx, tick, scale, win) { paintPage(ctx, page, list.windowLayers(tick, page.fps, scale, win, page), scale); },
     dispose() { for (const p of [...list.items]) list.remove(p); },
   };
 }

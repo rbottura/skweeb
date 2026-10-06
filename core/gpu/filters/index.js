@@ -19,6 +19,12 @@
  *   reach?      (values) → how far past its picture it can spread, in the
  *               source's pixels: a blur's taps, an outline's width. Absent is
  *               0 — a colour change reaches nowhere (runner.js, *Past the edge*)
+ *   reads?      (values) → how far from a pixel it reads, in the source's
+ *               pixels, where that is further than it spreads: a block's
+ *               colour, an erosion's radius — Infinity for a zoom blur, which
+ *               reads toward the middle from anywhere. Absent is its reach. A
+ *               window of a chain's picture needs this much round it
+ *               (core/gpu/window.js)
  *   passes      in order: { code, uniforms?(values, info) → number[] }, the
  *               code a WGSL `fx` (core/gpu/wgsl.js), the numbers its `Params`
  *               fields in the order declared

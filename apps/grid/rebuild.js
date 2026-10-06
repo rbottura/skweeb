@@ -43,6 +43,7 @@ import { roleOf }        from '../../core/uses.js';
 import { fromVault }     from './source.js';
 import { resolveFrame }  from '../../core/frame.js';
 import { drawFrameInto } from '../../core/rebuild.js';
+import { windowed, canvasFor } from '../../core/windowed.js';
 
 /**
  * Whether `/apps/grid/?open=<id>` brings this object back to work on
@@ -144,6 +145,17 @@ export async function openObject(object, opts = {}) {
     return current.canvas;
   };
 
+  // A print's windows (core/print.js): frame i's cells once, then each window drawn through them.
+  let tile = null, cellsOf = null;
+  const W = Math.max(1, Math.round(frame.width * zoom * k)), H = Math.max(1, Math.round(frame.height * zoom * k));
+  const windowOf = (i, win) => {
+    if (!cellsOf || cellsOf.i !== i) cellsOf = { i, ...growth.at(i, recipe, frame, tiles.length) };
+    tile = canvasFor(tile, win);
+    const ctx = windowed(tile.getContext('2d'), { x: win.x, y: win.y, width: W, height: H });
+    renderGrid({ recipe, tiles, frame, indices: cellsOf.indices, scales: cellsOf.scales, draft, scale: zoom * k, ctx });
+    return tile;
+  };
+
   return {
     length: parent.frames,
     fps:    parent.fps || (object.render && object.render.fps) || 30,
@@ -170,6 +182,9 @@ export async function openObject(object, opts = {}) {
     scale: k,
 
     frame(i) { return render(i); },
+
+    /** A window of frame i at this scale, for a print past any canvas. */
+    window(i, win) { return windowOf(i, win); },
 
     drawInto(ctx, i, w, h) {
       drawFrameInto(ctx, this.frame(i), this.bounds, this, w, h);

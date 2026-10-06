@@ -15,6 +15,7 @@ import { ParamPanel }          from './ui/ParamPanel.js';
 import { GalleryPanel }        from './ui/GalleryPanel.js';
 import { TimelinePanel }       from './ui/TimelinePanel.js';
 import { VaultPanel }          from '../../core/VaultPanel.js';
+import { PrintBox }            from './ui/PrintBox.js';
 import { Vault }               from '../../core/vault.js';
 import { offers }              from '../../core/uses.js';
 import { createSketch,
@@ -24,8 +25,9 @@ import { createSketch,
 
 import { BrushSelector }       from './ui/BrushSelector.js';
 
-/** Built during boot; the keyboard handler at the bottom reaches it. */
+/** Built during boot; the keyboard handler at the bottom reaches them. */
 let vaultPanel = null;
+let printBox = null;
 
 // Saving also writes a vault object, with the recipe attached.
 import './core/vaultBridge.js';
@@ -83,6 +85,9 @@ async function boot() {
     // The read side of the vault. Unlike the GALLERY panel, which shows this
     // browser's scratchpad, this one shows what is on disk with its recipes.
     vaultPanel = new VaultPanel();
+
+    // The drawing at a sheet's size: drawn again from its marks, a tile at a time.
+    printBox = new PrintBox();
 
     // 6. Restore previously saved images from IndexedDB
     await ImageStore.ready;
@@ -199,6 +204,7 @@ document.addEventListener('keydown', e => {
     document.dispatchEvent(new CustomEvent('ui:toggleTimeline'));
   }
   if (e.key === 'v' || e.key === 'V') vaultPanel?.toggle();
+  if (e.key === 'e' || e.key === 'E') printBox?.toggle();
 });
 
 function _buildStatusBar() {
@@ -216,7 +222,7 @@ function _buildStatusBar() {
     <span class="sb-spacer"></span>
     <a class="sb-item sb-link" href="gallery/" target="_blank" rel="noopener">Gallery &#8599;</a>
     <span class="sb-sep">·</span>
-    <span class="sb-item sb-dim">V = vault &nbsp;·&nbsp; T = timeline &nbsp;·&nbsp; H = help</span>
+    <span class="sb-item sb-dim">V = vault &nbsp;·&nbsp; T = timeline &nbsp;·&nbsp; E = print &nbsp;·&nbsp; H = help</span>
   `;
   document.body.appendChild(bar);
 
@@ -257,6 +263,7 @@ function _toggleHelp() {
           <tr><td>Select</td><td>—</td><td>Open Gallery</td></tr>
           <tr><td>—</td><td>T</td><td>Open / close Timeline</td></tr>
           <tr><td>—</td><td>V</td><td>Open / close the Vault</td></tr>
+          <tr><td>—</td><td>E</td><td>Print the drawing — a sheet's size, a dpi</td></tr>
         </tbody>
       </table>
       <h3>In the Timeline</h3>

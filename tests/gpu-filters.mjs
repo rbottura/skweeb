@@ -11,7 +11,7 @@
 
 import fs from 'node:fs';
 const { FILTERS } = await import('../core/gpu/filters/index.js');
-const { passesOf, reachOf, marginOf, drawsAtRandom } = await import('../core/gpu/runner.js');
+const { passesOf, reachOf, readsOf, marginOf, drawsAtRandom } = await import('../core/gpu/runner.js');
 const { moduleFor } = await import('../core/gpu/wgsl.js');
 const { PARAM_TYPES, valuesFor } = await import('../core/params.js');
 
@@ -119,6 +119,20 @@ ok('a CRT reaches as far as its colours split; a glitch as far as it tears, and 
 
 ok('a motion blur reaches half its length; zoom blur, dither and gradient map nowhere',
   [reachOf([{ id: 'motionblur', params: { length: 8 } }]), reachOf([{ id: 'zoomblur' }, { id: 'dither' }, { id: 'gradientmap' }])], [4, 0]);
+// ── How far a chain reads round a pixel: what a window of its picture needs ──
+ok('a colour change reads nowhere; a blur as far as it reaches', [readsOf([{ id: 'brightness' }]), readsOf([{ id: 'blur', params: { radius: 4 } }])], [0, 12]);
+ok('a pixelation reads its block; dots and a halftone their cell', [readsOf([{ id: 'pixelate', params: { size: 8 } }]),
+  readsOf([{ id: 'dots', params: { cell: 6 } }]), readsOf([{ id: 'halftone', params: { cell: 10 } }])], [8, 6, 10]);
+ok('erode reads its radius, though it spreads nowhere; unsharp its blur', [readsOf([{ id: 'erode', params: { radius: 2 } }]),
+  readsOf([{ id: 'unsharp', params: { radius: 2 } }])], [2, 6]);
+ok('a chain reads its filters added up, one switched off not at all',
+  readsOf([{ id: 'pixelate', params: { size: 8 } }, { id: 'sharpen' }, { id: 'blur', params: { radius: 1 }, on: false }]), 9);
+ok('a zoom blur reads from anywhere: no window holds it', readsOf([{ id: 'blur' }, { id: 'zoomblur' }]) === Infinity, true);
+ok('every filter reads at least as far as it reaches', all.filter(([, f]) => {
+  const v = valuesFor(f.params || {}, {});
+  return (f.reads ? f.reads(v) : 0) < (f.reach && f.reads ? f.reach(v) : 0);
+}).map(([id]) => id), []);
+
 ok('a motion blur steps no more than a pixel, both ways',
   FILTERS.motionblur.passes[0].uniforms({ length: 10, angle: 90 }, { scale: 1 }).map(v => Math.round(v * 1000) / 1000), [0, 1, 5]);
 ok('a gradient of three fills three of sixteen stops',

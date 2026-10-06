@@ -46,6 +46,8 @@ export async function openObject(object, opts = {}) {
     missing: frames.missing,
     scale: frames.scale,
     frame(i) { return frames.frame(i); },
+    /** A window of frame i at this scale, for a print past any canvas (core/print.js). */
+    window(i, win) { return frames.window(i, win); },
     drawInto(ctx, i, w, h) { drawFrameInto(ctx, frames.frame(i), box, this, w, h); },
     dispose() { frames.dispose(); },
   };

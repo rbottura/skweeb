@@ -16,6 +16,7 @@ export default {
   licence: 'MIT',
   copyright: 'Copyright (c) 2024 Darragh Nolan',
   notice: 'LICENSE-p5.FIP.txt',
+  reads: () => 1,                     // the four pixels round it
   params: {
     amount: { type: 'range', min: 0, max: 4, step: 0.05, default: 0.5, label: 'amount' },
   },

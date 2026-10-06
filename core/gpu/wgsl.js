@@ -11,7 +11,16 @@
  *
  *   frame      size and texel (1/size) in pixels; scale, the print scale a
  *              size param is multiplied by; time in seconds; seed (rule 2);
- *              tick, the frame of a loop — 0 for a still
+ *              tick, the frame of a loop — 0 for a still. And where the run
+ *              lies in a bigger picture: `origin`, the corner of what is being
+ *              drawn, and `here`, its own size — a print's window (core/
+ *              print.js). Then `size`, `uv` and every pixel a pass is handed
+ *              are the whole picture's, and `tex`, `texAt` and `origAt` read
+ *              the window's texture where that point of the picture lies — so
+ *              a pass that places anything by position, a vignette's middle,
+ *              a halftone's grid, grain's seed, draws its part of the whole
+ *              and never a whole of its own. Drawn whole, origin is 0 and
+ *              here is size: nothing changes.
  *   src        the previous pass's output
  *   orig       this filter's own input — the picture before its first pass,
  *              what a later pass lays back over (an outline, a shadow)
@@ -41,6 +50,8 @@ struct Frame {
   time: f32,
   seed: u32,
   tick: u32,
+  origin: vec2f,
+  here: vec2f,
 }
 
 @group(0) @binding(0) var<uniform> frame: Frame;
@@ -62,22 +73,23 @@ struct Vary {
   return v;
 }
 
+// A pass is handed the whole picture's uv: its pixel's middle, moved by the window's corner.
 @fragment fn fs_main(v: Vary) -> @location(0) vec4f {
-  return fx(v.uv);
+  return fx((v.pos.xy + frame.origin) * frame.texel);
 }
 
 fn tex(uv: vec2f) -> vec4f {
-  return textureSampleLevel(src, samp, uv, 0.0);
+  return textureSampleLevel(src, samp, (uv * frame.size - frame.origin) / frame.here, 0.0);
 }
 
 fn texAt(px: vec2i) -> vec4f {
   let last = vec2i(textureDimensions(src)) - vec2i(1);
-  return textureLoad(src, clamp(px, vec2i(0), last), 0);
+  return textureLoad(src, clamp(px - vec2i(frame.origin), vec2i(0), last), 0);
 }
 
 fn origAt(px: vec2i) -> vec4f {
   let last = vec2i(textureDimensions(orig)) - vec2i(1);
-  return textureLoad(orig, clamp(px, vec2i(0), last), 0);
+  return textureLoad(orig, clamp(px - vec2i(frame.origin), vec2i(0), last), 0);
 }
 
 fn oklab(rgb: vec3f) -> vec3f {

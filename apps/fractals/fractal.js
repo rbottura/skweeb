@@ -77,6 +77,18 @@ export function planeAt(v, w, h, px, py) {
 }
 
 /**
+ * The values that draw one window of a `w` × `h` picture as a picture of its
+ * own (core/print.js): the same plane units a pixel — the zoom as much more
+ * as the window is shorter — its centre the window's middle on the plane.
+ *
+ * @param {{x, y, w, h}} win   in the whole picture's pixels
+ */
+export function windowOf(v, w, h, win) {
+  const [cx, cy] = planeAt(v, w, h, win.x + win.w / 2, win.y + win.h / 2);
+  return { ...v, cx, cy, zoom: v.zoom * h / win.h };
+}
+
+/**
  * The view zoomed by `factor` about a pixel, which keeps the point under it:
  * the pointer's place on the plane is the same before and after.
  *

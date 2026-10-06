@@ -207,7 +207,7 @@ export function mapFrame({ recipe, source, frame, steps }) {
  * @returns {{canvas, cols, rows, cell, indices, drawn, scale, frame}}
  */
 export function renderGrid({ recipe, source, tiles, frame, scale, indices: mapped, scales = null,
-                             draft = false, into = null }) {
+                             draft = false, into = null, ctx: through = null }) {
   const zoom = Math.max(0.01, scale || recipe.scale || 1);
 
   // Counted in frame pixels, so the answer does not move with `scale`.
@@ -217,12 +217,13 @@ export function renderGrid({ recipe, source, tiles, frame, scale, indices: mappe
   const outW = Math.max(1, Math.round(frame.width * zoom));
   const outH = Math.max(1, Math.round(frame.height * zoom));
 
-  const canvas = into || surface(outW, outH);
-  if (canvas.width !== outW) canvas.width = outW;
-  if (canvas.height !== outH) canvas.height = outH;
-  const ctx = canvas.getContext('2d');
+  // Or through a context given — a window of the picture (core/windowed.js), its canvas left as it is.
+  const canvas = through ? (through.canvas.real || through.canvas) : into || surface(outW, outH);
+  if (!through && canvas.width !== outW) canvas.width = outW;
+  if (!through && canvas.height !== outH) canvas.height = outH;
+  const ctx = through || canvas.getContext('2d');
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  if (into) ctx.clearRect(0, 0, outW, outH);      // a reused canvas holds the last frame
+  if (into || through) ctx.clearRect(0, 0, outW, outH);      // a reused canvas holds the last frame
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 

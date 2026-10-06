@@ -25,6 +25,7 @@ function button(label, onClick, { primary = false, wide = false, title = '' } = 
 /**
  * @param {object} panel   the rig's ParamPanel
  * @param {object} does    { rest, preset(name), still, save, download }
+ * @returns {object}       the Export drawer, for main.js to put the print in
  */
 export function buildDrawers(panel, does) {
   const pose = panel.addDrawer({ id: 'pose', title: 'Pose', before: 'motion' });
@@ -43,4 +44,5 @@ export function buildDrawers(panel, does) {
   actions.append(button('Save to the vault  [S]', does.save, { primary: true, wide: true }),
                  button('Download the frame (PNG)', does.download, { wide: true }));
   exp.body.append(actions);
+  return exp;
 }

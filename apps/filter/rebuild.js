@@ -21,6 +21,7 @@
 
 import { fromVault }    from './source.js';
 import { createRunner, reachOf } from '../../core/gpu/runner.js';
+import { chainWindow, windows } from '../../core/gpu/window.js';
 import { drawFrameInto, openPicture } from '../../core/rebuild.js';
 
 /**
@@ -77,6 +78,7 @@ export async function openObject(object, opts = {}) {
   const room = grow ? reachOf(chain) : 0;
   const width = parent.width + 2 * room;
   const height = parent.height + 2 * room;
+  const kept = {};                     // a print's windows' canvases (core/gpu/window.js)
 
   return {
     length: parent.frames,
@@ -96,6 +98,17 @@ export async function openObject(object, opts = {}) {
     frame(i) {
       return runner.run(parent.frame(i), chain, { scale: k, time: i / fps, grow, seed, tick: i });
     },
+
+    /** A window of frame i at this scale, for a print past any canvas: the chain over its part (core/gpu/window.js). */
+    ...(windows(chain) ? {
+      window(i, win) {
+        return chainWindow({
+          runner, chain, grow, scale: k, time: i / fps, seed, tick: i,
+          width: parent.pixels.w, height: parent.pixels.h,
+          piece: part => parent.window(i, part),
+        }, win, kept);
+      },
+    } : {}),
 
     drawInto(ctx, i, w, h) {
       drawFrameInto(ctx, this.frame(i), this.bounds, this, w, h);

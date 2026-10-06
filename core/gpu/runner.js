@@ -74,6 +74,25 @@ export function reachOf(chain) {
   return Math.ceil(sum);
 }
 
+/**
+ * How far from a pixel a chain reads, in the source's pixels at scale 1: its
+ * filters' reads added up, each its reach where it says no more — so a window
+ * of its picture knows how much of its source to take round it
+ * (core/gpu/window.js). Infinity where one reads from anywhere: a zoom blur.
+ */
+export function readsOf(chain) {
+  let sum = 0;
+  for (const entry of chain || []) {
+    if (!entry || entry.on === false) continue;
+    const filter = FILTERS[entry.id];
+    if (!filter) continue;
+    const values = valuesFor(filter.params || {}, entry.params);
+    const far = filter.reads ? filter.reads(values) : filter.reach ? filter.reach(values) : 0;
+    sum += Math.max(0, Number.isNaN(far) ? 0 : far);
+  }
+  return sum;
+}
+
 /** Whether a chain draws at random — then what it made has a seed to keep (rule 2). */
 export function drawsAtRandom(chain) {
   return (chain || []).some(e => e && e.on !== false && FILTERS[e.id] && FILTERS[e.id].random);
@@ -125,7 +144,7 @@ class Runner {
       magFilter: 'linear', minFilter: 'linear',
       addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge',
     });
-    this.frameBuffer = device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    this.frameBuffer = device.createBuffer({ size: 48, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
     this.paramBuffers = [];      // one per pass of a run: a run's writes all land before it
     this.pipelines = new Map();  // target format + module → pipeline
 
@@ -195,7 +214,9 @@ class Runner {
    *
    * @param {CanvasImageSource} source   a canvas, an OffscreenCanvas, an ImageBitmap, an image
    * @param {object[]} [chain]
-   * @param {{scale?: number, time?: number, seed?: number, tick?: number, grow?: boolean}} [opts]
+   * @param {{scale?: number, time?: number, seed?: number, tick?: number, grow?: boolean, window?: {x: number, y: number, width: number, height: number}}} [opts]
+   *        `window`: the source is a part of a bigger picture — its corner there, the whole's size — and is
+   *        drawn as that part of it, its room its own (wgsl.js, frame); `grow` then adds none
    *   scale multiplies every size a filter has — its sizes are in the
    *   source's pixels at 1, so a picture drawn again at 2x keeps its look;
    *   grow gives the chain room past the edge, and the picture comes back
@@ -203,10 +224,11 @@ class Runner {
    *   filter drawing at random draws from — the recipe's seed, the loop's frame
    * @returns {ImageBitmap} the runner's, good until its next run()
    */
-  run(source, chain = [], { scale = 1, time = 0, seed = 0, tick = 0, grow = false } = {}) {
+  run(source, chain = [], { scale = 1, time = 0, seed = 0, tick = 0, grow = false, window = null } = {}) {
     const sw = source.naturalWidth || source.width;
     const sh = source.naturalHeight || source.height;
-    const m = grow ? marginOf(chain, scale) : 0;
+    // A window of a bigger picture brings its own room, its corner where it lies in it (wgsl.js, frame).
+    const m = grow && !window ? marginOf(chain, scale) : 0;
     const w = sw + 2 * m;
     const h = sh + 2 * m;
     this.fit(w, h);
@@ -223,9 +245,11 @@ class Runner {
     device.queue.copyExternalImageToTexture({ source },
       { texture: this.src, origin: [m, m], premultipliedAlpha: true }, [sw, sh]);
 
-    const frame = new ArrayBuffer(32);
-    new Float32Array(frame, 0, 6).set([w, h, 1 / w, 1 / h, scale, time]);
+    const whole = window ? [window.width, window.height] : [w, h];
+    const frame = new ArrayBuffer(48);
+    new Float32Array(frame, 0, 6).set([whole[0], whole[1], 1 / whole[0], 1 / whole[1], scale, time]);
     new Uint32Array(frame, 24, 2).set([seed >>> 0, tick >>> 0]);
+    new Float32Array(frame, 32, 4).set([window ? window.x : 0, window ? window.y : 0, w, h]);
     device.queue.writeBuffer(this.frameBuffer, 0, frame);
 
     const encoder = device.createCommandEncoder({ label: 'chain' });

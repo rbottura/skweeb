@@ -31,25 +31,45 @@ function wrap(frames, { id, title, scale = 1 }) {
   const box = frames.bounds || { x: 0, y: 0, w: frames.width, h: frames.height };
   const w = Math.max(1, Math.round(box.w));
   const h = Math.max(1, Math.round(box.h));
-  const canvas = surface(Math.max(1, Math.round(box.w * scale)), Math.max(1, Math.round(box.h * scale)));
-  const ctx = canvas.getContext('2d');
+  const W = Math.max(1, Math.round(box.w * scale)), H = Math.max(1, Math.round(box.h * scale));
+  let canvas = null, ctx = null, part = null;      // the whole frame's when asked for; a print's windows'
+  const exact = typeof frames.window === 'function' && Math.abs((frames.scale || 1) - scale) < 1e-9;
   return {
     id,
     title,
     width: w,
     height: h,
     density: scale,                    // pixels per pixel of what frame() hands out
+    pixels: { w: W, h: H },            // frame()'s canvas: its box at the density, rounded once
     scale: frames.scale || 1,          // the detail the source really drew
     frames: frames.length,
     fps: frames.fps || 0,
     loop: frames.loop !== false,
     missing: frames.missing || [],
     frame(i) {
+      if (!canvas) {
+        canvas = surface(W, H);
+        ctx = canvas.getContext('2d');
+      }
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.translate(-box.x * scale, -box.y * scale);
       frames.drawInto(ctx, i, frames.width * scale, frames.height * scale);
       return canvas;
+    },
+    /**
+     * A window of frame i, `{ x, y, w, h }` in its pixels (core/print.js): its source's own window
+     * where its app draws one at this scale; else the frame drawn through the window — a picture.
+     */
+    window(i, win) {
+      if (exact) return frames.window(i, win);            // the same pixels: (0, 0) the corner of its bounds
+      if (!part || part.width < win.w || part.height < win.h) part = surface(Math.max(win.w, part ? part.width : 0), Math.max(win.h, part ? part.height : 0));
+      const c = part.getContext('2d');
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      c.clearRect(0, 0, part.width, part.height);
+      c.translate(-box.x * scale - win.x, -box.y * scale - win.y);
+      frames.drawInto(c, i, frames.width * scale, frames.height * scale);
+      return part;
     },
     dispose() { frames.dispose(); },
   };

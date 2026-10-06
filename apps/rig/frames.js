@@ -19,6 +19,7 @@
 import { Vault }        from '../../core/vault.js';
 import { familySprite } from '../../core/sprites.js';
 import { surface }      from '../../core/surface.js';
+import { windowed, canvasFor } from '../../core/windowed.js';
 import { alphaBounds, union } from '../../core/trim.js';
 import { drawingOf, hasMarks, spritesOf } from './drawing.js';
 import { posed }        from './bones.js';
@@ -136,8 +137,8 @@ export async function openRig(recipe, { scale = 1 } = {}) {
   const drawn = await openPathFrom(recipe.rig, centreOf(drawingOf(opened.recipe, { jump: recipe.rig.jump })));
   const f = framesOf(recipe, opened, drawn);
   const at = recipe.box || f.ink();
-  const canvas = surface(Math.max(1, Math.round(at.w * scale)), Math.max(1, Math.round(at.h * scale)));
-  const ctx = canvas.getContext('2d');
+  const W = Math.max(1, Math.round(at.w * scale)), H = Math.max(1, Math.round(at.h * scale));
+  let canvas = null, tile = null;            // the whole frame's when asked for; a print's windows' (core/print.js)
   return {
     length: f.length,
     fps: f.fps,
@@ -147,8 +148,16 @@ export async function openRig(recipe, { scale = 1 } = {}) {
     scale,
     missing: opened.missing ? [`${opened.missing} sprites of ${opened.object.title || recipe.rig.drawing}`] : [],
     frame(i) {
-      drawRig(ctx, f.drawing, f.placesAt(Math.round(i) % f.length), opened.images, scale, at);
+      canvas = canvas || surface(W, H);
+      drawRig(canvas.getContext('2d'), f.drawing, f.placesAt(Math.round(i) % f.length), opened.images, scale, at);
       return canvas;
+    },
+    /** A window of frame i at this scale: drawn as a frame is, every transform moved by its corner. */
+    window(i, win) {
+      tile = canvasFor(tile, win);
+      const ctx = windowed(tile.getContext('2d'), { x: win.x, y: win.y, width: W, height: H });
+      drawRig(ctx, f.drawing, f.placesAt(Math.round(i) % f.length), opened.images, scale, at);
+      return tile;
     },
     dispose() {},
   };

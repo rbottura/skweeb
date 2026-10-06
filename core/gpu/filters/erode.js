@@ -15,6 +15,7 @@ export default {
   licence: 'MIT',
   copyright: 'Copyright (c) 2024 Darragh Nolan',
   notice: 'LICENSE-p5.FIP.txt',
+  reads: v => v.radius,               // shrinks, so it spreads nowhere, but reads its radius
   params: {
     radius: { type: 'range', min: 0.5, max: 16, step: 0.5, default: 1, label: 'radius' },
   },

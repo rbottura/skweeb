@@ -22,6 +22,7 @@ import { drawMap } from './draw.js';
 import { Things }  from './things.js';
 import { loadSprites } from '../../core/sprites.js';
 import { surface }     from '../../core/surface.js';
+import { windowed, canvasFor } from '../../core/windowed.js';
 
 /**
  * What a map is drawn from, opened: its tileset's images and its things —
@@ -63,8 +64,8 @@ export async function openMap(recipe, { scale = 1, draft = false } = {}) {
   const { tiles, things, missing } = await openParts(recipe, { scale, draft });
 
   const { width, height } = mapSize(m);
-  const canvas = surface(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));
-  const ctx = canvas.getContext('2d');
+  const W = Math.max(1, Math.round(width * scale)), H = Math.max(1, Math.round(height * scale));
+  let canvas = null, tile = null;      // the whole frame's when asked for; a print's windows' (core/print.js)
   const length = things.length(m.fps);
 
   return {
@@ -76,8 +77,16 @@ export async function openMap(recipe, { scale = 1, draft = false } = {}) {
     scale,
     missing,
     frame(i) {
-      drawMap(ctx, m, scale, { cells: recipe.cells || [], tiles, layers: things.layers(i, m) });
+      canvas = canvas || surface(W, H);
+      drawMap(canvas.getContext('2d'), m, scale, { cells: recipe.cells || [], tiles, layers: things.layers(i, m) });
       return canvas;
+    },
+    /** A window of frame i at this scale: drawn as a frame is, every transform moved by its corner. */
+    window(i, win) {
+      tile = canvasFor(tile, win);
+      const ctx = windowed(tile.getContext('2d'), { x: win.x, y: win.y, width: W, height: H });
+      drawMap(ctx, m, scale, { cells: recipe.cells || [], tiles, layers: things.layers(i, m) });
+      return tile;
     },
     dispose() {
       for (const p of things.items) if (p.handle && p.handle.dispose) p.handle.dispose();

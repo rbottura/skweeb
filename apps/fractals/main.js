@@ -22,7 +22,8 @@ import { fractalParams, GROUPS } from './params.js';
 import { drawCopies, SHAPES } from './copies.js';
 import { loopOf, valuesAt, rangeAround, moverOf } from './motion.js';
 import { chainOf } from './frames.js';
-import { saveFractal, downloadFrames, downloadSheet } from './save.js';
+import { saveFractal, downloadFrames, downloadSheet, APP } from './save.js';
+import { PrintPanel }     from '../../core/PrintPanel.js';
 import { wirePointer }    from './pointer.js';
 import { loadSprites }    from '../../core/sprites.js';
 import { mipFor }         from '../../core/stamps.js';
@@ -240,6 +241,15 @@ function buildExport(panel) {
     return `downloaded ${out.name} — ${out.frames} frames of ${out.box.w} × ${out.box.h} on a ${out.width} × ${out.height} sheet, and its JSON`;
   }));
   exp.body.append(actions);
+  // A print of the frame on screen, drawn again at the sheet's size a window at a time (core/PrintPanel.js).
+  const printing = new PrintPanel({
+    mount: exp.body, app: 'fractals', leave, say: text => bar.say(text), format: params.get('format'), tick: () => clock.tick,
+    object: () => {
+      const v = params.values, own = v.scale || 1;
+      return { type: 'still', origin: APP, recipe: v, render: { w: Math.round(v.width * own), h: Math.round(v.height * own) } };
+    },
+  });
+  params.on(key => { if (key === 'format') printing.follow(params.get('format')); });
 }
 
 /** One way out: the player held still, nothing else started, what happened said. */

@@ -4,11 +4,12 @@
  * Covers apps/fractals/fractal.js without a GPU: the plane under a pixel,
  * a zoom that keeps the pointer's point, the escape count the GPU's picture
  * is held to, and the numbers the pass is handed. The promises — the
- * picture is a function of its params, the same at any size in pixels, and
- * a wheel turned over a point leaves that point under the pointer.
+ * picture is a function of its params, the same at any size in pixels, a
+ * window of it drawn alone its own part of the plane pixel for pixel, and a
+ * wheel turned over a point leaves that point under the pointer.
  */
 
-const { planeAt, zoomAbout, escape, FRACTAL, FRACTAL_PARAMS, SPAN, MAX_STOPS } = await import('../apps/fractals/fractal.js');
+const { planeAt, zoomAbout, windowOf, escape, FRACTAL, FRACTAL_PARAMS, SPAN, MAX_STOPS } = await import('../apps/fractals/fractal.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -27,6 +28,9 @@ ok('its height spans SPAN at zoom 1, the imaginary axis up',
    [planeAt(v, 800, 600, 400, 0)[1], planeAt(v, 800, 600, 400, 600)[1]], [SPAN / 2, -SPAN / 2]);
 ok('a wider picture shows more of the plane across, not less up', planeAt(v, 1200, 600, 0, 300)[0], -0.5 - SPAN);
 ok('the same point at any size in pixels', planeAt(v, 400, 300, 100, 75).every((x, i) => near(x, planeAt(v, 1600, 1200, 400, 300)[i])), true);
+const win = { x: 1300, y: 250, w: 512, h: 300 }, part = windowOf(v, 14173, 20787, win);
+ok('a window drawn alone: each of its pixels the whole picture\'s point there', [[0, 0], [511, 299], [100, 37]]
+  .every(([px, py]) => planeAt(part, win.w, win.h, px, py).every((x, i) => near(x, planeAt(v, 14173, 20787, win.x + px, win.y + py)[i]))), true);
 ok('zoom 10 shows a tenth', planeAt({ ...v, zoom: 10 }, 800, 600, 400, 0)[1], SPAN / 20);
 
 const z = zoomAbout(v, 800, 600, 620, 130, 3);

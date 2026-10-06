@@ -37,6 +37,7 @@ import { ChosenBone } from './chosen.js';
 import { buildDrawers } from './drawers.js';
 import { openDrawing, framesOf, openPathFrom, centreOf } from './frames.js';
 import { ways }         from './leaving.js';
+import { PrintPanel }   from '../../core/PrintPanel.js';
 import { requested }    from '../../core/reopen.js';
 import { ParamPanel }   from '../../core/ParamPanel.js';
 import { VaultPanel }   from '../../core/VaultPanel.js';
@@ -78,7 +79,8 @@ function boot() {
   const out = ways({ bar, clock, args: () => (drawing ? { params, opened, bones, turns, waves, drawn,
                                                           title: opened.object.title || params.get('drawing'), tick: clock.tick } : null) });
   save = out.save;
-  buildDrawers(panel, { rest: toRest, preset: applyPreset, still: toStill, save, download: out.download });
+  const exp = buildDrawers(panel, { rest: toRest, preset: applyPreset, still: toStill, save, download: out.download });
+  new PrintPanel({ mount: exp.body, app: 'rig', object: () => out.envelope(), leave: out.leave, say: text => bar.say(text), tick: () => clock.tick });
   chosenPanel = new ChosenBone({ mount: document.getElementById('bone-side'), onWave });
 
   params.on(key => {

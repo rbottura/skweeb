@@ -310,6 +310,10 @@ if (saved) {
   c.ok('the vault replays it: the frame on screen is its render', replay.length === 60 && replay.off < 0.002 && replay.mean < 0.5
     && !replay.missing.length, JSON.stringify(replay).slice(0, 160));
   c.ok('at scale 2, drawn again at twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.big[2], JSON.stringify(replay.big));
+  // A print past any canvas (core/print.js): the map in tiles, each its own part of the room.
+  const printed = await c.printMatch(mid, { scale: 2, tick });
+  c.ok(`a print in ${printed.tiles} tiles is the map drawn whole: its tiles, things and torch, no seam`,
+    printed.enlarged === 1 && printed.off < 0.002 && printed.mean < 0.3, JSON.stringify(printed));
 
   await c.go(c.base + '/apps/map/?open=' + mid);
   await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });

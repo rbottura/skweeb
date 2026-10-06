@@ -19,6 +19,7 @@ export default {
   licence: 'MIT',
   copyright: 'Copyright (c) 2024 Darragh Nolan',
   notice: 'LICENSE-p5.FIP.txt',
+  reads: v => 3 * v.radius,           // the blur it takes away from the picture
   params: {
     radius: { type: 'range', min: 0.5, max: 32, step: 0.5, default: 2, label: 'radius' },
     amount: { type: 'range', min: 0, max: 5, step: 0.05, default: 1, label: 'amount' },

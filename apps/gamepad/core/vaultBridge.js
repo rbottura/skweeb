@@ -27,21 +27,24 @@ import { ImageStore }       from './imageStore.js';
 import * as StillFrame      from './stillFrame.js';
 import { SequenceRecorder } from '../../../core/stage/recorder.js';
 
-const APP = { app: 'gamepad', version: '1.0.0' };
+export const APP = { app: 'gamepad', version: '1.0.0' };
 
-/** Everything needed to draw this again, and nothing that is not. */
-function recipeNow(sketch, entry) {
+/**
+ * Everything needed to draw this again, and nothing that is not: the canvas
+ * as it is, framed by `frame` — the last save's, or a print's of the canvas
+ * now (ui/PrintBox.js).
+ */
+export function recipeNow(sketch, frame = StillFrame.lastFrame()) {
   if (!sketch.canvasIsReproducible()) return null;
 
   const family = BrushRegistry.familyMetaByIndex(sketch.familyIndex);
   const shot   = SequenceRecorder.snapshot();
-  const frame  = StillFrame.lastFrame();
 
   return {
     /**
      * The surface the marks were drawn on — NOT the size of the render, which
-     * since the still learned to crop is a window onto it. `entry.width` is
-     * the cropped size, so it is no longer a usable fallback here.
+     * since the still learned to crop is a window onto it. A save's
+     * `entry.width` is the cropped size, so it is no longer a usable fallback.
      */
     canvas: {
       w: shot.w,
@@ -76,7 +79,7 @@ document.addEventListener('imagestore:saved', async e => {
     const sketch = await import('../sketch/gamepadSketch.js');
     const thumb  = await thumbFromBlob(entry.blob);
 
-    const recipe = recipeNow(sketch, entry);
+    const recipe = recipeNow(sketch);
     const object = await Vault.save({
       type:  'still',
       title: entry.label || 'Draw',

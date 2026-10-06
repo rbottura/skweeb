@@ -19,6 +19,7 @@ import { prepare, particlesAt } from './model.js';
 import { toModel, framesOf }    from './params.js';
 import { drawParticles, pictureSize } from './draw.js';
 import { surface }              from '../../core/surface.js';
+import { windowed, canvasFor }  from '../../core/windowed.js';
 
 /**
  * @param {object} recipe            `{ emit, picture, tick? }`
@@ -36,8 +37,8 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
   const size = pictureSize(picture);
   const own = picture.scale || 1;
   const px = own * scale;
-  const canvas = surface(size.width * px, size.height * px);
-  const ctx = canvas.getContext('2d');
+  const W = Math.max(1, Math.round(size.width * px)), H = Math.max(1, Math.round(size.height * px));
+  let canvas = null, tile = null;      // the whole frame's when asked for; a print's windows' (core/print.js)
   const still = Number.isInteger(recipe.tick);
 
   return {
@@ -50,8 +51,18 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
 
     frame(i) {
       const tick = still ? recipe.tick : i;
-      drawParticles(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites);
+      canvas = canvas || surface(W, H);
+      drawParticles(canvas.getContext('2d'), particlesAt(model, tick / picture.fps), picture, px, sprites);
       return canvas;
+    },
+
+    /** A window of frame i at this scale: drawn as a frame is, every transform moved by its corner. */
+    window(i, win) {
+      const tick = still ? recipe.tick : i;
+      tile = canvasFor(tile, win);
+      const ctx = windowed(tile.getContext('2d'), { x: win.x, y: win.y, width: W, height: H });
+      drawParticles(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites);
+      return tile;
     },
   };
 }

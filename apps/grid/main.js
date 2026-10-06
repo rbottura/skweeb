@@ -22,7 +22,8 @@ import { manifest, ramp, materialTiles } from './materials.js';
 import { Maker }                   from './maker.js';
 import { Growth }                  from './growth.js';
 import { fromFile, fromVault }     from './source.js';
-import { saveStill, saveSequence } from './save.js';
+import { saveStill, saveSequence, APP } from './save.js';
+import { PrintPanel }              from '../../core/PrintPanel.js';
 import { ParamPanel }              from '../../core/ParamPanel.js';
 import { VaultPanel }              from '../../core/VaultPanel.js';
 import { Transport }               from '../../core/Transport.js';
@@ -32,7 +33,7 @@ import { Vault }                   from '../../core/vault.js';
 import { resolveFrame, applyFrameEdit } from '../../core/frame.js';
 import { requested }               from '../../core/reopen.js';
 
-let params, panel, bar, transport;
+let params, panel, bar, transport, printing;
 let tiles = [];                    // the loaded ramp, light to dark
 let tilesName = '';                // what they are called, for a save's title
 let previewTiles = null;           // the maker's tray, while it is open
@@ -152,6 +153,13 @@ function buildDrawers() {
   buttons.frames = button('Save + download the frames', () => save({ keepFrames: true }));
   actions.append(buttons.save, buttons.frames);
   exp.body.append(actions);
+  // A print, drawn again at the sheet's size a window at a time — of a source in the vault only: a recipe names it.
+  printing = new PrintPanel({ mount: exp.body, app: 'grid', leave, say: t => bar.say(t), format: params.get('format'), tick: () => clock.tick,
+    object: () => {
+      if (!source || !source.id) return null;
+      const v = params.values, f = resolveFrame(v, source.content, source), z = Math.max(0.01, v.scale || 1);
+      return { type: 'still', origin: APP, recipe: v, render: { w: Math.max(1, Math.round(f.width * z)), h: Math.max(1, Math.round(f.height * z)) } };
+    } });
 
   showLoopControls();
 }
@@ -180,6 +188,7 @@ async function onParamChange(key, value) {
   if (key === 'source') await loadSource(value);
 
   applyFrameEdit(params, key, source && source.content);
+  if (key === 'format' && printing) printing.follow(params.get('format'));
   draw();
 }
 
@@ -335,6 +344,15 @@ async function save({ keepFrames = false } = {}) {
     busy = false;
     refreshVaultState();
   }
+}
+
+/** One way out for a print: the player held still, nothing else started, what happened said. */
+async function leave(action) {
+  if (busy) return;
+  clock.pause();
+  busy = true;
+  try { bar.announce(await action()); } catch (err) { console.error('[grid] print failed:', err); bar.announce('failed: ' + err.message); }
+  finally { busy = false; }
 }
 
 // ── Keys and drops ───────────────────────────────────────────────────────────

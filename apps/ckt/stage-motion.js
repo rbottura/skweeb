@@ -17,12 +17,13 @@ import { centre, loopFrames } from './motion.js';
 import { framing, renderFrame } from './render.js';
 import { datasetFor, glyphOf, remember } from './datasets.js';
 import { markFor }      from './sprites.js';
-import { saveStill, saveLoop } from './save.js';
+import { saveStill, saveLoop, APP } from './save.js';
 import { emitFamily }   from './family.js';
 import { Session, setOrder } from './sessions.js';
 import { Playhead }     from '../../core/playback.js';
 import { Transport }    from '../../core/Transport.js';
 import { applyFrameEdit } from '../../core/frame.js';
+import { PrintPanel }   from '../../core/PrintPanel.js';
 
 const DATA   = new Set(['dataset', 'made']);
 const ANCHOR = new Set(['dataset', 'made', 'glyph', 'width', 'height']);
@@ -105,6 +106,18 @@ export class MotionStage {
       button('Emit a brush family', () => run(() => this.emit())),
     );
     exp.body.append(actions);
+    // A print of the frame on screen, drawn again at the sheet's size a window at a time (core/PrintPanel.js).
+    // A set held only in memory has no recipe to draw again: nothing to print until it is saved.
+    this.printing = new PrintPanel({
+      mount: exp.body, app: 'ckt', leave: run, say: text => this.bar.say(text), format: this.params.get('format'),
+      tick: () => this.clock.tick,
+      object: () => {
+        if (!this.anchors.length || this.leaf) return null;
+        const recipe = { ...this.params.values, tick: Math.round(this.clock.tick) };
+        const f = framing(recipe, this.anchors, this.mark);
+        return { type: 'still', origin: APP, recipe, render: { w: f.width, h: f.height } };
+      },
+    });
   }
 
   async init() {
@@ -120,6 +133,7 @@ export class MotionStage {
     // No content passed: a derived format must never rewrite the window, which
     // is what the attractor's paths are measured against.
     applyFrameEdit(this.params, key);
+    if (key === 'format' && this.printing) this.printing.follow(this.params.get('format'));
     if (key === 'made' && this.params.get('made')) this.local = null;
     // A legacy chip means that set: whatever made set was drawn, it is not now.
     if (key === 'dataset' && this.params.get('made')) this.params.set('made', null);

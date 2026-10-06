@@ -175,6 +175,11 @@ if (pose) {
   c.ok('at scale 2, drawn again from the marks at twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.big[2],
     JSON.stringify(replay.big));
 }
+if (pose) {
+  const printed = await c.printMatch(pid, { scale: 3 });
+  c.ok('printed in tiles, the pose is the pose drawn whole: the rig draws each window', printed.enlarged === 1 && printed.off < 0.002 && printed.mean < 0.3,
+    JSON.stringify(printed));
+}
 
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }))`);
 await page.until(`${say}.includes('at rest')`, { timeout: 8000 }).catch(() => {});   // past a save's few seconds on the bar

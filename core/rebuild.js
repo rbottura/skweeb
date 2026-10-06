@@ -207,8 +207,10 @@ const replayed = object => !!object && !!object.recipe
  * whatever it is asked. Print scale is where this matters (docs/roadmap.md,
  * M4): a picture stretched to 300 dpi is its pixels, blurred. So above 1 a
  * still is drawn again by its app when the app says it can — `redraws()` in
- * its rebuild.js, as `reopens()` is — and stays its pixels otherwise. Every
- * handle says what it did: `handle.scale` is the scale its frames are
+ * its rebuild.js, as `reopens()` is — and stays its pixels otherwise. A
+ * gamepad still is core's own to draw again, from its marks (stage/still.js),
+ * and so is one that comes with no picture at all — a drawing printed straight
+ * off the gamepad's canvas. Every handle says what it did: `handle.scale` is the scale its frames are
  * really drawn at, 1 for a picture, and a caller that asked for more knows
  * what it will be stretching.
  *
@@ -218,9 +220,11 @@ const replayed = object => !!object && !!object.recipe
  */
 export async function openFrames(object, opts = {}) {
   const file = object && object.render && object.render.file;
+  const picture = !!file && PICTURE.test(file);
   if (replayed(object)) return openSequence(object, opts);
   if (opts.scale > 1 && object.recipe && await redrawn(object)) return openSequence(object, opts);
-  if (file && PICTURE.test(file)) return openPicture(object, opts.url);
+  if ((opts.scale > 1 || !picture) && isStillMarks(object)) return (await import('./stage/still.js')).openStill(object, opts);
+  if (picture) return openPicture(object, opts.url);
   return openSequence(object, opts);
 }
 
@@ -231,6 +235,10 @@ export async function openFrames(object, opts = {}) {
  */
 const isMarks = recipe => !!recipe
   && (Array.isArray(recipe.marks) || !!(recipe.sequence && Array.isArray(recipe.sequence.events)));
+
+/** A still drawn with marks: a gamepad drawing, not an image under them (stage/still.js `hasMarks`). */
+const isStillMarks = object => !!object && object.type === 'still' && !!object.recipe
+  && Array.isArray(object.recipe.marks) && object.recipe.marks.length > 0;
 
 /** Whether the app that made an object says it can draw it again at a scale. */
 async function redrawn(object) {

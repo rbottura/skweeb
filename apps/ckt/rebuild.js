@@ -18,6 +18,7 @@ import { datasetFor, glyphOf } from './datasets.js';
 import { markFor }       from './sprites.js';
 import { plotDots }      from './dots.js';
 import { surface }       from '../../core/surface.js';
+import { windowed, canvasFor } from '../../core/windowed.js';
 import { drawFrameInto } from '../../core/rebuild.js';
 
 /**
@@ -76,6 +77,7 @@ export async function openObject(object, opts = {}) {
   const length = loop ? loopFrames(recipe) : 1;
   const tickOf = i => (loop ? i : (Number.isFinite(recipe.tick) ? recipe.tick : 0));
   const size = { width: own.width, height: own.height };
+  let tile = null;                     // a print's windows' (core/print.js)
 
   return {
     length,
@@ -88,6 +90,13 @@ export async function openObject(object, opts = {}) {
     missing,
     scale: k,                          // the whole picture drawn again at the size asked
     frame(i) { return renderFrame({ recipe, anchors, mark, tick: tickOf(i), frame }).canvas; },
+    /** A window of frame i at this scale, for a print past any canvas: drawn as a frame is, moved by its corner. */
+    window(i, win) {
+      tile = canvasFor(tile, win);
+      const ctx = windowed(tile.getContext('2d'), { x: win.x, y: win.y, width: frame.width, height: frame.height });
+      renderFrame({ recipe, anchors, mark, tick: tickOf(i), frame, ctx });
+      return tile;
+    },
     drawInto(ctx, i, w, h) { drawFrameInto(ctx, this.frame(i), this.bounds, this, w, h); },
     dispose() {},
   };

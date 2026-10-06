@@ -22,7 +22,8 @@ import { drawParticles, pictureSize } from './draw.js';
 import { loadSprites }  from '../../core/sprites.js';
 import { loadPoints }   from '../../core/points.js';
 import { loadField }    from '../../core/fields.js';
-import { saveParticles, downloadFrames, downloadSheet } from './save.js';
+import { saveParticles, downloadFrames, downloadSheet, APP } from './save.js';
+import { PrintPanel }     from '../../core/PrintPanel.js';
 import { requested }      from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -215,6 +216,16 @@ function buildExport(side) {
   button('Download every frame (zip)', frames);
   button('Download a sprite sheet', sheet);
   exp.body.append(actions);
+  // A print of the frame on screen, drawn again at the sheet's size (core/PrintPanel.js).
+  const printing = new PrintPanel({
+    mount: exp.body, app: 'particles', leave, say: text => bar.say(text), format: picture.get('format'), tick: () => clock.tick,
+    object: () => {
+      const size = pictureSize(picture.values), own = picture.values.scale || 1;
+      return { type: 'still', origin: APP, recipe: { emit: emit.values, picture: picture.values, tick: clock.tick },
+               render: { w: Math.round(size.width * own), h: Math.round(size.height * own) } };
+    },
+  });
+  picture.on(key => { if (key === 'format') printing.follow(picture.get('format')); });
 }
 
 /** One way out for all three: the player held still, nothing else started meanwhile. */

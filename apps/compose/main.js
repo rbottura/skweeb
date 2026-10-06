@@ -29,7 +29,8 @@ import { endOf, showsAt } from './time.js';
 import { Editing }        from './editing.js';
 import { PlacedList }     from './list.js';
 import { wirePointer }    from './pointer.js';
-import { saveComposition } from './save.js';
+import { saveComposition, APP } from './save.js';
+import { PrintPanel }     from '../../core/PrintPanel.js';
 import { exportPng, exportFrames } from './export.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -112,10 +113,21 @@ async function boot() {
   button('png', 'Download the page (PNG)', png);
   button('frames', 'Download every frame (zip)', frames);
   exp.body.append(actions);
+  // A print of the page at the tick on screen, past any canvas: each object asked for its windows (core/PrintPanel.js).
+  const printing = new PrintPanel({
+    mount: exp.body, app: 'compose', say: t => bar.say(t), format: page.get('format'), tick: () => clock.tick,
+    leave: action => leave('print', () => action()),
+    object: () => {
+      const v = page.values, size = pageSize(v), own = v.scale || 1;
+      return { type: 'composition', origin: APP, recipe: JSON.parse(JSON.stringify({ page: v, place: placements.blocks() })),
+               render: { w: Math.max(1, Math.round(size.width * own)), h: Math.max(1, Math.round(size.height * own)) } };
+    },
+  });
 
   // The frame chain keeps the format and the box in step (core/frame.js).
   page.on(key => {
     applyFrameEdit(page, key);
+    if (key === 'format') printing.follow(page.get('format'));
     if (key === 'fps') configureClock();
     draw();
   });

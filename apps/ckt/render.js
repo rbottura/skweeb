@@ -192,21 +192,25 @@ function directAll(ctx, dots, n, mark, f) {
  * @param {number} args.tick
  * @param {object} [args.frame]  from framing(); computed if absent
  * @param {HTMLCanvasElement|OffscreenCanvas} [args.into]  draw here, reused
+ * @param {CanvasRenderingContext2D} [args.ctx]  or draw through this — a window of the frame
+ *                               (core/windowed.js), its canvas left as it is
  * @param {boolean} [args.draft] the live preview: faster, a hair coarser
  * @returns {{canvas, drawn: number, scale: number, attractor: ?{x, y}}}
  */
-export function renderFrame({ recipe, anchors, mark, tick, frame, into, draft = false }) {
+export function renderFrame({ recipe, anchors, mark, tick, frame, into, ctx: through = null, draft = false }) {
   const f = frame || framing(recipe, anchors, mark);
-  const canvas = into || surface(f.width, f.height);
-  if (canvas.width !== f.width) canvas.width = f.width;
-  if (canvas.height !== f.height) canvas.height = f.height;
+  let canvas = through ? (through.canvas.real || through.canvas) : into || surface(f.width, f.height);
+  if (!through) {
+    if (canvas.width !== f.width) canvas.width = f.width;
+    if (canvas.height !== f.height) canvas.height = f.height;
+  }
 
-  const ctx = canvas.getContext('2d');
+  const ctx = through || canvas.getContext('2d');
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;
   const ground = groundOf(recipe);
-  if (ground === 'none') ctx.clearRect(0, 0, canvas.width, canvas.height);
-  else { ctx.fillStyle = ground; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+  if (ground === 'none') ctx.clearRect(0, 0, f.width, f.height);
+  else { ctx.fillStyle = ground; ctx.fillRect(0, 0, f.width, f.height); }
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = draft ? 'low' : 'high';
 

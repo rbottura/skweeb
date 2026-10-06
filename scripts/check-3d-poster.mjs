@@ -43,15 +43,15 @@ await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Esc
 await page.typeInto(`${panelRow('bands of light — 0, smooth')}?.querySelector('.pp-num')`, '3');
 await page.typeInto(`${panelRow('outline, thousandths of its height')}?.querySelector('.pp-num')`, '4');
 await page.click(`${panelRow('shadows, on a ground of their own')}?.querySelector('input')`);
-await page.click(`document.querySelector('.pp-chip[title="120x176"]')`);
+await page.click(`${panelRow('format')}?.querySelector('.pp-chip[title="120x176"]')`);
 await page.typeInto(`${panelRow('dpi')}?.querySelector('.pp-num')`, '300');
 await wait(500);
-const note = await page.eval(`document.querySelector('.td-note')?.textContent || ''`);
+const note = await page.eval(`document.querySelector('.pp-print-note')?.textContent || ''`);
 c.ok('the sheet: 14173 × 20787 px in 77 tiles', note === `120×176 at 300 dpi: ${W} × ${H} px, drawn in 77 tiles`, note);
 
 const started = Date.now();
 await page.eval(`document.querySelector('.bar-say').textContent = ''`);
-await page.click(`document.querySelector('.td-print')`);
+await page.click(`document.querySelector('.pp-print')`);
 await page.until(`/^printed|failed/.test(${say})`, { timeout: 15 * 60000, every: 1000 });
 const said = await page.eval(say);
 const seconds = (Date.now() - started) / 1000;
@@ -60,7 +60,7 @@ c.ok('printed', said.startsWith('printed'), said);
 // Chrome writes beside the name, then renames: wait for the name, then for its size to hold.
 let file = null, last = -1;
 for (let i = 0; i < 600; i++) {
-  const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.startsWith('model_120x176_300dpi') && n.endsWith('.png'));
+  const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.startsWith('3d_120x176_300dpi') && n.endsWith('.png'));
   if (f) {
     const size = fs.statSync(path.join(DL, f)).size;
     if (size === last) { file = path.join(DL, f); break; }

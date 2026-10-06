@@ -95,7 +95,7 @@ export class Model {
   /**
    * Bring the scene into step with a recipe.
    * @param {object} recipe   the app's values and `shapes: [{ id, params, on, modifiers }]`
-   * @param {object} [print]  for a print (print.js): `detail`, the fewest segments a
+   * @param {object} [print]  drawn above its own size (frames.js `sharper`): `detail`, the fewest segments a
    *                          smooth round shape is made with (shapes.js `finer`), and
    *                          `shadowMap`, the side of the sun's shadow map
    * @returns {Model} this

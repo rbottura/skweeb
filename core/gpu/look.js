@@ -20,6 +20,7 @@
 
 import { Vault } from '../vault.js';
 import { createRunner, reachOf } from './runner.js';
+import { chainWindow, windows } from './window.js';
 import { drawFrameInto } from '../rebuild.js';
 
 /** A look by id: its chain, whether it grows, its seed, what it is called. */
@@ -50,6 +51,7 @@ export async function withLook(handle, look) {
   const box = handle.bounds || { x: 0, y: 0, w: handle.width, h: handle.height };
   const r = look.grow ? reachOf(look.chain) : 0;
   const fps = handle.fps || 30;
+  const kept = {};                       // a print's windows' canvases
 
   return {
     length: handle.length,
@@ -73,6 +75,18 @@ export async function withLook(handle, look) {
     drawInto(ctx, i, w, h) {
       drawFrameInto(ctx, this.frame(i), this.bounds, this, w, h);
     },
+
+    /** A window of frame i, for a print past any canvas: the look over its object's part (window.js). */
+    ...(typeof handle.window === 'function' && windows(look.chain) ? {
+      window(i, win) {
+        const density = handle.scale || 1;
+        return chainWindow({
+          runner, chain: look.chain, grow: look.grow, scale: density, time: i / fps, seed: look.seed ?? 1, tick: i,
+          width: Math.max(1, Math.round(box.w * density)), height: Math.max(1, Math.round(box.h * density)),
+          piece: part => handle.window(i, part),
+        }, win, kept);
+      },
+    } : {}),
 
     dispose() {
       handle.dispose();

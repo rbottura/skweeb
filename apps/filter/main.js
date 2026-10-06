@@ -15,7 +15,8 @@
 import { filterParams, GROUPS } from './params.js';
 import { Chain }                from './chain.js';
 import { fromVault, fromFile }  from './source.js';
-import { save as saveObject, saveLook } from './save.js';
+import { save as saveObject, saveLook, APP } from './save.js';
+import { PrintPanel }           from '../../core/PrintPanel.js';
 import { requested }            from '../../core/reopen.js';
 import { ParamPanel }           from '../../core/ParamPanel.js';
 import { VaultPanel }           from '../../core/VaultPanel.js';
@@ -23,7 +24,7 @@ import { Transport }            from '../../core/Transport.js';
 import { Bar }                  from '../../core/Bar.js';
 import { Playhead }             from '../../core/playback.js';
 import { Vault }                from '../../core/vault.js';
-import { createRunner }         from '../../core/gpu/runner.js';
+import { createRunner, reachOf } from '../../core/gpu/runner.js';
 import { whyNoGpu }             from '../../core/gpu/device.js';
 
 let params, panel, bar, transport, chain;
@@ -111,7 +112,24 @@ function buildDrawers() {
   buttons.look = button('Save the chain as a look', () => look());
   actions.append(buttons.save, buttons.frames, buttons.look);
   exp.body.append(actions);
+  // A print, the chain run over the source a window at a time (core/PrintPanel.js) — a source in the vault only.
+  new PrintPanel({ mount: exp.body, app: 'filter', leave, say: t => bar.say(t), tick: () => clock.tick,
+    object: () => {
+      if (!source || !source.id || !runner) return null;
+      const list = chain.recipe(), room = params.get('edges') !== 'keep' ? reachOf(list) : 0;
+      return { type: 'still', origin: APP, recipe: { ...params.values, chain: list },
+               render: { w: source.width + 2 * room, h: source.height + 2 * room } };
+    } });
   showLoopControls();
+}
+
+/** One way out for a print: the player held still, nothing else started, what happened said. */
+async function leave(action) {
+  if (busy) return;
+  clock.pause();
+  busy = true;
+  try { bar.announce(await action()); } catch (err) { console.error('[filter] print failed:', err); bar.announce('failed: ' + err.message); }
+  finally { busy = false; }
 }
 
 function button(label, onClick, primary = false) {

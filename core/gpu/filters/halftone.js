@@ -24,6 +24,7 @@ export default {
   licence: 'MIT',
   copyright: 'Copyright (c) 2024 Darragh Nolan',
   notice: 'LICENSE-p5.FIP.txt',
+  reads: v => v.cell,                 // its turned cell's middle
   params: {
     cell:  { type: 'range', min: 2, max: 64, step: 1, default: 8, label: 'cell' },
     angle: { type: 'range', min: 0, max: 90, step: 1, default: 45, label: 'angle °' },

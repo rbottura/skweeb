@@ -17,6 +17,7 @@ export default {
   licence: 'MIT',
   copyright: 'Copyright (C) 2011 by Evan Wallace',
   notice: 'LICENSE-glfx.txt',
+  reads: () => Infinity,              // toward the middle, from anywhere on the picture
   params: {
     strength: { type: 'range', min: 0, max: 1, step: 0.01, default: 0.3, label: 'strength' },
     x:        { type: 'range', min: 0, max: 1, step: 0.01, default: 0.5, label: 'centre x' },

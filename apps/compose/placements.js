@@ -15,7 +15,7 @@
 import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
 import { lookOver }   from '../../core/gpu/look.js';
-import { inkSize }    from './page.js';
+import { inkSize, placementMatrix, offPage } from './page.js';
 import { moves, tickAt, showsAt, endOf, ripple } from './time.js';
 
 /**
@@ -167,6 +167,51 @@ export class Placements {
       if (!p.handle || !showsAt(pageTick, p.block) || (only && !only(p))) continue;
       const image = this.frameOf(p, tickAt(pageTick - (p.block.at || 0), p.handle, fps));
       if (image) out.push({ image, size: p.size, transform: p.block.transform });
+    }
+    return out;
+  }
+
+  /**
+   * The layers for one window of the page at `scale` (core/print.js), in the
+   * page's pixels at that scale: each object that reaches into it asked for
+   * only its part there — `handle.window`, in its own pixels at the scale it
+   * was opened at, a pixel round it for its edges' smoothing — and drawn as
+   * that `part` of its box. An object whose app draws no window is its
+   * whole frame, as `layers` gives it.
+   */
+  windowLayers(pageTick, fps, scale, win, page) {
+    const out = [];
+    const corners = [[win.x, win.y], [win.x + win.w, win.y], [win.x, win.y + win.h], [win.x + win.w, win.y + win.h]]
+      .map(([x, y]) => [x / scale, y / scale]);
+    for (const p of this.items) {
+      if (!p.handle || !showsAt(pageTick, p.block)) continue;
+      const transform = p.block.transform;
+      const tick = Math.min(tickAt(pageTick - (p.block.at || 0), p.handle, fps), p.handle.length - 1);
+      if (typeof p.handle.window !== 'function') {
+        const image = this.frameOf(p, tick);
+        if (image) out.push({ image, size: p.size, transform });
+        continue;
+      }
+      const own = corners.map(c => offPage(placementMatrix(transform, p.size, page), c));
+      const x0 = Math.max(0, Math.min(...own.map(c => c[0]))), y0 = Math.max(0, Math.min(...own.map(c => c[1])));
+      const x1 = Math.min(p.size.width, Math.max(...own.map(c => c[0]))), y1 = Math.min(p.size.height, Math.max(...own.map(c => c[1])));
+      if (!(x1 > x0 && y1 > y0)) continue;                     // nowhere in this window
+      const k = p.handle.scale || 1;                            // its pixels per pixel of its own
+      const full = { w: Math.max(1, Math.round(p.size.width * k)), h: Math.max(1, Math.round(p.size.height * k)) };
+      // The whole frame's pixels across its box, as `layers` draws them: not k where its box is no whole number.
+      const kx = full.w / p.size.width, ky = full.h / p.size.height;
+      const part = { x: Math.max(0, Math.floor(x0 * kx) - 1), y: Math.max(0, Math.floor(y0 * ky) - 1) };
+      part.w = Math.min(full.w, Math.ceil(x1 * kx) + 1) - part.x;
+      part.h = Math.min(full.h, Math.ceil(y1 * ky) + 1) - part.y;
+      if (part.w < 1 || part.h < 1) continue;
+      let image = null;
+      try {
+        image = p.handle.window(tick, part);
+      } catch (err) {
+        console.warn('[compose] could not draw a window of', p.title, err);
+        this.say(`could not draw ${p.title}: ${err.message}`);
+      }
+      if (image) out.push({ image, size: p.size, transform, part: { ...part, at: { x: part.x / kx, y: part.y / ky, w: part.w / kx, h: part.h / ky } } });
     }
     return out;
   }

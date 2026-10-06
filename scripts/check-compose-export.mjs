@@ -10,7 +10,8 @@
  *
  *   its own size        every kind of object opened at scale 1 and 2 keeps the
  *                       size of its render; an app draws its frames at twice
- *                       the pixels, a picture says it stays its pixels
+ *                       the pixels — a gamepad still drawn again from its
+ *                       marks by core — a picture says it stays its pixels
  *   drawn again         a grid dither at 2x has far more fine detail drawn
  *                       again than stretched from 1x
  *   the PNG             A4 at scale 2 downloads as 2480 x 3508, and the bar
@@ -65,7 +66,10 @@ try {
   // dither already fine at 1x, which gains 1.4 times the detail at 2x where
   // the old ones gain 11 and 15 — drawn again all the same.
   const gridLoop = [...rows].reverse().find(r => r.type === 'sequence' && r.origin.app === 'grid');
-  const still = pick('still', 'gamepad');
+  // A gamepad still with its marks: drawn again by core since 2026-10-06 (core/stage/still.js). A
+  // shape is only its pixels — what a page stretches, and names.
+  const still = rows.find(r => r.type === 'still' && r.origin && r.origin.app === 'gamepad' && !(r.tags || []).includes('leaf'));
+  const shape = rows.find(r => r.type === 'shape' && !(r.tags || []).some(t => t.startsWith('folder:')));   // out of a folder: the picker shows it
 
   // 1. Every kind at scale 1 and 2.
   await go(BASE + '/apps/compose/');
@@ -92,7 +96,8 @@ try {
        JSON.stringify(one.own) === JSON.stringify(two.own) && one.own[0] === row.render.w && one.own[1] === row.render.h,
        `${one.own.join('×')} against ${row.render.w}×${row.render.h}`);
     ok(`${kind}: ${redrawn ? 'drawn again at twice the pixels' : 'a picture: it says it stays its pixels'}`,
-       redrawn ? Math.abs(two.frame[0] - 2 * one.frame[0]) <= 2 : two.scale === 1 && two.frame[0] === one.frame[0],
+       (kind !== 'gamepad still' || redrawn)
+       && (redrawn ? Math.abs(two.frame[0] - 2 * one.frame[0]) <= 2 : two.scale === 1 && two.frame[0] === one.frame[0]),
        `${two.frame.join('×')}, scale ${two.scale}`);
   }
 
@@ -116,15 +121,15 @@ try {
     ok('a grid dither at 2x: drawn again, not stretched', d[1] > 3 * d[0], `fine detail ${d[1]} against ${d[0]}`);
   }
 
-  // 3. The PNG: A4 at scale 2, a dither drawn again and a still stretched beside it.
-  if (gridLoop && still) {
+  // 3. The PNG: A4 at scale 2, a dither drawn again and a shape stretched beside it.
+  if (gridLoop && shape) {
     await go(BASE + '/apps/compose/?place=' + gridLoop.id);
     await page.until(`(document.querySelector('.bar-say')?.textContent || '').includes(' on the page')`, { timeout: 90000 });
     await page.click(`[...document.querySelectorAll('#place-side .pl-actions .nb-btn')].find(b => b.textContent === 'Add…')`);
     await page.until(`document.querySelectorAll('.vp--visible .vp-use').length > 0`);
     await page.click(`[...document.querySelectorAll('.vp--visible .vp-cell')].find(c =>
-      c.querySelector('.vp-name')?.textContent === ${JSON.stringify(still.title)}
-      && c.querySelector('.vp-sub')?.textContent.includes(${JSON.stringify(still.render.w + '×' + still.render.h)}))?.querySelector('.vp-use')`);
+      c.querySelector('.vp-name')?.textContent === ${JSON.stringify(shape.title)}
+      && c.querySelector('.vp-sub')?.textContent.includes(${JSON.stringify(shape.render.w + '×' + shape.render.h)}))?.querySelector('.vp-use')`);
     await page.until(`document.querySelectorAll('#place-side .pl-row').length === 2
       && (document.querySelector('.bar-say')?.textContent || '').includes(' on the page')`, { timeout: 90000 });
     await set('place-side', 'x from centre', 380);
@@ -134,7 +139,7 @@ try {
     const file = await downloaded('.png');
     ok('the page downloads as a PNG at print scale', !!file && JSON.stringify(pngSize(file)) === '[2480,3508]',
        `${file ? pngSize(file).join('×') : 'nothing'} in ${Date.now() - t0} ms`);
-    ok('and the bar names what was stretched', png.includes('stretched') && png.includes(still.title), png);
+    ok('and the bar names what was stretched', png.includes('stretched') && png.includes(shape.title), png);
     await shot('10-print-page');
 
     // 4. The frames of the moving page, at 12 fps and scale 1.

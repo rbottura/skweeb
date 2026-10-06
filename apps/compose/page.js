@@ -113,7 +113,8 @@ export function inkSize(handle) {
  *
  * A layer is a placement with its frame already in hand: `image` is the
  * object at the tick being drawn, and `size` its ink (`inkSize`), which the
- * image fills.
+ * image fills — or, with a `part`, only that part of it is in hand (a
+ * print's window, placements.js `windowLayers`), and fills only its place.
  *
  * @param {CanvasRenderingContext2D} ctx   a canvas the page's size times `scale`
  * @param {object} page                    the page's values
@@ -133,11 +134,12 @@ export function paintPage(ctx, page, layers, scale) {
     ctx.fillRect(0, 0, width, height);
   }
 
-  for (const { image, size, transform } of layers) {
+  for (const { image, size, transform, part } of layers) {
     if (!image) continue;
     ctx.save();
     ctx.transform(...placementMatrix(transform, size, page));
-    ctx.drawImage(image, 0, 0, size.width, size.height);
+    if (part) ctx.drawImage(image, 0, 0, part.w, part.h, part.at.x, part.at.y, part.at.w, part.at.h);
+    else ctx.drawImage(image, 0, 0, size.width, size.height);
     ctx.restore();
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);

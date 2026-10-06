@@ -61,6 +61,8 @@ const type = async (side, label, value) => {
   await new Promise(r => setTimeout(r, 200));
 };
 const chip = text => `[...document.querySelectorAll('#page-side .pp-chip')].find(c => c.textContent === ${JSON.stringify(text)})`;
+/** A chip in one drawer of the page's side: the print's paper has a "none" of its own. */
+const chipIn = (drawer, text) => `[...([...document.querySelectorAll('#page-side .dr')].find(d => d.querySelector('.dr-head')?.textContent.includes(${JSON.stringify(drawer)}))?.querySelectorAll('.pp-chip') || [])].find(c => c.textContent === ${JSON.stringify(text)})`;
 const settled = `(() => { const t = document.querySelector('.bar-say')?.textContent || '';
   return t.includes(' on the page') || t.includes('could not'); })()`;
 
@@ -138,7 +140,7 @@ try {
     await shot('04-bleed');
     await type('page-side', 'bleed', 0);
     await page.click(`[...document.querySelectorAll('#page-side .dr-head')].find(h => h.textContent.includes('Ground'))`);
-    await page.click(chip('none'));
+    await page.click(chipIn('Ground', 'none'));
     await new Promise(r => setTimeout(r, 200));
     s = await look();
     ok('a ground of none is transparent', s.clear > 0, s.clear + ' clear pixels');
@@ -321,6 +323,11 @@ try {
       const said = await page.eval(`document.querySelector('.bar-say').textContent`);
       ok('a page placed on a page, whole and moving', said.includes('composition') && said.includes('fps loop'), said);
       await shot('07-page-on-a-page');
+
+      // A print past any canvas (core/print.js): the page in tiles, each placement asked for its part of each.
+      const printed = await kit.printMatch(m[1], { scale: 2, tile: 512 });
+      ok(`a print in ${printed.tiles} tiles is the page drawn whole, its two loops cut by no seam`,
+         printed.enlarged === 1 && printed.off < 0.002 && printed.mean < 0.3, JSON.stringify(printed));
     }
   }
   const noise = kit.quiet();

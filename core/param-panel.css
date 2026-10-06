@@ -367,3 +367,7 @@ textarea.pp-text { resize: vertical; }
 .pp-cards-empty { margin: 2px 0 10px; color: var(--nb-muted); font-style: italic; }
 .pp-cards-empty[hidden] { display: none; }
 .pp-cards-add { width: 100%; margin-top: 12px; }
+
+/* A print (core/PrintPanel.js): what the sheet comes to, then its button. */
+.pp-print-note { margin: 8px 0 6px; font: 400 12px/1.45 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
+.pp-print { width: 100%; }
