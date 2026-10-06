@@ -161,7 +161,7 @@ function buildDrawers() {
       const v = params.values, f = resolveFrame(v, source.content, source), z = Math.max(0.01, v.scale || 1);
       return { type: 'still', origin: APP, recipe: v, render: { w: Math.max(1, Math.round(f.width * z)), h: Math.max(1, Math.round(f.height * z)) } };
     } });
-  stackDrawer(panel, { app: 'grid', layer: () => printing.object() });     // a window of the stack (core/live.js)
+  stackDrawer(panel, { app: 'grid', layer: () => printing.object(), clock });     // a window of the stack (core/live.js)
 
   showLoopControls();
 }

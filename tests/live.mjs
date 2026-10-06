@@ -10,7 +10,7 @@
  * that misses three calls is taken for gone; with no channel, nothing.
  */
 
-const { joinLive, CHANNEL } = await import('../core/live.js');
+const { joinLive, loopOf, CHANNEL } = await import('../core/live.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -79,6 +79,18 @@ await alone.changed();
 ok('with no channel: no windows, and nothing thrown', [alone.windows().length, alone.mine().layer.render.w], [0, 1080]);
 alone.leave();
 ok('the channel\'s name, for every page of the suite', CHANNEL, 'skweeb-live');
+
+// A layer that moves goes as a loop: what a save of it would write.
+const frame = { type: 'still', origin: { app: 'particles' }, recipe: { emit: { rate: 90 }, tick: 17 }, render: { w: 1080, h: 1080 } };
+const loop = loopOf(frame, { length: 60, fps: 30 });
+ok('a frame of a playing app goes as its loop: no frame chosen, its frames and rate', [loop.type, loop.recipe, loop.render],
+  ['sequence', { emit: { rate: 90 } }, { w: 1080, h: 1080, frames: 60, fps: 30, loop: true }]);
+ok('…the same from frame to frame, so it is not sent again',
+  JSON.stringify(loopOf({ ...frame, recipe: { ...frame.recipe, tick: 18 } }, { length: 60, fps: 30 })), JSON.stringify(loop));
+ok('a page that moves keeps its kind', loopOf({ type: 'composition', recipe: {}, render: { w: 4, h: 4 } }, { length: 8, fps: 12 }).type, 'composition');
+ok('a still, no clock, or why there is nothing: as they are',
+  [loopOf(frame, { length: 1, fps: 30 }) === frame, loopOf(frame, null) === frame, loopOf('choose a source', { length: 9 })],
+  [true, true, 'choose a source']);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

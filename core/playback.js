@@ -54,6 +54,7 @@ export class Playhead {
 
   get tick()    { return this._tick; }
   get length()  { return this._length; }
+  get fps()     { return this._fps; }
   get playing() { return this._playing; }
 
   /**

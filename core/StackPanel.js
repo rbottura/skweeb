@@ -8,14 +8,16 @@
  * (rule 1): its opacity and blend, its place on the page. Then what can go
  * on: this window, the other windows open, anything in the vault.
  *
- * `stackDrawer(panel, { app, layer })` is the one line an app adds: it joins
- * the windows with what is on screen — the envelope its print draws — and
- * the stack, and puts the drawer in its panel. DOM and params;
+ * `stackDrawer(panel, { app, layer, clock })` is the one line an app adds:
+ * it joins the windows with what is on screen — the envelope its print
+ * draws, a loop as a loop by its clock — and the stack, puts the drawer in
+ * its panel, and draws the stack round its canvas (core/stackView.js). DOM and params;
  * core/param-panel.css draws `.pp-stack`.
  */
 
-import { joinLive }     from './live.js';
+import { joinLive, loopOf } from './live.js';
 import { joinStack }    from './stack.js';
+import { stackView }    from './stackView.js';
 import { BLENDS, BLEND_LABELS } from './blend.js';
 import { defineParams } from './params.js';
 import { ParamPanel }   from './ParamPanel.js';
@@ -70,11 +72,14 @@ const sizeOf = thing => {
  * @param {object} opts
  * @param {string} opts.app
  * @param {() => (object|string|null)} opts.layer   what is on screen, as its print has it
- * @returns {{live: object, stack: object}}
+ * @param {?object} [opts.clock]          the app's, core/playback.js's: what plays goes as a loop
+ * @param {() => ?HTMLCanvasElement} [opts.canvas]  its own canvas: by default, its viewer's
+ * @returns {{live: object, stack: object, view: object}}
  */
-export function stackDrawer(panel, { app, layer }) {
-  const live = joinLive({ app, layer });
+export function stackDrawer(panel, { app, layer, clock = null, canvas = () => document.querySelector('.viewer-stage canvas:not(.stack-layer)') }) {
+  const live = joinLive({ app, layer: async () => loopOf(await layer(), clock) });
   const stack = joinStack(live);
+  const view = stackView({ live, stack, canvas });
   const drawer = panel.addDrawer({ id: 'stack', title: 'Stack' });
   const note = el('p', 'pp-stack-note');
   const list = el('ul', 'pp-stack');
@@ -167,5 +172,5 @@ export function stackDrawer(panel, { app, layer }) {
   live.on(paint);
   stack.on(() => { titled(); paint(); });
   paint();
-  return { live, stack };
+  return { live, stack, view };
 }

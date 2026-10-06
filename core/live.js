@@ -40,6 +40,22 @@ function said(made) {
 
 const parse = text => (text ? JSON.parse(text) : null);
 
+/**
+ * A layer that moves, as a loop: what a save of it would write — its recipe
+ * with no frame chosen, its render with its frames and rate — so that another
+ * window plays it on its own clock, and a playing window's layer stays the
+ * same from frame to frame. A still, or an app with no clock, as it is.
+ *
+ * @param {?object|string} made   what is on screen, as the app's print has it
+ * @param {?{length: number, fps: number}} clock   the app's, core/playback.js's
+ */
+export function loopOf(made, clock) {
+  if (!made || typeof made !== 'object' || !clock || !(clock.length > 1)) return made;
+  const { tick, ...recipe } = made.recipe || {};
+  return { ...made, type: made.type === 'still' ? 'sequence' : made.type, recipe,
+           render: { ...made.render, frames: clock.length, fps: clock.fps || 30, loop: true } };
+}
+
 /** An id for as long as the page is open: who a window is, never part of anything drawn. */
 function makeId() {
   if (globalThis.crypto && crypto.randomUUID) return crypto.randomUUID().slice(0, 8);
@@ -76,7 +92,7 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
 
   const post = message => { if (ch && !away) ch.postMessage({ id, app, title: title(), ...message }); };
   const tell = (kind, window) => { for (const fn of listeners) fn({ kind, window }); };
-  const copy = w => ({ id: w.id, app: w.app, title: w.title, layer: w.layer, why: w.why });
+  const copy = w => ({ id: w.id, app: w.app, title: w.title, layer: w.layer, why: w.why, text: w.text });
 
   /** Ask the app what is on screen; send it when it changed, or when `always`. */
   function look(always = false) {
@@ -161,7 +177,7 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
   if (ch) setTimeout(() => look(true).then(hello), 0);
 
   function mine() {
-    return { id, app, title: title(), layer: parse(now.layer), why: now.why };
+    return { id, app, title: title(), layer: parse(now.layer), why: now.why, text: now.layer };
   }
 
   return {

@@ -73,11 +73,24 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
   return {
     page,
 
-    /** Another tab, its page as `page` is: two windows of the suite that talk to each other. */
+    /**
+     * Another window, its page as `page` is: two windows of the suite that
+     * talk to each other. A window and not a tab: a tab behind another is
+     * hidden, and a hidden page draws no animation frames.
+     */
     async open() {
-      const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
-      attached.add(t.id);
-      return (await attach(t.webSocketDebuggerUrl)).page;
+      const { webSocketDebuggerUrl } = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+      const browser = await attach(webSocketDebuggerUrl, { page: false });
+      const { targetId } = await browser.send('Target.createTarget', { url: 'about:blank', newWindow: true });
+      browser.ws.close();
+      attached.add(targetId);
+      for (let i = 0; i < 50; i++) {
+        const tabs = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+        const t = tabs.find(x => x.id === targetId);
+        if (t && t.webSocketDebuggerUrl) return (await attach(t.webSocketDebuggerUrl)).page;
+        await sleep(100);
+      }
+      throw new Error('Chrome opened no window');
     },
 
     /**
@@ -110,7 +123,8 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
 }
 
 /** A tab's page, from its DevTools socket: run code in it, wait on it, press it, hear its console. */
-async function attach(wsUrl) {
+/** `page: false` for the browser's own socket, which has no page to enable: only `send`. */
+async function attach(wsUrl, { page: isPage = true } = {}) {
   const ws = new WebSocket(wsUrl);
   await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; });
 
@@ -144,6 +158,7 @@ async function attach(wsUrl) {
     ws.send(JSON.stringify({ id, method, params }));
   });
 
+  if (!isPage) return { send, ws };
   await send('Runtime.enable');
   await send('Log.enable');
   await send('Page.enable');

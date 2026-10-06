@@ -18,6 +18,7 @@
  * alone (rule 7). And no page said anything wrong.
  */
 
+import path from 'node:path';
 import { startCheck } from './check-kit.mjs';
 
 const c = await startCheck();
@@ -38,13 +39,22 @@ await page.until(`!!document.querySelector('.pp-stack-adds .pp-stack-btn')`, { t
 c.ok('particles alone: its drawer says so, nothing stacked yet', (await page.eval(note)) === 'Alone in this browser · nothing stacked yet'
   && JSON.stringify(await page.eval(adds)) === '["＋ this window","＋ from the vault…"]', `${await page.eval(note)} ${JSON.stringify(await page.eval(adds))}`);
 
-const filter = await c.tab(c.base + '/apps/filter/');
+// Filter on one of its own objects, so that it has a loop on screen to stack.
+const index = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
+const saved = index.filter(o => o.origin && o.origin.app === 'filter' && !(o.tags || []).some(t => t === 'trash' || t === 'leaf'))
+  .sort((a, b) => (b.created || '').localeCompare(a.created || ''))[0];
+const gpu = await page.eval(`(async () => !!(navigator.gpu && await navigator.gpu.requestAdapter()))()`);
+const shown = !!(saved && gpu);
+const filter = await c.tab(c.base + '/apps/filter/' + (shown ? '?open=' + saved.id : ''));
 await filter.until(`(${adds}).includes('＋ particles')`, { timeout: 20000 });
 await page.until(`(${adds}).includes('＋ filter')`, { timeout: 10000 });
 c.ok('a second window: each has a button to stack the other', (await filter.eval(note)).startsWith('2 windows open in this browser')
   && (await page.eval(adds)).includes('＋ filter'), `${await filter.eval(note)} · ${JSON.stringify(await page.eval(adds))}`);
-c.ok('…saying what it has on screen: particles its still, filter why it has none', /^still · \d+ × \d+$/.test(await filter.eval(`${adder('＋ particles')}.title`))
-  && (await page.eval(`${adder('＋ filter')}.title`)) === 'nothing on screen', `${await filter.eval(`${adder('＋ particles')}.title`)} · ${await page.eval(`${adder('＋ filter')}.title`)}`);
+// A playing app's layer is its loop (core/live.js `loopOf`): its frames and rate, never one frame of it.
+const wantFilter = shown ? `sequence · ${saved.render.w} × ${saved.render.h} · ${saved.render.frames} frames` : 'nothing on screen';
+await page.until(`${adder('＋ filter')}?.title === ${JSON.stringify(wantFilter)}`, { timeout: 20000 }).catch(() => {});
+c.ok('…saying what it has on screen: particles its loop, filter its own', /^sequence · \d+ × \d+ · \d+ frames$/.test(await filter.eval(`${adder('＋ particles')}.title`))
+  && (await page.eval(`${adder('＋ filter')}.title`)) === wantFilter, `${await filter.eval(`${adder('＋ particles')}.title`)} · ${await page.eval(`${adder('＋ filter')}.title`)}`);
 
 // What particles has on screen, heard in filter's tab as a change is made: a window listening there.
 await filter.eval(`(async () => {
@@ -60,6 +70,10 @@ c.ok('a rate changed in particles reaches another tab within a second', (await f
   `${before} → ${JSON.stringify(await filter.eval(`window.heard`))}`);
 
 // ── The stack they share ────────────────────────────────────────────────────
+
+// Particles with no ground: ink on nothing, as a layer over another is meant to be — an opaque
+// ground hides what is under it, in a stack as on a page.
+await page.click(`${row('ground')}?.querySelector('.pp-chip')`);
 
 await filter.click(adder('＋ particles'));
 await page.until(`document.querySelectorAll('.pp-stack-row').length === 2`, { timeout: 5000 }).catch(() => {});
@@ -89,6 +103,38 @@ c.ok('something from the vault goes on top, in both', (await filter.eval(order))
 await filter.click(`${rowOf('vault')}?.querySelector('[title="off the stack"]')`);
 await page.until(`(${order}).length === 2`, { timeout: 5000 }).catch(() => {});
 c.ok('…and off, in both', (await page.eval(order)).length === 2 && (await filter.eval(order)).length === 2, JSON.stringify(await page.eval(order)));
+
+// ── Drawn round each window's own canvas ────────────────────────────────────
+
+/** How much of a canvas is drawn on, and a sum of what is there: another when it moves. */
+const inked = sel => `(() => { const c = ${sel}; if (!c || !c.width) return null;
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let n = 0, sum = 0;
+  for (let i = 3; i < d.length; i += 4) if (d[i]) { n++; sum = (sum + d[i - 3] * 7 + d[i - 2] * 3 + d[i - 1] + i) % 1000003; }
+  return { share: +(n / (d.length / 4)).toFixed(4), sum }; })()`;
+const layerAt = z => `[...document.querySelectorAll('.viewer-stage canvas.stack-layer')].find(c => c.style.zIndex === '${z}' && !c.hidden)`;
+const ownStyle = `(() => { const s = document.getElementById('stage').style; return [s.opacity, s.mixBlendMode, document.querySelectorAll('.stack-layer').length]; })()`;
+if (shown) {
+  // The stack now, bottom first: filter, at 0.4 and multiply; particles over it.
+  await page.until(`(${inked(layerAt(0))})?.share > 0.01`, { timeout: 30000 }).catch(() => {});
+  const a = await page.eval(inked(layerAt(0)));
+  await wait(500);
+  const b = await page.eval(inked(layerAt(0)));
+  c.ok('particles shows the filter\'s loop behind it, moving by the wall clock', !!a && a.share > 0.01 && !!b && a.sum !== b.sum,
+    JSON.stringify([a, b]));
+  await filter.until(`(${inked(layerAt(2))})?.share > 0.002`, { timeout: 30000 }).catch(() => {});
+  const own = await filter.eval(ownStyle), over = await filter.eval(inked(layerAt(2)));
+  c.ok('filter\'s own canvas carries its opacity and blend, particles drawn over it', own[0] === '0.4' && own[1] === 'multiply'
+    && !!over && over.share > 0.002, `${JSON.stringify(own)} ${JSON.stringify(over)}`);
+  await c.shot('02-particles-over-filter');
+  await filter.screenshot(path.join(c.dir, 'shots', '03-filter-under-particles.png'));
+  await filter.click(`${rowOf('filter')}?.querySelector('[title="off the stack"]')`);
+  await filter.until(`!document.querySelector('.stack-layer')`, { timeout: 5000 }).catch(() => {});
+  const back = await filter.eval(ownStyle);
+  c.ok('taken off the stack, filter has its page back as it was', back.join() === ',,0', JSON.stringify(back));
+} else {
+  console.log('     no filter object, or no WebGPU, here: the stack drawn round a canvas goes unchecked');
+}
 
 // ── The gamepad, and windows that go ────────────────────────────────────────
 

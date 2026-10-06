@@ -82,7 +82,7 @@ function boot() {
   save = out.save;
   const exp = buildDrawers(panel, { rest: toRest, preset: applyPreset, still: toStill, save, download: out.download });
   new PrintPanel({ mount: exp.body, app: 'rig', object: () => out.envelope(), leave: out.leave, say: text => bar.say(text), tick: () => clock.tick });
-  stackDrawer(panel, { app: 'rig', layer: () => out.envelope() });     // a window of the stack (core/live.js)
+  stackDrawer(panel, { app: 'rig', layer: () => out.envelope(), clock });     // a window of the stack (core/live.js)
   chosenPanel = new ChosenBone({ mount: document.getElementById('bone-side'), onWave });
 
   params.on(key => {

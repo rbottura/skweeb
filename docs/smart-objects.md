@@ -116,10 +116,10 @@ screen: its **layer**, the envelope a save would write, made and never saved
 (the print's, `core/PrintPanel.js`), so with no id. Envelopes, never pixels:
 a recipe is small, and any window draws any layer with `core/rebuild.js`, as
 it draws any object. A window alone, or a browser with no channel, is the
-app as it was (rule 7). Until brick 3 a layer is the one the print draws —
-the frame on screen, a still; drawn in other windows, a loop must come as a
-loop, its recipe without a tick and its render with its frames, so that
-every window plays it on its own clock.
+app as it was (rule 7). A layer is the one the print draws, but a loop goes
+as a loop (`loopOf`): its recipe with no frame chosen, its render with its
+frames and rate — so a playing window's layer stays the same from frame to
+frame, and every window shows the loop at the wall clock's frame.
 
 **The stack** is one live composition per browser: a page and its
 placements, bottom first, as a composition's recipe is — `{ page, place }` —
@@ -134,6 +134,10 @@ block's opacity and blend — CSS's `opacity` and `mix-blend-mode`, which
 composite as canvas's `globalAlpha` and `globalCompositeOperation` do. So
 filter shows its chain over the composition it will join, as the chain is
 dragged; and compose shows the filter's layer on its page, following it.
+The checkerboard goes under all of it. Where nothing is under a layer, the
+window blends it with the checkerboard and a save with nothing — the same
+for most blends over a light board, not for screen or difference; an exact
+preview would want the layers in a group of their own.
 
 **Saved, a live block becomes a smart object.** A live block never reaches
 the vault. When what holds one is saved — the stack as a composition, a

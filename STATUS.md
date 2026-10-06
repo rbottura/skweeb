@@ -36,6 +36,15 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
     handed it; a closed window's layer leaves it. Putting a layer on from a
     window not yet stacked puts that window over it — a look tried over what
     it will join.
+  - **Brick 3, drawn round every canvas** (`core/stackView.js`,
+    `core/place.js`; `tests/place.mjs` 12, `check-live` 17): a window in
+    the stack draws, in its own frame, the layers under it on a canvas behind
+    its own and each over it on one in front, its own canvas given its
+    opacity and blend by CSS — the browser composites them as a save does.
+    A playing app's layer goes as its loop (`loopOf`), shown everywhere at
+    the wall clock's frame. Filter's loop at 0.4 and multiply under
+    particles' plume, seen from both windows; taken off the stack, a window
+    has its page back as it was. compose's placement math is core's now.
 - **M10 is 3D, and four of its six bricks work** (the author: "a simple
   thing to generate and manipulate some real basic primitives"; meshes over
   distance fields, three.js over a renderer of the suite's own —
@@ -248,6 +257,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Broken / half-done
 
+- **The stack's live view blends over the checkerboard** where nothing is
+  under a layer; a save blends over nothing — alike for most blends, not for
+  screen or difference. An app's own ground is opaque: set it to none to see
+  what is under its layer. The gamepad and the 3D app have no clock in the
+  stack: the gamepad has no drawer, the 3D app's model does not move yet.
 - **A gamepad loop prints enlarged where it is large**: p5 replays it with
   no window, so it is drawn whole as large as a canvas allows — most loops
   fit a 120×176 sheet at 300 dpi, a tall one is enlarged a little, and the
@@ -298,14 +312,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M11's brick 3: the stack drawn round every canvas** (`docs/roadmap.md`,
-M11). Written, not yet wired: `core/place.js` (compose's placement math,
-moved), `core/stackView.js` (the layers under an app's canvas on one canvas,
-each over it on its own, its own canvas given its opacity and blend by CSS,
-in its own frame), `tests/place.mjs`; wiring them is the script
-`brick3-wire` would be — `loopOf` in live.js, the Playhead's `fps`,
-compose's page.js handing on the math, `clock` from each app — then
-`check-live` proving pixels: filter's loop behind particles, moving.
+**M11's brick 4, its first half: Send to ▸ filter** (`docs/roadmap.md`,
+M11). A button in every app's Export drawer: the filter window found among
+the windows, or opened (`window.open`, `?live=<window id>`), and handed
+this window as its source — filter's source a live layer, drawn by
+core/rebuild.js and redrawn when that window changes. Checked in two windows,
+`check-kit`'s `found()` for the one opened.
 
 **Waiting on the author first: how a moving model saves.** M10's brick 5
 is motion — a turntable, then a shape swung as the rig swings a bone — and

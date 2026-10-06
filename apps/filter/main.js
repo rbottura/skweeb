@@ -122,7 +122,7 @@ function buildDrawers() {
                render: { w: source.width + 2 * room, h: source.height + 2 * room } };
     } });
   // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(panel, { app: 'filter', layer: () => printing.object() });
+  stackDrawer(panel, { app: 'filter', layer: () => printing.object(), clock });
   showLoopControls();
 }
 

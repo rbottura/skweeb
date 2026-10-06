@@ -117,6 +117,12 @@ html, body {
   background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 16px 16px;
 }
 
+/* The live stack round the canvas (core/stackView.js): its layers have no ground or edge of their own,
+   and the checkerboard goes under all of them — the canvas, its edge kept, shows what is under it. */
+.viewer-stage canvas.stack-layer { background: none; outline: none; max-width: none; max-height: none; }
+.viewer-stage.stacked { background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 16px 16px; }
+.viewer-stage.stacked canvas:not(.stack-layer) { background: none; }
+
 @media (max-width: 900px) {
   .app-main { grid-template-columns: minmax(0, 1fr); overflow: auto; }
 }

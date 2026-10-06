@@ -360,13 +360,12 @@ blend, and the three saved as a page of smart objects that follows when the
 particles are changed and saved again. The link: `every app → every app: a
 live layer`.
 
-Later, and for fun: a window as a lens — where it sits on the screen, the
-part of the stack under it, bgstaal's own trick.
+Later: a window as a lens — where it sits on the screen, the part of the
+stack under it, bgstaal's own trick.
 
-*So far:* bricks 0 to 2, 2026-10-06. The spec has its own file; every app
-joins the windows of its browser with what is on screen, and shares one
-stack with them in a Stack drawer — a window or a vault object added, moved,
-taken off, its opacity and blend set, from any window.
+*So far:* bricks 0 to 3, 2026-10-06. Every app joins its browser's windows
+and shares one stack in a Stack drawer — a window or a vault object put on,
+moved, its opacity and blend set — and draws it round its own canvas.
 
 ## Decided before, 2026-09-21 to -23
 

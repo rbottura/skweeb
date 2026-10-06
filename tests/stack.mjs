@@ -14,6 +14,7 @@
 const { joinLive } = await import('../core/live.js');
 const { joinStack } = await import('../core/stack.js');
 const { BLENDS, compositeOf, cssBlendOf } = await import('../core/blend.js');
+const { tickNow } = await import('../core/stackView.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -86,6 +87,11 @@ for (const w of [compose, grid]) { w.stack.leave(); w.live.leave(); }
 ok('seventeen blends, normal first', [BLENDS.length, BLENDS[0]], [17, 'normal']);
 ok('canvas spells normal and add its own way', [compositeOf('normal'), compositeOf('plus-lighter'), compositeOf('multiply')], ['source-over', 'lighter', 'multiply']);
 ok('anything unknown is normal, for both', [compositeOf('glow'), cssBlendOf('glow'), cssBlendOf('screen')], ['source-over', 'normal', 'screen']);
+
+// A loop at the wall clock's frame: every window the same, with no word passed.
+ok('a loop shows the wall clock\'s frame: the same in every window at one moment', [tickNow(60, 30, 10_000), tickNow(60, 30, 10_000)], [0, 0]);
+ok('…moving on at its rate, round its length', [tickNow(60, 30, 10_500), tickNow(60, 30, 12_000), tickNow(60, 30, 12_034)], [15, 0, 1]);
+ok('a still is its one frame', tickNow(1, 30, 12_345), 0);
 
 // No channel: a stack of its own, and nothing thrown.
 const alone = joinLive({ app: 'rig', layer: () => null, channel: null });

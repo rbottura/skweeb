@@ -96,7 +96,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise png fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick 3d-handles 3d-modifiers 3d-look windowed stage-still live stack; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise png fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick 3d-handles 3d-modifiers 3d-look windowed stage-still live stack place; do
   node tests/$t.mjs || break
 done
 
@@ -119,7 +119,7 @@ node scripts/check-map-play.mjs         # M8's player: what answers outlined, a 
 node scripts/check-rig.mjs              # M9's rig: bones from strokes, a pose and a loop saved, presets by part, a crawl round a path
 node scripts/check-3d-poster.mjs        # the 120×176 poster at 300 dpi, once: 77 tiles into one streamed PNG, checked whole
 node scripts/check-print.mjs            # every app's print in tiles against its object drawn whole; a gamepad still from its marks; the gamepad's print box
-node scripts/check-live.mjs             # M11: windows in tabs of one browser, each listing the others and what they have on screen
+node scripts/check-live.mjs             # M11: windows of one browser sharing a stack, each drawing it round its own canvas
 node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click and moved by handles, twisted by a stack, drawn in a style; a model saved, drawn again at scale 2, placed
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips
