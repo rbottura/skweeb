@@ -174,8 +174,9 @@ call, 2026-10-06 (`docs/decisions.md`).
 frames.js's `openModel` gives that many frames at that rate; core's
 Playhead plays them in the view, space to stop, the handles hidden while
 it plays. S saves a `sequence`, as the rig's loops are — its recipe the
-model's and its motion — replayed by rebuild.js; compose plays it. Then a
-shape's place swung on a wave, as the rig swings a bone.
+model's and its motion — replayed by rebuild.js; compose plays it — unless
+the author answers otherwise what a moving model saves as (`STATUS.md`,
+*Next*). Then a shape's place swung on a wave, as the rig swings a bone.
 
 ## Parked
 

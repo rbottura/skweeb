@@ -11,24 +11,39 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ### Newest — 2026-10-06
 
-- **M10 is 3D, and its first brick works** (the author: "a simple thing to
-  generate and manipulate some real basic primitives"; meshes over distance
-  fields, three.js over a renderer of the suite's own — `docs/decisions.md`).
-  `apps/3d/` (`apps/3d/STATUS.md`; `check-3d` 30, `tests/3d-shapes.mjs`
-  23, `3d-camera` 23, `3d-model` 26):
-  - Box, sphere, cylinder, cone, torus, plane, capsule — three's
-    geometries as a catalogue, each shape a card from its schema: form,
-    place, look. A model keeps their values, never a vertex.
-  - An orbit view by hand — a drag turns, the right button slides, the
-    wheel comes nearer, F frames — perspective or orthographic, the same
-    picture at any pixels. One sun, fixed in the world, and a fill.
-  - three r186 (`core/libs/three/`, pinned by `scripts/vendor-three.mjs`)
-    draws on core's one GPU device, WebGL2 where there is none — checked
-    with WebGPU taken away.
-  - A new type, `model`: saved, replayed to the pixel, drawn again at
-    scale 2, reopened, placed in compose; map and filter take one too.
+- **M10 is 3D, and four of its six bricks work** (the author: "a simple
+  thing to generate and manipulate some real basic primitives"; meshes over
+  distance fields, three.js over a renderer of the suite's own —
+  `docs/decisions.md`). `apps/3d/` (`apps/3d/STATUS.md`; `check-3d` 58;
+  `tests/3d-shapes.mjs` 24, `3d-camera` 23, `3d-model` 28, `3d-pick` 19,
+  `3d-handles` 18, `3d-modifiers` 41, `3d-look` 28):
+  - **The app** (brick 1): box, sphere, cylinder, cone, torus, plane,
+    capsule — three's geometries as a catalogue, each shape a card from its
+    schema; an orbit view by hand, perspective or orthographic, the same
+    picture at any pixels; one sun and a fill; three r186 on core's one GPU
+    device, WebGL2 where there is none. A new type, `model`, keeps values,
+    never a vertex: saved, replayed to the pixel, drawn again at scale 2,
+    reopened, placed in compose; map and filter take one too.
+  - **Handled in the view** (brick 2): a click picks a shape by a ray from
+    the eye — what is drawn is what is picked — its card the one open, the
+    rest folded to a line, its box dashed in the view; three's
+    TransformControls move, turn, size and stretch it by axis (`sx`, `sy`,
+    `sz`, new), writing into its card; D duplicates it, Delete takes it out.
+  - **Modifiers** (brick 3): a stack in each shape's card — subdivide,
+    displace by seeded 3D noise, twist, bend, mirror, array — in the shape's
+    own space, the normals carried by the deformation, nothing cracking,
+    capped at half a million triangles the same way every time.
+  - **A style** (brick 4): toon bands on a ramp, an outline as a share of
+    the picture, shadows on a catcher of their own — under WebGPU and
+    WebGL2, the same picture at scale 2.
 - **Core's cards** (`core/Cards.js`): filter's chain moved into core when
-  the 3D app's shapes needed the same list; filter's three checks pass on it.
+  the 3D app's shapes needed the same list; then `choose` and `fold` — one
+  card open, the rest a line each — `duplicate`, and `inner`, a list inside
+  each card. Filter does not fold, and its three checks pass on it.
+- **core/noise.js `noise3`**: gradient noise in 3D on the suite's hash, JS
+  only, for a displaced shape.
+- **`check-map` measures its replay** now, as the note under *Tests* says a
+  check must: caught in the act at worst 121, 0.03% off, it passes.
 - **The docs under the cap**: `docs/decisions.md` split — its first three
   days are `docs/decisions-2026-09-21-to-23.md`, listed at its head — and
   the roadmap's finished milestones cut to what proved them.
@@ -192,20 +207,20 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Forty-three files, no runner, no dependencies — the loop in `CLAUDE.md`
-runs all of them, and all pass (2026-10-06). Newest: `3d-shapes`, `3d-camera`
-and `3d-model` — primitives as big as their params, the view's promises,
-the scene kept in step; `rig-crawl` — a spine that
-carries, undulates and follows a path, closing; parts and presets;
-`rig-strokes`, `rig-bones` and `rig-motion` — strokes, corners, bones, the
-skin's promises, waves that close; `map-walk` — what can be walked, the spawn, a warp's arrival;
-`map-play` — what answers, a sign's picture, the latest map of a name.
+Forty-seven files, no runner, no dependencies — the loop in `CLAUDE.md`
+runs all of them, and all pass (2026-10-06). Newest: `3d-pick` — a ray's
+answer is a card's place, what is drawn is what is picked; `3d-handles` —
+three's own controls driven in Node, a drag along the x arrow moving a box
+exactly as far as the pointer went; `3d-modifiers` — counts, angles,
+normals true to the surface, no crack, the caps; `3d-look` — ramps, hulls,
+shadows; before them `3d-shapes`, `3d-camera`, `3d-model`, and the rig's
+four.
 
 Seventeen browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-3d` (30), on this
-machine's WebGPU; `check-rig` (35), `check-map-play` (16). On the laptop Chrome keeps
+throws or its console is not quiet. Newest: `check-3d` (58), on this
+machine's WebGPU and with WebGPU taken away; `check-rig` (35), `check-map-play` (16). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
 (`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
@@ -236,12 +251,10 @@ compares two pages' canvases measures, never demands the pixel.
   `docs/object-model.md` (399) — the next thing either learns needs a split
   first: the object model's `.skw` section, eighty lines and not yet built,
   is the natural one to move out.
-- **`check-map` failed once in two runs on 2026-10-06** — its replay "pixel
-  for pixel" at worst 121, passing on the rerun. It demands the pixel of a
-  read-back canvas, which the note under *Tests* says a check must measure.
-- **The 3D app's cards are tall**, and a model is a still until brick 5;
-  not yet seen on the laptop itself, where it should draw with WebGL2
-  (`apps/3d/STATUS.md`, *Known*).
+- **A 3D model is a still until brick 5**; its handles turn about the
+  world's axes only; nothing in it is undone; a shadow's darkness and map
+  are fixed; not yet seen on the laptop itself, where it should draw with
+  WebGL2 (`apps/3d/STATUS.md`, *Known*).
 - **Trashed brush sets still show in the gamepad and in ckt**; a cut-loose
   set or page keeps its old picture until saved again.
 - **`detached` is a new envelope field**, for cutting loose — written up as
@@ -262,11 +275,20 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M10's brick 2, its first half: a click picks a shape** (`apps/3d/
-STATUS.md`, *Next*). Raycast from the pointer into the model's meshes with
-the camera `cameraFor` makes; the picked shape's card marked and scrolled
-to, the others' drawers closed — the fix for tall cards. The handles come
-after, three's `TransformControls` added to `scripts/vendor-three.mjs`.
+**Waiting on the author first: how a moving model saves.** M10's brick 5
+is motion — a turntable, then a shape swung as the rig swings a bone — and
+the decisions say a model's "pictures are `still` and `sequence`, the model
+their parent" without settling which object S writes when it moves: a
+`model` whose render carries frames; a `sequence` whose recipe is the
+model's and its motion, as the rig's loops are; or both, the sequence's
+parent the model. The second fits what replays already, and is the
+default unless the author says otherwise.
+
+**Then M10's brick 5, its first: a turntable** (`apps/3d/STATUS.md`,
+*Next*). A Motion drawer — turns a loop, its length and rate — frame i seen
+from the yaw plus 360° × turns × i / length, so the loop closes to the bit;
+core's Playhead plays it, the handles hidden while it does; saved,
+replayed, played in compose.
 
 **Waiting on the author: the slug from the back and from the side**, drawn
 in the gamepad as the front was — M9's last brick, a character set by
@@ -292,7 +314,10 @@ asked for a scale above 1, could draw them the same way, and
   vertices; `model` a type, its pictures `still` and `sequence`;
   `material` still deferred; three r186 pinned in `core/libs/three/`, its
   WebGPU renderer on core's device; the app is `apps/3d/`. Distance fields
-  can come back as a family of M7. `docs/decisions.md`.
+  can come back as a family of M7. `docs/decisions.md`. Its bricks 2 to 4
+  settled more the same day: the handles are three's, driven by the app's
+  own pointer, their gizmo a scene of its own; a shape's modifiers are a
+  stack in its own entry; a style is the model's, a colour the shape's.
 - **M9 is the rig, between M8's bricks 3 and 4** (the author, 2026-10-02):
   a drawing made of marks rigged at its marks — never its pixels, which
   would stretch the scales; the mesh and Blender's heat weights wait for a
