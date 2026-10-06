@@ -89,6 +89,19 @@ export async function fromVault(id, { draft = true, scale = 1, depth } = {}) {
   return wrap(frames, { id, title: object.title || id, scale });
 }
 
+/**
+ * Another window's layer, live (following.js; core/live.js): what it has on
+ * screen, the envelope its save would write. No id until that window saves
+ * it; `layer` is kept, for filter's own layer to carry (main.js).
+ *
+ * @param {object} layer               an envelope, never saved
+ * @param {object} [opts]              as fromVault's, and its `title`
+ */
+export async function fromLayer(layer, { title = 'a window', draft = true, scale = 1, depth } = {}) {
+  const frames = await openFrames(layer, { draft, scale, depth });
+  return { ...wrap(frames, { id: null, title, scale }), layer };
+}
+
 /** A file off disk. No id: anything made from it is a leaf. */
 export async function fromFile(file) {
   const bitmap = await createImageBitmap(file);

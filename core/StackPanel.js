@@ -15,7 +15,8 @@
  * core/param-panel.css draws `.pp-stack`.
  */
 
-import { joinLive, loopOf } from './live.js';
+import { joinLive, loopOf, savedBy } from './live.js';
+import { sendButtons, takeWhenAsked } from './send.js';
 import { joinStack }    from './stack.js';
 import { stackView }    from './stackView.js';
 import { BLENDS, BLEND_LABELS } from './blend.js';
@@ -74,9 +75,12 @@ const sizeOf = thing => {
  * @param {() => (object|string|null)} opts.layer   what is on screen, as its print has it
  * @param {?object} [opts.clock]          the app's, core/playback.js's: what plays goes as a loop
  * @param {() => ?HTMLCanvasElement} [opts.canvas]  its own canvas: by default, its viewer's
+ * @param {() => *} [opts.save]          its own save: what another window asks of it before it holds this one
+ * @param {(windowId: string) => void} [opts.take]   take another window as its source (core/send.js)
  * @returns {{live: object, stack: object, view: object}}
  */
-export function stackDrawer(panel, { app, layer, clock = null, canvas = () => document.querySelector('.viewer-stage canvas:not(.stack-layer)') }) {
+export function stackDrawer(panel, { app, layer, clock = null, save = null, take = null,
+  canvas = () => document.querySelector('.viewer-stage canvas:not(.stack-layer)') }) {
   const live = joinLive({ app, layer: async () => loopOf(await layer(), clock) });
   const stack = joinStack(live);
   const view = stackView({ live, stack, canvas });
@@ -85,7 +89,12 @@ export function stackDrawer(panel, { app, layer, clock = null, canvas = () => do
   const list = el('ul', 'pp-stack');
   const rows = el('div', 'pp-stack-layer');
   const adds = el('div', 'pp-stack-adds');
-  drawer.body.append(note, list, rows, adds);
+  const said = el('p', 'pp-stack-said');
+  const sends = el('div', 'pp-stack-sends');
+  sends.append(...sendButtons(live, app, { button, say: text => { said.textContent = text; } }));
+  drawer.body.append(note, list, rows, adds, sends, said);
+  if (save) live.answer('save', () => savedBy(save));
+  if (take) takeWhenAsked(live, take);
 
   const values = defineParams(app + '-stack-layer', LAYER_PARAMS);
   new ParamPanel(values, { title: 'layer', mount: rows });

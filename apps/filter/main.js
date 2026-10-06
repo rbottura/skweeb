@@ -15,6 +15,7 @@
 import { filterParams, GROUPS } from './params.js';
 import { Chain }                from './chain.js';
 import { fromVault, fromFile }  from './source.js';
+import { followWindows }        from './following.js';
 import { save as saveObject, saveLook, APP } from './save.js';
 import { PrintPanel }           from '../../core/PrintPanel.js';
 import { stackDrawer }          from '../../core/StackPanel.js';
@@ -29,6 +30,7 @@ import { createRunner, reachOf } from '../../core/gpu/runner.js';
 import { whyNoGpu }             from '../../core/gpu/device.js';
 
 let params, panel, bar, transport, chain;
+let followed = null;     // another window followed as the source (following.js)
 let runner = null;       // core/gpu's, or null where there is no WebGPU
 let source = null;       // source.js's handle
 let failing = '';        // why the chain does not compile, until it does
@@ -116,13 +118,16 @@ function buildDrawers() {
   // A print, the chain run over the source a window at a time (core/PrintPanel.js) — a source in the vault only.
   const printing = new PrintPanel({ mount: exp.body, app: 'filter', leave, say: t => bar.say(t), tick: () => clock.tick,
     object: () => {
-      if (!source || !source.id || !runner) return null;
+      if (!source || !(source.id || source.layer) || !runner) return null;
       const list = chain.recipe(), room = params.get('edges') !== 'keep' ? reachOf(list) : 0;
-      return { type: 'still', origin: APP, recipe: { ...params.values, chain: list },
+      // A source followed live goes whole, its window's envelope: any window can draw it (core/live.js).
+      return { type: 'still', origin: APP, recipe: { ...params.values, chain: list, ...(source.id ? {} : { source: source.layer }) },
                render: { w: source.width + 2 * room, h: source.height + 2 * room } };
     } });
   // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(panel, { app: 'filter', layer: () => printing.object(), clock });
+  const stacked = stackDrawer(panel, { app: 'filter', layer: () => printing.object(), clock,
+    save: () => save(), take: id => followed && followed.take(id) });
+  followed = followWindows({ live: stacked.live, params, setSource, source: () => source, say: t => bar.say(t) });
   showLoopControls();
 }
 
@@ -145,6 +150,7 @@ function button(label, onClick, primary = false) {
 }
 
 async function onParamChange(key, value) {
+  if (key === 'source' && value && followed) followed.stop();
   if (key === 'source') await loadSource(value);
   if (key === 'edges' || key === 'seed') draw();
 }
@@ -164,10 +170,12 @@ function onChainChange() {
 
 // ── The source ───────────────────────────────────────────────────────────────
 
-function setSource(next) {
+/** A new source; one that is the same loop again — a window followed, changed — keeps the player where it was. */
+function setSource(next, { keep = false } = {}) {
+  const same = keep && source && next && source.frames === next.frames && source.fps === next.fps;
   if (source) source.dispose();
   source = next;
-  clock.configure({ length: next ? next.frames : 0, fps: next ? next.fps : 0, loop: next ? next.loop : true });
+  if (!same) clock.configure({ length: next ? next.frames : 0, fps: next ? next.fps : 0, loop: next ? next.loop : true });
   showLoopControls();
   draw();
 }
@@ -190,6 +198,7 @@ async function loadSource(id) {
 /** A file off disk: the param is cleared first, since clearing it after would drop this file. */
 async function loadFile(file) {
   if (!file) return;
+  if (followed) followed.stop();
   params.set('source', null);
   const ask = ++asked;
   const next = await fromFile(file);
@@ -218,6 +227,12 @@ async function save({ keepFrames = false } = {}) {
   if (failing) return bar.announce('the chain does not compile — ' + failing);
   const list = chain.recipe();
   if (!runner.ready(list)) return bar.announce('a filter is still compiling — try again in a moment');
+  let again = null;                // a window followed: it saves first, and is followed again after
+  try {
+    again = await followed.saveSourceFirst();
+  } catch (err) {
+    return bar.announce('save failed: ' + err.message);
+  }
 
   clock.pause();
   busy = true;
@@ -238,6 +253,7 @@ async function save({ keepFrames = false } = {}) {
     busy = false;
     refreshVaultState();
     draw();
+    if (again) followed.take(again);
   }
 }
 

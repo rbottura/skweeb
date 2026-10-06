@@ -202,7 +202,7 @@ function buildExport(panel) {
   exp.body.append(actions);
   const printing = buildPrint(exp);
   // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(panel, { app: '3d', layer: () => printing.object() });
+  stackDrawer(panel, { app: '3d', layer: () => printing.object(), save: () => save() });
 }
 
 /**

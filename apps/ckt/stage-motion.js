@@ -120,7 +120,8 @@ export class MotionStage {
       },
     });
     // A window of the stack (core/live.js): what is on screen, as its print has it.
-    this.stacked = stackDrawer(this.panel, { app: 'ckt', layer: () => this.printing.object(), clock: this.clock });
+    this.stacked = stackDrawer(this.panel, { app: 'ckt', layer: () => this.printing.object(), clock: this.clock,
+      save: () => run(() => (this.clock.length > 1 ? this.saveLoop(false) : this.saveStill())) });
   }
 
   async init() {

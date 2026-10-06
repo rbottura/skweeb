@@ -363,9 +363,9 @@ live layer`.
 Later: a window as a lens — where it sits on the screen, the part of the
 stack under it, bgstaal's own trick.
 
-*So far:* bricks 0 to 3, 2026-10-06. Every app joins its browser's windows
-and shares one stack in a Stack drawer — a window or a vault object put on,
-moved, its opacity and blend set — and draws it round its own canvas.
+*So far:* bricks 0 to 4. Every app shares one stack in a Stack drawer and
+draws it round its own canvas; *Send to ▸ filter* makes another window
+filter's live source, saved first in its own window when filter saves.
 
 ## Decided before, 2026-09-21 to -23
 

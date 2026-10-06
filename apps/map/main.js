@@ -188,7 +188,7 @@ function buildExport(panel) {
       return { type: 'still', origin: APP, recipe: recipeOf(map, cells, walls, editing.things.blocks()), render: { w: width, h: height } };
     } });
   // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(panel, { app: 'map', layer: () => printing.object(), clock });
+  stackDrawer(panel, { app: 'map', layer: () => printing.object(), clock, save: () => save() });
 }
 
 /** The map the player opens: the one last saved or opened, none before. */

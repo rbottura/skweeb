@@ -41,6 +41,35 @@ function said(made) {
 const parse = text => (text ? JSON.parse(text) : null);
 
 /**
+ * A window asked to save itself answers with the id the vault gives what it
+ * keeps next: the app saves as it always does — S, its own title, lineage
+ * and picture — and core/vault.js says on the page what came of it
+ * (`vault:saved`, or `vault:duplicate` for one it had already).
+ *
+ * @param {() => *} save     the app's own save
+ * @returns {Promise<string>} the saved object's id
+ */
+export function savedBy(save, { timeout = 90000 } = {}) {
+  return new Promise((resolve, reject) => {
+    const done = e => { stop(); resolve(e.detail && e.detail.id); };
+    const stop = () => {
+      document.removeEventListener('vault:saved', done);
+      document.removeEventListener('vault:duplicate', done);
+      clearTimeout(timer);
+    };
+    const timer = setTimeout(() => { stop(); reject(new Error('it kept nothing: no vault here, or nothing to save')); }, timeout);
+    document.addEventListener('vault:saved', done);
+    document.addEventListener('vault:duplicate', done);
+    try {
+      Promise.resolve(save()).catch(err => { stop(); reject(err); });
+    } catch (err) {
+      stop();
+      reject(err);
+    }
+  });
+}
+
+/**
  * A layer that moves, as a loop: what a save of it would write — its recipe
  * with no frame chosen, its render with its frames and rate — so that another
  * window plays it on its own clock, and a playing window's layer stays the
@@ -158,8 +187,32 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
       if (m.kind === 'hello') {
         const has = Array.isArray(m.known) && m.known.includes(id);
         post({ kind: 'here', ...(has ? {} : { layer: now.layer, why: now.why }) });
+      } else if (m.kind === 'ask' && m.to === id) {
+        reply(m);
+      } else if (m.kind === 'answer' && m.to === id) {
+        settle(m);
       }
     };
+  }
+
+  // Asked and answered: a window asks another for what it answers to — save itself, take a source.
+  const answers = new Map();     // what → fn(args, from id) → its answer
+  const waiting = new Map();     // the count of an ask → its promise's ends
+  let asks = 0;
+  function reply(m) {
+    const fn = answers.get(m.what);
+    Promise.resolve()
+      .then(() => { if (!fn) throw new Error(`the ${app} window does not ${m.what}`); return fn(m.args || {}, m.id); })
+      .then(result => post({ kind: 'answer', to: m.id, n: m.n, result: result ?? null }),
+            err => post({ kind: 'answer', to: m.id, n: m.n, error: (err && err.message) || String(err) }));
+  }
+  function settle(m) {
+    const w = waiting.get(m.n);
+    if (!w) return;
+    waiting.delete(m.n);
+    clearTimeout(w.timer);
+    if (m.error) w.reject(new Error(m.error));
+    else w.resolve(m.result);
   }
 
   const seen = () => typeof document === 'undefined' || document.visibilityState !== 'hidden';
@@ -194,6 +247,21 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
     },
     /** Say what is on screen now, rather than at the next half second. */
     changed: () => look(),
+    /**
+     * Ask window `to` for what it answers to, and hear its answer — or why
+     * not, as an error: no such answer there, or none in time.
+     */
+    ask(to, what, args = {}, { timeout = 90000 } = {}) {
+      if (!ch) return Promise.reject(new Error('no other window here to ask'));
+      const n = ++asks;
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => { waiting.delete(n); reject(new Error(`no answer to ${what} in time`)); }, timeout);
+        waiting.set(n, { resolve, reject, timer });
+        post({ kind: 'ask', to, what, args, n });
+      });
+    },
+    /** Answer what another window asks of this one: `fn(args, from)`, its answer or a promise of it. */
+    answer(what, fn) { answers.set(what, fn); },
     /** Leave the windows: a `bye`, and nothing more sent or heard. */
     leave() {
       bye();

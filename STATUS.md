@@ -9,7 +9,7 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Works right now
 
-### Newest — 2026-10-06
+### Newest — 2026-10-06 and -07
 
 - **M11 begun: the live stack and smart objects** (the author's, after a
   week of making things with the suite: "we really need the smart objects
@@ -45,35 +45,24 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
     the wall clock's frame. Filter's loop at 0.4 and multiply under
     particles' plume, seen from both windows; taken off the stack, a window
     has its page back as it was. compose's placement math is core's now.
-- **M10 is 3D, and four of its six bricks work** (the author: "a simple
-  thing to generate and manipulate some real basic primitives"; meshes over
-  distance fields, three.js over a renderer of the suite's own —
-  `docs/decisions.md`). `apps/3d/` (`apps/3d/STATUS.md`; `check-3d` 58;
-  `tests/3d-shapes.mjs` 24, `3d-camera` 23, `3d-model` 28, `3d-pick` 19,
-  `3d-handles` 18, `3d-modifiers` 41, `3d-look` 28):
-  - **The app** (brick 1): box, sphere, cylinder, cone, torus, plane,
-    capsule — three's geometries as a catalogue, each shape a card from its
-    schema; an orbit view by hand, perspective or orthographic, the same
-    picture at any pixels; one sun and a fill; three r186 on core's one GPU
-    device, WebGL2 where there is none. A new type, `model`, keeps values,
-    never a vertex: saved, replayed to the pixel, drawn again at scale 2,
-    reopened, placed in compose; map and filter take one too.
-  - **Handled in the view** (brick 2): a click picks a shape by a ray from
-    the eye — what is drawn is what is picked — its card the one open, the
-    rest folded to a line, its box dashed in the view; three's
-    TransformControls move, turn, size and stretch it by axis (`sx`, `sy`,
-    `sz`, new), writing into its card; D duplicates it, Delete takes it out.
-  - **Modifiers** (brick 3): a stack in each shape's card — subdivide,
-    displace by seeded 3D noise, twist, bend, mirror, array — in the shape's
-    own space, the normals carried by the deformation, nothing cracking,
-    capped at half a million triangles the same way every time.
-  - **A style** (brick 4): toon bands on a ramp, an outline as a share of
-    the picture, shadows on a catcher of their own — under WebGPU and
-    WebGL2, the same picture at scale 2.
-- **Core's cards** (`core/Cards.js`): filter's chain moved into core when
-  the 3D app's shapes needed the same list; then `choose` and `fold` — one
-  card open, the rest a line each — `duplicate`, and `inner`, a list inside
-  each card. Filter does not fold, and its three checks pass on it.
+  - **Brick 4, Send to ▸** (2026-10-07; `core/send.js`,
+    `apps/filter/following.js`; `tests/live.mjs` 32, `check-send` 8): in
+    any app's Stack drawer, *Send to ▸ filter* — the filter window open
+    asked to take this one, or one opened beside it — and filter's source is
+    that window, live, redrawn a moment after each change there, its
+    envelope carried whole in filter's own layer. Saved, filter asks the
+    window it follows to save itself first — its own save, title, lineage;
+    the vault's id the answer (`savedBy`) — names what it kept as its source
+    and parent, and follows it again. A window asks another for what it
+    answers to: `live.ask`, `live.answer`.
+- **M10 is 3D, and four of its six bricks work** (`apps/3d/STATUS.md`, its
+  detail; `check-3d` 58, seven unit files): primitives from a catalogue,
+  each a card; an orbit view; three r186 on core's GPU device, WebGL2 where
+  there is none; a `model` keeps values, never a vertex — saved, replayed,
+  drawn again at scale 2, placed. A click picks a shape, three's handles
+  move, turn and stretch it; a stack of modifiers per shape; a style — toon
+  bands, an outline, shadows. Core's cards (`core/Cards.js`) came out of
+  filter for it: `choose`, `fold`, `duplicate`, `inner`.
 - **A print at a sheet's size and a dpi, in every app** (the author's asks,
   2026-10-06: 120 × 176 cm at 300 dpi, "just one export" — then "to all our
   suite apps"): 14173 × 20787 px in 77 tiles of 2048, written band by band
@@ -312,12 +301,13 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M11's brick 4, its first half: Send to ▸ filter** (`docs/roadmap.md`,
-M11). A button in every app's Export drawer: the filter window found among
-the windows, or opened (`window.open`, `?live=<window id>`), and handed
-this window as its source — filter's source a live layer, drawn by
-core/rebuild.js and redrawn when that window changes. Checked in two windows,
-`check-kit`'s `found()` for the one opened.
+**M11's brick 5, its first step: the `skw` in the vault** (`docs/smart-objects.md`,
+*Smart objects*; `docs/roadmap.md`, M11). `server.js` keeps a `skw`'s
+versions — `versions/vN.json`, `object.version` bumped — the one object
+edited after the fact; `Vault.save` of a `skw` with an id appends a
+version and says `vault:updated { id, version }`; `tests/vault.mjs` holds
+it to that. Then `openFrames` of a `skw` (its app, its recipe), and a
+window followed saved as one.
 
 **Waiting on the author first: how a moving model saves.** M10's brick 5
 is motion — a turntable, then a shape swung as the rig swings a bone — and

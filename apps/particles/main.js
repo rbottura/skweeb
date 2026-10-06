@@ -228,7 +228,7 @@ function buildExport(side) {
   });
   picture.on(key => { if (key === 'format') printing.follow(picture.get('format')); });
   // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(side, { app: 'particles', layer: () => printing.object(), clock });
+  stackDrawer(side, { app: 'particles', layer: () => printing.object(), clock, save: () => save() });
 }
 
 /** One way out for all three: the player held still, nothing else started meanwhile. */

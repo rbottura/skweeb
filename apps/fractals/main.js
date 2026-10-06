@@ -252,7 +252,7 @@ function buildExport(panel) {
   });
   params.on(key => { if (key === 'format') printing.follow(params.get('format')); });
   // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(panel, { app: 'fractals', layer: () => printing.object(), clock });
+  stackDrawer(panel, { app: 'fractals', layer: () => printing.object(), clock, save: () => save() });
 }
 
 /** One way out: the player held still, nothing else started, what happened said. */

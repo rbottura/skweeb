@@ -73,6 +73,19 @@ silent.close();
 particles.leave();
 filter.leave();
 
+// Asked and answered: what one window asks another to do.
+const asker = joinLive({ app: 'particles', layer: () => null, channel: new BroadcastChannel(name), every: 40, call: 60 });
+const answerer = joinLive({ app: 'filter', layer: () => null, channel: new BroadcastChannel(name), every: 40, call: 60 });
+answerer.answer('take', ({ from }, by) => ({ took: from, by }));
+answerer.answer('save', () => Promise.reject(new Error('nothing to save')));
+await wait(120);
+ok('a window asked answers, and the asker hears it', await asker.ask(answerer.id, 'take', { from: asker.id }), { took: asker.id, by: asker.id });
+ok('asked what it does not do, it says so', await asker.ask(answerer.id, 'print').catch(err => err.message), 'the filter window does not print');
+ok('an answer that fails comes back as its reason', await asker.ask(answerer.id, 'save').catch(err => err.message), 'nothing to save');
+ok('a window nobody is answers nothing, in time', await asker.ask('nobody', 'take', {}, { timeout: 80 }).catch(err => err.message), 'no answer to take in time');
+asker.leave();
+answerer.leave();
+
 // No channel: the app as it was.
 const alone = joinLive({ app: 'rig', layer: () => picture, channel: null });
 await alone.changed();

@@ -125,7 +125,7 @@ async function boot() {
     },
   });
   // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(pagePanel, { app: 'compose', layer: () => printing.object(), clock });
+  stackDrawer(pagePanel, { app: 'compose', layer: () => printing.object(), clock, save: () => save() });
 
   // The frame chain keeps the format and the box in step (core/frame.js).
   page.on(key => {

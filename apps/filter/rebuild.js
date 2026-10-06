@@ -19,7 +19,7 @@
  * which reaches this file only through a dynamic import().
  */
 
-import { fromVault }    from './source.js';
+import { fromVault, fromLayer } from './source.js';
 import { createRunner, reachOf } from '../../core/gpu/runner.js';
 import { chainWindow, windows } from '../../core/gpu/window.js';
 import { drawFrameInto, openPicture } from '../../core/rebuild.js';
@@ -65,7 +65,10 @@ export async function openObject(object, opts = {}) {
   const k = opts.scale > 0 ? opts.scale : 1;
   let parent;
   try {
-    parent = await fromVault(recipe.source, { draft: !!opts.draft, scale: k, depth: opts.depth });
+    // A vault object by id; or, from a window followed live, its envelope carried whole (following.js).
+    parent = typeof recipe.source === 'object'
+      ? await fromLayer(recipe.source, { draft: !!opts.draft, scale: k, depth: opts.depth })
+      : await fromVault(recipe.source, { draft: !!opts.draft, scale: k, depth: opts.depth });
   } catch (err) {
     runner.dispose();
     throw err;
