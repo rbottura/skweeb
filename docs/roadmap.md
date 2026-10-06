@@ -328,16 +328,40 @@ the same day the print moved into core, for every app: each handle draws a
 window of its frame, a gamepad still is drawn again from its marks
 (`docs/core-export.md`).
 
-**Next, the author's: the smart object.** "we'll soon tackle the link
-'smart' object between apps" (2026-10-06, `docs/inbox.md`). The `skw` type —
-a sketch with its parameters bound in, placed by reference, versioned, the
-one object with `refs` — has been specified since 2026-09-21
-(`docs/object-model.md`, *Smart objects*) and never built; compose's
-placements already have its block's shape. Its first step is the spec's own
-file: the object model is at the 400-line cap, so that section moves out,
-compose's five comments that point at *Placement* follow it. Its bricks are
-laid out with the author when it starts, between M10's as M9 was between
-M8's, or after.
+**M11 — the live stack, and smart objects.** The author's, 2026-10-06,
+after a week of making things with the suite: "we really need the smart
+objects and a new 'layer' system" — to try a filter over the composition it
+will join, and to take a particle effect into filter without "a new tab,
+then paste url and load from vault". After bgstaal's multipleWindow3dScene:
+every app its own window, the windows one stack, each drawing it round its
+own layer, with opacity and blend, live within one browser
+(`docs/smart-objects.md`).
+
+The bricks: **(0)** the spec — the `skw` out of the object model, at its
+cap; the live stack and a placement's `opacity` and `blend` written in.
+**(1)** Windows that know each other: each says who it is and what it has
+on screen, its layer, over one channel; a Stack drawer in every app lists
+the windows open. **(2)** The stack: one live composition the windows share
+— a layer from a window or the vault added, hidden, moved up or down,
+placed, its opacity and blend set, from any window. **(3)** Drawn in every
+viewer: the layers under and over each app's own canvas, composited by the
+browser as a save composites them; filter first. **(4)** *Send to ▸*: what
+is on screen as another app's source — filter, grid, compose, rig — its
+window found or opened, live as the first app changes. **(5)** Smart
+objects: a `skw` saved, versioned, placed by reference, and every page
+holding it drawn again when it changes; a live layer saved as one when what
+holds it is saved. **(6)** Compose edits the stack: its page the live stack,
+opacity and blend on every placement, saved as a page of smart objects,
+printed and exported as it shows.
+
+*Done when:* a particle loop sent to filter with no tab or URL, its look
+tried live over a composition in the window behind, at an opacity and a
+blend, and the three saved as a page of smart objects that follows when the
+particles are changed and saved again. The link: `every app → every app: a
+live layer`.
+
+Later, and for fun: a window as a lens — where it sits on the screen, the
+part of the stack under it, bgstaal's own trick.
 
 ## Decided before, 2026-09-21 to -23
 

@@ -22,7 +22,7 @@ export { moves, framesOnPage, tickAt };
 /**
  * Whether a placement shows at a tick of the page: from its `at`, for its
  * `length` of the page's frames — or, with no length, until the page ends
- * (docs/object-model.md, *Placement*). A flipbook is stills one after
+ * (docs/smart-objects.md, *Placement*). A flipbook is stills one after
  * another, each shown for a frame or a few.
  *
  * @param {number} pageTick

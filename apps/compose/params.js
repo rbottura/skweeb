@@ -90,7 +90,7 @@ export function placeParams() {
 
 /**
  * A placement's values as the block a composition's recipe keeps
- * (docs/object-model.md, *Placement*). `at` and `length` are time, frames from
+ * (docs/smart-objects.md, *Placement*). `at` and `length` are time, frames from
  * the composition's start and `null` for the object's own length. `version`
  * pins only a `.skw`; any other object never changes, so it is `latest`.
  * `look` is there only when there is one, so a block with none is the block

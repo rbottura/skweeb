@@ -2,7 +2,7 @@
  * placements.js — what is on the page, in order, bottom first.
  *
  * Each entry is two things. Its `block` is the placement as a composition's
- * recipe keeps it (docs/object-model.md, *Placement*): the part that will be
+ * recipe keeps it (docs/smart-objects.md, *Placement*): the part that will be
  * saved, and the only part that is. The rest is the object that block names,
  * opened into frames (core/rebuild.js) — what gets drawn, which comes and
  * goes, a slow rebuild or a missing object, without the block changing.

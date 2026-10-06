@@ -2,7 +2,7 @@
  * save.js — a composition, into the vault.
  *
  * The recipe is the page and what is on it: `{ page, place }`, the page's
- * values and every placement's block, bottom first (docs/object-model.md,
+ * values and every placement's block, bottom first (docs/smart-objects.md,
  * *Placement*). Every placed object is a parent — the page is made from them
  * — and none is a ref: an ordinary object never changes, so nothing here can
  * go stale. A `.skw` placed live will be the first ref.

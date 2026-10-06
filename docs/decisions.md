@@ -309,3 +309,16 @@ own, E — a mouse's and a keyboard's, since a print is chosen once, sitting
 down. A print is never saved: it is what a save would write, drawn again.
 How each kind meets the window is in `docs/core-export.md`, moved out of
 the core API's file, which stood at its cap.
+
+**M11 is the live stack and smart objects: windows, not one page.** The
+author, the same day, choosing from three: every app stays its own window —
+no page holding them all, which would be a shell owning the page (rule 7)
+and every app at once in one tab — and the windows share one stack, each
+drawing it round its own layer. A browser cannot see through a window nor
+set the order of windows, so the windows share recipes and draw each other,
+as bgstaal's multipleWindow3dScene shares one scene between its windows.
+Live within one browser, over a `BroadcastChannel`: the tower's and the
+laptop's windows share saved smart objects through the vault, never what is
+unsaved. And every placement gains `opacity` and `blend`, CSS's blend
+modes by name — one spec with canvas's, so a window shows a layer as a save
+will draw it. Written into `docs/smart-objects.md`, the spec's own file now.
