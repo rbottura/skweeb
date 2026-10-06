@@ -7,7 +7,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 |---|---|---|
 | `vault.js` | save / load / list; the client for `server.js` | **in** |
 | `thumb.js` | one thumbnailer per object type | **in** |
-| `export.js` | deterministic frame export, and a store-only zip whose entries may be Blobs, by reference | **in**; video is the zip plus `scripts/frames-to-video.mjs` |
+| `export.js` | deterministic frame export, and a store-only zip whose entries may be Blobs, by reference; `png.js` beside it writes a PNG band by band, its dpi in a pHYs, for a picture no canvas holds — a 120×176 poster at 300 dpi | **in**; video is the zip plus `scripts/frames-to-video.mjs`; `png.js` 2026-10-06, for the 3D app's print |
 | `rng.js` | seeded random, the only random in the suite | **in**, 32 checks |
 | `params.js` | **the param schema** — see below | **in**, 43 checks |
 | `registry.js` | manifest-driven asset loading, families of sprites | **in**, was `gamepad/core/brushRegistry.js` |

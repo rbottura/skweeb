@@ -28,7 +28,7 @@ call, 2026-10-06 (`docs/decisions.md`).
 ## Works now
 
 - **Primitives, made from their params** (2026-10-06; `shapes.js`,
-  `tests/3d-shapes.mjs` 24). Box, sphere, cylinder, cone, torus, plane and
+  `tests/3d-shapes.mjs` 28). Box, sphere, cylinder, cone, torus, plane and
   capsule — three's own geometries, each a catalogue entry like a filter:
   an id, a label, a schema, the geometry its values make. A card's drawers:
   *Form*, the shape's own; *Place*, where it stands, turned about each axis
@@ -66,7 +66,7 @@ call, 2026-10-06 (`docs/decisions.md`).
   a row is cut shorter, a mirror left out, the same way every time. A
   model twisted and displaced saves, replays to the pixel, draws again at
   scale 2 and reopens with its stack; F frames by every vertex.
-- **A style** (2026-10-06, brick 4; `look.js`, `tests/3d-look.mjs` 28), the
+- **A style** (2026-10-06, brick 4; `look.js`, `tests/3d-look.mjs` 29), the
   model's, in its Style drawer — a shape keeps its colour and its flat or
   smooth:
   - *bands of light* — 0 is three's physical shading as before; 1 to 6 a
@@ -120,7 +120,7 @@ call, 2026-10-06 (`docs/decisions.md`).
   under the pointer staying under it; the wheel comes nearer; F frames
   every shape from where it is seen. Only the picture's shape counts:
   twice the pixels is the same picture.
-- **The scene kept in step** (`scene.js`, `tests/3d-model.mjs` 28). A
+- **The scene kept in step** (`scene.js`, `tests/3d-model.mjs` 29). A
   move or a colour keeps a shape's geometry; a change of form makes it
   again and frees the old; a shape taken out is freed. One sun, fixed in
   the world — turning round shows the dark side — and an ambient fill, in
@@ -134,7 +134,7 @@ call, 2026-10-06 (`docs/decisions.md`).
   it draws with WebGL2 by itself, the bar saying so — checked with WebGPU
   taken away, the same opening drawn; its one line about falling back is
   kept off the console.
-- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 58 with
+- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 61 with
   all the above, a real mouse on the handles). S
   saves a `model`: its recipe the panel's values and `shapes: [{ id,
   params, on }]`, titled by its shapes — *box, sphere, torus* — its render
@@ -143,15 +143,30 @@ call, 2026-10-06 (`docs/decisions.md`).
   sharper (mean difference 0.02 of 255 once halved); its own replay at
   scale 1 is its render to the pixel on the same machine. `?open=` brings
   the cards back; compose, map and filter take a model.
+- **A print at a sheet's size and a dpi** (2026-10-06; `print.js`,
+  core/png.js, `tests/png.mjs` 10, `check-3d-poster` 8). On a print format
+  — A5 to A1, or the new 120×176 — the Export drawer's print panel takes a
+  dpi and says what it comes to; *Print it* draws the model at the sheet's
+  pixels in tiles of 2048, each a window of the whole sheet's camera, the
+  outline's push in each tile's terms, and writes them band by band into a
+  PNG with the dpi in its pHYs. Never the vault's: a file for a printer.
+  Drawn again sharper — smooth round shapes get π√R segments for the sheet,
+  the shadow map 4096 — flat shapes keep their facets. The 120×176 poster
+  at 300 dpi, 14173 × 20787 px in 77 tiles, prints in 12 s to 3–5 MB for a
+  model on its ground; twelve tiles against the model drawn whole differ by
+  0.009 of 255; a crop across a tile's corner shows no seam.
 - **Opens with no vault** (rule 7), on a box, a sphere and a torus.
 
 ## Known
 
 - **A model is a still.** No loop until brick 5; the Format drawer has no
   rate.
-- **A print past the GPU's side throws** — 16384 here, a WebGL2 fallback
-  8192 — with the size in words; compose's print export at scale 4 of an
-  A-size sheet is under it.
+- **A replay asked for a scale draws in one piece**: compose placing a
+  model and printing its page at scale 4 asks rebuild.js, which throws past
+  the GPU's side — 16384 here, 8192 under WebGL2 — with the size in words.
+  Only the app's own print tiles; a print's file sizes are measured on a
+  model with ground round it, and a picture filling the sheet will be
+  larger.
 - **No tone mapping.** Colours stay as typed, so a face square to a strong
   sun clips to white: sun 2.6 and ambient 1 keep the opening under it.
 - **The style's fixed parts**: a shadow's darkness (0.35) and its map

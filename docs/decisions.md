@@ -266,6 +266,21 @@ call as the model; its push is a share of the picture's height, never
 pixels, so a print at scale 2 is the same line, and its normals are
 smoothed where a box's edge splits them, so no corner opens. Shadows fall
 on a catcher of nothing but shadows under the model, so a model on no
-ground keeps its shadow as a sprite's; the shadow map is one size at every
-scale, and three's map is on from the start, since turning it on later
-would rebuild every lit material.
+ground keeps its shadow as a sprite's; the shadow map is one size for the
+preview and its saves — a print's is larger, below — and three's map is on
+from the start, since turning it on later would rebuild every lit material.
+
+**A print past any canvas is tiles and a streamed PNG.** The author, the
+same day: a still of a model at 120 × 176 cm and 300 dpi, "extremely large
+but we don't need to preview it live, just one export". That is 14173 ×
+20787 px, past Chrome's canvas cap and any GPU's side, so it is drawn in
+tiles, each a window of the whole sheet's camera, and written band by band
+into a PNG by core/png.js through the platform's deflate, its dpi in a
+pHYs — nothing holds the whole picture. The sheet is a print format in
+core's table, as A1 is, so the bar says its dpi in every app. A print is
+not the vault's: it is a file for a printer, and the model saves as
+before. And it is drawn again sharper, never enlarged: a smooth round
+shape gets π√R segments for the sheet, since 48 round a sphere five
+thousand pixels across is five pixels off a circle; a flat shape keeps its
+facets, its look; the shadow map is 4096 a side. Compose's own print still
+draws its page on one canvas.

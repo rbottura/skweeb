@@ -40,6 +40,13 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
   the 3D app's shapes needed the same list; then `choose` and `fold` — one
   card open, the rest a line each — `duplicate`, and `inner`, a list inside
   each card. Filter does not fold, and its three checks pass on it.
+- **A print at a sheet's size and a dpi** (the author's ask, 2026-10-06:
+  120 × 176 cm at 300 dpi, "just one export"): the 120×176 sheet is a print
+  format in core's table, and the 3D app prints a model at its format's
+  sheet and a dpi — 14173 × 20787 px in 77 tiles of 2048, each a window of
+  one camera, written band by band into a PNG with its dpi (core/png.js),
+  in 12 s, 3–5 MB, sharper than the preview: round shapes get the segments
+  the sheet needs (`apps/3d/STATUS.md`; `check-3d-poster` 8).
 - **core/noise.js `noise3`**: gradient noise in 3D on the suite's hash, JS
   only, for a displaced shape.
 - **`check-map` measures its replay** now, as the note under *Tests* says a
@@ -207,8 +214,9 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Forty-seven files, no runner, no dependencies — the loop in `CLAUDE.md`
-runs all of them, and all pass (2026-10-06). Newest: `3d-pick` — a ray's
+Forty-eight files, no runner, no dependencies — the loop in `CLAUDE.md`
+runs all of them, and all pass (2026-10-06). Newest: `png` — a PNG
+written band by band, read back by zlib to the byte; `3d-pick` — a ray's
 answer is a card's place, what is drawn is what is picked; `3d-handles` —
 three's own controls driven in Node, a drag along the x arrow moving a box
 exactly as far as the pointer went; `3d-modifiers` — counts, angles,
@@ -216,10 +224,11 @@ normals true to the surface, no crack, the caps; `3d-look` — ramps, hulls,
 shadows; before them `3d-shapes`, `3d-camera`, `3d-model`, and the rig's
 four.
 
-Seventeen browser checks, each a command in `CLAUDE.md`: its own server on a
+Eighteen browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-3d` (58), on this
+throws or its console is not quiet. Newest: `check-3d-poster` (8), the
+300 dpi poster printed whole and read back; `check-3d` (61), on this
 machine's WebGPU and with WebGPU taken away; `check-rig` (35), `check-map-play` (16). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
@@ -233,8 +242,10 @@ compares two pages' canvases measures, never demands the pixel.
   the export names them. A rig's pose is drawn again from the same marks,
   so the fix is near: core's replay of a still's marks at a scale (*Next*).
 - **A blur's taps stop at 512 a side**; past that it wants a smaller picture.
-- **A print export draws its page on one canvas**, tried up to 2480 × 3508;
-  the largest sheets at scale 4 are past a browser's canvas cap.
+- **Compose's print export draws its page on one canvas**, tried up to
+  2480 × 3508; the largest sheets at scale 4 are past a browser's canvas
+  cap. The 3D app's print draws in tiles into core/png.js, which compose
+  could use the same way.
 - **grid's own player opens its source exact**, so it cannot ask for drafts
   as compose does; and **grid still stutters now and then** while a loop
   plays — measure first, as ckt was (`bar.rate`).
@@ -283,6 +294,10 @@ their parent" without settling which object S writes when it moves: a
 model's and its motion, as the rig's loops are; or both, the sequence's
 parent the model. The second fits what replays already, and is the
 default unless the author says otherwise.
+
+**And soon, the author's: the smart object** (`docs/roadmap.md`, after
+M10): the `skw` spec moved to a file of its own first, the object model
+being at the cap; its bricks laid out with the author.
 
 **Then M10's brick 5, its first: a turntable** (`apps/3d/STATUS.md`,
 *Next*). A Motion drawer — turns a loop, its length and rate — frame i seen

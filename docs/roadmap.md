@@ -322,7 +322,19 @@ stretch it by axis, writing into its card; D duplicates it, Delete takes it
 out. Each shape has a stack of modifiers in its card — subdivide, displace
 by seeded noise, twist, bend, mirror, array — the normals carried by the
 deformation, nothing cracking. And a style: toon bands, an outline, shadows
-on a catcher of their own — the same picture at any print scale.
+on a catcher of their own — the same picture at any print scale. A print
+at a sheet's size and a dpi, in tiles: the 120×176 poster at 300 dpi.
+
+**Next, the author's: the smart object.** "we'll soon tackle the link
+'smart' object between apps" (2026-10-06, `docs/inbox.md`). The `skw` type —
+a sketch with its parameters bound in, placed by reference, versioned, the
+one object with `refs` — has been specified since 2026-09-21
+(`docs/object-model.md`, *Smart objects*) and never built; compose's
+placements already have its block's shape. Its first step is the spec's own
+file: the object model is at the 400-line cap, so that section moves out,
+compose's five comments that point at *Placement* follow it. Its bricks are
+laid out with the author when it starts, between M10's as M9 was between
+M8's, or after.
 
 ## Decided before, 2026-09-21 to -23
 

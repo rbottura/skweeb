@@ -21,10 +21,16 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-- **2026-10-06 — the smart object, soon.** "we'll soon to tackle the link \"smart\" object between apps very soon." Not yet sorted: it is the `skw` type in `docs/object-model.md`, *Smart objects*, specified and not built; that section, eighty lines, should move to a file of its own first, since the object model is at the cap.
+Nothing waiting.
 
 ## Sorted
 
+- **2026-10-06 — the smart object, soon.** "we'll soon to tackle the link
+  'smart' object between apps very soon." → `docs/roadmap.md`, after M10's
+  *So far*: the `skw` type, specified in `docs/object-model.md` since
+  2026-09-21 and not built; its first step the spec moved to a file of its
+  own, the object model being at the cap; its bricks laid out with the
+  author when it starts.
 - **2026-09-30 — the suite as a game editor, a room first.** "Using these
   apps as vfx and assets editor for a little game, so also game editor with
   map editor, some physics, something like pokewebkit … a space editor where
