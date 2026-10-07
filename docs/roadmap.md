@@ -363,9 +363,8 @@ live layer`.
 Later: a window as a lens — where it sits on the screen, the part of the
 stack under it, bgstaal's own trick.
 
-*So far:* bricks 0 to 5. Every app shares one stack and draws it round its
-canvas; *Send to ▸ filter* follows another window; saved, it is a smart
-object, versioned, drawn again wherever it is held.
+*Done* 2026-10-07, bricks 0 to 6: the stack in every window, *Send to ▸*,
+smart objects, the stack saved as a page that follows — `check-page`.
 
 ## Decided before, 2026-09-21 to -23
 

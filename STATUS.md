@@ -11,22 +11,16 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ### Newest — 2026-10-06 and -07
 
-- **M11 begun: the live stack and smart objects** (the author's, after a
-  week of making things with the suite: "we really need the smart objects
-  and a new 'layer' system"; `docs/roadmap.md`, M11). The author's calls:
-  every app its own window, the windows one stack each draws round its own
-  layer; opacity and blend on every placement; live within one browser.
-  - **Brick 0, the spec**: `docs/smart-objects.md` — the `skw` moved out of
-    the object model, the live stack written in, a placement's `opacity`,
-    `blend` and runtime-only `live`.
-  - **Brick 1, windows that know each other** (`core/live.js`,
-    `core/StackPanel.js`; `tests/live.mjs` 14, `check-live` 9): every
-    app joins one BroadcastChannel with what is on screen — the envelope its
-    print draws — and lists the windows open in its Stack drawer, itself
-    first, each with what it has or why it has nothing; a change heard in
-    another tab within a second; a tab closed leaves every list, a crashed
-    one after three missed calls. The gamepad joins with no drawer of its
-    own. `chrome.mjs` opens more tabs than one.
+- **M11 is done: the live stack and smart objects** (the author's, after a
+  week of making things with the suite; `docs/roadmap.md`, M11;
+  `docs/smart-objects.md`, its spec). Every app its own window, the windows
+  one stack each draws round its own layer; opacity and blend; live within
+  one browser.
+  - **Bricks 0 and 1, the spec and windows that know each other**
+    (`core/live.js`; `tests/live.mjs`, `check-live`): every app joins one
+    BroadcastChannel with what is on screen — the envelope its print draws,
+    a loop as a loop — heard in another window within a second; a window
+    closed leaves, a crashed one after three missed calls.
   - **Brick 2, the stack** (`core/stack.js`, `core/blend.js`; `tests/stack.mjs`
     18, `check-live` 14): one live composition the windows share — a layer
     from a window or the vault put on, moved up or down, taken off, its
@@ -64,6 +58,13 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
     was kept in `versions/`, `vault:updated` on every page; filter's
     source, compose's placements and the stack's layers that are it or hold
     it are drawn again. `refs` fill in for what places one.
+  - **Brick 6, the stack saved as a page** (2026-10-07; `core/stackSave.js`;
+    `tests/compose-page.mjs`, `check-page` 7): in any drawer, *Save the
+    stack as a page* — every window a smart object, the page compose's
+    recipe placing them; compose's placements take opacity and blend, drawn
+    by `paintPage`, in its preview, saves, export and print. M11's *Done
+    when*, as a command: particles sent to filter over a drawing at 0.7 and
+    screen, saved as a page, and the page drawn again when particles saves.
 - **M10 is 3D, and four of its six bricks work** (`apps/3d/STATUS.md`, its
   detail; `check-3d` 58, seven unit files): primitives from a catalogue,
   each a card; an orbit view; three r186 on core's GPU device, WebGL2 where
@@ -310,13 +311,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M11's brick 6, its first step: opacity and blend on compose's placements**
-(`docs/roadmap.md`, M11; `docs/smart-objects.md`, *Placement*). The two
-rows in compose's placed panel (`apps/compose/params.js`), kept in the block
-when they say something, as the stack keeps them, and `paintPage` drawing
-each with `globalAlpha` and `compositeOf(blend)` (core/blend.js) — so a
-page's export and print show them. Then compose opening the live stack as
-its page, its windows smart objects when the page is saved.
+**M11 is done; the author's call is next.** What M11 left for later, each
+small: grid taking a window as its source as filter does (`core/send.js`
+`TAKERS`, grid's `source.js`); a pinned `version` in compose's placed
+panel; flatten; refusing a cycle on save. Or M10's brick 5, which waits on
+how a moving model saves. Ask the author which.
 
 **Waiting on the author first: how a moving model saves.** M10's brick 5
 is motion — a turntable, then a shape swung as the rig swings a bone — and

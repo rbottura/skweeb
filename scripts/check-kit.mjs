@@ -160,7 +160,13 @@ export async function startCheck({ keep = false } = {}) {
       console.log('\nscreenshots: ' + shots);
       if (!keep) {
         for (const dir of [vaultDir, path.join(work, 'profile')]) {
-          fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+          // Chrome on Windows can still hold a file in its profile a moment after it closed:
+          // what cannot go is left in the temp folder and said, never a check failed for it.
+          try {
+            fs.rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
+          } catch (err) {
+            console.log(`     left behind, still held: ${dir} (${err.code})`);
+          }
         }
       }
       console.log(fails ? `\n${fails} FAILED` : '\nall passed');

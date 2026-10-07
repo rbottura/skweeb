@@ -17,6 +17,7 @@
 
 import { joinLive, loopOf, savedBy } from './live.js';
 import { sendButtons, takeWhenAsked } from './send.js';
+import { saveStack }    from './stackSave.js';
 import { joinStack }    from './stack.js';
 import { stackView }    from './stackView.js';
 import { BLENDS, BLEND_LABELS } from './blend.js';
@@ -91,7 +92,20 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
   const adds = el('div', 'pp-stack-adds');
   const said = el('p', 'pp-stack-said');
   const sends = el('div', 'pp-stack-sends');
-  sends.append(...sendButtons(live, app, { button, say: text => { said.textContent = text; } }));
+  const say = text => { said.textContent = text; };
+  sends.append(...sendButtons(live, app, { button, say }), button('Save the stack as a page', 'every window in it saved as a smart object, and a page placing them', async () => {
+    try {
+      const page = await saveStack({ live, stack, say });
+      if (!page) return say('no vault here: the page is downloaded instead');
+      say(`saved ${page.id}, a page of ${page.recipe.place.length} layers — `);
+      const open = el('a', 'pp-stack-open', 'open it in compose ↗');
+      open.href = new URL('../compose/?open=' + encodeURIComponent(page.id), location.href).href;
+      open.target = '_blank';
+      said.append(open);
+    } catch (err) {
+      say('the stack was not saved: ' + err.message);
+    }
+  }));
   drawer.body.append(note, list, rows, adds, sends, said);
   // Asked to save for something that will hold it: as a smart object, made once and then versioned.
   if (save) live.answer('save', ({ smart }) => { if (smart && !Vault.bound) Vault.bind({}); return savedBy(save); });

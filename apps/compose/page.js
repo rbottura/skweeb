@@ -21,6 +21,7 @@
  */
 
 import { pageSize, placementMatrix, onPage, offPage } from '../../core/place.js';
+import { compositeOf } from '../../core/blend.js';
 export { pageSize, placementMatrix, onPage, offPage };
 
 /**
@@ -95,10 +96,13 @@ export function paintPage(ctx, page, layers, scale) {
     ctx.fillRect(0, 0, width, height);
   }
 
-  for (const { image, size, transform, part } of layers) {
+  for (const { image, size, transform, part, opacity, blend } of layers) {
     if (!image) continue;
     ctx.save();
     ctx.transform(...placementMatrix(transform, size, page));
+    // How it meets what is under it: one spec with the live stack's CSS (core/blend.js).
+    ctx.globalAlpha = opacity ?? 1;
+    ctx.globalCompositeOperation = compositeOf(blend);
     if (part) ctx.drawImage(image, 0, 0, part.w, part.h, part.at.x, part.at.y, part.at.w, part.at.h);
     else ctx.drawImage(image, 0, 0, size.width, size.height);
     ctx.restore();

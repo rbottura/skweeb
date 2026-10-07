@@ -95,9 +95,9 @@ ok('a placement is the object model\'s block', block,
    { ref: 'gam_1_abc', version: 'latest', transform: { x: -40, y: 12, scale: 0.5, rot: 15 }, at: 0, length: null });
 place.reset();
 place.restore(Params.fromPlacement(block));
-ok('and comes back from it', place.values, { ref: 'gam_1_abc', look: null, x: -40, y: 12, scale: 0.5, rot: 15, at: 0, length: 0 });
+ok('and comes back from it', place.values, { ref: 'gam_1_abc', look: null, x: -40, y: 12, scale: 0.5, rot: 15, opacity: 1, blend: 'normal', at: 0, length: 0 });
 place.restore(Params.fromPlacement({ ref: 'gam_2_def' }));
-ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', look: null, x: 0, y: 0, scale: 1, rot: 0, at: 0, length: 0 });
+ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', look: null, x: 0, y: 0, scale: 1, rot: 0, opacity: 1, blend: 'normal', at: 0, length: 0 });
 
 // Its time: from a frame, for some — a length of 0 in the panel is null in the block, its own.
 place.set({ ref: 'gam_1_abc', at: 3, length: 2 });
@@ -116,6 +116,24 @@ ok('and comes back with it', place.values.look, 'fil_1_look');
 ok('a block with no look has no look key', 'look' in Params.toPlacement({ ...place.values, look: null }), false);
 ok('a look is a parent of its page, once',
   Params.parentsOf({ place: [looked, { ...looked, ref: 'gam_2_def' }] }), ['gam_1_abc', 'fil_1_look', 'gam_2_def']);
+// How it meets what is under it (M11): in the block only when it says something.
+place.set({ ref: 'gam_1_abc', look: null, opacity: 0.6, blend: 'multiply' });
+const blended = Params.toPlacement(place.values);
+ok('an opacity and a blend ride in the block', [blended.opacity, blended.blend], [0.6, 'multiply']);
+place.restore(Params.fromPlacement(blended));
+ok('and come back with it', [place.values.opacity, place.values.blend], [0.6, 'multiply']);
+const plain = Params.toPlacement({ ...place.values, opacity: 1, blend: 'normal' });
+ok('opacity 1 and a normal blend are no keys at all', ['opacity' in plain, 'blend' in plain], [false, false]);
+
+// Each layer drawn with its opacity and blend, canvas's spelling; one with neither, as it always was.
+const calls = [];
+const fake = { canvas: { width: 100, height: 80 }, save() {}, restore() { calls.push('restore'); }, transform() {}, setTransform() {},
+  clearRect() {}, fillRect() {}, set fillStyle(v) {}, set imageSmoothingEnabled(v) {}, set imageSmoothingQuality(v) {},
+  set globalAlpha(v) { calls.push(['alpha', v]); }, set globalCompositeOperation(v) { calls.push(['op', v]); }, drawImage() { calls.push('draw'); } };
+const rest = { x: 0, y: 0, scale: 1, rot: 0 }, sq = { width: 10, height: 10 };
+Page.paintPage(fake, { ...sheet, ground: 'none' }, [{ image: {}, size: sq, transform: rest, opacity: 0.5, blend: 'plus-lighter' }, { image: {}, size: sq, transform: rest }], 0.1);
+ok('a page draws each layer with its opacity and blend', calls,
+  [['alpha', 0.5], ['op', 'lighter'], 'draw', 'restore', ['alpha', 1], ['op', 'source-over'], 'draw', 'restore']);
 place.reset();
 ok('a placement takes what core gives frames of, pages, maps and models too', place.spec('ref').accepts,
    ['still', 'sequence', 'shape', 'composition', 'map', 'model']);

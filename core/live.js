@@ -252,6 +252,12 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
      * not, as an error: no such answer there, or none in time.
      */
     ask(to, what, args = {}, { timeout = 90000 } = {}) {
+      // Asked of itself, answered here: a channel does not carry a window's own words back to it.
+      if (to === id) return Promise.resolve().then(() => {
+        const fn = answers.get(what);
+        if (!fn) throw new Error(`the ${app} window does not ${what}`);
+        return fn(args, id);
+      });
       if (!ch) return Promise.reject(new Error('no other window here to ask'));
       const n = ++asks;
       return new Promise((resolve, reject) => {

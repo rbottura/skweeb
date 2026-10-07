@@ -333,3 +333,12 @@ app's as ever. A window filter follows, asked to save, saves as one; one
 reopened in its app binds that window. `refs` fill in by themselves: a
 `skw_` id among the parents is a dependency too. Pins, flatten and
 refusing a cycle wait for compose's placements to carry a version.
+
+**The stack is saved as a page; compose's placements blend.** M11's brick 6,
+the same day. Any window's drawer saves the stack, not only compose's: a
+page is compose's recipe whoever writes it, and its picture is compose's
+replay — so the stack can be kept from the window the author is working
+in. Every window in it is saved as a smart object, so the page follows
+them. And compose's placements take the stack's `opacity` and `blend`,
+drawn by its one drawing path, so its preview, its saves, its export and
+its print show them alike.

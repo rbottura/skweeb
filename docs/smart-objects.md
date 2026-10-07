@@ -174,3 +174,12 @@ as a `skw` (`bound`: its app, its recipe, its seed), and the block becomes a
 `ref` to it at `version: "latest"`, a ref and a parent both. Opened in its
 app again and saved, the `skw` takes a version, and every page placing it
 at `latest` draws it new (*Invalidation*, above).
+
+**The stack saved as a page** (`core/stackSave.js`), from any window's
+drawer: every window in it saves itself as a smart object — this one too —
+and the page is compose's recipe placing what they kept and the vault
+objects it held, bottom first, each at its transform, its opacity and its
+blend; its picture is compose's replay. A filter following another window
+saves that window first, so a page of a filter of particles is a smart
+object of a smart object: change the particles and save, and the page,
+opened anywhere, is drawn again.

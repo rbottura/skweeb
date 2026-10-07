@@ -14,7 +14,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/gamepad/` | draw with a gamepad, record sequences; E prints the drawing | — |
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
-| `apps/compose/` | M4: objects from every app placed on one page | `apps/compose/STATUS.md` |
+| `apps/compose/` | M4: objects from every app placed on one page, each at an opacity and a blend | `apps/compose/STATUS.md` |
 | `apps/filter/` | M5: any picture or loop through a chain of GPU filters | `apps/filter/STATUS.md` |
 | `apps/fractals/` | M7: escape time on the GPU kit, a sprite copying itself, idles, and a field for particles | `apps/fractals/STATUS.md` |
 | `apps/particles/` | M6: particles as a function of time — loops that close, frames that stand alone | `apps/particles/STATUS.md` |
@@ -26,7 +26,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | smart objects, the live stack | M11: the `skw`, and every open window one layer of a stack each draws | `docs/smart-objects.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault, `server/versions.js` a smart object's next version | `docs/object-model.md`, *Trash, and deleting* |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs`, `check-3d.mjs`, `check-3d-poster.mjs`, `check-print.mjs`, `check-live.mjs`, `check-send.mjs` and `check-smart.mjs` are twenty-two, as commands; `chrome.mjs` opens more tabs than one, for windows that talk to each other. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned, with the add-ons the 3D app uses — its handles. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs`, `check-3d.mjs`, `check-3d-poster.mjs`, `check-print.mjs`, `check-live.mjs`, `check-send.mjs`, `check-smart.mjs` and `check-page.mjs` are twenty-three, as commands; `chrome.mjs` opens more tabs than one, for windows that talk to each other. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned, with the add-ons the 3D app uses — its handles. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/decisions.md` | what was decided before today, and why, by date — the newest days; its head lists the files the older ones moved to, `docs/decisions-<from>-to-<to>.md` | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
@@ -122,6 +122,7 @@ node scripts/check-print.mjs            # every app's print in tiles against its
 node scripts/check-live.mjs             # M11: windows of one browser sharing a stack, each drawing it round its own canvas
 node scripts/check-send.mjs             # M11: Send to ▸ filter — a window opened, following particles; saved, particles first
 node scripts/check-smart.mjs            # M11: smart objects — saved, versioned, drawn again wherever they are held
+node scripts/check-page.mjs             # M11 done: the stack saved as a page of smart objects that follows its windows
 node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click and moved by handles, twisted by a stack, drawn in a style; a model saved, drawn again at scale 2, placed
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips

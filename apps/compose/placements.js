@@ -46,7 +46,7 @@ export class Placements {
   constructor({ onChange = () => {}, say = () => {}, load = fromVault } = {}) {
     this.items = [];
     // A smart object took a new version: what places it, or holds it, is opened again (core/smart.js).
-    document.addEventListener('vault:updated', ({ detail }) => {
+    if (typeof document !== 'undefined') document.addEventListener('vault:updated', ({ detail }) => {
       const stale = this.items.filter(p => p.block.ref === detail.id || (p.refs || []).includes(detail.id));
       for (const p of stale) p.opening = this.open(p).then(() => this.onChange());
       if (stale.length) this.say(`${stale.map(p => p.title).join(', ')}: drawn again, version ${detail.version}`);
@@ -172,7 +172,7 @@ export class Placements {
     for (const p of this.items) {
       if (!p.handle || !showsAt(pageTick, p.block) || (only && !only(p))) continue;
       const image = this.frameOf(p, tickAt(pageTick - (p.block.at || 0), p.handle, fps));
-      if (image) out.push({ image, size: p.size, transform: p.block.transform });
+      if (image) out.push({ image, size: p.size, transform: p.block.transform, opacity: p.block.opacity, blend: p.block.blend });
     }
     return out;
   }
@@ -195,7 +195,7 @@ export class Placements {
       const tick = Math.min(tickAt(pageTick - (p.block.at || 0), p.handle, fps), p.handle.length - 1);
       if (typeof p.handle.window !== 'function') {
         const image = this.frameOf(p, tick);
-        if (image) out.push({ image, size: p.size, transform });
+        if (image) out.push({ image, size: p.size, transform, opacity: p.block.opacity, blend: p.block.blend });
         continue;
       }
       const own = corners.map(c => offPage(placementMatrix(transform, p.size, page), c));
@@ -217,7 +217,8 @@ export class Placements {
         console.warn('[compose] could not draw a window of', p.title, err);
         this.say(`could not draw ${p.title}: ${err.message}`);
       }
-      if (image) out.push({ image, size: p.size, transform, part: { ...part, at: { x: part.x / kx, y: part.y / ky, w: part.w / kx, h: part.h / ky } } });
+      if (image) out.push({ image, size: p.size, transform, opacity: p.block.opacity, blend: p.block.blend,
+                            part: { ...part, at: { x: part.x / kx, y: part.y / ky, w: part.w / kx, h: part.h / ky } } });
     }
     return out;
   }

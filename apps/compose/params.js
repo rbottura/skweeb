@@ -12,6 +12,7 @@
 
 import { defineParams } from '../../core/params.js';
 import { frameParams, DERIVED, MAX_SIDE } from '../../core/frame.js';
+import { BLENDS, BLEND_LABELS } from '../../core/blend.js';
 
 /** The page panel's drawers. Format is the page, so it starts open. */
 export const PAGE_GROUPS = {
@@ -24,6 +25,7 @@ export const PAGE_GROUPS = {
 export const PLACE_GROUPS = {
   object:    { label: 'Object', open: true },
   transform: { label: 'Transform', open: true },
+  blend:     { label: 'Blend', open: false },
   time:      { label: 'Time', open: false },
 };
 
@@ -78,6 +80,9 @@ export function placeParams() {
     y: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'y from centre', group: 'transform' },
     scale: { type: 'range', min: 0.01, max: 8, step: 0.01, default: 1, label: 'scale', group: 'transform' },
     rot: { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'rotation °', group: 'transform' },
+    /** How it meets what is under it: how much of it shows, and how it mixes (core/blend.js). */
+    opacity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1, label: 'opacity', group: 'blend' },
+    blend: { type: 'enum', options: BLENDS, labels: BLEND_LABELS, default: 'normal', label: 'blend', group: 'blend' },
     /**
      * When, in the page's frames: from `at`, for `length` — 0 its own, which
      * for a still is the rest of the page and for a loop its loop, again and
@@ -93,21 +98,23 @@ export function placeParams() {
  * (docs/smart-objects.md, *Placement*). `at` and `length` are time, frames from
  * the composition's start and `null` for the object's own length. `version`
  * pins only a `.skw`; any other object never changes, so it is `latest`.
- * `look` is there only when there is one, so a block with none is the block
- * it always was.
+ * `look`, `opacity` and `blend` are there only when they say something, so a
+ * block with none is the block it always was.
  */
 export function toPlacement(values) {
-  const { ref, x, y, scale, rot, look } = values;
+  const { ref, x, y, scale, rot, look, opacity, blend } = values;
   const at = Math.max(0, Math.round(values.at || 0));
   const length = values.length > 0 ? Math.round(values.length) : null;
-  return { ref, version: 'latest', transform: { x, y, scale, rot }, at, length, ...(look ? { look } : {}) };
+  return { ref, version: 'latest', transform: { x, y, scale, rot }, at, length, ...(look ? { look } : {}),
+           ...(opacity != null && opacity < 1 ? { opacity } : {}), ...(blend && blend !== 'normal' ? { blend } : {}) };
 }
 
 /** And back: the values a placement's panel shows for a block. */
 export function fromPlacement(block) {
   const t = (block && block.transform) || {};
   return { ref: (block && block.ref) || null, x: t.x, y: t.y, scale: t.scale, rot: t.rot,
-           look: (block && block.look) || null, at: (block && block.at) || 0, length: (block && block.length) || 0 };
+           look: (block && block.look) || null, at: (block && block.at) || 0, length: (block && block.length) || 0,
+           opacity: block && block.opacity != null ? block.opacity : 1, blend: (block && block.blend) || 'normal' };
 }
 
 /**

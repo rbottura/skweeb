@@ -7,6 +7,13 @@ done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome
 
+- **Opacity and blend on every placement** (2026-10-07, M11's brick 6; a
+  Blend drawer in the placed panel): kept in the block when they say
+  something, drawn by `paintPage` with `globalAlpha` and canvas's blend —
+  the preview, a save, an export and a print alike. A page saved from the
+  live stack (core/stackSave.js) is a compose page like any other, its
+  windows smart objects: what holds one is opened again when it takes a
+  version (`placements.js`, `vault:updated`).
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the Export drawer, `docs/core-export.md`): the page at the tick on screen
   in tiles, each placement asked for its part of each in its own pixels, a
