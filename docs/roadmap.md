@@ -2,35 +2,26 @@
 
 ## Milestones
 
-Done milestones keep what they were and what proved them; how they were
-built is in their apps' `STATUS.md`, and why in `docs/decisions.md`.
+Done milestones are in `docs/roadmap-done.md` since 2026-10-22, what they
+were and what proved them; how each was built is in its app's
+`STATUS.md`, and why in `docs/decisions.md`. What is to do now, item by
+item, is the board in `docs/plan.md`. Here, the milestones still open.
 
-**M1 — core + gamepad moved in.** `core/` extracted while porting the app it
-came from, so the kit was shaped by use, not guesswork. *Done when:* a loop
-drawn and recorded lands in `vault/` with its recipe, its thumbnail and its
-seed, from `skweeb/` and not from `sketch-2-print/` — done.
+| | milestone | where it stands |
+|---|---|---|
+| M1 | core + gamepad moved in | done — `docs/roadmap-done.md` |
+| M2 | grid v2 on core | done 2026-09-22 |
+| M3 | ckt v3 | done 2026-09-23 |
+| M4 | compose, and the master render | done 2026-09-24 |
+| M5 | filters, and the GPU kit under them | *Done when* met 2026-09-26; its catalogue open, below |
+| M6 | particles | done 2026-09-27 |
+| M7 | fractals | *Done when* met 2026-09-30; its bricks open, below |
+| M8 | the map editor, and a room first | bricks 1 to 3 of six, below |
+| M9 | the rig: bones, walks, and worms | bricks 1 to 5 of six, and the puppet, below |
+| M10 | 3D: meshes, from primitives up | bricks 1 to 4 of six, below |
+| M11 | the live stack, and smart objects | done 2026-10-07; what it left is L in `docs/plan.md` |
 
-**M2 — grid v2 on core.** The 700-line sketch rewritten onto the kit: the
-honest test of a core extracted from the gamepad. *Done when:* any vault
-object is dithered and saved back with its source as its parent — **done
-2026-09-22**.
-
-**M3 — ckt v3.** Text, grid, dots, sprites, motion; no Matter, and no
-`opencv.js` — datasets are cut in the browser by `apps/ckt/blobs.js`. *Done
-when:* ckt regenerates a family like `Garam_blue` — letterforms with a
-pattern on them, emitted as a `set` the gamepad loads as a brush family —
-running itself and keeping its lineage: **done 2026-09-23**.
-
-**M4 — compose: the fourth app, and the master render.** An app where objects
-from every process are placed, timed, previewed live and rendered out — and
-**where a finished output is made**: export in the other apps is demoted to a
-shortcut for producing an asset, and anything with more than one element in
-it goes through compose. *Done when:* a sheet of objects from three apps, one
-of them moving, previews live, renders at print scale, and one object has a
-URL you can send — **done 2026-09-24**, in five bricks
-(`apps/compose/STATUS.md`). What it cost — video as frames plus ffmpeg, a
-pin named `version` apart from time's `at`, `render()` made real — is in the
-decisions of 2026-09-22 and `docs/object-model.md`.
+## The links
 
 Each milestone after M1 should also leave **one link** behind, since the
 catalogue of links is the only real measure of whether this is a suite:
@@ -48,11 +39,20 @@ from. M7 `fractal → particles: a field` — **done, 2026-09-30**: escape
 time's slope, which way the set is, pulls particles; fractals answer it in
 their rebuild.js, the producer declaring the link. M9 `gamepad → rig: a
 drawing's strokes as limbs` — **done, 2026-10-02**: the vault offers a
-gamepad still to the rig, *Rig this ↗*.
+gamepad still to the rig, *Rig this ↗*. M8 `any → map: a thing in the room` —
+**done, 2026-09-30**: any still, loop, shape or page stood on a cell.
+M11 `every app → every app: a live layer` — **done, 2026-10-07**: a
+window's layer in every other's stack, *Send to ▸*, a page of smart
+objects that follows them. Open: `rig → map: a character` and
+`model → map: a character from every side` — P5 and P6 in
+`docs/plan.md`.
+
+## The milestones still open
 
 The next three were chosen by the author on 2026-09-26, with 3D parked: the
 suite is to make the assets of a small game — 2D first, fake 3D where it helps,
-real 3D later. Each stands on one new piece of core, the GPU kit.
+real 3D later. Each stands on one new piece of core, the GPU kit. M6,
+done, is in `docs/roadmap-done.md`.
 
 **M5 — filters, and the GPU kit under them.** The fifth process, and the test
 M5 was always meant to be: a new app should cost a folder, a schema and three
@@ -90,17 +90,6 @@ grain and glitch from a seed, and the game-asset group begun with an
 outline, a drop shadow and palette lock. Frames by hand came first, a
 flipbook in compose (2026-09-27); then the author chose M6 over the rest of
 the catalogue, and motion and time filters are parked, not dropped.
-
-**M6 — particles.** A particle is a function of its spawn slot and its age,
-not a step in one shared simulation: so any frame renders on its own, a loop
-whose emission repeats with its period closes exactly, and a frame draws
-again at any size. Particles that interact — flocking, collisions — break
-all three, and wait for a mode that caches. *Done when:* a torch loop that
-closes, drawn with a vault set's sprites and scrubbed to any frame, and a
-one-shot burst, both leave as sprite sheets a game engine loads — **done
-2026-09-27**, in seven bricks (`apps/particles/STATUS.md`), Phaser 3 loading
-the torch's sheet (`check-sheet-engine`). The link: `set → particles:
-sprites`, a use. Open still: colour over life.
 
 **M7 — fractals.** Escape-time on the GPU — Mandelbrot, Julia, Burning Ship,
 multibrot, Newton, Phoenix, Lyapunov — with smooth colouring and orbit traps,
@@ -329,44 +318,6 @@ the same day the print moved into core, for every app: each handle draws a
 window of its frame, a gamepad still is drawn again from its marks
 (`docs/core-export.md`).
 
-**M11 — the live stack, and smart objects.** The author's, 2026-10-06,
-after a week of making things with the suite: "we really need the smart
-objects and a new 'layer' system" — to try a filter over the composition it
-will join, and to take a particle effect into filter without "a new tab,
-then paste url and load from vault". After bgstaal's multipleWindow3dScene:
-every app its own window, the windows one stack, each drawing it round its
-own layer, with opacity and blend, live within one browser
-(`docs/smart-objects.md`).
-
-The bricks: **(0)** the spec — the `skw` out of the object model, at its
-cap; the live stack and a placement's `opacity` and `blend` written in.
-**(1)** Windows that know each other: each says who it is and what it has
-on screen, its layer, over one channel; a Stack drawer in every app lists
-the windows open. **(2)** The stack: one live composition the windows share
-— a layer from a window or the vault added, hidden, moved up or down,
-placed, its opacity and blend set, from any window. **(3)** Drawn in every
-viewer: the layers under and over each app's own canvas, composited by the
-browser as a save composites them; filter first. **(4)** *Send to ▸*: what
-is on screen as another app's source — filter, grid, compose, rig — its
-window found or opened, live as the first app changes. **(5)** Smart
-objects: a `skw` saved, versioned, placed by reference, and every page
-holding it drawn again when it changes; a live layer saved as one when what
-holds it is saved. **(6)** Compose edits the stack: its page the live stack,
-opacity and blend on every placement, saved as a page of smart objects,
-printed and exported as it shows.
-
-*Done when:* a particle loop sent to filter with no tab or URL, its look
-tried live over a composition in the window behind, at an opacity and a
-blend, and the three saved as a page of smart objects that follows when the
-particles are changed and saved again. The link: `every app → every app: a
-live layer`.
-
-Later: a window as a lens — where it sits on the screen, the part of the
-stack under it, bgstaal's own trick.
-
-*Done* 2026-10-07, bricks 0 to 6: the stack in every window, *Send to ▸*,
-smart objects, the stack saved as a page that follows — `check-page`.
-
 ## Decided before, 2026-09-21 to -23
 
 In `docs/decisions-2026-09-21-to-23.md`, with their reasoning: the `.skw`
@@ -383,7 +334,8 @@ plan it was built to, is in `apps/compose/STATUS.md`.
 
 1. ~~**`destra.otf` and `GPDestra-Light.otf`**~~ **Answered 2026-09-23** —
    free, from fonderiz.fr, made by a friend of the author's. What is left is
-   naming the licence in the files before they ship. See `docs/fonts.md`.
+   naming the licence in the files before they ship. See `docs/fonts.md`;
+   C3 in `docs/plan.md`.
 2. **The online skweeboteque.** Wanted, not now — it needs a server, and it is
    also what turns sandboxing from theory into work. Nothing in the local design
    blocks it; the vault interface is the seam it would go behind.

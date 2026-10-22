@@ -3,7 +3,7 @@
  *
  * Two, because they are two kinds of thing. The page is one per composition,
  * and it is the suite's own Format drawer: a page is a user of
- * core/formats.js, never a second copy of it (docs/roadmap.md, M4). A
+ * core/formats.js, never a second copy of it (docs/roadmap-done.md, M4). A
  * placement is one of many — an object and where it sits — so its schema is
  * an editor for whichever placement is chosen, and a composition's `place`
  * list holds its values, one block each, in the shape docs/object-model.md

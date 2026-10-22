@@ -77,24 +77,6 @@ Nothing, 2026-10-22: both ideas that waited went onto the plan's board.
   `docs/roadmap.md`; the guide in `docs/guides/obs.md`, read by
   `core/Guide.js`; decided those days (`docs/decisions.md`).
 
-- **2026-10-06 — layers across apps, live.** "we really need the smart
-  objects and a new 'layer' system where i need to be able to test effect in
-  filter on my image with a 'composition' in the background or anything in
-  vault or open in app … all my skweeb apps as windows with z indexes … to act
-  as stacked layer of apps with all common renderer in the middle so we could
-  visually stack, with transparency or low opacity" — after
-  bgstaal/multipleWindow3dScene, sketched in `docs/layers_ref.png`. And:
-  "when in app, creating some particle effect i want to use filter app over
-  it, i dont have to open a new tab then paste url and load from vault but
-  something more direct". → M11 in `docs/roadmap.md`, the
-  live stack and smart objects; the author's three calls the same day —
-  windows, opacity and blend, live within one browser (`docs/decisions.md`).
-- **2026-10-06 — the smart object, soon.** "we'll soon to tackle the link
-  'smart' object between apps very soon." → `docs/roadmap.md`, after M10's
-  *So far*: the `skw` type, specified in `docs/object-model.md` since
-  2026-09-21 and not built; its first step the spec moved to a file of its
-  own, the object model being at the cap; its bricks laid out with the
-  author when it starts.
 - **2026-09-30 — the suite as a game editor, a room first.** "Using these
   apps as vfx and assets editor for a little game, so also game editor with
   map editor, some physics, something like pokewebkit … a space editor where

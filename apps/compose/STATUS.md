@@ -2,7 +2,7 @@
 _last touched: 2026-10-22_
 
 M4's app: objects from every process placed on one page, previewed live and
-rendered out (`docs/roadmap.md`, M4). Built in five bricks, all in: **M4 is
+rendered out (`docs/roadmap-done.md`, M4). Built in five bricks, all in: **M4 is
 done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome

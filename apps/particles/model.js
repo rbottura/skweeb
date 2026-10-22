@@ -1,7 +1,7 @@
 /**
  * model.js — particles as a function of time, not a simulation.
  *
- * M6's one idea (docs/roadmap.md): a particle is a function of its spawn slot
+ * M6's one idea (docs/roadmap-done.md): a particle is a function of its spawn slot
  * and its age. Nothing is stepped and nothing is carried from one frame to
  * the next, so:
  *

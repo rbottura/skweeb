@@ -2,7 +2,7 @@
 _last touched: 2026-10-22_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
-and *Done when* are in `docs/roadmap.md`, M6 — a torch loop that closes
+and *Done when* are in `docs/roadmap-done.md`, M6 — a torch loop that closes
 exactly, drawn with a vault set's sprites and scrubbed to any frame, and a
 one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 `set → particles: sprites`, a use.
