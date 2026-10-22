@@ -23,6 +23,12 @@ apps/*/gallery/images/*
 !apps/*/gallery/images/.gitkeep
 apps/*/gallery/manifest.json
 
+# MediaPipe's face landmarker, for the rig's puppet: a WASM of 11.8 MB and a
+# model of 3.8 MB, fetched on each machine by scripts/vendor-mediapipe.mjs.
+# Its README, which says what is there and from where, is committed.
+core/libs/mediapipe/*
+!core/libs/mediapipe/README.md
+
 node_modules/
 .DS_Store
 Thumbs.db
