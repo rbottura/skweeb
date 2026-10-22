@@ -230,7 +230,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   not the code's: its copy of `./vault` is empty there — no set to draw
   with — and a frame through the fields takes 17–22 ms on its i7-8565U,
   before this brick and after, against a 16.7 ms budget set on the tower.
-- The checks are three files (C2, 2026-10-22, at the line cap):
+- The checks are three files (C2, 2026-10-22, split at their sections):
   `check-particles` — the loop, a burst, print scale, a set's sprites, the
   saves (41); `check-particles-fields` — emitters, fields and depth, the
   guides dragged, a picture from outside (22); and `check-particles-links`.

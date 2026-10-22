@@ -26,7 +26,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | smart objects, the live stack | M11: the `skw`, and every open window one layer of a stack each draws | `docs/smart-objects.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault, `server/versions.js` a smart object's next version | `docs/object-model.md`, *Trash, and deleting* |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-fields.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs`, `check-puppet.mjs`, `check-3d.mjs`, `check-3d-save.mjs`, `check-3d-poster.mjs`, `check-print.mjs`, `check-live.mjs`, `check-send.mjs`, `check-smart.mjs` and `check-page.mjs` are twenty-six, as commands; `chrome.mjs` opens more tabs than one, for windows that talk to each other. `lines.mjs` is rule 4 as a command: every file git keeps past 400 lines, the gamepad's four known. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned, with the add-ons the 3D app uses — its handles. `vendor-mediapipe.mjs` fetches MediaPipe's face landmarker into `core/libs/mediapipe/`, one version, pinned — 15 MB of WASM and model that git never holds, so once a machine. `obs/hide-projectors.lua` is loaded in OBS itself: its projectors kept out of the screen it records; `obs/overlay.ps1` (with `Overlay.cs`, `ObsSocket.cs`, `Placed.cs`; `overlay.cmd` to double-click) puts the puppet's source over that screen as it stands in the scene, transparent, through obs-websocket (`docs/guides/obs.md`). `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-fields.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs`, `check-puppet.mjs`, `check-3d.mjs`, `check-3d-poster.mjs`, `check-print.mjs`, `check-live.mjs`, `check-send.mjs`, `check-smart.mjs` and `check-page.mjs` are twenty-five, as commands; `chrome.mjs` opens more tabs than one, for windows that talk to each other. `lines.mjs` is rule 4 as a command: a file past 400 lines split or kept whole with its reason, none past 600. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned, with the add-ons the 3D app uses — its handles. `vendor-mediapipe.mjs` fetches MediaPipe's face landmarker into `core/libs/mediapipe/`, one version, pinned — 15 MB of WASM and model that git never holds, so once a machine. `obs/hide-projectors.lua` is loaded in OBS itself: its projectors kept out of the screen it records; `obs/overlay.ps1` (with `Overlay.cs`, `ObsSocket.cs`, `Placed.cs`; `overlay.cmd` to double-click) puts the puppet's source over that screen as it stands in the scene, transparent, through obs-websocket (`docs/guides/obs.md`). `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
 | `docs/roadmap.md` | the milestones still open, the links, open decisions; the done ones in `docs/roadmap-done.md` | when planning |
 | `docs/plan.md` | the work items of the cycle — the board: each with its branch, in order, and what waits on the author | before starting work, and when an item lands |
 | `docs/workflow.md` | a branch for each work item: merge or rebase, the gate before landing, several machines | before branching, and before landing |
@@ -67,10 +67,14 @@ never symmetric, never inferred. The catalogue of links is the map of the suite.
    re-rendering. Use `rng()` from core, seeded from the object.
 3. **Manifests, not scans.** Assets are listed in a generated manifest. Nothing
    walks a directory at runtime — and no agent should have to either.
-4. **One concept per file, 400 lines hard cap.** If a file needs a table of
-   contents it needs splitting. This is the thing we are escaping: CKT v2 was a
-   1223-line `index.html` with ~200 global ids, and every edit to it cost an
-   hour of reading.
+4. **One concept per file.** 400 lines is where a file is looked at, not
+   where it is cut: past it, split it along a seam it already has — never
+   into a part two, nor so that the halves share state or copy a setup — or
+   keep it whole and give the reason in `scripts/lines.mjs`. Past 600 it
+   splits. The docs every session reads — this file, `STATUS.md`,
+   `docs/plan.md` — stay under 400. What we escape: CKT v2, a 1223-line
+   `index.html` with ~200 global ids — its globals more than its length;
+   every edit to it cost an hour of reading. A hard cap until 2026-10-22.
 5. **No font or shader enters the repo or the vault without a licence record
    in the file itself.** Six fonts were pulled for this on 2026-09-21 —
    `docs/fonts.md`. A shader names its source and its licence; LYGIA, and
@@ -95,7 +99,7 @@ never symmetric, never inferred. The catalogue of links is the map of the suite.
 Nothing is committed on `main`. Every work item is a branch, named on the
 board in `docs/plan.md` and made from `main` when the item starts. Rebase it
 on `main` to catch up — never merge `main` into it; land it after the gate —
-the unit loop, the browser checks of what it touched, no file past the cap,
+the unit loop, the browser checks of what it touched, rule 4's lines,
 its docs and its board row written — with `git merge --no-ff` when it has
 two commits or more, `--ff-only` when it has one. A session ends pushed,
 finished or not. Since 2026-10-22, the author's ask → `docs/workflow.md`
@@ -111,7 +115,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise png fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick 3d-handles 3d-modifiers 3d-look windowed stage-still live stack place smart puppet-eyes puppet-mouth puppet-sway puppet-roles; do
   node tests/$t.mjs || break
 done
-node scripts/lines.mjs                  # rule 4: no file past 400 lines but the gamepad's four, known
+node scripts/lines.mjs                  # rule 4: past 400 lines, a reason; past 600, none; the gamepad's four known
 
 # In a real browser: compose in headless Chrome, on a copy of the vault.
 node scripts/check-compose.mjs
@@ -139,8 +143,7 @@ node scripts/check-smart.mjs            # M11: smart objects — saved, versione
 node scripts/check-page.mjs             # M11 done: the stack saved as a page of smart objects that follows its windows
 node scripts/check-puppet.mjs           # the rig's puppet: a fake camera read once a frame, eyes and mouth worn, the body swayed, the guides, the camera switched; sent and followed by a page in OBS; parts found drawn eyes first, and told
 node scripts/vendor-mediapipe.mjs       # once a machine, before the puppet reads a face: MediaPipe into core/libs/mediapipe/, out of git
-node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click and moved by handles, twisted by a stack, drawn in a style; with WebGL2 too
-node scripts/check-3d-save.mjs          # …a model saved, replayed, drawn again at scale 2, reopened, placed; its PNG
+node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click and moved by handles, twisted by a stack, drawn in a style; a model saved, drawn again at scale 2, placed; with WebGL2 too
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips
 # its GPU half, unless Chrome is given the flags:

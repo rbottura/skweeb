@@ -32,7 +32,7 @@ apps/<name>/
   STATUS.md    works now / known / next single step / parked
 ```
 
-One concept per file, 400 lines at most: the model, the drawing, the pointer
+One concept per file, looked at past 400 lines, split past 600 (rule 4): the model, the drawing, the pointer
 and the guides each get their own (particles: `model.js`, `forces.js`,
 `draw.js`, `guides.js`, `pointer.js`).
 
@@ -172,7 +172,7 @@ chains one value to another leaves a restore alone (`params.restoring`).
 ## Before calling it done
 
 - Served as plain files with no vault, it opens and draws (rule 7).
-- No file over 400 lines; no global crosses a file.
+- No file past 400 lines without its reason in `scripts/lines.mjs`, none past 600; no global crosses a file.
 - Saved and replayed, the vault's frame is the render, pixel for pixel; at
   scale 2 it is drawn again; `?open=` brings the panels back; compose places
   it (`/apps/compose/?place=<id>`). A loop's frame after the last is its

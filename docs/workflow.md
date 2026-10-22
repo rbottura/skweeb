@@ -106,9 +106,10 @@ What a branch passes before it lands — the definition of done:
      printf '%-40s' "$c"; node "$c" 2>&1 | tail -1
    done
    ```
-4. **No file past 400 lines** (rule 4): `node scripts/lines.mjs`, which
-   names the gamepad's four as known until C6 and fails on any other — so a
-   branch adds none. A file new on the branch counts once git knows it:
+4. **Rule 4's lines**: `node scripts/lines.mjs`. A file past 400 lines is
+   split along a seam it has, or kept whole with its reason in the script's
+   `KEPT`; none passes 600; the docs every session reads stay under 400; the
+   gamepad's four are known until C6. A file new on the branch counts once git knows it:
    `git add -N` it first.
 5. **Written where it is read:** its app's `STATUS.md`; `CLAUDE.md` for a
    new command, test or check; `docs/decisions.md` for a decision; and its
