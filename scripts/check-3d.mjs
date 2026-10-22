@@ -17,14 +17,19 @@
  * E, R and W say which handles; D duplicates it beside itself, Delete takes
  * it out; a drag that starts on a shape
  * turns round the model by as much as camera.js says and chooses nothing,
- * the right button slides it, the wheel comes nearer, F frames it. With
- * WebGPU taken away, as the laptop's Intel has it, three draws the same
- * opening with WebGL2. And no page said anything wrong. A model saved,
- * replayed, reopened and placed, and its PNG, are check-3d-save.mjs's, its
- * print check-print.mjs's — split from this one on 2026-10-22, at the line
- * cap.
+ * the right button slides it, the wheel comes nearer, F frames it. Saved: a `model`
+ * whose recipe is its shapes and whose render is the format; drawn again by
+ * its app it is its render; at scale 2 it is drawn again at twice the
+ * pixels, the same picture; `?open=` brings its shapes back; compose places
+ * it; the PNG is the format at its scale. With WebGPU taken away, as the
+ * laptop's Intel has it, three draws the same opening with WebGL2. And no
+ * page said anything wrong. Its print is check-print.mjs's, since
+ * 2026-10-22; past 400 lines, it is one model followed from the opening to
+ * its save (scripts/lines.mjs says so).
  */
 
+import fs   from 'node:fs';
+import path from 'node:path';
 import { startCheck } from './check-kit.mjs';
 import { TURN } from '../apps/3d/camera.js';
 
@@ -300,6 +305,87 @@ c.ok('F frames every shape: looking at their middle, from far enough', Math.abs(
   && framed[2] > 3, JSON.stringify(framed.map(x => +x.toFixed(3))));
 c.ok('…and every corner is still ground', (await Promise.all([[0.02, 0.02], [0.98, 0.98]].map(([x, y]) => pixelAt(x, y)))).every(isGround));
 await c.shot('3-framed');
+
+// ── Saved, replayed, drawn again ────────────────────────────────────────────
+
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+const mid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const o = mid ? await (await fetch(c.base + '/api/vault/' + mid)).json() : null;
+c.ok('saved: a model, made by 3d, titled by its shapes', !!o && o.type === 'model' && o.origin.app === '3d'
+  && o.title === 'box, sphere, torus' && /^3d_/.test(o.id), o ? `${o.id} ${o.type} "${o.title}"` : await page.eval(say));
+c.ok('its recipe: the view and its shapes, no vertices', !!o && o.recipe.shapes.length === 3 && o.recipe.shapes[1].id === 'sphere'
+  && o.recipe.shapes[1].params.radius === 0.6 && typeof o.recipe.yaw === 'number' && !JSON.stringify(o.recipe).includes('position'));
+const kept = o && o.recipe.shapes[0].modifiers;
+c.ok('…the box\'s stack kept with it, in order', !!kept && kept.map(m => `${m.id}:${m.on}`).join() === 'subdivide:true,twist:true,displace:true'
+  && kept[1].params.angle === 90, JSON.stringify(kept));
+c.ok('…and its style, three bands, an outline, shadows', !!o && o.recipe.toon === 3 && o.recipe.outline === 6 && o.recipe.shadows === true, o && `${o.recipe.toon} ${o.recipe.outline} ${o.recipe.shadows}`);
+c.ok('its render: the format, 1080 square', !!o && o.render.w === 1080 && o.render.h === 1080 && o.render.file === 'render.png',
+  o && `${o.render.w} × ${o.render.h} ${o.render.file}`);
+
+/** A saved model as the vault replays it: at its size, drawn again by its app, and at scale 2. */
+const replayOf = id => page.eval(`(async () => {
+  const { Vault } = await import('/core/vault.js');
+  const { openFrames } = await import('/core/rebuild.js');
+  const app = await import('/apps/3d/rebuild.js');
+  const { object, url } = await Vault.load(${JSON.stringify(id)});
+  const img = await createImageBitmap(await (await fetch(url)).blob());
+  const read = (src, w, h) => { const x = new OffscreenCanvas(w, h).getContext('2d'); x.drawImage(src, 0, 0, w, h); return x.getImageData(0, 0, w, h).data; };
+  const render = read(img, img.width, img.height);
+  const own = await app.openObject(object, { url });
+  const again = read(own.frame(0), img.width, img.height);
+  let worst = 0, off = 0;
+  for (let i = 0; i < render.length; i++) { const d = Math.abs(render[i] - again[i]); worst = Math.max(worst, d); if (d > 8) off++; }
+  const big = await openFrames(object, { url, scale: 2 });
+  const bigFrame = big.frame(0);
+  const down = read(bigFrame, img.width, img.height);
+  let mean = 0; for (let i = 0; i < render.length; i++) mean += Math.abs(render[i] - down[i]); mean /= render.length;
+  const out = { worst, off: off / render.length, big: [big.scale, bigFrame.width, bigFrame.height], mean, missing: own.missing,
+                atOwn: (await openFrames(object, { url })).scale };
+  own.dispose(); big.dispose(); return out;
+})()`);
+if (o) {
+  const replay = await replayOf(o.id);
+  c.ok('drawn again by its app, it is its render', replay.off < 0.001 && replay.worst <= 64,
+    `worst ${replay.worst}, ${(replay.off * 100).toFixed(3)}% past 8`);
+  c.ok('at its own size the vault shows its render', replay.atOwn === 1);
+  c.ok('at scale 2: drawn again, twice the pixels', replay.big[0] === 2 && replay.big[1] === 2160 && replay.big[2] === 2160, JSON.stringify(replay.big));
+  c.ok('…the same picture, sharper', replay.mean < 2, `mean difference ${replay.mean.toFixed(3)} of 255`);
+  c.ok('…with nothing missing', replay.missing.length === 0);
+
+  await c.go(c.base + '/apps/3d/?open=' + o.id);
+  await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+  c.ok('?open= brings its shapes back, folded, the box\'s stack too', (await page.eval(`${cards}.length`)) === 3
+    && (await page.eval(`Number(${cardRow(1, 'radius')}?.querySelector('.pp-num')?.value)`)) === 0.6
+    && Math.abs((await value('distance')) - o.recipe.distance) < 1e-9 && (await choice()) === 'folded folded folded'
+    && (await page.eval(`${modCards(0)}.map(m => m.querySelector('.pp-title').textContent).join()`)) === 'subdivide,twist,displace'
+    && (await value('bands of light — 0, smooth')) === 3 && (await value('outline, thousandths of its height')) === 6, await page.eval(say));
+
+  await c.go(c.base + '/apps/compose/?place=' + o.id);
+  await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
+  c.ok('compose places it', (await page.eval(say)).includes('box, sphere, torus — model'), await page.eval(say));
+  await c.shot('4-placed');
+}
+
+// ── The PNG: the format at its scale, drawn again ───────────────────────────
+
+await c.go(c.base + '/apps/3d/');
+await page.until(drawn, { timeout: 30000 });
+const DL = path.join(c.dir, 'downloads');
+await page.downloadsTo(DL);
+await page.typeInto(`${panelRow('scale')}?.querySelector('.pp-num')`, '2');
+await wait(300);
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download the picture (PNG)')`);
+await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 60000 });
+let file = null;
+for (let i = 0; i < 100 && !file; i++) {
+  const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.endsWith('.png'));
+  if (f) file = path.join(DL, f); else await wait(200);
+}
+const size = file ? (b => [b.readUInt32BE(16), b.readUInt32BE(20)])(fs.readFileSync(file)) : [0, 0];
+c.ok('the PNG is the format at its scale', size[0] === 2160 && size[1] === 2160, size.join(' × '));
 
 // ── With no WebGPU: three falls back to WebGL2, as on the laptop's Intel ────
 
