@@ -12,7 +12,7 @@
  * it joins the windows with what is on screen — the envelope its print
  * draws, a loop as a loop by its clock — and the stack, puts the drawer in
  * its panel, and draws the stack round its canvas (core/stackView.js). DOM and params;
- * core/param-panel.css draws `.pp-stack`.
+ * core/stack-panel.css draws `.pp-stack`.
  */
 
 import { joinLive, loopOf, savedBy } from './live.js';

@@ -4,6 +4,8 @@
 
 @import '../../core/theme.css';
 @import '../../core/param-panel.css';
+@import '../../core/cards.css';
+@import '../../core/stack-panel.css';
 @import './ui/hud.css';
 @import './ui/bsel.css';
 @import './ui/timeline.css';

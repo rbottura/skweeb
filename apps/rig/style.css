@@ -8,6 +8,8 @@
 
 @import '../../core/theme.css';
 @import '../../core/param-panel.css';
+@import '../../core/cards.css';
+@import '../../core/stack-panel.css';
 @import '../../core/vault-panel.css';
 
 .app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }

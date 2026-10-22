@@ -26,7 +26,8 @@ apps/<name>/
   frames.js    a recipe as frames: what a save draws and a replay draws
   save.js      Vault.save; every frame as a zip; a sprite sheet
   rebuild.js   what core asks: openObject(), reopens(), redraws()
-  style.css    @imports core's theme.css, param-panel.css, vault-panel.css
+  style.css    @imports core's theme.css, param-panel.css, cards.css,
+               stack-panel.css, vault-panel.css
                (and sequence-viewer.css for a loop), then only its layout
   STATUS.md    works now / known / next single step / parked
 ```

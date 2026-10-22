@@ -24,7 +24,7 @@
  * drawer of the card, its changes the outer list's, kept in the entry's
  * recipe under its key: `[{ id, params, on, modifiers: [{ id, params, on }] }]`.
  *
- * DOM and params only; core/param-panel.css draws `.pp-cards` and `.pp-card`.
+ * DOM and params only; core/cards.css draws `.pp-cards` and `.pp-card`.
  */
 
 import { defineParams } from './params.js';
