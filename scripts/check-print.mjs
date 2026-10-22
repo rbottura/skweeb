@@ -12,7 +12,8 @@
  * every window itself, nothing enlarged. Apps whose objects this vault has
  * not got are checked in their own checks (check-rig, check-map,
  * check-compose). A gamepad still is drawn again from its marks by core
- * (core/stage/still.js): one painted here as the gamepad paints, mirrored and
+ * (core/stage/still.js): one painted here as the gamepad paints — within a
+ * rasterizer's edges, and a frame a pixel off told apart — mirrored and
  * framed past its canvas's edge, is its render; a real one is, but for the
  * edges another rasterizer drew. Then the gamepad's print box from end to
  * end: a drawing made with a pad, E, a sheet at a low dpi, the PNG
@@ -126,15 +127,26 @@ const painted = await page.eval(`(async () => {
     g.setTransform(1, 0, 0, 1, x, y); g.rotate(r); g.scale(m.scale * flip, m.scale); g.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
   }
   const from = { x: -20, y: 60, w: 300, h: 280 }, to = { x: 12, y: 8, w: 300, h: 280 };
-  const still = new OffscreenCanvas(324, 296), s = still.getContext('2d');
-  s.fillStyle = '#ffffff'; s.fillRect(0, 0, 324, 296);
-  s.drawImage(overlay, from.x, from.y, from.w, from.h, to.x, to.y, to.w, to.h);
+  /** The gamepad's composite: the canvas copied through the frame, dx pixels right of where it goes. */
+  const framed = dx => {
+    const still = new OffscreenCanvas(324, 296), s = still.getContext('2d');
+    s.fillStyle = '#ffffff'; s.fillRect(0, 0, 324, 296);
+    s.drawImage(overlay, from.x, from.y, from.w, from.h, to.x + dx, to.y, to.w, to.h);
+    return still;
+  };
   const recipe = { canvas: { w: 500, h: 400, background: '#ffffff' }, frame: { from, to, w: 324, h: 296 }, marks };
   const h = await openStill({ type: 'still', recipe, render: { w: 324, h: 296 } }, { scale: 1 });
-  return (${apart})(h.frame(0), still, 324, 296);
+  return { right: (${apart})(h.frame(0), framed(0), 324, 296), pixelOff: (${apart})(h.frame(0), framed(1), 324, 296) };
 })()`);
-c.ok('a still painted as the gamepad paints, drawn again from its marks: its render', painted.mean < 0.05 && painted.off < 0.0005,
-  JSON.stringify(painted));
+// Within a rasterizer's edges, never to the pixel (STATUS.md, *Tests*): Chrome 155 draws a sprite's
+// turned edges a little differently by what the page drew with that picture before — measured
+// 2026-10-22, 0.13 of 255 and 0.4% of values past 8 here, 0.0009 in a fresh page — where the
+// frame one pixel off is 2.8 and 3.6%. The bounds sit between, and the second check proves
+// that they still tell the two apart.
+const close = p => p.mean < 0.5 && p.off < 0.01;
+c.ok('a still painted as the gamepad paints, drawn again from its marks: its render', close(painted.right),
+  JSON.stringify(painted.right));
+c.ok('…and the same frame a pixel off is told apart from it', !close(painted.pixelOff), JSON.stringify(painted.pixelOff));
 
 const drawing = newest('gamepad', ['still']);
 if (drawing) {
