@@ -24,7 +24,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 |---|---|---|---|---|
 | C0 | the puppet landed | `rig/puppet` | — | landed 2026-10-22 |
 | — | this plan, and the method | `docs/plan` | — | landed 2026-10-22 |
-| C1 | the docs true again | `docs/status` | S | ready |
+| C1 | the docs true again | `docs/status` | S | landed 2026-10-22 |
 | C2 | under the line cap | `clean/line-cap` | S | ready |
 | U0 | the columns measured | `ui/measure` | S | ready |
 | U1 | drawers on demand | `ui/drawers` | S | needs U0 |
@@ -61,6 +61,8 @@ S is a session, M two or three, L more.
 
 ## The order, and why
 
+The author's, 2026-10-22: "l'ordre proposé me va".
+
 1. **The ground cleared** — C1, C2, U0. The docs say what is true, the
    line cap holds, and the columns have numbers before anything moves
    them. C2 splits `core/param-panel.css` (392 lines), which U2 grows.
@@ -89,7 +91,6 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
-- **The order** above — taken as it stands, unless the author reorders it.
 - **How a moving model saves** (P1, asked 2026-10-06): a `sequence` whose
   recipe is the model's and its motion, the model its parent, as the rig's
   loops are. The default.
@@ -109,8 +110,8 @@ Each with what happens if nothing is said.
 - **The unit loop on GitHub** (C5): yes or no.
 - **Destra's licence**, in words its files can carry (C3).
 - **`docs/layers_ref.png`**, the sketch of the layers: rule 6 keeps it out
-  of git, so into the vault, by *+ pictures* on the laptop; the inbox will
-  point at its id.
+  of git, so into the vault, by *+ pictures* on the laptop;
+  `docs/smart-objects.md` will name its id.
 - **`detached`**, the envelope field for cutting loose, written up as
   decided: to confirm (root `STATUS.md`, *Broken*).
 

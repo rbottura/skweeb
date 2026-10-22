@@ -279,12 +279,14 @@ is cut from about fifty of the camera's pixels and shown larger: soft.
 
 ## Next single step
 
-**The puppet on the author's own head**: in OBS, *sway*, *rise as I nod*,
+**The puppet on the author's own head** — P0 on the board of
+`docs/plan.md`, waiting on an evening in OBS: *sway*, *rise as I nod*,
 *wobble* and the mouth's size and place tried and set — what is too much,
 what too little — and the defaults moved to what the author keeps.
 
 Paused, the author's call on 2026-10-21: **brick 6 waits on the author —
-the slug's back and side**, drawn in the gamepad as the front was. A worm
-stands on the map already — a crawling loop placed as a thing goes round
-inside its own box. What comes next for the worms is M8's: a path drawn on
-the map, that a thing follows across the room.
+the slug's back and side**, drawn in the gamepad as the front was (P5,
+after P3 has defined a character). A worm stands on the map already — a
+crawling loop placed as a thing goes round inside its own box. What comes
+next for the worms is M8's: a path drawn on the map, that a thing follows
+across the room (P7).

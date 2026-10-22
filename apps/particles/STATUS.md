@@ -1,8 +1,8 @@
 # STATUS — particles
-_last touched: 2026-09-30_
+_last touched: 2026-10-22_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
-and *Done when* are in `docs/roadmap.md`, M6 — a torch loop that closes
+and *Done when* are in `docs/roadmap-done.md`, M6 — a torch loop that closes
 exactly, drawn with a vault set's sprites and scrubbed to any frame, and a
 one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 `set → particles: sprites`, a use.
@@ -231,13 +231,15 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   with — and a frame through the fields takes 17–22 ms on its i7-8565U,
   before this brick and after, against a 16.7 ms budget set on the tower.
 - `scripts/check-particles.mjs` is 506 lines, past the cap; new checks of
-  the app go in `check-particles-links.mjs` until it is split.
+  the app go in `check-particles-links.mjs` until it is split — C2 on the
+  board.
 
 ## Next single step
 
 M6's seven bricks are in, its *Done when* met, and with them an emitter
-and a field taken from other objects. The suite goes on to M8 (`STATUS.md`);
-what is left here waits:
+and a field taken from other objects. Of particles' own, only C2 is on the
+board of the cycle begun 2026-10-22 (`docs/plan.md`) — it splits
+`scripts/check-particles.mjs`; what is left here waits under its *Later*:
 
 - **Colour over life** — for dots, and a tint for sprites: a `color[]`
   ramp run along a curve.

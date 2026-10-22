@@ -1,5 +1,5 @@
 # STATUS — fractals
-_last touched: 2026-09-30_
+_last touched: 2026-10-22_
 
 M7's app: fractals — escape time on the GPU kit, and a sprite copying
 itself. The plan and *Done when* are in `docs/roadmap.md`, M7 — a Julia loop that closes, redrawn exactly at print
@@ -144,8 +144,9 @@ field`.
 
 ## Next single step
 
-M7's *Done when* is met; the suite goes on to M8, the map editor
-(`STATUS.md`). What is left here waits, none of it started, as M5's
+M7's *Done when* is met, and nothing of fractals' own is on the board of
+the cycle begun 2026-10-22 (`docs/plan.md`). What is left here waits under
+its *Later*, none of it started, as M5's
 catalogue waits: a Julia set chosen by clicking a point of the Mandelbrot
 set (brick 2); more families and orbit traps (4); deeper, past 32 bits (5);
 strange attractors, flames and L-systems (6); and a field that moves with

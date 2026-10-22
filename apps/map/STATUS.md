@@ -1,5 +1,5 @@
 # STATUS — map
-_last touched: 2026-10-02_
+_last touched: 2026-10-22_
 
 M8's app: the map editor, and a room first (`docs/roadmap.md`, M8). A map
 is the field's word for a level; the playable map is its export, as video
@@ -141,6 +141,10 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## Next single step
 
-**M9 comes first** (`docs/roadmap.md`): the rig gives the avatar of brick 4
-a body that walks. Its first step is in the root `STATUS.md`. Brick 4
-resumes from here once M9's walk is saved as a character set.
+**Brick 4, an avatar that walks — P4 on the board of `docs/plan.md`**, once
+P3 has defined a character (its fields wait on the author's yes). It waits
+on no drawing: until a character set exists the avatar is any loop, facing
+every way. ZQSD or WASD by `event.code`, the arrows, a gamepad's stick; E
+uses what it faces; a tap walks to a cell by the shortest way over
+`walkable`; where it stands lives in the player, never in a recipe. Then
+P7, a worm's path across the map, and P8, brick 5.

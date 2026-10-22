@@ -3,7 +3,7 @@
  *
  * The fourth app, and where a finished piece will be made: objects from every
  * process placed on one page, previewed live and rendered out
- * (docs/roadmap.md, M4). The page is the suite's Format drawer and a rate;
+ * (docs/roadmap-done.md, M4). The page is the suite's Format drawer and a rate;
  * what is on it is a list of placements (placements.js, list.js), each an
  * object and a transform, and one of them at a time is chosen for the
  * `placed` panel to edit — from the list, or picked up on the page itself

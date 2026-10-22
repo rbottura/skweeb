@@ -1,5 +1,5 @@
 # STATUS — ckt
-_last touched: 2026-09-23_
+_last touched: 2026-10-22_
 
 ColorKineType v3. Ported from v2's own source, `J:\codes\ColorKineType_v2` —
 `script.js` (stage one), `p5_opencv.js` (the blob pass), `render.js` (stage
@@ -81,3 +81,7 @@ paths are measured against — so with `ink` the rows cannot show the ink's
 size, as grid's do, without moving the motion. Give the world its own fixed
 size in the recipe, and let an old recipe without it keep using its width and
 height: a migration, not a change of meaning.
+
+Not on the board of the cycle begun 2026-10-22 (`docs/plan.md`): it waits
+there under *Later*. The newsroom idea, if it becomes a milestone, would
+want ckt's whole words first.

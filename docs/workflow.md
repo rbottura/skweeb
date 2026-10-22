@@ -162,6 +162,24 @@ git config pull.ff only        # main only fast-forwards
 git config fetch.prune true    # a branch deleted on GitHub goes from here too
 ```
 
+And a key that pushes without asking, or a session cannot end pushed: the
+GitHub key (`~/.ssh/config`, `id_ed25519_perso`) has a passphrase, and on
+the tower, 2026-10-22, no agent held it — Windows' own was disabled — so
+an agent session's push was refused. Once, in PowerShell, the first two
+lines as an administrator:
+
+```powershell
+Set-Service ssh-agent -StartupType Automatic
+Start-Service ssh-agent
+ssh-add $env:USERPROFILE\.ssh\id_ed25519_perso       # the passphrase, once: the agent keeps it
+git config --global core.sshCommand C:/Windows/System32/OpenSSH/ssh.exe
+```
+
+The last line has Git use Windows' ssh, which asks that agent, instead of
+the ssh Git brings. Any program run as the author can then push with the
+key — the agent sessions included, which is the point. Without it, the
+author pushes by hand, and the session says so.
+
 ## GitHub, if wanted
 
 A pull request is a place to read a large item over before it lands, and

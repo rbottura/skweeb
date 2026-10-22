@@ -302,3 +302,43 @@ hangs by, the author telling any of it otherwise (`parts`). For it the rig
 took two options and changed nothing it draws: `proposeBones(…, { order })`
 and `drawingOf(…, { reverse })` — the rig's own proposal by hand, parked in
 its STATUS, can stand on them.
+
+## Decided since, 2026-10-22
+
+**A branch for each work item.** The author: "je suis le seul dev sur le
+projet pour l'instant mais je voudrais adopter une méthode de production
+correcte". Until that day every commit went straight onto `main`, and two
+days of the puppet sat uncommitted on the tower. So `main` is always green
+and is what every machine runs; every item of the plan is a branch, made
+when the item starts. A rebase brings a branch up to `main`, a merge lands
+it: `--no-ff` for two commits or more, so `git log --first-parent` reads as
+the board and one revert takes an item out; `--ff-only` for one, since a
+merge commit round a single commit says nothing. No squash: the commits are
+the project's diary, a brick's commits how it was built. A gate before
+landing — the unit loop, the checks of what was touched, the line cap, the
+docs — and a session ends pushed, three machines sharing the code. Side
+jobs keep the inbox's definition and run in worktrees of their own
+(`docs/workflow.md`).
+
+**The work is a board, and its order the author's.** `docs/plan.md`, the
+same day: the suite tidied, columns that fit, the paused bricks, layers and
+smart objects — each item with its branch, its size, what it needs and a
+*Done when*; and what waits on the author, each with what happens if
+nothing is said. The order, laid out and taken — "l'ordre proposé me va":
+the ground cleared, then the columns, then the bricks that wait on no one,
+then the layers, and the shell last, after a mockup.
+
+**The UI's second pass closes before it moves.** Measured that day in every
+app at 1600 × 1000: a column runs 2.14 screens on average as it opens,
+ckt's motion column 3.2. Four drawers every app shares — Format, Export,
+Stack, the player — are open by default under the app's own, and a range
+row is two lines, 70 px. Closing those by default takes the mean to 1.54,
+a row on one line to 1.32; moving them out of the column, to the viewer, a
+sheet and a panel of their own, to 1.23 only. So the cheapest step goes
+first, and where the shared things live waits on the author's eye.
+
+**The roadmap keeps the milestones still open.** It stood at the cap: the
+done ones — M1 to M4, M6 and M11 — went word for word to
+`docs/roadmap-done.md`, as the decisions' older days went before them; the
+roadmap keeps an index of all eleven, and the links as a section of their
+own.

@@ -1,7 +1,7 @@
 # Smart objects, and the live stack
 
 The one object that changes, and the live layers it is the saved form of —
-M11 (`docs/roadmap.md`). Moved out of `docs/object-model.md` on
+M11 (`docs/roadmap-done.md`). Moved out of `docs/object-model.md` on
 2026-10-06, when M11 began and that file stood at its cap: the object model
 keeps the envelope and the two kinds of edge, `parents` and `refs`; this
 file keeps what `refs` is for.

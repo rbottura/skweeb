@@ -1,5 +1,5 @@
 # STATUS — grid
-_last touched: 2026-09-24_
+_last touched: 2026-10-22_
 
 Grid v2: a source image resized so one pixel is one cell, each cell's
 luminance picking a member of an ordered ramp of tiles. Ported from
@@ -157,14 +157,17 @@ luminance picking a member of an ordered ramp of tiles. Ported from
   wins over the sort.
 
 ## Next single step
-- Nothing grid-only. The suite's next step is M4's compose, which will place
-  grid's dithers as it places everything else.
+- **L5 on the board of `docs/plan.md`: grid takes a window** — another app's
+  window as grid's source, followed live as filter follows one
+  (`apps/filter/following.js`), saved as a smart object when grid saves.
+  Until then nothing grid-only: U1 and U2 change grid's column with every
+  app's.
 
 ## Parked decisions
-- **No p5 in this app.** Grid needs `drawImage` into a canvas and nothing else,
-  and a render with no p5 instance can run in a worker, which keeps a
-  standalone `.skw` sandboxable. CLAUDE.md rule 8 asks for p5 in every app;
-  whether that stays the rule is open in the review doc.
+- **No p5 in this app** — and none required by the suite since 2026-09-26
+  (rule 8). Grid needs `drawImage` into a canvas and nothing else, and a
+  render with no p5 instance can run in a worker, which keeps a standalone
+  `.skw` sandboxable.
 - **Bots on the grid — deferred, not dropped.** `playerOne.js` in the original
   is an agent: a current cell, four neighbours, verbs that act on cells —
   paint, resize, rotate, change image, swap — with `index` separating player 1
