@@ -30,7 +30,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C7 | check-print green again | `fix/print-still` | S | landed 2026-10-22 |
 | C8 | rule 4 eased: a file looked at past 400, split past 600 | `docs/rule-4` | S | landed 2026-10-22 |
 | U0 | the columns measured | — | — | dropped: "mesurer les colonnes n'est pas nécessaire" |
-| U8a | the shared boxes: one contract, Export first | `ui/boxes` | M | ready |
+| U8a | the shared boxes: one contract, Export first | `ui/boxes` | M | ready, its spec landed |
 | U8b | the player and the Stack, as boxes | `ui/boxes-player-stack` | S | needs U8a |
 | U8c | Format and Ground, mounted anywhere | `ui/boxes-format` | S | needs U8a |
 | L10 | saved three ways: S, then 1 2 3 | `layers/save-three` | M | needs U8a |
