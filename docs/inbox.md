@@ -6,20 +6,27 @@ stays one brick.
 
 A session sorts each one before it ends (`CLAUDE.md`, *Ending a session*):
 
-- **onto the plan** — into an app's `STATUS.md` or `docs/roadmap.md`, and down
-  to *Sorted* with where it went. An idea is often a roadmap item already, in
-  other words; sorting is where that is noticed.
-- **a side job** — marked `side`. It touches no file the brick under way
-  touches, fits in one sitting with a check that proves it, needs no decision
-  from the author midway, and leaves the object model, recipes and core's APIs
-  alone. It runs on a branch of its own, as `grid/legacy-materials` did, and
-  never edits `STATUS.md`, `docs/roadmap.md` or `CLAUDE.md`: its commit
-  message says what it did, and the main thread folds that in at the merge.
+- **onto the plan** — a row on the board of `docs/plan.md`, or into an app's
+  `STATUS.md` or `docs/roadmap.md`, and down to *Sorted* with where it went.
+  An idea is often a roadmap item already, in other words; sorting is where
+  that is noticed.
+- **a side job** — marked `side`, its row on the board too. It touches no
+  file the item under way touches, fits in one sitting with a check that
+  proves it, needs no decision from the author midway, and leaves the object
+  model, recipes and core's APIs alone. Every item is a branch since
+  2026-10-22 (`docs/workflow.md`); a side job's runs beside the main
+  thread's, in a worktree of its own, and never edits `STATUS.md`,
+  `docs/roadmap.md`, `docs/plan.md` or `CLAUDE.md`: its commit message says
+  what it did, and the main thread folds that in at the merge.
 - **parked** — marked, with why.
 
 A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
+
+Nothing, 2026-10-22: both ideas that waited went onto the plan's board.
+
+## Sorted
 
 - **2026-10-08 — moving pictures for a newsroom, Blast first.** "try to
   setup skweeb suite to create motion designs just like kielmd did for the
@@ -39,7 +46,9 @@ A sorted entry goes once what it became is done; git keeps it.
   whole words, and motion of their own — then a page's length set by hand in
   compose, and a delivery: every format of one page, an MP4 made for the
   web, a poster. Waits on the author: whether it is a milestone, and what it
-  comes before.
+  comes before. → `docs/plan.md`, *Waiting on the author*, 2026-10-22, with
+  what it would want first: a page's length set by hand
+  (`apps/compose/STATUS.md`, *Next*) and ckt's whole words.
 - **2026-10-22 — the suite's other apps in OBS.** "ça veut dire donc aussi
   qu'on peut connecter d'autre app de la suite à des scènes obs de la même
   manière non ? c'est à explorer plus tard mais la possibilité est
@@ -49,10 +58,9 @@ A sorted entry goes once what it became is done; git keeps it.
   browser, and OBS's is another. Any app could have such a page for what it
   makes: a particle loop over a stream, a fractal behind it, a compose page
   as an overlay, a map's room. Waits on the author: which first, and
-  whether it is a milestone.
-
-## Sorted
-
+  whether it is a milestone. → L9 on the board of `docs/plan.md`, the
+  other apps worn in OBS, 2026-10-22: the puppet's way made core's; which
+  app first waits on the author.
 - **2026-10-21 — a VTuber avatar: the slug, worn.** "je veux savoir si on
   peut rapidement créer un système pour créer un avatar de vtubing … un rig
   comme fait précédemment très simple d'un haut de corps comme celui d'un

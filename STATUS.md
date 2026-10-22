@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-10-06_
+_last touched: 2026-10-22_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` has the milestones, `docs/decisions.md` why things are as
@@ -9,7 +9,19 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Works right now
 
-### Newest — 2026-10-06 and -07
+### Newest — 2026-10-21 and -22
+
+- **The rig's puppet, worn in OBS** (`apps/rig/STATUS.md`, *The puppet*):
+  the author's eyes from the camera at the eyestalks' tips, the mouth on
+  the face, the body swaying with the head, the rig's bones over it as
+  guides; kept as a smart object that a page in OBS follows; and scripts
+  that keep the avatar in sight on the screen OBS records
+  (`docs/guides/obs.md`, read in the page by `core/Guide.js`).
+- **A plan, and a branch for each item** (`docs/plan.md`,
+  `docs/workflow.md`): the cycle's work items on one board, in order, each
+  a branch landed after a gate; the puppet the first, `rig/puppet`.
+
+### 2026-10-06 and -07
 
 - **M11 is done: the live stack and smart objects** (the author's, after a
   week of making things with the suite; `docs/roadmap.md`, M11;
@@ -225,8 +237,8 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Tests
 
-Fifty-one files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-10-06). Newest: `live` — windows on Node's
+Fifty-eight files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-10-22). Newest: `live` — windows on Node's
 own BroadcastChannel hearing each other come, change and go; `windowed` — a window's corner
 moving every absolute transform and pixel, and nothing else; `stage-still`
 — a gamepad still's marks as stamps, framed, mirrored, clipped, drawn;
@@ -239,7 +251,7 @@ normals true to the surface, no crack, the caps; `3d-look` — ramps, hulls,
 shadows; before them `3d-shapes`, `3d-camera`, `3d-model`, and the rig's
 four.
 
-Twenty browser checks, each a command in `CLAUDE.md`: its own server on a
+Twenty-four browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
 throws or its console is not quiet. Newest: `check-live` (9), windows in
@@ -311,41 +323,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M11 is done; the author's call is next.** What M11 left for later, each
-small: grid taking a window as its source as filter does (`core/send.js`
-`TAKERS`, grid's `source.js`); a pinned `version` in compose's placed
-panel; flatten; refusing a cycle on save. Or M10's brick 5, which waits on
-how a moving model saves. Ask the author which.
-
-**Waiting on the author first: how a moving model saves.** M10's brick 5
-is motion — a turntable, then a shape swung as the rig swings a bone — and
-the decisions say a model's "pictures are `still` and `sequence`, the model
-their parent" without settling which object S writes when it moves: a
-`model` whose render carries frames; a `sequence` whose recipe is the
-model's and its motion, as the rig's loops are; or both, the sequence's
-parent the model. The second fits what replays already, and is the
-default unless the author says otherwise.
-
-**And soon, the author's: the smart object** (`docs/roadmap.md`, after
-M10): the `skw` spec moved to a file of its own first, the object model
-being at the cap; its bricks laid out with the author.
-
-**Then M10's brick 5, its first: a turntable** (`apps/3d/STATUS.md`,
-*Next*). A Motion drawer — turns a loop, its length and rate — frame i seen
-from the yaw plus 360° × turns × i / length, so the loop closes to the bit;
-core's Playhead plays it, the handles hidden while it does; saved,
-replayed, played in compose.
-
-**Waiting on the author: the slug from the back and from the side**, drawn
-in the gamepad as the front was — M9's last brick, a character set by
-direction, for M8's avatar (`apps/rig/STATUS.md`). And for the worms,
-when M8 resumes: **a path drawn on the map that a thing follows across the
-room**, so a crawling worm goes about the room and not only round its own
-box.
-
-Waiting elsewhere (their STATUS files): a Julia set by clicking the
-Mandelbrot set, more fractal families, deeper zoom; colour over life in
-particles; filter's motion group — *bob* first — parked with M5's catalogue.
+**C1 on the board of `docs/plan.md`: the docs true again** — every app's
+next step true, this file rewritten under the cap, the roadmap split as
+the decisions were. The board holds the rest in order — the suite tidied,
+columns that fit, the paused bricks, layers and smart objects — each item a
+branch landed after a gate (`docs/workflow.md`), and what waits on the
+author, each with what happens if nothing is said.
 
 ## Parked decisions
 
