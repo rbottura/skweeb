@@ -37,18 +37,24 @@ export function nearestBone(bones, p) {
 }
 
 /**
+ * The chains are hung in drawing order, or in `order` — stroke indices, the
+ * body's first — so a body drawn after its limbs can still be what they
+ * hang from.
+ *
  * @param {object} drawing          drawing.js `drawingOf`
  * @param {object} [opts]
  * @param {number} [opts.corner=30]   degrees: a turn that makes a joint
  * @param {number} [opts.longest=200] px: the longest a bone runs before it is cut
  * @param {number} [opts.least=4]     px: a stroke shorter has no bones
+ * @param {number[]} [opts.order]     the strokes in the order their chains are hung
  * @returns {Array<{id, stroke, parent, x, y, angle, length, from, to}>}  parents before children
  */
-export function proposeBones(drawing, { corner = 30, longest = 200, least = 4 } = {}) {
+export function proposeBones(drawing, { corner = 30, longest = 200, least = 4, order = null } = {}) {
   const bones = [];
-  drawing.strokes.forEach((stroke, k) => {
+  for (const k of order || drawing.strokes.map((_, i) => i)) {
+    const stroke = drawing.strokes[k];
     const { path } = stroke;
-    if (path.length < least) return;
+    if (path.length < least) continue;
     const cuts = [0, ...cornersOf(path, { corner }), path.length];
     const at = [];
     for (let i = 0; i < cuts.length - 1; i++) {
@@ -69,7 +75,7 @@ export function proposeBones(drawing, { corner = 30, longest = 200, least = 4 } 
         from: at[i], to: at[i + 1],
       });
     }
-  });
+  }
   return bones;
 }
 

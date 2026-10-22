@@ -65,5 +65,12 @@ ok('a mirror pattern\'s copy is a stroke of its own, mirrored', [mirrored.stroke
   mirrored.stamps[1].stroke], [2, 700, -1, 1]);
 ok('a drawing names each sprite it uses once', [...spritesOf(recipe).entries()], [['brushes#8', ['brushes', 8]]]);
 
+const back = drawingOf(recipe, { reverse: [1] });
+const armStamps = back.strokes[1].stamps;
+ok('a stroke read in reverse: from its last stamp, measured from there', [armStamps[0] > armStamps[armStamps.length - 1],
+  back.stamps[armStamps[0]].s, near(back.strokes[1].path.points[0].y, d.stamps[d.strokes[1].stamps.at(-1)].y)], [true, 0, true]);
+ok('…the stamps in the order drawn, and the other strokes as they were', [back.stamps.map(s => s.x).join() === d.stamps.map(s => s.x).join(),
+  back.strokes[0].stamps.join() === d.strokes[0].stamps.join()], [true, true]);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

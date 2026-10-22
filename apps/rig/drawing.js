@@ -16,14 +16,20 @@ import { strokesOf, pathOf } from './strokes.js';
 export { hasMarks, spriteKey, spritesOf };
 
 /**
+ * A stroke in `reverse` is read from its last stamp to its first — its
+ * line, how far along each stamp lies, and the order of its `stamps` —
+ * while the stamps keep the order they were drawn in, and so how they
+ * overlap: a limb drawn from its tip in is rigged from the body out.
+ *
  * @param {object} recipe          a gamepad still's: { canvas, frame, marks }
  * @param {object} [opts]
  * @param {number} [opts.jump=16]  a lifted pen, px (strokes.js)
+ * @param {Iterable<number>} [opts.reverse]   strokes read the other way round
  * @returns {{width: number, height: number, ground: ?string,
  *            stamps: Array<{x, y, rotation, scale, flipX, key, stroke, s}>,
  *            strokes: Array<{stamps: number[], path: object}>}}
  */
-export function drawingOf(recipe, { jump = 16 } = {}) {
+export function drawingOf(recipe, { jump = 16, reverse = [] } = {}) {
   const still = stampsOf(recipe);
   const strokeOfMark = [];
   strokesOf(recipe.marks, { jump }).forEach((group, k) => { for (const i of group) strokeOfMark[i] = k; });
@@ -38,6 +44,8 @@ export function drawingOf(recipe, { jump = 16 } = {}) {
     strokes[stroke].stamps.push(n);
     return { x, y, rotation, scale, flipX, key, stroke, s: 0 };
   });
+  const backwards = new Set(reverse);
+  strokes.forEach((stroke, k) => { if (backwards.has(k)) stroke.stamps.reverse(); });
   for (const stroke of strokes) {
     stroke.path = pathOf(stroke.stamps.map(i => stamps[i]));
     stroke.stamps.forEach((i, n) => { stamps[i].s = stroke.path.at[n]; });
