@@ -2,10 +2,13 @@
 _last touched: 2026-10-22_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
-`docs/roadmap.md` has the milestones, `docs/decisions.md` why things are as
-they are. Rewritten on 2026-10-02, when it had grown to 557 lines: what each
-day added is in its app's file, and here only what works. Ideas the author
-has between bricks wait in `docs/inbox.md` until a session sorts them.
+`docs/roadmap.md` the milestones still open and `docs/roadmap-done.md` the
+done ones; `docs/plan.md` the work items and their branches;
+`docs/decisions.md` why things are as they are. Rewritten on 2026-10-02,
+when it had grown to 557 lines, and on 2026-10-22, M11's bricks folded into
+what works: what each day added is in its app's file, here only what works.
+Ideas the author has between bricks wait in `docs/inbox.md` until a session
+sorts them.
 
 ## Works right now
 
@@ -21,95 +24,41 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
   `docs/workflow.md`): the cycle's work items on one board, in order, each
   a branch landed after a gate; the puppet the first, `rig/puppet`.
 
-### 2026-10-06 and -07
+### M11 — the live stack and smart objects (done 2026-10-07; `docs/smart-objects.md`)
 
-- **M11 is done: the live stack and smart objects** (the author's, after a
-  week of making things with the suite; `docs/roadmap.md`, M11;
-  `docs/smart-objects.md`, its spec). Every app its own window, the windows
-  one stack each draws round its own layer; opacity and blend; live within
-  one browser.
-  - **Bricks 0 and 1, the spec and windows that know each other**
-    (`core/live.js`; `tests/live.mjs`, `check-live`): every app joins one
-    BroadcastChannel with what is on screen — the envelope its print draws,
-    a loop as a loop — heard in another window within a second; a window
-    closed leaves, a crashed one after three missed calls.
-  - **Brick 2, the stack** (`core/stack.js`, `core/blend.js`; `tests/stack.mjs`
-    18, `check-live` 14): one live composition the windows share — a layer
-    from a window or the vault put on, moved up or down, taken off, its
-    opacity and blend (CSS's seventeen, `plus-lighter` as add) and place set
-    in the drawer's rows, from any window; the newest change wins in every
-    window, two crossed changes end on one stack; a window opening late is
-    handed it; a closed window's layer leaves it. Putting a layer on from a
-    window not yet stacked puts that window over it — a look tried over what
-    it will join.
-  - **Brick 3, drawn round every canvas** (`core/stackView.js`,
-    `core/place.js`; `tests/place.mjs` 12, `check-live` 17): a window in
-    the stack draws, in its own frame, the layers under it on a canvas behind
-    its own and each over it on one in front, its own canvas given its
-    opacity and blend by CSS — the browser composites them as a save does.
-    A playing app's layer goes as its loop (`loopOf`), shown everywhere at
-    the wall clock's frame. Filter's loop at 0.4 and multiply under
-    particles' plume, seen from both windows; taken off the stack, a window
-    has its page back as it was. compose's placement math is core's now.
-  - **Brick 4, Send to ▸** (2026-10-07; `core/send.js`,
-    `apps/filter/following.js`; `tests/live.mjs` 32, `check-send` 8): in
-    any app's Stack drawer, *Send to ▸ filter* — the filter window open
-    asked to take this one, or one opened beside it — and filter's source is
-    that window, live, redrawn a moment after each change there, its
-    envelope carried whole in filter's own layer. Saved, filter asks the
-    window it follows to save itself first — its own save, title, lineage;
-    the vault's id the answer (`savedBy`) — names what it kept as its source
-    and parent, and follows it again. A window asks another for what it
-    answers to: `live.ask`, `live.answer`.
-  - **Brick 5, smart objects** (2026-10-07; `core/smart.js`,
-    `server/versions.js`; `tests/vault.mjs` now with versions, `smart` 7,
-    `check-smart` 10): a `skw` — `skw_…`, its recipe the bound form, the
-    app, the kind, its recipe and seed — saved by its app through its own
-    save, the window bound (`Vault.bind`): a window filter follows, saved
-    for filter; one reopened in its app. Saved again, a version: what it
-    was kept in `versions/`, `vault:updated` on every page; filter's
-    source, compose's placements and the stack's layers that are it or hold
-    it are drawn again. `refs` fill in for what places one.
-  - **Brick 6, the stack saved as a page** (2026-10-07; `core/stackSave.js`;
-    `tests/compose-page.mjs`, `check-page` 7): in any drawer, *Save the
-    stack as a page* — every window a smart object, the page compose's
-    recipe placing them; compose's placements take opacity and blend, drawn
-    by `paintPage`, in its preview, saves, export and print. M11's *Done
-    when*, as a command: particles sent to filter over a drawing at 0.7 and
-    screen, saved as a page, and the page drawn again when particles saves.
-- **M10 is 3D, and four of its six bricks work** (`apps/3d/STATUS.md`, its
-  detail; `check-3d` 58, seven unit files): primitives from a catalogue,
-  each a card; an orbit view; three r186 on core's GPU device, WebGL2 where
-  there is none; a `model` keeps values, never a vertex — saved, replayed,
-  drawn again at scale 2, placed. A click picks a shape, three's handles
-  move, turn and stretch it; a stack of modifiers per shape; a style — toon
-  bands, an outline, shadows. Core's cards (`core/Cards.js`) came out of
-  filter for it: `choose`, `fold`, `duplicate`, `inner`.
-- **A print at a sheet's size and a dpi, in every app** (the author's asks,
-  2026-10-06: 120 × 176 cm at 300 dpi, "just one export" — then "to all our
-  suite apps"): 14173 × 20787 px in 77 tiles of 2048, written band by band
-  into a PNG with its dpi (core/png.js). First the 3D app — 12 s, 3–5 MB,
-  round shapes given the segments the sheet needs (`check-3d-poster` 8) —
-  then core's `print.js` and `PrintPanel.js` in every Export drawer: each
-  handle draws a `window` of its frame, so nothing holds the sheet. Rig,
-  particles, map, grid, ckt and fractals' copies through their own drawing
-  code on a moved context (`core/windowed.js`); escape time by the plane's
-  window; filter and looks by `core/gpu/window.js`, the GPU prelude knowing
-  where a run lies; compose by each placement's part. A gamepad still is
-  drawn again from its marks (`core/stage/still.js`, the rig's stamps now
-  core's), and the gamepad prints its canvas: E. `check-print` (16) holds
-  every app's print to its object drawn whole, a seam measured apart; map
-  and compose print in their own checks (`docs/core-export.md`).
-- **`frames-to-video` reads a zip past 2 GiB** — a frame at a time; the
-  author's 2.65 GiB loop could not be read whole (`ERR_FS_FILE_TOO_LARGE`).
-  Past 4 GiB a zip cannot hold the frames, and the export says so.
-- **core/noise.js `noise3`**: gradient noise in 3D on the suite's hash, JS
-  only, for a displaced shape.
-- **`check-map` measures its replay** now, as the note under *Tests* says a
-  check must: caught in the act at worst 121, 0.03% off, it passes.
-- **The docs under the cap**: `docs/decisions.md` split — its first three
-  days are `docs/decisions-2026-09-21-to-23.md`, listed at its head — and
-  the roadmap's finished milestones cut to what proved them.
+- **Every app its own window, the windows one stack** (`core/live.js`,
+  `stack.js`, `stackView.js`, `place.js`): every app joins one
+  BroadcastChannel with what is on screen; the stack is one live
+  composition every window keeps — a layer from a window or the vault, put
+  on, moved, taken off, its opacity and blend by CSS's names — and each
+  window draws it round its own canvas, a loop at the wall clock's frame.
+- **Send to ▸ filter** (`core/send.js`, `apps/filter/following.js`): a
+  window as filter's source, live; saved, the window saves itself first.
+- **Smart objects** (`core/smart.js`, `server/versions.js`): a `skw` saved
+  by its app through its own save, the window bound; saved again, a
+  version, and every page holding it drawn again (`vault:updated`).
+- **The stack saved as a page** (`core/stackSave.js`): every window a smart
+  object, the page compose's, whose placements blend. What M11 left — pins,
+  flatten, no cycle, more takers, overrides — is L in `docs/plan.md`.
+
+### M10 — 3D (`apps/3d/STATUS.md`, four bricks of six, 2026-10-06)
+
+- **Primitives made from their params**, each a card (`core/Cards.js`, out
+  of filter for it); an orbit view; three r186 on core's GPU device, WebGL2
+  where there is none; a `model` keeps values, never a vertex — saved,
+  replayed, drawn again at scale 2, placed. Picked by a click, moved by
+  three's handles; a stack of modifiers per shape; a style — toon bands, an
+  outline, shadows. Brick 5, a turntable, is P1 on the board.
+
+### The print, in every app (2026-10-06; `docs/core-export.md`)
+
+- Any object at a sheet's size and a dpi — the 120 × 176 cm poster at 300
+  dpi is 14173 × 20787 px — in tiles, each handle drawing a `window` of its
+  frame, written band by band into a PNG with its dpi (`core/print.js`,
+  `PrintPanel.js`, `png.js`, `windowed.js`): nothing holds the sheet. A
+  gamepad still is drawn again from its marks (`core/stage/still.js`), and
+  the gamepad prints its canvas, E. `check-print` holds every app's print
+  to its object drawn whole.
 
 ### M9 — the rig (`apps/rig/STATUS.md`, five bricks of six, 2026-10-02)
 
@@ -119,7 +68,8 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
   Poses saved as stills, swings and walks by part as loops that close,
   worms crawling round a path; replayed to the pixel, drawn again from the
   marks at any scale, placed in compose. The vault offers *Rig this ↗*.
-  Brick 6, the slug from every side, waits on the author's drawings.
+  Brick 6, the slug from every side, waits on the author's drawings (P5).
+  Its player, the puppet, is under *Newest*.
 
 ### M8 — the map editor (`apps/map/STATUS.md`, three bricks of six; the player)
 
@@ -233,33 +183,25 @@ has between bricks wait in `docs/inbox.md` until a session sorts them.
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
-  `frames.zip` plus `scripts/frames-to-video.mjs`.
+  `frames.zip` plus `scripts/frames-to-video.mjs`, which reads a zip past
+  2 GiB a frame at a time.
 
 ## Tests
 
 Fifty-eight files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-10-22). Newest: `live` — windows on Node's
-own BroadcastChannel hearing each other come, change and go; `windowed` — a window's corner
-moving every absolute transform and pixel, and nothing else; `stage-still`
-— a gamepad still's marks as stamps, framed, mirrored, clipped, drawn;
-`png` — a PNG
-written band by band, read back by zlib to the byte; `3d-pick` — a ray's
-answer is a card's place, what is drawn is what is picked; `3d-handles` —
-three's own controls driven in Node, a drag along the x arrow moving a box
-exactly as far as the pointer went; `3d-modifiers` — counts, angles,
-normals true to the surface, no crack, the caps; `3d-look` — ramps, hulls,
-shadows; before them `3d-shapes`, `3d-camera`, `3d-model`, and the rig's
-four.
+all of them, and all pass (2026-10-22). Newest: the puppet's four —
+`puppet-eyes` (27), `puppet-mouth` (15), `puppet-sway` (24), `puppet-roles`
+(17): the eyes and the mouth cut and worn, the sway, the parts found;
+before them M11's — `live`, `stack`, `place`, `smart` — the print's —
+`windowed`, `stage-still`, `png` — and the 3D app's seven.
 
 Twenty-four browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-live` (9), windows in
-tabs of one browser listing each other; `check-print` (16), every app's
-print against its object drawn whole, and the gamepad's box drawn on with a
-pad that is not there; `check-3d-poster` (8), the
-300 dpi poster printed whole and read back; `check-3d` (61), on this
-machine's WebGPU and with WebGPU taken away; `check-rig` (35), `check-map-play` (16). On the laptop Chrome keeps
+throws or its console is not quiet. Newest: `check-puppet`, the puppet on
+a fake camera, sent and followed by a page in OBS; before it M11's four —
+`check-live`, `check-send`, `check-smart`, `check-page` — `check-print`
+(16), `check-3d-poster` (8) and `check-3d` (61). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
 (`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
@@ -271,8 +213,8 @@ compares two pages' canvases measures, never demands the pixel.
 - **The stack's live view blends over the checkerboard** where nothing is
   under a layer; a save blends over nothing — alike for most blends, not for
   screen or difference. An app's own ground is opaque: set it to none to see
-  what is under its layer. The gamepad and the 3D app have no clock in the
-  stack: the gamepad has no drawer, the 3D app's model does not move yet.
+  what is under its layer (L4). The gamepad and the 3D app have no clock in
+  the stack: the gamepad has no drawer, the 3D app's model does not move yet.
 - **A gamepad loop prints enlarged where it is large**: p5 replays it with
   no window, so it is drawn whole as large as a canvas allows — most loops
   fit a 120×176 sheet at 300 dpi, a tall one is enlarged a little, and the
@@ -289,26 +231,23 @@ compares two pages' canvases measures, never demands the pixel.
   rate saves default to is the author's call; its width and height are both
   the canvas and the world the glyph sits in.
 - **The gamepad cannot reopen its recordings**; its params are not on
-  `core/params.js`, its panels its own; its GALLERY panel shows IndexedDB.
-- **Files over the 400-line cap**: `scripts/check-particles.mjs` (506),
-  `scripts/check-3d.mjs` (454, since brick 4 — its print section would sit
-  in `check-print`), and
-  the gamepad's `ui/hud.css` (721), `sketch/gamepadSketch.js` (572),
-  `ui/TimelinePanel.js` (547), `ui/ParamPanel.js` (500). At it:
-  `core/VaultPanel.js` (399) and `docs/roadmap.md` (400) — the next thing
-  either learns needs a split first: the roadmap's finished milestones are
-  the natural cut, as the object model's `.skw` went to
-  `docs/smart-objects.md`.
-- **A 3D model is a still until brick 5**; its handles turn about the
+  `core/params.js`, its panels its own; its GALLERY panel shows IndexedDB
+  (C6).
+- **Files over the 400-line cap**: `scripts/check-particles.mjs` (506) and
+  `scripts/check-3d.mjs` (454) — C2 — and the gamepad's `ui/hud.css` (721),
+  `sketch/gamepadSketch.js` (572), `ui/TimelinePanel.js` (547) and
+  `ui/ParamPanel.js` (500) — C6. At it, `core/VaultPanel.js` (399): the next
+  thing it learns needs a split first.
+- **A 3D model is a still until brick 5** (P1); its handles turn about the
   world's axes only; nothing in it is undone; a shadow's darkness and map
   are fixed; not yet seen on the laptop itself, where it should draw with
   WebGL2 (`apps/3d/STATUS.md`, *Known*).
-- **Trashed brush sets still show in the gamepad and in ckt**; a cut-loose
+- **Trashed brush sets still show in the gamepad and in ckt** (C4); a cut-loose
   set or page keeps its old picture until saved again.
 - **`detached` is a new envelope field**, for cutting loose — written up as
-  decided; the author may want to confirm it.
+  decided; the author may want to confirm it (`docs/plan.md`, *Waiting*).
 - **An identical re-cut does not join the new session folder**: dedup hands
-  back the old object with its old tags.
+  back the old object with its old tags (C4).
 - **Five sprite names mean two pictures** in `brushes` against v2's
   `sprites/`. A cleanup must never renumber `brushes`: marks name sprites
   by index — the rig's poses too.
@@ -316,22 +255,27 @@ compares two pages' canvases measures, never demands the pixel.
   restart it after pulling — on the laptop, `systemctl --user restart
   skweeb-vault`.
 - **Nothing can leave the author's machines**: `Vault.publish` is specified,
-  not built; M8's fifth brick bakes a map into a bundle instead.
+  not built; M8's fifth brick bakes a map into a bundle instead (P8).
 - As before: old grid recipes re-render trimmed; `grd_` against `gri_` id
-  prefixes; `assets/fonts/` lacks its `OFL.txt` files; a recipe past
+  prefixes; `assets/fonts/` lacks its `OFL.txt` files (C3); a recipe past
   4000 px opens clamped.
 
 ## Next single step
 
-**C1 on the board of `docs/plan.md`: the docs true again** — every app's
-next step true, this file rewritten under the cap, the roadmap split as
-the decisions were. The board holds the rest in order — the suite tidied,
-columns that fit, the paused bricks, layers and smart objects — each item a
-branch landed after a gate (`docs/workflow.md`), and what waits on the
-author, each with what happens if nothing is said.
+**C2 on the board of `docs/plan.md`: under the line cap** —
+`scripts/check-particles.mjs` split in two, `check-3d`'s print section
+moved into `check-print`, `core/param-panel.css` split before U2 grows it,
+and `scripts/lines.mjs`, the gate's line check as a command. Then U0, U1
+and U2: columns that fit. The board holds the rest in order, the author's
+since 2026-10-22, each item a branch landed after a gate
+(`docs/workflow.md`), and what waits on the author, each with what happens
+if nothing is said.
 
 ## Parked decisions
 
+- **A branch for each work item** (the author, 2026-10-22): `main` always
+  green, an item a branch, rebased to catch up and merged to land —
+  `docs/workflow.md`; the plan's order, the author's the same day.
 - **M10 is 3D, and it is meshes, drawn by three.js** (the author,
   2026-10-06): primitives generated from their params, never stored as
   vertices; `model` a type, its pictures `still` and `sequence`;
@@ -374,5 +318,5 @@ author, each with what happens if nothing is said.
 - The rest — the theme and the UI pass, M4 as the master render, video as
   frames plus ffmpeg, `version` against `at`, `.skw` as a smart object, a
   port reading the original's source — in `docs/decisions.md`; Destra is
-  free, its licence to be named in the files (`docs/fonts.md`). The UI
+  free, its licence to be named in the files (`docs/fonts.md`, C3). The UI
   review: https://claude.ai/code/artifact/28ad1346-969d-44e7-b058-b6d7abeced8d
