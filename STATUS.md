@@ -201,7 +201,8 @@ mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
 throws or its console is not quiet. Newest: `check-puppet`, the puppet on
 a fake camera, sent and followed by a page in OBS; before it M11's four —
 `check-live`, `check-send`, `check-smart`, `check-page` — `check-print`
-(16), `check-3d-poster` (8) and `check-3d` (61). On the laptop Chrome keeps
+(20), `check-3d-poster` (8), `check-3d` (45) and `check-3d-save` (14). On
+the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
 (`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
@@ -233,10 +234,6 @@ compares two pages' canvases measures, never demands the pixel.
 - **The gamepad cannot reopen its recordings**; its params are not on
   `core/params.js`, its panels its own; its GALLERY panel shows IndexedDB
   (C6).
-- **check-print fails one check on the tower**, since Chrome 155: a still
-  painted as the gamepad paints is 0.13 of 255 from core's drawing of it
-  from its marks, where 0.05 is asked — the same on the commit of
-  2026-10-07, so not the code since (C7).
 - **Files over the 400-line cap**: the gamepad's `ui/hud.css` (721),
   `sketch/gamepadSketch.js` (572), `ui/TimelinePanel.js` (547) and
   `ui/ParamPanel.js` (500) — C6; `node scripts/lines.mjs` names them, and
@@ -266,10 +263,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**C7 on the board of `docs/plan.md`: check-print green again** — find
-where a still painted as the gamepad paints and core's drawing of it from
-its marks part since Chrome 155, and mend the drawing or the measure. Then
-U0, U1 and U2: columns that fit. The board holds the rest in order, the author's
+**U0 on the board of `docs/plan.md`: the columns measured** —
+`scripts/check-ui.mjs`, every app at 1600 × 1000 and 1366 × 768, each
+column in screens as it opens and with every drawer open, failing when one
+grows past its last measure. Then U1 and U2: columns that fit. The board holds the rest in order, the author's
 since 2026-10-22, each item a branch landed after a gate
 (`docs/workflow.md`), and what waits on the author, each with what happens
 if nothing is said.
