@@ -1,5 +1,5 @@
 # STATUS — filter
-_last touched: 2026-09-26_
+_last touched: 2026-10-22_
 
 M5's app: any picture or loop through a chain of GPU filters, on the kit in
 `core/gpu/` (`docs/core-api.md`, *gpu/*). The plan and *Done when* are in
@@ -25,6 +25,15 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
 
 ## Works now
 
+- **Another window as the source, live** (2026-10-07, M11's brick 4;
+  `following.js`, `core/send.js`; `check-send`). *Send to ▸ filter* in
+  another app's Stack drawer, or `?live=<window id>`: the source is what
+  that window has on screen — its layer, the envelope its save would write —
+  drawn again a moment after each change there, so a slider dragged there
+  is not a hundred rebuilds here; the window gone, it is said, and the last
+  picture stays. Saved, filter asks the window to save itself first, with
+  its own save, title and lineage — as a smart object since brick 5 — and
+  saves over what it kept, then follows the window again.
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the Export drawer, `docs/core-export.md`): the chain over its part of the
   source and as far round it as the chain reads — a filter that reads
@@ -141,6 +150,9 @@ The first is *bob*: the picture up and down by a height, eased. Saving such
 a chain saves a `sequence`, its render the frame on screen, replayed by
 rebuild.js from the still and the chain. Then breathe, sway, glow pulse,
 spin — and time, a loop in.
+
+Not on the board of the cycle begun 2026-10-22 (`docs/plan.md`): it waits
+there under *Later*, as M5's catalogue has since M6 was chosen over it.
 
 ## Parked
 

@@ -1,5 +1,5 @@
 # STATUS — 3d
-_last touched: 2026-10-06_
+_last touched: 2026-10-22_
 
 M10's app (`docs/roadmap.md`, M10): 3D, from primitives up. A model is
 its shapes — each a primitive, its params, a place and a look — with a
@@ -191,9 +191,11 @@ call, 2026-10-06 (`docs/decisions.md`).
 frames.js's `openModel` gives that many frames at that rate; core's
 Playhead plays them in the view, space to stop, the handles hidden while
 it plays. S saves a `sequence`, as the rig's loops are — its recipe the
-model's and its motion — replayed by rebuild.js; compose plays it — unless
-the author answers otherwise what a moving model saves as (`STATUS.md`,
-*Next*). Then a shape's place swung on a wave, as the rig swings a bone.
+model's and its motion — replayed by rebuild.js; compose plays it — the
+default, unless the author answers otherwise (`docs/plan.md`, *Waiting on
+the author*). P1 on the board, ready; then P2, a shape's place swung on a
+wave as the rig swings a bone, and P6, a model from every side, once P3 has
+defined a character.
 
 ## Parked
 

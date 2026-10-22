@@ -1,5 +1,5 @@
 # STATUS — compose
-_last touched: 2026-09-27_
+_last touched: 2026-10-22_
 
 M4's app: objects from every process placed on one page, previewed live and
 rendered out (`docs/roadmap.md`, M4). Built in five bricks, all in: **M4 is
@@ -141,9 +141,10 @@ done** (2026-09-24).
   recording's marks at `renderScale`, grid's tiles at the cell's size times
   it, ckt's whole picture, a page's objects each at theirs. Its own size stays
   its render's at any scale, so a page places it the same way in the preview
-  and in the export. A picture no app can draw again — a gamepad still, a
-  shape — stays its pixels, says so (`handle.scale`), and the bar names it:
-  `stretched from their pixels: brushes`. On a grid dither at 2x, drawn
+  and in the export. A picture no app can draw again — a shape, a picture
+  from outside — stays its pixels, says so (`handle.scale`), and the bar
+  names it; a gamepad still is drawn again from its marks by core since
+  2026-10-06 (`core/stage/still.js`). On a grid dither at 2x, drawn
   again keeps 11 times the fine detail of stretched; on a ckt still, twice.
 - **Export**: *Download the page (PNG)* — A4 at scale 2 is 2480 × 3508, in
   about 0.4 to 1.6 s — and, for a page that moves, *Download every frame
@@ -181,20 +182,21 @@ at scale 2.
 
 ## Next
 
-The five bricks are in. What would come after them, none of it started:
+The five bricks are in, and M11 gave the placements opacity and blend. On
+the board of `docs/plan.md`, compose's next come with the layers: **L1,
+pins** — a smart placement *follows the latest* or is *kept at vN*, in the
+placed panel — then L2, flatten, and L6, edit in place. Not on the board,
+waiting:
 
-- **A gamepad still drawn again at print scale**, the one kind that still
-  prints stretched: its recipe's `marks` are a recording's events — the same
-  shape — its `canvas` the screen, and `frame.from` its crop, so core can
-  replay them through the stage at `renderScale`, every mark shown, cropped.
 - **A timeline**, if the list's frame labels stop being enough: rows by
   time, dragged to move `at` and `length`.
-- **A page length set by hand**, for a post that must be exactly ten seconds.
+- **A page length set by hand**, for a post that must be exactly ten
+  seconds — the newsroom's first need, if it becomes a milestone.
 
 ## Known
 
-- A gamepad still or a shape prints stretched from its pixels, and the bar
-  says which; the first item under *Next* fixes the gamepad's.
+- A shape, or a picture from outside, prints stretched from its pixels, and
+  the bar says which.
 - A print export draws its page on one canvas. Tried up to A4 at scale 2,
   2480 × 3508; a browser caps a canvas's area — about 268 million pixels in
   Chrome — and the largest sheets at scale 4 are past that. Untested there.
@@ -217,8 +219,8 @@ The five bricks are in. What would come after them, none of it started:
   turned sprite takes it, not what shows through beneath.
 - The picker lists shapes inside their `folder:` groups, closed, so a legacy
   sprite is two clicks away.
-- `main.js` is at 349 lines, the placement editing moved to `editing.js`;
-  `scripts/check-compose.mjs` is at 336, and print scale has a check of its
+- `main.js` is at 365 lines, the placement editing moved to `editing.js`;
+  `scripts/check-compose.mjs` is at 345, and print scale has a check of its
   own.
 
 ## Decided as it was built — M4, 2026-09-24
