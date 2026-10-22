@@ -27,7 +27,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | — | this plan, and the method | `docs/plan` | — | landed 2026-10-22 |
 | C1 | the docs true again | `docs/status` | S | landed 2026-10-22 |
 | C2 | under the line cap | `clean/line-cap` | S | landed 2026-10-22 |
-| C7 | check-print green again | `fix/print-still` | S | ready |
+| C7 | check-print green again | `fix/print-still` | S | landed 2026-10-22 |
 | U0 | the columns measured | `ui/measure` | S | ready |
 | U1 | drawers on demand | `ui/drawers` | S | needs U0 |
 | U2 | a row on one line | `ui/rows` | M | needs C2, U1 |
@@ -68,8 +68,8 @@ S is a session, M two or three, L more.
 The author's, 2026-10-22: "l'ordre proposé me va".
 
 1. **The ground cleared** — C1, C2, C7, U0. The docs say what is true,
-   the line cap holds, `main` is green — check-print is not, since Chrome
-   155 — and the columns have numbers before anything moves them.
+   the line cap holds, `main` is green, and the columns have numbers before
+   anything moves them.
 2. **Columns that fit** — U1, U2, U3: core alone, every app at once, from
    2.14 screens a column to 1.32, projected (*U*, below). Before any brick,
    since every brick after them adds rows.
@@ -140,13 +140,7 @@ it lands. Nothing to install; the browser checks stay on the machines.
 its own, four files past the cap, its recordings never reopened, no clock
 in the stack. A milestone's size: listed so it is chosen, not forgotten.
 
-**C7 — check-print green again** · `fix/print-still` · S. Since Chrome 155
-on the tower, a still painted as the gamepad paints is 0.13 of 255 from
-core's drawing of it from its marks (`core/stage/still.js`), where 0.05 is
-asked; the commit of 2026-10-07 measures the same to the last digit. Found
-where the two part, then `still.js` mended if a print is truly off, or the
-check made to measure, never to demand the pixel. *Done when* check-print
-is green on the tower.
+**C7 — check-print green again** · landed 2026-10-22, `fix/print-still`.
 
 ## U — columns that fit
 

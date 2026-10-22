@@ -357,3 +357,16 @@ places it and filter takes it: core's picker hears its versions and core's
 loaders unwrap it. A moving model's sequence keeps the default asked on
 2026-10-06 — the model's recipe and its motion, the model its parent — and
 a character is taken as proposed: "on adaptera sûrement plus tard".
+
+**A tolerance comes with the fault it must still catch.** C7, the same
+day: check-print's still painted as the gamepad paints stood 0.13 of 255
+from core's drawing of it from its marks, where 0.05 was asked, on the
+commit of 2026-10-07 as on that day's — and drawn by the same path in a
+fresh page the two are 0.0009 apart. So `core/stage/still.js` is right,
+and Chrome 155 draws a sprite's turned edges a little differently by what
+the page drew with that picture before; which history, the measures did
+not pin down. A frame one pixel off is 2.8 of 255 and 3.6% of values: the
+bounds sit between, 0.5 and 1%, and the check draws that pixel-off frame
+too and fails if the bounds no longer tell it apart. The rule of the
+checks — measure, never demand the pixel — now says how far: as far as a
+fault measured beside it allows.
