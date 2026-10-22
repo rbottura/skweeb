@@ -96,6 +96,10 @@ moved no widget.)
 
 ## The UI kit — decided 2026-09-23
 
+Reopened 2026-10-22: the layout and the theme are to be redesigned from the
+author's notes, and the boxes every app shares become components first —
+`docs/plan.md`, *U*, and `docs/boxes.md`.
+
 One look and one set of pieces for every app. `theme.css` is neo-brutalist
 and light: cream ground, black ink, thick borders, hard shadows, one yellow
 accent — and yellow is a fill, never text. The page is a grid (`.app`): the

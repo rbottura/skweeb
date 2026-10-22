@@ -131,7 +131,7 @@ any of them.
 ## Several machines
 
 The tower, the laptop and the work PC share the code through GitHub, and
-the vault through the laptop (`docs/decisions.md`, 2026-09-28). So a
+the vault through the laptop (`docs/decisions-2026-09-28-to-10-02.md`). So a
 session ends pushed: a branch half done is committed — `wip: …` — and
 pushed, never left in a working tree. The next machine fetches and
 switches. A branch is rebased only on the machine about to land it.
