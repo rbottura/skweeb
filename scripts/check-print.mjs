@@ -10,14 +10,16 @@
  * small tiles and held against the object drawn whole at the same scale —
  * the same picture, no seam where tiles meet — and the app is shown to draw
  * every window itself, nothing enlarged. Apps whose objects this vault has
- * not got are checked in their own checks (check-3d, check-rig, check-map,
+ * not got are checked in their own checks (check-rig, check-map,
  * check-compose). A gamepad still is drawn again from its marks by core
  * (core/stage/still.js): one painted here as the gamepad paints, mirrored and
  * framed past its canvas's edge, is its render; a real one is, but for the
  * edges another rasterizer drew. Then the gamepad's print box from end to
  * end: a drawing made with a pad, E, a sheet at a low dpi, the PNG
- * downloaded — its size, its dpi, the drawing on it. And no page said
- * anything wrong.
+ * downloaded — its size, its dpi, the drawing on it. And the 3D app's: a
+ * model made here, printed in twelve tiles against it drawn whole, and its
+ * print panel from end to end — moved from check-3d.mjs on 2026-10-22. And
+ * no page said anything wrong.
  */
 
 import fs   from 'node:fs';
@@ -208,6 +210,53 @@ const inked = file ? await page.eval(`(async () => {
 c.ok('printed: a PNG the sheet\'s size, saying its 50 dpi, the drawing on it', !!file && png.readUInt32BE(16) === 2362
   && png.readUInt32BE(20) === 3465 && phys > 0 && png.readUInt32BE(phys + 4) === Math.round(50 / 0.0254) && inked > 0.02,
   `${await page.eval(gpSay)} · ink ${(inked * 100).toFixed(1)}%`);
+
+// ── The 3D app: a model in tiles, and its print panel from end to end ───────
+
+await c.go(c.base + '/apps/3d/');
+await page.until(`/box, sphere, torus|nothing draws/.test(${say})`, { timeout: 30000 });
+await page.downloadsTo(DL);
+const panelRow = name => `[...document.querySelectorAll('#side > .pp > .pp-body .pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+
+const tiling = await page.eval(`(async () => {
+  const { printObject } = await import('/core/print.js');
+  const { openModel } = await import('/apps/3d/frames.js');
+  const { openRenderer } = await import('/apps/3d/renderer.js');
+  const { modelParams, OPENING } = await import('/apps/3d/params.js');
+  const recipe = { ...modelParams().values, toon: 3, outline: 6, shadows: true, width: 600, height: 880, scale: 1,
+                   shapes: OPENING.map(s => ({ ...s, modifiers: s.id === 'box' ? [{ id: 'subdivide', params: {} }, { id: 'twist', params: {} }] : [] })) };
+  const renderer = await openRenderer();
+  const read = (src, w, h) => { const x = new OffscreenCanvas(w, h).getContext('2d'); x.drawImage(src, 0, 0); return x.getImageData(0, 0, w, h).data; };
+  const out = await printObject({ type: 'model', origin: { app: '3d' }, recipe, render: { w: 600, h: 880 } }, { sheet: [600, 880], tile: 256, paper: null });
+  const bmp = await createImageBitmap(out.blob);
+  const tiled = read(bmp, 600, 880);
+  const whole = openModel(recipe, { renderer });
+  const one = read(whole.frame(0), 600, 880);
+  whole.dispose();
+  let worst = 0, off = 0, sum = 0;
+  for (let i = 0; i < one.length; i++) { const d = Math.abs(one[i] - tiled[i]); worst = Math.max(worst, d); sum += d; if (d > 8) off++; }
+  return { size: [bmp.width, bmp.height], worst, off: off / one.length, mean: sum / one.length, enlarged: out.enlarged };
+})()`);
+c.ok('the 3D app: a print in twelve tiles is the model drawn whole, the outline and shadows meeting',
+  tiling.size.join() === '600,880' && tiling.enlarged === 1 && tiling.off < 0.002 && tiling.mean < 0.3, JSON.stringify(tiling));
+
+await page.click(`${panelRow('format')}?.querySelector('.pp-chip[title="120x176"]')`);
+await page.typeInto(`${panelRow('dpi')}?.querySelector('.pp-num')`, '50');
+await wait(300);
+const printNote = await page.eval(`document.querySelector('.pp-print-note')?.textContent || ''`);
+c.ok('the 3D app\'s print panel: the 120×176 sheet at 50 dpi, its pixels and tiles, said', printNote === '120×176 at 50 dpi: 2362 × 3465 px, drawn in 4 tiles', printNote);
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.click(`document.querySelector('.pp-print')`);
+await page.until(`/^printed|failed/.test(${say})`, { timeout: 120000 });
+let printed = null;
+for (let i = 0; i < 100 && !printed; i++) {
+  const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => /^3d_120x176_50dpi/.test(n) && n.endsWith('.png'));
+  if (f) printed = path.join(DL, f); else await wait(200);
+}
+const head = printed ? fs.readFileSync(printed) : Buffer.alloc(0);
+const physAt = head.indexOf('pHYs');
+c.ok('…printed: a PNG the sheet\'s size, saying its 50 dpi', !!printed && head.readUInt32BE(16) === 2362 && head.readUInt32BE(20) === 3465
+  && physAt > 0 && head.readUInt32BE(physAt + 4) === Math.round(50 / 0.0254), `${await page.eval(say)} · ${printed && path.basename(printed)}`);
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));

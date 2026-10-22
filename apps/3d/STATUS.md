@@ -134,7 +134,8 @@ call, 2026-10-06 (`docs/decisions.md`).
   it draws with WebGL2 by itself, the bar saying so — checked with WebGPU
   taken away, the same opening drawn; its one line about falling back is
   kept off the console.
-- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 61 with
+- **Saved, replayed, placed** (`save.js`, `rebuild.js`; `check-3d` 45 and
+  `check-3d-save` 14 since C2, its print in `check-print`, with
   all the above, a real mouse on the handles). S
   saves a `model`: its recipe the panel's values and `shapes: [{ id,
   params, on }]`, titled by its shapes — *box, sphere, torus* — its render
