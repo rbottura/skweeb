@@ -257,7 +257,8 @@ mirrored — a set, `role: 'character'`, walks by direction, for M8's avatar.
 
 Later, past *Done when*: pictures with no marks — a mesh from their alpha,
 Blender's heat weights, skinning on the GPU kit; IK; keyframes on core's
-easing; the gamepad as a puppeteer.
+easing; the gamepad as a puppeteer — and the face as one, begun 2026-10-21
+from the inbox: the puppet, the author's eyes and head in OBS (`apps/rig/STATUS.md`).
 
 *Done when:* the author's slug walks the room in four directions, and worms
 crawl about it on their paths, their stamps sliding like scales. The links:
