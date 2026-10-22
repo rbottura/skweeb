@@ -190,12 +190,13 @@ call, 2026-10-06 (`docs/decisions.md`).
 360° × turns × i / length, so frame `length` is frame 0 to the bit.
 frames.js's `openModel` gives that many frames at that rate; core's
 Playhead plays them in the view, space to stop, the handles hidden while
-it plays. S saves a `sequence`, as the rig's loops are — its recipe the
-model's and its motion — replayed by rebuild.js; compose plays it — the
-default, unless the author answers otherwise (`docs/plan.md`, *Waiting on
-the author*). P1 on the board, ready; then P2, a shape's place swung on a
-wave as the rig swings a bone, and P6, a model from every side, once P3 has
-defined a character.
+it plays. S saves through the sheet every app gets first (L10), the
+author's answer of 2026-10-22: 1 the model as it stands, 2 the loop — a
+`sequence`, as the rig's loops are, its recipe the model's and its motion —
+3 a smart object of either, that a particle sprite or a placement follows.
+Replayed by rebuild.js; compose plays it. P1 on the board, after L10; then
+P2, a shape's place swung on a wave as the rig swings a bone, and P6, a
+model from every side, once P3 has defined a character.
 
 ## Parked
 

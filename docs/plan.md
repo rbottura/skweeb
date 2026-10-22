@@ -14,7 +14,8 @@ the row `landed` with the date in the branch's last commit. An idea that
 comes mid-item goes to `docs/inbox.md`, as before; sorted onto the plan, it
 becomes a row here. A row is `ready`; `needs` another; `waits` on the
 author or on something made; or is a `side job`, run beside the main
-thread in a worktree of its own (`docs/inbox.md`, its head).
+thread in a worktree of its own (`docs/inbox.md`, its head). A landed item
+keeps its row, and its paragraph shrinks to a line: git keeps the rest.
 
 ## The board
 
@@ -30,9 +31,11 @@ In the order the main thread takes them; side jobs and waits at the end.
 | U1 | drawers on demand | `ui/drawers` | S | needs U0 |
 | U2 | a row on one line | `ui/rows` | M | needs C2, U1 |
 | U3 | any control by name | `ui/find` | S | needs U1 |
-| P1 | M10's brick 5: a turntable | `3d/turntable` | M | ready, on the default below |
-| P3 | a character, defined once | `core/character` | S | waits: the author's yes on its fields |
+| L10 | saved three ways: S, then 1 2 3 | `layers/save-three` | M | ready |
+| P1 | M10's brick 5: a turntable | `3d/turntable` | M | needs L10 |
+| P3 | a character, defined once | `core/character` | S | ready |
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | needs P3 |
+| L11 | a smart object followed wherever it is picked | `layers/follow` | M | ready |
 | L1 | pins | `layers/pins` | M | ready |
 | L3 | no cycle | `layers/cycles` | S | ready |
 | L2 | flatten | `layers/flatten` | S | needs L1 |
@@ -69,12 +72,15 @@ The author's, 2026-10-22: "l'ordre proposé me va".
 2. **Columns that fit** — U1, U2, U3: core alone, every app at once, from
    2.14 screens a column to 1.32, projected (*U*, below). Before any brick,
    since every brick after them adds rows.
-3. **The paused bricks that wait on no one** — P1, then P3 and P4 once the
-   author has said yes to a character's fields. P1 has waited since
-   2026-10-06 on one answer, and has a default.
-4. **Layers and smart objects** — L1, L3, L2, L6, L7, L5: what M11 left
-   after its *Done when*, in compose's placed panel and the Stack drawer;
-   they move into the layers panel with U6.
+3. **Saving, and the paused bricks that wait on no one** — L10, P1, P3,
+   P4. Asked how a moving model saves, the author answered for every app:
+   a still, a sequence or a smart object (2026-10-22). So the sheet comes
+   first, and the turntable saves through it.
+4. **Layers and smart objects** — L11 first, the author's own example: a
+   3D smart object as a particle sprite, drawn again in particles when the
+   model changes. Then L1, L3, L2, L6, L7, L5: what M11 left after its
+   *Done when*, in compose's placed panel and the Stack drawer, moving into
+   the layers panel with U6.
 5. **The shell** — U4, U5, U6, once the author has seen a mockup: where
    the clock, the frame, the output and the layers live is a matter for the
    author's eye more than a measure — after U2 they take a column from
@@ -83,21 +89,15 @@ The author's, 2026-10-22: "l'ordre proposé me va".
    drawings exist.
 
 Two hot spots set it. `core/ParamPanel.js`, `widgets.js`, `Drawer.js`,
-`theme.css` and every app's `main.js` are U's — U4 touches every app — so
-no app brick runs beside U4. `core/smart.js`, `vault.js` and compose's
+`theme.css` and every app's `main.js` are U's — U4 touches every app, and
+so does L10, since S is in every `main.js` — so no app brick runs beside
+either. `core/smart.js`, `vault.js` and compose's
 placed panel are L's. The side jobs touch neither and run any time.
 
 ## Waiting on the author
 
 Each with what happens if nothing is said.
 
-- **How a moving model saves** (P1, asked 2026-10-06): a `sequence` whose
-  recipe is the model's and its motion, the model its parent, as the rig's
-  loops are. The default.
-- **A character's fields** (P3; the object model is the contract): a `set`,
-  `role: 'character'`, its members loops by direction in RPG Maker's order
-  — down, left, right, up — the first frame of each its stance; a left left
-  out is the right, mirrored; eight directions later, by the same rule.
 - **The shell's look** (U4 to U6): a mockup to look at before a line of it.
 - **The slug's back and side**, drawn in the gamepad as the front was (P5).
 - **An evening in OBS with the puppet** (P0): sway, rise, wobble and the
@@ -117,15 +117,9 @@ Each with what happens if nothing is said.
 
 ## C — the suite tidied
 
-**C1 — the docs true again** · `docs/status` · S. Every `STATUS.md`'s
-*Next single step* true again: grid's names M4's compose, and a p5 question
-settled on 2026-09-26; compose's first *Next*, a gamepad still at print
-scale, landed with the print on 2026-10-06; map's points at a root step
-that moved; ckt's, particles' and filter's say a row of this board, or
-that they wait. The root `STATUS.md` (395 lines) rewritten under the cap,
-its next step this board. The roadmap (399) split as the decisions were:
-the done milestones' paragraphs into `docs/roadmap-done.md`. *Done when* no
-STATUS names a step done or gone, and no doc is past 400 lines.
+**C1 — the docs true again** · landed 2026-10-22: every app's next step
+true and on this board, the roadmap's done milestones in
+`docs/roadmap-done.md`, the root `STATUS.md` folded to 322 lines.
 
 **C2 — under the line cap** · `clean/line-cap` · S.
 `scripts/check-particles.mjs` (506) split in two; `scripts/check-3d.mjs`
@@ -231,9 +225,10 @@ viewer's head, `1080 × 1080 · 1:1 ▾`, opening over the viewer:
 `ParamPanel` learns to mount a group elsewhere, still drawn from the
 schema. Every app's `main.js`. A mockup first.
 
-**U5 — export on a sheet** · `ui/export` · M. The Export drawer's actions
-and core's print panel on a sheet over the page, as the guide's, from a
-button in the viewer's head. S still saves at once.
+**U5 — export on a sheet** · `ui/export` · M. The Export drawer's
+downloads and core's print panel join L10's sheet: one sheet for what
+leaves the screen — into the vault, 1 2 3, or out of the suite, a PNG, the
+frames, a sprite sheet, a print — opened from the viewer's head too.
 
 **U6 — the layers panel** · `ui/layers` · M. The Stack drawer out of the
 column: a panel of its own over the viewer's edge, toggled from its head —
@@ -249,7 +244,37 @@ What M11 left after its *Done when* (`docs/smart-objects.md`; decisions,
 2026-10-07): pins, flatten and refusing a cycle wait for a placement to
 carry a version; filter is the one app that takes a window; `overrides` is
 written and never built; the live view blends over the checkerboard where
-a save blends over nothing.
+a save blends over nothing. And the author's of 2026-10-22: every app saves
+a still, a sequence or a smart object, and a smart object is followed
+wherever it is used.
+
+**L10 — saved three ways: S, then 1 2 3** · `layers/save-three` · M. S
+opens a sheet over the viewer in every app on core's kit: **1** a still,
+the frame on screen; **2** a sequence, the loop; **3** a smart object,
+what is on screen kept live. The keys by their place (`event.code`, the
+digits and the keypad's): & é " on the author's AZERTY. What an app cannot
+make is greyed — 2 where nothing moves — and Enter, or S again, repeats
+the last choice, so S S is the save of before. A smart object is M11's:
+what is on screen bound (`Vault.bind`), its next save of that kind its next
+version — the sheet says *v3 → v4*, and offers a new one instead. Each app
+declares what it saves; the sheet is drawn from that (`core/SaveSheet.js`).
+The gamepad comes with C6. *Done when* every app's check saves through the
+sheet, and a smart object saved twice is two versions of one id.
+
+**L11 — a smart object followed wherever it is picked** · `layers/follow` ·
+M. The author's example: a 3D smart object as a particle sprite, drawn
+again in particles when the model is changed and saved in the 3D app.
+Today only compose's placements, filter's source, the stack's layers and
+the puppet hear a new version (`vault:updated`), and core's loaders —
+`sprites.js`, `points.js`, `fields.js` — know nothing of a smart object,
+where `openFrames` unwraps one. So core's object param, the picker every
+app takes an object with, offers a smart object wherever the kind it binds
+is accepted, and holding one, hears its versions and says it changed: the
+app loads it again as if picked again, the loaders unwrapping it as
+`openFrames` does. Every picker at once — particles' sprites and emitter,
+grid's source, a map's things, the rig's drawing. *Done when* a check
+saves a model again in one window, and particles' sprites change in
+another, with no reload.
 
 **L1 — pins** · `layers/pins` · M. A placement of a smart object carries
 its `version`, shown in compose's placed panel and in the Stack drawer —
@@ -319,17 +344,23 @@ evening in OBS, then the defaults moved to what the author kept.
 **P1 — M10's brick 5: a turntable** · `3d/turntable` · M. A Motion drawer:
 turns a loop — 0, ±1, ±2 — its frames and its fps; frame i seen from the
 yaw plus 360° × turns × i / frames, so the last frame meets the first to
-the bit (`apps/3d/STATUS.md`, *Next*). Saved by the default above,
-replayed by `rebuild.js`, played in compose. Its player is a drawer until
-U4 moves every player.
+the bit (`apps/3d/STATUS.md`, *Next*). Saved through L10's sheet: 1 the
+model as it stands, as today; 2 the loop, a `sequence` whose recipe is the
+model's and its motion, the model its parent, as the rig's loops are; 3 a
+smart object of whichever is on screen. Replayed by `rebuild.js`, played
+in compose. Its player is a drawer until U4 moves every player.
 
 **P2 — M10's brick 5: a shape swung** · `3d/swing` · M. A shape's place
 swung on a wave, as the rig swings a bone, a phase a shape, every loop
 closing.
 
 **P3 — a character, defined once** · `core/character` · S. The fields the
-author says yes to, as a row of `docs/object-model.md` and of
-`core/uses.js` — *map character* — with a test.
+author took on 2026-10-22, "on adaptera sûrement plus tard": a `set`,
+`role: 'character'`, its members loops by direction in RPG Maker's order —
+down, left, right, up — the first frame of each its stance; a left left
+out is the right, mirrored; eight directions later, by the same rule. A
+row of `docs/object-model.md` and of `core/uses.js`, *map character*, with
+a test.
 
 **P4 — M8's brick 4: an avatar that walks** · `map/avatar` · M. In the
 player, a character on the spawn — or, until there is one, any loop facing

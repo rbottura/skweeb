@@ -342,3 +342,18 @@ done ones — M1 to M4, M6 and M11 — went word for word to
 `docs/roadmap-done.md`, as the decisions' older days went before them; the
 roadmap keeps an index of all eleven, and the links as a section of their
 own.
+
+**Saved three ways, and followed wherever used.** Asked how a moving model
+saves, the author answered for every app: "sauvegarder une still doit être
+possible, une séquence aussi, et un smart object aussi" — a 3D smart object
+as a particle sprite, drawn again in particles when the model is changed in
+the 3D app. So S opens a sheet in every app on core's kit — 1 a still, 2 a
+sequence, 3 a smart object — the keys by their place, & é " on the
+author's AZERTY as ZQSD is WASD; what an app cannot make is greyed, and
+Enter repeats the last choice. A smart object is M11's bound form,
+unchanged: what is on screen bound, its next save its next version. And it
+is followed wherever an object can be picked, not only where compose
+places it and filter takes it: core's picker hears its versions and core's
+loaders unwrap it. A moving model's sequence keeps the default asked on
+2026-10-06 — the model's recipe and its motion, the model its parent — and
+a character is taken as proposed: "on adaptera sûrement plus tard".
