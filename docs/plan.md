@@ -28,6 +28,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C1 | the docs true again | `docs/status` | S | landed 2026-10-22 |
 | C2 | under the line cap | `clean/line-cap` | S | landed 2026-10-22 |
 | C7 | check-print green again | `fix/print-still` | S | landed 2026-10-22 |
+| C8 | rule 4 eased: a file looked at past 400, split past 600 | `docs/rule-4` | S | landed 2026-10-22 |
 | U0 | the columns measured | `ui/measure` | S | ready |
 | U1 | drawers on demand | `ui/drawers` | S | needs U0 |
 | U2 | a row on one line | `ui/rows` | M | needs C2, U1 |
@@ -52,6 +53,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | P8 | M8's brick 5: baked and published | `map/bake` | L | needs P4 |
 | C3 | fonts licensed in their files | `clean/font-licences` | S | side job; Destra waits on the author |
 | C4 | two known bugs | `fix/trashed-sets`, `fix/recut-folder` | S | side jobs |
+| C9 | the checks' helpers shared | `clean/check-helpers` | S | side job |
 | L4 | the live view blends as a save does | `layers/isolation` | S | side job |
 | P5 | M9's brick 6: the slug from every side | `rig/views` | M | waits: the author's drawings |
 | P0 | the puppet on the author's head | `rig/puppet-defaults` | S | waits: an evening in OBS |
@@ -141,6 +143,15 @@ its own, four files past the cap, its recordings never reopened, no clock
 in the stack. A milestone's size: listed so it is chosen, not forgotten.
 
 **C7 — check-print green again** · landed 2026-10-22, `fix/print-still`.
+
+**C8 — rule 4 eased** · landed 2026-10-22, `docs/rule-4`.
+
+**C9 — the checks' helpers shared** · `clean/check-helpers` · S, a side job.
+Every check defines its own `say`, `wait`, `row`, `set`, `scrubTo`,
+`pixels`, `apart`, `readZip` — the same lines in twenty files, a little
+different in each. A module of them beside `check-kit.mjs`, each check
+taking what it uses: what rule 4's eased cap leaves to split is then
+seams, never copies. *Done when* no check defines a helper another has.
 
 ## U — columns that fit
 

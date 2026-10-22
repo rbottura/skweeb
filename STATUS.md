@@ -195,14 +195,13 @@ all of them, and all pass (2026-10-22). Newest: the puppet's four —
 before them M11's — `live`, `stack`, `place`, `smart` — the print's —
 `windowed`, `stage-still`, `png` — and the 3D app's seven.
 
-Twenty-six browser checks, each a command in `CLAUDE.md`: its own server on a
+Twenty-five browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
 throws or its console is not quiet. Newest: `check-puppet`, the puppet on
 a fake camera, sent and followed by a page in OBS; before it M11's four —
 `check-live`, `check-send`, `check-smart`, `check-page` — `check-print`
-(20), `check-3d-poster` (8), `check-3d` (45) and `check-3d-save` (14). On
-the laptop Chrome keeps
+(20), `check-3d-poster` (8) and `check-3d` (58). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
 (`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
@@ -234,11 +233,11 @@ compares two pages' canvases measures, never demands the pixel.
 - **The gamepad cannot reopen its recordings**; its params are not on
   `core/params.js`, its panels its own; its GALLERY panel shows IndexedDB
   (C6).
-- **Files over the 400-line cap**: the gamepad's `ui/hud.css` (721),
-  `sketch/gamepadSketch.js` (572), `ui/TimelinePanel.js` (547) and
-  `ui/ParamPanel.js` (500) — C6; `node scripts/lines.mjs` names them, and
-  fails on any other. At it, `core/VaultPanel.js` (399): the next thing it
-  learns needs a split first.
+- **Files past 400 lines** (rule 4, `node scripts/lines.mjs`): the
+  gamepad's `ui/hud.css` (721), `sketch/gamepadSketch.js` (572),
+  `ui/TimelinePanel.js` (547) and `ui/ParamPanel.js` (500) — C6 — and
+  `scripts/check-3d.mjs` (414), kept whole with its reason.
+  `core/VaultPanel.js` stands at 399.
 - **A 3D model is a still until brick 5** (P1); its handles turn about the
   world's axes only; nothing in it is undone; a shadow's darkness and map
   are fixed; not yet seen on the laptop itself, where it should draw with

@@ -370,3 +370,17 @@ bounds sit between, 0.5 and 1%, and the check draws that pixel-off frame
 too and fails if the bounds no longer tell it apart. The rule of the
 checks — measure, never demand the pixel — now says how far: as far as a
 fault measured beside it allows.
+
+**Rule 4 eased: a file is looked at past 400 lines, split past 600.** The
+author, the same day: the cap "un peu trop arbitraire", cutting files in
+parts where one would be cleaner. Seen that day: check-3d, cut to pass
+under 400, copied its helpers and built its model again for the half that
+saves — a split that shares a setup is coupling by copy — and the plan was
+trimmed to fit rather than shaped. What the cap was for stays: one concept
+per file, and a session's reading bounded. So past 400 a file is split
+along a seam it already has — never into a part two — or kept whole with
+its reason written in `scripts/lines.mjs`; past 600 it splits; and the docs
+every session reads — CLAUDE.md, STATUS.md, docs/plan.md — keep 400, since
+every session pays for them. check-3d is whole again, 414 lines, its print
+in check-print where it belongs; the checks' helpers, copied in every
+check, wait to be shared (C9).
