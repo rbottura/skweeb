@@ -1,11 +1,147 @@
 # STATUS — rig
-_last touched: 2026-10-02_
+_last touched: 2026-10-22_
 
 M9's app (`docs/roadmap.md`, M9): a drawing made of marks, rigged at its
 marks. Its strokes are its bones; each stamp rides its own stroke's and
 stays whole, so a bend crowds and fans them like scales. It comes between
 M8's bricks 3 and 4, to give the map's avatar a body that walks — and, the
-author's direction, many slugs and worms that crawl.
+author's direction, many slugs and worms that crawl. And its player, the
+**puppet** (`puppet/`), worn by the author in OBS — below.
+
+## The puppet — `puppet/`, begun 2026-10-21
+
+The author's ask, from the inbox: a VTuber avatar — a slug's bust drawn in
+the gamepad, its body a tube of stamps, two eyestalks — wearing the
+author's own eyes from the camera, moved a little by the head, shown in
+OBS. M9's *later*, "the gamepad as a puppeteer", with the face as one.
+`/apps/rig/puppet/?drawing=<id>`; `&obs`, the avatar alone. Its bricks:
+**(1)** the eyes — done 2026-10-21; **(2)** in OBS — done 2026-10-21;
+**(3)** moved by the head, the eyes trembling less — done 2026-10-22;
+**(4)** the mouth on the face, and the rig's guides over the puppet —
+done 2026-10-22, the author's ask: "on peut rajouter la bouche et la
+visualisation des guides de l'app de rig ?"; **(5)** kept and followed in
+OBS, the camera switched, the parts found and told — done 2026-10-22, the
+author's: settings that did not stay in OBS, "un moyen de disable la cam
+avec un bouton pour faire des aller retour facilement entre skweeb et obs",
+and a drawing made eyes first whose mouth went into an eye.
+
+- **Kept, and followed in OBS** (2026-10-22; `keeping.js`, `rebuild.js`;
+  `check-puppet` 41). *Send to OBS*, or S, keeps the puppet in the vault as
+  a smart object — a `params` object, its values the recipe, its picture
+  the avatar as worn then, `origin.app` `rig/puppet` so core's paths find
+  `puppet/rebuild.js` and this page. The first send makes it and binds the
+  window; every send after is its next version. Its address is then
+  `?open=<id>`, given to OBS once: the page in OBS hears each new version
+  through the server's event stream and takes its values, with no reload.
+  The button counts the changes OBS has not had. The vault offers it back,
+  *Open in rig/puppet ↗*.
+- **The avatar over the screen recorded, on nothing** (2026-10-22;
+  `scripts/obs/overlay.ps1`, `Overlay.cs`, `ObsSocket.cs`, `Placed.cs`;
+  `overlay.cmd` to double-click). OBS's projectors draw on black, so a
+  window of skweeb's own: WPF from PowerShell 7, transparent, on top,
+  clicks passing through, out of screen capture; standing where the source
+  stands in the program scene and at its size — its alignment and bounds
+  read, mapped through the scene's Display Capture onto the screen; showing
+  OBS's own picture of it, asked of obs-websocket 5 fifteen times a second
+  (`GetSourceScreenshot`, transparent round it). Ctrl+Alt+P takes hold of
+  it: dragged it moves the source in OBS, the wheel sizes it, Esc lets go.
+  The password is read from OBS's settings. Tried against a fake
+  obs-websocket in the scratchpad, by its own `-Check`: placed at 60,620
+  400×400 as the scene said, clicks through, on top, out of capture, a
+  notch of the wheel 420×420 and OBS told so — not yet against OBS, whose
+  WebSocket server is off here; a drag only by hand.
+- **The avatar watched on the screen recorded** (2026-10-22;
+  `scripts/obs/hide-projectors.lua`, the guide's *Watching the avatar*). An
+  OBS projector of the source, always on top, on the very screen the
+  Display Capture records: OBS's own "Hide OBS windows from screen capture"
+  leaves projectors in on purpose (`OBSBasic::SetDisplayAffinity`, OBS 32),
+  so a Lua script inside OBS asks Windows to keep every OBS window out of
+  capture (`SetWindowDisplayAffinity`, WDA_EXCLUDEFROMCAPTURE), and gives
+  back those it hid when taken out. Tried in OBS's own LuaJIT on a window
+  titled as a projector: 0x0, 0x11, 0x0 again; not yet in OBS itself.
+- **The camera switched** (`seeing.js`, which the camera and the reading
+  moved into): off, it is let go and the puppet wears its own eyes; a page
+  that finds the camera held, or none yet, asks again every two seconds —
+  so OBS takes it as soon as the window lets go.
+- **The parts found, and told** (`roles.js`, `drawers.js`;
+  `tests/puppet-roles.mjs` 17). The puppet no longer takes the first stroke
+  for the body, as the rig does: its body is the widest stroke, the longest
+  among strokes as wide, read from its base — its higher end the face;
+  every other stroke is read from the end it hangs by, an eyestalk when it
+  hangs from the body's upper half and points up, a limb otherwise; and the
+  body is hung first. The rig took `order` in `proposeBones` and `reverse`
+  in `drawingOf` for it. On the author's drawing made eyes first,
+  `gam_1792624494217_04d278`: the rig alone named an eye the body; the
+  puppet, eye, eye, body. The *Parts* drawer shows each stroke in its
+  guides' colour — its number on it in the guides — with the part found and
+  a choice that tells it otherwise, kept as `parts`, a word a stroke.
+
+- **The mouth on the face** (2026-10-22; `mouth.js`, `tips.js`, `crop.js`,
+  `draw.js`; `tests/puppet-mouth.mjs` 15, `check-puppet` 23). Cut from the
+  camera as the eyes are, wider than tall (0.75), faded to an ellipse; its
+  box held to the face, not the lips — its width a share of the eyes'
+  distance (a closed mouth is 0.85 of it; MediaPipe's portrait smiles at
+  1.2), its middle between the corners and a little below, where an open
+  mouth goes — so a smile and an open mouth move inside it. Worn on the
+  face, the body's last stamp, or *lower* down the body, turning with it:
+  *my mouth on the face*, *mouth size*, *around the mouth*, *mouth lower*.
+  Each cut is laid just after the stamp it goes on (`drawRig` took an
+  `after` for it), so the stalks drawn over the face's edge pass over the
+  mouth too.
+- **The guides** (2026-10-22; `guides.js`): B, or *guides* over the viewer,
+  draws the bones as the rig draws them (`../guides.js`), moving with the
+  head; a dashed ring where each eye and the mouth go; and in the corner,
+  what the camera sees as the page shows it, the boxes cut from it ringed —
+  to set *around the eye* and *around the mouth* by looking. A view, never
+  in the address.
+
+- **Moved by the head** (2026-10-22; `head.js`, `sway.js`, `wear.js`;
+  `tests/puppet-sway.mjs` 24, `check-puppet` 18). MediaPipe's face
+  transform read as yaw, pitch and roll, measured on its own portrait
+  turned and mirrored, from *straight* — the head's first second in front
+  of the camera, or C. The body bends towards a lean, a turn and a move
+  aside (*sway with my head*), its top turning most and its base kept; the
+  stalks lean into a turn; a nod lifts the drawing (*rise as I nod*). Each
+  bone a damped spring on the way it points, so the stalks and arms are
+  left behind and swing past (*wobble*). A gamepad drawing is cut into
+  bones of 70 px (*longest bone*) so the body bends along it; a rig's pose
+  keeps its own bones, its loop playing under the head. The room is fixed,
+  with space for the sway, so the avatar keeps its size in OBS.
+- **Steadier eyes** (2026-10-22). The face is read once a frame of the
+  camera, when the video says the frame came (`requestVideoFrameCallback`),
+  at that frame's time — read at every frame of the screen, the box moved
+  between two screen frames over the same picture and the 1€ filter read a
+  still frame, then a jump: measured on a portrait leaning in a video, the
+  eye slid 1.24 px in its circle at every camera frame, and now none. An
+  eye's centre is its ring of sixteen points; the boxes' size is the eyes'
+  distance in depth as well as across, which a turn does not narrow — its
+  wobble halved, and no zoom as the head turns; size and angle held still,
+  the place let go fast, its speed counted in boxes a second.
+- **Worn in OBS** (2026-10-21): the address the page writes as it changes,
+  copied with `&obs`, in a Browser source — OBS started with
+  `--enable-media-stream --use-fake-ui-for-media-stream`, which OBS 32
+  needs to give a Browser source the camera; inside OBS without it the page
+  says so. The guide, `docs/guides/obs.md`, is read in the page (G), by
+  core's new `Guide.js`. The camera is let go with the page and asked for
+  again while it is held, so a refresh finds it.
+- **The author's eyes at the stalks' tips** (2026-10-21; `face.js`,
+  `eyes.js`, `steady.js`, `crop.js`, `tips.js`, `draw.js`, `params.js`,
+  `address.js`; `tests/puppet-eyes.mjs` 27). MediaPipe's Face Landmarker,
+  `@mediapipe/tasks-vision` 1.0.1, on the GPU or the CPU, from
+  `core/libs/mediapipe/` — `node scripts/vendor-mediapipe.mjs` once a
+  machine; git keeps its README (rule 6). Each eye cut level, mirrored, a
+  soft disc, drawn as wide as its stalk's last stamp and turned with it;
+  with no face the drawing's own eyes show. On the author, in Chrome and in
+  OBS: "je vois bien mes yeux au bon endroit".
+
+Known: the head's motion and the mouth are tried on a portrait leaning in
+a video, not yet on the author. A crawling rig is worn without the head's
+motion, and shows no bones in its guides. A pose the rig saved keeps its
+own parts: Parts tells only a gamepad drawing. Once kept, a change not sent
+is lost with the page — the address is the kept puppet's. When OBS holds
+the camera, the window waits until OBS lets go: hiding the source does it.
+The camera is the browser's first unless chosen, and not remembered. An eye
+is cut from about fifty of the camera's pixels and shown larger: soft.
 
 ## The bricks
 
@@ -143,8 +279,12 @@ author's direction, many slugs and worms that crawl.
 
 ## Next single step
 
-**Brick 6 waits on the author: the slug's back and side**, drawn in the
-gamepad as the front was. A worm stands on the map already — a crawling
-loop placed as a thing goes round inside its own box. What comes next for
-the worms is M8's: a path drawn on the map, that a thing follows across
-the room.
+**The puppet on the author's own head**: in OBS, *sway*, *rise as I nod*,
+*wobble* and the mouth's size and place tried and set — what is too much,
+what too little — and the defaults moved to what the author keeps.
+
+Paused, the author's call on 2026-10-21: **brick 6 waits on the author —
+the slug's back and side**, drawn in the gamepad as the front was. A worm
+stands on the map already — a crawling loop placed as a thing goes round
+inside its own box. What comes next for the worms is M8's: a path drawn on
+the map, that a thing follows across the room.

@@ -8,8 +8,8 @@
 
 import { tipOf } from './bones.js';
 
-/** A colour for each chain — a stroke's bones — so what bends together reads together. */
-const HUES = ['#1f5fd6', '#d62828', '#2a9d4b', '#c77d00', '#7b2cbf', '#0a9396', '#c2185b'];
+/** A colour for each chain — a stroke's bones — so what bends together reads together; the puppet's Parts drawer names strokes by them. */
+export const HUES = ['#1f5fd6', '#d62828', '#2a9d4b', '#c77d00', '#7b2cbf', '#0a9396', '#c2185b'];
 const INK = '#111111', PAPER = '#fffdf6', HOT = '#ffd60a';
 
 /**

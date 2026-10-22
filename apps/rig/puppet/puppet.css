@@ -1,0 +1,84 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   puppet.css — the rig's puppet
+
+   Everything that looks like the suite comes from core. The puppet says its
+   layout, and how it looks alone — `html.obs`, with ?obs or H: the avatar on
+   nothing, the page transparent, for OBS's Browser source to composite.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../../core/theme.css';
+@import '../../../core/param-panel.css';
+@import '../../../core/vault-panel.css';
+@import '../../../core/guide.css';
+
+/* The camera plays here and is never seen; kept in the page, since a video
+   taken out of it altogether may stop giving frames. */
+.pz-camera {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pz-note { margin: 6px 0 2px; font: 400 12px/1.45 var(--nb-mono); color: var(--nb-muted); }
+.app-side .nb-btn + .nb-btn { margin-top: 6px; }
+
+/* The camera's switch, lit while it is on (drawers.js). */
+.app-side .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+
+/* A row a stroke in the Parts drawer: its guides' colour, its name, what it is (drawers.js). */
+.pz-parts { display: grid; gap: 6px; margin: 4px 0 8px; }
+.pz-part { display: grid; grid-template-columns: 14px 1fr auto; align-items: center; gap: 8px; font: 500 12px var(--nb-font); }
+.pz-swatch { width: 14px; height: 14px; border: var(--nb-line-sm) solid var(--nb-ink); }
+
+/* The guides' switch over the viewer, lit while they show (main.js). */
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+
+/* What the camera sees, with the boxes cut from it ringed — in the viewer's
+   corner while the guides show (guides.js). */
+.viewer-stage { position: relative; }
+.viewer-stage canvas.pz-seen {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: none;
+  width: min(260px, 38%);
+  height: auto;
+  max-width: none;
+  max-height: none;
+  background: var(--nb-ink);
+  outline: var(--nb-line-sm) solid var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+}
+html.guides .viewer-stage canvas.pz-seen { display: block; }
+.pp-select { width: 100%; }
+
+/* What keeps the eyes off — no camera, no MediaPipe, no drawing — said over
+   the avatar when it is alone, where there is no bar to say it. */
+.pz-trouble {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  max-width: calc(100vw - 24px);
+  margin: 0;
+  padding: 6px 10px;
+  background: var(--nb-paper);
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+  font: 400 12px/1.45 var(--nb-mono);
+  white-space: pre-line;
+}
+.pz-trouble[hidden], html:not(.obs) .pz-trouble { display: none; }
+
+/* ── Alone ───────────────────────────────────────────────────────────────── */
+
+html.obs, html.obs body { background: transparent; }
+html.obs .app { grid-template-rows: minmax(0, 1fr); }
+html.obs .bar, html.obs .app-side, html.obs .viewer-head { display: none; }
+html.obs .app-main { padding: 0; grid-template-columns: minmax(0, 1fr); }
+html.obs .viewer { background: none; border: 0; box-shadow: none; }
+html.obs .viewer-stage { padding: 0; }
+html.obs .viewer-stage canvas { outline: none; background: none; }

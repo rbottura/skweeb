@@ -13,109 +13,11 @@ move to a file named for their dates, listed here:
   export, the loop format, video as frames plus ffmpeg, replay as a
   dispatch, framing, M2 and M3 done, the UI pass, reopening, the tailnet,
   and where the name came from.
-
-## Decided since, 2026-09-26
-
-**Objects can be deleted, in two steps.** Decided 2026-09-26, by the author:
-a trash first, then deleting for good from it; and when other objects are made
-from what is going, either the chain goes too, or they are kept and cut loose —
-"still there and usable, but maybe not with all its past features". The trash
-is a `trash` tag; cutting loose is the one edit an ordinary object gets besides
-its tags, and it records itself in a new envelope field, `detached`. Rules in
-`docs/object-model.md`, *Trash, and deleting*.
-
-**Filters, particles and fractals are next; 3D is parked.** The author, after
-M4: the suite is to make the assets of a small game, 2D first — with fake 3D
-motion where it helps — and 3D later. So M5 is filters, on a GPU kit in core
-that the next two share; M6 particles; M7 fractals. 3D was M5 (2026-09-21) and
-comes back after, starting from the kit. The plan, each milestone's *Done
-when* and its link are in `docs/roadmap.md`.
-
-**Rule 8 is settled: p5 is not required.** Open since M2, when grid was
-written without it, then ckt. Every app is ES modules with no globals across
-files, which was the point of the rule; p5 is optional and new work does not
-take it on. The gamepad's sketch and core's replay of its recordings still use
-it, the one version in `core/libs/`, until they are ported — a job of its own,
-since every recording in the vault replays through that code and must replay
-the same after.
-
-**The GPU kit is WebGPU.** The author's call, after a probe of both on the
-serving machine: WebGL2 and WebGPU each ran in headless Chrome with no flags
-and each handed a frame to Canvas 2D in the same call; WebGPU adds compute,
-one device for any number of canvases, and is where 3D is going. Its cost is
-that it needs a real GPU the browser trusts: the author's smallest PC, an
-Intel gen-9, had the API but no adapter until Chrome's flags
-(`#enable-unsafe-webgpu`, and Vulkan) turned it on — textures to 16384, a
-software fallback adapter besides. Nothing is cut to fit a machine without it. Where WebGPU is missing the
-apps still open, an app that makes GPU objects says why, and a GPU object
-shows as its saved render; a flag lifts the browser's list where the GPU is
-merely unlisted. The kit's API speaks canvases, chains and schemas, never GPU
-objects, so a second backend stays possible and is not built. The probe ran
-on Chrome 154 and a Radeon RX 7600; WebGL2's case was that it runs anywhere,
-in software too, and takes the GLSL literature almost as it is — with no
-compute, and no new features coming.
-
-**A GPU render replays close, not bit for bit.** The author's answer, before
-the first GPU object was saved: a small difference between two machines is
-fine. So a GPU object's promise is its recipe; on the machine that made it, it
-replays the same, and a check compares a replay with a tolerance. Written into
-`docs/object-model.md`, *The recipe contract*.
-
-**A filter may reach past its picture, and a sprite gets the room.** A blur,
-a glow, an outline spreads past what it is given; a sprite trimmed to its ink
-lost its halo at the trim. So a filter says how far it reaches, and filter's
-`edges` — grow or keep — says whether the picture grows to give it room:
-`grow` by default, since the suite's pictures are mostly sprites on nothing,
-`keep` for a photograph that fills its frame. A recipe from before `edges`
-kept its size, and still does: read as `keep`, it replays as it was saved.
-
-**A look is a chain saved alone, and a placement may carry one.** M5's link.
-A `params` object made by filter, `{ chain, edges }`, with a picture of what
-it does; compose puts it over a placement, whose frames then run through it
-(`core/gpu/look.js`), sized by what the look grows. The placement block
-gains `look` — written into the object model's *Placement* before it was
-used — and a look is a parent of the page it is on.
-
-**Kin sit together in the vault; folders keep their own.** The author, on
-2026-09-27: objects joined as parent and child are shown together by
-default, from the most original to the last made, in a small container.
-Only loose objects: a folder is an explicit decision — a session's
-dot-sets, a material's earlier versions put away — and keeps what it holds.
-The whole vault still joins them, so two loops made from one dot-set in a
-folder sit together and name it. A `lineage` switch in the panel's head
-lays them out one by one. And a folder should not look like one more
-object: it is shorter now, a peek of its members on a small stack.
-
-**A flipbook is placements in time, not a new kind.** The author, on
-2026-09-27: idle animation wants a few frames by hand before it wants motion
-filters. The placement block has said *when* since 2026-09-22 — `at` and
-`length`, in the page's frames — and nothing honoured it; compose now does.
-So a flipbook is stills placed one after another and saved as a composition:
-a loop the vault replays and exports, each frame still its own object with
-its lineage. No field was added. *Next frame…* puts the object picked where
-the chosen one is, with its look, from where it ends, for as long; one with
-no length is given its own first, or it would show under every frame after
-it. And a press on the page picks up only what shows at the page's tick,
-since a flipbook's frames are stacked in one place.
-
-**A ripple, and an onion skin.** The author, the same day, after trying the
-flipbook: a placement's end, moved, moves the placements that started at it,
-and on down the chain — held longer, cut short, taken off, or a frame put in
-after it. Only a chain touching end to start moves, so a page that is not a
-flipbook is left as it was unless something on it happens to start exactly
-where another ends. No switch: the bar says when anything moved. And paused,
-the frames either side show faint — before in red, after in blue — preview
-only, a switch in the player drawer, on by default.
-
-**M6 next, M5's catalogue parked.** The author, 2026-09-27: after the
-flipbook, particles. M5's *Done when* was met on 2026-09-26; what it stays
-open for — the motion group, the time group, more of the catalogue — waits.
-
-**A shader carries its licence, as a font does.** Rule 5 now covers shaders. The
-filter catalogue ports from p5.FIP and glfx.js (MIT) and GPUImage (BSD). LYGIA
-is under the Prosperity licence — noncommercial, a thirty-day commercial trial —
-and Shadertoy code with no licence header is CC BY-NC-SA 3.0 by default: both
-stay out of a suite meant to make a game's assets.
+- **2026-09-26 to -27** — `docs/decisions-2026-09-26-to-27.md`: deleting in
+  two steps, filters then particles then fractals with 3D parked, rule 8
+  settled, WebGPU and a GPU render replaying close, a filter's reach, looks,
+  kin and folders, the flipbook and its ripple, M6 over M5's catalogue, a
+  shader's licence.
 
 ## Decided since, 2026-09-28
 
@@ -342,3 +244,61 @@ in. Every window in it is saved as a smart object, so the page follows
 them. And compose's placements take the stack's `opacity` and `blend`,
 drawn by its one drawing path, so its preview, its saves, its export and
 its print show them alike.
+
+## Decided since, 2026-10-21
+
+**A VTuber puppet, now, the rest paused.** The author, 2026-10-21, with a
+bust drawn in the gamepad — a tube of stamps, two eyestalks, two small arms
+(`gam_1792618477805_861bac`, on the tower's vault until the next merge):
+"je voudrais mes yeux dans un premier temps, je voudrais qu'on teste ça
+maintenant et mettre le reste sur pause si c'est pas bloquant". So M9's
+brick 6, M8's fourth and the newsroom idea wait. "Mes yeux dans les yeux
+de l'avatar" is the camera's own eyes, cut out and worn at the stalks'
+tips — not drawn eyes that blink as the author does.
+
+**The puppet is the rig's player, and a performance.** `apps/rig/puppet/`,
+as `play/` is the map's: it wears what the rig rigs, drawn by the rig's own
+code, and what it does live — the camera's eyes, the head's turn, springs
+with a past — never enters a recipe. Its values live in its address, the
+thing OBS is given. A puppet saved in the vault, a `params` object, waits
+until one is wanted. No VTuber program is used: Live2D, Inochi2D and
+VSeeFace want the avatar made again as a mesh or a 3D model, and the stamps
+riding their bones would be lost.
+
+**MediaPipe reads the face, and git never holds it.** The Face Landmarker
+of `@mediapipe/tasks-vision`, pinned at 1.0.1 (1.1.1 was a week old):
+Apache-2.0 by its `package.json` and by each of the three model cards its
+bundle is made of. Its WASM is 11.8 MB and its model 3.8 MB, binaries, so
+`scripts/vendor-mediapipe.mjs` fetches them on each machine into
+`core/libs/mediapipe/` and git keeps its README (rule 6); the page never
+fetches them from outside (rule 7), and opens without them, saying how.
+
+**OBS is started with a flag, and guides live in `docs/guides/`.** OBS 32
+gives a Browser source nothing of its own accord but the loopback network
+(obs-browser's permission handler), so the camera is refused; started with
+`--enable-media-stream --use-fake-ui-for-media-stream` it is given — tried
+by the author the same day: "ça fonctionne comme sur chrome dans obs". The
+page says so inside OBS. What needs another program is written in
+`docs/guides/` and read in the app by `core/Guide.js` — the author's
+suggestion, made in core for every app.
+
+**The puppet is kept as a smart object, and OBS follows it.** 2026-10-22,
+the author: the settings chosen in the window "did not stay in OBS" — the
+address, copied once, was OBS's copy. So a puppet is sent (S): saved as a
+`params` object bound into a `skw`, every send its next version, the page
+in OBS opened on `?open=<id>` taking each version as the server announces
+it (server/events.js) — M11's smart objects, unchanged. A send is a
+version, so versions are what the author chose to send, never every
+slider's step. Its app is `rig/puppet`: core builds `/apps/<app>/` for
+`rebuild.js` and `?open=`, so the puppet's own page and file are found with
+no change to core. And the camera has a switch, and a page waiting for it
+takes it when it is let go: on this machine one camera goes to one program.
+
+**The puppet finds its parts; the rig's proposal can be ordered.** The same
+day, a drawing made eyes first had its mouth on an eye: the rig takes the
+first stroke for the body. The puppet takes the widest — a bust is drawn
+with a bigger brush than its stalks — and reads each stroke from the end it
+hangs by, the author telling any of it otherwise (`parts`). For it the rig
+took two options and changed nothing it draws: `proposeBones(…, { order })`
+and `drawingOf(…, { reverse })` — the rig's own proposal by hand, parked in
+its STATUS, can stand on them.

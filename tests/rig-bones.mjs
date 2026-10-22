@@ -91,5 +91,11 @@ turns[1] = turnToward(bones[1], rest[1], 0, aim);
 const aimed = posed(bones, turns);
 ok('a bone is pointed where it is asked', close(Math.atan2(aim.y - aimed[1].y, aim.x - aimed[1].x), aimed[1].a), true);
 
+// Hung in another order: the second stroke's chain first, the first's hanging from it.
+const reordered = proposeBones(d, { order: [1, 0, 2] });
+ok('chains hung in the order asked: the first asked is the root', reordered.filter(b => b.parent == null).map(b => b.stroke), [1]);
+ok('…and a stroke drawn before it hangs from it, parents still first', reordered.every(b => b.parent == null || b.parent < b.id)
+  && reordered.find(b => b.stroke === 0 && reordered[b.parent] && reordered[b.parent].stroke !== 0) !== undefined, true);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

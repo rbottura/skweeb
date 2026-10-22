@@ -26,6 +26,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
 | `Cards.js` | a list of small param panels, each from its own catalogue entry's schema — filter's chain, a model's shapes; `recipe()` is `[{ id, params, on }]`; `choose()` marks one card, and with `fold` it is the only one open, the others a line each; `duplicate()` puts an entry again after itself; `inner` is a list inside each card, kept in its entry under a key | **in**, 2026-10-06, moved from filter when the 3D app needed it; `fold` and `inner` the same day, for a model's shapes and their modifiers |
 | `Bar.js` | the strip under every app: information only | **in**, 2026-09-23 |
+| `Guide.js` | a page of `docs/guides/` read inside an app: its markdown — headings, paragraphs, lists, code, links — on a sheet over the page, fetched when opened (`guide.css`) | **in**, 2026-10-21, the author's ask: what needs another program is written down and read where it is needed — the puppet's guide to OBS first |
 | `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
 | `stamps.js` | a sprite drawn once at the size and angle it shows, blitted to many (`stampFor`, `blit`); the halving of a picture nearest above a size (`mipFor`) | **in**, 2026-09-27, moved from ckt when particles needed `mipFor` |
 | `surface.js` | an off-screen canvas: OffscreenCanvas where there is one | **in**, 2026-09-27, with `stamps.js`; grid keeps its own copy |
@@ -41,7 +42,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `links.js` | the named one-way links between apps | not yet, see below |
 | `uses.js` | what a set can be used as, and where each set is offered | **in**, 2026-09-23 |
 | `easing.js` | the suite's easing curves, and the param that offers one | **in**, 2026-09-24 |
-| `libs/` | p5 1.5.0, for the gamepad and core's replay of its recordings; three.js r186, for the 3D app — `libs/three/README.md`, copied by `scripts/vendor-three.mjs` | **in**; three since 2026-10-06 |
+| `libs/` | p5 1.5.0, for the gamepad and core's replay of its recordings; three.js r186, for the 3D app — `libs/three/README.md`, copied by `scripts/vendor-three.mjs`; MediaPipe's face landmarker, tasks-vision 1.0.1, for the rig's puppet — fetched on each machine by `scripts/vendor-mediapipe.mjs`, 15 MB of WASM and model git never holds, its README kept | **in**; three since 2026-10-06, MediaPipe since 2026-10-21 |
 
 `registry.js` now takes a manifest URL. It used to `fetch('brush-manifest.json')`
 with no path at all, which resolves against the *page* — invisible while the

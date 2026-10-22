@@ -10,7 +10,7 @@ it.** Everything below is load-bearing; nothing below is background.
 
 | Path | What it is | Before touching it, read |
 |---|---|---|
-| `core/` | the shared kit — theme, panels, drawers and cards, params, registry, rng, stage, vault client, GPU filters (`gpu/`), the print; `libs/` holds p5 and three.js, one version each | `docs/core-api.md`; what leaves the suite — export, the print — `docs/core-export.md` |
+| `core/` | the shared kit — theme, panels, drawers and cards, params, registry, rng, stage, vault client, GPU filters (`gpu/`), the print, a guide read in an app; `libs/` holds p5 and three.js, one version each, and MediaPipe — fetched on each machine, git keeps its README | `docs/core-api.md`; what leaves the suite — export, the print — `docs/core-export.md` |
 | `apps/gamepad/` | draw with a gamepad, record sequences; E prints the drawing | — |
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
@@ -19,14 +19,14 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/fractals/` | M7: escape time on the GPU kit, a sprite copying itself, idles, and a field for particles | `apps/fractals/STATUS.md` |
 | `apps/particles/` | M6: particles as a function of time — loops that close, frames that stand alone | `apps/particles/STATUS.md` |
 | `apps/map/` | M8, begun: the map editor — a room on a grid of tiles, things placed on it, what can be walked and what answers, saved as a `map`; and its player, `play/`, point and click | `apps/map/STATUS.md` |
-| `apps/rig/` | M9, begun: a drawing made of marks, rigged at its marks — its strokes its bones; poses, swings, walks by part, worms crawling | `apps/rig/STATUS.md` |
+| `apps/rig/` | M9, begun: a drawing made of marks, rigged at its marks — its strokes its bones; poses, swings, walks by part, worms crawling; and its player, `puppet/`, worn in OBS: the author's eyes from the camera at the eyestalks' tips, the mouth on the face, the body swaying with the head; the rig's bones over it as guides; sent, kept as a smart object OBS follows | `apps/rig/STATUS.md`; for OBS, `docs/guides/obs.md` |
 | `apps/3d/` | M10, begun: primitives made from their params, seen from anywhere, drawn by three.js on the page's GPU device, saved as a `model` | `apps/3d/STATUS.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | smart objects, the live stack | M11: the `skw`, and every open window one layer of a stack each draws | `docs/smart-objects.md` |
 | `server.js` | the vault write API; `server/static.js` serves the files, `server/delete.js` is the one way out of the vault, `server/versions.js` a smart object's next version | `docs/object-model.md`, *Trash, and deleting* |
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
-| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs`, `check-3d.mjs`, `check-3d-poster.mjs`, `check-print.mjs`, `check-live.mjs`, `check-send.mjs`, `check-smart.mjs` and `check-page.mjs` are twenty-three, as commands; `chrome.mjs` opens more tabs than one, for windows that talk to each other. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned, with the add-ons the 3D app uses — its handles. `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
+| `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs`, `check-puppet.mjs`, `check-3d.mjs`, `check-3d-poster.mjs`, `check-print.mjs`, `check-live.mjs`, `check-send.mjs`, `check-smart.mjs` and `check-page.mjs` are twenty-four, as commands; `chrome.mjs` opens more tabs than one, for windows that talk to each other. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned, with the add-ons the 3D app uses — its handles. `vendor-mediapipe.mjs` fetches MediaPipe's face landmarker into `core/libs/mediapipe/`, one version, pinned — 15 MB of WASM and model that git never holds, so once a machine. `obs/hide-projectors.lua` is loaded in OBS itself: its projectors kept out of the screen it records; `obs/overlay.ps1` (with `Overlay.cs`, `ObsSocket.cs`, `Placed.cs`; `overlay.cmd` to double-click) puts the puppet's source over that screen as it stands in the scene, transparent, through obs-websocket (`docs/guides/obs.md`). `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
 | `docs/decisions.md` | what was decided before today, and why, by date — the newest days; its head lists the files the older ones moved to, `docs/decisions-<from>-to-<to>.md` | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
@@ -96,7 +96,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise png fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick 3d-handles 3d-modifiers 3d-look windowed stage-still live stack place smart; do
+for t in recorder clip export vault grid-map params rng playback frame joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise png fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick 3d-handles 3d-modifiers 3d-look windowed stage-still live stack place smart puppet-eyes puppet-mouth puppet-sway puppet-roles; do
   node tests/$t.mjs || break
 done
 
@@ -123,6 +123,8 @@ node scripts/check-live.mjs             # M11: windows of one browser sharing a 
 node scripts/check-send.mjs             # M11: Send to ▸ filter — a window opened, following particles; saved, particles first
 node scripts/check-smart.mjs            # M11: smart objects — saved, versioned, drawn again wherever they are held
 node scripts/check-page.mjs             # M11 done: the stack saved as a page of smart objects that follows its windows
+node scripts/check-puppet.mjs           # the rig's puppet: a fake camera read once a frame, eyes and mouth worn, the body swayed, the guides, the camera switched; sent and followed by a page in OBS; parts found drawn eyes first, and told
+node scripts/vendor-mediapipe.mjs       # once a machine, before the puppet reads a face: MediaPipe into core/libs/mediapipe/, out of git
 node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click and moved by handles, twisted by a stack, drawn in a style; a model saved, drawn again at scale 2, placed
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips

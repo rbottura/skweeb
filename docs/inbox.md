@@ -21,9 +21,53 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing waiting.
+- **2026-10-08 — moving pictures for a newsroom, Blast first.** "try to
+  setup skweeb suite to create motion designs just like kielmd did for the
+  new york times, or people like him making animation art to illustrate an
+  article, display as like a header or for social media posts, but for media
+  i'd like to work with that does not do it yet. i have blast in mind … could
+  also more mainstream media, more difficult to access i guess". And the same
+  day: "If they have illustrations, i dont want to replace the illustration
+  by my creation, i can come after, before the title or just after maybe."
+  kielmd is Kiel D. Mutschelknaus (@kiel.d.m): for the NYT in November 2019,
+  an online animation for an article on gender bias in AI — the brief
+  "illustrate with code", his Space Type Generator's Layers made an endless
+  succession of pronouns (Eye, summer 2020). Blast's headers are still
+  photomontages in a house style, credited article by article, and nothing
+  on its site moves. So the piece is the story's own words and figures in
+  motion, beside its illustration and never instead of it: ckt's type first —
+  whole words, and motion of their own — then a page's length set by hand in
+  compose, and a delivery: every format of one page, an MP4 made for the
+  web, a poster. Waits on the author: whether it is a milestone, and what it
+  comes before.
+- **2026-10-22 — the suite's other apps in OBS.** "ça veut dire donc aussi
+  qu'on peut connecter d'autre app de la suite à des scènes obs de la même
+  manière non ? c'est à explorer plus tard mais la possibilité est
+  intéressante". The puppet showed how: a page with nothing on it but its
+  picture, transparent (`&obs`), opened on a smart object and following each
+  version the server announces — since M11's live stack stays inside one
+  browser, and OBS's is another. Any app could have such a page for what it
+  makes: a particle loop over a stream, a fractal behind it, a compose page
+  as an overlay, a map's room. Waits on the author: which first, and
+  whether it is a milestone.
 
 ## Sorted
+
+- **2026-10-21 — a VTuber avatar: the slug, worn.** "je veux savoir si on
+  peut rapidement créer un système pour créer un avatar de vtubing … un rig
+  comme fait précédemment très simple d'un haut de corps comme celui d'un
+  escargot ou limace fait de plein de sprites les uns sur les autres comme
+  des segments d'un corps en tube, et 2 yeux un peu longs rattachés à la tête
+  … l'utiliser via un logiciel tiers ou OBS pour faire un avatar avec mes
+  yeux dans les yeux de l'avatar et la bouche sur le visage et l'animer
+  légèrement avec mes mouvements de tête"; "si cela nécessite un logiciel on
+  peut créer un document de doc ici dans skweeb et y avoir accès dans les
+  apps de skweeb pour le lire". Then, the drawing made: "je voudrais mes yeux
+  dans un premier temps … mettre le reste sur pause si c'est pas bloquant".
+  → the rig's puppet, `apps/rig/STATUS.md`, *The puppet*: the eyes, OBS and
+  the head done 2026-10-21 and -22, the mouth next; M9's *later* in
+  `docs/roadmap.md`; the guide in `docs/guides/obs.md`, read by
+  `core/Guide.js`; decided those days (`docs/decisions.md`).
 
 - **2026-10-06 — layers across apps, live.** "we really need the smart
   objects and a new 'layer' system where i need to be able to test effect in

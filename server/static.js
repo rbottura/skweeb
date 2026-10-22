@@ -32,6 +32,7 @@ const MIME = {
   '.woff2':'font/woff2',
   '.md':   'text/plain; charset=utf-8',
   '.map':  'application/json; charset=utf-8',
+  '.wasm': 'application/wasm',      // compiled as it streams in: MediaPipe's, for the puppet
 };
 
 function sendText(res, code, msg) {

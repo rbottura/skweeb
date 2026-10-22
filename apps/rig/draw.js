@@ -53,8 +53,10 @@ export function reachOf(drawing, places, images) {
  * @param {Map<string, CanvasImageSource>} images   by drawing.js `spriteKey`
  * @param {number} view                    canvas pixels per picture pixel
  * @param {{x, y, width, height}} stage    stageOf's
+ * @param {?(i: number) => void} [after]   called after each stamp, with its index: what is laid between
+ *                                         the stamps — the puppet's eyes and mouth, under what is drawn after
  */
-export function drawRig(ctx, drawing, places, images, view, stage) {
+export function drawRig(ctx, drawing, places, images, view, stage, after = null) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   if (drawing.ground) {
@@ -64,13 +66,15 @@ export function drawRig(ctx, drawing, places, images, view, stage) {
   ctx.imageSmoothingEnabled = true;
   drawing.stamps.forEach((stamp, i) => {
     const image = images.get(stamp.key);
-    if (!image) return;
-    const p = places[i];
-    ctx.setTransform(view, 0, 0, view, -stage.x * view, -stage.y * view);
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.rotation);
-    ctx.scale(stamp.scale * stamp.flipX, stamp.scale);
-    ctx.drawImage(image, -image.width / 2, -image.height / 2);
+    if (image) {
+      const p = places[i];
+      ctx.setTransform(view, 0, 0, view, -stage.x * view, -stage.y * view);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.scale(stamp.scale * stamp.flipX, stamp.scale);
+      ctx.drawImage(image, -image.width / 2, -image.height / 2);
+    }
+    if (after) after(i);
   });
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
