@@ -20,8 +20,8 @@ import { fileURLToPath } from 'node:url';
 import { launch } from './chrome.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
-  '.png': 'image/png', '.webp': 'image/webp' };
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
+  '.png': 'image/png', '.webp': 'image/webp', '.wasm': 'application/wasm' };
 
 const freePort = () => new Promise((resolve, reject) => {
   const probe = net.createServer();
