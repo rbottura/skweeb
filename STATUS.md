@@ -179,7 +179,8 @@ sorts them.
 
 - **The UI pass, from the author's brief** (`docs/decisions.md`): one theme,
   neo-brutalist and light; a bar that is information only; drawers; core's
-  Format drawer everywhere; a page that never scrolls.
+  Format drawer everywhere; a page that never scrolls. Reopened 2026-10-22:
+  layout and theme to be redesigned, the shared boxes first (`docs/plan.md`, U).
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -262,10 +263,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**U0 on the board of `docs/plan.md`: the columns measured** —
-`scripts/check-ui.mjs`, every app at 1600 × 1000 and 1366 × 768, each
-column in screens as it opens and with every drawer open, failing when one
-grows past its last measure. Then U1 and U2: columns that fit. The board holds the rest in order, the author's
+**U8a on the board of `docs/plan.md`: the shared boxes, Export first** —
+its spec first, `docs/boxes.md`: every app's shared boxes, app by app, and
+the contract that makes each a component an app declares and a layout
+places. Then the Export box in every app, nothing moving on screen. The board holds the rest in order, the author's
 since 2026-10-22, each item a branch landed after a gate
 (`docs/workflow.md`), and what waits on the author, each with what happens
 if nothing is said.

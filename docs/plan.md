@@ -29,11 +29,11 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C2 | under the line cap | `clean/line-cap` | S | landed 2026-10-22 |
 | C7 | check-print green again | `fix/print-still` | S | landed 2026-10-22 |
 | C8 | rule 4 eased: a file looked at past 400, split past 600 | `docs/rule-4` | S | landed 2026-10-22 |
-| U0 | the columns measured | `ui/measure` | S | ready |
-| U1 | drawers on demand | `ui/drawers` | S | needs U0 |
-| U2 | a row on one line | `ui/rows` | M | needs C2, U1 |
-| U3 | any control by name | `ui/find` | S | needs U1 |
-| L10 | saved three ways: S, then 1 2 3 | `layers/save-three` | M | ready |
+| U0 | the columns measured | — | — | dropped: "mesurer les colonnes n'est pas nécessaire" |
+| U8a | the shared boxes: one contract, Export first | `ui/boxes` | M | ready |
+| U8b | the player and the Stack, as boxes | `ui/boxes-player-stack` | S | needs U8a |
+| U8c | Format and Ground, mounted anywhere | `ui/boxes-format` | S | needs U8a |
+| L10 | saved three ways: S, then 1 2 3 | `layers/save-three` | M | needs U8a |
 | P1 | M10's brick 5: a turntable | `3d/turntable` | M | needs L10 |
 | P3 | a character, defined once | `core/character` | S | ready |
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | needs P3 |
@@ -44,9 +44,9 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L6 | edit in place | `layers/edit` | S | ready |
 | L7 | versions in the vault | `layers/versions` | S | ready |
 | L5 | grid takes a window | `layers/grid-takes` | M | ready |
-| U4 | the viewer's own chrome | `ui/viewer` | L | waits: the author's look at a mockup |
-| U5 | export on a sheet | `ui/export` | M | needs U4 |
-| U6 | the layers panel | `ui/layers` | M | needs U4 |
+| U9 | the author's notes on each app | — | — | waits: the author |
+| U10 | the new theme | `ui/theme` | M | waits: the author's description |
+| U11 | the new layout | `ui/layout` | L | needs U8a–c, U9, U10 |
 | P2 | M10's brick 5: a shape swung | `3d/swing` | M | needs P1 |
 | P6 | M10's brick 6: a model from every side | `3d/sides` | S | needs P1, P3 |
 | P7 | a worm's path across the map | `map/paths` | M | needs P4 |
@@ -59,7 +59,6 @@ In the order the main thread takes them; side jobs and waits at the end.
 | P0 | the puppet on the author's head | `rig/puppet-defaults` | S | waits: an evening in OBS |
 | L8 | overrides | `layers/overrides` | L | waits: the author — now, or later |
 | L9 | the other apps worn in OBS | `layers/obs` | M | waits: the author — which app first |
-| U7 | tabs in a column | `ui/tabs` | M | only if U0 still asks for them after U6 |
 | C5 | the unit loop on GitHub | `clean/ci` | S | waits: the author's yes |
 | C6 | the gamepad on core's kit | — | L+ | waits: the author — a milestone, or later |
 
@@ -69,39 +68,42 @@ S is a session, M two or three, L more.
 
 The author's, 2026-10-22: "l'ordre proposé me va".
 
-1. **The ground cleared** — C1, C2, C7, U0. The docs say what is true,
-   the line cap holds, `main` is green, and the columns have numbers before
-   anything moves them.
-2. **Columns that fit** — U1, U2, U3: core alone, every app at once, from
-   2.14 screens a column to 1.32, projected (*U*, below). Before any brick,
-   since every brick after them adds rows.
+1. **The ground cleared** — C1, C2, C7, C8. The docs say what is true,
+   rule 4 says what it means, and `main` is green.
+2. **The shared boxes** — U8a, U8b, U8c: Format, Ground, the player, Export
+   and its print, the Stack — one contract in core, each app declaring its
+   boxes as data, mounted wherever a layout puts them; today's drawers stay
+   the layout until U11, so nothing moves on screen. Before the bricks,
+   since every brick after them would build its boxes by hand again.
 3. **Saving, and the paused bricks that wait on no one** — L10, P1, P3,
    P4. Asked how a moving model saves, the author answered for every app:
    a still, a sequence or a smart object (2026-10-22). So the sheet comes
-   first, and the turntable saves through it.
+   first, on U8a's Export box, and the turntable saves through it.
 4. **Layers and smart objects** — L11 first, the author's own example: a
    3D smart object as a particle sprite, drawn again in particles when the
    model changes. Then L1, L3, L2, L6, L7, L5: what M11 left after its
-   *Done when*, in compose's placed panel and the Stack drawer, moving into
-   the layers panel with U6.
-5. **The shell** — U4, U5, U6, once the author has seen a mockup: where
-   the clock, the frame, the output and the layers live is a matter for the
-   author's eye more than a measure — after U2 they take a column from
-   1.32 screens to 1.23 only.
+   *Done when*, in compose's placed panel and the Stack box, moving where
+   the new layout puts the layers.
+5. **The new layout and theme** — U9, U10, U11: a layout better than a
+   column that scrolls, from the author's notes on each app, in a theme the
+   author describes. Nothing is restyled before the description.
 6. **Then** P2, P6, P7, P8 as the board reaches them; P5 the day the
    drawings exist.
 
 Two hot spots set it. `core/ParamPanel.js`, `widgets.js`, `Drawer.js`,
-`theme.css` and every app's `main.js` are U's — U4 touches every app, and
-so does L10, since S is in every `main.js` — so no app brick runs beside
-either. `core/smart.js`, `vault.js` and compose's
+`theme.css` and every app's `main.js` are U's — U8a touches every app's
+export, U11 every app's layout, and L10 every app's S — so no app brick
+runs beside them. `core/smart.js`, `vault.js` and compose's
 placed panel are L's. The side jobs touch neither and run any time.
 
 ## Waiting on the author
 
 Each with what happens if nothing is said.
 
-- **The shell's look** (U4 to U6): a mockup to look at before a line of it.
+- **Notes on each app** (U9): what is in the way, what is wanted where —
+  the brief of the new layout (U11).
+- **The new theme** (U10): neo-brutalism, the theme of 2026-09-23, likely
+  left for what the author describes; nothing is restyled until then.
 - **The slug's back and side**, drawn in the gamepad as the front was (P5).
 - **An evening in OBS with the puppet** (P0): sway, rise, wobble and the
   mouth on the author's own head — what is too much, what too little.
@@ -153,96 +155,57 @@ different in each. A module of them beside `check-kit.mjs`, each check
 taking what it uses: what rule 4's eased cap leaves to split is then
 seams, never copies. *Done when* no check defines a helper another has.
 
-## U — columns that fit
+## U — the UI redesigned: boxes, layout, theme
 
-Measured on 2026-10-22 in headless Chrome at 1600 × 1000, where a column
-shows 791 px — a laptop at 1366 × 768 shows nearer 650, a fifth more to
-scroll. In screens, how far a column runs as it opens, then projected
-after each step; the puppet's own drawers, and ckt's sprite grid, are left
-as they are in the projection:
+The author, 2026-10-22, after the measures: measuring the columns is not
+needed (U0, dropped); what is wanted is a layout better than a column that
+scrolls, found from notes the author takes app by app (U9); the boxes every
+app shares gathered first, as components present in every app (U8); and
+the theme rethought with it — the neo-brutalism of 2026-09-23 likely left
+for what the author will describe (U10). The measures of that day stay as
+data (`docs/decisions.md`): a column ran 2.14 screens as it opened; the
+shared drawers closed, 1.54; a row on one line, 1.32; the shared boxes
+out of the column, 1.23.
 
-| column | now | U1 | + U2 | + U4–U6 |
-|---|---|---|---|---|
-| ckt · motion | 3.2 | 2.3 | 2.0 | 1.7 |
-| particles · picture | 3.1 | 1.5 | 1.3 | 1.0 |
-| 3d | 3.1 | 2.2 | 1.6 | 1.4 |
-| rig/puppet | 2.8 | 2.8 | 2.3 | 2.3 |
-| fractals | 2.5 | 1.5 | 1.3 | 1.1 |
-| rig | 2.5 | 1.6 | 1.3 | 1.2 |
-| grid | 2.2 | 1.4 | 1.2 | 1.1 |
-| particles · particles | 2.1 | 2.1 | 1.5 | 1.5 |
-| compose · page | 2.1 | 1.0 | 1.0 | 1.0 |
-| map | 2.0 | 1.0 | 1.0 | 1.0 |
-| the mean of fifteen columns | 2.14 | 1.54 | 1.32 | 1.23 |
+**U8a — the shared boxes: one contract, Export first** · `ui/boxes` · M.
+Every app builds by hand what every app has — Format, Ground, the player,
+Export with core's print, the Stack — each placed, titled and worded its
+own way: "Save this frame", "Save this frame as a still", "Save to the
+vault", for one act. Its spec first, `docs/boxes.md`: the inventory, app by
+app, and the contract — a box is a component with a title and a body,
+mounted wherever a layout puts it, declared by an app as data; today's
+drawers are the first layout, so nothing moves on screen. Then the Export
+box: an app declares what it saves — a still, a sequence, a smart object,
+L10's three — what it downloads — a picture, the frames, a sprite sheet —
+and its own acts — ckt's brush family, filter's look, map's play link — and
+core draws them alike, with the print. *Done when* every app's export is
+that box, and its checks find the same acts by the same words.
 
-What weighs: a range row is two lines, 70 px; and four drawers that every
-app shares — Format, 513 to 685 px with its eighteen chips; Export, 516 to
-630 with the print in it; Stack, about 246; the Sequence player, about 200
-— open by default under the app's own. Closing them is the largest step and
-the cheapest. ckt's sprite grid is 703 px alone.
+**U8b — the player and the Stack, as boxes** · `ui/boxes-player-stack` ·
+S. core's Transport and `stackDrawer`, mounted through the contract rather
+than into a drawer each app adds where it can.
 
-The system, after the tools that met this first:
+**U8c — Format and Ground, mounted anywhere** · `ui/boxes-format` · S.
+`ParamPanel` learns to mount a group of the schema outside its column,
+still drawn from it (rule 1); Ground one group in every app, where today
+it lives in five different drawers.
 
-- **drawers on demand** — Blender's panels: a Ctrl-click on a head, and
-  the others fold;
-- **a row on one line** — Tweakpane's and Leva's density, under the
-  suite's own theme;
-- **any control by name** — Blender's F3, VS Code's palette: cheap here,
-  since every control is a schema entry (rule 1);
-- **what every app shares, where every editor puts it** — the clock under
-  the picture, the frame by the canvas, the output on a sheet, the layers
-  in a panel of their own, as Photoshop's are;
-- **tabs last** — Blender's property tabs — and only for a column still
-  past 1.5 screens.
+**U9 — the author's notes on each app.** Not a branch: the author opens
+each app and writes what is in the way and what is wanted where — the
+brief of U11.
 
-**U0 — the columns measured** · `ui/measure` · S. `scripts/check-ui.mjs`:
-every app at 1600 × 1000 and at 1366 × 768, each column in screens as it
-opens and with every drawer open — the table above, as its output. It
-fails when a column grows past its last measure, kept in the check, so no
-brick after it lengthens a column unseen.
+**U10 — the new theme** · `ui/theme` · M. Waits on the author's
+description. What is already so prepares it: the look is tokens in
+`core/theme.css`, and an app's stylesheet says only how its columns lie.
 
-**U1 — drawers on demand** · `ui/drawers` · S. Format, Ground, Export and
-Stack start closed wherever an app adds them, and each app closes its own
-secondary drawers — the puppet's Parts, Camera and For OBS among them. A
-Ctrl-click on a head opens that drawer alone in its column; the panel's
-head has *fold all*. Open or closed is remembered per viewer as today
-(`core/Drawer.js`), under a new key, so a browser that remembered the old
-defaults sees the new ones once. *Done when* U0's mean is 1.6 or under.
-
-**U2 — a row on one line** · `ui/rows` · M. `core/widgets.js` and
-`param-panel.css`: a range's label, slider and number on one line — 34 px,
-not 70 — a long label wrapping in its own cell; a switch beside its label;
-chips and the rule between rows lighter; a colour, a text and a sprite grid
-keep their room, the grid a height of its own and its own scroll. Every app
-at once, none touched. *Done when* U0's mean is 1.35 or under, every
-browser check passes — one that drags a slider by its place may have to
-find it again — and the author has seen three apps before and after.
-
-**U3 — any control by name** · `ui/find` · S. Ctrl+K: a box over the page
-that finds a row or a button of the page's panels by its label or its
-drawer's as it is typed; Enter opens the drawer, brings the row into view
-and puts the cursor in it. Drawn from the schemas alone: no app writes an
-entry.
-
-**U4 — the viewer's own chrome** · `ui/viewer` · L. The player
-(`core/Transport.js`) a strip under the picture in every app with a clock —
-play, scrub, frame N of M, fps — and the Format group behind a chip in the
-viewer's head, `1080 × 1080 · 1:1 ▾`, opening over the viewer:
-`ParamPanel` learns to mount a group elsewhere, still drawn from the
-schema. Every app's `main.js`. A mockup first.
-
-**U5 — export on a sheet** · `ui/export` · M. The Export drawer's
-downloads and core's print panel join L10's sheet: one sheet for what
-leaves the screen — into the vault, 1 2 3, or out of the suite, a PNG, the
-frames, a sprite sheet, a print — opened from the viewer's head too.
-
-**U6 — the layers panel** · `ui/layers` · M. The Stack drawer out of the
-column: a panel of its own over the viewer's edge, toggled from its head —
-Photoshop's Layers — where L1's pins and L2's flatten then show.
-
-**U7 — tabs in a column** · `ui/tabs` · M. A group's `tab` in the schema,
-a strip of tabs at the column's top — only if U0 still finds a column past
-1.5 screens after U6.
+**U11 — the new layout** · `ui/layout` · L. From U9's notes, in U10's
+theme, on U8's boxes: where the clock, the frame, the output, the layers
+and an app's own controls live. The proposals of 2026-10-22, to start from
+or to leave: drawers on demand, Blender's Ctrl-click (U1); a row on one
+line, Tweakpane's density (U2); any control by name, Ctrl+K (U3); the
+viewer's own chrome — the clock under the picture, the frame beside it
+(U4); export on a sheet (U5); the layers in a panel of their own (U6);
+tabs (U7).
 
 ## L — layers and smart objects
 
@@ -263,7 +226,7 @@ make is greyed — 2 where nothing moves — and Enter, or S again, repeats
 the last choice, so S S is the save of before. A smart object is M11's:
 what is on screen bound (`Vault.bind`), its next save of that kind its next
 version — the sheet says *v3 → v4*, and offers a new one instead. Each app
-declares what it saves; the sheet is drawn from that (`core/SaveSheet.js`).
+declares what it saves in U8a's Export box; the sheet is drawn from that.
 The gamepad comes with C6. *Done when* every app's check saves through the
 sheet, and a smart object saved twice is two versions of one id.
 
@@ -354,7 +317,7 @@ the bit (`apps/3d/STATUS.md`, *Next*). Saved through L10's sheet: 1 the
 model as it stands, as today; 2 the loop, a `sequence` whose recipe is the
 model's and its motion, the model its parent, as the rig's loops are; 3 a
 smart object of whichever is on screen. Replayed by `rebuild.js`, played
-in compose. Its player is a drawer until U4 moves every player.
+in compose. Its player is the player box, U8b's.
 
 **P2 — M10's brick 5: a shape swung** · `3d/swing` · M. A shape's place
 swung on a wave, as the rig swings a bone, a phase a shape, every loop
