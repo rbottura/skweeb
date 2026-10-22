@@ -1,0 +1,47 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   cards.css — a list of cards (core/Cards.js): filter's chain, the 3D app's
+   shapes and their modifiers.
+
+   Moved out of param-panel.css on 2026-10-22, at its cap. Every page imports
+   it right after param-panel.css, so its rules still come after the panel's
+   and win where they did.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.pp-cards { display: grid; gap: 12px; }
+
+/* Two rows, always: the entry's name, then its buttons at the right — the
+   same for a short name and a long one, rather than wrapping where it falls. */
+.pp-card .pp-head { flex-wrap: wrap; gap: 5px; margin-bottom: 0; }
+.pp-card .pp-title { flex: 1 0 100%; }
+.pp-card .pp-head .pp-btn { min-height: 24px; padding: 0 7px; }
+.pp-card .pp-btn:disabled { opacity: 0.35; cursor: default; }
+.pp-card .pp-body { overflow: visible; padding: 0; }
+.pp-card .pp-loose:not(:empty) { margin-bottom: 0; }
+
+/* What follows is a card's own — `>` down to its head and body — so a card
+   inside a card (Cards' `inner`: a shape's modifiers) keeps its own state. */
+
+/* Off: still in the list and still editable, just not drawn or run. */
+.pp-card--off > .pp > .pp-head > .pp-title { text-decoration: line-through; }
+.pp-card--off > .pp > .pp-body > .pp-loose,
+.pp-card--off > .pp > .pp-body > .dr { opacity: 0.5; }
+
+/* Chosen: its head in the accent. Folding (Cards' `fold`): every head on one
+   line — the name, cut short if it must be, then its buttons — the others
+   their head alone, and the name, marked as a drawer's head is, opens one. */
+.pp-card--chosen > .pp > .pp-head { background: var(--nb-accent, #ffd60a); color: var(--nb-ink, #111); }
+.pp-card--chosen > .pp > .pp-head > .pp-btn { border-color: var(--nb-ink, #111); }
+.pp-card--foldable > .pp > .pp-head > .pp-title { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.pp-card--foldable > .pp > .pp-head > .pp-title::before { content: '▾'; display: inline-block; width: 1.1em; letter-spacing: 0; }
+.pp-card--folded > .pp > .pp-head > .pp-title::before { content: '▸'; }
+.pp-card--foldable > .pp > .pp-head > .pp-title:focus-visible { outline: var(--nb-line-sm, 2px) solid currentColor; outline-offset: 2px; }
+.pp-card--foldable > .pp > .pp-head > .pp-spacer { display: none; }
+.pp-card--folded > .pp > .pp-body { display: none; }
+
+/* A card inside a card: a lighter head, under its card's dark one. */
+.pp-card .pp-card > .pp > .pp-head { background: var(--nb-paper, #fffdf6); color: var(--nb-ink, #111); border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111); }
+.pp-card .pp-card > .pp > .pp-head > .pp-btn { border-color: var(--nb-ink, #111); }
+
+.pp-cards-empty { margin: 2px 0 10px; color: var(--nb-muted); font-style: italic; }
+.pp-cards-empty[hidden] { display: none; }
+.pp-cards-add { width: 100%; margin-top: 12px; }

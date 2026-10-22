@@ -195,7 +195,7 @@ all of them, and all pass (2026-10-22). Newest: the puppet's four —
 before them M11's — `live`, `stack`, `place`, `smart` — the print's —
 `windowed`, `stage-still`, `png` — and the 3D app's seven.
 
-Twenty-four browser checks, each a command in `CLAUDE.md`: its own server on a
+Twenty-six browser checks, each a command in `CLAUDE.md`: its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
 throws or its console is not quiet. Newest: `check-puppet`, the puppet on
@@ -233,11 +233,15 @@ compares two pages' canvases measures, never demands the pixel.
 - **The gamepad cannot reopen its recordings**; its params are not on
   `core/params.js`, its panels its own; its GALLERY panel shows IndexedDB
   (C6).
-- **Files over the 400-line cap**: `scripts/check-particles.mjs` (506) and
-  `scripts/check-3d.mjs` (454) — C2 — and the gamepad's `ui/hud.css` (721),
+- **check-print fails one check on the tower**, since Chrome 155: a still
+  painted as the gamepad paints is 0.13 of 255 from core's drawing of it
+  from its marks, where 0.05 is asked — the same on the commit of
+  2026-10-07, so not the code since (C7).
+- **Files over the 400-line cap**: the gamepad's `ui/hud.css` (721),
   `sketch/gamepadSketch.js` (572), `ui/TimelinePanel.js` (547) and
-  `ui/ParamPanel.js` (500) — C6. At it, `core/VaultPanel.js` (399): the next
-  thing it learns needs a split first.
+  `ui/ParamPanel.js` (500) — C6; `node scripts/lines.mjs` names them, and
+  fails on any other. At it, `core/VaultPanel.js` (399): the next thing it
+  learns needs a split first.
 - **A 3D model is a still until brick 5** (P1); its handles turn about the
   world's axes only; nothing in it is undone; a shadow's darkness and map
   are fixed; not yet seen on the laptop itself, where it should draw with
@@ -262,11 +266,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**C2 on the board of `docs/plan.md`: under the line cap** —
-`scripts/check-particles.mjs` split in two, `check-3d`'s print section
-moved into `check-print`, `core/param-panel.css` split before U2 grows it,
-and `scripts/lines.mjs`, the gate's line check as a command. Then U0, U1
-and U2: columns that fit. The board holds the rest in order, the author's
+**C7 on the board of `docs/plan.md`: check-print green again** — find
+where a still painted as the gamepad paints and core's drawing of it from
+its marks part since Chrome 155, and mend the drawing or the measure. Then
+U0, U1 and U2: columns that fit. The board holds the rest in order, the author's
 since 2026-10-22, each item a branch landed after a gate
 (`docs/workflow.md`), and what waits on the author, each with what happens
 if nothing is said.

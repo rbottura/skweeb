@@ -74,7 +74,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   draw order. More than 20 000 alive keeps the newest.
 
 - **The app opens and plays dots** (`main.js`, `params.js`, `draw.js`;
-  `node scripts/check-particles.mjs`, now 62 checks). Three columns, as
+  `node scripts/check-particles.mjs`, 41 checks since its split). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
   core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
@@ -230,16 +230,17 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   not the code's: its copy of `./vault` is empty there — no set to draw
   with — and a frame through the fields takes 17–22 ms on its i7-8565U,
   before this brick and after, against a 16.7 ms budget set on the tower.
-- `scripts/check-particles.mjs` is 506 lines, past the cap; new checks of
-  the app go in `check-particles-links.mjs` until it is split — C2 on the
-  board.
+- The checks are three files (C2, 2026-10-22, at the line cap):
+  `check-particles` — the loop, a burst, print scale, a set's sprites, the
+  saves (41); `check-particles-fields` — emitters, fields and depth, the
+  guides dragged, a picture from outside (22); and `check-particles-links`.
 
 ## Next single step
 
 M6's seven bricks are in, its *Done when* met, and with them an emitter
-and a field taken from other objects. Of particles' own, only C2 is on the
-board of the cycle begun 2026-10-22 (`docs/plan.md`) — it splits
-`scripts/check-particles.mjs`; what is left here waits under its *Later*:
+and a field taken from other objects. Nothing of particles' own is on the
+board of the cycle begun 2026-10-22 (`docs/plan.md`) — L11 will have its
+sprites follow a smart object; what is left here waits under its *Later*:
 
 - **Colour over life** — for dots, and a tint for sprites: a `color[]`
   ramp run along a curve.

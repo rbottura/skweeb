@@ -7,6 +7,9 @@
    Two ways to sit on the page. Docked (`.pp--docked`) the panel is a column of
    the layout and never covers the canvas: grid and ckt. Floating (`.pp`) it
    slides over the right edge, for a page with no column to give it.
+
+   A list of cards and the Stack drawer have files of their own, cards.css and
+   stack-panel.css: every page imports them right after this one.
    ────────────────────────────────────────────────────────────────────────────── */
 
 .pp {
@@ -327,66 +330,6 @@ textarea.pp-text { resize: vertical; }
 /* A column of actions in a drawer: export, make. */
 .pp-actions { display: grid; gap: 8px; padding-top: 6px; }
 
-/* ── A list of cards (core/Cards.js): filter's chain, the 3D app's shapes ──── */
-
-.pp-cards { display: grid; gap: 12px; }
-
-/* Two rows, always: the entry's name, then its buttons at the right — the
-   same for a short name and a long one, rather than wrapping where it falls. */
-.pp-card .pp-head { flex-wrap: wrap; gap: 5px; margin-bottom: 0; }
-.pp-card .pp-title { flex: 1 0 100%; }
-.pp-card .pp-head .pp-btn { min-height: 24px; padding: 0 7px; }
-.pp-card .pp-btn:disabled { opacity: 0.35; cursor: default; }
-.pp-card .pp-body { overflow: visible; padding: 0; }
-.pp-card .pp-loose:not(:empty) { margin-bottom: 0; }
-
-/* What follows is a card's own — `>` down to its head and body — so a card
-   inside a card (Cards' `inner`: a shape's modifiers) keeps its own state. */
-
-/* Off: still in the list and still editable, just not drawn or run. */
-.pp-card--off > .pp > .pp-head > .pp-title { text-decoration: line-through; }
-.pp-card--off > .pp > .pp-body > .pp-loose,
-.pp-card--off > .pp > .pp-body > .dr { opacity: 0.5; }
-
-/* Chosen: its head in the accent. Folding (Cards' `fold`): every head on one
-   line — the name, cut short if it must be, then its buttons — the others
-   their head alone, and the name, marked as a drawer's head is, opens one. */
-.pp-card--chosen > .pp > .pp-head { background: var(--nb-accent, #ffd60a); color: var(--nb-ink, #111); }
-.pp-card--chosen > .pp > .pp-head > .pp-btn { border-color: var(--nb-ink, #111); }
-.pp-card--foldable > .pp > .pp-head > .pp-title { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
-.pp-card--foldable > .pp > .pp-head > .pp-title::before { content: '▾'; display: inline-block; width: 1.1em; letter-spacing: 0; }
-.pp-card--folded > .pp > .pp-head > .pp-title::before { content: '▸'; }
-.pp-card--foldable > .pp > .pp-head > .pp-title:focus-visible { outline: var(--nb-line-sm, 2px) solid currentColor; outline-offset: 2px; }
-.pp-card--foldable > .pp > .pp-head > .pp-spacer { display: none; }
-.pp-card--folded > .pp > .pp-body { display: none; }
-
-/* A card inside a card: a lighter head, under its card's dark one. */
-.pp-card .pp-card > .pp > .pp-head { background: var(--nb-paper, #fffdf6); color: var(--nb-ink, #111); border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111); }
-.pp-card .pp-card > .pp > .pp-head > .pp-btn { border-color: var(--nb-ink, #111); }
-
-.pp-cards-empty { margin: 2px 0 10px; color: var(--nb-muted); font-style: italic; }
-.pp-cards-empty[hidden] { display: none; }
-.pp-cards-add { width: 100%; margin-top: 12px; }
-
 /* A print (core/PrintPanel.js): what the sheet comes to, then its button. */
 .pp-print-note { margin: 8px 0 6px; font: 400 12px/1.45 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
 .pp-print { width: 100%; }
-
-/* The Stack drawer (core/StackPanel.js): this browser's live stack, top first, and what can go on it. */
-.pp-stack-note { margin: 4px 0 8px; font: 400 12px/1.45 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
-.pp-stack { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
-.pp-stack-row { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 8px; cursor: pointer;
-  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111); background: var(--nb-paper, #fff); }
-.pp-stack-row--mine { background: var(--nb-accent, #ffd60a); }
-.pp-stack-row--chosen { box-shadow: var(--nb-shadow-sm, 3px 3px 0 #111); }
-.pp-stack-app { font-weight: 700; white-space: nowrap; }
-.pp-stack-what { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  font: 400 12px/1.4 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
-.pp-stack-row--mine .pp-stack-what { color: var(--nb-ink, #111); }
-.pp-stack-tag { font-size: 11px; white-space: nowrap; }
-.pp-stack-btn { min-width: 26px; padding: 2px 6px; }
-.pp-stack-adds { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.pp-stack-sends { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.pp-stack-sends:empty { display: none; }
-.pp-stack-said { margin: 6px 0 0; min-height: 1.4em; font: 400 12px/1.4 var(--nb-mono, monospace); color: var(--nb-muted, #6b665c); }
-.pp-stack-open { color: var(--nb-ink, #111); }

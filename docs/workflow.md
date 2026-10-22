@@ -106,16 +106,10 @@ What a branch passes before it lands — the definition of done:
      printf '%-40s' "$c"; node "$c" 2>&1 | tail -1
    done
    ```
-4. **No file past 400 lines** (rule 4). Until `scripts/lines.mjs` lands
-   (C2 on the plan):
-
-   ```sh
-   git ls-files '*.js' '*.mjs' '*.css' '*.html' '*.md' ':!core/libs' ':!apps/*/libs' \
-     | xargs wc -l | awk '$1 > 400 && $2 != "total"'
-   ```
-
-   It names the gamepad's four and two checks on 2026-10-22, all known: a
-   branch adds none.
+4. **No file past 400 lines** (rule 4): `node scripts/lines.mjs`, which
+   names the gamepad's four as known until C6 and fails on any other — so a
+   branch adds none. A file new on the branch counts once git knows it:
+   `git add -N` it first.
 5. **Written where it is read:** its app's `STATUS.md`; `CLAUDE.md` for a
    new command, test or check; `docs/decisions.md` for a decision; and its
    row on the plan's board marked `landed` with the date — in the branch's

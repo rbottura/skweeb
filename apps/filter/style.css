@@ -3,11 +3,13 @@
 
    Everything that looks like the suite comes from core. All filter says is its
    layout — the viewer, then one column of drawers. A filter's card, a small
-   param panel of its own, is core's (core/Cards.js, core/param-panel.css).
+   param panel of its own, is core's (core/Cards.js, core/cards.css).
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
 @import '../../core/param-panel.css';
+@import '../../core/cards.css';
+@import '../../core/stack-panel.css';
 @import '../../core/vault-panel.css';
 @import '../../core/sequence-viewer.css';
 

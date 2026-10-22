@@ -8,6 +8,8 @@
 
 @import '../../../core/theme.css';
 @import '../../../core/param-panel.css';
+@import '../../../core/cards.css';
+@import '../../../core/stack-panel.css';
 @import '../../../core/vault-panel.css';
 @import '../../../core/guide.css';
 

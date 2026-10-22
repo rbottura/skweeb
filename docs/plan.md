@@ -26,7 +26,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C0 | the puppet landed | `rig/puppet` | — | landed 2026-10-22 |
 | — | this plan, and the method | `docs/plan` | — | landed 2026-10-22 |
 | C1 | the docs true again | `docs/status` | S | landed 2026-10-22 |
-| C2 | under the line cap | `clean/line-cap` | S | ready |
+| C2 | under the line cap | `clean/line-cap` | S | landed 2026-10-22 |
+| C7 | check-print green again | `fix/print-still` | S | ready |
 | U0 | the columns measured | `ui/measure` | S | ready |
 | U1 | drawers on demand | `ui/drawers` | S | needs U0 |
 | U2 | a row on one line | `ui/rows` | M | needs C2, U1 |
@@ -66,9 +67,9 @@ S is a session, M two or three, L more.
 
 The author's, 2026-10-22: "l'ordre proposé me va".
 
-1. **The ground cleared** — C1, C2, U0. The docs say what is true, the
-   line cap holds, and the columns have numbers before anything moves
-   them. C2 splits `core/param-panel.css` (392 lines), which U2 grows.
+1. **The ground cleared** — C1, C2, C7, U0. The docs say what is true,
+   the line cap holds, `main` is green — check-print is not, since Chrome
+   155 — and the columns have numbers before anything moves them.
 2. **Columns that fit** — U1, U2, U3: core alone, every app at once, from
    2.14 screens a column to 1.32, projected (*U*, below). Before any brick,
    since every brick after them adds rows.
@@ -117,17 +118,9 @@ Each with what happens if nothing is said.
 
 ## C — the suite tidied
 
-**C1 — the docs true again** · landed 2026-10-22: every app's next step
-true and on this board, the roadmap's done milestones in
-`docs/roadmap-done.md`, the root `STATUS.md` folded to 322 lines.
+**C1 — the docs true again** · landed 2026-10-22, `docs/status`.
 
-**C2 — under the line cap** · `clean/line-cap` · S.
-`scripts/check-particles.mjs` (506) split in two; `scripts/check-3d.mjs`
-(454) gives its print section to `check-print`, as its STATUS says;
-`core/param-panel.css` (392) gives the cards and the stack files of their
-own, before U2. And `scripts/lines.mjs`, the gate's fourth step as a
-command, the gamepad's four files named as known until C6. *Done when* it
-prints those four alone, and the split checks count what they counted.
+**C2 — under the line cap** · landed 2026-10-22, `clean/line-cap`.
 
 **C3 — fonts licensed in their files** · `clean/font-licences` · S, a side
 job. Rule 5: `assets/fonts/` lacks its `OFL.txt` files, and Destra's
@@ -146,6 +139,14 @@ it lands. Nothing to install; the browser checks stay on the machines.
 **C6 — the gamepad on core's kit.** The last app on panels and params of
 its own, four files past the cap, its recordings never reopened, no clock
 in the stack. A milestone's size: listed so it is chosen, not forgotten.
+
+**C7 — check-print green again** · `fix/print-still` · S. Since Chrome 155
+on the tower, a still painted as the gamepad paints is 0.13 of 255 from
+core's drawing of it from its marks (`core/stage/still.js`), where 0.05 is
+asked; the commit of 2026-10-07 measures the same to the last digit. Found
+where the two part, then `still.js` mended if a print is truly off, or the
+check made to measure, never to demand the pixel. *Done when* check-print
+is green on the tower.
 
 ## U — columns that fit
 
