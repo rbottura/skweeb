@@ -28,6 +28,8 @@ it.** Everything below is load-bearing; nothing below is background.
 | `assets/fonts/` | the suite's fonts. Open-licence only, verified. | `docs/fonts.md` |
 | `scripts/` | the generators, and `frames-to-video.mjs` — a frame zip into a video, via ffmpeg. Video is a conversion, not a feature. `chrome.mjs` drives headless Chrome, `check-kit.mjs` is what a browser check stands on, and `check-compose.mjs`, `check-compose-export.mjs`, `check-gpu.mjs`, `check-filter.mjs`, `check-filter-save.mjs`, `check-look.mjs`, `check-vault.mjs`, `check-filters.mjs`, `check-frames.mjs`, `check-particles.mjs`, `check-particles-links.mjs`, `check-sheet-engine.mjs`, `check-fractals.mjs`, `check-map.mjs`, `check-map-play.mjs`, `check-rig.mjs`, `check-puppet.mjs`, `check-3d.mjs`, `check-3d-poster.mjs`, `check-print.mjs`, `check-live.mjs`, `check-send.mjs`, `check-smart.mjs` and `check-page.mjs` are twenty-four, as commands; `chrome.mjs` opens more tabs than one, for windows that talk to each other. `vendor-three.mjs` copies three.js into `core/libs/three/`, one version, pinned, with the add-ons the 3D app uses — its handles. `vendor-mediapipe.mjs` fetches MediaPipe's face landmarker into `core/libs/mediapipe/`, one version, pinned — 15 MB of WASM and model that git never holds, so once a machine. `obs/hide-projectors.lua` is loaded in OBS itself: its projectors kept out of the screen it records; `obs/overlay.ps1` (with `Overlay.cs`, `ObsSocket.cs`, `Placed.cs`; `overlay.cmd` to double-click) puts the puppet's source over that screen as it stands in the scene, transparent, through obs-websocket (`docs/guides/obs.md`). `import-legacy-grid.mjs` brings the original grid sketch's materials into the vault. `vault-merge.mjs` copies one vault's objects into another — each machine's old vault into the one on the laptop that travels. | — |
 | `docs/roadmap.md` | milestones, open decisions | when planning |
+| `docs/plan.md` | the work items of the cycle — the board: each with its branch, in order, and what waits on the author | before starting work, and when an item lands |
+| `docs/workflow.md` | a branch for each work item: merge or rebase, the gate before landing, several machines | before branching, and before landing |
 | `docs/decisions.md` | what was decided before today, and why, by date — the newest days; its head lists the files the older ones moved to, `docs/decisions-<from>-to-<to>.md` | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
 | `docs/inbox.md` | the author's ideas between bricks, not yet sorted | when the author has one, and at the end of a session |
@@ -88,6 +90,16 @@ never symmetric, never inferred. The catalogue of links is the map of the suite.
    until it is ported. Settled 2026-09-26. The 3D app draws with three.js, its
    one version in `core/libs/three/` — the author's call, 2026-10-06.
 
+## Branches
+
+Nothing is committed on `main`. Every work item is a branch, named on the
+board in `docs/plan.md` and made from `main` when the item starts. Rebase it
+on `main` to catch up — never merge `main` into it; land it after the gate —
+the unit loop, the browser checks of what it touched, no file past the cap,
+its docs and its board row written — with `git merge --no-ff` when it has
+two commits or more, `--ff-only` when it has one. A session ends pushed,
+finished or not. Since 2026-10-22, the author's ask → `docs/workflow.md`
+
 ## Running
 
 ```sh
@@ -144,3 +156,7 @@ file that makes the next session cost nothing to start.
 Then sort `docs/inbox.md` — each idea onto the plan, marked a side job, or
 parked, as its head says. An idea the author has mid-brick goes there, not
 into the brick under way.
+
+Then commit what the session did on its branch and push it. An item done
+lands, its row on the board marked `landed` with the date (`docs/workflow.md`,
+*The gate*); one not done stays pushed for the next machine to take up.
