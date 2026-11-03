@@ -187,10 +187,13 @@ sorts them.
 
 ### Across the suite
 
-- **The UI pass, from the author's brief** (`docs/decisions.md`): one theme,
-  neo-brutalist and light; a bar that is information only; drawers; core's
-  Format drawer everywhere; a page that never scrolls. Reopened 2026-10-22:
-  layout and theme to be redesigned, the shared boxes first (`docs/plan.md`, U).
+- **The dark theme** (S1, 2026-11-03; `core/theme.css`): tokens by role —
+  frame, panel, view, raised, field, sel, line, fg, accent — the author's
+  keep from the bench (violet, corners 9 px, borders 7.5 %, contrast 5, IBM
+  Plex); every stylesheet of core and the apps on them, the names of
+  2026-09-23 (`--nb-*`, `--hud-*`) pointing at them. A bar that is
+  information only; drawers; core's Format drawer everywhere; a page that
+  never scrolls. The layout's turn is track S's (`docs/scene.md`).
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -262,10 +265,6 @@ compares two pages' canvases measures, never demands the pixel.
 - **Five sprite names mean two pictures** in `brushes` against v2's
   `sprites/`. A cleanup must never renumber `brushes`: marks name sprites
   by index — the rig's poses too.
-- **The tower cannot push** (2026-11-03): its GitHub key has a passphrase
-  and no agent holds it — Windows' ssh-agent still disabled — so every
-  commit since C1 is on this machine only. The fix, once, as an
-  administrator: `docs/workflow.md`, *Once a machine*.
 - **A server started before a change to `server.js` keeps its old API**:
   restart it after pulling — on the laptop, `systemctl --user restart
   skweeb-vault`.
@@ -277,14 +276,15 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S1 on the board of `docs/plan.md`, after the session's reset at 15:40:
-the dark theme** — branch `ui/theme` from `main`; the bench's tokens (the
-author's keep: violet, corners 9 px, borders 7.5 %, contrast 5, IBM Plex)
-into `core/theme.css`, read from the bench's published files
-(`docs/scene.md`, *The bench*); every browser check after it. Before it,
-the tower's key, so the day's commits reach GitHub. The board holds the
-rest in order — S1 to S10 first, then what was there — each item a branch
-landed after a gate (`docs/workflow.md`), and what waits on the author.
+**S2 on the board of `docs/plan.md`: a value on one line** — branch
+`ui/rows` from `main`. In `core/widgets.js` and `ParamPanel.js`: the typed
+box scrubs (drag, Shift ×10, Ctrl ×0.1) and shows its fill; the slider is a
+second line only where the schema says `slider: true`, under Alt held over
+its drawer, or pinned by Alt click on its label, its step five times the
+field's; a row's mark — a hairline, a dot when changed from its default —
+and its drawer's count. The checks reach rows by `.pp-row`, `.pp-name`,
+`.pp-num` and `.pp-range`: all four stay. The board holds the rest in order
+— track S first — each a branch landed after a gate (`docs/workflow.md`).
 
 ## Parked decisions
 
