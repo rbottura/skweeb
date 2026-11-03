@@ -150,14 +150,16 @@ the box's shape while either side is typed or dragged; a ratio or a paper
 format stays picked, being still that shape at any size, so a sheet's dpi can
 be read while its pixels are set.
 
-The viewer's guides are core's (S8): Bar puts `<skw-rulers>` in
-`.viewer-stage` and `<skw-viewtools>` in `.viewer-head` — a head made if
-there is none — and `output()` tells them the picture's size. An app with
-things to place says so, from `shell/guides.js`: `placeable([{ id, label,
-put(x, y) }])`, in the picture's pixels from its top left; `select(id)` when
-one is pressed; a drag pulled through `snapPoint(x, y, ctrlKey)`, and
-`endSnap()` at its end. F then puts the selection at the centre. Particles'
-pointer.js is the one that does.
+The viewer and the left hand are core's (S8, S5b): Bar puts `<skw-rulers>`
+in `.viewer-stage`, `<skw-viewtools>` in `.viewer-head` (made if missing),
+tells them the picture's size from `output()`, and installs `keys.js` — a
+key by its place, `event.code`, tapped or held for its pie (`shell/pie.js`),
+each key's act in every app `shell/bindings.js`'s. An app adds what is its
+own: `placeable([{ id, label, put(x, y) }])` from `shell/guides.js`, then
+`select(id)` when one is pressed and `snapPoint(x, y, ctrlKey)` through a
+drag, `endSnap()` after; its pie on A, `setAppPie({ title, items, tap })`
+or `enumPie(params, key, title)`; Z's first, `setOverlay({ label, on,
+toggle })`; and `own('KeyR')` for a key it means otherwise.
 
 ## bus.js — event names
 

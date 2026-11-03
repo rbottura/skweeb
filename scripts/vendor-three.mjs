@@ -7,7 +7,7 @@
  *
  * The 3D app (apps/3d/) draws with three.js's WebGPU renderer, on the page's
  * one GPU device (core/gpu/device.js) — the author's call, 2026-10-06
- * (docs/decisions.md). Like p5 it is a copy in the repo, never fetched at
+ * (docs/decisions-2026-10-06-to-20.md). Like p5 it is a copy in the repo, never fetched at
  * runtime: every app runs alone (rule 7), and three releases once a month,
  * each free to change what a recipe draws. An upgrade is this script, then
  * `node scripts/check-3d.mjs`.

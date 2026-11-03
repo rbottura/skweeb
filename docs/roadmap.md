@@ -263,7 +263,7 @@ every loop closes. Brick 6 waits on the author's views.
 2026-10-06, while M9's last brick waits on the slug's views: "a simple thing
 to generate and manipulate some real basic primitives". Meshes, not the
 ray-marched distance fields planned when 3D was parked, for what meshes open
-(`docs/decisions.md`, 2026-10-06); distance fields can come back as a family
+(`docs/decisions-2026-10-06-to-20.md`); distance fields can come back as a family
 of M7, or as one more way to make a mesh.
 
 **A model is an object like any other.** `model`, the type deferred since

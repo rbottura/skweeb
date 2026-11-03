@@ -215,6 +215,10 @@ sorts them.
   bar in every app — the search, Save, Export ▾ read from the Export box —
   the player under the viewer, and the status bar's keys for what is under
   the cursor.
+- **The left hand** (S5b, 2026-11-03; `core/keys.js`, `core/shell/bindings.js`,
+  `pie.js`): keys by their place, tapped or held for a pie at the pointer —
+  Q D frames, A the app's own, Z the view, E export, R again, F place, G the
+  ground, X a reset under the pointer; an app's own keys kept (`check-keys`).
 - **S2's rest** (S2b, 2026-11-03; `core/param-rows.js`, `core/numbox.js`): a
   number's unit inside its box; width × height on one line, linked, with a
   swap that makes the format custom, and every x/y from centre; the rows
@@ -311,14 +315,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S5's keys and pies, once the author has said what G and A are** — branch
-`ui/keys-pies`, `core/keys.js`: keys read by `event.code`, the left hand's
-place — Q and D a frame, Space play, S save, H the states — today's keys
-kept beside them, `key` read too for the checks; pies held on A Z E R F,
-tapped for their first act. Asked of the author: G stays the guides, or
-becomes the ground? And which pie A opens in each app — its own, by
-default? Meanwhile, S6 waits on `parent` and `parent2` in
-`docs/object-model.md`, the gabarit on its type's fields.
+**S6 on the board of `docs/plan.md`: an object's states as a tree** —
+branch `layers/states`: `parent` and `parent2` in `docs/object-model.md`,
+agreed 2026-11-03; S saves the next state of the object open rather than a
+new object, the server keeping each state; the session's steps for Ctrl Z
+and Ctrl Y at no cost; a row's Alt click on its dot lists its value in
+every state. Then S7, the graph over the page.
 
 ## Parked decisions
 

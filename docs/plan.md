@@ -36,10 +36,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S2 | a value on one line: field, fill, slider, mark | `ui/rows` | M | landed 2026-11-03 |
 | S3 | the shared boxes, as the bench has them | `ui/boxes`, `ui/player` | M | landed 2026-11-03 |
 | S4 | the format a list | `ui/boxes-format` | S | landed 2026-11-03; Format and Ground mounted anywhere → S9 |
-| S5 | the left hand: the search, then keys by place and pies | `ui/keys` | M | the search landed 2026-11-03; keys and pies after S12, S8 |
+| S5 | the left hand: the search, then keys by place and pies | `ui/keys`, `ui/keys-pies` | M | landed 2026-11-03: the search, then the keys and pies |
 | — | Lit, the components' one library | `ui/lit` | — | landed 2026-11-03 |
 | S12 | the bench's shell in every app: title bar, the player under the viewer, the status bar's hints | `ui/shell` | M | landed 2026-11-03 |
-| S6 | an object's states as a tree | `layers/states` | M | needs S3; the object model |
+| S6 | an object's states as a tree | `layers/states` | M | ready: `parent` and `parent2` agreed 2026-11-03 |
 | S7 | the graph over the page: compare, merge, open in | `ui/graph` | M | needs S6 |
 | S8 | rulers, guides, magnetism, F; the gabarit | `ui/guides` | M | rulers, guides, the magnet and F landed 2026-11-03; the gabarit's type waits on the author |
 | S2b | S2's rest: the unit in the box, the fold of rows seldom touched, a pair on one line | `ui/rows-more` | S | landed 2026-11-03 |
