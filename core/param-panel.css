@@ -345,3 +345,35 @@ textarea.pp-text { resize: vertical; }
 /* A print (core/PrintPanel.js): what the sheet comes to, then its button. */
 .pp-print-note { margin: 8px 0 6px; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); }
 .pp-print { width: 100%; }
+
+/* ── A value on one line (S2) ──────────────────────────────────────────────── */
+
+/* A row is its label's line; its mark, before it, a hairline that turns a dot
+   when the value differs from its default. */
+.pp-row { position: relative; padding: 2px 0 2px 14px; }
+.pp-row + .pp-row { border-top: 0; }
+.pp-row:hover { background: var(--hover); }
+.pp-label { min-height: 26px; margin-bottom: 0; }
+.pp-mark { position: absolute; left: 5px; top: 8px; bottom: 8px; width: 1px; background: var(--mark); pointer-events: none; }
+.pp-row--mod > .pp-mark { left: 3px; top: 12px; bottom: auto; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+/* A drawer counts its changed values in its head. */
+.dr-mod { display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; font: 500 10.5px var(--font-num); color: var(--accent); letter-spacing: 0; text-transform: none; }
+.dr-mod::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+/* A number is its box: dragged sideways or typed, its fill where it sits in
+   its range. Its slider is a second line only where it is wanted: marked by
+   the schema, pinned by Alt click, or while Alt is held over its drawer. */
+.pp-num {
+  width: 96px;
+  height: 22px;
+  border-color: var(--line);
+  cursor: ew-resize;
+  background: linear-gradient(90deg, transparent var(--fa, 0%), var(--accent-soft) var(--fa, 0%), var(--accent-soft) var(--fb, 0%), transparent var(--fb, 0%)), var(--field);
+}
+.pp-num:hover { border-color: var(--line-2); }
+.pp-num:focus { cursor: text; }
+.pp-row--num:not(.pp-row--slider) > .pp-range { display: none; }
+.dr.pp-peek .pp-row--num > .pp-range { display: block; }
+.pp-row--num > .pp-range { margin: 0 0 4px; }
+.pp-scrubbing, .pp-scrubbing * { cursor: ew-resize !important; user-select: none !important; }
