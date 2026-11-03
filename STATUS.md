@@ -206,6 +206,8 @@ sorts them.
 - **The player as After Effects' preview** (S3, 2026-11-03; `core/Transport.js`):
   first, back, play, on, last, a timecode in the accent, the frame count, the
   loop a ticked ruler to scrub.
+- **The format a list** (S4, 2026-11-03): a dropdown in runs — shape,
+  pixels, print — where it was twenty-one chips.
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -246,6 +248,9 @@ compares two pages' canvases measures, never demands the pixel.
   fit a 120×176 sheet at 300 dpi, a tall one is enlarged a little, and the
   print says by how much. A shape, or a picture from outside, has only its
   pixels. The gamepad's print box is not on the pad.
+- **check-map's press is intermittent** (2026-11-03): "a press paints the
+  cell under it" read the cell unpainted once in six runs — the pixel read a
+  little early after a real press; it passed every rerun.
 - **A blur's taps stop at 512 a side**; past that it wants a smaller picture.
 - **Compose's PNG export still draws its page on one canvas**, tried up to
   2480 × 3508 — its print beside it draws any sheet in tiles.
@@ -288,12 +293,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S4 on the board of `docs/plan.md`: the format a list** — branch
-`ui/boxes-format`: the frame's format a dropdown grouped as `frame.js`
-already marks its runs (shape, pixels, print), where it is a wall of chips
-today; the three checks that click a format chip — compose's, the print's,
-the poster's — pick it from the list. Then Format and Ground mounted
-anywhere, Ground one group in every app. The board holds the rest in order —
+**S5 on the board of `docs/plan.md`: the left hand, the search first** —
+branch `ui/keys`: `core/Palette.js`, ² or Ctrl K, every control and act of
+the page by name, read from the page as it stands (its rows, its drawers'
+buttons) so no app declares anything; then keys by place (`event.code`) and
+the pies, keeping `key` for the checks' synthetic presses. The board holds the rest in order —
 track S first — each a branch landed after a gate (`docs/workflow.md`).
 
 ## Parked decisions
