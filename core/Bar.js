@@ -12,7 +12,9 @@
  *
  * Since S12 (2026-11-03) it puts the title bar at the page's head —
  * core/shell/titlebar.js, a Lit component, loaded once there is a DOM — and
- * its keys say what the thing under the cursor answers to.
+ * its keys say what the thing under the cursor answers to. Since S8 it puts
+ * the viewer's rulers, guides and tools round the app's stage
+ * (core/shell/rulers.js), and tells them the picture's size, from `output`.
  *
  * A result — "saved ckt_…" — holds the status line for a few seconds, because
  * a playing loop rewrites that line every frame and would otherwise show a
@@ -23,6 +25,7 @@
 
 import { dpiOf }   from './formats.js';
 import { labelOf } from './frame.js';
+import * as Guides from './shell/guides.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -67,6 +70,21 @@ export class Bar {
       import('./shell/titlebar.js').catch(err => console.warn('the title bar did not load:', err.message));
     }
     if (typeof document !== 'undefined') document.addEventListener('pointerover', e => this._hint(e.target), { passive: true });
+    this._viewer(app);
+  }
+
+  /** The rulers over the stage's padding, the viewer's tools at the end of its head — a head made if it has none. */
+  _viewer(app) {
+    const stage = typeof customElements !== 'undefined' && document.querySelector('.viewer .viewer-stage');
+    if (!stage) return;
+    Guides.forApp(app);
+    Guides.on('say', text => this.announce(text));
+    if (!stage.querySelector(':scope > skw-rulers')) stage.append(document.createElement('skw-rulers'));
+    const viewer = stage.closest('.viewer');
+    let head = viewer.querySelector(':scope > .viewer-head');
+    if (!head) { head = el('div', 'viewer-head'); viewer.prepend(head); }
+    if (!head.querySelector('skw-viewtools')) head.append(document.createElement('skw-viewtools'));
+    import('./shell/rulers.js').catch(err => console.warn('the rulers did not load:', err.message));
   }
 
   /** What the thing under the cursor answers to, in place of the app's keys while it is there. */
@@ -77,6 +95,9 @@ export class Bar {
       : at('.tp') ? 'drag: scrub · the buttons: first, back, play, on, last'
       : at('.dr-head') ? 'click: open or close'
       : at('skw-titlebar') ? '² or Ctrl K: every control and act, by name'
+      : at('skw-rulers .rl') ? 'drag out: a guide · back into a ruler: gone · Ctrl held: no magnet'
+      : at('skw-rulers .gd-grip') ? 'drag: move the guide · back into the ruler it came from: gone · Ctrl held: no magnet'
+      : at('skw-viewtools') ? 'the rulers and guides · the magnet'
       : null;
     this._keys.textContent = h || this._keysText;
   }
@@ -114,6 +135,7 @@ export class Bar {
    * @param {string} [o.format]  the frame format id, for the print resolution
    */
   output({ width, height, scale = 1, format }) {
+    Guides.setDoc(width > 0 ? width / scale : 0, height > 0 ? height / scale : 0);   // the rulers', in the picture's own pixels
     if (!(width > 0) || !(height > 0)) { this._out.textContent = ''; this._print.textContent = ''; return; }
     this._out.textContent = `${width} × ${height} px` + (scale !== 1 ? ` · ${scale}×` : '');
     const dpi = format && dpiOf(format, width, height);

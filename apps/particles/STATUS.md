@@ -1,5 +1,5 @@
 # STATUS — particles
-_last touched: 2026-10-22_
+_last touched: 2026-11-03_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
 and *Done when* are in `docs/roadmap-done.md`, M6 — a torch loop that closes
@@ -26,6 +26,10 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **The viewer's magnet and F** (S8, 2026-11-03; `pointer.js`, core's
+  `shell/guides.js`): a handle dragged is pulled to the picture's edges, its
+  centre and the guides, Ctrl held not; the one last pressed is ringed, and
+  F puts it at the centre — the emitter until another is pressed.
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the Export drawer, `docs/core-export.md`): the frame on screen, drawn
   again a window at a time through `core/windowed.js` — 81 tiles against

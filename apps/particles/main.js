@@ -36,6 +36,7 @@ import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { viewFactor }     from '../../core/view.js';
 import { drawGuides }     from './guides.js';
+import { selected }       from '../../core/shell/guides.js';
 import { wirePointer }    from './pointer.js';
 
 const canvas = document.getElementById('stage');
@@ -67,7 +68,7 @@ const clock = new Playhead({
 
 async function boot() {
   bar = new Bar({ app: 'particles', mount: document.querySelector('.app'),
-                  keys: 'drag the handles · G guides · space play · , . frame · S save · V vault' });
+                  keys: 'drag the handles · F the one pressed to the centre · G guides · space play · , . frame · S save · V vault' });
   emit = emitParams();
   picture = pictureParams();
   new ParamPanel(emit, { title: 'particles', mount: document.getElementById('emit-side'), groups: EMIT_GROUPS });
@@ -92,7 +93,7 @@ async function boot() {
     else draw();
   });
   new ResizeObserver(() => draw()).observe(canvas.parentElement);
-  wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn });
+  wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn, chose: () => draw() });
   guidesBtn.addEventListener('click', () => showGuides(!guidesOn));
   showGuides(guidesOn);
   wireKeys();
@@ -310,7 +311,7 @@ function paint() {
   shown = particlesAt(model, clock.tick / p.fps);
   drawParticles(ctx, shown, p, view, sprites);
   shownView = view;
-  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), given);
+  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), { ...given, selected: selected() });
 
   bar.output({ width: Math.round(size.width * p.scale), height: Math.round(size.height * p.scale),
                scale: p.scale, format: p.format });
