@@ -306,12 +306,16 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S2b on the board of `docs/plan.md`: S2's rest, as the bench has it** —
-branch `ui/rows-more`: a number's unit inside its box (`px`, `°`, `s`)
-instead of in its label; a drawer's rows seldom touched folded under
-"n more" (a schema key, `more: true`); width × height on one line, linked,
-with a swap. Then S5's keys and pies, once the author has said what G and
-A are.
+**S2b, on its branch `ui/rows-more`, pushed, not landed: run its gate** —
+the code is in: a number's unit inside its box (`unit`, 45 labels split;
+`core/numbox.js` split out of widgets.js), rows folded under "n more"
+(`more`: the frame's bleed and scale, particles' jitter and prewarm), two
+numbers on one line (`pair`: width × height with link and swap — a swap
+makes the format custom, `tests/frame.mjs` — and the x/y from centre), in
+`core/param-rows.js` and `.css`; the checks renamed to the labels without
+units. Left: every browser check, a `check-rows.mjs` for S2 and S2b, the
+schema keys in `docs/core-api.md`, then land. Then S5's keys and pies, once
+the author has said what G and A are.
 
 ## Parked decisions
 

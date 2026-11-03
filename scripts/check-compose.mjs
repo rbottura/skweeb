@@ -119,7 +119,7 @@ try {
     await type('place-side', 'x from centre', t.x);
     await type('place-side', 'y from centre', t.y);
     await type('place-side', 'scale', t.scale);
-    await type('place-side', 'rotation °', t.rot);
+    await type('place-side', 'rotation', t.rot);
     s = await look();
     const view = s.w / pageSize(SHEET).width;
     const mx = placementMatrix(t, { width: still.render.w, height: still.render.h }, SHEET);

@@ -393,5 +393,19 @@ const box = p => [p.get('width'), p.get('height')];
   ok('and the link then holds its shape', box(p), [750, 540]);
 }
 
+// Swapped, as the pair's button does it (core/param-rows.js): both at once, a set that stands —
+// but a box no longer the shape its format names is custom.
+{
+  const p = chained();
+  p.set('format', 'hd');
+  p.set({ width: p.get('height'), height: p.get('width') });
+  ok('swapped, the sides change places', box(p), [1080, 1920]);
+  ok('and a format that named the other shape is custom now', p.get('format'), 'custom');
+  p.set('format', 'a4');
+  const [w, h] = box(p);
+  p.set({ width: h, height: w });
+  ok('a sheet turned on its side is custom too', [box(p), p.get('format')], [[h, w], 'custom']);
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

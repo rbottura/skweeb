@@ -76,10 +76,10 @@ export function placeParams() {
     ref: { type: 'object', accepts: PLACEABLE, label: 'object', group: 'object' },
     /** A look made in filter, run over the object's frames (core/gpu/look.js). */
     look: { type: 'object', accepts: ['params'], label: 'look', group: 'object' },
-    x: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'x from centre', group: 'transform' },
-    y: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'y from centre', group: 'transform' },
+    x: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'x from centre', group: 'transform', pair: 'y', pairLabel: 'from centre', axis: 'x' },
+    y: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'y from centre', group: 'transform', axis: 'y' },
     scale: { type: 'range', min: 0.01, max: 8, step: 0.01, default: 1, label: 'scale', group: 'transform' },
-    rot: { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'rotation °', group: 'transform' },
+    rot: { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'rotation', unit: '°', group: 'transform' },
     /** How it meets what is under it: how much of it shows, and how it mixes (core/blend.js). */
     opacity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1, label: 'opacity', group: 'blend' },
     blend: { type: 'enum', options: BLENDS, labels: BLEND_LABELS, default: 'normal', label: 'blend', group: 'blend' },

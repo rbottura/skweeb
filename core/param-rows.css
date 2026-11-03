@@ -1,0 +1,36 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   param-rows.css — S2b's rows (core/param-rows.js, core/numbox.js): a unit
+   inside its box, the fold of rows seldom touched, two numbers on one line.
+   param-panel.css takes it at its head, so its selectors carry the weight to
+   stand over that file's rules, which come after it.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* A unit inside its box, at its right; the number right-aligned short of it. */
+.pp-numbox { position: relative; display: inline-flex; }
+.pp-numbox > .pp-num.pp-num { padding-right: calc(var(--pp-unit, 1) * 0.62em + 10px); }
+.pp-numbox > .pp-unit { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font: 400 10.5px var(--font-ui); color: var(--fg-3); pointer-events: none; white-space: nowrap; }
+
+/* The fold: the rows seldom touched shown only when asked — a changed one stays out. */
+.dr:not(.pp-more-open) > .dr-body > .pp-row.pp-row--more:not(.pp-row--mod) { display: none; }
+.dr-body > .pp-more { display: flex; align-items: center; height: 20px; margin: 2px 0 2px 14px; padding: 0 6px; border: 0; border-radius: var(--radius); background: none; color: var(--fg-3); font: 400 11.5px var(--font-ui); cursor: pointer; }
+.dr-body > .pp-more:hover { color: var(--fg); background: var(--hover); }
+.dr-body > .pp-more[hidden] { display: none; }
+
+/* Two numbers on one line: the line's name, a box each with its letter, the link and the swap between. */
+.pp-pair { position: relative; display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 2px 0 2px 14px; }
+.pp-pair:hover { background: var(--hover); }
+.pp-pair[hidden] { display: none; }
+.pp-pair:has(.pp-row--mod) > .pp-mark { left: 3px; top: 12px; bottom: auto; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.pp-pair-name { flex: 1; min-width: 0; font-weight: 500; color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-pair-unit { font-weight: 400; font-size: 11px; color: var(--fg-3); }
+.pp-halves { display: flex; align-items: center; gap: 3px; }
+.pp-row.pp-row--half { padding: 0; }
+.pp-row.pp-row--half:hover { background: none; }
+.pp-row.pp-row--half > .pp-mark, .pp-row.pp-row--half .pp-name, .pp-row.pp-row--half > .pp-range { display: none !important; }
+.pp-row.pp-row--half .pp-label { min-height: 0; margin: 0; gap: 3px; }
+.pp-row.pp-row--half .pp-num.pp-num { width: 64px; }
+.pp-axis { font: 500 10.5px var(--font-num); color: var(--fg-3); }
+.pp-pair-btn { width: 22px; height: 22px; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius); background: none; color: var(--fg-3); cursor: pointer; }
+.pp-pair-btn svg { width: 14px; height: 14px; }
+.pp-pair-btn:hover { background: var(--hover); color: var(--fg); }
+.pp-pair-link[aria-pressed="true"] { color: var(--accent); }

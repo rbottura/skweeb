@@ -20,7 +20,7 @@ export default {
   notice: 'LICENSE-p5.FIP.txt',
   params: {
     length: { type: 'range', min: 0, max: 64, step: 0.5, default: 8, label: 'length' },
-    angle:  { type: 'range', min: 0, max: 360, step: 1, default: 0, label: 'angle °' },
+    angle:  { type: 'range', min: 0, max: 360, step: 1, default: 0, label: 'angle', unit: '°' },
   },
   reach: v => v.length / 2,
   passes: [{

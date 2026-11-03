@@ -110,7 +110,7 @@ const later = await alive();
 c.ok('the first frame is as full as any', Math.abs(full - later) < later * 0.25, `${full} at frame 1, ${later} at 31`);
 
 // Changing the loop's length keeps its frame; changing a force redraws it.
-await set('gravity px/s²', '-300');
+await set('gravity', '-300');
 c.ok('a force changed, the frame redrawn where it was', apart(await pixels(), stepped) > 0 && (await page.eval(count)) === '31 / 60');
 
 // ── A burst ─────────────────────────────────────────────────────────────────
@@ -175,9 +175,9 @@ if (picked) {
   await c.shot('3-sprites');
 
   // Over its life: bigger sprites, turning, shrinking — and the loop still closes.
-  await set('size px', '48');
-  await set('start angle spread °', '360');
-  await set('spin °/s', '240');
+  await set('size', '48');
+  await set('start angle spread', '360');
+  await set('spin', '240');
   await scrubTo(12);
   const turning = await pixels();
   c.ok('turned and grown, a different picture', apart(turning, drawn) > 2, 'apart by ' + apart(turning, drawn).toFixed(1));
@@ -285,7 +285,7 @@ if (picked) {
     // Reopened: both panels and the frame, as saved.
     await c.go(c.base + '/apps/particles/?open=' + o.id);
     await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
-    const spinBack = await page.eval(`${row('spin °/s')}?.querySelector('.pp-num')?.value`);
+    const spinBack = await page.eval(`${row('spin')}?.querySelector('.pp-num')?.value`);
     const stackBack = await page.eval(`[...${row('stacking')}.querySelectorAll('button')].find(b => b.getAttribute('aria-pressed') === 'true' || b.classList.contains('is-on') || b.className.includes('on'))?.textContent`);
     c.ok('?open= brings the panels back', spinBack === '240', `spin ${spinBack}, stacking ${stackBack}`);
     c.ok('a loop opens at its first frame', (await page.eval(count)) === '1 / 60', await page.eval(count));

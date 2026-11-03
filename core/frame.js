@@ -77,14 +77,15 @@ export function frameParams({ format = 'content', bleed = 0 } = {}) {
      * or a sheet, which are still themselves at any size. Both directions go
      * through `applyFrameEdit()` so the two can never disagree.
      */
-    width:  { type: 'int', min: 1, max: MAX_SIDE, default: 1080, label: 'width', group },
-    height: { type: 'int', min: 1, max: MAX_SIDE, default: 1080, label: 'height', group },
+    width:  { type: 'int', min: 1, max: MAX_SIDE, default: 1080, label: 'width', group,
+              pair: 'height', pairLabel: 'size', unit: 'px', axis: 'w', link: 'link', swap: true },   // one line, since S2b
+    height: { type: 'int', min: 1, max: MAX_SIDE, default: 1080, label: 'height', group, axis: 'h' },
 
     /** Hold the shape while typing: either side drags the other — the chain. */
     link: { type: 'bool', default: true, label: 'link w/h', group },
 
     /** Ground on all four sides. Always grows the canvas; 0 for an exact size. */
-    bleed: { type: 'int', min: 0, max: 2048, default: bleed, label: 'bleed', group },
+    bleed: { type: 'int', min: 0, max: 2048, default: bleed, label: 'bleed', unit: 'px', group, more: true },
 
     /**
      * The object's scale inside the canvas. Never changes the canvas: above 1
@@ -97,7 +98,7 @@ export function frameParams({ format = 'content', bleed = 0 } = {}) {
      * canvas with them — the same picture in more pixels. Resolution, never
      * composition, so it is applied last, by the renderer (see resolveFrame).
      */
-    scale: { type: 'range', min: 0.25, max: 4, step: 0.25, default: 1, label: 'scale', group },
+    scale: { type: 'range', min: 0.25, max: 4, step: 0.25, default: 1, label: 'scale', unit: '×', group, more: true },
   };
 }
 
@@ -205,7 +206,10 @@ function edit(params, key, content) {
       changed = params.set('format', CUSTOM) > 0;
       shape = null;
     } else if (movedW) {
-      shape = null;                              // both at once: a set, and it stands
+      shape = null;                              // both at once: a set, and it stands —
+      // but swapped (ParamPanel's pair, `swap`), the box is no longer the shape its format names.
+      const swapped = params.get('width') === last.h && params.get('height') === last.w;
+      if (swapped && !DERIVED.includes(format) && format !== CUSTOM) changed = params.set('format', CUSTOM) > 0;
     }
   } else if (key === 'format' || DERIVED.includes(format)) {
     // A picked format writes its size, and a derived one keeps writing it, so

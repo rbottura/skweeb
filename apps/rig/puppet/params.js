@@ -34,7 +34,7 @@ export function puppetParams() {
     /** A gamepad drawing with its eyestalks drawn from the head out — or a pose or loop the rig saved of one. */
     drawing: { type: 'object', accepts: ['still', 'sequence'], label: 'drawing', group: 'wear' },
     /** A gamepad drawing's strokes cut into bones this long at most, so the body bends along it; a rig's pose keeps its own. */
-    longest: { type: 'range', min: 20, max: 400, step: 5, log: true, default: 70, label: 'longest bone, px', group: 'wear' },
+    longest: { type: 'range', min: 20, max: 400, step: 5, log: true, default: 70, label: 'longest bone', unit: 'px', group: 'wear' },
     /** What each stroke is, told — body, eye or limb, a word a stroke in drawing order, comma between, empty where found (roles.js). */
     parts:   { type: 'text', default: '', label: 'told, a word a stroke', group: 'parts' },
 

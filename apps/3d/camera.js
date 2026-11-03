@@ -26,10 +26,10 @@ const along = axis => ({ type: 'range', min: -100, max: 100, step: 'any', defaul
 /** The view's rows, for the app's schema. */
 export const VIEW_PARAMS = {
   lens:     { type: 'enum', options: ['perspective', 'orthographic'], default: 'perspective', display: 'chips', label: 'lens', group: view },
-  yaw:      { type: 'range', min: -180, max: 180, step: 'any', default: 30, label: 'turned °', group: view },
-  pitch:    { type: 'range', min: -89, max: 89, step: 'any', default: 22, label: 'raised °', group: view },
+  yaw:      { type: 'range', min: -180, max: 180, step: 'any', default: 30, label: 'turned', unit: '°', group: view },
+  pitch:    { type: 'range', min: -89, max: 89, step: 'any', default: 22, label: 'raised', unit: '°', group: view },
   distance: { type: 'range', min: 0.2, max: 500, step: 'any', log: true, default: 7, label: 'distance', group: view },
-  fov:      { type: 'range', min: 5, max: 120, step: 0.5, default: 40, label: 'field of view °', group: view, when: { lens: 'perspective' } },
+  fov:      { type: 'range', min: 5, max: 120, step: 0.5, default: 40, label: 'field of view', unit: '°', group: view, when: { lens: 'perspective' } },
   tx: along('x'), ty: along('y'), tz: along('z'),
 };
 

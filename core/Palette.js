@@ -68,7 +68,12 @@ function opened(drawer) {
 
 /** The hand on a row: its drawer open, the row in view, its control taken. */
 function reach(row) {
-  opened(row.closest('.dr'));
+  const drawer = row.closest('.dr');
+  opened(drawer);
+  // A row seldom touched, folded away (core/param-rows.js): its fold opened first.
+  if (row.classList.contains('pp-row--more') && drawer && !drawer.classList.contains('pp-more-open')) {
+    drawer.querySelector(':scope > .dr-body > .pp-more')?.click();
+  }
   row.scrollIntoView({ block: 'center', behavior: 'smooth' });
   row.classList.add('pp-row--found');
   setTimeout(() => row.classList.remove('pp-row--found'), 1200);
@@ -87,7 +92,8 @@ function gather() {
     const name = row.querySelector('.pp-name');
     if (!name || !name.textContent.trim()) continue;
     const where = titleOf(drawer) || (row.closest('.pp')?.querySelector('.pp-title')?.textContent || '');
-    out.push({ label: `${where ? where + ' › ' : ''}${name.textContent.trim()}`, detail: valueOf(row), run: () => reach(row) });
+    const unit = row.querySelector('.pp-unit');
+    out.push({ label: `${where ? where + ' › ' : ''}${name.textContent.trim()}${unit ? ' ' + unit.textContent : ''}`, detail: valueOf(row), run: () => reach(row) });
   }
   for (const b of document.querySelectorAll('.dr-body .nb-btn')) {
     const drawer = b.closest('.dr');

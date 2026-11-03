@@ -35,12 +35,17 @@
  * this browser. A switch sits on its label's line. Each row has a mark, a
  * hairline that turns a dot when the value differs from its default, and a
  * drawer counts its dots in its head.
+ *
+ * Since S2b the rows are core/param-rows.js's: a unit inside its box, two
+ * numbers on one line (`pair`), the rows seldom touched folded under "n
+ * more" (`more`).
  */
 
 import { VaultPanel } from './VaultPanel.js';
 import { Drawer }     from './Drawer.js';
 import { applies }    from './params.js';
 import { WIDGETS, WIDGET_TYPES } from './widgets.js';
+import { buildRow, buildPair, pairedKeys, addFold, loadFolds } from './param-rows.js';
 import { installPalette } from './Palette.js';
 
 export { WIDGET_TYPES };
@@ -59,7 +64,6 @@ const el = (tag, cls, text) => {
 
 const titleCase = key => key.replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
 
-const NUMERIC = new Set(['range', 'int']);
 const pinsKey = app => `skweeb/sliders/${app}`;
 function loadPins(app) {
   try { return JSON.parse(localStorage.getItem(pinsKey(app)) || '{}') || {}; } catch { return {}; }
@@ -86,6 +90,9 @@ export class ParamPanel {
     this._extra   = new Set();       // drawers holding more than params
     this._open    = false;
     this._pins    = loadPins(params.app);
+    this._folds   = loadFolds(params.app);   // the drawers whose rows seldom touched are shown
+    this._foldOf  = new Map();       // group id -> { button, paint } of its fold
+    this._pairs   = [];              // [{ node, keys }]: two numbers on one line
     this._hover   = null;            // the drawer under the pointer, for Alt's peek
     this._alt     = false;
 
@@ -192,64 +199,52 @@ export class ParamPanel {
   }
 
   _paint() {
+    const inPair = pairedKeys(this._params);
     for (const key of this._params.keys) {
+      if (inPair.has(key)) continue;              // painted with the number it pairs with
       const spec = this._params.spec(key);
-      const build = WIDGETS[spec.type];
-      if (!build) continue;                       // params.js refuses these first
-
-      const row = el('div', 'pp-row');
-      row.dataset.key = key;
-      row.append(el('span', 'pp-mark'));
-      const label = el('div', 'pp-label');
-      label.append(el('span', 'pp-name', spec.label || titleCase(key)));
-      const readout = el('span', 'pp-value');
-      label.append(readout);
-      if (spec.bind) label.append(el('span', 'pp-bind', spec.bind));
-      row.append(label);
-
-      const widget = build({
-        key, spec,
-        value: this._params.get(key),
-        set: value => this._params.set(key, value),
-        readout,
-        panel: this,
-      });
-      if (spec.type === 'bool') readout.replaceChildren(widget.node);     // a switch, on its label's line
-      else row.append(widget.node);
-      if (NUMERIC.has(spec.type)) {
-        row.classList.add('pp-row--num');
-        row.classList.toggle('pp-row--slider', this._sliderShown(key, spec));
-        label.title = 'Alt click: its slider, shown or hidden';
-        label.addEventListener('click', e => {
-          if (!e.altKey) return;
-          e.preventDefault();
-          this._pin(key, spec, row);
-        });
-      }
-
+      if (!WIDGETS[spec.type]) continue;          // params.js refuses these first
       const group = spec.group || null;
-      (group ? this._drawerFor(group).body : this._loose).append(row);
+      const into = group ? this._drawerFor(group).body : this._loose;
+      if (spec.pair) {
+        const pair = buildPair(this, this._params, key);
+        into.append(pair.node);
+        this._pairs.push({ node: pair.node, keys: pair.rows.filter(r => r.row).map(r => r.key) });
+        for (const r of pair.rows) this._rows.set(r.key, { widget: r.widget, row: r.row, spec: r.spec, group });
+        continue;
+      }
+      const { row, widget } = buildRow(this, this._params, key, spec);
+      into.append(row);
       this._rows.set(key, { widget, row, spec, group });
+    }
+    for (const [id, drawer] of this._drawers) {
+      const fold = addFold(this._params.app, id, drawer, this._folds);
+      if (fold) this._foldOf.set(id, fold);
     }
   }
 
   /** Rows that apply, drawers that have anything to show, widgets that read others, what changed. */
   _refresh() {
     const values = this._params.values;
-    const shown = new Map(), changed = new Map();
+    const shown = new Map(), changed = new Map(), folded = new Map();
     for (const [key, { widget, row, spec, group }] of this._rows) {
       const on = applies(spec, values);
-      row.hidden = !on;
       if (widget.values) widget.values(values);
       if (group) shown.set(group, (shown.get(group) || false) || on);
       const mod = JSON.stringify(values[key]) !== JSON.stringify(this._params.defaultOf(key));
-      row.classList.toggle('pp-row--mod', mod);
       if (mod && on && group) changed.set(group, (changed.get(group) || 0) + 1);
+      if (!row) continue;                         // a pair's link: its switch is the pair's
+      row.hidden = !on;
+      row.classList.toggle('pp-row--mod', mod);
+      if (spec.more && on && !mod && group) folded.set(group, (folded.get(group) || 0) + 1);
     }
+    for (const { node, keys } of this._pairs) node.hidden = keys.every(k => this._rows.get(k).row.hidden);
     for (const [id, drawer] of this._drawers) {
       if (this._extra.has(id)) continue;
       drawer.hidden = !shown.get(id);
       this._count(drawer, changed.get(id) || 0);
+      const fold = this._foldOf.get(id);
+      if (fold) fold.paint(folded.get(id) || 0);
     }
   }
 

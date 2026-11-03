@@ -27,7 +27,7 @@ export default {
   reads: v => v.cell,                 // its turned cell's middle
   params: {
     cell:  { type: 'range', min: 2, max: 64, step: 1, default: 8, label: 'cell' },
-    angle: { type: 'range', min: 0, max: 90, step: 1, default: 45, label: 'angle °' },
+    angle: { type: 'range', min: 0, max: 90, step: 1, default: 45, label: 'angle', unit: '°' },
     ink:   { type: 'color', default: '#111111', label: 'ink' },
     paper: { type: 'ground', default: 'none', label: 'paper' },
   },

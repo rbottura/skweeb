@@ -36,7 +36,7 @@ await wait(400);
 const hand = await page.eval(`(() => { const a = document.activeElement, row = a && a.closest('.pp-row');
   return { gone: !document.querySelector('.pal'), name: row?.querySelector('.pp-name')?.textContent, num: a?.classList.contains('pp-num'),
            selected: a ? a.selectionStart === 0 && a.selectionEnd === String(a.value).length : false, open: !!row?.closest('.dr.dr--open') }; })()`);
-c.ok('Enter puts the hand on it: its box focused, ready to type', hand.gone && hand.name === 'gravity px/s²' && hand.num && hand.open, JSON.stringify(hand));
+c.ok('Enter puts the hand on it: its box focused, ready to type', hand.gone && hand.name === 'gravity' && hand.num && hand.open, JSON.stringify(hand));
 await page.eval(`document.activeElement && document.activeElement.blur()`);
 
 await key('KeyK', 'k', ', ctrlKey: true');

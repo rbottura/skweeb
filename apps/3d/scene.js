@@ -33,8 +33,8 @@ const light = 'light';
 /** The light's rows, for the app's schema; the ground under the model goes with them. */
 export const LIGHT_PARAMS = {
   sun:       { type: 'range', min: 0, max: 12, step: 0.05, default: 2.6, label: 'sun', group: light },
-  sunYaw:    { type: 'range', min: -180, max: 180, step: 0.5, default: -35, label: 'sun from °', group: light },
-  sunPitch:  { type: 'range', min: -89, max: 89, step: 0.5, default: 50, label: 'sun raised °', group: light },
+  sunYaw:    { type: 'range', min: -180, max: 180, step: 0.5, default: -35, label: 'sun from', unit: '°', group: light },
+  sunPitch:  { type: 'range', min: -89, max: 89, step: 0.5, default: 50, label: 'sun raised', unit: '°', group: light },
   ambient:   { type: 'range', min: 0, max: 6, step: 0.05, default: 1, label: 'ambient', group: light },
   ground:    { type: 'ground', default: '#fffdf6', label: 'ground', group: light },
 };
