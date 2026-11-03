@@ -90,14 +90,21 @@ export async function rigUrl(object) {
  * @returns {Promise<?{object:object, url:string, thumbUrl:?string}>}
  */
 export async function requested(app) {
-  const id = new URLSearchParams(location.search).get('open');
-  if (!id) return null;
+  const asked = new URLSearchParams(location.search).get('open');
+  if (!asked) return null;
+  const [id, at] = asked.split('@v');            // `skw_…@v3`: a state of it, to go on from — a branch
   let loaded = await Vault.load(id);
-  // A smart object: the object it binds to work on, this window bound to it — its saves are its versions.
+  // A smart object: the object it binds to work on, this window bound to it — its saves are its states.
   if (loaded.object.type === 'skw') {
-    const object = (await import('./smart.js')).unwrap(loaded.object);
-    loaded = { ...loaded, object };
-    Vault.bind({ id, type: object.type });
+    const smart = await import('./smart.js');
+    const version = Number(at) || null;
+    if (version && version !== (loaded.object.version || 1)) {
+      const { object, url } = await smart.innerOf(loaded.object, { version });
+      loaded = { ...loaded, object, url: url || loaded.url };
+    } else {
+      loaded = { ...loaded, object: smart.unwrap(loaded.object) };
+    }
+    Vault.bind({ id, type: loaded.object.type, version: loaded.object.version || 1 });
   }
   const made = loaded.object.origin && loaded.object.origin.app;
   if (made !== app) throw new Error(`${id} was made by ${made || 'nothing known'}, not ${app}`);

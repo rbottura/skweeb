@@ -15,14 +15,44 @@
  *
  * The page hears which object, and which version (server/events.js): what
  * places it at `latest` draws it again.
+ *
+ * Since S6 (2026-11-03) the versions are a tree, as git's are: each state
+ * names its `parent` — the version it was saved from, the one it is at by
+ * default, an older one for a branch — and a merge its `parent2`, the
+ * branch it took in (docs/smart-objects.md, *Versions*). A state kept from
+ * before then has none, and reads as the line it was: N's parent is N - 1.
+ *
+ *   GET /api/vault/<id>/states   -> { id, version, states: [{ version, parent, parent2, created, title, url }] }
  */
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+/** A state's parent: its own, or — kept before S6 — the version before it. */
+const parentOf = (n, v) => (v && Number.isInteger(v.parent) ? v.parent : n > 1 ? n - 1 : null);
+const parent2Of = v => (v && Number.isInteger(v.parent2) ? v.parent2 : null);
+
 module.exports = function versionRoute({ objectsDir, readEnvelope, safeId, readBody, sendJson, decodeAsset, rebuildIndex, maxUpload }) {
-  return async function apiVersion(req, res, id) {
+  /** Every state of a smart object, from v1 to the one it is at: the tree, by each one's parents. */
+  function states(res, id) {
+    const safe = safeId(id);
+    const envelope = safe && readEnvelope(safe);
+    if (!envelope) return sendJson(res, 404, { error: 'no such object' });
+    if (envelope.type !== 'skw') return sendJson(res, 409, { error: 'only a smart object has states' });
+    const now = envelope.version || 1, out = [];
+    for (let n = 1; n < now; n++) {
+      let v = null;
+      try { v = JSON.parse(fs.readFileSync(path.join(objectsDir, safe, 'versions', `v${n}.json`), 'utf8')); } catch { /* lost: its place kept */ }
+      out.push({ version: n, parent: parentOf(n, v), parent2: parent2Of(v), created: v ? v.created : null, title: v ? v.title : '',
+                 url: v && v.render && v.render.file ? `/vault/objects/${safe}/versions/${v.render.file}` : null });
+    }
+    out.push({ version: now, parent: parentOf(now, envelope), parent2: parent2Of(envelope), created: envelope.updated || envelope.created,
+               title: envelope.title, url: envelope.render && envelope.render.file ? `/vault/objects/${safe}/${envelope.render.file}` : null });
+    sendJson(res, 200, { id: safe, version: now, states: out });
+  }
+
+  return { states, put: async function apiVersion(req, res, id) {
     const safe = safeId(id);
     const envelope = safe && readEnvelope(safe);
     if (!envelope) return sendJson(res, 404, { error: 'no such object' });
@@ -42,9 +72,17 @@ module.exports = function versionRoute({ objectsDir, readEnvelope, safeId, readB
       if (thumb.error) return sendJson(res, 400, { error: thumb.error });
     }
 
+    // Saved from which state: the one it is at, unless the page says an older one — a branch.
+    const was = envelope.version || 1;
+    const parent = payload.parent == null ? was : Number(payload.parent);
+    const parent2 = payload.parent2 == null ? null : Number(payload.parent2);
+    if (!Number.isInteger(parent) || parent < 1 || parent > was) return sendJson(res, 400, { error: `parent: a version from 1 to ${was}` });
+    if (parent2 != null && (!Number.isInteger(parent2) || parent2 < 1 || parent2 > was || parent2 === parent)) {
+      return sendJson(res, 400, { error: `parent2: another version, from 1 to ${was}` });
+    }
+
     // What it was, kept as it was.
     const dir = path.join(objectsDir, safe);
-    const was = envelope.version || 1;
     const versions = path.join(dir, 'versions');
     fs.mkdirSync(versions, { recursive: true });
     const oldRender = envelope.render && envelope.render.file;
@@ -54,6 +92,7 @@ module.exports = function versionRoute({ objectsDir, readEnvelope, safeId, readB
       version: was, created: envelope.updated || envelope.created,
       title: envelope.title, recipe: envelope.recipe, seed: envelope.seed,
       parents: envelope.parents, refs: envelope.refs,
+      parent: parentOf(was, envelope), parent2: parent2Of(envelope),
       render: { ...envelope.render, file: keptRender },
     }, null, 1));
 
@@ -78,13 +117,15 @@ module.exports = function versionRoute({ objectsDir, readEnvelope, safeId, readB
       },
       thumb: thumb ? 'thumb' + thumb.ext : envelope.thumb,
       version: was + 1,
+      parent,
       updated: new Date().toISOString(),
     });
+    if (parent2 == null) delete envelope.parent2; else envelope.parent2 = parent2;     // absent, not null, but for a merge
     // Written aside and moved into place: a crash mid-write must not leave an object.json that no longer parses.
     const file = path.join(dir, 'object.json');
     fs.writeFileSync(file + '.tmp', JSON.stringify(envelope, null, 1));
     fs.renameSync(file + '.tmp', file);
     rebuildIndex({ updated: { id: safe, version: envelope.version } });
     sendJson(res, 200, { status: 'updated', object: envelope });
-  };
+  } };
 };

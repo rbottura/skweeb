@@ -101,7 +101,11 @@ saying nothing: the id says what it is.
 **Versions.** Editing a `.skw` appends `versions/vN.json` and bumps
 `object.version` — `PUT /api/vault/<id>` (server/versions.js), what it was
 kept with its picture of then, `versions/vN.<ext>`, and `updated` the time
-of the version it is at; its index row carries `version`. Past versions are
+of the version it is at; its index row carries `version`. Since S6
+(2026-11-03) the versions are a tree, as git's: each names its `parent`, the
+state it was saved from — a window holds one (`Vault.bind`'s `version`), and
+one reopened at an older state, `?open=skw_…@v3`, saves a **branch** — and a
+merge its `parent2`. `GET /api/vault/<id>/states` lists them (`Vault.states`). Past versions are
 immutable, so a pin is a real promise. Nothing else in the vault has
 versions, because nothing else is meant to be edited after the fact.
 

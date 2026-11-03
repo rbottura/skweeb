@@ -40,7 +40,7 @@ export const isTrashed = row => !!row && (row.tags || []).includes(TRASH);
 let _available = false;
 let _index = [];
 let _events = null;
-let _bound = null;     // the smart object this page's saves bind into: { id, type }
+let _bound = null;     // the smart object this page's saves bind into: { id, type, version } — the state it holds
 let _heard = '';       // the last new version said, so one is said once
 
 /** A smart object's new version, said once on the page however it is heard. */
@@ -113,7 +113,14 @@ export const Vault = {
    * objects again. Only a save of the kind it binds: a look saved in filter
    * stays a look.
    */
-  bind(bound) { _bound = bound ? { id: bound.id || null, type: bound.type || null } : null; },
+  bind(bound) { _bound = bound ? { id: bound.id || null, type: bound.type || null, version: bound.version || null } : null; },
+
+  /** A smart object's states, a tree by their parents (S6, server/versions.js): [{ version, parent, parent2, created, title, url }]. */
+  async states(id) {
+    const res = await fetch(API + '/' + encodeURIComponent(id) + '/states', { cache: 'no-store' });
+    if (!res.ok) throw new Error('vault: ' + id + ' has no states');
+    return (await res.json()).states;
+  },
 
   /** What a smart object was at version `n` (server/versions.js): kept, as it was. */
   async version(id, n) {
@@ -163,6 +170,9 @@ export const Vault = {
       parents,
       // What a smart object places, it depends on: one among its parents is a ref too.
       refs: [...new Set([...(spec.refs || []), ...parents.filter(id => String(id).startsWith('skw_'))])],
+      // Saved from the state this page holds — an older one, a branch — and, for a merge, the one it took in.
+      parent: smart && _bound.id && _bound.version ? _bound.version : undefined,
+      parent2: smart && _bound.id && spec.parent2 ? spec.parent2 : undefined,
       render: {
         ext: spec.render.ext,
         w: spec.render.w, h: spec.render.h,
@@ -191,7 +201,7 @@ export const Vault = {
 
     _available = true;
     const object = out.object;
-    if (smart) _bound = { id: object.id, type: spec.type };
+    if (smart) _bound = { id: object.id, type: spec.type, version: object.version || 1 };
     dispatch(out.status === 'duplicate' ? 'vault:duplicate' : 'vault:saved',
              { id: object.id, type: object.type });
     if (out.status === 'updated') {

@@ -215,6 +215,10 @@ sorts them.
   bar in every app — the search, Save, Export ▾ read from the Export box —
   the player under the viewer, and the status bar's keys for what is under
   the cursor.
+- **A smart object's states, a tree** (S6a, 2026-11-03; server/versions.js):
+  each state names its `parent`, a merge its `parent2`; a window holds a state,
+  `?open=skw_…@v3` reopens an older one and its save is a branch;
+  `GET /api/vault/<id>/states` lists them (`tests/vault.mjs`, `check-smart`).
 - **The left hand** (S5b, 2026-11-03; `core/keys.js`, `core/shell/bindings.js`,
   `pie.js`): keys by their place, tapped or held for a pie at the pointer —
   Q D frames, A the app's own, Z the view, E export, R again, F place, G the
@@ -315,12 +319,13 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S6 on the board of `docs/plan.md`: an object's states as a tree** —
-branch `layers/states`: `parent` and `parent2` in `docs/object-model.md`,
-agreed 2026-11-03; S saves the next state of the object open rather than a
-new object, the server keeping each state; the session's steps for Ctrl Z
-and Ctrl Y at no cost; a row's Alt click on its dot lists its value in
-every state. Then S7, the graph over the page.
+**S6c on the board of `docs/plan.md`: the session's steps, Ctrl Z and Ctrl Y**
+— branch `layers/steps`: `core/steps.js`, every change of a page's params a
+step, held in memory, a drag one step however long; Ctrl Z back, Ctrl Y or
+Ctrl Shift Z on, never in a text field (its own undo). Then S6b — S saves
+the next state of the object open, the page bound by default, the Export
+box's acts staying frozen objects — and S6d, a row's Alt click on its dot:
+its value in every state.
 
 ## Parked decisions
 

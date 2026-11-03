@@ -354,6 +354,20 @@ try {
   ok('an ordinary object takes no version', (await put(o.id, { recipe: {}, render: smartPng([0, 0, 0, 255]) })).code, 409);
   ok('nor does one that is not there', (await put('skw_1700000000000_abcdef', { render: smartPng([0, 0, 0, 255]) })).code, 404);
 
+  // The states a tree (S6): saved from v1 again, a branch; a merge names both.
+  const branch = await put(skw.id, { recipe: bound(120), render: smartPng([4, 4, 4, 255]), parent: 1 });
+  ok('saved from an older state: a branch, its parent that one', [branch.code, branch.out.object.version, branch.out.object.parent], [200, 3, 1]);
+  const v2 = await (await fetch(BASE + '/vault/objects/' + skw.id + '/versions/v2.json')).json();
+  ok('…and the state it left kept its own parent', [v2.version, v2.parent, v2.recipe.recipe.emit.rate], [2, 1, 151]);
+  const merged = await put(skw.id, { recipe: bound(140), render: smartPng([5, 5, 5, 255]), parent: 3, parent2: 2 });
+  ok('a merge: the state it is at, and the branch it took in', [merged.out.object.version, merged.out.object.parent, merged.out.object.parent2], [4, 3, 2]);
+  const tree = await (await fetch(BASE + '/api/vault/' + skw.id + '/states')).json();
+  ok('its states, a tree by their parents', tree.states.map(st => [st.version, st.parent, st.parent2]), [[1, null, null], [2, 1, null], [3, 1, null], [4, 3, 2]]);
+  ok('…each with its picture', tree.states.every(st => typeof st.url === 'string' && st.url.startsWith('/vault/objects/' + skw.id)), true);
+  ok('a parent it does not have is refused', (await put(skw.id, { recipe: bound(1), render: smartPng([0, 0, 0, 255]), parent: 9 })).code, 400);
+  ok('as is a merge with itself', (await put(skw.id, { recipe: bound(1), render: smartPng([0, 0, 0, 255]), parent: 4, parent2: 4 })).code, 400);
+  ok('an ordinary object has no states', (await fetch(BASE + '/api/vault/' + o.id + '/states')).status, 409);
+
   // ── Method routing ─────────────────────────────────────────────────────────
   ok('PUT on the collection is refused',
      (await fetch(BASE + '/api/vault', { method: 'PUT' })).status, 405);
