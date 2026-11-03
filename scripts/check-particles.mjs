@@ -242,7 +242,7 @@ if (picked) {
     c.ok('at scale 2 it is drawn again, twice the pixels', replay.big[0] === 2 && replay.big[1] === 2 * replay.w
       && replay.big[2] === replay.w, JSON.stringify(replay.big));
 
-    const still = await saveAs(() => page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Save this frame as a still')`));
+    const still = await saveAs(() => page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Save the frame as a still')`));
     c.ok('a frame saves as a still, with the tick it is', !!still && still.type === 'still' && still.recipe.tick === tickShown,
       still ? `${still.type}, tick ${still.recipe.tick}` : '');
 

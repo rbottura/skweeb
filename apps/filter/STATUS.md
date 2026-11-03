@@ -107,7 +107,7 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
   source a `still`, a loop a `sequence`, the recipe `{ source, chain }` and
   the source the parent (`save.js`). A save filters its source exact, never
   the preview's draft. A loop's picture is the frame on screen, compose's rule;
-  *Save + download the frames* filters them all into a zip with the rate. A
+  *Save the loop + every frame (zip)* filters them all into a zip with the rate. A
   file saves as a leaf. `rebuild.js` replays an object for anything that asks
   — the vault's player, compose, a filter of a filter: a saved still came back
   with no difference at all on this machine, the same twice; at print scale

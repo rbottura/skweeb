@@ -135,7 +135,10 @@ every app that has one, where it lives in five different drawers now.
 1. **U8a** — this file; then `core/boxes/` (the contract, `columnLayout`,
    `exportBox`), and every app's Export drawer made by it; its checks
    given the words. *Done when* every app's export is the box and every
-   browser check is green.
+   browser check is green. **Made 2026-11-03 as S3's first half**:
+   `core/boxes/export.js`, `exportBox(panel, { vault, disk, acts })` — the
+   drawer is the layout for now, so `columnLayout` waits for S9's scene; the
+   gamepad's export waits for C6.
 2. **U8b** — `playerBox` and `stackBox`, every app.
 3. **U8c** — groups mounted anywhere; Ground one group.
 

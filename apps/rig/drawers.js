@@ -6,6 +6,7 @@
  */
 
 import { PRESETS } from './presets.js';
+import { exportBox }      from '../../core/boxes/export.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -39,10 +40,5 @@ export function buildDrawers(panel, does) {
   presets.append(button('Still', does.still, { title: 'Every wave and the rise taken off' }));
   motion.prepend(el('p', 'rg-note', 'A preset sets the waves by each chain\'s part — choose a bone to see or change its chain\'s.'), presets);
 
-  const exp = panel.addDrawer({ id: 'export', title: 'Export' });
-  const actions = el('div', 'pp-actions');
-  actions.append(button('Save to the vault  [S]', does.save, { primary: true, wide: true }),
-                 button('Download the frame (PNG)', does.download, { wide: true }));
-  exp.body.append(actions);
-  return exp;
+  return exportBox(panel, { vault: { save: does.save }, disk: { picture: does.download } }).drawer;
 }

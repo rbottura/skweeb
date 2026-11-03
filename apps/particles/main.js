@@ -24,6 +24,7 @@ import { loadPoints }   from '../../core/points.js';
 import { loadField }    from '../../core/fields.js';
 import { saveParticles, downloadFrames, downloadSheet, APP } from './save.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
+import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }    from '../../core/StackPanel.js';
 import { requested }      from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
@@ -201,22 +202,10 @@ const pointsSaid = got => `${got.title}: ${got.list.length.toLocaleString('en')}
 
 /** The Export drawer, under the picture's settings. */
 function buildExport(side) {
-  const exp = side.addDrawer({ id: 'export', title: 'Export' });
-  const actions = document.createElement('div');
-  actions.className = 'pp-actions';
-  const button = (label, onClick, primary = false) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
-    b.textContent = label;
-    b.addEventListener('click', onClick);
-    actions.append(b);
-  };
-  button('Save the loop to the vault  [S]', () => save(), true);
-  button('Save this frame as a still', () => save({ still: true }));
-  button('Download every frame (zip)', frames);
-  button('Download a sprite sheet', sheet);
-  exp.body.append(actions);
+  const exp = exportBox(side, {
+    vault: { save: () => save(), still: () => save({ still: true }) },
+    disk: { frames, sheet },
+  }).drawer;
   // A print of the frame on screen, drawn again at the sheet's size (core/PrintPanel.js).
   const printing = new PrintPanel({
     mount: exp.body, app: 'particles', leave, say: text => bar.say(text), format: picture.get('format'), tick: () => clock.tick,

@@ -34,6 +34,7 @@ import { pick }           from './pick.js';
 import { boxOnPicture, drawChosen } from './guides.js';
 import { wireChosen }     from './chosen.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
+import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }    from '../../core/StackPanel.js';
 import { Cards }          from '../../core/Cards.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
@@ -188,18 +189,17 @@ function button(label, onClick, primary = false) {
 }
 
 function buildExport(panel) {
-  const exp = panel.addDrawer({ id: 'export', title: 'Export', before: 'format' });
-  const actions = document.createElement('div');
-  actions.className = 'pp-actions';
-  actions.append(
-    button('Save to the vault  [S]', save, true),
-    button('Download the picture (PNG)', () => leave(async () => {
-      bar.say('drawing…');
-      const out = await downloadPicture({ params, shapes: cards.recipe(), renderer });
-      return `downloaded ${out.width} × ${out.height} px`;
-    })),
-  );
-  exp.body.append(actions);
+  const exp = exportBox(panel, {
+    before: 'format',
+    vault: { save },
+    disk: {
+      picture: () => leave(async () => {
+        bar.say('drawing…');
+        const out = await downloadPicture({ params, shapes: cards.recipe(), renderer });
+        return `downloaded ${out.width} × ${out.height} px`;
+      }),
+    },
+  }).drawer;
   const printing = buildPrint(exp);
   // A window of the stack (core/live.js): what is on screen, as its print has it.
   stackDrawer(panel, { app: '3d', layer: () => printing.object(), save: () => save() });

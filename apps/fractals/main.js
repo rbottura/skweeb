@@ -24,6 +24,7 @@ import { loopOf, valuesAt, rangeAround, moverOf } from './motion.js';
 import { chainOf } from './frames.js';
 import { saveFractal, downloadFrames, downloadSheet, APP } from './save.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
+import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }    from '../../core/StackPanel.js';
 import { wirePointer }    from './pointer.js';
 import { loadSprites }    from '../../core/sprites.js';
@@ -223,28 +224,21 @@ function describe(v) {
 // ── Leaving ──────────────────────────────────────────────────────────────────
 
 function buildExport(panel) {
-  const exp = panel.addDrawer({ id: 'export', title: 'Export', before: 'format' });
-  const actions = document.createElement('div');
-  actions.className = 'pp-actions';
-  const button = (label, onClick, primary = false) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
-    b.textContent = label;
-    b.addEventListener('click', onClick);
-    actions.append(b);
-  };
-  button('Save to the vault  [S]', save, true);
-  button('Download the picture (PNG)', downloadPicture);
-  button('Download every frame (zip)', () => leave(async () => {
-    const out = await downloadFrames({ params, sprites, runner, onStatus: t => bar.say(t) });
-    return `downloaded ${out.frames} frames at ${out.fps} fps — node scripts/frames-to-video.mjs makes the video`;
-  }));
-  button('Download a sprite sheet', () => leave(async () => {
-    const out = await downloadSheet({ params, sprites, runner, onStatus: t => bar.say(t) });
-    return `downloaded ${out.name} — ${out.frames} frames of ${out.box.w} × ${out.box.h} on a ${out.width} × ${out.height} sheet, and its JSON`;
-  }));
-  exp.body.append(actions);
+  const exp = exportBox(panel, {
+    before: 'format',
+    vault: { save },
+    disk: {
+      picture: downloadPicture,
+      frames: () => leave(async () => {
+        const out = await downloadFrames({ params, sprites, runner, onStatus: t => bar.say(t) });
+        return `downloaded ${out.frames} frames at ${out.fps} fps — node scripts/frames-to-video.mjs makes the video`;
+      }),
+      sheet: () => leave(async () => {
+        const out = await downloadSheet({ params, sprites, runner, onStatus: t => bar.say(t) });
+        return `downloaded ${out.name} — ${out.frames} frames of ${out.box.w} × ${out.box.h} on a ${out.width} × ${out.height} sheet, and its JSON`;
+      }),
+    },
+  }).drawer;
   // A print of the frame on screen, drawn again at the sheet's size a window at a time (core/PrintPanel.js).
   const printing = new PrintPanel({
     mount: exp.body, app: 'fractals', leave, say: text => bar.say(text), format: params.get('format'), tick: () => clock.tick,

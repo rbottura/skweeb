@@ -31,6 +31,7 @@ import { PlacedList }     from './list.js';
 import { wirePointer }    from './pointer.js';
 import { saveComposition, APP } from './save.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
+import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }    from '../../core/StackPanel.js';
 import { exportPng, exportFrames } from './export.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
@@ -99,21 +100,11 @@ async function boot() {
   player.body.prepend(holder);
   transport = new Transport({ clock, mount: holder, busy: () => busy });
 
-  const exp = pagePanel.addDrawer({ id: 'export', title: 'Export', before: 'ground' });
-  const actions = document.createElement('div');
-  actions.className = 'pp-actions';
-  const button = (key, label, onClick, primary = false) => {
-    const b = buttons[key] = document.createElement('button');
-    b.type = 'button';
-    b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
-    b.textContent = label;
-    b.addEventListener('click', onClick);
-    actions.append(b);
-  };
-  button('save', 'Save to the vault  [S]', save, true);
-  button('png', 'Download the page (PNG)', png);
-  button('frames', 'Download every frame (zip)', frames);
-  exp.body.append(actions);
+  const box = exportBox(pagePanel, { before: 'ground', vault: { save }, disk: { picture: png, frames } });
+  const exp = box.drawer;
+  buttons.save = box.buttons.save;
+  buttons.png = box.buttons.picture;
+  buttons.frames = box.buttons.frames;
   // A print of the page at the tick on screen, past any canvas: each object asked for its windows (core/PrintPanel.js).
   const printing = new PrintPanel({
     mount: exp.body, app: 'compose', say: t => bar.say(t), format: page.get('format'), tick: () => clock.tick,

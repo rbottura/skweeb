@@ -16,7 +16,7 @@
  * save never does. It opens the source again, exact, and filters that. A
  * loop's render is the frame on screen — compose's rule for a page that
  * moves: pause where it looks like itself, and that is its picture. The loop
- * itself is the recipe, so a plain save filters one frame; *Save + download
+ * itself is the recipe, so a plain save filters one frame; *Save the loop + every frame
  * the frames* filters them all, into a zip for scripts/frames-to-video.mjs.
  */
 

@@ -18,6 +18,7 @@ import { fromVault, fromFile }  from './source.js';
 import { followWindows }        from './following.js';
 import { save as saveObject, saveLook, APP } from './save.js';
 import { PrintPanel }           from '../../core/PrintPanel.js';
+import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }          from '../../core/StackPanel.js';
 import { requested }            from '../../core/reopen.js';
 import { ParamPanel }           from '../../core/ParamPanel.js';
@@ -107,14 +108,14 @@ function buildDrawers() {
   const player = panel.addDrawer({ id: 'player', title: 'Sequence player' });
   transport = new Transport({ clock, mount: player.body, busy: () => busy });
 
-  const exp = panel.addDrawer({ id: 'export', title: 'Export' });
-  const actions = document.createElement('div');
-  actions.className = 'pp-actions';
-  buttons.save = button('Save to the vault  [S]', () => save(), true);
-  buttons.frames = button('Save + download the frames', () => save({ keepFrames: true }));
-  buttons.look = button('Save the chain as a look', () => look());
-  actions.append(buttons.save, buttons.frames, buttons.look);
-  exp.body.append(actions);
+  const box = exportBox(panel, {
+    vault: { save: () => save(), loopFrames: () => save({ keepFrames: true }) },
+    acts: [{ id: 'look', label: 'Save the chain as a look', run: () => look() }],
+  });
+  const exp = box.drawer;
+  buttons.save = box.buttons.save;
+  buttons.frames = box.buttons.loopFrames;
+  buttons.look = box.buttons.look;
   // A print, the chain run over the source a window at a time (core/PrintPanel.js) — a source in the vault only.
   const printing = new PrintPanel({ mount: exp.body, app: 'filter', leave, say: t => bar.say(t), tick: () => clock.tick,
     object: () => {

@@ -110,9 +110,9 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   redrawn whole each frame, so it is the draw loop's order, not a composite
   operation; checked, and the loop still closes.
 - **It saves** (2026-09-27, brick 4; `save.js`, `frames.js`, `rebuild.js`).
-  The picture's Export drawer: *Save the loop to the vault* [S] — a
+  The picture's Export box: *Save to the vault* [S] — a
   `sequence` of every frame at the picture's `fps`, its picture the frame on
-  screen — *Save this frame as a still*, and *Download every frame (zip)*,
+  screen — *Save the frame as a still*, and *Download every frame (zip)*,
   numbered PNGs and a `meta.json` for `scripts/frames-to-video.mjs`. The
   recipe is `{ emit, picture }`, both panels' values, and `tick` for a
   still; the sprite set is the parent (`consumedObjectIds`), the seed the

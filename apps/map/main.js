@@ -28,6 +28,7 @@ import { Editing }      from './editing.js';
 import { wirePointer }  from './pointer.js';
 import { saveMap, downloadPicture, recipeOf, APP } from './save.js';
 import { PrintPanel } from '../../core/PrintPanel.js';
+import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer } from '../../core/StackPanel.js';
 import { requested }    from '../../core/reopen.js';
 import { loadSprites }  from '../../core/sprites.js';
@@ -160,27 +161,20 @@ async function chooseTileset(id) {
 // ── Leaving: the vault, a picture ────────────────────────────────────────────
 
 function buildExport(panel) {
-  const exp = panel.addDrawer({ id: 'export', title: 'Export' });
-  const actions = document.createElement('div');
-  actions.className = 'pp-actions';
-  const button = (label, onClick, primary = false) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
-    b.textContent = label;
-    b.addEventListener('click', onClick);
-    actions.append(b);
-    return b;
-  };
-  button('Save to the vault  [S]', save, true);
-  playBtn = button('Play the last save ↗', () => window.open(`./play/?map=${encodeURIComponent(savedId)}`, '_blank'));
+  const box = exportBox(panel, {
+    vault: { save },
+    disk: {
+      picture: () => leave(async () => {
+        const out = await downloadPicture({ map, cells, walls, place: editing.things.blocks(), tick: clock.tick });
+        return `downloaded ${out.width} × ${out.height} px`;
+      }),
+    },
+    acts: [{ id: 'play', label: 'Play the last save ↗', run: () => window.open(`./play/?map=${encodeURIComponent(savedId)}`, '_blank') }],
+  });
+  const exp = box.drawer;
+  playBtn = box.buttons.play;
   playBtn.title = 'The player, in a tab of its own: what answers outlined, signs shown, warps followed';
   playable(null);
-  button('Download the picture (PNG)', () => leave(async () => {
-    const out = await downloadPicture({ map, cells, walls, place: editing.things.blocks(), tick: clock.tick });
-    return `downloaded ${out.width} × ${out.height} px`;
-  }));
-  exp.body.append(actions);
   // A print of the room, drawn again at the sheet's size a window at a time, fitted on it (core/PrintPanel.js).
   const printing = new PrintPanel({ mount: exp.body, app: 'map', leave, say: t => bar.say(t), tick: () => clock.tick,
     object: () => {

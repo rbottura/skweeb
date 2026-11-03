@@ -24,6 +24,7 @@ import { Playhead }     from '../../core/playback.js';
 import { Transport }    from '../../core/Transport.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { PrintPanel }   from '../../core/PrintPanel.js';
+import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }  from '../../core/StackPanel.js';
 
 const DATA   = new Set(['dataset', 'made']);
@@ -97,16 +98,11 @@ export class MotionStage {
     this.panel.drawer('player').body.prepend(holder);
     this.transport = new Transport({ clock: this.clock, mount: holder, busy });
 
-    const exp = this.panel.addDrawer({ id: 'export', title: 'Export', before: 'ground' });
-    const actions = document.createElement('div');
-    actions.className = 'pp-actions';
-    actions.append(
-      button('Save this frame  [S]', () => run(() => this.saveStill()), true),
-      button('Save the loop', () => run(() => this.saveLoop(false))),
-      button('Save the loop + frames zip', () => run(() => this.saveLoop(true))),
-      button('Emit a brush family', () => run(() => this.emit())),
-    );
-    exp.body.append(actions);
+    const exp = exportBox(this.panel, {
+      before: 'ground',
+      vault: { save: () => run(() => this.saveStill()), loop: () => run(() => this.saveLoop(false)), loopFrames: () => run(() => this.saveLoop(true)) },
+      acts: [{ id: 'brushes', label: 'Emit a brush family', run: () => run(() => this.emit()) }],
+    }).drawer;
     // A print of the frame on screen, drawn again at the sheet's size a window at a time (core/PrintPanel.js).
     // A set held only in memory has no recipe to draw again: nothing to print until it is saved.
     this.printing = new PrintPanel({
@@ -371,11 +367,3 @@ export class MotionStage {
   }
 }
 
-function button(label, onClick, primary = false) {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = 'nb-btn nb-btn--wide' + (primary ? ' nb-btn--primary' : '');
-  b.textContent = label;
-  b.addEventListener('click', onClick);
-  return b;
-}
