@@ -13,6 +13,8 @@
  *                             -> { status: 'created' | 'duplicate', object }
  *   PATCH /api/vault/<id>     <- { add: [tag], remove: [tag] }
  *                             -> { status: 'updated', object }
+ *   PUT  /api/vault/<id>      <- a smart object's next state — server/versions.js
+ *   GET  /api/vault/<id>/states -> its states, a tree by their parents
  *   POST /api/vault/delete    <- { ids, dependents? }   — server/delete.js
  *   GET  /api/vault/events    -> a stream: `changed` each time the index is rewritten — server/events.js
  *
@@ -301,7 +303,7 @@ async function apiRetag(req, res, id) {
 }
 
 const apiDelete   = deleteRoute({ objectsDir: OBJECTS_DIR, allObjects, rebuildIndex, safeId, readBody, sendJson });
-const apiVersion  = versionRoute({ objectsDir: OBJECTS_DIR, readEnvelope, safeId, readBody, sendJson, decodeAsset, rebuildIndex, maxUpload: MAX_UPLOAD });
+const versions    = versionRoute({ objectsDir: OBJECTS_DIR, readEnvelope, safeId, readBody, sendJson, decodeAsset, rebuildIndex, maxUpload: MAX_UPLOAD });
 const serveStatic = staticHost({ root: ROOT, vault: VAULT_DIR });
 
 // -- Routing -----------------------------------------------------------------
@@ -322,11 +324,15 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'POST') return await apiDelete(req, res);
       return sendJson(res, 405, { error: 'POST' });
     }
+    if (urlPath.startsWith('/api/vault/') && urlPath.endsWith('/states')) {
+      if (req.method === 'GET') return versions.states(res, urlPath.slice('/api/vault/'.length, -'/states'.length));
+      return sendJson(res, 405, { error: 'GET' });
+    }
     if (urlPath.startsWith('/api/vault/')) {
       const id = urlPath.slice('/api/vault/'.length);
       if (req.method === 'GET')   return apiGet(res, id);
       if (req.method === 'PATCH') return await apiRetag(req, res, id);
-      if (req.method === 'PUT')   return await apiVersion(req, res, id);
+      if (req.method === 'PUT')   return await versions.put(req, res, id);
       return sendJson(res, 405, { error: 'GET, PATCH or PUT' });
     }
     if (urlPath.startsWith('/api/')) return sendJson(res, 404, { error: 'no such endpoint' });

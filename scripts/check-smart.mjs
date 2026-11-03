@@ -12,6 +12,7 @@
  * new particles, its player where it was. Compose placing that filter is
  * drawn again at version 3. Reopened in particles, the smart object is the
  * loop to work on, and that window is bound to it too: saved, version 4.
+ * Reopened at version 1 (S6), it is that state; saved, a branch from it.
  * And no page said anything wrong. Needs WebGPU, for filter.
  */
 
@@ -87,6 +88,18 @@ c.ok('saved there, version 3: compose places the filter of it, drawn again', (aw
   && (await page.eval(barSay)).includes('drawn again, version 3'), `${await page.eval(barSay)} · v${(await envelope(skw.id)).version}`);
 const v1 = await (await fetch(c.base + '/vault/objects/' + skw.id + '/versions/v1.json')).json();
 c.ok('what it was stays: version 1 kept, at its first rate', v1.version === 1 && v1.recipe.recipe.emit.rate !== 233, `v1 rate ${v1.recipe.recipe.emit.rate}`);
+
+// A state to go on from (S6): reopened at version 1, changed and saved — a branch, its parent version 1.
+const old = await c.tab(c.base + '/apps/particles/?open=' + skw.id + '@v1');
+await old.until(`/^opened /.test(${barSay})`, { timeout: 30000 }).catch(() => {});
+const first = await old.eval(`${row('a second')}?.querySelector('.pp-num')?.value`);
+const holds = await old.eval(bound);
+await old.typeInto(`${row('a second')}?.querySelector('.pp-num')`, '188');
+await old.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 's' }))`);
+await old.until(`/^saved |failed/.test(${barSay})`, { timeout: 60000 }).catch(() => {});
+const tree = (await (await fetch(c.base + '/api/vault/' + skw.id + '/states')).json()).states || [];
+c.ok('reopened at version 1, it holds that state; saved, a branch from it', Number(first) === v1.recipe.recipe.emit.rate && holds?.version === 1
+  && tree.length === 4 && tree[3].parent === 1 && tree[2].parent === 2, `rate ${first}, holds v${holds?.version}, ${JSON.stringify(tree.map(t => [t.version, t.parent]))}`);
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));
