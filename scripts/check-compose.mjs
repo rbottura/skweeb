@@ -60,7 +60,6 @@ const type = async (side, label, value) => {
   await page.typeInto(row(side, label) + '?.querySelector(".pp-num")', value);
   await new Promise(r => setTimeout(r, 200));
 };
-const chip = text => `[...document.querySelectorAll('#page-side .pp-chip')].find(c => c.textContent === ${JSON.stringify(text)})`;
 /** A chip in one drawer of the page's side: the print's paper has a "none" of its own. */
 const chipIn = (drawer, text) => `[...([...document.querySelectorAll('#page-side .dr')].find(d => d.querySelector('.dr-head')?.textContent.includes(${JSON.stringify(drawer)}))?.querySelectorAll('.pp-chip') || [])].find(c => c.textContent === ${JSON.stringify(text)})`;
 const settled = `(() => { const t = document.querySelector('.bar-say')?.textContent || '';
@@ -144,7 +143,7 @@ try {
     await new Promise(r => setTimeout(r, 200));
     s = await look();
     ok('a ground of none is transparent', s.clear > 0, s.clear + ' clear pixels');
-    await page.click(chip('A3'));
+    await page.typeInto(`[...document.querySelectorAll('#page-side .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === 'format')?.querySelector('select')`, 'a3');
     await new Promise(r => setTimeout(r, 200));
     s = await look();
     ok('A3 is A4\'s shape: the box stays, the dpi moves', s.out === '1240 × 1754 px' && s.dpi.includes('106 dpi on A3'), s.dpi);

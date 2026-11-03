@@ -345,12 +345,22 @@ export const WIDGETS = {
 
 // ── The two faces of an enum ─────────────────────────────────────────────────
 
+/** What a run of a list is called, where an enum marks its runs (`groups`, frame.js's format). */
+const RUN_WORDS = { derived: 'from the picture', ratio: 'shape', px: 'pixels', print: 'print', custom: 'yours' };
+
 function selectEnum({ spec, value, set }) {
   const select = el('select', 'pp-select');
+  let into = select;
   for (const option of spec.options || []) {
+    const run = spec.groups && spec.groups[option];
+    if (run) {
+      into = el('optgroup');
+      into.label = RUN_WORDS[run] || run;
+      select.append(into);
+    }
     const o = el('option', null, labelFor(spec, option));
     o.value = option;
-    select.append(o);
+    into.append(o);
   }
   select.value = value;
   select.addEventListener('change', () => set(select.value));

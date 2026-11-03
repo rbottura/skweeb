@@ -35,8 +35,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S1 | the dark theme, from the bench's tokens | `ui/theme` | M | landed 2026-11-03 |
 | S2 | a value on one line: field, fill, slider, mark | `ui/rows` | M | landed 2026-11-03 |
 | S3 | the shared boxes, as the bench has them | `ui/boxes`, `ui/player` | M | landed 2026-11-03 |
-| S4 | Format and Ground anywhere; the format a list | `ui/boxes-format` | S | ready |
-| S5 | the left hand: keys by place, pies, the search | `ui/keys` | M | needs S3 |
+| S4 | the format a list | `ui/boxes-format` | S | landed 2026-11-03; Format and Ground mounted anywhere → S9 |
+| S5 | the left hand: the search, then keys by place and pies | `ui/keys` | M | ready |
 | S6 | an object's states as a tree | `layers/states` | M | needs S3; the object model |
 | S7 | the graph over the page: compare, merge, open in | `ui/graph` | M | needs S6 |
 | S8 | rulers, guides, magnetism; the gabarit | `ui/guides` | M | needs S4 |

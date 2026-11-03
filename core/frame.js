@@ -65,7 +65,7 @@ export function frameParams({ format = 'content', bleed = 0 } = {}) {
       options: [...DERIVED, ...ids(), CUSTOM],
       default: format,
       label: 'format',
-      display: 'chips',
+      display: 'list',               // a dropdown in runs — shape, pixels, print — since S4, 2026-11-03
       labels: formatLabels(),
       groups: formatGroups(),
       group,
