@@ -7,7 +7,7 @@
    distinct from the yellow of the card open in the drawer.
    ────────────────────────────────────────────────────────────────────────────── */
 
-.vp-card--picked { outline: var(--nb-line, 3px) solid var(--nb-ink, #111); outline-offset: 3px; }
+.vp-card--picked { outline: 1px solid var(--line-2); outline-offset: 3px; }
 .vp-card--picked::after {
   content: '✓';
   position: absolute;
@@ -17,16 +17,16 @@
   height: 22px;
   display: grid;
   place-items: center;
-  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
-  background: var(--nb-accent, #ffd60a);
-  font: 700 13px var(--nb-font, sans-serif);
+  border: 1px solid var(--line-2);
+  background: var(--accent);
+  font: 700 13px var(--font-ui); color: var(--accent-ink);
 }
 .vp-card { position: relative; }
 
 .vp-trash { margin-right: 4px; }
 
-.vp-btn.vp-btn--danger { background: var(--nb-alert, #ff4d4d); color: var(--nb-ink, #111); }
-.vp-btn.vp-btn--danger:hover { background: var(--nb-ink, #111); color: var(--nb-paper, #fffdf6); }
+.vp-btn.vp-btn--danger { background: var(--danger); color: var(--fg); }
+.vp-btn.vp-btn--danger:hover { background: var(--sel); color: var(--fg); }
 
 /* The bar over the grid: what is selected, and what can be done with it. */
 .vp-bar {
@@ -39,11 +39,11 @@
   gap: 8px;
   margin: -16px -16px 14px;
   padding: 10px 16px;
-  border-bottom: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
-  background: var(--nb-paper, #fffdf6);
+  border-bottom: 1px solid var(--line-2);
+  background: var(--field);
 }
 .vp-bar[hidden] { display: none; }
-.vp-bar-say { font: 400 12px var(--nb-mono, monospace); }
+.vp-bar-say { font: 400 12px var(--font-num); }
 
 /* The question: over the whole panel, nothing behind it clickable. */
 .vp-ask {
@@ -53,19 +53,19 @@
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(17, 17, 17, 0.45);
+  background: rgba(0, 0, 0, .55);
 }
 .vp-ask-box {
   width: min(520px, 100%);
   max-height: 100%;
   overflow: auto;
   padding: 16px 18px;
-  border: var(--nb-line, 3px) solid var(--nb-ink, #111);
-  background: var(--nb-paper, #fffdf6);
-  box-shadow: 8px 8px 0 var(--nb-ink, #111);
+  border: 1px solid var(--line-2);
+  background: var(--panel);
+  box-shadow: none;
   line-height: 1.5;
 }
-.vp-ask-title { font: 700 16px var(--nb-font, sans-serif); }
+.vp-ask-title { font: 700 16px var(--font-ui); }
 .vp-ask-box p { margin: 8px 0; }
 .vp-ask-list { margin: 8px 0; padding-left: 18px; }
 .vp-ask-list li { margin: 6px 0; }

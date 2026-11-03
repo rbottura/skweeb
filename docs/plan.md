@@ -32,8 +32,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C8 | rule 4 eased: a file looked at past 400, split past 600 | `docs/rule-4` | S | landed 2026-10-22 |
 | U0 | the columns measured | — | — | dropped: "mesurer les colonnes n'est pas nécessaire" |
 | — | the scene planned: M12, `docs/scene.md` | `docs/scene` | — | landed 2026-11-03 |
-| S1 | the dark theme, from the bench's tokens | `ui/theme` | M | ready, after the 15:40 reset |
-| S2 | a value on one line: field, fill, slider, mark | `ui/rows` | M | needs S1 |
+| S1 | the dark theme, from the bench's tokens | `ui/theme` | M | landed 2026-11-03 |
+| S2 | a value on one line: field, fill, slider, mark | `ui/rows` | M | ready |
 | S3 | the shared boxes, as the bench has them | `ui/boxes` | M | needs S2 |
 | S4 | Format and Ground anywhere; the format a list | `ui/boxes-format` | S | needs S3 |
 | S5 | the left hand: keys by place, pies, the search | `ui/keys` | M | needs S3 |
@@ -119,8 +119,6 @@ Each with what happens if nothing is said.
 
 - **States as a tree** (S6): a version's parent, and a merge's second, in
   `docs/object-model.md` — written up as proposed, to confirm.
-- **The tower's key** (`docs/workflow.md`, *Once a machine*): nothing has
-  reached GitHub since C1; the commits of 2026-10-22 and -11-03 wait on it.
 - **Notes on each app** (U9): given in part on the bench, 2026-11-03.
 - **The slug's back and side**, drawn in the gamepad as the front was (P5).
 - **An evening in OBS with the puppet** (P0): sway, rise, wobble and the

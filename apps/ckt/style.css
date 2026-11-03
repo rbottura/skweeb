@@ -14,7 +14,7 @@
 
 .app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
 
-.viewer-note { margin-left: auto; font: 400 12px var(--nb-mono); color: var(--nb-muted); }
+.viewer-note { margin-left: auto; font: 400 12px var(--font-num); color: var(--fg-2); }
 
 /* The attractor can be put down by hand when it is a point. */
 body.can-point .viewer-stage canvas { cursor: crosshair; }
@@ -36,26 +36,26 @@ body.can-point .viewer-stage canvas { cursor: crosshair; }
   align-items: center;
   gap: 8px;
   padding: 4px;
-  border: var(--nb-line-sm) solid var(--nb-ink);
-  background: var(--nb-paper);
-  color: var(--nb-ink);
+  border: 1px solid var(--line-2);
+  background: var(--panel);
+  color: var(--fg);
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
 
-.ss-row:hover { background: #fff3b0; }
-.ss-row--on { background: var(--nb-accent); box-shadow: 2px 2px 0 var(--nb-ink); }
+.ss-row:hover { background: var(--accent-soft); }
+.ss-row--on { background: var(--accent); box-shadow: none; color: var(--accent-ink); }
 
 .ss-thumb {
   width: 40px;
   height: 40px;
   flex: none;
   object-fit: contain;
-  border: var(--nb-line-sm) solid var(--nb-ink);
-  background: var(--nb-paper);
+  border: 1px solid var(--line-2);
+  background: var(--panel);
 }
 
 .ss-meta { min-width: 0; }
 .ss-title { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ss-sub { font: 400 11px var(--nb-mono); color: var(--nb-muted); }
+.ss-sub { font: 400 11px var(--font-num); color: var(--fg-2); }

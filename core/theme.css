@@ -1,43 +1,65 @@
 /* ──────────────────────────────────────────────────────────────────────────────
    theme.css — the suite's look, once.
 
-   Neo-brutalist and light, decided 2026-09-23: a cream ground, black ink,
-   thick borders, hard offset shadows and one yellow accent. No glow, no blur,
-   no gradients — every edge is a line you can see. Every app takes this file;
-   an app's own stylesheet only says how its columns are laid out.
+   Dark, as VS Code's modern theme, decided 2026-11-03 on a bench
+   (docs/scene.md): surfaces in steps of one lightness, borders a white alpha,
+   corners lightly rounded, one accent. The values are the author's keep of
+   that day: violet, corners 9 px, borders 7.5 %, contrast 5, IBM Plex. It
+   replaces the neo-brutalism of 2026-09-23. Every app takes this file; an
+   app's own stylesheet only says how its columns are laid out.
 
    Three layers, top to bottom:
-     tokens      the colours, lines, shadows and faces — change the look here
+     tokens      surfaces, lines, text, the accent, corners, faces — change the look here
      the shell   the page grid: side columns, the viewer, the bar below
-     controls    buttons, chips, fields, switches, sliders, drawers, the bar
+     controls    buttons, toggles, fields, drawers, the bar
 
-   The old --hud-* names are mapped onto the tokens at the end, so a stylesheet
-   not yet rewritten (the gamepad's) still reads the new palette.
+   The names of 2026-09-23, --nb-*, and the gamepad's --hud-* are mapped onto
+   the tokens at the end, so a stylesheet not yet rewritten reads the new
+   palette — the gamepad's, until C6.
    ────────────────────────────────────────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
 :root {
-  --nb-ground:   #f4efe3;     /* the page */
-  --nb-paper:    #fffdf6;     /* panels, the viewer, fields */
-  --nb-ink:      #111111;     /* text, lines, shadows */
-  --nb-muted:    #6b665c;     /* secondary text */
-  --nb-accent:   #ffd60a;     /* what is on, what is chosen */
-  --nb-alert:    #ff4d4d;     /* recording, failure */
-  --nb-check-a:  #e9e4d8;     /* the transparency checkerboard */
-  --nb-check-b:  #fffdf6;
+  color-scheme: dark;
 
-  --nb-line:     3px;          /* panels and the viewer */
-  --nb-line-sm:  2px;          /* controls */
-  --nb-shadow:   4px 4px 0 var(--nb-ink);
-  --nb-shadow-sm: 3px 3px 0 var(--nb-ink);
-  --nb-gap:      14px;
+  /* Surfaces: one hue, a little blue, lightness stepping from the frame. */
+  --frame:  hsl(225 4% 7%);       /* the page, round the panels */
+  --panel:  hsl(225 4% 11.5%);    /* panels, drawers */
+  --view:   hsl(225 4% 16.5%);    /* the viewer, under the canvas */
+  --raised: hsl(225 4% 21%);      /* buttons, menus, what floats */
+  --field:  hsl(225 4% 24%);      /* fields */
+  --sel:    hsl(225 4% 32%);      /* what is chosen, a hover */
+  --mark:   hsl(225 4% 29%);      /* a row's hairline */
 
-  --nb-font:     'Space Grotesk', system-ui, sans-serif;
-  --nb-mono:     'Space Mono', ui-monospace, monospace;
+  --line:   rgba(255, 255, 255, .075);   /* between surfaces */
+  --line-2: rgba(255, 255, 255, .16);    /* round a control */
+  --hover:  rgba(255, 255, 255, .035);
 
-  --nb-side:     320px;        /* a side column */
-  --nb-bar:      34px;         /* the bottom bar */
+  --fg:   #d0d0d4;                 /* text */
+  --fg-2: #9c9da3;                 /* labels */
+  --fg-3: #6d6e75;                 /* units, hints */
+
+  --accent:      #a08cf7;          /* what is on, what is chosen */
+  --accent-ink:  #16122a;          /* text on the accent */
+  --accent-soft: rgba(160, 140, 247, .22);
+  --danger: #ef5a5a;               /* recording, failure */
+  --warn:   #d9a43a;               /* changed, not saved */
+  --ok:     #4bb879;
+
+  --checker-a: hsl(225 4% 17%);    /* the transparency checkerboard */
+  --checker-b: hsl(225 4% 12.5%);
+  --shadow: rgba(0, 0, 0, .45);
+
+  --radius:    9px;
+  --radius-lg: 11px;
+  --gap:       6px;
+
+  --font-ui:  'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-num: 'IBM Plex Mono', 'Cascadia Mono', Consolas, monospace;
+
+  --side:  320px;                  /* a side column */
+  --bar-h: 28px;                   /* the bottom bar */
 }
 
 /* ── The shell ─────────────────────────────────────────────────────────────── */
@@ -48,10 +70,18 @@ html, body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: var(--nb-ground);
-  color: var(--nb-ink);
-  font: 500 14px/1.35 var(--nb-font);
+  background: var(--frame);
+  color: var(--fg);
+  font: 400 13px/1.4 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
 }
+
+:focus { outline: none; }
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+
+/* Thin scrollbars, the panel's own colour. */
+* { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
 
 /* The page is a grid: the work above, the bar below as a row of its own, so
    the bar can never cover the canvas or a panel. It holds and clips whatever
@@ -63,15 +93,16 @@ html, body {
   overflow: clip;
   height: 100vh;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) var(--nb-bar);
+  grid-template-rows: minmax(0, 1fr) var(--bar-h);
 }
 
+/* Floating panels on the frame, a gap between them. */
 .app-main {
   min-height: 0;
   display: grid;
-  gap: var(--nb-gap);
-  padding: var(--nb-gap);
-  grid-template-columns: var(--app-columns, minmax(0, 1fr) var(--nb-side));
+  gap: var(--gap);
+  padding: var(--gap);
+  grid-template-columns: var(--app-columns, minmax(0, 1fr) var(--side));
 }
 
 /* A side column holds a docked panel and scrolls on its own. */
@@ -87,17 +118,20 @@ html, body {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--nb-paper);
-  border: var(--nb-line) solid var(--nb-ink);
-  box-shadow: var(--nb-shadow);
+  overflow: hidden;
+  background: var(--view);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
 }
 
 .viewer-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  border-bottom: var(--nb-line-sm) solid var(--nb-ink);
+  min-height: 34px;
+  padding: 4px 10px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
 }
 
 .viewer-stage {
@@ -109,18 +143,20 @@ html, body {
   padding: 18px;
 }
 
-/* The canvas sits on a checkerboard, so a transparent ground reads as one. */
+/* The canvas sits on a checkerboard, so a transparent ground reads as one;
+   the sheet's edge a fine line and a soft shadow, as paper on a desk. */
 .viewer-stage canvas {
   max-width: 100%;
   max-height: 100%;
-  outline: var(--nb-line-sm) solid var(--nb-ink);
-  background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 16px 16px;
+  outline: 1px solid var(--line-2);
+  box-shadow: 0 10px 30px var(--shadow);
+  background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 16px 16px;
 }
 
 /* The live stack round the canvas (core/stackView.js): its layers have no ground or edge of their own,
    and the checkerboard goes under all of them — the canvas, its edge kept, shows what is under it. */
-.viewer-stage canvas.stack-layer { background: none; outline: none; max-width: none; max-height: none; }
-.viewer-stage.stacked { background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 16px 16px; }
+.viewer-stage canvas.stack-layer { background: none; outline: none; box-shadow: none; max-width: none; max-height: none; }
+.viewer-stage.stacked { background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 16px 16px; }
 .viewer-stage.stacked canvas:not(.stack-layer) { background: none; }
 
 @media (max-width: 900px) {
@@ -134,86 +170,98 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 30px;
-  padding: 0 12px;
-  border: var(--nb-line-sm) solid var(--nb-ink);
-  background: var(--nb-paper);
-  color: var(--nb-ink);
-  box-shadow: var(--nb-shadow-sm);
-  font: 700 13px var(--nb-font);
+  min-height: 28px;
+  padding: 0 11px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  background: var(--raised);
+  color: var(--fg);
+  font: 500 12.5px var(--font-ui);
   cursor: pointer;
-  transition: transform 60ms, box-shadow 60ms, background 60ms;
+  transition: background 80ms, border-color 80ms;
 }
 
-.nb-btn:hover { background: var(--nb-accent); }
-.nb-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--nb-ink); }
-.nb-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; transform: none; }
+.nb-btn:hover { background: var(--sel); }
+.nb-btn:active { background: var(--field); }
+.nb-btn:disabled { opacity: 0.45; cursor: default; }
 .nb-btn[hidden] { display: none; }
-.nb-btn--primary { background: var(--nb-accent); }
+.nb-btn--primary { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
+.nb-btn--primary:hover { background: var(--accent); filter: brightness(1.08); }
 .nb-btn--wide { width: 100%; }
 
 .nb-btn:focus-visible,
 .nb-field:focus-visible {
-  outline: var(--nb-line-sm) solid var(--nb-ink);
-  outline-offset: 2px;
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
 }
 
-/* Two or more choices side by side, one of them on. */
-.nb-toggle { display: inline-flex; }
-.nb-toggle .nb-btn { box-shadow: none; }
-.nb-toggle .nb-btn + .nb-btn { border-left: 0; }
-.nb-toggle .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+/* Two or more choices side by side, one of them on: a segmented control. */
+.nb-toggle {
+  display: inline-flex;
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--field);
+}
+.nb-toggle .nb-btn { min-height: 24px; border: 0; border-radius: calc(var(--radius) - 2px); background: none; color: var(--fg-2); }
+.nb-toggle .nb-btn:hover { color: var(--fg); background: none; }
+.nb-toggle .nb-btn[aria-pressed="true"] { background: var(--sel); color: var(--fg); box-shadow: 0 0 0 1px var(--line-2); }
 
 .nb-field {
   width: 100%;
-  min-height: 30px;
+  min-height: 28px;
   padding: 4px 8px;
-  border: var(--nb-line-sm) solid var(--nb-ink);
-  border-radius: 0;
-  background: var(--nb-paper);
-  color: var(--nb-ink);
-  font: 500 13px var(--nb-mono);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--field);
+  color: var(--fg);
+  font: 400 12.5px var(--font-num);
 }
+.nb-field:hover { border-color: var(--line-2); }
 
 /* ── Drawers — a collapsible section of a panel ───────────────────────────── */
 
 .dr {
   flex: none;
-  background: var(--nb-paper);
-  border: var(--nb-line-sm) solid var(--nb-ink);
-  box-shadow: var(--nb-shadow-sm);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-.dr + .dr { margin-top: 12px; }
+.dr + .dr { margin-top: var(--gap); }
 .dr[hidden] { display: none; }
 
 .dr-head {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
   border: 0;
   background: transparent;
-  color: var(--nb-ink);
-  font: 700 12px var(--nb-font);
-  letter-spacing: 0.08em;
+  color: var(--fg-2);
+  font: 600 11px var(--font-ui);
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   text-align: left;
   cursor: pointer;
 }
 
-.dr-head::before { content: '▸'; width: 10px; }
+.dr-head::before { content: '▸'; width: 10px; color: var(--fg-3); }
 .dr--open > .dr-head::before { content: '▾'; }
-.dr--open > .dr-head { border-bottom: var(--nb-line-sm) solid var(--nb-ink); }
-.dr-head:hover { background: var(--nb-accent); }
-.dr-head:focus-visible { outline: var(--nb-line-sm) solid var(--nb-ink); outline-offset: -5px; }
+.dr--open > .dr-head { border-bottom: 1px solid var(--line); }
+.dr-head:hover { color: var(--fg); background: var(--hover); }
+.dr-head:focus-visible { outline: 1px solid var(--accent); outline-offset: -2px; }
 
 .dr-note {
   margin-left: auto;
-  font: 400 11px var(--nb-mono);
+  font: 400 11px var(--font-num);
   letter-spacing: 0;
   text-transform: none;
+  color: var(--fg-3);
 }
 
 .dr-body { display: none; padding: 4px 10px 10px; }
@@ -227,34 +275,53 @@ html, body {
   gap: 14px;
   min-width: 0;
   padding: 0 14px;
-  background: var(--nb-ink);
-  color: var(--nb-paper);
-  font: 400 13px var(--nb-mono);
+  background: var(--frame);
+  border-top: 1px solid var(--line);
+  color: var(--fg-2);
+  font: 400 12px var(--font-num);
   white-space: nowrap;
 }
 
-.bar-name { font: 700 13px var(--nb-font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--nb-accent); }
-.bar-say { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.bar-say--held { color: var(--nb-accent); }
-.bar-out { font-weight: 700; }
-.bar-dim { color: #b9b4a8; }
-.bar-sep { color: #6b665c; }
+.bar-name { font: 600 12px var(--font-ui); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+.bar-say { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fg); }
+.bar-say--held { color: var(--accent); }
+.bar-out { font-weight: 600; color: var(--fg); }
+.bar-dim { color: var(--fg-3); }
+.bar-sep { color: var(--fg-3); }
 
 @media (max-width: 1000px) { .bar-keys { display: none; } }
 
 /* ── Old names, for stylesheets not yet rewritten ─────────────────────────── */
 
 :root {
-  --hud-cyan:    var(--nb-ink);
-  --hud-lime:    var(--nb-accent);
-  --hud-amber:   var(--nb-accent);
-  --hud-bg:      var(--nb-paper);
-  --hud-border:  var(--nb-ink);
-  --hud-glass:   var(--nb-paper);
-  --hud-text:    var(--nb-ink);
-  --hud-subtle:  var(--nb-muted);
-  --hud-font:    var(--nb-mono);
-  --hud-font-ui: var(--nb-font);
+  --nb-ground:    var(--frame);
+  --nb-paper:     var(--panel);
+  --nb-ink:       var(--fg);
+  --nb-muted:     var(--fg-2);
+  --nb-accent:    var(--accent);
+  --nb-alert:     var(--danger);
+  --nb-check-a:   var(--checker-a);
+  --nb-check-b:   var(--checker-b);
+  --nb-line:      1px;
+  --nb-line-sm:   1px;
+  --nb-shadow:    none;
+  --nb-shadow-sm: none;
+  --nb-gap:       var(--gap);
+  --nb-font:      var(--font-ui);
+  --nb-mono:      var(--font-num);
+  --nb-side:      var(--side);
+  --nb-bar:       var(--bar-h);
+
+  --hud-cyan:    var(--accent);
+  --hud-lime:    var(--accent);
+  --hud-amber:   var(--warn);
+  --hud-bg:      var(--panel);
+  --hud-border:  var(--line-2);
+  --hud-glass:   var(--panel);
+  --hud-text:    var(--fg);
+  --hud-subtle:  var(--fg-2);
+  --hud-font:    var(--font-num);
+  --hud-font-ui: var(--font-ui);
   --hud-blur:    none;
   --hud-anim:    ease;
 }

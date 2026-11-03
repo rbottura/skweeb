@@ -16,7 +16,7 @@
 .app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
 
 /* The handles' mode, and what else the chosen shape can have done, over the viewer (chosen.js). */
-.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .td-spacer { flex: 1; }
 
 .viewer-stage canvas { cursor: grab; touch-action: none; }

@@ -25,19 +25,19 @@
   pointer-events: none;
 }
 
-.pz-note { margin: 6px 0 2px; font: 400 12px/1.45 var(--nb-mono); color: var(--nb-muted); }
+.pz-note { margin: 6px 0 2px; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); }
 .app-side .nb-btn + .nb-btn { margin-top: 6px; }
 
 /* The camera's switch, lit while it is on (drawers.js). */
-.app-side .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+.app-side .nb-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 
 /* A row a stroke in the Parts drawer: its guides' colour, its name, what it is (drawers.js). */
 .pz-parts { display: grid; gap: 6px; margin: 4px 0 8px; }
-.pz-part { display: grid; grid-template-columns: 14px 1fr auto; align-items: center; gap: 8px; font: 500 12px var(--nb-font); }
-.pz-swatch { width: 14px; height: 14px; border: var(--nb-line-sm) solid var(--nb-ink); }
+.pz-part { display: grid; grid-template-columns: 14px 1fr auto; align-items: center; gap: 8px; font: 500 12px var(--font-ui); }
+.pz-swatch { width: 14px; height: 14px; border: 1px solid var(--line-2); }
 
 /* The guides' switch over the viewer, lit while they show (main.js). */
-.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 
 /* What the camera sees, with the boxes cut from it ringed — in the viewer's
    corner while the guides show (guides.js). */
@@ -51,9 +51,9 @@
   height: auto;
   max-width: none;
   max-height: none;
-  background: var(--nb-ink);
-  outline: var(--nb-line-sm) solid var(--nb-ink);
-  box-shadow: var(--nb-shadow-sm);
+  background: var(--sel);
+  outline: 1px solid var(--line-2);
+  box-shadow: none;
 }
 html.guides .viewer-stage canvas.pz-seen { display: block; }
 .pp-select { width: 100%; }
@@ -67,10 +67,10 @@ html.guides .viewer-stage canvas.pz-seen { display: block; }
   max-width: calc(100vw - 24px);
   margin: 0;
   padding: 6px 10px;
-  background: var(--nb-paper);
-  border: var(--nb-line-sm) solid var(--nb-ink);
-  box-shadow: var(--nb-shadow-sm);
-  font: 400 12px/1.45 var(--nb-mono);
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  box-shadow: none;
+  font: 400 12px/1.45 var(--font-num);
   white-space: pre-line;
 }
 .pz-trouble[hidden], html:not(.obs) .pz-trouble { display: none; }

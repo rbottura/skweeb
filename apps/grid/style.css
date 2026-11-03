@@ -32,13 +32,13 @@
 .mk-item {
   aspect-ratio: 1;
   padding: 3px;
-  border: var(--nb-line-sm) solid var(--nb-ink);
-  background: var(--nb-paper);
+  border: 1px solid var(--line-2);
+  background: var(--panel);
   cursor: pointer;
 }
 .mk-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.mk-item:hover { background: #fff3b0; }
-.mk-item--on { background: var(--nb-accent); box-shadow: 2px 2px 0 var(--nb-ink); }
+.mk-item:hover { background: var(--accent-soft); }
+.mk-item--on { background: var(--accent); box-shadow: none; color: var(--accent-ink); }
 
 /* The tray reads like the ramp: left to right, top to bottom, light to dark,
    each tile on the ground it will be drawn on. */
@@ -50,8 +50,8 @@
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
-  border: var(--nb-line-sm) solid var(--nb-ink);
-  background: var(--nb-paper);
+  border: 1px solid var(--line-2);
+  background: var(--panel);
 }
 .mk-slot--none {
   background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 12px 12px;
@@ -62,26 +62,26 @@
   position: absolute;
   top: 2px;
   padding: 0 3px;
-  background: var(--nb-paper);
-  font: 700 10px var(--nb-mono);
+  background: var(--panel);
+  font: 700 10px var(--font-num);
 }
 .mk-order { left: 2px; }
 .mk-tone { right: 2px; font-weight: 400; }
 
-.mk-slot-bar { display: flex; border-top: var(--nb-line-sm) solid var(--nb-ink); background: var(--nb-paper); }
+.mk-slot-bar { display: flex; border-top: 1px solid var(--line-2); background: var(--panel); }
 .mk-slot-bar button {
   flex: 1;
   min-height: 20px;
   border: 0;
   background: none;
-  font: 700 12px var(--nb-font);
+  font: 700 12px var(--font-ui);
   cursor: pointer;
 }
-.mk-slot-bar button:hover:not(:disabled) { background: var(--nb-accent); }
-.mk-slot-bar button:disabled { color: var(--nb-muted); cursor: default; }
+.mk-slot-bar button:hover:not(:disabled) { background: var(--sel); }
+.mk-slot-bar button:disabled { color: var(--fg-2); cursor: default; }
 
 .mk-row { display: flex; gap: 8px; margin-top: 10px; }
-.mk-note { margin-top: 6px; font: 400 11px var(--nb-mono); color: var(--nb-muted); }
+.mk-note { margin-top: 6px; font: 400 11px var(--font-num); color: var(--fg-2); }
 .mk .pp-text { margin-bottom: 8px; }
 .mk-open { margin: 2px 0 8px; }
 .mk-grid + .nb-btn { width: 100%; margin-top: 8px; }
