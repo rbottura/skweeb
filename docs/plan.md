@@ -36,7 +36,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S2 | a value on one line: field, fill, slider, mark | `ui/rows` | M | landed 2026-11-03 |
 | S3 | the shared boxes, as the bench has them | `ui/boxes`, `ui/player` | M | landed 2026-11-03 |
 | S4 | the format a list | `ui/boxes-format` | S | landed 2026-11-03; Format and Ground mounted anywhere → S9 |
-| S5 | the left hand: the search, then keys by place and pies | `ui/keys` | M | ready |
+| S5 | the left hand: the search, then keys by place and pies | `ui/keys` | M | the search landed 2026-11-03; keys and pies next |
 | S6 | an object's states as a tree | `layers/states` | M | needs S3; the object model |
 | S7 | the graph over the page: compare, merge, open in | `ui/graph` | M | needs S6 |
 | S8 | rulers, guides, magnetism; the gabarit | `ui/guides` | M | needs S4 |
@@ -119,6 +119,11 @@ Each with what happens if nothing is said.
 
 - **States as a tree** (S6): a version's parent, and a merge's second, in
   `docs/object-model.md` — written up as proposed, to confirm.
+- **The keys** (S5): G the guides, as today in particles, or the ground, as
+  on the bench; and which pie A is in each app. Until said: G stays the
+  guides, A the app's own pie where it has one.
+- **The gabarit, a type** (S8): a format and its guides as an object, made
+  for its format (`docs/scene.md`) — its fields to confirm before S8.
 - **Notes on each app** (U9): given in part on the bench, 2026-11-03.
 - **The slug's back and side**, drawn in the gamepad as the front was (P5).
 - **An evening in OBS with the puppet** (P0): sway, rise, wobble and the
