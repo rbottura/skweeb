@@ -211,6 +211,10 @@ sorts them.
 - **The search** (S5, 2026-11-03; `core/Palette.js`): ² or Ctrl K, every
   control and act of the page by name, read from the page as it stands;
   Enter puts the hand on a row, or presses an act (`check-palette`).
+- **The bench's shell** (S12, 2026-11-03; the first Lit components): a title
+  bar in every app — the search, Save, Export ▾ read from the Export box —
+  the player under the viewer, and the status bar's keys for what is under
+  the cursor.
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -296,12 +300,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S12 on the board of `docs/plan.md`: the bench's shell in every app** —
-branch `ui/shell`, the first components written with Lit (`core/libs/lit/`,
-light DOM): a title bar — the app, the search, Save and Export, read from
-the page's Export box so no app wires it; the player under the viewer
-instead of in a drawer; the status bar's hints for what is under the
-cursor. Then S8, the viewer's tools, and S5's keys and pies.
+**S8 on the board of `docs/plan.md`: the viewer's tools, rulers and guides
+first** — branch `ui/guides`: a Lit `<skw-rulers>` round `.viewer-stage` in
+the format's pixels (the size Bar.output is told), guides drawn out of the
+rulers and back, kept per app in this browser until the gabarit is a type;
+then magnetism and F's placing in particles, the one app with handles to
+place (the emitter, the fields' centre). Then S5's keys and pies.
 
 ## Parked decisions
 

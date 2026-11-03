@@ -10,6 +10,10 @@
  * It is a row of the page grid (theme.css `.app`), not an overlay, so it can
  * never cover the canvas or a panel.
  *
+ * Since S12 (2026-11-03) it puts the title bar at the page's head —
+ * core/shell/titlebar.js, a Lit component, loaded once there is a DOM — and
+ * its keys say what the thing under the cursor answers to.
+ *
  * A result — "saved ckt_…" — holds the status line for a few seconds, because
  * a playing loop rewrites that line every frame and would otherwise show a
  * result for one frame. What was said meanwhile shows when the hold ends: an
@@ -53,6 +57,28 @@ export class Bar {
     );
     mount.append(this.root);
     this._holdUntil = 0;
+    this._keysText = keys;
+
+    // The title bar: the app, the search, Save and Export (core/shell/titlebar.js).
+    if (typeof customElements !== 'undefined' && !mount.querySelector(':scope > skw-titlebar')) {
+      const top = document.createElement('skw-titlebar');
+      top.setAttribute('app', app);
+      mount.prepend(top);
+      import('./shell/titlebar.js').catch(err => console.warn('the title bar did not load:', err.message));
+    }
+    if (typeof document !== 'undefined') document.addEventListener('pointerover', e => this._hint(e.target), { passive: true });
+  }
+
+  /** What the thing under the cursor answers to, in place of the app's keys while it is there. */
+  _hint(t) {
+    const at = sel => t && t.closest && t.closest(sel);
+    const h = at('.pp-num') ? 'drag: scrub · Shift ×10 · Ctrl ×0.1 · click: type'
+      : at('.pp-row--num .pp-label') ? 'Alt click: its slider · Alt held over a drawer: every slider'
+      : at('.tp') ? 'drag: scrub · the buttons: first, back, play, on, last'
+      : at('.dr-head') ? 'click: open or close'
+      : at('skw-titlebar') ? '² or Ctrl K: every control and act, by name'
+      : null;
+    this._keys.textContent = h || this._keysText;
   }
 
   /** The status line — once any result holding it has had its few seconds. */
