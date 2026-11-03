@@ -144,6 +144,12 @@ worktree isolation is the same thing. Only a side job runs beside the
 main thread; two branches that edit the same core file wait for each
 other, and the plan's order says which first.
 
+A worktree holds what git holds, and no more: no `./vault`, no heavy
+sprite families, no MediaPipe (`core/libs/mediapipe/`). Its browser checks
+that need them fail for the machine — "the vault has a loose still…", a
+404 on `gamepad_sprites/` — never for the code (2026-11-03). Run those in
+the main tree, or link the three folders into the worktree first.
+
 ## When main breaks
 
 `git revert -m 1 <merge>` takes the item out at once; it is mended on its
