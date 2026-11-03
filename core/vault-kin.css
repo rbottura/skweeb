@@ -14,8 +14,8 @@
   gap: 14px;
   align-content: start;
   padding: 26px 8px 8px;
-  border: var(--nb-line-sm, 2px) dashed var(--nb-ink, #111);
-  background: repeating-linear-gradient(135deg, transparent 0 7px, rgba(17, 17, 17, 0.05) 7px 8px);
+  border: 1px dashed var(--line-2);
+  background: repeating-linear-gradient(135deg, transparent 0 7px, var(--hover) 7px 8px);
 }
 
 .vp-kin-head {
@@ -28,15 +28,15 @@
   gap: 8px;
   overflow: hidden;
   white-space: nowrap;
-  font: 700 10px var(--nb-mono, monospace);
+  font: 700 10px var(--font-num);
 }
 
 .vp-kin-name {
   flex: none;
   padding: 1px 6px;
   border: 0;
-  background: var(--nb-ink, #111);
-  color: var(--nb-paper, #fffdf6);
+  background: var(--sel);
+  color: var(--fg);
   font: inherit;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -50,13 +50,13 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--nb-ink, #111);
-  font: 400 10px var(--nb-mono, monospace);
+  color: var(--fg);
+  font: 400 10px var(--font-num);
   text-decoration: underline;
   cursor: pointer;
 }
-.vp-kin-from:hover { background: var(--nb-accent, #ffd60a); }
-.vp-kin-more { color: var(--nb-muted, #6b665c); }
+.vp-kin-from:hover { background: var(--sel); }
+.vp-kin-more { color: var(--fg-2); }
 
 /* The arrow from one to the next, in the gap between them. */
 .vp-kin > .vp-card ~ .vp-card::before,
@@ -68,6 +68,6 @@
   top: 30%;
   width: 16px;
   text-align: center;
-  font: 700 14px var(--nb-font, sans-serif);
-  color: var(--nb-ink, #111);
+  font: 700 14px var(--font-ui);
+  color: var(--fg);
 }

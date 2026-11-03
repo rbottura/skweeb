@@ -12,8 +12,8 @@
 .sv-canvas {
   display: block;
   width: 100%;
-  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
-  background: repeating-conic-gradient(var(--nb-check-a, #e9e4d8) 0 25%, var(--nb-check-b, #fffdf6) 0 50%) 0 0 / 14px 14px;
+  border: 1px solid var(--line-2);
+  background: repeating-conic-gradient(var(--nb-check-a, var(--raised)) 0 25%, var(--nb-check-b, var(--panel)) 0 50%) 0 0 / 14px 14px;
 }
 
 .sv-bar { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
@@ -22,30 +22,30 @@
   width: 36px;
   height: 28px;
   flex: none;
-  border: var(--nb-line-sm, 2px) solid var(--nb-ink, #111);
-  background: var(--nb-accent, #ffd60a);
-  color: var(--nb-ink, #111);
-  box-shadow: 2px 2px 0 var(--nb-ink, #111);
-  font: 700 12px var(--nb-font, sans-serif);
+  border: 1px solid var(--line-2);
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: none;
+  font: 700 12px var(--font-ui);
   cursor: pointer;
 }
 
 .sv-btn:active { transform: translate(2px, 2px); box-shadow: none; }
 
-.sv-scrub { flex: 1; min-width: 0; accent-color: var(--nb-ink, #111); cursor: pointer; }
+.sv-scrub { flex: 1; min-width: 0; accent-color: var(--fg); cursor: pointer; }
 .sv-scrub:disabled { opacity: 0.4; cursor: default; }
 
 .sv-count {
   flex: none;
   min-width: 8ch;
   text-align: right;
-  font: 400 11px var(--nb-mono, monospace);
+  font: 400 11px var(--font-num);
 }
 
 .sv-note {
   margin-top: 6px;
-  font: 400 11px/1.5 var(--nb-mono, monospace);
-  color: var(--nb-muted, #6b665c);
+  font: 400 11px/1.5 var(--font-num);
+  color: var(--fg-2);
 }
 
-.sv-note--bad { color: var(--nb-alert, #ff4d4d); font-weight: 700; }
+.sv-note--bad { color: var(--danger); font-weight: 700; }

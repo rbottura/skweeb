@@ -18,4 +18,4 @@
 .viewer-stage canvas.can-move { cursor: move; }
 
 /* The guides' switch, over the viewer (main.js). */
-.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }

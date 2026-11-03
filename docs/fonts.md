@@ -16,6 +16,13 @@ Every one of these carries SIL Open Font License 1.1 in the file itself.
 | `Yarndings20-Regular.ttf` | Soft Type Project, 2023 | |
 | `SpaceMono-{Regular,Bold,Italic,BoldItalic}.ttf` | Colophon for Google, 2016 | |
 
+The interface's own faces are not in `assets/fonts/`: `core/theme.css` takes
+them from Google Fonts at run time, nothing entering the repo. Since
+2026-11-03 (S1, the dark theme) they are **IBM Plex Sans** and **IBM Plex
+Mono**, both SIL OFL 1.1 (IBM, github.com/IBM/plex); Space Grotesk was the
+interface's before. Shipped in a bundle someday (P8), they come into
+`assets/fonts/` with their licence as the rest.
+
 OFL 1.1 lets you use, embed, modify and redistribute these, including in a
 public gallery. Two obligations: keep the copyright and licence notices, and do
 not sell the fonts on their own. **Still to do:** each family ships an `OFL.txt`

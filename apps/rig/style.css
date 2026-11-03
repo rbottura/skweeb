@@ -19,10 +19,10 @@
 .rg-presets .nb-btn { padding: 0 6px; font-size: 12px; }
 
 /* What to do with no bone chosen, what the chosen one is, what a preset does. */
-.rg-note { margin: 4px 0 2px; font: 400 12px/1.45 var(--nb-mono); color: var(--nb-muted); }
+.rg-note { margin: 4px 0 2px; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); }
 
 /* The bones' switch and the loop's, over the viewer (main.js). */
-.viewer-head .nb-btn[aria-pressed="true"] { background: var(--nb-accent); }
+.viewer-head .nb-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 
 /* A joint under the pointer is taken hold of; held, it turns its bone (pointer.js). */
 .viewer-stage canvas { touch-action: none; }
