@@ -9,8 +9,9 @@
  * what it binds; changed and saved again, the same object's version 2, its
  * parent version 1. The frame saved as a still is an ordinary object, named
  * from that state and not depending on it. "Save as a new object" starts
- * another. In compose, the project placed at a state is pinned there, its row
- * saying so. No page said anything wrong.
+ * another. Alt click on a row's mark lists its value in every state (S6d);
+ * a pick sets it, Ctrl Z takes it back. In compose, the project placed at a
+ * state is pinned there, its row saying so. No page said anything wrong.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -55,6 +56,22 @@ const sid = await saved();
 const still = sid ? await envelope(sid) : null;
 c.ok('the frame as a still: an ordinary object, made from that state, not depending on it', !!still && still.type === 'still'
   && still.parents.includes(`${id}@v2`) && !still.refs.some(r => r.startsWith(id)), JSON.stringify(still && { type: still.type, parents: still.parents, refs: still.refs }));
+
+// S6d: Alt click on a row's mark — its value in every state, the newest first; a pick sets it, Ctrl Z takes it back.
+await page.typeInto(`${row('rate')}.querySelector('.pp-num')`, '200');
+await page.eval(`${row('rate')}.querySelector(':scope > .pp-mark').dispatchEvent(new MouseEvent('click', { altKey: true, bubbles: true }))`);
+await page.until(`document.querySelectorAll('.pp-hist-item').length >= 2`, { timeout: 15000 }).catch(() => {});
+const listedValues = await page.eval(`[...document.querySelectorAll('.pp-hist-item')].map(i => i.querySelector('.pp-hist-v').textContent + ' = ' + i.querySelector('.pp-hist-val').textContent)`);
+c.ok("Alt click on a row's mark: its value in every state, the newest first", JSON.stringify(listedValues) === JSON.stringify(['v2 · held = 150', 'v1 = 90']),
+  JSON.stringify(listedValues));
+await page.click(`[...document.querySelectorAll('.pp-hist-item')].find(i => i.querySelector('.pp-hist-v').textContent === 'v1')`);
+await new Promise(r => setTimeout(r, 200));
+const picked = +(await page.eval(`${row('rate')}.querySelector('.pp-num').value`));
+await new Promise(r => setTimeout(r, 600));
+await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }))`);
+await new Promise(r => setTimeout(r, 200));
+const backTo = +(await page.eval(`${row('rate')}.querySelector('.pp-num').value`));
+c.ok("a state's value picked is set, and Ctrl Z takes it back", picked === 90 && backTo === 200, `${picked}, then ${backTo}`);
 
 // Save as a new object: another smart object, and the page bound to it.
 await act('Save as a new object');

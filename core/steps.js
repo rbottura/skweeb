@@ -12,6 +12,8 @@
  * a params' values before and after, given back through `restore`, so an
  * app hears it as it hears an object opened. A new change after going back
  * forgets the steps on. Never in a text field: a field undoes its typing.
+ * A save ends the step being made: what came before it and what after are
+ * two steps, however close.
  * What an app sets itself while it boots, before a hand has touched the
  * page, is where the steps start from too — not a step to go back over.
  *
@@ -130,6 +132,7 @@ function installKeys() {
   installed = true;
   const touch = () => { touched = true; };
   for (const t of ['pointerdown', 'keydown', 'input', 'change']) window.addEventListener(t, touch, { capture: true, passive: true });
+  document.addEventListener('vault:saved', () => settle());       // a save ends a step (core/vault.js says it)
   window.addEventListener('keydown', e => {
     if (!(e.ctrlKey || e.metaKey) || e.altKey || typing(e.target)) return;
     const k = (e.key || '').toLowerCase();

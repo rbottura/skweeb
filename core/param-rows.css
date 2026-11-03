@@ -16,6 +16,20 @@
 .dr-body > .pp-more:hover { color: var(--fg); background: var(--hover); }
 .dr-body > .pp-more[hidden] { display: none; }
 
+/* A row's mark takes a press round it, for Alt click's values in every state (S6d). */
+.pp-row > .pp-mark.pp-mark { pointer-events: auto; }
+.pp-row > .pp-mark::before { content: ""; position: absolute; inset: -8px -6px; }
+.pp-hist { position: fixed; z-index: 92; min-width: 168px; display: flex; flex-direction: column; padding: 4px; border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg); background: var(--raised); box-shadow: 0 12px 30px var(--shadow); font: 400 12px var(--font-ui); }
+.pp-hist-head { padding: 4px 6px 3px; font: 600 10.5px var(--font-ui); letter-spacing: .07em; text-transform: uppercase; color: var(--fg-3); }
+.pp-hist-item { display: flex; justify-content: space-between; gap: 14px; padding: 5px 6px; border: 0; border-radius: var(--radius); background: none; color: var(--fg); cursor: pointer; }
+.pp-hist-item:hover { background: var(--accent); color: var(--accent-ink); }
+.pp-hist-item--now .pp-hist-val::after { content: " · now"; color: var(--fg-3); }
+.pp-hist-v { color: var(--fg-2); }
+.pp-hist-item:hover .pp-hist-v { color: inherit; }
+.pp-hist-val { font: 400 12px var(--font-num); }
+.pp-hist-none { padding: 5px 6px; color: var(--fg-3); font-style: italic; }
+
 /* Two numbers on one line: the line's name, a box each with its letter, the link and the swap between. */
 .pp-pair { position: relative; display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 2px 0 2px 14px; }
 .pp-pair:hover { background: var(--hover); }
