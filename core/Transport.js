@@ -11,6 +11,11 @@
  * It is chrome, not a parameter: it says which frame you are looking at, and
  * says nothing about the artwork. A saved loop is every frame regardless.
  *
+ * Since S12 it sits under the viewer, as a preview's transport does: in a
+ * strip at the foot of the page's `.viewer`, hidden while nothing moves;
+ * the drawer it was given, left empty, goes. A page with no viewer keeps it
+ * where it was mounted.
+ *
  * The checks hold it by `.tp-scrub` and `.tp-count`: both stay as they were.
  */
 
@@ -75,7 +80,11 @@ export class Transport {
     this.scrub.step = 1;
     this.scrub.setAttribute('aria-label', 'The frame on screen');
     this.root.append(row, this.scrub);
-    mount.append(this.root);
+    const viewer = document.querySelector('.viewer');
+    this.strip = viewer ? (viewer.querySelector(':scope > .viewer-player') || viewer.appendChild(el('div', 'viewer-player'))) : null;
+    (this.strip || mount).append(this.root);
+    const given = this.strip && mount.closest('.dr');
+    if (given && !given.querySelector('.dr-body').textContent.trim() && !given.querySelector('.dr-body *:not(div)')) given.classList.add('dr--emptied');
 
     this.scrub.addEventListener('input', () => {
       if (busy()) { this.scrub.value = clock.tick; return; }
@@ -91,6 +100,7 @@ export class Transport {
     this.scrub.max = Math.max(0, n - 1);
     const every = [1, 2, 5, 10, 15, 30, 60, 120, 300].find(k => (n - 1) / k <= 72) || 600;
     this.scrub.style.setProperty('--tp-step', n > 1 ? `${(100 * every) / (n - 1)}%` : '100%');
+    if (this.strip) this.strip.hidden = n < 2;
     this.show(this.clock.tick);
   }
 

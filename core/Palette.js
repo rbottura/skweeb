@@ -97,6 +97,9 @@ function gather() {
   return out;
 }
 
+/** Open it from elsewhere — the title bar's search. */
+export function openPalette() { if (!open) show(); }
+
 function show() {
   const all = gather();
   const root = el('div', 'pal'), box = el('div', 'pal-box');

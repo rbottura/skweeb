@@ -9,7 +9,8 @@
  * puts the hand on it — its drawer open, its box focused and selected for
  * typing; the acts of the drawers are found by their words, the Export
  * box's among them; Escape closes it; typed into a field, ² is a letter and
- * no search. And no page said anything wrong.
+ * no search. The title bar's search opens it, and its Export lists the
+ * Export box's acts and the print. And no page said anything wrong.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -60,6 +61,16 @@ await type('onion');
 const compose = await shown();
 c.ok('compose: its rows by name too', compose.length === 1 && compose[0].startsWith('Sequence player › onion skin'), JSON.stringify(compose));
 await press('Escape');
+
+// The title bar (core/shell/titlebar.js, S12): its search opens this; its Export lists the Export box's acts.
+await page.until(`!!document.querySelector('skw-titlebar .tb-search')`);
+await page.click(`document.querySelector('skw-titlebar .tb-search')`);
+c.ok("the title bar's search opens it", await page.eval(`!!document.querySelector('.pal .pal-input')`));
+await press('Escape');
+await page.click(`document.querySelector('skw-titlebar .tb-export')`);
+await wait(200);
+const menu = await page.eval(`[...document.querySelectorAll('skw-titlebar .tb-menu-item')].map(b => b.textContent.trim())`);
+c.ok("its Export lists the box's acts, and the print", menu.some(t => t.startsWith('Save to the vault')) && menu.some(t => t.startsWith('Print')), JSON.stringify(menu));
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
