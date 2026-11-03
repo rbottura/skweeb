@@ -29,8 +29,9 @@ const el = (tag, cls, text) => {
 };
 
 /**
- * A typed number beside a slider: sliders are for feel, numbers for exact
- * values. A number the param refuses or clamps to what it already was changes
+ * A number, on one line: typed for an exact value, dragged sideways for
+ * feel — the slider is a second line only where it is wanted (ParamPanel).
+ * A number the param refuses or clamps to what it already was changes
  * nothing, so nothing syncs the box — it puts the real value back itself, or
  * it would go on showing -50 against a width of 1.
  */
@@ -45,7 +46,59 @@ function numberBox(spec, value, set, current) {
     const v = parseFloat(box.value);
     if (!Number.isFinite(v) || !set(v)) box.value = current();
   });
+  scrubbable(box, spec, set, current);
+  paintFill(box, spec, value);
   return box;
+}
+
+/** Where a value sits in its range, a fill behind its box: from the left, or from zero when the range holds it. */
+function paintFill(box, spec, v) {
+  if (typeof spec.min !== 'number' || typeof spec.max !== 'number' || !(spec.max > spec.min)) return;
+  const log = !!spec.log && spec.min > 0, at = x => (log ? Math.log10(x) : x);
+  const lo = at(spec.min), hi = at(spec.max), q = Math.min(1, Math.max(0, (at(v) - lo) / (hi - lo)));
+  let a = 0, b = q;
+  if (!log && spec.min < 0 && spec.max > 0) { const z = -lo / (hi - lo); a = Math.min(z, q); b = Math.max(z, q); }
+  box.style.setProperty('--fa', (a * 100).toFixed(2) + '%');
+  box.style.setProperty('--fb', (b * 100).toFixed(2) + '%');
+}
+
+/**
+ * The box scrubs: dragged sideways it moves the value — Shift ten times
+ * faster, Ctrl ten times finer — and a click without a drag still types. A
+ * log range scrubs on the logarithm, as its slider runs.
+ */
+function scrubbable(box, spec, set, current) {
+  const log = !!spec.log && spec.min > 0;
+  const lo = spec.min ?? 0, hi = spec.max ?? lo + 100;
+  const span = log ? Math.log10(hi) - Math.log10(lo) : hi - lo;
+  const per = spec.drag ?? (log ? span / 400 : Math.max(spec.step ?? 1, span / 500));
+  let st = null;
+  box.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || document.activeElement === box) return;      // typing: the caret is the box's
+    st = { x: e.clientX, last: e.clientX, v0: current(), acc: 0, moved: false, id: e.pointerId };
+  });
+  box.addEventListener('pointermove', e => {
+    if (!st) return;
+    if (!st.moved) {
+      if (Math.abs(e.clientX - st.x) < 3) return;
+      st.moved = true; st.last = e.clientX;
+      try { box.setPointerCapture(st.id); } catch { /* the pointer is gone already */ }
+      document.body.classList.add('pp-scrubbing');
+    }
+    e.preventDefault();
+    st.acc += (e.clientX - st.last) * per * (e.shiftKey ? 10 : 1) * (e.ctrlKey || e.metaKey ? 0.1 : 1);
+    st.last = e.clientX;
+    set(log ? 10 ** (Math.log10(st.v0) + st.acc) : st.v0 + st.acc);
+  });
+  const stop = () => {
+    if (!st) return;
+    const moved = st.moved;
+    st = null;
+    document.body.classList.remove('pp-scrubbing');
+    if (moved) box.blur();
+  };
+  box.addEventListener('pointerup', stop);
+  box.addEventListener('pointercancel', stop);
 }
 
 export const WIDGETS = {
@@ -62,15 +115,19 @@ export const WIDGETS = {
     const along = v => (log ? Math.log10(v) : v);
     input.min = along(spec.min ?? 0);
     input.max = along(spec.max ?? 100);
-    input.step = log ? 'any' : spec.step ?? 1;
+    // The slider's step is five of the box's, a quick way to a round value
+    // (the author's, 2026-11-03) — unless that leaves it fewer than eight stops.
+    const lo = spec.min ?? 0, hi = spec.max ?? 100, fine = spec.step ?? 1;
+    const coarse = (hi - lo) / (fine * 5) >= 8 ? fine * 5 : fine;
+    input.step = 'any';
     input.value = along(value);
     input.addEventListener('input', () => {
       const x = parseFloat(input.value);
-      set(log ? 10 ** x : x);
+      set(log ? 10 ** x : Math.min(hi, Math.max(lo, Math.round(x / coarse) * coarse)));
     });
     const box = numberBox(spec, value, set, () => panel.value(key));
     readout.replaceChildren(box);
-    return { node: input, sync(v) { input.value = along(v); box.value = v; } };
+    return { node: input, sync(v) { input.value = along(v); box.value = v; paintFill(box, spec, v); } };
   },
 
   // A count. Declaring `int` rather than `range` with step 1 says the value is

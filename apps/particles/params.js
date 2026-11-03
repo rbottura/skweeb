@@ -45,10 +45,11 @@ const D = DEFAULTS;
 const STREAM = { mode: 'stream' };
 const BURST = { mode: 'burst' };
 
+/** `slider: true` keeps a slider under its box, as the bench kept these six (S2, 2026-11-03). */
 export function emitParams() {
   return defineParams('particles', {
     mode:    { type: 'enum', options: ['stream', 'burst'], default: D.mode, display: 'chips', label: 'mode', group: 'emission' },
-    rate:    { type: 'range', min: 1, max: 2000, step: 1, default: 90, label: 'a second', group: 'emission', when: STREAM },
+    rate:    { type: 'range', min: 1, max: 2000, step: 1, default: 90, label: 'a second', group: 'emission', when: STREAM, slider: true },
     count:   { type: 'int', min: 1, max: 5000, default: D.count, label: 'at once', group: 'emission', when: BURST },
     /** A stream's loop, in the picture's frames: its period is frames / fps. */
     frames:  { type: 'int', min: 2, max: 1200, default: 60, label: 'loop, frames', group: 'emission', when: STREAM },
@@ -78,15 +79,15 @@ export function emitParams() {
                  labels: { fixed: 'as the angle', outward: 'outward' }, group: 'emission',
                  when: { shape: ['disc', 'ring', 'object'] } },
 
-    speed:       { type: 'range', min: 0, max: 3000, step: 1, default: 140, label: 'speed px/s', group: 'launch' },
+    speed:       { type: 'range', min: 0, max: 3000, step: 1, default: 140, label: 'speed px/s', group: 'launch', slider: true },
     speedSpread: { type: 'range', min: 0, max: 1, step: 0.01, default: D.speedSpread, label: 'speed spread', group: 'launch' },
     angle:       { type: 'range', min: -180, max: 180, step: 1, default: D.angle, label: 'angle ° from up', group: 'launch' },
-    spread:      { type: 'range', min: 0, max: 360, step: 1, default: 36, label: 'cone °', group: 'launch' },
+    spread:      { type: 'range', min: 0, max: 360, step: 1, default: 36, label: 'cone °', group: 'launch', slider: true },
 
-    life:       { type: 'range', min: 0.05, max: 20, step: 0.05, default: 1.4, label: 'life s', group: 'life' },
+    life:       { type: 'range', min: 0.05, max: 20, step: 0.05, default: 1.4, label: 'life s', group: 'life', slider: true },
     lifeSpread: { type: 'range', min: 0, max: 1, step: 0.01, default: D.lifeSpread, label: 'life spread', group: 'life' },
 
-    gravity: { type: 'range', min: -3000, max: 3000, step: 1, default: -260, label: 'gravity px/s²', group: 'forces' },
+    gravity: { type: 'range', min: -3000, max: 3000, step: 1, default: -260, label: 'gravity px/s²', group: 'forces', slider: true },
     wind:    { type: 'range', min: -3000, max: 3000, step: 1, default: D.wind, label: 'wind px/s²', group: 'forces' },
     drag:    { type: 'range', min: 0, max: 20, step: 0.05, default: 1.2, label: 'drag /s', group: 'forces' },
 
@@ -146,7 +147,7 @@ export function pictureParams() {
      */
     sprites: { type: 'object', accepts: ['set', 'shape', 'still'], use: 'particles', label: 'sprites', group: 'look' },
     /** A dot's width, or a sprite's: its height follows its own shape. */
-    size:   { type: 'range', min: 0.5, max: 256, step: 0.5, default: 22, label: 'size px', group: 'look' },
+    size:   { type: 'range', min: 0.5, max: 256, step: 0.5, default: 22, label: 'size px', group: 'look', slider: true },
     color:  { type: 'color', default: '#d9481c', label: 'dot colour', group: 'look', when: { sprites: null } },
     /** Its size at the end of its life, as a share of `size`, reached along `growEase`. */
     grow:     { type: 'range', min: 0, max: 4, step: 0.05, default: 0.2, label: 'size at its end ×', group: 'look' },

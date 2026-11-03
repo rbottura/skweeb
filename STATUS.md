@@ -194,6 +194,12 @@ sorts them.
   2026-09-23 (`--nb-*`, `--hud-*`) pointing at them. A bar that is
   information only; drawers; core's Format drawer everywhere; a page that
   never scrolls. The layout's turn is track S's (`docs/scene.md`).
+- **A value on one line** (S2, 2026-11-03; `core/widgets.js`, `ParamPanel.js`):
+  a number's box scrubs — Shift ×10, Ctrl ×0.1 — or is typed, its fill where
+  it sits; its slider a second line only where the schema says `slider: true`,
+  under Alt held over its drawer, or pinned by Alt click, its step five of the
+  box's; a switch on its label's line; a row's mark, a dot when it differs
+  from its default, counted in its drawer's head.
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -276,15 +282,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S2 on the board of `docs/plan.md`: a value on one line** — branch
-`ui/rows` from `main`. In `core/widgets.js` and `ParamPanel.js`: the typed
-box scrubs (drag, Shift ×10, Ctrl ×0.1) and shows its fill; the slider is a
-second line only where the schema says `slider: true`, under Alt held over
-its drawer, or pinned by Alt click on its label, its step five times the
-field's; a row's mark — a hairline, a dot when changed from its default —
-and its drawer's count. The checks reach rows by `.pp-row`, `.pp-name`,
-`.pp-num` and `.pp-range`: all four stay. The board holds the rest in order
-— track S first — each a branch landed after a gate (`docs/workflow.md`).
+**S3 on the board of `docs/plan.md`: the shared boxes** — its first half,
+the Export box (`core/boxes/export.js`, branch `ui/boxes`), every app's
+export in one order and one set of words; then the player as After
+Effects' preview, its second half. The board holds the rest in order —
+track S first — each a branch landed after a gate (`docs/workflow.md`).
 
 ## Parked decisions
 

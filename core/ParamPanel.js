@@ -26,6 +26,15 @@
  *
  * With `mount`, the panel is a column of the page layout and never covers the
  * canvas. Without it, it floats over the right edge as it always did.
+ *
+ * ── A value on one line (S2, 2026-11-03) ────────────────────────────────────
+ *
+ * A number is its box, dragged or typed (widgets.js); its slider is a second
+ * line only where the schema says `slider: true`, while Alt is held over its
+ * drawer, or pinned by Alt click on its label — a viewer's choice, kept in
+ * this browser. A switch sits on its label's line. Each row has a mark, a
+ * hairline that turns a dot when the value differs from its default, and a
+ * drawer counts its dots in its head.
  */
 
 import { VaultPanel } from './VaultPanel.js';
@@ -49,6 +58,15 @@ const el = (tag, cls, text) => {
 
 const titleCase = key => key.replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
 
+const NUMERIC = new Set(['range', 'int']);
+const pinsKey = app => `skweeb/sliders/${app}`;
+function loadPins(app) {
+  try { return JSON.parse(localStorage.getItem(pinsKey(app)) || '{}') || {}; } catch { return {}; }
+}
+function savePins(app, pins) {
+  try { localStorage.setItem(pinsKey(app), JSON.stringify(pins)); } catch { /* a convenience: without storage, none kept */ }
+}
+
 export class ParamPanel {
   /**
    * @param {object} params             from defineParams()
@@ -66,9 +84,13 @@ export class ParamPanel {
     this._drawers = new Map();       // group id -> Drawer
     this._extra   = new Set();       // drawers holding more than params
     this._open    = false;
+    this._pins    = loadPins(params.app);
+    this._hover   = null;            // the drawer under the pointer, for Alt's peek
+    this._alt     = false;
 
     this._build();
     this._paint();
+    this._wirePeek();
     if (this._mount) this.show();
 
     // An external change — a restore, a key, a drag on the canvas — has to
@@ -99,7 +121,7 @@ export class ParamPanel {
   get head() { return this._head; }
 
   /** Take the panel off the page; its params go with whoever holds them. */
-  remove() { this._root.remove(); }
+  remove() { this._root.remove(); if (this._unpeek) this._unpeek(); }
 
   /**
    * A drawer for something that is not a parameter.
@@ -174,6 +196,8 @@ export class ParamPanel {
       if (!build) continue;                       // params.js refuses these first
 
       const row = el('div', 'pp-row');
+      row.dataset.key = key;
+      row.append(el('span', 'pp-mark'));
       const label = el('div', 'pp-label');
       label.append(el('span', 'pp-name', spec.label || titleCase(key)));
       const readout = el('span', 'pp-value');
@@ -188,7 +212,18 @@ export class ParamPanel {
         readout,
         panel: this,
       });
-      row.append(widget.node);
+      if (spec.type === 'bool') readout.replaceChildren(widget.node);     // a switch, on its label's line
+      else row.append(widget.node);
+      if (NUMERIC.has(spec.type)) {
+        row.classList.add('pp-row--num');
+        row.classList.toggle('pp-row--slider', this._sliderShown(key, spec));
+        label.title = 'Alt click: its slider, shown or hidden';
+        label.addEventListener('click', e => {
+          if (!e.altKey) return;
+          e.preventDefault();
+          this._pin(key, spec, row);
+        });
+      }
 
       const group = spec.group || null;
       (group ? this._drawerFor(group).body : this._loose).append(row);
@@ -196,18 +231,76 @@ export class ParamPanel {
     }
   }
 
-  /** Rows that apply, drawers that have anything to show, widgets that read others. */
+  /** Rows that apply, drawers that have anything to show, widgets that read others, what changed. */
   _refresh() {
     const values = this._params.values;
-    const shown = new Map();
-    for (const { widget, row, spec, group } of this._rows.values()) {
+    const shown = new Map(), changed = new Map();
+    for (const [key, { widget, row, spec, group }] of this._rows) {
       const on = applies(spec, values);
       row.hidden = !on;
       if (widget.values) widget.values(values);
       if (group) shown.set(group, (shown.get(group) || false) || on);
+      const mod = JSON.stringify(values[key]) !== JSON.stringify(this._params.defaultOf(key));
+      row.classList.toggle('pp-row--mod', mod);
+      if (mod && on && group) changed.set(group, (changed.get(group) || 0) + 1);
     }
     for (const [id, drawer] of this._drawers) {
-      if (!this._extra.has(id)) drawer.hidden = !shown.get(id);
+      if (this._extra.has(id)) continue;
+      drawer.hidden = !shown.get(id);
+      this._count(drawer, changed.get(id) || 0);
     }
+  }
+
+  /** A drawer's head says how many of its values differ from their defaults. */
+  _count(drawer, n) {
+    const head = drawer.root.querySelector('.dr-head');
+    if (!head) return;
+    let badge = head.querySelector('.dr-mod');
+    if (!badge) {
+      if (!n) return;
+      badge = el('span', 'dr-mod');
+      head.insertBefore(badge, head.querySelector('.dr-note'));
+    }
+    badge.textContent = n ? String(n) : '';
+    badge.hidden = !n;
+    badge.title = n === 1 ? 'one value changed from its default' : `${n} values changed from their defaults`;
+  }
+
+  // ── Sliders: where wanted ────────────────────────────────────────────────
+
+  _sliderShown(key, spec) { return key in this._pins ? !!this._pins[key] : !!spec.slider; }
+
+  /** Alt click on a label: its slider shown or hidden, kept for this app in this browser. */
+  _pin(key, spec, row) {
+    const show = !this._sliderShown(key, spec);
+    if (show === !!spec.slider) delete this._pins[key]; else this._pins[key] = show;
+    savePins(this._params.app, this._pins);
+    row.classList.toggle('pp-row--slider', show);
+  }
+
+  /** Alt held over a drawer shows every slider in it, for as long as it is held. */
+  _wirePeek() {
+    const paint = () => {
+      for (const d of this._root.querySelectorAll('.dr.pp-peek')) d.classList.remove('pp-peek');
+      if (this._alt && this._hover) this._hover.classList.add('pp-peek');
+    };
+    const over = e => { this._hover = e.target.closest('.dr'); paint(); };
+    const out = () => { this._hover = null; paint(); };
+    const key = down => e => {
+      if (e.key !== 'Alt') return;
+      if (down && this._hover) e.preventDefault();     // Windows would take Alt to the browser's menu
+      this._alt = down; paint();
+    };
+    const down = key(true), up = key(false), blur = () => { this._alt = false; paint(); };
+    this._root.addEventListener('pointerover', over);
+    this._root.addEventListener('pointerleave', out);
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', blur);
+    this._unpeek = () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
+    };
   }
 }

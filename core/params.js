@@ -254,6 +254,9 @@ export function defineParams(app, schema) {
     /** The declaration for one key, for a panel or a gallery filter. */
     spec(key) { return schema[key]; },
 
+    /** A key's default, as a reset gives it: a panel marks what differs from it. */
+    defaultOf(key) { return TYPES[schema[key].type].default(schema[key]); },
+
     /**
      * set('cell', 20) or set({ cell: 20, invert: true }).
      *

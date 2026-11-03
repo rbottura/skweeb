@@ -33,8 +33,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | U0 | the columns measured | — | — | dropped: "mesurer les colonnes n'est pas nécessaire" |
 | — | the scene planned: M12, `docs/scene.md` | `docs/scene` | — | landed 2026-11-03 |
 | S1 | the dark theme, from the bench's tokens | `ui/theme` | M | landed 2026-11-03 |
-| S2 | a value on one line: field, fill, slider, mark | `ui/rows` | M | ready |
-| S3 | the shared boxes, as the bench has them | `ui/boxes` | M | needs S2 |
+| S2 | a value on one line: field, fill, slider, mark | `ui/rows` | M | landed 2026-11-03 |
+| S3 | the shared boxes, as the bench has them | `ui/boxes` | M | ready: Export, then the player |
 | S4 | Format and Ground anywhere; the format a list | `ui/boxes-format` | S | needs S3 |
 | S5 | the left hand: keys by place, pies, the search | `ui/keys` | M | needs S3 |
 | S6 | an object's states as a tree | `layers/states` | M | needs S3; the object model |
