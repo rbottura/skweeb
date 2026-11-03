@@ -38,10 +38,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S4 | the format a list | `ui/boxes-format` | S | landed 2026-11-03; Format and Ground mounted anywhere → S9 |
 | S5 | the left hand: the search, then keys by place and pies | `ui/keys` | M | the search landed 2026-11-03; keys and pies after S12, S8 |
 | — | Lit, the components' one library | `ui/lit` | — | landed 2026-11-03 |
-| S12 | the bench's shell in every app: title bar, the player under the viewer, the status bar's hints | `ui/shell` | M | ready, before S8 and S5's keys |
+| S12 | the bench's shell in every app: title bar, the player under the viewer, the status bar's hints | `ui/shell` | M | landed 2026-11-03 |
 | S6 | an object's states as a tree | `layers/states` | M | needs S3; the object model |
 | S7 | the graph over the page: compare, merge, open in | `ui/graph` | M | needs S6 |
-| S8 | rulers, guides, magnetism; the gabarit | `ui/guides` | M | needs S4 |
+| S8 | rulers, guides, magnetism; the gabarit | `ui/guides` | M | ready: rulers and guides first; the gabarit's type waits on the author |
 | S9 | every app a module; the scene | `scene/host` | L | needs S3–S5 |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9, S11 |
 | S11 | the space viewer's own bench | — | M | side bench, before S10 |
