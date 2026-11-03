@@ -90,6 +90,17 @@ JavaScript to someone else's browser.
 - `live` — a window's id, in place of `ref`: a block of the live stack, never
   saved (*The live stack*, below).
 
+**A project is one** (S6b, 2026-11-03, the author's ask: "pas un nouvel
+objet à chaque pression de S"). Every app on core's kit saves its S as a
+state — `Vault.save({ state: true })` — so its first S makes a smart object
+and binds the page to it, strictly: only an S is a state of it. The Export
+box's frozen acts say `state: false` and name the state they come from;
+"Save as a new object" starts another. ckt, the gamepad and the puppet keep
+their own saves until they are on the kit. Placed in compose from the vault,
+a project is **pinned at the state it had** — the author's choice — its
+placement's row set to 0 to follow it (`?place=skw_…@v3` pins too). A
+picker takes a smart object for what it binds: the index row says, `binds`.
+
 **Saving one.** A `skw` is saved by the app that makes it, through its own
 save: the window is bound into it (core/vault.js `bind`) — reopened in its
 app (`?open=skw_…`), or asked to save for what will hold it, as a window

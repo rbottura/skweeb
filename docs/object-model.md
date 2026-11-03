@@ -168,7 +168,10 @@ changes, I am stale*: the gallery marks it, the next render rebuilds it.
 Ordinary objects are **immutable** — a change makes a new object whose parent is
 the old one. `skw` is the single exception, and versioning is how it stays
 honest about it. (Tags aside — they are a label on the object, not the object;
-see *Tags change*.)
+see *Tags change*.) Since S6b (2026-11-03) it is what an app's S saves: a
+project is a smart object, each S its next state; what leaves it frozen — a
+frame as a still, a look — is an ordinary object naming that state,
+`skw_…@v3`.
 
 ## Smart objects — the `skw` type
 
@@ -310,7 +313,9 @@ An old object must never disappear because its app moved on.
 `render.sha256` is the identity of the bytes. Saving the same bytes twice is a
 no-op whatever it is named — this is how `gamepad/gallery` already works and it
 is kept. Two objects may legitimately share a sha (same pixels, different
-recipe): the id is the object, the sha is only the file.
+recipe): the id is the object, the sha is only the file. A smart object is
+never a twin (S6b): each one made is a project of its own — "Save as a new
+object" of one unchanged is another, its id the object.
 
 ## Publishing
 

@@ -215,6 +215,12 @@ sorts them.
   bar in every app — the search, Save, Export ▾ read from the Export box —
   the player under the viewer, and the status bar's keys for what is under
   the cursor.
+- **S is the next state** (S6b, 2026-11-03; core/vault.js `state`): an app's
+  S saves its project as the next state of a smart object, its first S making
+  it; "Save as a new object" starts another; the frozen acts name the state
+  they come from. compose pins a project placed at its state, 0 to follow;
+  pickers, fields and the vault's player take a project for what it binds.
+  ckt, the gamepad and the puppet keep their own saves.
 - **Ctrl Z, Ctrl Y** (S6c, 2026-11-03; `core/steps.js`): every change of a
   page's params a step, held in memory — a drag one step, a panel's Reset
   one; a recipe arriving where the steps start from; in a field, the field's
@@ -323,13 +329,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S6b on the board of `docs/plan.md`: S saves the next state of the object
-open** — branch `layers/save-state`: a page bound by default (core/vault.js
-`bind`), so its first S makes a smart object and every S after it the next
-state of it; the Export box's acts into the vault — the frame as a still,
-the loop — stay frozen objects, made from the state (`parents: [skw_…@vN]`).
-Every check that saves reads a `skw` where it read the app's own type. Then
-S6d, a row's Alt click on its dot: its value in every state; then S7.
+**S6d on the board of `docs/plan.md`: a row's value in every state** —
+branch `layers/values`: Alt click on a row's mark lists its value in each
+state of the object the page holds (`Vault.states`, each state's recipe
+read for that row's params), the one now marked; a pick sets it, a step
+Ctrl Z takes back. Then S7, the graph over the page.
 
 ## Parked decisions
 
