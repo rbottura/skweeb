@@ -6,7 +6,8 @@
  * Nothing is declared for it. It reads the page as it stands: a control is a
  * panel's row (its `.pp-name`), found under its drawer's title; an act is a
  * drawer's button (an Export box's, a pose's). A row or an act added
- * tomorrow is found the day it exists. Enter on a control opens its drawer,
+ * tomorrow is found the day it exists. The viewer's tools, outside any
+ * drawer, carry their words in `data-pal`. Enter on a control opens its drawer,
  * brings the row into view and puts the hand on it — a number's box selected
  * for typing; Enter on an act presses it.
  *
@@ -24,7 +25,8 @@ const el = (tag, cls, text) => {
 let installed = false;
 let open = null;          // { root, input, list, shown, hot }
 
-const typing = t => !!t && ((t.tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button', 'color'].includes(t.type))
+/** Whether a key pressed on `t` is typed into it: a field takes its letters. */
+export const typing = t => !!t && ((t.tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button', 'color'].includes(t.type))
   || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 
 /** ² or Ctrl K, anywhere but in a field — before an app's own keys hear it. */
@@ -93,6 +95,11 @@ function gather() {
     const text = b.textContent.replace(/\s+/g, ' ').trim();
     if (!text) continue;
     out.push({ label: text, detail: titleOf(drawer), act: true, run: () => { opened(drawer); b.click(); } });
+  }
+  // The viewer's tools and offers (core/shell/rulers.js), by the words they carry.
+  for (const b of document.querySelectorAll('[data-pal]')) {
+    if (b.disabled || b.closest('[hidden]') || b.closest('.pal')) continue;
+    out.push({ label: b.dataset.pal, detail: 'Viewer', act: true, run: () => b.click() });
   }
   return out;
 }

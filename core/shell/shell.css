@@ -1,0 +1,82 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   shell.css — the shell the bench found (docs/scene.md), round every app:
+   the title bar (S12), the player under the viewer (S12), the viewer's
+   rulers, guides and tools (S8). Taken by theme.css, so every app has it;
+   its tokens are theme.css's.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* ── The title bar, and the player under the viewer (S12) ─────────────────── */
+
+.app:has(> skw-titlebar) { grid-template-rows: 38px minmax(0, 1fr) var(--bar-h); }
+skw-titlebar { position: relative; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 var(--gap) 0 12px; border-bottom: 1px solid var(--line); background: var(--frame); }
+skw-titlebar kbd { display: inline-flex; align-items: center; height: 16px; padding: 0 4px; border: 1px solid var(--line-2); border-radius: 3px; font: 500 10px/1 var(--font-num); color: var(--fg-2); }
+.tb-brand { display: flex; align-items: center; gap: 8px; font-weight: 500; white-space: nowrap; }
+.tb-mark { width: 14px; height: 14px; flex: none; border-radius: 4px; background: conic-gradient(from 200deg, var(--accent), #d9481c, var(--accent)); }
+.tb-crumb { color: var(--fg-3); }
+.tb-search { flex: 1 1 auto; min-width: 0; max-width: 440px; margin-inline: auto; height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 10px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--panel); color: var(--fg-3); font: 400 12.5px var(--font-ui); cursor: pointer; }
+.tb-search span { flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-search:hover { color: var(--fg-2); border-color: var(--fg-3); }
+.tb-acts { display: flex; gap: 6px; }
+.tb-acts .nb-btn { min-height: 26px; }
+.tb-save kbd { border-color: currentColor; color: inherit; opacity: .7; }
+.tb-menu { position: absolute; right: var(--gap); top: 36px; z-index: 50; min-width: 260px; display: flex; flex-direction: column; padding: 4px; border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--raised); box-shadow: 0 14px 36px var(--shadow); }
+.tb-menu-head { padding: 7px 8px 3px; font: 600 10.5px var(--font-ui); letter-spacing: 0.07em; text-transform: uppercase; color: var(--fg-3); }
+.tb-menu-item { padding: 6px 8px; border: 0; border-radius: var(--radius); background: none; color: var(--fg); font: 400 12.5px var(--font-ui); text-align: left; cursor: pointer; }
+.tb-menu-item:hover, .tb-menu-item:focus-visible { background: var(--accent); color: var(--accent-ink); outline: none; }
+.viewer-player { flex: none; padding: 2px 10px 6px; border-top: 1px solid var(--line); background: var(--panel); }
+.viewer-player[hidden] { display: none; }
+.viewer-player .tp { padding: 2px 0 0; }
+.dr--emptied { display: none !important; }
+
+/* ── Rulers and guides (S8; core/shell/rulers.js) ────────────────────────────
+   Over the stage's padding, never the picture: the stage keeps 18 px round
+   it (theme.css .viewer-stage), and the rulers are that wide. */
+
+.viewer-stage { position: relative; }
+skw-rulers { position: absolute; inset: 0; z-index: 30; pointer-events: none; display: block; }
+skw-rulers .rl { position: absolute; display: block; pointer-events: auto; background: var(--panel); touch-action: none; }
+skw-rulers .rl-x { left: 18px; top: 0; width: calc(100% - 18px); height: 18px; border-bottom: 1px solid var(--line-2); cursor: row-resize; }
+skw-rulers .rl-y { left: 0; top: 18px; width: 18px; height: calc(100% - 18px); border-right: 1px solid var(--line-2); cursor: col-resize; }
+skw-rulers .rl-corner { position: absolute; left: 0; top: 0; width: 18px; height: 18px; background: var(--panel); border-right: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+skw-rulers .rl-span { fill: var(--hover); }
+skw-rulers .rl-tick { stroke: var(--fg-3); stroke-width: 1; fill: none; shape-rendering: crispEdges; }
+skw-rulers .rl text { fill: var(--fg-3); font: 400 9px var(--font-num); user-select: none; }
+skw-rulers .rl-cur { position: absolute; display: none; background: var(--fg-2); pointer-events: none; }
+skw-rulers.rl-in .rl-cur { display: block; }
+skw-rulers .rl-cur-x { top: 0; width: 1px; height: 17px; left: var(--rl-cx, -9px); }
+skw-rulers .rl-cur-y { left: 0; height: 1px; width: 17px; top: var(--rl-cy, -9px); }
+
+/* A guide: a hairline of the accent across the stage, taking no press — the
+   picture is the app's — and its grip in the ruler it crosses, to hold it by. */
+skw-rulers .gd { position: absolute; pointer-events: none; background: var(--accent); opacity: .8; }
+skw-rulers .gd-x { top: 18px; bottom: 0; width: 1px; }
+skw-rulers .gd-y { left: 18px; right: 0; height: 1px; }
+skw-rulers .gd--held { opacity: 1; box-shadow: 0 0 0 1px var(--accent-soft); }
+skw-rulers .gd-grip { position: absolute; z-index: 1; pointer-events: auto; touch-action: none; }
+skw-rulers .gd-grip::before { content: ""; position: absolute; border: 0 solid transparent; }
+skw-rulers .gd-grip-x { top: 0; width: 11px; height: 18px; margin-left: -5px; cursor: col-resize; }
+skw-rulers .gd-grip-x::before { left: 1px; bottom: 1px; border-width: 7px 4.5px 0; border-top-color: var(--accent); }
+skw-rulers .gd-grip-y { left: 0; width: 18px; height: 11px; margin-top: -5px; cursor: row-resize; }
+skw-rulers .gd-grip-y::before { right: 1px; top: 1px; border-width: 4.5px 0 4.5px 7px; border-left-color: var(--accent); }
+skw-rulers .gd-grip:hover::before { filter: brightness(1.25); }
+
+/* What the magnet pulls to, while it pulls: across the picture, dashed. */
+skw-rulers .gd-snap { position: absolute; pointer-events: none; }
+skw-rulers .gd-snap-x { width: 0; border-left: 1px dashed var(--snap); }
+skw-rulers .gd-snap-y { height: 0; border-top: 1px dashed var(--snap); }
+
+/* Guides of another size: the offer to lay them here. */
+skw-rulers .gd-away { position: absolute; left: 26px; top: 26px; display: flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px;
+  border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--raised); color: var(--fg-2); font: 400 12px var(--font-ui);
+  pointer-events: auto; box-shadow: 0 6px 18px var(--shadow); }
+skw-rulers .gd-away span { margin-right: 4px; white-space: nowrap; }
+skw-rulers .gd-act { height: 22px; padding: 0 8px; border: 0; border-radius: var(--radius); background: none; color: var(--fg); font: 500 12px var(--font-ui); cursor: pointer; }
+skw-rulers .gd-act:hover { background: var(--accent); color: var(--accent-ink); }
+
+/* The viewer's tools, at the end of its head. */
+skw-viewtools { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+skw-viewtools .vt-btn { height: 24px; min-width: 24px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 0 6px;
+  border: 0; border-radius: var(--radius); background: none; color: var(--fg-3); font: 400 12px var(--font-ui); cursor: pointer; }
+skw-viewtools .vt-btn:hover { background: var(--hover); color: var(--fg); }
+skw-viewtools .vt-btn[aria-pressed="true"] { color: var(--accent); }
+skw-viewtools .vt-ic { width: 16px; height: 16px; }

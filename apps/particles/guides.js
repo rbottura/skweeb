@@ -108,6 +108,13 @@ function handle(ctx, x, y, colour, square) {
   stroke(ctx, colour, 2);
 }
 
+/** The handle F places (core/shell/guides.js): a ring round it. */
+function ring(ctx, x, y, colour) {
+  ctx.beginPath();
+  ctx.arc(x, y, 11, 0, Math.PI * 2);
+  stroke(ctx, colour, 1.5);
+}
+
 /**
  * Draw the guides over a preview already painted.
  *
@@ -118,9 +125,10 @@ function handle(ctx, x, y, colour, square) {
  * @param {number} [dpp=1]  canvas pixels per CSS pixel: the guides are sized
  *                          on screen, not on the canvas, so they read the same
  *                          on any display and at any preview size
- * @param {object} [given]  what the emitter names, loaded: `points`, `field`
+ * @param {object} [given]  what the emitter names, loaded: `points`, `field`;
+ *                          and `selected`, the handle F places, ringed
  */
-export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = null } = {}) {
+export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = null, selected = null } = {}) {
   const { width, height } = pictureSize(p);
   view /= dpp;                                  // from here on, CSS pixels
   const ox = (width / 2) * view, oy = (height / 2) * view;
@@ -134,8 +142,8 @@ export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = nu
   ctx.moveTo(ox, oy - 8); ctx.lineTo(ox, oy + 8);
   stroke(ctx, QUIET, 1);
 
-  drawField(ctx, e, p, view, ox, oy, width, height, field);
-  drawEmitter(ctx, e, p, view, ox, oy, points);
+  drawField(ctx, e, p, view, ox, oy, width, height, field, selected === 'field');
+  drawEmitter(ctx, e, p, view, ox, oy, points, selected === 'emitter');
   drawPull(ctx, e);
   ctx.restore();
 }
@@ -143,7 +151,7 @@ export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = nu
 /** At most this many of an object's points are drawn: enough to see its shape. */
 const SHOWN = 900;
 
-function drawEmitter(ctx, e, p, view, ox, oy, points) {
+function drawEmitter(ctx, e, p, view, ox, oy, points, chosen) {
   const k = depthScale(e.z, p.focal);
   if (!k) return;
   const x = ox + e.x * k * view, y = oy + e.y * k * view;
@@ -193,15 +201,17 @@ function drawEmitter(ctx, e, p, view, ox, oy, points) {
   }
 
   handle(ctx, x, y, EMITTER, false);
+  if (chosen) ring(ctx, x, y, EMITTER);
   label(ctx, e.z ? `emitter · depth ${e.z}` : 'emitter', x + 11, y + 16, EMITTER);
 }
 
-function drawField(ctx, e, p, view, ox, oy, width, height, given) {
+function drawField(ctx, e, p, view, ox, oy, width, height, given, chosen) {
   const x = ox + e.fx * view, y = oy + e.fy * view;
   if (!hasField(e)) {
     // Nothing pulls yet: the centre alone, faint, ready to be placed.
     ctx.globalAlpha = 0.55;
     handle(ctx, x, y, FIELD, true);
+    if (chosen) ring(ctx, x, y, FIELD);
     label(ctx, 'field · off', x + 11, y - 10, FIELD);
     ctx.globalAlpha = 1;
     return;
@@ -262,6 +272,7 @@ function drawField(ctx, e, p, view, ox, oy, width, height, given) {
     }
   }
   handle(ctx, x, y, FIELD, true);
+  if (chosen) ring(ctx, x, y, FIELD);
   label(ctx, 'field', x + 11, y - 10, FIELD);
 }
 

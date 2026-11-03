@@ -10,10 +10,16 @@
  * its drag is divided by the camera's scale and it stays under the pointer.
  * Over a handle the pointer says it can move it; with the guides off there
  * is nothing to take hold of.
+ *
+ * Since S8 (core/shell/guides.js) a handle dragged is pulled by the viewer's
+ * magnet — to the picture's edges, its centre, the guides; Ctrl held, not —
+ * and the one last pressed is the selection: F puts it at the centre, the
+ * emitter until another is pressed.
  */
 
 import { handlesOf } from './guides.js';
 import { pictureSize } from './draw.js';
+import { snapPoint, endSnap, select, placeable } from '../../core/shell/guides.js';
 
 /** How near a press must be to a handle, in CSS pixels. */
 const REACH = 12;
@@ -25,8 +31,9 @@ const REACH = 12;
  * @param {object} opts.emit              the emitter's Params
  * @param {object} opts.picture           the picture's Params
  * @param {() => boolean} opts.guides     whether the guides, and so the handles, are shown
+ * @param {() => void} [opts.chose]       a handle was pressed: the selection changed, to be drawn
  */
-export function wirePointer({ canvas, view, emit, picture, guides }) {
+export function wirePointer({ canvas, view, emit, picture, guides, chose = () => {} }) {
   let drag = null;
 
   /** A pointer's place in picture pixels from the centre, and CSS pixels per picture pixel. */
@@ -53,6 +60,8 @@ export function wirePointer({ canvas, view, emit, picture, guides }) {
     const pt = at(ev);
     const h = under(pt);
     if (!h) return;
+    select(h.id === 'emitter' ? 'emitter' : 'field');
+    chose();
     const [kx, ky] = h.id === 'emitter' ? ['x', 'y'] : ['fx', 'fy'];
     drag = { reach: h.id === 'reach', from: pt, kx, ky, x: emit.get(kx), y: emit.get(ky), k: h.k };
     canvas.setPointerCapture(ev.pointerId);
@@ -65,11 +74,26 @@ export function wirePointer({ canvas, view, emit, picture, guides }) {
       emit.set('falloff', Math.max(1, Math.round(Math.hypot(pt.x - emit.get('fx'), pt.y - emit.get('fy')))));
       return;
     }
-    emit.set({ [drag.kx]: Math.round(drag.x + (pt.x - drag.from.x) / drag.k),
-               [drag.ky]: Math.round(drag.y + (pt.y - drag.from.y) / drag.k) });
+    // Where the handle is seen, pulled by the magnet — in the picture's pixels from its top left.
+    const { width, height } = pictureSize(picture.values);
+    const [sx, sy] = snapPoint(drag.x * drag.k + (pt.x - drag.from.x) + width / 2,
+                               drag.y * drag.k + (pt.y - drag.from.y) + height / 2, ev.ctrlKey || ev.metaKey);
+    emit.set({ [drag.kx]: Math.round((sx - width / 2) / drag.k),
+               [drag.ky]: Math.round((sy - height / 2) / drag.k) });
   });
 
-  const drop = () => { drag = null; };
+  const drop = () => { if (drag) endSnap(); drag = null; };
   canvas.addEventListener('pointerup', drop);
   canvas.addEventListener('pointercancel', drop);
+
+  // What F places: put where it is seen — the emitter through the camera at its depth.
+  const put = (kx, ky, deep) => (x, y) => {
+    const { width, height } = pictureSize(picture.values);
+    const k = (deep && handlesOf(emit.values, picture.values).find(h => h.id === 'emitter')?.k) || 1;
+    emit.set({ [kx]: Math.round((x - width / 2) / k), [ky]: Math.round((y - height / 2) / k) });
+  };
+  placeable([
+    { id: 'emitter', label: 'the emitter', put: put('x', 'y', true) },
+    { id: 'field', label: "the fields' centre", put: put('fx', 'fy', false) },
+  ]);
 }

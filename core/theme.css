@@ -19,6 +19,7 @@
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import url('./shell/shell.css');      /* the shell the bench found: title bar, player strip, rulers and guides */
 
 :root {
   color-scheme: dark;
@@ -46,6 +47,7 @@
   --danger: #ef5a5a;               /* recording, failure */
   --warn:   #d9a43a;               /* changed, not saved */
   --ok:     #4bb879;
+  --snap:   #ff4d8d;               /* what the magnet pulls to, while it pulls */
 
   --checker-a: hsl(225 4% 17%);    /* the transparency checkerboard */
   --checker-b: hsl(225 4% 12.5%);
@@ -286,29 +288,6 @@ html, body {
 .pal-hot .pal-detail, .pal-hot .pal-name::before { color: inherit; opacity: .85; }
 .pal-empty { color: var(--fg-3); cursor: default; }
 .pp-row--found { background: var(--accent-soft); }
-
-/* ── The shell (S12): the title bar above, the player under the viewer ───── */
-
-.app:has(> skw-titlebar) { grid-template-rows: 38px minmax(0, 1fr) var(--bar-h); }
-skw-titlebar { position: relative; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 var(--gap) 0 12px; border-bottom: 1px solid var(--line); background: var(--frame); }
-skw-titlebar kbd { display: inline-flex; align-items: center; height: 16px; padding: 0 4px; border: 1px solid var(--line-2); border-radius: 3px; font: 500 10px/1 var(--font-num); color: var(--fg-2); }
-.tb-brand { display: flex; align-items: center; gap: 8px; font-weight: 500; white-space: nowrap; }
-.tb-mark { width: 14px; height: 14px; flex: none; border-radius: 4px; background: conic-gradient(from 200deg, var(--accent), #d9481c, var(--accent)); }
-.tb-crumb { color: var(--fg-3); }
-.tb-search { flex: 1 1 auto; min-width: 0; max-width: 440px; margin-inline: auto; height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 10px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--panel); color: var(--fg-3); font: 400 12.5px var(--font-ui); cursor: pointer; }
-.tb-search span { flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tb-search:hover { color: var(--fg-2); border-color: var(--fg-3); }
-.tb-acts { display: flex; gap: 6px; }
-.tb-acts .nb-btn { min-height: 26px; }
-.tb-save kbd { border-color: currentColor; color: inherit; opacity: .7; }
-.tb-menu { position: absolute; right: var(--gap); top: 36px; z-index: 50; min-width: 260px; display: flex; flex-direction: column; padding: 4px; border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--raised); box-shadow: 0 14px 36px var(--shadow); }
-.tb-menu-head { padding: 7px 8px 3px; font: 600 10.5px var(--font-ui); letter-spacing: 0.07em; text-transform: uppercase; color: var(--fg-3); }
-.tb-menu-item { padding: 6px 8px; border: 0; border-radius: var(--radius); background: none; color: var(--fg); font: 400 12.5px var(--font-ui); text-align: left; cursor: pointer; }
-.tb-menu-item:hover, .tb-menu-item:focus-visible { background: var(--accent); color: var(--accent-ink); outline: none; }
-.viewer-player { flex: none; padding: 2px 10px 6px; border-top: 1px solid var(--line); background: var(--panel); }
-.viewer-player[hidden] { display: none; }
-.viewer-player .tp { padding: 2px 0 0; }
-.dr--emptied { display: none !important; }
 
 /* ── The bar — information only ────────────────────────────────────────────── */
 
