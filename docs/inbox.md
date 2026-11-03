@@ -24,9 +24,28 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing, 2026-10-22: both ideas that waited went onto the plan's board.
+Nothing, 2026-11-03: the day's ideas went onto the plan as M12.
 
 ## Sorted
+
+- **2026-11-03 — the UI, worked out on a bench, and the scene round it.**
+  The morning's direction: "la modern UI de vscode en dark avec des légers
+  rounded corners et des borders très fine … les menus circulaires, les
+  activations de menus par keyboard shortcut … la main gauche sur zqsd ou
+  azer comme sur league of legends"; the formats a list, sections smaller,
+  sliders optional, "le player … comme la boîte preview d'after effect",
+  saving set in order. Then, on the bench: a slider's step five times the
+  field's; a row's mark, "modifié depuis la valeur par défaut", and its
+  value in every state on Alt click; "le versionning de projet … comme git
+  pour un fichier de code", a graph of the states over the page, "les
+  fonctions de git de base comme le merge entre 2 branches"; rulers,
+  magnetism, F to place, and "un concept de partage de gabarit entre les
+  apps"; versions that cross apps, "en stackant les versions in-app ou
+  d'une autre manière"; a state opened in another app "si la passerelle le
+  permet"; layers of contexts along Z, the bridge's "petits cubes volants";
+  and "un moteur de rendu global, un viewer de scène". → M12 in
+  `docs/roadmap.md`, its spec `docs/scene.md`, track S on the board of
+  `docs/plan.md`; decided the same day (`docs/decisions.md`).
 
 - **2026-10-08 — moving pictures for a newsroom, Blast first.** "try to
   setup skweeb suite to create motion designs just like kielmd did for the

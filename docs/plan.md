@@ -5,7 +5,8 @@ la suite, faire les quelques briques mises en pause, avancer sur le système
 de couche 'layer' et de smart object, et aussi faire des optimisations
 d'ui" — some columns are long to scroll. Four tracks: **C**, the suite
 tidied; **U**, columns that fit; **L**, layers and smart objects; **P**,
-the paused bricks. Each item is a branch (`docs/workflow.md`). The roadmap
+the paused bricks; and since 2026-11-03 **S**, the scene — M12,
+`docs/scene.md` — which takes U up. Each item is a branch (`docs/workflow.md`). The roadmap
 keeps the milestones and why, an app's `STATUS.md` how its bricks were
 built; this file what is to do, in what order, and what waits on whom.
 
@@ -30,11 +31,22 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C7 | check-print green again | `fix/print-still` | S | landed 2026-10-22 |
 | C8 | rule 4 eased: a file looked at past 400, split past 600 | `docs/rule-4` | S | landed 2026-10-22 |
 | U0 | the columns measured | — | — | dropped: "mesurer les colonnes n'est pas nécessaire" |
-| U8a | the shared boxes: one contract, Export first | `ui/boxes` | M | ready, its spec landed |
-| U8b | the player and the Stack, as boxes | `ui/boxes-player-stack` | S | needs U8a |
-| U8c | Format and Ground, mounted anywhere | `ui/boxes-format` | S | needs U8a |
-| L10 | saved three ways: S, then 1 2 3 | `layers/save-three` | M | needs U8a |
-| P1 | M10's brick 5: a turntable | `3d/turntable` | M | needs L10 |
+| — | the scene planned: M12, `docs/scene.md` | `docs/scene` | — | landed 2026-11-03 |
+| S1 | the dark theme, from the bench's tokens | `ui/theme` | M | ready, after the 15:40 reset |
+| S2 | a value on one line: field, fill, slider, mark | `ui/rows` | M | needs S1 |
+| S3 | the shared boxes, as the bench has them | `ui/boxes` | M | needs S2 |
+| S4 | Format and Ground anywhere; the format a list | `ui/boxes-format` | S | needs S3 |
+| S5 | the left hand: keys by place, pies, the search | `ui/keys` | M | needs S3 |
+| S6 | an object's states as a tree | `layers/states` | M | needs S3; the object model |
+| S7 | the graph over the page: compare, merge, open in | `ui/graph` | M | needs S6 |
+| S8 | rulers, guides, magnetism; the gabarit | `ui/guides` | M | needs S4 |
+| S9 | every app a module; the scene | `scene/host` | L | needs S3–S5; rule 7 |
+| S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9 |
+| U8a | the shared boxes: one contract, Export first | — | — | → S3 |
+| U8b | the player and the Stack, as boxes | — | — | → S3 |
+| U8c | Format and Ground, mounted anywhere | — | — | → S4 |
+| L10 | saved three ways: S, then 1 2 3 | — | — | → S3 and S6: S saves the next state |
+| P1 | M10's brick 5: a turntable | `3d/turntable` | M | needs S3 |
 | P3 | a character, defined once | `core/character` | S | ready |
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | needs P3 |
 | L11 | a smart object followed wherever it is picked | `layers/follow` | M | ready |
@@ -42,11 +54,11 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L3 | no cycle | `layers/cycles` | S | ready |
 | L2 | flatten | `layers/flatten` | S | needs L1 |
 | L6 | edit in place | `layers/edit` | S | ready |
-| L7 | versions in the vault | `layers/versions` | S | ready |
+| L7 | versions in the vault | — | — | → S6, S7 |
 | L5 | grid takes a window | `layers/grid-takes` | M | ready |
-| U9 | the author's notes on each app | — | — | waits: the author |
-| U10 | the new theme | `ui/theme` | M | waits: the author's description |
-| U11 | the new layout | `ui/layout` | L | needs U8a–c, U9, U10 |
+| U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
+| U10 | the new theme | — | — | → S1: described 2026-11-03 |
+| U11 | the new layout | — | — | → S9: the bench's |
 | P2 | M10's brick 5: a shape swung | `3d/swing` | M | needs P1 |
 | P6 | M10's brick 6: a model from every side | `3d/sides` | S | needs P1, P3 |
 | P7 | a worm's path across the map | `map/paths` | M | needs P4 |
@@ -66,7 +78,11 @@ S is a session, M two or three, L more.
 
 ## The order, and why
 
-The author's, 2026-10-22: "l'ordre proposé me va".
+The author's, 2026-10-22: "l'ordre proposé me va". Since 2026-11-03 the
+scene comes first: a day on a bench found the UI the author wanted, and
+the author asked for the scene round it — S1 to S10, `docs/scene.md`, as
+one refactor in bricks from the session's reset at 15:40. It takes up U8,
+U10, U11 and L10's save; the order below goes on after it.
 
 1. **The ground cleared** — C1, C2, C7, C8. The docs say what is true,
    rule 4 says what it means, and `main` is green.
@@ -100,10 +116,13 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
-- **Notes on each app** (U9): what is in the way, what is wanted where —
-  the brief of the new layout (U11).
-- **The new theme** (U10): neo-brutalism, the theme of 2026-09-23, likely
-  left for what the author describes; nothing is restyled until then.
+- **Rule 7, for the scene** (S9): reworded so the scene is one more host
+  and never the only one, or S9 waits (`docs/scene.md`, *The scene*).
+- **States as a tree** (S6): a version's parent, and a merge's second, in
+  `docs/object-model.md` — written up as proposed, to confirm.
+- **The tower's key** (`docs/workflow.md`, *Once a machine*): nothing has
+  reached GitHub since C1; the commits of 2026-10-22 and -11-03 wait on it.
+- **Notes on each app** (U9): given in part on the bench, 2026-11-03.
 - **The slug's back and side**, drawn in the gamepad as the front was (P5).
 - **An evening in OBS with the puppet** (P0): sway, rise, wobble and the
   mouth on the author's own head — what is too much, what too little.
@@ -206,6 +225,16 @@ line, Tweakpane's density (U2); any control by name, Ctrl+K (U3); the
 viewer's own chrome — the clock under the picture, the frame beside it
 (U4); export on a sheet (U5); the layers in a panel of their own (U6);
 tabs (U7).
+
+## S — the scene (M12)
+
+What the bench settled, the bricks and their order are `docs/scene.md`; the
+bench itself is https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm, its
+source its published files. **S1 — the dark theme** · `ui/theme` · M: the
+bench's tokens, the author's keep, into `core/theme.css`; an app's
+stylesheet still says only how its columns lie, so every app changes at
+once. *Done when* every browser check is green on it and the author has
+seen three apps in it.
 
 ## L — layers and smart objects
 

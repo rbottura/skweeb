@@ -20,6 +20,7 @@ item, is the board in `docs/plan.md`. Here, the milestones still open.
 | M9 | the rig: bones, walks, and worms | bricks 1 to 5 of six, and the puppet, below |
 | M10 | 3D: meshes, from primitives up | bricks 1 to 4 of six, below |
 | M11 | the live stack, and smart objects | done 2026-10-07; what it left is L in `docs/plan.md` |
+| M12 | the scene: one canvas, the suite round it | planned 2026-11-03 — `docs/scene.md`; track S in `docs/plan.md` |
 
 ## The links
 
@@ -317,6 +318,18 @@ at a sheet's size and a dpi, in tiles: the 120×176 poster at 300 dpi — and
 the same day the print moved into core, for every app: each handle draws a
 window of its frame, a gamepad still is drawn again from its marks
 (`docs/core-export.md`).
+
+**M12 — the scene: one canvas, the suite round it.** Asked by the author on
+2026-11-03, after a day on a bench where the new UI was found: one host page
+whose canvas stays in the middle while the apps' boxes leave and come back
+round it as another context is loaded; an object's states as a tree, with a
+graph over the page to compare, merge and open them elsewhere; and the space
+of contexts, the layers an object has in each app it went through, along Z.
+The apps stay pages of their own, in tabs, linked by the live stack.
+*Done when:* torch, made in particles, goes into grid and back in one page
+without the canvas moving, each app's checks green; and its states' graph
+shows both layers and the bridge between them. Its spec, the bench and the
+bricks: `docs/scene.md`. Rule 7's wording is the author's to settle first.
 
 ## Decided before, 2026-09-21 to -23
 

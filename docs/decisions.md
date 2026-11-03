@@ -335,3 +335,34 @@ shared boxes come first, one contract in core, today's drawers their first
 layout so that nothing moves on screen; and nothing is restyled before the
 description. The theme of 2026-09-23 is reopened, not yet replaced.
 
+## Decided since, 2026-11-03
+
+**The new UI is found on a bench, then built on core.** The author asked to
+work the UI out "ensemble dans un artefact … ou une nouvelle appli comme un
+bench", and gave its direction the same morning: VS Code's modern dark,
+"des légers rounded corners et des borders très fines", radial menus held on
+a key, the left hand where a player's rests. Six versions of a bench came of
+the day (`docs/scene.md`, *The bench*): what it settled — a value on one
+line with its slider a second line only where wanted, a row's mark, the
+keys by place, the player as After Effects' preview, saving in the author's
+order — is the description U10 waited for and much of U9's notes. The bench
+is a prototype outside the suite; each thing is built again on core's kit.
+
+**An object's states are a tree, as a file's commits.** "Il ne faut pas
+qu'à chaque pression de S il y ait un nouvel objet dans le vault mais
+plutôt qu'on sauvegarde un nouvel état d'un objet." A state is its values
+and its parent; a merge takes what only the arriving state changed and
+keeps, on a conflict, the receiving one's value until the other is picked.
+Between apps the lineage stays `parents`, pinned to a state (`id@vN`): each
+app keeps its own recipe's states. A gabarit is made for its format and is
+laid again on another, in % or in px. The model's fields are written up as
+proposed, the author's to confirm (`docs/plan.md`, *Waiting*).
+
+**The scene is M12, after the boxes.** "Une forme de fusion inter app avec
+au centre le canvas qui ne bouge pas … et le reste qui s'adapte autour",
+the apps still in tabs. Planned the same day, to begin after the session's
+reset at 15:40 as one refactor in bricks, S1 to S10. It takes up U8, U10,
+U11 and L10. Rule 7 — "not a shell that owns the page" — is kept as long as
+the scene is one more host and never the only one; how it is worded is the
+author's, before S9.
+

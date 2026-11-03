@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-10-22_
+_last touched: 2026-11-03_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open and `docs/roadmap-done.md` the
@@ -12,7 +12,17 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-10-21 and -22
+### Newest — 2026-11-03
+
+- **The new UI, found on a bench, and M12 planned** (`docs/scene.md`): a
+  page apart from the suite, https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm
+  — particles redrawn dark, a value on one line, the left hand's keys and
+  pies, the player as After Effects', saving in order, rulers and a
+  gabarit, an object's states as a tree with a graph over the page, merge,
+  and the space of contexts along Z. Nothing in the suite changed yet:
+  track S on the board builds it, from S1.
+
+### 2026-10-21 and -22
 
 - **The rig's puppet, worn in OBS** (`apps/rig/STATUS.md`, *The puppet*):
   the author's eyes from the camera at the eyestalks' tips, the mouth on
@@ -252,6 +262,10 @@ compares two pages' canvases measures, never demands the pixel.
 - **Five sprite names mean two pictures** in `brushes` against v2's
   `sprites/`. A cleanup must never renumber `brushes`: marks name sprites
   by index — the rig's poses too.
+- **The tower cannot push** (2026-11-03): its GitHub key has a passphrase
+  and no agent holds it — Windows' ssh-agent still disabled — so every
+  commit since C1 is on this machine only. The fix, once, as an
+  administrator: `docs/workflow.md`, *Once a machine*.
 - **A server started before a change to `server.js` keeps its old API**:
   restart it after pulling — on the laptop, `systemctl --user restart
   skweeb-vault`.
@@ -263,13 +277,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**U8a on the board of `docs/plan.md`: the shared boxes, Export first** —
-its spec first, `docs/boxes.md`: every app's shared boxes, app by app, and
-the contract that makes each a component an app declares and a layout
-places. Then the Export box in every app, nothing moving on screen. The board holds the rest in order, the author's
-since 2026-10-22, each item a branch landed after a gate
-(`docs/workflow.md`), and what waits on the author, each with what happens
-if nothing is said.
+**S1 on the board of `docs/plan.md`, after the session's reset at 15:40:
+the dark theme** — branch `ui/theme` from `main`; the bench's tokens (the
+author's keep: violet, corners 9 px, borders 7.5 %, contrast 5, IBM Plex)
+into `core/theme.css`, read from the bench's published files
+(`docs/scene.md`, *The bench*); every browser check after it. Before it,
+the tower's key, so the day's commits reach GitHub. The board holds the
+rest in order — S1 to S10 first, then what was there — each item a branch
+landed after a gate (`docs/workflow.md`), and what waits on the author.
 
 ## Parked decisions
 
