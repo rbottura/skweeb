@@ -296,16 +296,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S5's second part on the board of `docs/plan.md`: keys by place, and the
-pies** — branch `ui/keys-pies` from `main`. A `core/keys.js` reading
-`event.code` — Q D the frames, Space play, S save, H the states, the pies
-held on A Z E R F — that keeps every app's keys of today working (`,` `.`
-frames, `G` guides, `V` vault) and keeps `key` for the checks, which press
-by `key` with no `code`. Which pies each app offers, and whether G stays
-the guides or becomes the ground as on the bench, is the author's to say
-(`docs/plan.md`, *Waiting*); until then: Z view and E export in every app,
-A the app's own where it has one. The search landed the same day. The board holds the rest in order —
-track S first — each a branch landed after a gate (`docs/workflow.md`).
+**S12 on the board of `docs/plan.md`: the bench's shell in every app** —
+branch `ui/shell`, the first components written with Lit (`core/libs/lit/`,
+light DOM): a title bar — the app, the search, Save and Export, read from
+the page's Export box so no app wires it; the player under the viewer
+instead of in a drawer; the status bar's hints for what is under the
+cursor. Then S8, the viewer's tools, and S5's keys and pies.
 
 ## Parked decisions
 

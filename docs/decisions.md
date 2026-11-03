@@ -369,3 +369,15 @@ indépendantes ou alors une scène générique", the *skweeb absolute scene*, a
 name to find. The space viewer gets its own bench before S10 (S11), and the
 refactor starts with S1.
 
+**The components are Lit's.** Asked whether the suite should take a framework
+for its components, now the bench's interface is to reach every app, the
+author chose Lit the same evening: "anticiper lit maintenant nous fera gagner
+du temps". Not React, Vue or Svelte: each wants a build, and the suite serves
+its files as they are, every app alone. Lit is standards — custom elements,
+templates that update only what changed, reactive properties, a lifecycle to
+mount and unmount, controllers for behaviours shared — in one ES module of 29
+KB, vendored and pinned like three.js (`scripts/vendor-lit.mjs`, 3.3.3). Its
+components render into the page's DOM, no shadow root, so theme.css draws
+them and the checks find their classes. What exists stays plain DOM until a
+brick touches it.
+
