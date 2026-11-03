@@ -11,7 +11,7 @@ vault/                        ← not in git
     object.json               the envelope
     render.<ext>              the primary artifact: png webp webm json otf glb
     thumb.webp                256px preview. Every object has one, any type.
-    versions/                 .skw only: v1.json, v2.json … past recipes
+    versions/                 .skw only: v1.json, v2.json … past states, each with its parent
     cache/                    disposable: rendered frames, preview video
     source/                   optional: extra files the object needs
   index.json                  generated. The gallery reads this and nothing else.
@@ -61,6 +61,9 @@ gallery/                      ← in git, deployed
 | `seed` | the integer every `rng()` in that render was drawn from. No seed, no re-render. `null` is correct only when the render used no randomness at all — true of the gamepad, which draws exactly what you drew. |
 | `parents` | **made from.** Historical, frozen, for lineage. |
 | `refs` | **depends on.** Live, for invalidation. See *Smart objects*. |
+| `version` | `skw` only: the state it is at, 1 when made, the next number at each save (server/versions.js). |
+| `parent` | `skw` only, from version 2: the state this one was saved from — the one before it, or an older one for a **branch**. Agreed 2026-11-03 (S6). A state kept before then has none and reads as the line it was: N's parent is N − 1. |
+| `parent2` | `skw` only, absent but for a **merge**: the other state it took in. Agreed with `parent`. |
 | `render.density` | the scale this render was made at. 1 is screen. Export writes a second render at 4 or more; the object keeps both. |
 | `render.sha256` | of the bytes of `render.<ext>`. Identity for dedup. |
 | `published` | true once a copy exists under `gallery/`. |
