@@ -41,6 +41,7 @@ import { VaultPanel } from './VaultPanel.js';
 import { Drawer }     from './Drawer.js';
 import { applies }    from './params.js';
 import { WIDGETS, WIDGET_TYPES } from './widgets.js';
+import { installPalette } from './Palette.js';
 
 export { WIDGET_TYPES };
 
@@ -91,6 +92,7 @@ export class ParamPanel {
     this._build();
     this._paint();
     this._wirePeek();
+    installPalette();                // ² or Ctrl K: every control and act of the page, by name
     if (this._mount) this.show();
 
     // An external change — a restore, a key, a drag on the canvas — has to
