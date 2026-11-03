@@ -37,6 +37,7 @@ import { applyFrameEdit } from '../../core/frame.js';
 import { viewFactor }     from '../../core/view.js';
 import { drawGuides }     from './guides.js';
 import { selected }       from '../../core/shell/guides.js';
+import { setAppPie, setOverlay, enumPie } from '../../core/shell/bindings.js';
 import { wirePointer }    from './pointer.js';
 
 const canvas = document.getElementById('stage');
@@ -68,7 +69,7 @@ const clock = new Playhead({
 
 async function boot() {
   bar = new Bar({ app: 'particles', mount: document.querySelector('.app'),
-                  keys: 'drag the handles · F the one pressed to the centre · G guides · space play · , . frame · S save · V vault' });
+                  keys: 'drag the handles · Z guides · A emitter · F place · space play · , . frame · S save · V vault' });
   emit = emitParams();
   picture = pictureParams();
   new ParamPanel(emit, { title: 'particles', mount: document.getElementById('emit-side'), groups: EMIT_GROUPS });
@@ -96,6 +97,9 @@ async function boot() {
   wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn, chose: () => draw() });
   guidesBtn.addEventListener('click', () => showGuides(!guidesOn));
   showGuides(guidesOn);
+  // The left hand (core/shell/bindings.js): Z shows the guides — G is the ground's since S5b — and A picks the emitter's shape.
+  setOverlay({ label: 'guides', on: () => guidesOn, toggle: () => showGuides(!guidesOn) });
+  setAppPie(enumPie(emit, 'shape', 'emitter'));
   wireKeys();
   remake();
   if (await openRequested()) return;
@@ -272,7 +276,7 @@ function frames() {
 // ── The guides' switch ───────────────────────────────────────────────────────
 
 /**
- * The guides on or off (guides.js): a switch over the viewer, and G. How the
+ * The guides on or off (guides.js): a switch over the viewer, and Z since S5b. How the
  * viewer looks, not what the particles are — so not a param, never in a
  * recipe — and remembered in this browser, for the next visit.
  */
@@ -337,7 +341,6 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (e.key === 'g' || e.key === 'G') showGuides(!guidesOn);
     if (e.key === 's' || e.key === 'S') save();
     if (busy || clock.length < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }

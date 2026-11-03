@@ -13,13 +13,12 @@
  *
  * The magnet: a guide dragged, or a thing an app lets be placed, is pulled to
  * the picture's edges, its centre and the guides, from 8 screen pixels; Ctrl
- * held, nothing pulls. F puts the selection at the picture's centre.
+ * held, nothing pulls. F puts the selection at the picture's centre, held, at
+ * an edge or a corner (core/shell/bindings.js).
  *
  * No DOM at import. core/shell/rulers.js draws all of it; an app asks this
  * only for the magnet and the placing — particles' handles (apps/particles/).
  */
-
-import { typing } from '../Palette.js';
 
 const SIZES = 12;            // sizes remembered per app
 const NEAR = 8;              // screen pixels the magnet pulls from
@@ -37,7 +36,6 @@ const s = {
   sel: null,                 // the one chosen, by a press on it
 };
 let quiet = 0;
-let keys = false;
 
 const changed = () => { for (const fn of ears.change) fn(); };
 const say = text => { for (const fn of ears.say) fn(text); };
@@ -217,7 +215,7 @@ export function endSnap() {
 // ── What F places ────────────────────────────────────────────────────────────
 
 const ANCHORS = { c: [0.5, 0.5], n: [0.5, 0], ne: [1, 0], e: [1, 0.5], se: [1, 1], s: [0.5, 1], sw: [0, 1], w: [0, 0.5], nw: [0, 0] };
-const WORDS = { c: 'the centre', n: 'the top', ne: 'the top right', e: 'the right', se: 'the bottom right',
+export const WORDS = { c: 'the centre', n: 'the top', ne: 'the top right', e: 'the right', se: 'the bottom right',
   s: 'the bottom', sw: 'the bottom left', w: 'the left', nw: 'the top left' };
 
 /**
@@ -226,8 +224,10 @@ const WORDS = { c: 'the centre', n: 'the top', ne: 'the top right', e: 'the righ
  */
 export function placeable(list) {
   for (const it of list) s.items.set(it.id, it);
-  installKeys();
 }
+
+/** Whether the page has anything to place: F is core's only then. */
+export const hasPlaceable = () => s.items.size > 0;
 
 /** The one a press chose: what F places. */
 export function select(id) {
@@ -247,15 +247,4 @@ export function place(anchor = 'c') {
   it.put(at[0] * s.doc.w, at[1] * s.doc.h);
   say(`${it.label} → ${WORDS[anchor]}`);
   return true;
-}
-
-/** F, once a page has something to place — never in a field, never with a modifier. */
-function installKeys() {
-  if (keys || typeof window === 'undefined') return;
-  keys = true;
-  window.addEventListener('keydown', e => {
-    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || typing(e.target)) return;
-    if (e.code !== 'KeyF' && e.key !== 'f') return;
-    if (place('c')) e.preventDefault();
-  });
 }

@@ -45,6 +45,7 @@ import { VaultPanel }   from '../../core/VaultPanel.js';
 import { Playhead }     from '../../core/playback.js';
 import { Bar }          from '../../core/Bar.js';
 import { Vault }        from '../../core/vault.js';
+import { own }          from '../../core/keys.js';
 import { viewFactor }   from '../../core/view.js';
 
 const canvas = document.getElementById('stage');
@@ -75,6 +76,7 @@ const clock = new Playhead({ onShow: () => repose(), onState: () => playBtn.setA
 function boot() {
   bar = new Bar({ app: 'rig', mount: document.querySelector('.app'),
                   keys: 'drag a joint · B bones · R rest · space play · S save · V vault' });
+  own('KeyR');                        // R is the rig's rest, not core's seed (core/keys.js)
   params = rigParams();
   const panel = new ParamPanel(params, { title: 'rig', mount: document.getElementById('side'), groups: GROUPS });
   const out = ways({ bar, clock, args: () => (drawing ? { params, opened, bones, turns, waves, drawn,

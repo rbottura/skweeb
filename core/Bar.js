@@ -26,6 +26,8 @@
 import { dpiOf }   from './formats.js';
 import { labelOf } from './frame.js';
 import * as Guides from './shell/guides.js';
+import { installKeys, bound, letterOf } from './keys.js';
+import { installBindings } from './shell/bindings.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -71,6 +73,19 @@ export class Bar {
     }
     if (typeof document !== 'undefined') document.addEventListener('pointerover', e => this._hint(e.target), { passive: true });
     this._viewer(app);
+    // The left hand (S5b): keys by their place, tapped or held for a pie (core/keys.js, core/shell/bindings.js).
+    if (typeof customElements !== 'undefined') {
+      installKeys();
+      installBindings();
+      import('./shell/pie.js').catch(err => console.warn('the pies did not load:', err.message));
+    }
+  }
+
+  /** The left hand's keys that answer in this page now, by the letters of an AZERTY. */
+  _leftHand() {
+    const by = new Map();
+    for (const k of bound()) { const w = k.short; by.set(w, [...(by.get(w) || []), letterOf(k.code)]); }
+    return [...by].map(([w, letters]) => `${letters.join(' ')} ${w}`).join(' · ');
   }
 
   /** The rulers over the stage's padding, the viewer's tools at the end of its head — a head made if it has none. */
@@ -98,6 +113,7 @@ export class Bar {
       : at('skw-rulers .rl') ? 'drag out: a guide · back into a ruler: gone · Ctrl held: no magnet'
       : at('skw-rulers .gd-grip') ? 'drag: move the guide · back into the ruler it came from: gone · Ctrl held: no magnet'
       : at('skw-viewtools') ? 'the rulers and guides · the magnet'
+      : at('.viewer') ? `${this._leftHand()} · held: its pie`
       : null;
     this._keys.textContent = h || this._keysText;
   }

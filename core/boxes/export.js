@@ -79,3 +79,30 @@ export function exportBox(panel, { before = null, vault = {}, disk = {}, acts = 
   section('Its own', acts);
   return { drawer, body: drawer.body, buttons };
 }
+
+/**
+ * The Export box as the page has it now: its sections and the acts that
+ * apply — for the title bar's Export menu and E's pie (core/shell/).
+ *
+ * @returns {Array<{ title: string, acts: Array<{ label: string, button: HTMLElement }> }>}
+ */
+export function actsOnPage() {
+  const list = document.querySelector('.dr .pp-actions');
+  const dr = list && list.closest('.dr');
+  if (!dr) return [];
+  return [...dr.querySelectorAll('.pp-actions')].map(l => ({
+    title: l.querySelector('.pp-actions-head')?.textContent || '',
+    acts: [...l.querySelectorAll('.nb-btn')]
+      .filter(b => !b.hidden && !b.disabled && !b.closest('[hidden]'))
+      .map(b => ({ label: b.textContent.replace(/\s+/g, ' ').trim(), button: b })),
+  })).filter(s => s.acts.length);
+}
+
+/** The print under the box: its drawer opened and brought into view. */
+export function showPrint() {
+  const list = document.querySelector('.dr .pp-actions');
+  const dr = list && list.closest('.dr');
+  if (!dr) return;
+  if (!dr.classList.contains('dr--open')) dr.querySelector(':scope > .dr-head').click();
+  (dr.querySelector('.pp-print') || dr).scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
