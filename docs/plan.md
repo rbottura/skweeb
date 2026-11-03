@@ -41,7 +41,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S12 | the bench's shell in every app: title bar, the player under the viewer, the status bar's hints | `ui/shell` | M | landed 2026-11-03 |
 | S6 | an object's states as a tree | `layers/states` | M | needs S3; the object model |
 | S7 | the graph over the page: compare, merge, open in | `ui/graph` | M | needs S6 |
-| S8 | rulers, guides, magnetism; the gabarit | `ui/guides` | M | ready: rulers and guides first; the gabarit's type waits on the author |
+| S8 | rulers, guides, magnetism, F; the gabarit | `ui/guides` | M | rulers, guides, the magnet and F landed 2026-11-03; the gabarit's type waits on the author |
+| S2b | S2's rest: the unit in the box, the fold of rows seldom touched, a pair on one line | `ui/rows-more` | S | ready |
 | S9 | every app a module; the scene | `scene/host` | L | needs S3–S5 |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9, S11 |
 | S11 | the space viewer's own bench | — | M | side bench, before S10 |

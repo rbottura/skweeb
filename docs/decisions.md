@@ -381,3 +381,12 @@ components render into the page's DOM, no shadow root, so theme.css draws
 them and the checks find their classes. What exists stays plain DOM until a
 brick touches it.
 
+**A guide's line takes no press** (S8). The bench moved a guide by its line,
+anywhere over the viewer; in the suite the picture is its app's — particles'
+handles, map's brush, rig's strokes, compose's drag, the 3D app's turn — and
+a line across it would take their presses wherever it passes. So a guide is
+held by its grip in the ruler it crosses, and gone dragged back into the one
+it came out of. Until the gabarit is a vault type, the guides are kept per
+app and per size in the browser, the bench's rule kept: on another size they
+are not shown, and are laid again there in % or in px.
+

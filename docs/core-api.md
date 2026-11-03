@@ -25,7 +25,8 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `widgets.js` | one widget per param type, split out of ParamPanel | **in** |
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
 | `Cards.js` | a list of small param panels, each from its own catalogue entry's schema — filter's chain, a model's shapes; `recipe()` is `[{ id, params, on }]`; `choose()` marks one card, and with `fold` it is the only one open, the others a line each; `duplicate()` puts an entry again after itself; `inner` is a list inside each card, kept in its entry under a key | **in**, 2026-10-06, moved from filter when the 3D app needed it; `fold` and `inner` the same day, for a model's shapes and their modifiers |
-| `Bar.js` | the strip under every app: information only | **in**, 2026-09-23 |
+| `Bar.js` | the strip under every app: information only; it puts the shell in the page and tells the rulers the picture's size | **in**, 2026-09-23; the shell 2026-11-03 |
+| `shell/` | the shell the bench found, Lit components in the page's DOM (`libs/lit/`): the title bar (`titlebar.js`); the viewer's rulers, guides and tools (`rulers.js`) over `guides.js` — a size's guides, the magnet, what F places; `shell.css` | **in**, 2026-11-03: S12, S8 |
 | `Guide.js` | a page of `docs/guides/` read inside an app: its markdown — headings, paragraphs, lists, code, links — on a sheet over the page, fetched when opened (`guide.css`) | **in**, 2026-10-21, the author's ask: what needs another program is written down and read where it is needed — the puppet's guide to OBS first |
 | `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
 | `stamps.js` | a sprite drawn once at the size and angle it shows, blitted to many (`stampFor`, `blit`); the halving of a picture nearest above a size (`mipFor`) | **in**, 2026-09-27, moved from ckt when particles needed `mipFor` |
@@ -100,9 +101,8 @@ Reopened 2026-10-22: the layout and the theme are to be redesigned from the
 author's notes, and the boxes every app shares become components first —
 `docs/plan.md`, *U*, and `docs/boxes.md`.
 
-One look and one set of pieces for every app. `theme.css` is neo-brutalist
-and light: cream ground, black ink, thick borders, hard shadows, one yellow
-accent — and yellow is a fill, never text. The page is a grid (`.app`): the
+One look and one set of pieces for every app. `theme.css` is dark since
+2026-11-03, the bench's (its head; `docs/scene.md`). The page is a grid (`.app`): the
 work above, `Bar.js` below as a row of its own, so the bar never covers a
 canvas or a panel. The page itself never scrolls: `.app` holds and clips
 whatever is positioned inside it, because `overflow: hidden` on the body does
@@ -140,6 +140,15 @@ the renderer last — resolution, not composition. Width and height run 1 to
 the box's shape while either side is typed or dragged; a ratio or a paper
 format stays picked, being still that shape at any size, so a sheet's dpi can
 be read while its pixels are set.
+
+The viewer's guides are core's (S8): Bar puts `<skw-rulers>` in
+`.viewer-stage` and `<skw-viewtools>` in `.viewer-head` — a head made if
+there is none — and `output()` tells them the picture's size. An app with
+things to place says so, from `shell/guides.js`: `placeable([{ id, label,
+put(x, y) }])`, in the picture's pixels from its top left; `select(id)` when
+one is pressed; a drag pulled through `snapPoint(x, y, ctrlKey)`, and
+`endSnap()` at its end. F then puts the selection at the centre. Particles'
+pointer.js is the one that does.
 
 ## bus.js — event names
 

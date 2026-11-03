@@ -215,6 +215,12 @@ sorts them.
   bar in every app — the search, Save, Export ▾ read from the Export box —
   the player under the viewer, and the status bar's keys for what is under
   the cursor.
+- **Rulers, guides, the magnet** (S8, 2026-11-03; `core/shell/rulers.js`,
+  `guides.js`): in every viewer, in the picture's pixels; a guide drawn out
+  of a ruler, held by its grip, gone back into it; kept per size, laid again
+  on another in % or px; the magnet pulls to edges, centre and guides. In
+  particles a handle is pulled too, and F puts the one pressed at the centre
+  (`check-guides`).
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -300,12 +306,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S8 on the board of `docs/plan.md`: the viewer's tools, rulers and guides
-first** — branch `ui/guides`: a Lit `<skw-rulers>` round `.viewer-stage` in
-the format's pixels (the size Bar.output is told), guides drawn out of the
-rulers and back, kept per app in this browser until the gabarit is a type;
-then magnetism and F's placing in particles, the one app with handles to
-place (the emitter, the fields' centre). Then S5's keys and pies.
+**S2b on the board of `docs/plan.md`: S2's rest, as the bench has it** —
+branch `ui/rows-more`: a number's unit inside its box (`px`, `°`, `s`)
+instead of in its label; a drawer's rows seldom touched folded under
+"n more" (a schema key, `more: true`); width × height on one line, linked,
+with a swap. Then S5's keys and pies, once the author has said what G and
+A are.
 
 ## Parked decisions
 

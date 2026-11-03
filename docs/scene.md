@@ -166,3 +166,10 @@ at once, so every browser check runs at each gate.
 | S9 | every app a module; the scene, one canvas | `scene/host` | U11 |
 | S10 | the space of contexts, and the bridge | `scene/space` | — |
 | S11 | the space viewer's own bench: its parameters, its small tests | — | before S10, a side bench |
+| S12 | the bench's shell in every app, ahead of S8: title bar, the player under the viewer, hints | `ui/shell` | — |
+
+S12 came forward on the author's word of 2026-11-03 — the bench's
+interface is what every app should have first — and with it the
+components' one library, Lit (`docs/decisions.md`). S8 followed: rulers,
+guides and the magnet in every viewer, F in particles; the gabarit, a vault
+type, waits on the author.
