@@ -8,6 +8,9 @@
  *                        not in the label
  *   more: true           folded under its drawer's "n more" until asked for;
  *                        a value changed from its default stays out
+ * A row's mark, Alt clicked, lists its value in every state of the object
+ * the page holds (S6d, core/param-history.js).
+ *
  *   pair: '<key>'        this number and that one on one line, a box each:
  *                        `pairLabel` the line's name, `axis` each box's letter,
  *                        a `unit` beside the name,
@@ -94,6 +97,13 @@ export function buildRow(panel, params, key, spec, { half = false } = {}) {
   }
   if (spec.more) row.classList.add('pp-row--more');
   OWNER.set(row, { params, key });
+  // Alt click on its mark: its value in every state of the object the page holds (S6d, core/param-history.js).
+  if (!half) row.querySelector(':scope > .pp-mark').addEventListener('click', e => {
+    if (!e.altKey) return;
+    e.preventDefault();
+    e.stopPropagation();
+    import('./param-history.js').then(m => m.showValues(row, { params, key }));
+  });
   return { row, widget };
 }
 

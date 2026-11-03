@@ -12,15 +12,28 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-03
+### Newest — 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
 
-- **The new UI, found on a bench, and M12 planned** (`docs/scene.md`): a
-  page apart from the suite, https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm
-  — particles redrawn dark, a value on one line, the left hand's keys and
-  pies, the player as After Effects', saving in order, rulers and a
-  gabarit, an object's states as a tree with a graph over the page, merge,
-  and the space of contexts along Z. Nothing in the suite changed yet:
-  track S on the board builds it, from S1.
+- **The look and the rows**: the dark theme (S1); a value on one line — its
+  box dragged, its fill, its slider only where wanted, its mark a dot when
+  changed, counted by its drawer (S2); its unit in its box, two numbers on
+  one line, the rows seldom touched under "n more" (S2b); the format a list
+  (S4) — `check-rows`.
+- **The shell**, its first Lit components (S12): a title bar — the search,
+  Save, Export ▾ — the player under the viewer, as After Effects' (S3), the
+  Export box in order (S3), the status bar's hints; in every viewer rulers,
+  guides and the magnet, F placing in particles (S8) — `check-guides`.
+- **The left hand**: ² or Ctrl K, every control and act by name (S5); keys
+  by their place, tapped or held for a pie — Q D frames, A the app's own, Z
+  the view, E export, R again, F place, G the ground, X a reset (S5b) —
+  `check-palette`, `check-keys`.
+- **States** (S6): an app's S is the next state of a smart object, its first
+  S making it, "Save as a new object" another, the frozen acts naming the
+  state they came from; the states a tree (`parent`, `parent2`), a page
+  opened `@v3` saving a branch; compose pins a project placed, 0 to follow;
+  Ctrl Z and Ctrl Y over the session's steps; a row's value in every state,
+  by Alt click on its mark — `check-states`, `check-steps`, `check-smart`.
+- The bench stays a page apart: https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm.
 
 ### 2026-10-21 and -22
 
@@ -187,63 +200,6 @@ sorts them.
 
 ### Across the suite
 
-- **The dark theme** (S1, 2026-11-03; `core/theme.css`): tokens by role —
-  frame, panel, view, raised, field, sel, line, fg, accent — the author's
-  keep from the bench (violet, corners 9 px, borders 7.5 %, contrast 5, IBM
-  Plex); every stylesheet of core and the apps on them, the names of
-  2026-09-23 (`--nb-*`, `--hud-*`) pointing at them. A bar that is
-  information only; drawers; core's Format drawer everywhere; a page that
-  never scrolls. The layout's turn is track S's (`docs/scene.md`).
-- **A value on one line** (S2, 2026-11-03; `core/widgets.js`, `ParamPanel.js`):
-  a number's box scrubs — Shift ×10, Ctrl ×0.1 — or is typed, its fill where
-  it sits; its slider a second line only where the schema says `slider: true`,
-  under Alt held over its drawer, or pinned by Alt click, its step five of the
-  box's; a switch on its label's line; a row's mark, a dot when it differs
-  from its default, counted in its drawer's head.
-- **The Export box** (S3, 2026-11-03; `core/boxes/export.js`): every app's
-  export in one order — into the vault, to disk, its own — and one set of
-  words, the print under them; the gamepad's waits for C6.
-- **The player as After Effects' preview** (S3, 2026-11-03; `core/Transport.js`):
-  first, back, play, on, last, a timecode in the accent, the frame count, the
-  loop a ticked ruler to scrub.
-- **The format a list** (S4, 2026-11-03): a dropdown in runs — shape,
-  pixels, print — where it was twenty-one chips.
-- **The search** (S5, 2026-11-03; `core/Palette.js`): ² or Ctrl K, every
-  control and act of the page by name, read from the page as it stands;
-  Enter puts the hand on a row, or presses an act (`check-palette`).
-- **The bench's shell** (S12, 2026-11-03; the first Lit components): a title
-  bar in every app — the search, Save, Export ▾ read from the Export box —
-  the player under the viewer, and the status bar's keys for what is under
-  the cursor.
-- **S is the next state** (S6b, 2026-11-03; core/vault.js `state`): an app's
-  S saves its project as the next state of a smart object, its first S making
-  it; "Save as a new object" starts another; the frozen acts name the state
-  they come from. compose pins a project placed at its state, 0 to follow;
-  pickers, fields and the vault's player take a project for what it binds.
-  ckt, the gamepad and the puppet keep their own saves.
-- **Ctrl Z, Ctrl Y** (S6c, 2026-11-03; `core/steps.js`): every change of a
-  page's params a step, held in memory — a drag one step, a panel's Reset
-  one; a recipe arriving where the steps start from; in a field, the field's
-  own undo (`tests/steps.mjs`, `check-steps`).
-- **A smart object's states, a tree** (S6a, 2026-11-03; server/versions.js):
-  each state names its `parent`, a merge its `parent2`; a window holds a state,
-  `?open=skw_…@v3` reopens an older one and its save is a branch;
-  `GET /api/vault/<id>/states` lists them (`tests/vault.mjs`, `check-smart`).
-- **The left hand** (S5b, 2026-11-03; `core/keys.js`, `core/shell/bindings.js`,
-  `pie.js`): keys by their place, tapped or held for a pie at the pointer —
-  Q D frames, A the app's own, Z the view, E export, R again, F place, G the
-  ground, X a reset under the pointer; an app's own keys kept (`check-keys`).
-- **S2's rest** (S2b, 2026-11-03; `core/param-rows.js`, `core/numbox.js`): a
-  number's unit inside its box; width × height on one line, linked, with a
-  swap that makes the format custom, and every x/y from centre; the rows
-  seldom touched — bleed, scale, particles' jitter and prewarm — folded
-  under "n more", a changed one staying out (`check-rows`).
-- **Rulers, guides, the magnet** (S8, 2026-11-03; `core/shell/rulers.js`,
-  `guides.js`): in every viewer, in the picture's pixels; a guide drawn out
-  of a ruler, held by its grip, gone back into it; kept per size, laid again
-  on another in % or px; the magnet pulls to edges, centre and guides. In
-  particles a handle is pulled too, and F puts the one pressed at the centre
-  (`check-guides`).
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -329,11 +285,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S6d on the board of `docs/plan.md`: a row's value in every state** —
-branch `layers/values`: Alt click on a row's mark lists its value in each
-state of the object the page holds (`Vault.states`, each state's recipe
-read for that row's params), the one now marked; a pick sets it, a step
-Ctrl Z takes back. Then S7, the graph over the page.
+**S7 on the board of `docs/plan.md`: the graph over the page** — branch
+`ui/graph`: H opens the states of the object the page holds as a graph over
+the whole page, see-through, a 2D space panned and zoomed: each state a node
+with its picture (`Vault.states`'s `url`), wired to its parent, v1 at the
+bottom; hovered, the page draws it (Shift held, not); clicked, the page goes
+back to it — its save then a branch. Shift click two to compare; merge, the
+receiving one's values kept where only it changed (`parent2`). The bench's
+`bench-graph.js` and `bench-merge.js` are the sketch.
 
 ## Parked decisions
 

@@ -107,7 +107,8 @@ export class Bar {
   /** What the thing under the cursor answers to, in place of the app's keys while it is there. */
   _hint(t) {
     const at = sel => t && t.closest && t.closest(sel);
-    const h = at('.pp-num') ? 'drag: scrub · Shift ×10 · Ctrl ×0.1 · click: type'
+    const h = at('.pp-row > .pp-mark') ? 'Alt click: its value in every state of the object open'
+      : at('.pp-num') ? 'drag: scrub · Shift ×10 · Ctrl ×0.1 · click: type'
       : at('.pp-row--num .pp-label') ? 'Alt click: its slider · Alt held over a drawer: every slider'
       : at('.tp') ? 'drag: scrub · the buttons: first, back, play, on, last'
       : at('.dr-head') ? 'click: open or close'
