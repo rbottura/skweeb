@@ -191,7 +191,7 @@ await page.click(`[...${row('shape')}.querySelectorAll('button')].find(b => b.te
 await wait(400);
 const tree = copiesOf({ shape: 'tree', ...SHAPES.tree.start }).copies.length;
 c.ok('a tree picked starts from its own depth and ratio', (await value('generations')) === SHAPES.tree.start.depth
-  && Math.abs((await value('each copy ×')) - SHAPES.tree.start.ratio) < 1e-9, `${await value('generations')} deep`);
+  && Math.abs((await value('each copy')) - SHAPES.tree.start.ratio) < 1e-9, `${await value('generations')} deep`);
 const treeSay = await sayWith(`${tree.toLocaleString('en')} copies`);
 c.ok('and has as many copies as its branches make', treeSay.includes(`${tree.toLocaleString('en')} copies`), treeSay);
 await c.shot('5-copies-tree');

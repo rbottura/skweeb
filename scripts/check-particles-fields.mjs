@@ -79,7 +79,7 @@ await chip('mode', 'burst');
 await chip('emitter', 'ring');
 await wait(200);
 await chip('launch', 'outward');
-await set('gravity px/s²', '0');
+await set('gravity', '0');
 await scrubTo(12);
 c.ok('a ring aimed outward blooms', apart(await pixels(), torchAt20) > 4, 'apart by ' + apart(await pixels(), torchAt20).toFixed(1));
 await c.shot('7-ring-bloom');
@@ -98,9 +98,9 @@ c.ok('a burst leaves as a sprite sheet too, tagged as played once', !!burstSheet
 // A stream through a vortex and curl noise: every frame still its own, the loop still closed.
 await chip('mode', 'stream');
 await chip('emitter', 'disc');
-await set('gravity px/s²', '-200');
-await set('vortex px/s²', '600');
-await set('curl noise px/s²', '900');
+await set('gravity', '-200');
+await set('vortex', '600');
+await set('curl noise', '900');
 await scrubTo(17);
 const swirl = await pixels();
 c.ok('a vortex and curl noise move the stream', apart(swirl, torchAt20) > 4);
@@ -118,17 +118,17 @@ c.ok('a frame through the fields costs less than a 60 fps frame', ms < 16, ms.to
 await c.shot('8-swirl');
 
 // Depth: the cone tilted into it, a camera close in — far ones small, near ones large, and still a loop.
-await set('vortex px/s²', '0');
-await set('curl noise px/s²', '0');
-await set('into depth °', '160');
-await set('focal px', '400');
+await set('vortex', '0');
+await set('curl noise', '0');
+await set('into depth', '160');
+await set('focal', '400');
 await scrubTo(24);
 const deep = await pixels();
-await set('into depth °', '0');
+await set('into depth', '0');
 await scrubTo(24);
 const flatNow = await pixels();
 c.ok('into depth, the same stream is another picture', apart(deep, flatNow) > 2, 'apart by ' + apart(deep, flatNow).toFixed(1));
-await set('into depth °', '160');
+await set('into depth', '160');
 await scrubTo(59); key('.'); await wait(300);
 for (let i = 0; i < 24; i++) key('.');
 await wait(500);
@@ -179,7 +179,7 @@ const f = [await value('centre x'), await value('centre y')];
 c.ok('the fields\' centre, placed by its handle before a field is on', Math.abs(f[0] + 50 / css) <= 2 && Math.abs(f[1] - 40 / css) <= 2, `fx ${f[0]}, fy ${f[1]}`);
 
 // A vortex with a reach: its circle's handle pulls the radius wider.
-await set('vortex px/s²', '500');
+await set('vortex', '500');
 await set('reach px (0: everywhere)', '150');
 const rgrab = await onScreen(f[0] + 150, f[1]);
 await page.pointer(rgrab, await onScreen(f[0] + 230, f[1] + 60), 6);

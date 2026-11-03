@@ -253,7 +253,7 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await page.click(presetBtn('Walk'));
 await wait(400);
 c.ok('a preset sets the named chains moving, its loop and its rise', (await page.eval(say)).startsWith('walk: body, arm-right moving — a loop of 24 at 24 fps')
-  && Number(await page.eval(`${row('rise, px')}?.querySelector('.pp-num')?.value`)) > 0, await page.eval(say));
+  && Number(await page.eval(`${row('rise')}?.querySelector('.pp-num')?.value`)) > 0, await page.eval(say));
 await pickIn('#bone-side', 'part', 'leg-left');
 await page.click(presetBtn('Walk'));
 await wait(400);
@@ -261,7 +261,7 @@ c.ok('a chain named by hand takes the part\'s wave', (await page.eval(say)).star
 await page.click(presetBtn('Still'));
 await wait(400);
 c.ok('Still takes every wave and the rise off', await page.eval(`document.getElementById('play').disabled`)
-  && Number(await page.eval(`${row('rise, px')}?.querySelector('.pp-num')?.value`)) === 0, await page.eval(say));
+  && Number(await page.eval(`${row('rise')}?.querySelector('.pp-num')?.value`)) === 0, await page.eval(say));
 
 await pickIn('#side', 'crawl', 'along a path');
 await num('loop, frames', 40);
@@ -302,7 +302,7 @@ if (crawlObject) {
 }
 await pickIn('#side', 'crawl', 'none');
 
-await page.typeInto(`${row('longest bone, px')}?.querySelector('.pp-num')`, 50);
+await page.typeInto(`${row('longest bone')}?.querySelector('.pp-num')`, 50);
 await page.until(`${say}.includes('bones')`, { timeout: 8000 }).catch(() => {});
 await wait(300);
 c.ok('a shorter longest bone cuts more bones', (await page.eval(say)).includes('9 bones'), await page.eval(say));

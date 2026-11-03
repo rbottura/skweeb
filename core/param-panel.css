@@ -9,8 +9,11 @@
    slides over the right edge, for a page with no column to give it.
 
    A list of cards and the Stack drawer have files of their own, cards.css and
-   stack-panel.css: every page imports them right after this one.
+   stack-panel.css: every page imports them right after this one. The rows'
+   unit, fold and pairs (S2b) are param-rows.css's, taken here.
    ────────────────────────────────────────────────────────────────────────────── */
+
+@import url('./param-rows.css');
 
 .pp {
   position: fixed;

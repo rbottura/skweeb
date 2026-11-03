@@ -35,36 +35,36 @@ export function rigParams() {
     /** A gamepad still: its marks are what the bones carry. */
     drawing: { type: 'object', accepts: ['still'], label: 'drawing', group: 'drawing' },
     /** The least jump between two marks that is the pen lifted: a stroke ends there. */
-    jump:    { type: 'range', min: 4, max: 200, step: 1, default: 16, label: 'a lifted pen, px', group: 'bones' },
+    jump:    { type: 'range', min: 4, max: 200, step: 1, default: 16, label: 'a lifted pen', unit: 'px', group: 'bones' },
     /** The least turn of a stroke that is a joint: an elbow, a knee. */
     corner:  { type: 'range', min: 10, max: 120, step: 1, default: 30, label: 'a corner, degrees', group: 'bones' },
     /** A run longer than this is cut into bones of equal length, so a long body bends too. */
-    longest: { type: 'range', min: 20, max: 2000, step: 5, default: 200, log: true, label: 'longest bone, px', group: 'bones' },
+    longest: { type: 'range', min: 20, max: 2000, step: 5, default: 200, log: true, label: 'longest bone', unit: 'px', group: 'bones' },
     /** How far along a stroke, either side of a joint, its two bones share the stamps: the fan of a bend. */
-    bend:    { type: 'range', min: 0, max: 60, step: 1, default: 12, label: 'bend, px', group: 'bones' },
+    bend:    { type: 'range', min: 0, max: 60, step: 1, default: 12, label: 'bend', unit: 'px', group: 'bones' },
     /** A loop's length: every wave a whole number of cycles in it, so it closes. */
     length:  { type: 'int', min: 2, max: 600, default: 60, label: 'loop, frames', group: 'motion' },
     fps:     { type: 'int', min: 1, max: 60, default: 30, label: 'fps', group: 'motion' },
     /** The whole drawing rising and falling, px either way: a walk's bob, a breath. */
-    rise:    { type: 'range', min: 0, max: 200, step: 0.5, default: 0, label: 'rise, px', group: 'motion' },
+    rise:    { type: 'range', min: 0, max: 200, step: 0.5, default: 0, label: 'rise', unit: 'px', group: 'motion' },
     rises:   { type: 'int', min: 1, max: 8, default: 2, label: 'rises a loop', group: 'motion', when: { rise: { not: 0 } } },
 
     /** The body — the first stroke — as a spine: a wave down it, or a path it follows. */
     crawl:      { type: 'enum', options: CRAWLS, default: 'none', label: 'crawl', group: 'crawl' },
     undulate:   { type: 'range', min: 0, max: 90, step: 1, default: 25, label: 'undulate, degrees', group: 'crawl', when: { crawl: 'in place' } },
-    wavelength: { type: 'range', min: 20, max: 2000, step: 5, log: true, default: 160, label: 'wavelength, px', group: 'crawl', when: { crawl: 'in place' } },
+    wavelength: { type: 'range', min: 20, max: 2000, step: 5, log: true, default: 160, label: 'wavelength', unit: 'px', group: 'crawl', when: { crawl: 'in place' } },
     ripples:    { type: 'int', min: 1, max: 12, default: 1, label: 'ripples a loop', group: 'crawl', when: { crawl: 'in place' } },
     path:       { type: 'enum', options: PATHS, default: 'ellipse', label: 'path', group: 'crawl', when: ON_PATH },
     /** A gamepad drawing: its first stroke is the path, closed end to start. */
     pathFrom:   { type: 'object', accepts: ['still'], label: 'drawn path', group: 'crawl', when: { ...ON_PATH, path: 'drawn' } },
-    pathWidth:  { type: 'range', min: 20, max: 4000, step: 5, log: true, default: 500, label: 'path width, px', group: 'crawl',
+    pathWidth:  { type: 'range', min: 20, max: 4000, step: 5, log: true, default: 500, label: 'path width', unit: 'px', group: 'crawl',
                   when: { ...ON_PATH, path: ['circle', 'ellipse', 'eight'] } },
-    pathHeight: { type: 'range', min: 20, max: 4000, step: 5, log: true, default: 320, label: 'path height, px', group: 'crawl',
+    pathHeight: { type: 'range', min: 20, max: 4000, step: 5, log: true, default: 320, label: 'path height', unit: 'px', group: 'crawl',
                   when: { ...ON_PATH, path: ['ellipse', 'eight'] } },
     laps:       { type: 'int', min: 1, max: 12, default: 1, label: 'laps a loop', group: 'crawl', when: ON_PATH },
     way:        { type: 'enum', options: ['one way', 'the other way'], default: 'one way', label: 'way round', group: 'crawl', when: ON_PATH },
     /** Waves laid on the path, fixed to the ground: the body slithers through them. */
-    wiggle:     { type: 'range', min: 0, max: 200, step: 1, default: 14, label: 'wiggle, px', group: 'crawl', when: ON_PATH },
+    wiggle:     { type: 'range', min: 0, max: 200, step: 1, default: 14, label: 'wiggle', unit: 'px', group: 'crawl', when: ON_PATH },
     wiggles:    { type: 'int', min: 0, max: 60, default: 8, label: 'wiggles round it', group: 'crawl', when: { ...ON_PATH, wiggle: { not: 0 } } },
   });
 }

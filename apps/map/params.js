@@ -31,7 +31,7 @@ export function mapParams() {
     cols:   { type: 'int', min: 1, max: 128, default: 12, label: 'columns', group: 'map' },
     rows:   { type: 'int', min: 1, max: 128, default: 10, label: 'rows', group: 'map' },
     /** A tile's side in the map's own pixels: large, as the assets are. */
-    tile:   { type: 'int', min: 8, max: 512, default: 64, label: 'tile px', group: 'map' },
+    tile:   { type: 'int', min: 8, max: 512, default: 64, label: 'tile', unit: 'px', group: 'map' },
     /** What an empty cell shows: a colour, or nothing at all. */
     ground: { type: 'ground', default: '#fffdf6', label: 'ground', group: 'map' },
     /** The map's own rate: a loop standing on it keeps its speed, as on a compose page. */

@@ -175,12 +175,12 @@ const arrow = await green();
 c.ok('the chosen sphere has handles: its y arrow, green, above its middle', !!arrow && Math.abs(arrow.top[0] - 0.5) < 0.03 && arrow.top[1] < 0.45,
   JSON.stringify(arrow));
 const [gx, gy] = arrow ? [arrow.top[0], 0.5 + 0.7 * (arrow.top[1] - 0.5)] : [0.5, 0.42];
-const yaw2 = await value('turned °');
+const yaw2 = await value('turned');
 await page.pointer(await onStage(gx, gy), await onStage(gx, gy - 0.08), 8);
 await wait(300);
 const raised = await page.eval(`Number(${cardRow(1, 'y — up')}?.querySelector('.pp-num')?.value)`);
 c.ok('a drag up the arrow raises the sphere, written in its card', raised > 0.3 && (await choice()) === 'folded chosen folded', `y ${raised}`);
-c.ok('…the view unturned, the arrow gone up with it', (await value('turned °')) === yaw2 && ((await green()) || { top: [0, 1] }).top[1] < arrow.top[1] - 0.05,
+c.ok('…the view unturned, the arrow gone up with it', (await value('turned')) === yaw2 && ((await green()) || { top: [0, 1] }).top[1] < arrow.top[1] - 0.05,
   JSON.stringify(await green()));
 await page.typeInto(`${cardRow(1, 'y — up')}?.querySelector('.pp-num')`, '0');
 await c.shot('1c-moved');
@@ -272,13 +272,13 @@ await c.shot('1j-shadows');
 
 // ── The view, by hand ───────────────────────────────────────────────────────
 
-const yaw0 = await value('turned °'), pitch0 = await value('raised °');
+const yaw0 = await value('turned'), pitch0 = await value('raised');
 const [ax, ay] = await onStage(0.5, 0.5), [bx, by] = await onStage(0.62, 0.55);
 const h = await stageHeight();
 const turned = await grid();
 await page.pointer([ax, ay], [bx, by], 8);
 await wait(300);
-const yaw1 = await value('turned °'), pitch1 = await value('raised °');
+const yaw1 = await value('turned'), pitch1 = await value('raised');
 const wantYaw = yaw0 - (bx - ax) * TURN / h, wantPitch = pitch0 + (by - ay) * TURN / h;
 c.ok('a drag turns round the model, as far as the pointer went', Math.abs(yaw1 - wantYaw) < 0.01 && Math.abs(pitch1 - wantPitch) < 0.01,
   `yaw ${yaw0} → ${yaw1.toFixed(2)} (${wantYaw.toFixed(2)}), pitch ${pitch0} → ${pitch1.toFixed(2)} (${wantPitch.toFixed(2)})`);

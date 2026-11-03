@@ -30,10 +30,10 @@ import { Vault }        from './vault.js';
 export const LAYER_PARAMS = {
   opacity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1, label: 'opacity' },
   blend: { type: 'enum', options: BLENDS, labels: BLEND_LABELS, default: 'normal', label: 'blend' },
-  x: { type: 'int', min: -20000, max: 20000, default: 0, label: 'x from centre' },
-  y: { type: 'int', min: -20000, max: 20000, default: 0, label: 'y from centre' },
+  x: { type: 'int', min: -20000, max: 20000, default: 0, label: 'x from centre', pair: 'y', pairLabel: 'from centre', axis: 'x' },
+  y: { type: 'int', min: -20000, max: 20000, default: 0, label: 'y from centre', axis: 'y' },
   scale: { type: 'range', min: 0.01, max: 8, step: 0.01, default: 1, label: 'scale' },
-  rot: { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'rotation °' },
+  rot: { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'rotation', unit: '°' },
 };
 
 const el = (tag, cls, text) => {

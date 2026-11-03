@@ -98,11 +98,11 @@ c.ok('two dot-sets in the vault, as ckt saves them', !!(made && made.two && made
 
 await guidesOff();
 await chip('mode', 'burst');
-for (const [name, v] of [['at once', 200], ['speed px/s', 0], ['speed spread', 0], ['gravity px/s²', 0],
-                         ['life s', 5], ['life spread', 0], ['y from centre', 0], ['x from centre', 0]]) await set(name, v);
+for (const [name, v] of [['at once', 200], ['speed', 0], ['speed spread', 0], ['gravity', 0],
+                         ['life', 5], ['life spread', 0], ['y from centre', 0], ['x from centre', 0]]) await set(name, v);
 await chip('emitter', 'object');
 c.ok('an object emitter asks which object', await page.eval(`!!${row('emitter object')} && !${row('emitter object')}.hidden`));
-await set('length · radius · size px', 400);
+await set('length · radius · size', 400);
 await choose('emitter object', 'two dots');
 const dotsSay = await sayWith('two dots: 2 points to leave from');
 c.ok('the dot-set picked: two points to leave from', dotsSay.includes('two dots: 2 points'), dotsSay);
@@ -155,9 +155,9 @@ await c.go(c.base + '/apps/particles/');
 await page.until(`${say}.includes('alive')`, { timeout: 20000 });
 await guidesOff();
 await chip('mode', 'burst');
-for (const [name, v] of [['speed px/s', 0], ['speed spread', 0], ['gravity px/s²', 0], ['life s', 5], ['y from centre', 0]]) await set(name, v);
+for (const [name, v] of [['speed', 0], ['speed spread', 0], ['gravity', 0], ['life', 5], ['y from centre', 0]]) await set(name, v);
 await chip('emitter', 'object');
-await set('length · radius · size px', 400);
+await set('length · radius · size', 400);
 await page.click(`[...${row('emitter object')}.querySelectorAll('button')].find(b => b.textContent === 'Choose…')`);
 await page.until(`!!document.querySelector('.vp--visible')`, { timeout: 20000 });
 await page.eval(`(async () => {
@@ -213,7 +213,7 @@ const unpulled = await grid();
 await choose('a field from', 'julia loop');
 const fieldSay = await sayWith('julia loop: a field to move through');
 c.ok('the Julia loop picked: a field to move through', fieldSay.includes('a field to move through'), fieldSay);
-await set('its pull px/s²', 1500);
+await set('its pull', 1500);
 await scrubTo(20);
 const pulled = await grid();
 c.ok('its field moves the particles', apart(pulled, unpulled) > 8, 'apart by ' + apart(pulled, unpulled).toFixed(1));
