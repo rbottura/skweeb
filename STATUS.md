@@ -203,6 +203,9 @@ sorts them.
 - **The Export box** (S3, 2026-11-03; `core/boxes/export.js`): every app's
   export in one order — into the vault, to disk, its own — and one set of
   words, the print under them; the gamepad's waits for C6.
+- **The player as After Effects' preview** (S3, 2026-11-03; `core/Transport.js`):
+  first, back, play, on, last, a timecode in the accent, the frame count, the
+  loop a ticked ruler to scrub.
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -285,11 +288,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S3's second half on the board of `docs/plan.md`: the player as After
-Effects' preview** — branch `ui/player`, written: `core/Transport.js`,
-first, back, play, on, last, a timecode, the loop a ticked ruler; every
-browser check in the main tree, then it lands. Its first half, the Export
-box (`core/boxes/export.js`), landed the same day. The board holds the rest in order —
+**S4 on the board of `docs/plan.md`: the format a list** — branch
+`ui/boxes-format`: the frame's format a dropdown grouped as `frame.js`
+already marks its runs (shape, pixels, print), where it is a wall of chips
+today; the three checks that click a format chip — compose's, the print's,
+the poster's — pick it from the list. Then Format and Ground mounted
+anywhere, Ground one group in every app. The board holds the rest in order —
 track S first — each a branch landed after a gate (`docs/workflow.md`).
 
 ## Parked decisions
