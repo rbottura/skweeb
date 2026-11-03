@@ -69,7 +69,7 @@ c.ok('a handle dragged near a guide is pulled onto it', (await num('x')) === 324
 const fieldAt = [cl + (540 + await num('fx')) * z, ct + (540 + await num('fy')) * z];
 await page.pointer(fieldAt, [fieldAt[0] + 120, fieldAt[1] + 70], 8);
 const moved = [await num('fx'), await num('fy')];
-await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', code: 'KeyF', bubbles: true }))`);
+await page.eval(`(() => { for (const t of ['keydown', 'keyup']) window.dispatchEvent(new KeyboardEvent(t, { key: 'f', code: 'KeyF', bubbles: true })); })()`);   // a tap: held, F is a pie (S5b)
 await wait(300);
 const placed = [await num('fx'), await num('fy')];
 const said = await page.eval(`document.querySelector('.bar-say').textContent`);

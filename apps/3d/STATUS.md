@@ -7,7 +7,7 @@ camera and a light, never its vertices: three.js makes them again from the
 params, so a frame draws on its own at any size and a print is drawn again,
 not enlarged. Drawn by three.js r186 (`core/libs/three/`, pinned by
 `scripts/vendor-three.mjs`) on the page's one GPU device — the author's
-call, 2026-10-06 (`docs/decisions.md`).
+call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## The bricks
 

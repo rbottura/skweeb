@@ -9,7 +9,7 @@
  * tagged as played once; a stream through a vortex and curl noise still
  * closes its loop, and a frame of it costs less than a 60 fps frame; tilted
  * into depth behind a close camera, it is another picture and still a loop.
- * The guides: G switches them, the emitter and the fields' centre are dragged
+ * The guides: Z switches them (G is the ground since S5b), the emitter and the fields' centre are dragged
  * by their handles, and a save made with them on has none in its picture.
  * A picture from outside, dropped on the vault panel, comes in as a shape and
  * is picked as the one sprite; an opaque one is a still, several a set too.
@@ -36,6 +36,8 @@ const downloaded = async ending => {
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const count = `(document.querySelector('.tp-count')?.textContent || '')`;
 const key = k => page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ${JSON.stringify(k)} }))`);
+/** A key tapped by its place — down and up, as the left hand's are (core/keys.js): Z the view. */
+const tapKey = code => page.eval(`(() => { for (const t of ['keydown', 'keyup']) document.dispatchEvent(new KeyboardEvent(t, { code: '${code}', key: '', bubbles: true })); })()`);
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const row = name => `[...document.querySelectorAll('.pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const set = async (name, value) => { await page.typeInto(`${row(name)}?.querySelector('.pp-num')`, value); await wait(300); };
@@ -143,14 +145,14 @@ await page.until(`${say}.includes('alive')`, { timeout: 20000 });
 key(' '); await wait(200);
 await scrubTo(10);
 const guided = await pixels();
-key('g'); await wait(300);
+tapKey('KeyW'); await wait(300);                 // Z: the guides are the view's since S5b, G the ground's
 const bare = await pixels();
-c.ok('G takes the guides away, and the particles stay', apart(guided, bare) > 1
+c.ok('Z takes the guides away, and the particles stay', apart(guided, bare) > 1
   && (await page.eval(`document.getElementById('guides').getAttribute('aria-pressed')`)) === 'false');
-key('g'); await wait(300);
+tapKey('KeyW'); await wait(300);
 // Within a level, not to the pixel: Chrome moves a canvas read back often off
 // the GPU and draws it a hair differently after (check-frames.mjs says the same).
-c.ok('and G brings them back', apart(await pixels(), guided) <= 1, 'apart by ' + apart(await pixels(), guided).toFixed(2));
+c.ok('and Z brings them back', apart(await pixels(), guided) <= 1, 'apart by ' + apart(await pixels(), guided).toFixed(2));
 await page.click(`document.getElementById('guides')`); await wait(300);
 c.ok('the switch over the viewer turns them off too', apart(await pixels(), bare) <= 1
   && (await page.eval(`document.getElementById('guides').getAttribute('aria-pressed')`)) === 'false');

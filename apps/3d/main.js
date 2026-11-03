@@ -45,6 +45,7 @@ import { requested }      from '../../core/reopen.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { viewFactor }     from '../../core/view.js';
 import { whyNoGpu }       from '../../core/gpu/device.js';
+import { setAppPie }      from '../../core/shell/bindings.js';
 
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
@@ -57,7 +58,7 @@ let busy = false;        // a save or a download is drawing; nothing else starts
 
 async function boot() {
   bar = new Bar({ app: '3d', mount: document.querySelector('.app'),
-                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · F frame · S save · V vault' });
+                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · S save · V vault' });
   params = modelParams();
   const panel = new ParamPanel(params, { title: '3d', mount: document.getElementById('side'), groups: GROUPS });
 
@@ -253,6 +254,14 @@ function save() {
 // ── Keys ─────────────────────────────────────────────────────────────────────
 
 function wireKeys() {
+  // The left hand (core/shell/bindings.js): A the handles' mode — move, turn, size — tapped the next.
+  const MODES = ['move', 'turn', 'size'], modeOf = m => document.getElementById('handle-' + m);
+  const now = () => MODES.find(m => modeOf(m)?.getAttribute('aria-pressed') === 'true') || 'move';
+  setAppPie({
+    title: 'handles',
+    items: () => MODES.map(m => ({ label: m, on: now() === m, run: () => modeOf(m)?.click() })),
+    tap: () => modeOf(MODES[(MODES.indexOf(now()) + 1) % MODES.length])?.click(),
+  });
   let vault = null;
   // Heard before the vault panel's own keys, so an Escape that closes the
   // panel is seen as that, and lets go of no shape.

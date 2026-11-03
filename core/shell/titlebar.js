@@ -12,11 +12,7 @@
 
 import { LitElement, html, nothing } from '../libs/lit/lit-all.min.js';
 import { openPalette } from '../Palette.js';
-
-const exportDrawer = () => {
-  const list = document.querySelector('.dr .pp-actions');
-  return list ? list.closest('.dr') : null;
-};
+import { actsOnPage, showPrint } from '../boxes/export.js';
 
 class SkwTitlebar extends LitElement {
   static properties = { app: { type: String }, menu: { state: true } };
@@ -50,27 +46,12 @@ class SkwTitlebar extends LitElement {
   }
 
   /** The Export box as it stands: its sections and the acts that apply now. */
-  _sections() {
-    const dr = exportDrawer();
-    if (!dr) return [];
-    return [...dr.querySelectorAll('.pp-actions')].map(list => ({
-      title: list.querySelector('.pp-actions-head')?.textContent || '',
-      acts: [...list.querySelectorAll('.nb-btn')]
-        .filter(b => !b.hidden && !b.disabled && !b.closest('[hidden]'))
-        .map(b => ({ label: b.textContent.replace(/\s+/g, ' ').trim(), button: b })),
-    })).filter(s => s.acts.length);
-  }
+  _sections() { return actsOnPage(); }
 
   _run(button) { this.menu = null; button.click(); }
 
   /** The print, under the box: its drawer opened and brought into view. */
-  _print() {
-    this.menu = null;
-    const dr = exportDrawer();
-    if (!dr) return;
-    if (!dr.classList.contains('dr--open')) dr.querySelector(':scope > .dr-head').click();
-    (dr.querySelector('.pp-print') || dr).scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }
+  _print() { this.menu = null; showPrint(); }
 
   render() {
     return html`

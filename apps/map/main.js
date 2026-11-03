@@ -10,7 +10,7 @@
  * standing on the map play by its clock, each at its own speed
  * (core/playback.js). Drawn at the size the viewer shows (core/view.js);
  * the grid, what cannot be walked, the events and the chosen thing's box
- * are guides over it — one switch, G — never in the picture; the walls show
+ * are guides over it — one switch, Z since S5b — never in the picture; the walls show
  * whenever their tool is in hand.
  *
  * S saves the map (save.js) — `{ map, cells, walls, place }`, its picture drawn by
@@ -36,6 +36,7 @@ import { ParamPanel }   from '../../core/ParamPanel.js';
 import { VaultPanel }   from '../../core/VaultPanel.js';
 import { Playhead }     from '../../core/playback.js';
 import { Bar }          from '../../core/Bar.js';
+import { setAppPie, setOverlay } from '../../core/shell/bindings.js';
 import { Vault }        from '../../core/vault.js';
 import { viewFactor }   from '../../core/view.js';
 
@@ -64,7 +65,7 @@ const clock = new Playhead({ onShow: () => draw() });
 
 function boot() {
   bar = new Bar({ app: 'map', mount: document.querySelector('.app'),
-                  keys: '1 tiles · 2 things · 3 walls · G guides · space play · Del remove · S save · V vault' });
+                  keys: '1 tiles · 2 things · 3 walls · A tool · Z guides · space play · Del remove · S save · V vault' });
   map = mapParams();
   const panel = new ParamPanel(map, { title: 'map', mount: document.getElementById('map-side'), groups: MAP_GROUPS });
   palette = new Palette(panel.drawer('tiles').body, () => draw());
@@ -95,6 +96,14 @@ function boot() {
   for (const [name, b] of Object.entries(toolBtns)) b.addEventListener('click', () => useTool(name));
   showGuides(guidesOn);
   useTool('tiles');
+  // The left hand (core/shell/bindings.js): A the tool, tapped the next; Z the guides — G is the ground's since S5b.
+  const TOOLS = ['tiles', 'things', 'walls'];
+  setAppPie({
+    title: 'tool',
+    items: () => TOOLS.map(t => ({ label: t, on: tool === t, run: () => useTool(t) })),
+    tap: () => useTool(TOOLS[(TOOLS.indexOf(tool) + 1) % TOOLS.length]),
+  });
+  setOverlay({ label: 'guides', on: () => guidesOn, toggle: () => showGuides(!guidesOn) });
   wireKeys();
   draw();
   openRequested();
@@ -289,7 +298,6 @@ function wireKeys() {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (e.key === 'g' || e.key === 'G') showGuides(!guidesOn);
     if (e.key === 's' || e.key === 'S') save();
     if (e.key === '1') useTool('tiles');
     if (e.key === '2') useTool('things');

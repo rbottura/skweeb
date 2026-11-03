@@ -28,6 +28,12 @@ const el = (tag, cls, text) => {
   return node;
 };
 
+/** Each row's params and key, for what acts on the row shown — X's reset, R's seed (core/shell/bindings.js). */
+const OWNER = new WeakMap();
+
+/** The params and the key a row shows, or null for anything that is not a panel's row. */
+export const rowParams = row => (row && OWNER.get(row)) || null;
+
 const titleCase = key => key.replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
 const NUMERIC = new Set(['range', 'int']);
 
@@ -87,6 +93,7 @@ export function buildRow(panel, params, key, spec, { half = false } = {}) {
     }
   }
   if (spec.more) row.classList.add('pp-row--more');
+  OWNER.set(row, { params, key });
   return { row, widget };
 }
 

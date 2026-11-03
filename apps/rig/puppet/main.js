@@ -47,6 +47,7 @@ import { Bar }                  from '../../../core/Bar.js';
 import { Vault }                from '../../../core/vault.js';
 import { viewFactor }           from '../../../core/view.js';
 import { surface }              from '../../../core/surface.js';
+import { own }                  from '../../../core/keys.js';
 
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
@@ -76,6 +77,7 @@ const clock = new Playhead({ onShow: () => {} });
 async function boot() {
   params = puppetParams();
   bar = new Bar({ app: 'puppet', mount: document.querySelector('.app'), keys: 'S send to OBS · B guides · H alone · C straight · G guide · V vault' });
+  own('KeyG');                        // G opens the puppet's guide, not core's ground (core/keys.js)
   keeping = makeKeeping({ params, follow: values => {
     params.restore(values);
     drawers.sent(true, 0);
