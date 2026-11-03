@@ -98,15 +98,18 @@ async function boot() {
   wireKeys();
   fitClock();
 
-  runner = await createRunner();
-  if (!runner) bar.announce(`no escape time here — ${whyNoGpu()}; copies still draw`);
+  // The runner is the page's once its chain is compiled: a draw asked for in
+  // between — a resize, a param — would run a chain not ready yet, and throw.
+  const gpu = await createRunner();
+  if (!gpu) bar.announce(`no escape time here — ${whyNoGpu()}; copies still draw`);
   else {
     try {
-      await runner.prepare(chainOf(params.values));
+      await gpu.prepare(chainOf(params.values));
     } catch (err) {
       failing = err.message;
       bar.announce(err.message);
     }
+    runner = gpu;
   }
   await openRequested();
   draw();

@@ -126,6 +126,9 @@ field`.
 
 ## Known
 
+- Mended 2026-11-03: the runner was the page's before its chain was
+  compiled, so a draw asked for in between — a resize, the fonts arriving —
+  ran it and threw, about one check in two. It is the page's once prepared.
 - 32-bit floats: past a zoom of about 5 × 10⁴ the picture blocks up into
   flat squares, and the bar says so. Brick 5.
 - One param moves at a time; two swung together — the twist and the
