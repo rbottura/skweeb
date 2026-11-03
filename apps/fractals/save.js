@@ -56,6 +56,7 @@ export async function saveFractal({ params, sprites, spriteTitle, runner, tick =
   const blob = await toPng(shown);
   return Vault.save({
     type: loop ? 'sequence' : 'still',
+    state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
     title: titleOf(recipe, spriteTitle) + (loop ? ` ×${frames.length}` : ''),
     tags: ['fractals', recipe.family, ...(loop ? ['loop', 'idle'] : [])],
     origin: APP,

@@ -76,6 +76,8 @@ export function placeParams() {
     ref: { type: 'object', accepts: PLACEABLE, label: 'object', group: 'object' },
     /** A look made in filter, run over the object's frames (core/gpu/look.js). */
     look: { type: 'object', accepts: ['params'], label: 'look', group: 'object' },
+    /** A smart object placed at the state it had then (S6b, the author's 2026-11-03) — 0 follows its new states. */
+    version: { type: 'int', min: 0, max: 100000, default: 0, label: 'at its state · 0 follows', group: 'object', when: { ref: { prefix: 'skw_' } } },
     x: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'x from centre', group: 'transform', pair: 'y', pairLabel: 'from centre', axis: 'x' },
     y: { type: 'int', min: -MAX_SIDE, max: MAX_SIDE, default: 0, label: 'y from centre', group: 'transform', axis: 'y' },
     scale: { type: 'range', min: 0.01, max: 8, step: 0.01, default: 1, label: 'scale', group: 'transform' },
@@ -97,22 +99,24 @@ export function placeParams() {
  * A placement's values as the block a composition's recipe keeps
  * (docs/smart-objects.md, *Placement*). `at` and `length` are time, frames from
  * the composition's start and `null` for the object's own length. `version`
- * pins only a `.skw`; any other object never changes, so it is `latest`.
+ * pins only a `.skw` — at the state it had when placed, since S6b — and 0 is
+ * `latest`, following it; any other object never changes, so it is `latest`.
  * `look`, `opacity` and `blend` are there only when they say something, so a
  * block with none is the block it always was.
  */
 export function toPlacement(values) {
   const { ref, x, y, scale, rot, look, opacity, blend } = values;
+  const version = values.version > 0 && String(ref).startsWith('skw_') ? Math.round(values.version) : 'latest';
   const at = Math.max(0, Math.round(values.at || 0));
   const length = values.length > 0 ? Math.round(values.length) : null;
-  return { ref, version: 'latest', transform: { x, y, scale, rot }, at, length, ...(look ? { look } : {}),
+  return { ref, version, transform: { x, y, scale, rot }, at, length, ...(look ? { look } : {}),
            ...(opacity != null && opacity < 1 ? { opacity } : {}), ...(blend && blend !== 'normal' ? { blend } : {}) };
 }
 
 /** And back: the values a placement's panel shows for a block. */
 export function fromPlacement(block) {
   const t = (block && block.transform) || {};
-  return { ref: (block && block.ref) || null, x: t.x, y: t.y, scale: t.scale, rot: t.rot,
+  return { ref: (block && block.ref) || null, version: block && Number.isInteger(block.version) ? block.version : 0, x: t.x, y: t.y, scale: t.scale, rot: t.rot,
            look: (block && block.look) || null, at: (block && block.at) || 0, length: (block && block.length) || 0,
            opacity: block && block.opacity != null ? block.opacity : 1, blend: (block && block.blend) || 'normal' };
 }
@@ -123,5 +127,7 @@ export function fromPlacement(block) {
  * which names them all, so lineage cannot drift from what the page holds.
  */
 export function parentsOf(recipe) {
-  return [...new Set(((recipe && recipe.place) || []).flatMap(b => [b.ref, b.look]).filter(Boolean))];
+  // A smart object pinned is made from that state of it, `skw_…@v3` — no ref: it will not change.
+  const named = b => (Number.isInteger(b.version) && String(b.ref).startsWith('skw_') ? `${b.ref}@v${b.version}` : b.ref);
+  return [...new Set(((recipe && recipe.place) || []).flatMap(b => [named(b), b.look]).filter(Boolean))];
 }

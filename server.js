@@ -139,7 +139,8 @@ function indexRow(o) {
     },
     parents: o.parents, refs: o.refs, published: o.published,
     // A smart object's version, so a page knows when it changed without opening it.
-    ...(o.type === 'skw' ? { version: o.version || 1 } : {}),
+    // …and what it binds (S6b: an app's project), so a picker that takes a sequence takes one made a smart object.
+    ...(o.type === 'skw' ? { version: o.version || 1, binds: (o.recipe && o.recipe.type) || null } : {}),
     // What a set was made as — null for none — so a picker can tell a material
     // from a brush family without opening every folder (core/uses.js).
     ...(o.type === 'set' ? { role: o.recipe && typeof o.recipe.role === 'string' ? o.recipe.role : null } : {}),
@@ -218,8 +219,9 @@ async function apiCreate(req, res) {
   const recipeKey = stableStringify(payload.recipe === undefined ? null : payload.recipe);
 
   // Same bytes AND same recipe is the same object. Same bytes with a different
-  // recipe is not — see "Identity and dedup" in docs/object-model.md.
-  const twin = allObjects().find(o =>
+  // recipe is not — see "Identity and dedup" in docs/object-model.md. A smart
+  // object is never a twin: each one made is a project of its own (S6b).
+  const twin = payload.type !== 'skw' && allObjects().find(o =>
     o.render && o.render.sha256 === sha256 &&
     stableStringify(o.recipe === undefined ? null : o.recipe) === recipeKey);
   if (twin) return sendJson(res, 200, { status: 'duplicate', object: twin });

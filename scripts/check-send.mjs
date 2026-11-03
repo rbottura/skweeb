@@ -17,7 +17,7 @@
  * for filter draws nothing without it.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -69,7 +69,7 @@ await filter.until(`/^saved |failed/.test(${barSay})`, { timeout: 90000 }).catch
 const now = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).filter(o => !before.has(o.id));
 const kept = now.find(o => o.origin && o.origin.app === 'particles');
 const made = now.find(o => o.origin && o.origin.app === 'filter');
-const full = made ? await (await fetch(c.base + '/api/vault/' + made.id)).json() : null;
+const full = made ? inner(await (await fetch(c.base + '/api/vault/' + made.id)).json()) : null;
 c.ok('saved in filter: particles saves itself first, in its own window — a smart object', !!kept && kept.type === 'skw', kept ? `${kept.id} ${kept.type}` : await filter.eval(barSay));
 c.ok('…and the filter saved names what particles kept, its source and its parent', !!full && !!kept && full.recipe.source === kept.id
   && full.parents.includes(kept.id), full ? `${full.id} source ${full.recipe.source} parents ${JSON.stringify(full.parents)}` : await filter.eval(barSay));

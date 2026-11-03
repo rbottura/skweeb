@@ -30,7 +30,7 @@
 
 import fs   from 'node:fs';
 import path from 'node:path';
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 import { TURN } from '../apps/3d/camera.js';
 
 const c = await startCheck();
@@ -312,9 +312,9 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
 const mid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-const o = mid ? await (await fetch(c.base + '/api/vault/' + mid)).json() : null;
-c.ok('saved: a model, made by 3d, titled by its shapes', !!o && o.type === 'model' && o.origin.app === '3d'
-  && o.title === 'box, sphere, torus' && /^3d_/.test(o.id), o ? `${o.id} ${o.type} "${o.title}"` : await page.eval(say));
+const o = mid ? inner(await (await fetch(c.base + '/api/vault/' + mid)).json()) : null;
+c.ok('saved: a model, made by 3d, titled by its shapes — the first state of its smart object', !!o && o.type === 'model' && o.origin.app === '3d'
+  && o.title === 'box, sphere, torus' && o.smart && o.version === 1, o ? `${o.id} ${o.type} "${o.title}"` : await page.eval(say));
 c.ok('its recipe: the view and its shapes, no vertices', !!o && o.recipe.shapes.length === 3 && o.recipe.shapes[1].id === 'sphere'
   && o.recipe.shapes[1].params.radius === 0.6 && typeof o.recipe.yaw === 'number' && !JSON.stringify(o.recipe).includes('position'));
 const kept = o && o.recipe.shapes[0].modifiers;
@@ -333,7 +333,8 @@ const replayOf = id => page.eval(`(async () => {
   const img = await createImageBitmap(await (await fetch(url)).blob());
   const read = (src, w, h) => { const x = new OffscreenCanvas(w, h).getContext('2d'); x.drawImage(src, 0, 0, w, h); return x.getImageData(0, 0, w, h).data; };
   const render = read(img, img.width, img.height);
-  const own = await app.openObject(object, { url });
+  const it = object.type === 'skw' ? (await import('/core/smart.js')).unwrap(object) : object;   // the app's rebuild takes the object a smart one binds
+  const own = await app.openObject(it, { url });
   const again = read(own.frame(0), img.width, img.height);
   let worst = 0, off = 0;
   for (let i = 0; i < render.length; i++) { const d = Math.abs(render[i] - again[i]); worst = Math.max(worst, d); if (d > 8) off++; }

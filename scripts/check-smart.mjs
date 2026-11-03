@@ -16,7 +16,7 @@
  * And no page said anything wrong. Needs WebGPU, for filter.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -46,9 +46,9 @@ const before = new Set((await vault()).map(o => o.id));
 await filter.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent.startsWith('Save to the vault'))`);
 await filter.until(`/^saved |failed/.test(${barSay})`, { timeout: 90000 }).catch(() => {});
 const fresh = (await vault()).filter(o => !before.has(o.id));
-const skw = fresh.find(o => o.type === 'skw');
-const saved = fresh.find(o => o.origin && o.origin.app === 'filter' && o.type !== 'skw');
-const held = saved ? await envelope(saved.id) : null;
+const skw = fresh.find(o => o.type === 'skw' && o.origin && o.origin.app === 'particles');
+const saved = fresh.find(o => o.origin && o.origin.app === 'filter');        // the filter's own S: a state of its own smart object (S6b)
+const held = saved ? inner(await envelope(saved.id)) : null;
 c.ok('filter saved: particles is a smart object, version 1', !!skw && skw.id.startsWith('skw_') && skw.version === 1 && skw.origin.app === 'particles',
   skw ? `${skw.id} v${skw.version}` : JSON.stringify(fresh.map(o => o.id)));
 c.ok('…the filter names it: its source, a parent and a ref', !!held && !!skw && held.recipe.source === skw.id

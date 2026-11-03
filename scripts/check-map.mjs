@@ -29,7 +29,7 @@
  * brings what it needs: the vault it runs on may be empty.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -270,7 +270,7 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
 const mid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-const saved = mid ? await (await fetch(c.base + '/api/vault/' + mid)).json() : null;
+const saved = mid ? inner(await (await fetch(c.base + '/api/vault/' + mid)).json()) : null;
 c.ok('saved: a map — its cells, its things, the loop\'s frames and rate', !!saved && saved.type === 'map'
   && saved.recipe.cells.length === 120 && saved.recipe.place.length === 5 && saved.render.frames === 60 && saved.render.fps === 30,
   saved ? `${saved.type} · ${saved.title} · ${saved.recipe.place.length} things · ${saved.render.frames} frames` : await page.eval(say));

@@ -36,6 +36,7 @@ export async function saveComposition(recipe, { tick = 0 } = {}) {
 
   return Vault.save({
     type: 'composition',
+    state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
     title: `${labelOf(recipe.page.format)} · ${recipe.place.length} placed`,
     tags: moving ? ['compose', 'loop'] : ['compose'],
     origin: APP,

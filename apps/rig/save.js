@@ -47,6 +47,7 @@ export async function saveRig(args) {
   const turned = recipe.turns.some(t => t);
   return Vault.save({
     type: loop ? 'sequence' : 'still',
+    state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
     title: `${args.title || 'a drawing'} · ${crawls(recipe.rig) ? 'crawling' : loop ? 'moving' : turned ? 'posed' : 'at rest'}`,
     tags: ['rig', ...(loop ? ['loop'] : [])],
     origin: APP,

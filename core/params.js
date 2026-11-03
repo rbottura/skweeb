@@ -148,6 +148,8 @@ function holds(when, values) {
     if (want && typeof want === 'object' && !Array.isArray(want) && 'not' in want) {
       const not = Array.isArray(want.not) ? want.not : [want.not];
       if (not.includes(have)) return false;
+    } else if (want && typeof want === 'object' && !Array.isArray(want) && 'prefix' in want) {
+      if (typeof have !== 'string' || !have.startsWith(want.prefix)) return false;   // an id of a kind: `skw_` a smart object's
     } else if (!(Array.isArray(want) ? want : [want]).includes(have)) {
       return false;
     }

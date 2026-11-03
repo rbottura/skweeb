@@ -21,7 +21,7 @@
 
 import fs   from 'node:fs';
 import path from 'node:path';
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -206,7 +206,7 @@ if (picked) {
     await how();
     await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
     const sid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-    return sid ? (await fetch(c.base + '/api/vault/' + sid)).json() : null;
+    return sid ? inner(await (await fetch(c.base + '/api/vault/' + sid)).json()) : null;
   };
   const tickShown = Number((await page.eval(count)).split(' / ')[0]) - 1;
   const o = await saveAs(() => key('S'));

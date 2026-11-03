@@ -33,6 +33,7 @@ export function unwrap(skw, at = skw) {
     origin: { ...(skw.origin || {}), app: bound.app || (skw.origin && skw.origin.app) },
     recipe: bound.recipe ?? null,
     seed: bound.seed ?? null,
+    title: at.title || skw.title,              // a state kept has its own title
     render: at.render || skw.render,
     version: at.version || skw.version || 1,
   };

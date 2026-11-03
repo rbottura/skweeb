@@ -65,6 +65,7 @@ export async function saveStill({ params, render, sourceId, name }) {
 
   return Vault.save({
     type: 'still',
+    state: !!sourceId,                  // the project's next state (S6b) — a leaf, off disk, has none to be
     title: `${name || params.get('ramp')} ${render.cols}x${render.rows}`,
     tags: sourceId ? ['grid', tileTag(params.values)] : ['grid', tileTag(params.values), 'leaf'],
     origin: APP,
@@ -134,6 +135,7 @@ export async function saveSequence({ params, source, tiles, keepFrames = false, 
 
   const object = await Vault.save({
     type: 'sequence',
+    state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
     title: `${name || recipe.ramp} ${best.cols}x${best.rows} x${count}`,
     tags: ['grid', 'loop', tileTag(recipe)],
     origin: APP,

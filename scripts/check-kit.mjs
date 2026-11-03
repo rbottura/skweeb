@@ -47,6 +47,19 @@ function plainHost() {
  * @param {object} [opts]
  * @param {boolean} [opts.keep]   leave the vault copy and the profile behind
  */
+/**
+ * A saved object as its app has it. Since S6b an app's S saves the next
+ * state of a smart object, so what a check finds in the vault is often a
+ * `skw`: this is the object it binds — as core/smart.js `unwrap` makes it,
+ * its id, picture and version kept — and anything else is itself.
+ */
+export function inner(o) {
+  if (!o || o.type !== 'skw') return o;
+  const b = o.recipe || {};
+  return { ...o, type: b.type || 'still', origin: { ...(o.origin || {}), app: b.app || (o.origin && o.origin.app) },
+           recipe: b.recipe ?? null, seed: b.seed ?? null, smart: true };
+}
+
 export async function startCheck({ keep = false } = {}) {
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'skweeb-check-'));
   const shots = path.join(work, 'shots');

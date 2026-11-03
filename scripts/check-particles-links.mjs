@@ -22,7 +22,7 @@
  * GPU and brings its own objects: the vault it runs on may be empty.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -74,7 +74,7 @@ const saved = async () => {
   await key('S');
   await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
   const id = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-  return id ? (await fetch(c.base + '/api/vault/' + id)).json() : null;
+  return id ? inner(await (await fetch(c.base + '/api/vault/' + id)).json()) : null;
 };
 
 // ── Two dot-sets, saved as ckt saves them ───────────────────────────────────
@@ -235,7 +235,9 @@ if (f) {
     JSON.stringify(replay));
 }
 if (o) {
-  await choose('a field from', o.title);
+  // Saved again since, it is a later state of the same smart object (S6b): found by the title it has now.
+  const now = inner(await (await fetch(c.base + '/api/vault/' + o.id)).json());
+  await choose('a field from', now.title);
   const none = await sayWith('makes no field');
   c.ok('an object whose app makes no field says so', none.includes('makes no field'), none);
 }

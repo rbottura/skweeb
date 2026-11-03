@@ -49,6 +49,7 @@ export async function saveMap({ map, cells, walls, place, tick = 0 }) {
     for (const id of partsOf(place)) if (!parents.includes(id)) parents.push(id);
     return await Vault.save({
       type: 'map',
+      state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
       title: recipe.map.name || 'a map',
       tags: ['map', ...(loop ? ['loop'] : [])],
       origin: APP,

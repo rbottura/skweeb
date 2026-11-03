@@ -54,6 +54,7 @@ export async function saveParticles({ emit, picture, sprites, spritesTitle, poin
 
   return Vault.save({
     type: loop ? 'sequence' : 'still',
+    state: !still,                      // S: the project's next state (S6b); the frame as a still, frozen
     title: titleOf(recipe.emit, spritesTitle, points) + (loop ? ` ×${frames.length}` : ` · frame ${tick + 1}`),
     tags: ['particles', ...(loop ? ['loop'] : []), ...(recipe.emit.mode === 'burst' ? ['burst'] : [])],
     origin: APP,

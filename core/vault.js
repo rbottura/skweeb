@@ -99,7 +99,7 @@ export const Vault = {
     if (!_available) await Vault.refresh();
     return _index.filter(row =>
       isTrashed(row) === !!filter.trash &&
-      (!filter.type || row.type === filter.type) &&
+      (!filter.type || row.type === filter.type || (row.type === 'skw' && row.binds === filter.type)) &&
       (!filter.app  || (row.origin && row.origin.app) === filter.app) &&
       (!filter.tag  || (row.tags || []).includes(filter.tag)));
   },
@@ -155,10 +155,16 @@ export const Vault = {
    * @returns {Promise<object|null>} the envelope, or null when offline
    */
   async save(spec) {
-    // Bound into a smart object, a save of its kind is that object, saved again (core/smart.js).
-    const smart = !!_bound && (!_bound.type || _bound.type === spec.type);
+    // A project's own save — the app's S, `state: true` — is the next state of its smart object, its first
+    // S making it (S6b, the author's 2026-11-03). Bound, a save of its kind is that object saved again
+    // (core/smart.js); `state: false` — a frame as a still, a look — never is.
+    // Bound by its first S, a page is strict: nothing but an S is a state of it — not a picture brought in.
+    if (spec.state === true && !_bound) _bound = { id: null, type: spec.type, version: null, strict: true };
+    const smart = spec.state === true ? !!_bound
+      : !!_bound && !_bound.strict && spec.state !== false && (!_bound.type || _bound.type === spec.type);
     const recipe = spec.recipe === undefined ? null : spec.recipe;
-    const parents = spec.parents || [];
+    // A frozen object made from the state a page holds names that state: `skw_…@v3`.
+    const parents = [...(spec.parents || []), ...(spec.state === false && _bound && _bound.id && _bound.version ? [`${_bound.id}@v${_bound.version}`] : [])];
     const body = {
       type: smart ? 'skw' : spec.type,
       title: spec.title || '',
@@ -169,7 +175,7 @@ export const Vault = {
       seed: spec.seed,
       parents,
       // What a smart object places, it depends on: one among its parents is a ref too.
-      refs: [...new Set([...(spec.refs || []), ...parents.filter(id => String(id).startsWith('skw_'))])],
+      refs: [...new Set([...(spec.refs || []), ...parents.filter(id => String(id).startsWith('skw_') && !String(id).includes('@v'))])],   // a state named is pinned: no ref
       // Saved from the state this page holds — an older one, a branch — and, for a merge, the one it took in.
       parent: smart && _bound.id && _bound.version ? _bound.version : undefined,
       parent2: smart && _bound.id && spec.parent2 ? spec.parent2 : undefined,
@@ -201,7 +207,7 @@ export const Vault = {
 
     _available = true;
     const object = out.object;
-    if (smart) _bound = { id: object.id, type: spec.type, version: object.version || 1 };
+    if (smart) _bound = { id: object.id, type: spec.type, version: object.version || 1, strict: !!(_bound && _bound.strict) };
     dispatch(out.status === 'duplicate' ? 'vault:duplicate' : 'vault:saved',
              { id: object.id, type: object.type });
     if (out.status === 'updated') {

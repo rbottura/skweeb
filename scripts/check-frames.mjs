@@ -16,7 +16,7 @@
  * frame 1 makes room.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -96,7 +96,7 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await key('S');
 await page.until(`/^saved |failed/.test(${say})`, { timeout: 120000 });
 const id = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-const o = id ? await (await fetch(c.base + '/api/vault/' + id)).json() : null;
+const o = id ? inner(await (await fetch(c.base + '/api/vault/' + id)).json()) : null;
 c.ok('saved, each block keeps when it shows', !!o && JSON.stringify(o.recipe.place.map(p => [p.at, p.length])) === '[[0,1],[1,1],[2,1]]',
   o ? JSON.stringify(o.recipe.place.map(p => [p.ref === a.id || p.ref === b.id || p.ref === d.id, p.at, p.length])) : 'not saved');
 c.ok('a loop of three at eight', !!o && o.render.frames === 3 && o.render.fps === 8, o ? `${o.render.frames} at ${o.render.fps}` : '');

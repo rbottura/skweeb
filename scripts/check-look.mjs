@@ -14,13 +14,13 @@
  * Needs a GPU. Not in the tests loop.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const cards = `[...document.querySelectorAll('.pp-card')]`;
-const api = async id => (await fetch(c.base + '/api/vault/' + id)).json();
+const api = async id => inner(await (await fetch(c.base + '/api/vault/' + id)).json());
 const settled = `(() => { const t = ${say}; return t.includes(' on the page') || t.includes('could not'); })()`;
 const onPage = async () => (await page.eval(say)).match(/(\d+) × (\d+) on the page/);
 
@@ -95,7 +95,8 @@ if (comp) {
   const replay = await page.eval(`(async () => {
     const { renderComposition } = await import('/apps/compose/render.js');
     const { Vault } = await import('/core/vault.js');
-    const { object, url } = await Vault.load(${JSON.stringify(pageId)});
+    const { object: saved, url } = await Vault.load(${JSON.stringify(pageId)});
+    const object = saved.type === 'skw' ? (await import('/core/smart.js')).unwrap(saved) : saved;   // a page saved is a state of its smart object (S6b)
     const read = pic => { const k = new OffscreenCanvas(pic.width, pic.height), x = k.getContext('2d');
       x.drawImage(pic, 0, 0); return x.getImageData(0, 0, k.width, k.height).data; };
     const once = await renderComposition(object.recipe, { tick: 0 });

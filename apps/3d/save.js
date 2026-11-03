@@ -43,6 +43,7 @@ export async function saveModel({ params, shapes, renderer }) {
     const kinds = [...new Set(shapes.filter(s => s.on !== false && SHAPES[s.id]).map(s => s.id))];
     return await Vault.save({
       type: 'model',
+      state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
       title: titleOf(shapes),
       tags: ['3d', ...kinds],
       origin: APP,
