@@ -363,6 +363,9 @@ au centre le canvas qui ne bouge pas … et le reste qui s'adapte autour",
 the apps still in tabs. Planned the same day, to begin after the session's
 reset at 15:40 as one refactor in bricks, S1 to S10. It takes up U8, U10,
 U11 and L10. Rule 7 — "not a shell that owns the page" — is kept as long as
-the scene is one more host and never the only one; how it is worded is the
-author's, before S9.
+the scene is one more host and never the only one; the author worded it the
+same afternoon: "garder la possibilité d'avoir les apps en onglet
+indépendantes ou alors une scène générique", the *skweeb absolute scene*, a
+name to find. The space viewer gets its own bench before S10 (S11), and the
+refactor starts with S1.
 

@@ -40,8 +40,9 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S6 | an object's states as a tree | `layers/states` | M | needs S3; the object model |
 | S7 | the graph over the page: compare, merge, open in | `ui/graph` | M | needs S6 |
 | S8 | rulers, guides, magnetism; the gabarit | `ui/guides` | M | needs S4 |
-| S9 | every app a module; the scene | `scene/host` | L | needs S3–S5; rule 7 |
-| S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9 |
+| S9 | every app a module; the scene | `scene/host` | L | needs S3–S5 |
+| S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9, S11 |
+| S11 | the space viewer's own bench | — | M | side bench, before S10 |
 | U8a | the shared boxes: one contract, Export first | — | — | → S3 |
 | U8b | the player and the Stack, as boxes | — | — | → S3 |
 | U8c | Format and Ground, mounted anywhere | — | — | → S4 |
@@ -116,8 +117,6 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
-- **Rule 7, for the scene** (S9): reworded so the scene is one more host
-  and never the only one, or S9 waits (`docs/scene.md`, *The scene*).
 - **States as a tree** (S6): a version's parent, and a merge's second, in
   `docs/object-model.md` — written up as proposed, to confirm.
 - **The tower's key** (`docs/workflow.md`, *Once a machine*): nothing has

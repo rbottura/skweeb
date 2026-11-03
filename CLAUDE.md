@@ -88,7 +88,9 @@ never symmetric, never inferred. The catalogue of links is the map of the suite.
    674 MB. That is what carelessness here costs.
 7. **Every app runs alone.** `apps/<name>/index.html` opens and works with the
    vault absent. The suite is a shared core and a shared vault, not a shell
-   that owns the page.
+   that owns the page: a scene may host the apps round one canvas (M12,
+   `docs/scene.md`), one more host and never the only one — the author's
+   wording, 2026-11-03.
 8. **Every app is ES modules. No globals crossing file boundaries, ever.**
    p5 is not required, and new work does not take it on — grid and ckt draw
    with Canvas 2D. What still uses p5, the gamepad's sketch and core's replay

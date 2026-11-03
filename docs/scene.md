@@ -131,10 +131,21 @@ What it asks, in this order:
    2D canvas; or a canvas a renderer, stacked in the same place.
 4. **The gamepad** stays outside until C6: it is p5's.
 
-**Open, the author's**: rule 7 says the suite is "not a shell that owns the
-page". The scene keeps it true as one more host, never the only one — "on
-garderait quand même la possibilité d'avoir des apps ouvertes dans des
-onglets". Rule 7 reworded so before S9, or S9 waits.
+**Rule 7, settled by the author the same day**: "nous devons garder la
+possibilité d'avoir les apps en onglet indépendantes ou alors une scène
+générique qui peut être la *skweeb absolute scene*, l'application skweeb
+principale et organique, nous trouverons peut-être un meilleur nom". Both,
+then: every app its own page, and the scene one more host, never the only
+one — CLAUDE.md's rule 7 says so since. The name is open.
+
+**The space viewer gets a bench of its own first (S11).** The author, on
+version 6: "le viewer 3d est excellent, c'est quelque chose qu'il faut que
+j'explore absolument" — but the pan takes the clicks, the wheel is not
+smooth, what can be clicked is not clear, and layers too close on Z cover
+one another. The bridge's animation is kept, playing "de manière permanente
+comme une petite loop infinie" while the space is open. A bench of its own,
+"avec son lot de paramètres et de petits tests", since the vault itself is
+to be explored this way soon.
 
 ## The bricks
 
@@ -154,3 +165,4 @@ at once, so every browser check runs at each gate.
 | S8 | rulers, guides, magnetism, placing; the gabarit | `ui/guides` | — |
 | S9 | every app a module; the scene, one canvas | `scene/host` | U11 |
 | S10 | the space of contexts, and the bridge | `scene/space` | — |
+| S11 | the space viewer's own bench: its parameters, its small tests | — | before S10, a side bench |
