@@ -39,7 +39,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S5 | the left hand: the search, then keys by place and pies | `ui/keys`, `ui/keys-pies` | M | landed 2026-11-03: the search, then the keys and pies |
 | — | Lit, the components' one library | `ui/lit` | — | landed 2026-11-03 |
 | S12 | the bench's shell in every app: title bar, the player under the viewer, the status bar's hints | `ui/shell` | M | landed 2026-11-03 |
-| S6 | an object's states as a tree: S6a the tree, S6c Ctrl Z and Y, S6b S a state, S6d a value in each | `layers/states` | M | S6a landed 2026-11-03; S6c next |
+| S6 | an object's states as a tree: S6a the tree, S6c Ctrl Z and Y, S6b S a state, S6d a value in each | `layers/states`, `layers/steps` | M | S6a and S6c landed 2026-11-03; S6b next |
 | S7 | the graph over the page: compare, merge, open in | `ui/graph` | M | needs S6 |
 | S8 | rulers, guides, magnetism, F; the gabarit | `ui/guides` | M | rulers, guides, the magnet and F landed 2026-11-03; the gabarit's type waits on the author |
 | S2b | S2's rest: the unit in the box, the fold of rows seldom touched, a pair on one line | `ui/rows-more` | S | landed 2026-11-03 |
