@@ -52,6 +52,8 @@ export async function reopenUrl(object) {
  */
 export async function placeUrl(object) {
   if (!object || !object.id) return null;
+  // A smart object — a project, since S6b — is placed as the object it binds, its own id in the link.
+  if (object.type === 'skw') object = { ...(await import('./smart.js')).unwrap(object), id: object.id };
   try {
     const module = await import(/* @vite-ignore */ '/apps/compose/rebuild.js');
     if (typeof module.places !== 'function' || !module.places(object)) return null;
@@ -71,6 +73,7 @@ export async function placeUrl(object) {
  * @returns {Promise<?string>}
  */
 export async function rigUrl(object) {
+  if (object && object.type === 'skw') object = { ...(await import('./smart.js')).unwrap(object), id: object.id };
   if (!object || !object.id || !isMarks(object.recipe)) return null;
   try {
     const module = await import(/* @vite-ignore */ '/apps/rig/rebuild.js');

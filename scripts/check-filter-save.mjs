@@ -19,7 +19,7 @@
 
 import fs   from 'node:fs';
 import path from 'node:path';
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -30,7 +30,7 @@ await page.downloadsTo(DL);
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const cards = `[...document.querySelectorAll('.pp-card')]`;
 const addMenu = `document.querySelector('.pp-cards-add')`;
-const api = async id => (await fetch(c.base + '/api/vault/' + id)).json();
+const api = async id => inner(await (await fetch(c.base + '/api/vault/' + id)).json());
 
 // Objects to filter: loose (in no folder, not trashed) and unmistakable in the picker.
 const rows = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
@@ -73,7 +73,8 @@ const replay = (id, tick = 0) => page.eval(`(async () => {
   const { object, url } = await Vault.load(${JSON.stringify(id)});
   const read = pic => { const k = new OffscreenCanvas(pic.width, pic.height), x = k.getContext('2d');
     x.drawImage(pic, 0, 0); return x.getImageData(0, 0, k.width, k.height).data; };
-  const h = await filter.openObject(object, {});
+  const own = object.type === 'skw' ? (await import('/core/smart.js')).unwrap(object) : object;   // the app's rebuild takes the object a smart one binds
+  const h = await filter.openObject(own, {});
   const a = read(h.frame(${tick})), b = read(h.frame(${tick}));
   const r = read(await createImageBitmap(await (await fetch(url)).blob()));
   let worst = 0, same = a.length === b.length && a.length === r.length;

@@ -112,7 +112,8 @@ export class VaultPanel {
   /** Ask the server again, then repaint. */
   async refresh() {
     await Vault.refresh();
-    const ours = rows => rows.filter(r => !this._accepts || this._accepts.includes(r.type));
+    // A smart object is taken for what it binds — a project saved is a `skw` since S6b.
+    const ours = rows => rows.filter(r => !this._accepts || this._accepts.includes(r.type) || (r.type === 'skw' && this._accepts.includes(r.binds)));
     const rows = ours(await Vault.list(this._filter));
     const trashed = ours(await Vault.list({ ...this._filter, trash: true }));
     this._trashBtn.textContent = 'trash' + (trashed.length ? ' ' + trashed.length : '');

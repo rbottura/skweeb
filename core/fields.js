@@ -19,7 +19,9 @@ import { isMarks } from './reopen.js';
  * @returns {Promise<{at(x: number, y: number): [number, number], title: string}>}
  */
 export async function loadField(id) {
-  const { object } = await Vault.load(id);
+  let { object } = await Vault.load(id);
+  // A smart object — a fractals project, since S6b — is asked as the object it binds.
+  if (object.type === 'skw') object = (await import('./smart.js')).unwrap(object);
   const title = object.title || id;
   const app = object.origin && object.origin.app;
   let module = null;

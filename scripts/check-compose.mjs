@@ -27,7 +27,7 @@
  * Not in the tests loop: it needs Chrome, and a vault with things in it.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 import { placementMatrix, onPage, pageSize } from '../apps/compose/page.js';
 
 const kit = await startCheck({ keep: process.argv.includes('--keep') });
@@ -279,7 +279,7 @@ try {
     const m = await saved();
     ok('S saves the page to the vault', !!m, m ? m[1] : await page.eval(`document.querySelector('.bar-say').textContent`));
     if (m) {
-      const o = await (await fetch(BASE + '/api/vault/' + m[1])).json();
+      const o = inner(await (await fetch(BASE + '/api/vault/' + m[1])).json());
       const refs = (o.recipe.place || []).map(b => b.ref);
       ok('a composition, its recipe the page and the list', o.type === 'composition' && !!o.recipe.page
          && JSON.stringify(refs) === JSON.stringify([loopB.id, loopA.id]), `${o.type}: ${JSON.stringify(refs)}`);

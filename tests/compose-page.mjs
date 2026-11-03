@@ -95,9 +95,16 @@ ok('a placement is the object model\'s block', block,
    { ref: 'gam_1_abc', version: 'latest', transform: { x: -40, y: 12, scale: 0.5, rot: 15 }, at: 0, length: null });
 place.reset();
 place.restore(Params.fromPlacement(block));
-ok('and comes back from it', place.values, { ref: 'gam_1_abc', look: null, x: -40, y: 12, scale: 0.5, rot: 15, opacity: 1, blend: 'normal', at: 0, length: 0 });
+ok('and comes back from it', place.values, { ref: 'gam_1_abc', look: null, version: 0, x: -40, y: 12, scale: 0.5, rot: 15, opacity: 1, blend: 'normal', at: 0, length: 0 });
 place.restore(Params.fromPlacement({ ref: 'gam_2_def' }));
-ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', look: null, x: 0, y: 0, scale: 1, rot: 0, opacity: 1, blend: 'normal', at: 0, length: 0 });
+ok('a block with no transform sits at rest', place.values, { ref: 'gam_2_def', look: null, version: 0, x: 0, y: 0, scale: 1, rot: 0, opacity: 1, blend: 'normal', at: 0, length: 0 });
+
+// A smart object placed at its state (S6b): pinned, and named so among the page's parents; 0 follows it.
+const pinned = Params.toPlacement({ ...place.values, ref: 'skw_1_abc', version: 3 });
+ok('a smart object placed at its state is pinned there', pinned.version, 3);
+ok('…0, it follows its new states', Params.toPlacement({ ...place.values, ref: 'skw_1_abc', version: 0 }).version, 'latest');
+ok('…an ordinary object never pins: it never changes', Params.toPlacement({ ...place.values, ref: 'gam_1_abc', version: 3 }).version, 'latest');
+ok('the page is made from that state of it', Params.parentsOf({ place: [pinned, Params.toPlacement({ ...place.values, ref: 'skw_2_def', version: 0 })] }), ['skw_1_abc@v3', 'skw_2_def']);
 
 // Its time: from a frame, for some — a length of 0 in the panel is null in the block, its own.
 place.set({ ref: 'gam_1_abc', at: 3, length: 2 });

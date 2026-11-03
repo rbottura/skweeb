@@ -89,7 +89,7 @@ async function boot() {
                           onRemove: () => editing.chosen && editing.takeOff(editing.chosen),
                           onMove: by => editing.chosen && placements.move(editing.chosen, by) });
   adder = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'Place this',
-                           onPick: o => editing.putOn(toPlacement({ ref: o.id, ...AT_REST })) });
+                           onPick: o => editing.putOn(toPlacement({ ref: o.id, ...AT_REST, version: o.type === 'skw' ? (o.version || 1) : 0 })) });   // a project placed at its state of the moment (S6b)
   framer = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'The next frame',
                             onPick: o => { const { block, over } = nextFrame(o.id);
                                             editing.putOn(block, { fit: false, over }); toFrameOf(editing.chosen); } });
@@ -136,7 +136,8 @@ async function boot() {
 
   await openRequested();
   const asked = new URLSearchParams(location.search).get('place');
-  if (asked) editing.putOn(toPlacement({ ref: asked, ...AT_REST }));
+  // `?place=skw_…@v3`: a state of a smart object, pinned there (S6b); a bare id, as it is now.
+  if (asked) { const [ref, at] = String(asked).split('@v'); editing.putOn(toPlacement({ ref, ...AT_REST, version: Number(at) || 0 })); }
 }
 
 /**

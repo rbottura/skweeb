@@ -95,7 +95,8 @@ export function pointsOfPicture(rgba, w, h, side = SIDE) {
  * @returns {Promise<{list, cell, w, h, title: string, glyph?: number, glyphs?: number}>}
  */
 export async function loadPoints(id, { glyph = 0 } = {}) {
-  const { object, url } = await Vault.load(id);
+  let { object, url } = await Vault.load(id);
+  if (object.type === 'skw') object = (await import('./smart.js')).unwrap(object);   // a project: the object it binds (S6b)
   const title = object.title || id;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`the render of ${title} did not load (HTTP ${res.status})`);

@@ -26,7 +26,7 @@
  * family is in git.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -151,7 +151,7 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await press('S');
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
 const pid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-const pose = pid ? await (await fetch(c.base + '/api/vault/' + pid)).json() : null;
+const pose = pid ? inner(await (await fetch(c.base + '/api/vault/' + pid)).json()) : null;
 c.ok('S saves the pose: a still the rig made, its bones whole, a turn each, its drawing its parent', !!pose && pose.type === 'still'
   && pose.origin.app === 'rig' && pose.recipe.bones.length === 3 && pose.recipe.turns.length === 3
   && pose.recipe.turns[2] !== 0 && pose.recipe.turns[0] === 0 && JSON.stringify(pose.parents) === JSON.stringify([made.still])
@@ -164,7 +164,8 @@ if (pose) {
     const h = await openFrames(object, { url });
     const img = await createImageBitmap(await (await fetch(url)).blob());
     const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
-    const rebuilt = await (await import('/apps/rig/rebuild.js')).openObject(object);
+    const own = object.type === 'skw' ? (await import('/core/smart.js')).unwrap(object) : object;   // the app's rebuild takes the object a smart one binds
+    const rebuilt = await (await import('/apps/rig/rebuild.js')).openObject(own);
     const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(rebuilt.frame(0), 0, 0);
     const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
     let worst = 0; for (let k = 0; k < da.length; k++) worst = Math.max(worst, Math.abs(da[k] - db[k]));
@@ -207,7 +208,7 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await press('S');
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 90000 });
 const lid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-const loop = lid ? await (await fetch(c.base + '/api/vault/' + lid)).json() : null;
+const loop = lid ? inner(await (await fetch(c.base + '/api/vault/' + lid)).json()) : null;
 c.ok('saved: a loop, its frames and rate, the swinging bone\'s wave and no other', !!loop && loop.type === 'sequence'
   && loop.render.frames === 30 && loop.render.fps === 30 && loop.title === 'a figure · moving'
   && loop.recipe.waves[2].swing === 30 && loop.recipe.waves[0] === null && loop.recipe.waves[1] === null,
@@ -276,7 +277,7 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await press('S');
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 120000 });
 const cid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-const crawlObject = cid ? await (await fetch(c.base + '/api/vault/' + cid)).json() : null;
+const crawlObject = cid ? inner(await (await fetch(c.base + '/api/vault/' + cid)).json()) : null;
 c.ok('saved: a loop, crawling', !!crawlObject && crawlObject.type === 'sequence' && crawlObject.title === 'a figure · crawling'
   && crawlObject.render.frames === 40 && crawlObject.recipe.rig.crawl === 'along a path', crawlObject ? crawlObject.title : await page.eval(say));
 if (crawlObject) {
@@ -312,7 +313,8 @@ await page.until(`${say}.includes('no marks')`, { timeout: 20000 }).catch(() => 
 c.ok('a still with no marks is said to have none to rig', (await page.eval(say)).includes('no marks to rig'), await page.eval(say));
 
 if (pose) {
-  await c.go(c.base + '/apps/rig/?open=' + pid);
+  // The pose, the loop and the crawl were saved in one page: states of one smart object (S6b) — each by its version.
+  await c.go(c.base + '/apps/rig/?open=' + pid + '@v' + pose.version);
   await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 }).catch(() => {});
   await wait(500);
   await press('b');
@@ -331,17 +333,17 @@ if (pose) {
   await page.until(`[...document.querySelectorAll('.vp-btn')].some(b => b.textContent === 'Rig this ↗')`, { timeout: 20000 }).catch(() => {});
   c.ok('the vault offers a gamepad drawing to the rig — the M9 link', (await link('Rig this ↗')) === '/apps/rig/?drawing=' + made.still,
     await link('Rig this ↗') || 'no link');
-  await page.click(card('a figure · posed'));
+  await page.click(card(crawlObject.title));        // one card for the three states: titled as it is now, the crawl
   await page.until(`[...document.querySelectorAll('.vp-btn')].some(b => b.textContent === 'Open in rig ↗')`, { timeout: 20000 }).catch(() => {});
   c.ok('and a pose back to the rig', (await link('Open in rig ↗')) === '/apps/rig/?open=' + pid && !(await link('Rig this ↗')),
     await link('Open in rig ↗') || 'no link');
 
-  await c.go(c.base + '/apps/compose/?place=' + pid);
+  await c.go(c.base + '/apps/compose/?place=' + pid + '@v' + pose.version);
   await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 }).catch(() => {});
   c.ok('compose places the pose', (await page.eval(say)).includes('a figure · posed'), await page.eval(say));
 }
 if (loop) {
-  await c.go(c.base + '/apps/compose/?place=' + lid);
+  await c.go(c.base + '/apps/compose/?place=' + lid + '@v' + loop.version);
   await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 }).catch(() => {});
   c.ok('and the loop, and it plays: a 30 fps loop of 30', (await page.eval(say)).includes('a 30 fps loop of 30'), await page.eval(say));
 }

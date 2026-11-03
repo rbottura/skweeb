@@ -87,7 +87,9 @@ export class SequenceViewer {
   /** Rebuild and, unless told otherwise, start playing. */
   async start() {
     try {
-      this._seq = await openSequence(this._object);
+      // A project — a smart object since S6b — plays as the object it binds.
+      const o = this._object.type === 'skw' ? (await import('./smart.js')).unwrap(this._object) : this._object;
+      this._seq = await openSequence(o);
     } catch (err) {
       this._note.textContent = String(err.message || err);
       this._note.classList.add('sv-note--bad');

@@ -244,6 +244,13 @@ Keys are read by their place, `event.code`: the same fingers on an AZERTY
 and a QWERTY. An app that means something else by a key keeps it (`own`):
 R the rig's rest, G the puppet's guide.
 
+**A project is a smart object, placed at its state** (S6b). Every S is the
+next state of the object a page holds, its first making it; the frozen acts
+stay ordinary objects. Asked whether compose, placing a project, should
+follow its new states, the author: "Placé à l'état du moment" — pinned at the
+version it had, a row set to 0 to follow. Nothing changes under the eyes
+unless asked.
+
 **A state has a `parent`, and a merge a `parent2`** (S6). Asked whether S
 should save a new state of the same object rather than a new object, with
 two fields per state in `docs/object-model.md` — the state before, and the

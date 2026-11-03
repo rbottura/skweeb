@@ -17,11 +17,18 @@
  *   box.buttons.save, box.body — to hide an act that does not apply, to mount the print.
  *
  * DOM only; theme.css draws `.nb-btn`, core/param-panel.css `.pp-actions`.
+ *
+ * Since S6b, `save` — the app's S — is the next state of the smart object
+ * the page holds, its first making it (core/vault.js); "Save as a new object"
+ * is the box's own, the first state of another.
  */
+
+import { Vault } from '../vault.js';
 
 /** One set of words for every app — docs/boxes.md, *The words*. */
 export const EXPORT_WORDS = {
   save: 'Save to the vault  [S]',
+  saveNew: 'Save as a new object',
   still: 'Save the frame as a still',
   loop: 'Save the loop',
   loopFrames: 'Save the loop + every frame (zip)',
@@ -67,6 +74,8 @@ export function exportBox(panel, { before = null, vault = {}, disk = {}, acts = 
   const W = EXPORT_WORDS;
   section('Into the vault', [
     { id: 'save', label: W.save, run: vault.save, primary: true },
+    // S is the next state of the object the page holds (S6b); this, the first of another — the page bound to it after.
+    { id: 'saveNew', label: W.saveNew, run: vault.save && (() => { Vault.bind(null); return vault.save(); }) },
     { id: 'still', label: W.still, run: vault.still },
     { id: 'loop', label: W.loop, run: vault.loop },
     { id: 'loopFrames', label: W.loopFrames, run: vault.loopFrames },

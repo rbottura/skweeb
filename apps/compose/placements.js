@@ -14,6 +14,7 @@
 
 import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
+import { innerOf }    from '../../core/smart.js';
 import { lookOver }   from '../../core/gpu/look.js';
 import { inkSize, placementMatrix, offPage } from './page.js';
 import { moves, tickAt, showsAt, endOf, ripple } from './time.js';
@@ -30,8 +31,11 @@ import { moves, tickAt, showsAt, endOf, ripple } from './time.js';
  */
 async function fromVault(ref, block) {
   const { object, url, thumbUrl } = await Vault.load(ref);
-  const handle = await openFrames(object, { url, draft: true });
-  return { object, handle: await lookOver(handle, block && block.look), thumb: thumbUrl };
+  const version = block && Number.isInteger(block.version) ? block.version : 'latest';
+  const handle = await openFrames(object, { url, draft: true, version });
+  // A smart object is shown as the state it draws — its type, its title then (S6b) — its id and refs its own.
+  const shown = object.type === 'skw' ? { ...(await innerOf(object, { version })).object, id: object.id, refs: object.refs } : object;
+  return { object: shown, handle: await lookOver(handle, block && block.look), thumb: thumbUrl };
 }
 
 export class Placements {
@@ -47,7 +51,8 @@ export class Placements {
     this.items = [];
     // A smart object took a new version: what places it, or holds it, is opened again (core/smart.js).
     if (typeof document !== 'undefined') document.addEventListener('vault:updated', ({ detail }) => {
-      const stale = this.items.filter(p => p.block.ref === detail.id || (p.refs || []).includes(detail.id));
+      // What follows it — not a placement pinned at a state of it, which stays as it was placed (S6b).
+      const stale = this.items.filter(p => (p.block.ref === detail.id && !Number.isInteger(p.block.version)) || (p.refs || []).includes(detail.id));
       for (const p of stale) p.opening = this.open(p).then(() => this.onChange());
       if (stale.length) this.say(`${stale.map(p => p.title).join(', ')}: drawn again, version ${detail.version}`);
     });

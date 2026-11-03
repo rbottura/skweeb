@@ -1,5 +1,5 @@
 # STATUS — compose
-_last touched: 2026-10-22_
+_last touched: 2026-11-03_
 
 M4's app: objects from every process placed on one page, previewed live and
 rendered out (`docs/roadmap-done.md`, M4). Built in five bricks, all in: **M4 is
@@ -7,6 +7,11 @@ done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome
 
+- **A project placed at its state** (S6b, 2026-11-03): a smart object picked
+  from the vault is pinned at the version it has — `at its state · 0
+  follows` in its placement's Object drawer — drawn as that state, its title
+  and type then; `?place=skw_…@v3` pins too. What follows it redraws when it
+  takes a state; what is pinned stays.
 - **Opacity and blend on every placement** (2026-10-07, M11's brick 6; a
   Blend drawer in the placed panel): kept in the block when they say
   something, drawn by `paintPage` with `globalAlpha` and canvas's blend —

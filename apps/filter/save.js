@@ -71,6 +71,7 @@ export async function save({ params, chain, source, runner, tick = 0, keepFrames
 
     const object = await Vault.save({
       type: loop ? 'sequence' : 'still',
+      state: !!recipe,                  // the project's next state (S6b) — a leaf, off disk, has none to be
       title: `${source.title} · ${chainName(chain)}` + (loop ? ` ×${exact.frames}` : ''),
       tags: ['filter', ...(loop ? ['loop'] : []), ...(recipe ? [] : ['leaf'])],
       origin: APP,
@@ -108,6 +109,7 @@ export async function saveLook({ chain, edges, seed, picture }) {
   const blob = await toPng(shown);
   return Vault.save({
     type: 'params',
+    state: false,                       // a look: an object of its own, frozen
     title: `look · ${chainName(chain)}`,
     tags: ['filter', 'look'],
     origin: APP,

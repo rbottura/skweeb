@@ -23,7 +23,7 @@
 
 import fs   from 'node:fs';
 import path from 'node:path';
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 import { planeAt, escape } from '../apps/fractals/fractal.js';
 import { copiesOf, SHAPES } from '../apps/fractals/copies.js';
 
@@ -250,7 +250,7 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
 const sid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-const o = sid ? await (await fetch(c.base + '/api/vault/' + sid)).json() : null;
+const o = sid ? inner(await (await fetch(c.base + '/api/vault/' + sid)).json()) : null;
 const starRow = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).find(r => r.title === 'copy star');
 c.ok('saved, an idle: a sequence of its frames at its rate', !!o && o.type === 'sequence' && o.render.frames === 48 && o.render.fps === 24,
   o ? `${o.type} ${o.render.frames} at ${o.render.fps}` : await page.eval(say));
@@ -350,7 +350,7 @@ await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await key('S');
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
 const eid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
-const e = eid ? await (await fetch(c.base + '/api/vault/' + eid)).json() : null;
+const e = eid ? inner(await (await fetch(c.base + '/api/vault/' + eid)).json()) : null;
 c.ok('saved, the Julia c round: a sequence of 48 at 24', !!e && e.type === 'sequence' && e.render.frames === 48 && e.render.fps === 24
   && e.recipe.moveEscape === 'julia', e ? `${e.type} ${e.render.frames} · ${e.title}` : await page.eval(say));
 if (e) {
