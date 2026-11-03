@@ -28,6 +28,7 @@ import { labelOf } from './frame.js';
 import * as Guides from './shell/guides.js';
 import { installKeys, bound, letterOf } from './keys.js';
 import { installBindings } from './shell/bindings.js';
+import { onStep } from './steps.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -77,6 +78,7 @@ export class Bar {
     if (typeof customElements !== 'undefined') {
       installKeys();
       installBindings();
+      onStep(text => this.announce(text));     // Ctrl Z, Ctrl Y: a step back, a step on (core/steps.js)
       import('./shell/pie.js').catch(err => console.warn('the pies did not load:', err.message));
     }
   }

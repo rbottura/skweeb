@@ -36,6 +36,9 @@
  * hairline that turns a dot when the value differs from its default, and a
  * drawer counts its dots in its head.
  *
+ * Since S6c every change of its params is a step of the session, Ctrl Z and
+ * Ctrl Y (core/steps.js), its Reset one of them.
+ *
  * Since S2b the rows are core/param-rows.js's: a unit inside its box, two
  * numbers on one line (`pair`), the rows seldom touched folded under "n
  * more" (`more`).
@@ -47,6 +50,7 @@ import { applies }    from './params.js';
 import { WIDGETS, WIDGET_TYPES } from './widgets.js';
 import { buildRow, buildPair, pairedKeys, addFold, loadFolds } from './param-rows.js';
 import { installPalette } from './Palette.js';
+import { watch, around } from './steps.js';
 
 export { WIDGET_TYPES };
 
@@ -100,6 +104,7 @@ export class ParamPanel {
     this._paint();
     this._wirePeek();
     installPalette();                // ² or Ctrl K: every control and act of the page, by name
+    watch(params);                   // every change a step: Ctrl Z, Ctrl Y (core/steps.js, S6c)
     if (this._mount) this.show();
 
     // An external change — a restore, a key, a drag on the canvas — has to
@@ -168,7 +173,7 @@ export class ParamPanel {
     head.append(el('span', 'pp-title', this._title), el('span', 'pp-spacer'));
     const reset = el('button', 'pp-btn', 'Reset');
     reset.title = 'Every parameter back to its default';
-    reset.addEventListener('click', () => this._params.reset());
+    reset.addEventListener('click', () => around(this._params, () => this._params.reset()));   // one step, gone back over by Ctrl Z
     head.append(reset);
     if (!this._mount) {
       const close = el('button', 'pp-btn', '✕');

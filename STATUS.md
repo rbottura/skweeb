@@ -215,6 +215,10 @@ sorts them.
   bar in every app — the search, Save, Export ▾ read from the Export box —
   the player under the viewer, and the status bar's keys for what is under
   the cursor.
+- **Ctrl Z, Ctrl Y** (S6c, 2026-11-03; `core/steps.js`): every change of a
+  page's params a step, held in memory — a drag one step, a panel's Reset
+  one; a recipe arriving where the steps start from; in a field, the field's
+  own undo (`tests/steps.mjs`, `check-steps`).
 - **A smart object's states, a tree** (S6a, 2026-11-03; server/versions.js):
   each state names its `parent`, a merge its `parent2`; a window holds a state,
   `?open=skw_…@v3` reopens an older one and its save is a branch;
@@ -319,13 +323,13 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S6c on the board of `docs/plan.md`: the session's steps, Ctrl Z and Ctrl Y**
-— branch `layers/steps`: `core/steps.js`, every change of a page's params a
-step, held in memory, a drag one step however long; Ctrl Z back, Ctrl Y or
-Ctrl Shift Z on, never in a text field (its own undo). Then S6b — S saves
-the next state of the object open, the page bound by default, the Export
-box's acts staying frozen objects — and S6d, a row's Alt click on its dot:
-its value in every state.
+**S6b on the board of `docs/plan.md`: S saves the next state of the object
+open** — branch `layers/save-state`: a page bound by default (core/vault.js
+`bind`), so its first S makes a smart object and every S after it the next
+state of it; the Export box's acts into the vault — the frame as a still,
+the loop — stay frozen objects, made from the state (`parents: [skw_…@vN]`).
+Every check that saves reads a `skw` where it read the app's own type. Then
+S6d, a row's Alt click on its dot: its value in every state; then S7.
 
 ## Parked decisions
 

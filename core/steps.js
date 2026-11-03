@@ -1,0 +1,139 @@
+/**
+ * steps.js — the session's steps (S6c, 2026-11-03; docs/scene.md): every
+ * change of a page's params a step, held in memory, so going back costs
+ * nothing — Ctrl Z back, Ctrl Y or Ctrl Shift Z on. The author's, on the
+ * bench: an object's states saved, and "un historique de session … des
+ * fonctions de ctrl Z et ctrl Y sans coûts supérieurs de traitement".
+ *
+ * A drag is one step however long: changes come together while they come
+ * fast (BURST_MS), and the frame chain's answer to a typed width with them.
+ * A recipe arriving — an object opened, a state gone back to — is where the
+ * steps start from, not a step; a panel's Reset is one (`around`). A step is
+ * a params' values before and after, given back through `restore`, so an
+ * app hears it as it hears an object opened. A new change after going back
+ * forgets the steps on. Never in a text field: a field undoes its typing.
+ * What an app sets itself while it boots, before a hand has touched the
+ * page, is where the steps start from too — not a step to go back over.
+ *
+ * ParamPanel watches every panel's params; core/Bar.js says each step.
+ * No DOM at import.
+ */
+
+import { typing } from './Palette.js';
+
+const BURST_MS = 450;          // closer than this, two changes are one step
+const KEEP = 200;              // the steps held, the oldest let go first
+
+const back = [], ahead = [];   // the steps behind, and those gone back over
+const cur = new Map();         // params → its values after its latest change: a step's before, its after
+const ears = new Set();
+let open = null;               // { params, before, at }: the step being made
+let replaying = false;
+let installed = false;
+let touched = typeof window === 'undefined';   // a page counts its steps from the first touch; a test from the start
+let clock = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+const snap = params => params.values;          // a deep copy already (core/params.js)
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const say = text => { for (const fn of ears) fn(text); };
+
+/** Hear each step taken back or on, in words for the status bar. */
+export function onStep(fn) { ears.add(fn); return () => ears.delete(fn); }
+
+/** Every change of these params a step from here on. */
+export function watch(params) {
+  if (cur.has(params)) return;
+  cur.set(params, snap(params));
+  params.on(() => heard(params));
+  installKeys();
+}
+
+function heard(params) {
+  if (replaying) return;
+  const values = snap(params);
+  if (params.restoring || !touched) {          // a recipe arriving, or the app setting itself up: the steps start from it
+    if (open && open.params === params) open = null;
+    cur.set(params, values);
+    return;
+  }
+  const now = clock();
+  if (open && (open.params !== params || now - open.at > BURST_MS)) settle();
+  if (!open) { open = { params, before: cur.get(params) }; ahead.length = 0; }
+  open.at = now;
+  cur.set(params, values);
+}
+
+/** The step being made, made: what tests and going back start with. */
+export function settle() {
+  if (!open) return;
+  const { params, before } = open;
+  open = null;
+  const after = cur.get(params);
+  if (same(after, before)) return;
+  back.push({ params, before, after });
+  if (back.length > KEEP) back.shift();
+}
+
+/** A change made at once, as one step — a panel's Reset, which arrives as a restore. */
+export function around(params, fn) {
+  settle();
+  const before = snap(params);
+  replaying = true;
+  try { fn(); } finally { replaying = false; }
+  const after = snap(params);
+  cur.set(params, after);
+  if (same(after, before)) return;
+  back.push({ params, before, after });
+  ahead.length = 0;
+}
+
+function replay(params, values) {
+  replaying = true;
+  try { params.restore(values); } finally { replaying = false; }
+  cur.set(params, snap(params));
+}
+
+/** A step back: true if there was one. */
+export function undo() {
+  settle();
+  const st = back.pop();
+  if (!st) { say('nothing to go back to'); return false; }
+  replay(st.params, st.before);
+  ahead.push(st);
+  say(`a step back${back.length ? ` · ${back.length} more` : ''}`);
+  return true;
+}
+
+/** A step on again: true if there was one. */
+export function redo() {
+  settle();
+  const st = ahead.pop();
+  if (!st) { say('nothing to go on to'); return false; }
+  replay(st.params, st.after);
+  back.push(st);
+  say(`a step on${ahead.length ? ` · ${ahead.length} more` : ''}`);
+  return true;
+}
+
+/** How many steps there are each way. */
+export const counts = () => ({ back: back.length + (open ? 1 : 0), ahead: ahead.length });
+
+/** For tests: a clock of their own, and every step forgotten. */
+export function forTests({ now = null } = {}) {
+  if (now) clock = now;
+  back.length = 0; ahead.length = 0; cur.clear(); open = null;
+}
+
+/** Ctrl Z, Ctrl Y and Ctrl Shift Z — by their letter, as every program has them. */
+function installKeys() {
+  if (installed || typeof window === 'undefined') return;
+  installed = true;
+  const touch = () => { touched = true; };
+  for (const t of ['pointerdown', 'keydown', 'input', 'change']) window.addEventListener(t, touch, { capture: true, passive: true });
+  window.addEventListener('keydown', e => {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || typing(e.target)) return;
+    const k = (e.key || '').toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+  });
+}
