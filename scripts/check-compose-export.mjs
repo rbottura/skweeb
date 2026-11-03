@@ -135,7 +135,7 @@ try {
     await set('place-side', 'x from centre', 380);
     await set('page-side', 'scale', 2);
     const t0 = Date.now();
-    const png = await run('Download the page', '/^downloaded/');
+    const png = await run('Download the picture', '/^downloaded/');
     const file = await downloaded('.png');
     ok('the page downloads as a PNG at print scale', !!file && JSON.stringify(pngSize(file)) === '[2480,3508]',
        `${file ? pngSize(file).join('×') : 'nothing'} in ${Date.now() - t0} ms`);

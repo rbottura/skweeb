@@ -146,7 +146,7 @@ done** (2026-09-24).
   names it; a gamepad still is drawn again from its marks by core since
   2026-10-06 (`core/stage/still.js`). On a grid dither at 2x, drawn
   again keeps 11 times the fine detail of stretched; on a ckt still, twice.
-- **Export**: *Download the page (PNG)* — A4 at scale 2 is 2480 × 3508, in
+- **Export**: *Download the picture (PNG)* — A4 at scale 2 is 2480 × 3508, in
   about 0.4 to 1.6 s — and, for a page that moves, *Download every frame
   (zip)*: numbered PNGs and a `meta.json` with the page's rate, which
   `scripts/frames-to-video.mjs` turns into a video with no flags (seen: 134

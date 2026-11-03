@@ -29,8 +29,8 @@ v2 was wrong once and a whole port was built on it.
   square or a point you drag lean the dots on their tethers.
 - **Pulse and trail**, smoothed: the pulse swells between full size and a
   floor (−1 is v2's flip); the trail fades, sampled between frames.
-- **Saves.** A frame (with its `tick`), the loop (one turn), the loop plus a
-  frames zip, and **Emit a brush family** — every glyph as a `shape` cut to its
+- **Saves.** A frame (with its `tick`) — *Save to the vault* [S] — the loop
+  (one turn), the loop plus every frame, and **Emit a brush family** — every glyph as a `shape` cut to its
   ink, filed in a folder named for the family, the lot as a `set` the gamepad
   loads.
 - **Replays.** `rebuild.js` is core's dispatch target; a still replays

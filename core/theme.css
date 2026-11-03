@@ -267,6 +267,11 @@ html, body {
 .dr-body { display: none; padding: 4px 10px 10px; }
 .dr--open > .dr-body { display: block; }
 
+/* ── The Export box (core/boxes/export.js): its acts in sections ──────────── */
+
+.pp-actions + .pp-actions { margin-top: 10px; }
+.pp-actions-head { font: 600 10.5px var(--font-ui); letter-spacing: 0.07em; text-transform: uppercase; color: var(--fg-3); }
+
 /* ── The bar — information only ────────────────────────────────────────────── */
 
 .bar {

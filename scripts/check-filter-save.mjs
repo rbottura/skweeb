@@ -152,7 +152,7 @@ const through = await page.eval(`(async () => {
 })()`);
 c.ok('core replays it, as it replays any loop', through === o2.render.frames, through + ' frames');
 
-const zipped = await saved('Save + download');
+const zipped = await saved('Save the loop + every frame');
 let zip = null;
 for (let i = 0; i < 300 && !zip; i++) {
   const f = fs.existsSync(DL) && fs.readdirSync(DL).find(n => n.endsWith('_frames.zip'));

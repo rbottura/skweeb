@@ -24,6 +24,7 @@ import { Growth }                  from './growth.js';
 import { fromFile, fromVault }     from './source.js';
 import { saveStill, saveSequence, APP } from './save.js';
 import { PrintPanel }              from '../../core/PrintPanel.js';
+import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }             from '../../core/StackPanel.js';
 import { ParamPanel }              from '../../core/ParamPanel.js';
 import { VaultPanel }              from '../../core/VaultPanel.js';
@@ -147,13 +148,10 @@ function buildDrawers() {
   const player = panel.addDrawer({ id: 'player', title: 'Sequence player', before: 'material' });
   transport = new Transport({ clock, mount: player.body, busy: () => busy });
 
-  const exp = panel.addDrawer({ id: 'export', title: 'Export' });
-  const actions = document.createElement('div');
-  actions.className = 'pp-actions';
-  buttons.save = button('Save to the vault  [S]', () => save(), true);
-  buttons.frames = button('Save + download the frames', () => save({ keepFrames: true }));
-  actions.append(buttons.save, buttons.frames);
-  exp.body.append(actions);
+  const box = exportBox(panel, { vault: { save: () => save(), loopFrames: () => save({ keepFrames: true }) } });
+  const exp = box.drawer;
+  buttons.save = box.buttons.save;
+  buttons.frames = box.buttons.loopFrames;
   // A print, drawn again at the sheet's size a window at a time — of a source in the vault only: a recipe names it.
   printing = new PrintPanel({ mount: exp.body, app: 'grid', leave, say: t => bar.say(t), format: params.get('format'), tick: () => clock.tick,
     object: () => {

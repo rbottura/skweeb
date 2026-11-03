@@ -200,6 +200,9 @@ sorts them.
   under Alt held over its drawer, or pinned by Alt click, its step five of the
   box's; a switch on its label's line; a row's mark, a dot when it differs
   from its default, counted in its drawer's head.
+- **The Export box** (S3, 2026-11-03; `core/boxes/export.js`): every app's
+  export in one order — into the vault, to disk, its own — and one set of
+  words, the print under them; the gamepad's waits for C6.
 - **A check that throws takes its Chrome with it** (`scripts/check-kit.mjs`),
   and `CHROME_FLAGS` lets the laptop's Intel run a GPU check's GPU half.
 - Replay is a dispatch by `origin.app`; one clock plays every loop; video is
@@ -282,10 +285,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S3 on the board of `docs/plan.md`: the shared boxes** — its first half,
-the Export box (`core/boxes/export.js`, branch `ui/boxes`), every app's
-export in one order and one set of words; then the player as After
-Effects' preview, its second half. The board holds the rest in order —
+**S3's second half on the board of `docs/plan.md`: the player as After
+Effects' preview** — branch `ui/player`, written: `core/Transport.js`,
+first, back, play, on, last, a timecode, the loop a ticked ruler; every
+browser check in the main tree, then it lands. Its first half, the Export
+box (`core/boxes/export.js`), landed the same day. The board holds the rest in order —
 track S first — each a branch landed after a gate (`docs/workflow.md`).
 
 ## Parked decisions
