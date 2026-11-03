@@ -22,7 +22,8 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `reopen.js` | an object back in its app: `/apps/<app>/?open=<id>` | **in**, 2026-09-23 |
 | `rebuild.js` | frame N of any object: `openFrames()` — anything with a recipe and more than one frame replayed by its app (a sequence, a composition that moves), a picture as itself — and the dispatch to an app's own `rebuild.js`. `draft: true` asks for a live preview's frames, which an app may make faster and near-exact; nothing saved asks for them. `scale` asks for frames at more pixels: an app draws a still again when its rebuild.js `redraws()` it, core a gamepad still (`stage/still.js`), and a handle's `scale` says what it really drew — its size is always its render's; `window(i, win)`, a part of a frame, for a print | **in**; `openFrames`, `draft` and `scale` 2026-09-24, for compose |
 | `ParamPanel.js` | lays out a widget per param, docked or floating, in drawers | **in** |
-| `widgets.js` | one widget per param type, split out of ParamPanel | **in** |
+| `widgets.js` | one widget per param type, split out of ParamPanel; a number's box is `numbox.js`'s — typed, dragged, filled, its unit inside | **in**; `numbox.js` 2026-11-03 |
+| `param-rows.js` | a param's row as ParamPanel lays it out: its mark, label and widget; two numbers on one line; the fold of rows seldom touched (`param-rows.css`) | **in**, 2026-11-03, S2b |
 | `Drawer.js` | a collapsible section — what every panel is made of | **in**, 2026-09-23 |
 | `Cards.js` | a list of small param panels, each from its own catalogue entry's schema — filter's chain, a model's shapes; `recipe()` is `[{ id, params, on }]`; `choose()` marks one card, and with `fold` it is the only one open, the others a line each; `duplicate()` puts an entry again after itself; `inner` is a list inside each card, kept in its entry under a key | **in**, 2026-10-06, moved from filter when the 3D app needed it; `fold` and `inner` the same day, for a model's shapes and their modifiers |
 | `Bar.js` | the strip under every app: information only; it puts the shell in the page and tells the rulers the picture's size | **in**, 2026-09-23; the shell 2026-11-03 |
@@ -131,6 +132,14 @@ Three more schema keys, all data:
   picked from a grid of that family's own images.
 - `type: 'ground'` — a colour or `none`; one value, so a recipe cannot say
   "white, but transparent".
+
+And the bench's, since S2 and S2b (2026-11-03), how a row looks — never what
+is saved: `slider: true`, the number's slider shown under it; `unit: 'px'`,
+inside its box, not in its label; `more: true`, folded under its drawer's
+"n more", a changed value staying out; `pair: '<key>'`, this number and that
+one on one line — `pairLabel` the line's name, `axis` each box's letter,
+`link: '<bool key>'` a switch between them, `swap: true` a button that swaps
+them. A pair's halves are rows still, each with its whole label.
 
 Every slider has a typed number beside it. And the frame group changed
 meaning: `zoom` scales the object inside a canvas the format fixes, never the

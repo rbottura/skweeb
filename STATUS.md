@@ -215,6 +215,11 @@ sorts them.
   bar in every app — the search, Save, Export ▾ read from the Export box —
   the player under the viewer, and the status bar's keys for what is under
   the cursor.
+- **S2's rest** (S2b, 2026-11-03; `core/param-rows.js`, `core/numbox.js`): a
+  number's unit inside its box; width × height on one line, linked, with a
+  swap that makes the format custom, and every x/y from centre; the rows
+  seldom touched — bleed, scale, particles' jitter and prewarm — folded
+  under "n more", a changed one staying out (`check-rows`).
 - **Rulers, guides, the magnet** (S8, 2026-11-03; `core/shell/rulers.js`,
   `guides.js`): in every viewer, in the picture's pixels; a guide drawn out
   of a ruler, held by its grip, gone back into it; kept per size, laid again
@@ -306,16 +311,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S2b, on its branch `ui/rows-more`, pushed, not landed: run its gate** —
-the code is in: a number's unit inside its box (`unit`, 45 labels split;
-`core/numbox.js` split out of widgets.js), rows folded under "n more"
-(`more`: the frame's bleed and scale, particles' jitter and prewarm), two
-numbers on one line (`pair`: width × height with link and swap — a swap
-makes the format custom, `tests/frame.mjs` — and the x/y from centre), in
-`core/param-rows.js` and `.css`; the checks renamed to the labels without
-units. Left: every browser check, a `check-rows.mjs` for S2 and S2b, the
-schema keys in `docs/core-api.md`, then land. Then S5's keys and pies, once
-the author has said what G and A are.
+**S5's keys and pies, once the author has said what G and A are** — branch
+`ui/keys-pies`, `core/keys.js`: keys read by `event.code`, the left hand's
+place — Q and D a frame, Space play, S save, H the states — today's keys
+kept beside them, `key` read too for the checks; pies held on A Z E R F,
+tapped for their first act. Asked of the author: G stays the guides, or
+becomes the ground? And which pie A opens in each app — its own, by
+default? Meanwhile, S6 waits on `parent` and `parent2` in
+`docs/object-model.md`, the gabarit on its type's fields.
 
 ## Parked decisions
 
