@@ -252,7 +252,7 @@ const tiling = await page.eval(`(async () => {
 c.ok('the 3D app: a print in twelve tiles is the model drawn whole, the outline and shadows meeting',
   tiling.size.join() === '600,880' && tiling.enlarged === 1 && tiling.off < 0.002 && tiling.mean < 0.3, JSON.stringify(tiling));
 
-await page.click(`${panelRow('format')}?.querySelector('.pp-chip[title="120x176"]')`);
+await page.typeInto(`${panelRow('format')}?.querySelector('select')`, '120x176');
 await page.typeInto(`${panelRow('dpi')}?.querySelector('.pp-num')`, '50');
 await wait(300);
 const printNote = await page.eval(`document.querySelector('.pp-print-note')?.textContent || ''`);

@@ -43,7 +43,7 @@ await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Esc
 await page.typeInto(`${panelRow('bands of light — 0, smooth')}?.querySelector('.pp-num')`, '3');
 await page.typeInto(`${panelRow('outline, thousandths of its height')}?.querySelector('.pp-num')`, '4');
 await page.click(`${panelRow('shadows, on a ground of their own')}?.querySelector('input')`);
-await page.click(`${panelRow('format')}?.querySelector('.pp-chip[title="120x176"]')`);
+await page.typeInto(`${panelRow('format')}?.querySelector('select')`, '120x176');
 await page.typeInto(`${panelRow('dpi')}?.querySelector('.pp-num')`, '300');
 await wait(500);
 const note = await page.eval(`document.querySelector('.pp-print-note')?.textContent || ''`);
