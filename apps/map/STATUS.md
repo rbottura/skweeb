@@ -1,5 +1,5 @@
 # STATUS — map
-_last touched: 2026-10-22_
+_last touched: 2026-11-04_
 
 M8's app: the map editor, and a room first (`docs/roadmap.md`, M8). A map
 is the field's word for a level; the playable map is its export, as video
@@ -21,6 +21,14 @@ is a loop's, and nothing a player does enters a recipe.
 6. **Toys** — pushed, then rolled.
 
 ## Works now
+
+- **The editor a module** (S9a, 2026-11-04; `main.js` on core's
+  `mount.js`): `mount(host)` and `unmount()` — its keys and observer on the
+  scope, its clock stopped, its pie and its guides' switch gone with it;
+  its things disposed with it (`things.js` `dispose`), and a thing taken off
+  while it opened lets its frames go as they come, where before they were
+  kept. The player, `play/`, stays a page of its own: a playable map is an
+  export — `check-mount`.
 
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the Export drawer, `docs/core-export.md`): the map on screen, a window at

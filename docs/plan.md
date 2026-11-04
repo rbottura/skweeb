@@ -43,8 +43,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S7 | the graph over the page: S7a the graph, S7b compare and merge, S7c open in | `ui/graph`, `ui/merge`, `ui/open-in` | M | landed 2026-11-03, its three bricks |
 | S8 | rulers, guides, magnetism, F; the gabarit | `ui/guides` | M | rulers, guides, the magnet and F landed 2026-11-03; the gabarit's type waits on the author |
 | S2b | S2's rest: the unit in the box, the fold of rows seldom touched, a pair on one line | `ui/rows-more` | S | landed 2026-11-03 |
-| S9 | every app a module; the scene | `scene/host` | L | ready |
-| S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9, S11 |
+| S9a | every app a module: `mount(host)`, `unmount()`, a scope | `scene/host` | M | landed 2026-11-04: the nine on core's kit; the players' pages wait on the author |
+| S9b | the vault, an app: full screen, the canvas showing what is chosen | `scene/vault` | S | needs S9a |
+| S9c | *cluster*, the scene: one 2D canvas handed to the app mounted, the last frame held, the panels moving | `scene/cluster` | L | needs S9a, S9b |
+| S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
 | S11 | the space viewer's own bench | — | M | side bench, before S10 |
 | U8a | the shared boxes: one contract, Export first | — | — | → S3 |
 | U8b | the player and the Stack, as boxes | — | — | → S3 |
@@ -121,6 +123,11 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
+- **The players in cluster** (S9a): map's player (`play/`) and the rig's
+  puppet stay pages of their own — a playable map is an export, a puppet
+  worn is a performance OBS follows by its address. Mounted in cluster, the
+  puppet would turn the camera on there, and its address — rewritten every
+  change — would be the scene's. If nothing is said: pages of their own.
 - **The gabarit, a type** (S8): a format and its guides as an object, made
   for its format (`docs/scene.md`) — its fields to confirm before S8.
 - **Notes on each app** (U9): given in part on the bench, 2026-11-03.
@@ -176,11 +183,7 @@ taking what it uses: what rule 4's eased cap leaves to split is then
 seams, never copies. *Done when* no check defines a helper another has.
 
 **C10 — the checks several at a time, picked by what a change reaches** ·
-landed 2026-11-04, `clean/checks`. The author's ask, after two runs of
-every check: "il y a t-il un moyen d'accélérer le processus de check ?".
-`scripts/checks.mjs` runs them four at a time, the longest first, a failure
-again alone; `scripts/reach.mjs` picks them by the pages a change reaches;
-`--gate` adds the unit tests and rule 4 (`docs/workflow.md`, *The gate*).
+landed 2026-11-04, `clean/checks`: `docs/workflow.md`, *The gate*.
 
 ## U — the UI redesigned: boxes, layout, theme
 
@@ -238,11 +241,7 @@ tabs (U7).
 
 What the bench settled, the bricks and their order are `docs/scene.md`; the
 bench itself is https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm, its
-source its published files. **S1 — the dark theme** · `ui/theme` · M: the
-bench's tokens, the author's keep, into `core/theme.css`; an app's
-stylesheet still says only how its columns lie, so every app changes at
-once. *Done when* every browser check is green on it and the author has
-seen three apps in it.
+source its published files. **S1 — the dark theme** · landed 2026-11-03.
 
 ## L — layers and smart objects
 

@@ -21,6 +21,8 @@
  * BroadcastChannel, is the app as it was (rule 7).
  */
 
+import { held } from './scope.js';
+
 export const CHANNEL = 'skweeb-live';
 
 /** Calls of `hello` a window may miss before it is taken for gone. */
@@ -233,7 +235,7 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
     return { id, app, title: title(), layer: parse(now.layer), why: now.why, text: now.layer };
   }
 
-  return {
+  const joined = {
     get id() { return id; },
     app,
     /** The other windows, in the order they came: their app, title, and layer or why there is none. */
@@ -268,8 +270,9 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
     },
     /** Answer what another window asks of this one: `fn(args, from)`, its answer or a promise of it. */
     answer(what, fn) { answers.set(what, fn); },
-    /** Leave the windows: a `bye`, and nothing more sent or heard. */
+    /** Leave the windows: a `bye`, and nothing more sent or heard. Twice is once. */
     leave() {
+      unheld();
       bye();
       clearInterval(asking);
       clearInterval(calling);
@@ -283,4 +286,7 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
       listeners.clear();
     },
   };
+  let unheld = () => {};
+  unheld = held(() => joined.leave());   // its app unmounted: gone from the windows (core/scope.js, S9)
+  return joined;
 }

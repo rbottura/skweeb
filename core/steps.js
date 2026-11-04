@@ -28,6 +28,7 @@ const KEEP = 200;              // the steps held, the oldest let go first
 
 const back = [], ahead = [];   // the steps behind, and those gone back over
 const cur = new Map();         // params → its values after its latest change: a step's before, its after
+const offs = new Map();        // params → what stops hearing it
 const ears = new Set();
 let open = null;               // { params, before, at }: the step being made
 let replaying = false;
@@ -46,8 +47,23 @@ export function onStep(fn) { ears.add(fn); return () => ears.delete(fn); }
 export function watch(params) {
   if (cur.has(params)) return;
   cur.set(params, snap(params));
-  params.on(() => heard(params));
+  offs.set(params, params.on(() => heard(params)));
   installKeys();
+}
+
+/**
+ * These params no more: their app unmounted (core/scope.js, S9). Their steps
+ * go with them — a Ctrl Z in the next app never lays values into one gone.
+ */
+export function unwatch(params) {
+  if (!cur.has(params)) return;
+  if (open && open.params === params) open = null;
+  offs.get(params)();
+  offs.delete(params);
+  cur.delete(params);
+  for (const list of [back, ahead]) {
+    for (let i = list.length - 1; i >= 0; i--) if (list[i].params === params) list.splice(i, 1);
+  }
 }
 
 function heard(params) {
@@ -129,7 +145,8 @@ export const counts = () => ({ back: back.length + (open ? 1 : 0), ahead: ahead.
 /** For tests: a clock of their own, and every step forgotten. */
 export function forTests({ now = null } = {}) {
   if (now) clock = now;
-  back.length = 0; ahead.length = 0; cur.clear(); open = null;
+  for (const off of offs.values()) off();
+  back.length = 0; ahead.length = 0; cur.clear(); offs.clear(); open = null;
 }
 
 /** Ctrl Z, Ctrl Y and Ctrl Shift Z — by their letter, as every program has them. */

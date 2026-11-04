@@ -18,6 +18,7 @@ import { innerOf }    from '../../core/smart.js';
 import { lookOver }   from '../../core/gpu/look.js';
 import { inkSize, placementMatrix, offPage } from './page.js';
 import { moves, tickAt, showsAt, endOf, ripple } from './time.js';
+import { listen }   from '../../core/scope.js';
 
 /**
  * An object from the vault as a preview's frames (`draft`): near exact where
@@ -50,7 +51,8 @@ export class Placements {
   constructor({ onChange = () => {}, say = () => {}, load = fromVault } = {}) {
     this.items = [];
     // A smart object took a new version: what places it, or holds it, is opened again (core/smart.js).
-    if (typeof document !== 'undefined') document.addEventListener('vault:updated', ({ detail }) => {
+    // Heard while its app is mounted (core/scope.js): unmounted, compose hears it no more.
+    if (typeof document !== 'undefined') listen(document, 'vault:updated', ({ detail }) => {
       // What follows it — not a placement pinned at a state of it, which stays as it was placed (S6b).
       const stale = this.items.filter(p => (p.block.ref === detail.id && !Number.isInteger(p.block.version)) || (p.refs || []).includes(detail.id));
       for (const p of stale) p.opening = this.open(p).then(() => this.onChange());
@@ -87,6 +89,12 @@ export class Placements {
     p.opening = this.open(p);
     this.onChange();
     return p;
+  }
+
+  /** Every entry off the page, every handle let go of, a load still running dropped: its app unmounted. */
+  dispose() {
+    for (const p of this.items) { p.loads++; if (p.handle) p.handle.dispose(); p.handle = null; }
+    this.items = [];
   }
 
   /** Take an entry off the page. */

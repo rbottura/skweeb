@@ -16,6 +16,10 @@
  *
  * Opens with no vault (rule 7): copies are dots until a sprite is chosen.
  * With no WebGPU escape time says why, as filter does; copies still draw.
+ *
+ * A module since S9 (core/mount.js): `mount(host)` and `unmount()` — its
+ * runner's GPU memory let go of when it goes, the device the page's.
+ * index.html mounts it on itself. Nothing happens at import.
  */
 
 import { fractalParams, GROUPS } from './params.js';
@@ -42,33 +46,59 @@ import { toPng, download } from '../../core/export.js';
 import { surface }        from '../../core/surface.js';
 import { createRunner }   from '../../core/gpu/runner.js';
 import { whyNoGpu }       from '../../core/gpu/device.js';
-
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
+import { appModule }      from '../../core/mount.js';
 
 /** Past this zoom a 32-bit float cannot tell neighbouring pixels apart (fractal.js, *The plane*). */
 const DEEPEST = 5e4;
 
-let params, bar, transport, player, runner = null, failing = '';
-let blank = null;                  // the picture the pass writes over: only its size matters
-let busy = false;                  // a save or a download is drawing; nothing else starts
-let sprites = null;                // the copies' sprite, or a set's members; null: dots
-let spriteTitle = '';
-let spriteIn = Promise.resolve();  // the sprite on its way in, for a reopen to wait on
-let asked = 0;                     // the latest sprite asked for; an older answer is dropped
-let clockAt = '';                  // the loop the clock was fitted to
+/** The viewer, one column of drawers, the bar below; the picture drawn on the GPU, shown on a Canvas 2D; no p5. */
+const MARKUP = `
+  <main class="app-main">
+    <section class="viewer" aria-label="fractal">
+      <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+    </section>
+    <div class="app-side" id="side"></div>
+  </main>`;
 
-/** The clock plays an idle's frames at its rate; a still is one frame. */
-const clock = new Playhead({
-  onShow: tick => { if (transport) transport.show(tick); draw(); },
-  onState: () => { if (transport) transport.state(); },
-});
+const app = appModule('fractals', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
 
-async function boot() {
-  bar = new Bar({ app: 'fractals', mount: document.querySelector('.app'),
+/** fractals in `host`, started — a saved still or idle opened if the page asks for it (core/mount.js). */
+export const mount = host => app.mount(host);
+/** fractals out of its host, everything it held let go of: its keys, its runner, its clock. */
+export const unmount = () => app.unmount();
+const mounted = () => !!app.scope;
+
+// One app mounted at a time: its state, made again by each mount (`start`).
+let root, canvas, ctx, clock, pending;
+let params, bar, transport, player, runner, failing, blank, busy, sprites, spriteTitle, spriteIn, asked, clockAt;
+
+async function start(host, mine) {
+  root = host;
+  canvas = root.querySelector('#stage');
+  ctx = canvas.getContext('2d');
+  params = bar = transport = player = runner = null;
+  failing = '';
+  blank = null;                  // the picture the pass writes over: only its size matters
+  busy = pending = false;        // a save or a download drawing, nothing else starts; a paint asked for, not made
+  sprites = null;                // the copies' sprite, or a set's members; null: dots
+  spriteTitle = '';
+  spriteIn = Promise.resolve();  // the sprite on its way in, for a reopen to wait on
+  asked = 0;                     // the latest sprite asked for; an older answer is dropped
+  clockAt = '';                  // the loop the clock was fitted to
+  // The clock plays an idle's frames at its rate; a still is one frame. Stopped at the unmount.
+  clock = new Playhead({
+    onShow: tick => { if (transport) transport.show(tick); draw(); },
+    onState: () => { if (transport) transport.state(); },
+  });
+  mine.hold(() => clock.dispose());
+  try { await boot(mine); } catch (err) { if (bar) bar.announce('failed to boot: ' + err.message); throw err; }
+}
+
+async function boot(mine) {
+  bar = new Bar({ app: 'fractals', mount: root,
                   keys: 'drag pan · wheel zoom · space play · , . frame · S save · V vault' });
   params = fractalParams();
-  const panel = new ParamPanel(params, { title: 'fractal', mount: document.getElementById('side'), groups: GROUPS });
+  const panel = new ParamPanel(params, { title: 'fractal', mount: root.querySelector('#side'), groups: GROUPS });
 
   player = panel.addDrawer({ id: 'player', title: 'Sequence player', before: 'format' });
   transport = new Transport({ clock, mount: player.body, busy: () => busy });
@@ -94,14 +124,18 @@ async function boot() {
     fitClock();
     draw();
   });
-  new ResizeObserver(() => draw()).observe(canvas.parentElement);
+  const sized = new ResizeObserver(() => draw());
+  sized.observe(canvas.parentElement);
+  mine.hold(() => sized.disconnect());
   wirePointer({ canvas, params });
-  wireKeys();
+  wireKeys(mine);
   fitClock();
 
   // The runner is the page's once its chain is compiled: a draw asked for in
   // between — a resize, a param — would run a chain not ready yet, and throw.
   const gpu = await createRunner();
+  if (gpu) mine.hold(() => gpu.dispose());   // its GPU memory, not the device: that is the page's
+  if (mine.closed) return;
   if (!gpu) bar.announce(`no escape time here — ${whyNoGpu()}; copies still draw`);
   else {
     try {
@@ -110,6 +144,7 @@ async function boot() {
       failing = err.message;
       bar.announce(err.message);
     }
+    if (mine.closed) return;
     runner = gpu;
   }
   await openRequested();
@@ -120,7 +155,7 @@ async function boot() {
 async function openRequested() {
   try {
     const opened = await requested('fractals');
-    if (!opened) return;
+    if (!opened || !mounted()) return;
     params.restore(opened.object.recipe);
     await spriteIn;
     fitClock();
@@ -155,7 +190,7 @@ async function chooseSprite(id) {
   if (!id) return draw();
   try {
     const got = await loadSprites(id);
-    if (ask !== asked) return;
+    if (ask !== asked || !mounted()) return;
     sprites = got.images.length ? got.images : null;
     spriteTitle = got.title;
     bar.announce(`${got.title}: ${got.images.length} sprite${got.images.length === 1 ? '' : 's'}`);
@@ -167,10 +202,8 @@ async function chooseSprite(id) {
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
-let pending = false;
-
 function draw() {
-  if (pending) return;
+  if (pending || !mounted()) return;
   pending = true;
   requestAnimationFrame(() => { pending = false; paint(); });
 }
@@ -185,6 +218,7 @@ function render(values, w, h) {
 }
 
 function paint() {
+  if (!mounted() || !params) return;
   const v = valuesAt(params.values, clock.tick);
   const size = { width: v.width, height: v.height };
   const view = viewFactor(canvas, size, v.scale);
@@ -265,7 +299,7 @@ async function leave(action) {
     bar.announce('failed: ' + err.message);
   } finally {
     busy = false;
-    Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+    refreshVault();
     draw();
   }
 }
@@ -301,9 +335,9 @@ function downloadPicture() {
 
 // ── Keys ─────────────────────────────────────────────────────────────────────
 
-function wireKeys() {
+function wireKeys(mine) {
   const vault = new VaultPanel();
-  document.addEventListener('keydown', e => {
+  mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
@@ -313,10 +347,9 @@ function wireKeys() {
     if (e.key === ',') { clock.pause(); clock.step(-1); }
     if (e.key === '.') { clock.pause(); clock.step(1); }
   });
-  Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+  refreshVault();
 }
 
-boot().catch(err => {
-  console.error('[fractals] failed to boot:', err);
-  if (bar) bar.announce('failed to boot: ' + err.message);
-});
+function refreshVault() {
+  Vault.refresh().then(ok => { if (bar) bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'); });
+}

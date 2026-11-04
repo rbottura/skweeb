@@ -62,6 +62,14 @@ async function create() {
   // `shade`), and turning the map on later would rebuild every lit material.
   renderer.shadowMap.enabled = true;
   await renderer.init();
+  // three's init starts a frame loop of its own that runs as long as the page
+  // does: this renderer draws when asked, and a render does what that loop's
+  // frame would — its nodes' frame, its `info` reset by `draw` below — so it
+  // is stopped, as three stops it itself for a WebXR session. Found by
+  // check-mount (S9): the 3D app unmounted, frames were still asked for.
+  // `_animation` is three's own, pinned at r186 (core/libs/three/README.md).
+  renderer._animation.stop();
+  renderer.info.autoReset = false;
   renderer.setClearColor(0x000000, 0);
 
   const webgpu = !!renderer.backend.isWebGPUBackend;
@@ -80,6 +88,7 @@ async function create() {
         w = width;
         h = height;
       }
+      renderer.info.reset();             // a frame's counts, as three's own loop reset them each frame
       renderer.render(scene, camera);
       return canvas.transferToImageBitmap();
     },

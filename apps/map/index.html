@@ -11,29 +11,13 @@
 
 <body>
   <!--
-    The map's panel on the left, the map between, the things on it on the
-    right; the bar under all three is core's. No p5: Canvas 2D.
+    The app is a module (main.js, S9): it builds itself in a host and takes
+    itself out again, so a scene can mount it too. Here, alone, its host is
+    this page.
   -->
-  <div class="app">
-    <main class="app-main">
-      <div class="app-side" id="map-side"></div>
-      <section class="viewer" aria-label="map">
-        <div class="viewer-head">
-          <button class="nb-btn" id="tool-tiles" type="button" aria-pressed="true"
-                  title="A press paints the chosen tile [1]">tiles</button>
-          <button class="nb-btn" id="tool-things" type="button" aria-pressed="false"
-                  title="A press picks up the thing under it, a drag moves it [2]">things</button>
-          <button class="nb-btn" id="tool-walls" type="button" aria-pressed="false"
-                  title="A press marks a cell that cannot be walked, a drag a line of them; the right button clears [3]">walls</button>
-          <button class="nb-btn" id="guides" type="button" aria-pressed="true"
-                  title="The grid, and the chosen thing's box — never in anything saved [Z]">guides</button>
-        </div>
-        <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
-      </section>
-      <div class="app-side" id="things-side"></div>
-    </main>
-  </div>
-
-  <script type="module" src="./main.js"></script>
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
 </body>
 </html>

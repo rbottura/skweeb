@@ -50,7 +50,8 @@ import { applies }    from './params.js';
 import { WIDGETS, WIDGET_TYPES } from './widgets.js';
 import { buildRow, buildPair, pairedKeys, addFold, loadFolds } from './param-rows.js';
 import { installPalette } from './Palette.js';
-import { watch, around } from './steps.js';
+import { watch, unwatch, around } from './steps.js';
+import { held }       from './scope.js';
 
 export { WIDGET_TYPES };
 
@@ -75,6 +76,8 @@ function loadPins(app) {
 function savePins(app, pins) {
   try { localStorage.setItem(pinsKey(app), JSON.stringify(pins)); } catch { /* a convenience: without storage, none kept */ }
 }
+
+const panels = new WeakMap();        // params → how many panels show it
 
 export class ParamPanel {
   /**
@@ -104,6 +107,7 @@ export class ParamPanel {
     this._paint();
     this._wirePeek();
     installPalette();                // ² or Ctrl K: every control and act of the page, by name
+    panels.set(params, (panels.get(params) || 0) + 1);
     watch(params);                   // every change a step: Ctrl Z, Ctrl Y (core/steps.js, S6c)
     if (this._mount) this.show();
 
@@ -111,12 +115,13 @@ export class ParamPanel {
     // move the widgets too, or the panel starts lying about the values. The
     // value as it is now, not as announced: a listener heard before this one
     // may already have moved it on (the frame chain gives a typed width back).
-    params.on(key => {
+    this._off = params.on(key => {
       const row = this._rows.get(key);
       if (row) row.widget.sync(this._params.get(key));
       this._refresh();
     });
     this._refresh();
+    this._unheld = held(() => this.remove());   // its app unmounted (core/scope.js, S9)
   }
 
   show()   { this._open = true;  this._root.classList.add('pp--visible'); }
@@ -134,8 +139,22 @@ export class ParamPanel {
   /** The title bar, for an app's buttons beside Reset — a filter's in a chain. */
   get head() { return this._head; }
 
-  /** Take the panel off the page; its params go with whoever holds them. */
-  remove() { this._root.remove(); if (this._unpeek) this._unpeek(); }
+  /**
+   * Take the panel off the page, and what it hears: its keys, its params, their
+   * steps, its pickers. The params go on with whoever holds them. Twice is once.
+   */
+  remove() {
+    if (this._gone) return;
+    this._gone = true;
+    this._unheld();                        // gone before its app: its scope keeps nothing of it
+    this._root.remove();
+    if (this._unpeek) this._unpeek();
+    if (this._off) this._off();
+    const left = panels.get(this._params) - 1;
+    panels.set(this._params, left);
+    if (!left) unwatch(this._params);      // its steps go with the last panel showing it
+    for (const picker of (this._pickers || new Map()).values()) picker.remove();
+  }
 
   /**
    * A drawer for something that is not a parameter.

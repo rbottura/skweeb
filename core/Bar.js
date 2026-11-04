@@ -29,6 +29,7 @@ import * as Guides from './shell/guides.js';
 import { installKeys, bound, letterOf } from './keys.js';
 import { installBindings } from './shell/bindings.js';
 import { onStep } from './steps.js';
+import { bag, held } from './scope.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -62,6 +63,8 @@ export class Bar {
       el('span', 'bar-sep bar-keys', '·'), this._keys,
     );
     mount.append(this.root);
+    this._held = bag('bar');         // what it hears off its nodes, let go of by `remove` — or its app's unmount (S9)
+    this._unheld = held(() => this.remove());
     this._holdUntil = 0;
     this._keysText = keys;
 
@@ -70,17 +73,28 @@ export class Bar {
       const top = document.createElement('skw-titlebar');
       top.setAttribute('app', app);
       mount.prepend(top);
+      this._top = top;
       import('./shell/titlebar.js').catch(err => console.warn('the title bar did not load:', err.message));
     }
-    if (typeof document !== 'undefined') document.addEventListener('pointerover', e => this._hint(e.target), { passive: true });
-    this._viewer(app);
+    if (typeof document !== 'undefined') this._held.listen(document, 'pointerover', e => this._hint(e.target), { passive: true });
+    this._viewer(app, mount);
     // The left hand (S5b): keys by their place, tapped or held for a pie (core/keys.js, core/shell/bindings.js).
     if (typeof customElements !== 'undefined') {
       installKeys();
       installBindings();
-      onStep(text => this.announce(text));     // Ctrl Z, Ctrl Y: a step back, a step on (core/steps.js)
+      this._held.hold(onStep(text => this.announce(text)));     // Ctrl Z, Ctrl Y: a step back, a step on (core/steps.js)
       import('./shell/pie.js').catch(err => console.warn('the pies did not load:', err.message));
     }
+  }
+
+  /** Off the page, and deaf; the title bar with it, when it put one there. Twice is once. */
+  remove() {
+    if (this._held.closed) return;
+    this._unheld();
+    this._held.close();
+    clearTimeout(this._release);
+    this.root.remove();
+    if (this._top) this._top.remove();
   }
 
   /** The left hand's keys that answer in this page now, by the letters of an AZERTY. */
@@ -90,12 +104,12 @@ export class Bar {
     return [...by].map(([w, letters]) => `${letters.join(' ')} ${w}`).join(' · ');
   }
 
-  /** The rulers over the stage's padding, the viewer's tools at the end of its head — a head made if it has none. */
-  _viewer(app) {
-    const stage = typeof customElements !== 'undefined' && document.querySelector('.viewer .viewer-stage');
+  /** The rulers over the stage's padding, the viewer's tools at the end of its head — a head made if it has none. Its own app's viewer: in a scene, another may be on the page. */
+  _viewer(app, mount) {
+    const stage = typeof customElements !== 'undefined' && mount.querySelector('.viewer .viewer-stage');
     if (!stage) return;
     Guides.forApp(app);
-    Guides.on('say', text => this.announce(text));
+    this._held.hold(Guides.on('say', text => this.announce(text)));
     if (!stage.querySelector(':scope > skw-rulers')) stage.append(document.createElement('skw-rulers'));
     const viewer = stage.closest('.viewer');
     let head = viewer.querySelector(':scope > .viewer-head');

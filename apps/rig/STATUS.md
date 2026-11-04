@@ -1,5 +1,5 @@
 # STATUS — rig
-_last touched: 2026-10-22_
+_last touched: 2026-11-04_
 
 M9's app (`docs/roadmap.md`, M9): a drawing made of marks, rigged at its
 marks. Its strokes are its bones; each stamp rides its own stroke's and
@@ -161,6 +161,13 @@ is cut from about fifty of the camera's pixels and shown larger: soft.
    the same; a set, `role: 'character'`, for M8's avatar.
 
 ## Works now
+
+- **A module** (S9a, 2026-11-04; `main.js` on core's `mount.js`):
+  `mount(host)` and `unmount()` — its keys and observer on the scope, its
+  clock stopped; R, kept from core while it is mounted, core's again when it
+  goes — `check-mount`. The puppet, `puppet/`, stays a page of its own:
+  worn in OBS by its address, its camera its page's — the author's to say
+  otherwise (`docs/plan.md`, *Waiting on the author*).
 
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the Export drawer, `docs/core-export.md`): the pose on screen, drawn again

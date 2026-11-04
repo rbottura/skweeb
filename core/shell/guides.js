@@ -20,6 +20,8 @@
  * only for the magnet and the placing — particles' handles (apps/particles/).
  */
 
+import { held } from '../scope.js';
+
 const SIZES = 12;            // sizes remembered per app
 const NEAR = 8;              // screen pixels the magnet pulls from
 
@@ -224,6 +226,10 @@ export const WORDS = { c: 'the centre', n: 'the top', ne: 'the top right', e: 't
  */
 export function placeable(list) {
   for (const it of list) s.items.set(it.id, it);
+  held(() => {                          // its app unmounted: nothing of it left to place (core/scope.js, S9)
+    for (const it of list) if (s.items.get(it.id) === it) s.items.delete(it.id);
+    if (s.sel && !s.items.has(s.sel)) s.sel = null;
+  });
 }
 
 /** Whether the page has anything to place: F is core's only then. */

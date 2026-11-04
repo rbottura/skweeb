@@ -1,5 +1,5 @@
 # STATUS — particles
-_last touched: 2026-11-03_
+_last touched: 2026-11-04_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
 and *Done when* are in `docs/roadmap-done.md`, M6 — a torch loop that closes
@@ -26,6 +26,13 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **A module** (S9, 2026-11-04; `main.js` on core's `mount.js` and
+  `scope.js`): `mount(host)` builds the app in any host and `unmount()`
+  takes it out — its panels, bar, title bar and vault panel gone, its keys
+  and pies no more core's, its params' steps forgotten, a bye to the other
+  windows, every listener it put on the document and the window off.
+  `index.html` mounts it on itself; the markup it had is the module's.
+  The first of the suite, as the bench's was — `check-mount`.
 - **The viewer's magnet and F** (S8, 2026-11-03; `pointer.js`, core's
   `shell/guides.js`): a handle dragged is pulled to the picture's edges, its
   centre and the guides, Ctrl held not; the one last pressed is ringed, and

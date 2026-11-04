@@ -17,7 +17,7 @@
 .viewer-note { margin-left: auto; font: 400 12px var(--font-num); color: var(--fg-2); }
 
 /* The attractor can be put down by hand when it is a point. */
-body.can-point .viewer-stage canvas { cursor: crosshair; }
+.can-point .viewer-stage canvas { cursor: crosshair; }
 
 /* ── The dot-sets made this visit ──────────────────────────────────────────── */
 

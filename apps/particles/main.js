@@ -14,6 +14,10 @@
  * shape — and a field may come from one — a fractal: its points, its field,
  * loaded beside the recipe (core/points.js, core/fields.js). S saves the loop (save.js), and the vault plays it back through
  * rebuild.js; `?open=<id>` brings a saved one back to work on.
+ *
+ * A module since S9 (core/mount.js): `mount(host)` and `unmount()`, so a
+ * scene can mount another in its place; index.html mounts it on itself, and
+ * it runs alone as ever (rule 7). Nothing happens at import.
  */
 
 import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROUPS } from './params.js';
@@ -39,41 +43,82 @@ import { drawGuides }     from './guides.js';
 import { selected }       from '../../core/shell/guides.js';
 import { setAppPie, setOverlay, enumPie } from '../../core/shell/bindings.js';
 import { wirePointer }    from './pointer.js';
+import { appModule }      from '../../core/mount.js';
 
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
+/**
+ * Three columns, as compose has: what the particles do on the left, the
+ * picture between, the picture's own settings on the right. The bar under
+ * all three is core's. No p5: Canvas 2D.
+ */
+const MARKUP = `
+  <main class="app-main">
+    <div class="app-side" id="emit-side"></div>
+    <section class="viewer" aria-label="particles">
+      <div class="viewer-head">
+        <button class="nb-btn" id="guides" type="button" aria-pressed="true"
+                title="The emitter, the fields and the pull over the preview, with handles to drag — never saved [Z]">guides</button>
+      </div>
+      <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+    </section>
+    <div class="app-side" id="picture-side"></div>
+  </main>`;
 
-let emit, picture, bar, transport, player;
-let clockFps = 0;
-let shownView = 1;         // canvas pixels per picture pixel, as last painted
-let guidesOn = remembered();   // the guides over the preview: the viewer's, not the recipe's
-const guidesBtn = document.getElementById('guides');
-let model = null;          // the recipe, prepared: remade when a value changes, not every frame
-let shown = [];            // the particles on screen, for the bar
-let sprites = null;        // the chosen set's images, or null: dots
-let spritesTitle = '';     // and its title, for a saved object's
-let loading = false;       // a set is on its way in: nothing saves until it is
-let spritesIn = Promise.resolve();   // the set on its way in, for a reopen to wait on
-let asked = 0;             // the latest set asked for; an older answer is dropped
-const given = { points: null, field: null };   // what the emitter names, loaded beside the recipe
-const asking = { points: 0, field: 0 };        // the latest asked for, as `asked` is
-const coming = new Set();  // loads on their way in, for a reopen and a save to wait on
-let busy = false;          // a save or a download is drawing; nothing else starts
-const painted = [];        // when the last paints were, while playing
+const app = appModule('particles', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
 
-/** The clock plays the picture's frames at its rate; a tick is a time, tick / fps. */
-const clock = new Playhead({
-  onShow: tick => { if (transport) transport.show(tick); draw(); },
-  onState: () => { if (transport) transport.state(); if (!clock.playing) bar.rate(null); },
-});
+/** particles in `host`, started — a saved one opened if the page asks for it (core/mount.js). */
+export const mount = host => app.mount(host);
+/** particles out of its host, everything it held let go of: its keys, its windows, its clock. */
+export const unmount = () => app.unmount();
+const mounted = () => !!app.scope;
 
-async function boot() {
-  bar = new Bar({ app: 'particles', mount: document.querySelector('.app'),
+// One app mounted at a time: its state, made again by each mount (`start`).
+let root, canvas, ctx, guidesBtn, clock, emit, picture, bar, transport, player;
+let clockFps, shownView, guidesOn, model, shown, sprites, spritesTitle, loading, spritesIn, asked;
+let given, asking, coming, busy, painted, pending;
+
+async function start(at, mine) {
+  root = at;
+  canvas = root.querySelector('#stage');
+  ctx = canvas.getContext('2d');
+  guidesBtn = root.querySelector('#guides');
+  clockFps = 0;
+  shownView = 1;           // canvas pixels per picture pixel, as last painted
+  guidesOn = remembered(); // the guides over the preview: the viewer's, not the recipe's
+  model = null;            // the recipe, prepared: remade when a value changes, not every frame
+  shown = [];              // the particles on screen, for the bar
+  sprites = null;          // the chosen set's images, or null: dots
+  spritesTitle = '';       // and its title, for a saved object's
+  loading = false;         // a set is on its way in: nothing saves until it is
+  spritesIn = Promise.resolve();   // the set on its way in, for a reopen to wait on
+  asked = 0;               // the latest set asked for; an older answer is dropped
+  given = { points: null, field: null };   // what the emitter names, loaded beside the recipe
+  asking = { points: 0, field: 0 };        // the latest asked for, as `asked` is
+  coming = new Set();      // loads on their way in, for a reopen and a save to wait on
+  busy = false;            // a save or a download is drawing; nothing else starts
+  painted = [];            // when the last paints were, while playing
+  pending = false;         // a paint asked for, not yet made
+  emit = picture = bar = transport = player = null;
+  // The clock plays the picture's frames at its rate; a tick is a time, tick / fps. Stopped at the unmount.
+  clock = new Playhead({
+    onShow: tick => { if (transport) transport.show(tick); draw(); },
+    onState: () => { if (transport) transport.state(); if (!clock.playing && bar) bar.rate(null); },
+  });
+  mine.hold(() => clock.dispose());
+  try {
+    await boot(mine);
+  } catch (err) {
+    if (bar) bar.announce('failed to boot: ' + err.message);
+    throw err;
+  }
+}
+
+async function boot(mine) {
+  bar = new Bar({ app: 'particles', mount: root,
                   keys: 'drag the handles · Z guides · A emitter · F place · space play · , . frame · S save · V vault' });
   emit = emitParams();
   picture = pictureParams();
-  new ParamPanel(emit, { title: 'particles', mount: document.getElementById('emit-side'), groups: EMIT_GROUPS });
-  const side = new ParamPanel(picture, { title: 'picture', mount: document.getElementById('picture-side'),
+  new ParamPanel(emit, { title: 'particles', mount: root.querySelector('#emit-side'), groups: EMIT_GROUPS });
+  const side = new ParamPanel(picture, { title: 'picture', mount: root.querySelector('#picture-side'),
                                          groups: PICTURE_GROUPS });
 
   player = side.drawer('player');
@@ -93,16 +138,18 @@ async function boot() {
     else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'));
     else draw();
   });
-  new ResizeObserver(() => draw()).observe(canvas.parentElement);
+  const sized = new ResizeObserver(() => draw());
+  sized.observe(canvas.parentElement);
+  mine.hold(() => sized.disconnect());
   wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn, chose: () => draw() });
   guidesBtn.addEventListener('click', () => showGuides(!guidesOn));
   showGuides(guidesOn);
   // The left hand (core/shell/bindings.js): Z shows the guides — G is the ground's since S5b — and A picks the emitter's shape.
   setOverlay({ label: 'guides', on: () => guidesOn, toggle: () => showGuides(!guidesOn) });
   setAppPie(enumPie(emit, 'shape', 'emitter'));
-  wireKeys();
+  wireKeys(mine);
   remake();
-  if (await openRequested()) return;
+  if (await openRequested() || mine.closed) return;
   clock.play();
 }
 
@@ -115,7 +162,7 @@ async function boot() {
 async function openRequested() {
   try {
     const opened = await requested('particles');
-    if (!opened) return false;
+    if (!opened || !mounted()) return false;
     const { recipe } = opened.object;
     emit.restore(recipe.emit);
     picture.restore(recipe.picture);
@@ -195,7 +242,7 @@ function bring(what) {
     if (ask === asking[what]) bar.announce(`could not open ${what === 'field' ? 'the field' : "the emitter's object"}: ${err.message}`);
   }).finally(() => {
     coming.delete(done);
-    if (ask === asking[what]) remake();
+    if (ask === asking[what] && mounted()) remake();
   });
   coming.add(done);
 }
@@ -294,16 +341,14 @@ function remembered() {
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
-let pending = false;
-
 function draw() {
-  if (pending) return;
+  if (pending || !mounted()) return;
   pending = true;
   requestAnimationFrame(() => { pending = false; paint(); });
 }
 
 function paint() {
-  if (!model) return;
+  if (!model || !mounted()) return;
   const p = picture.values;
   const size = pictureSize(p);
   const view = viewFactor(canvas, size, p.scale);
@@ -335,9 +380,9 @@ function rate() {
 
 // ── Keys, the vault ──────────────────────────────────────────────────────────
 
-function wireKeys() {
+function wireKeys(mine) {
   const vault = new VaultPanel();
-  document.addEventListener('keydown', e => {
+  mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
@@ -351,10 +396,5 @@ function wireKeys() {
 }
 
 function refreshVault() {
-  Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+  Vault.refresh().then(ok => { if (bar) bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'); });
 }
-
-boot().catch(err => {
-  console.error('[particles] failed to boot:', err);
-  if (bar) bar.announce('failed to boot: ' + err.message);
-});

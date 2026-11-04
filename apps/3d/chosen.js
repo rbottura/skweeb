@@ -22,9 +22,10 @@ const KEYS = { w: 'move', e: 'turn', r: 'size' };
  * @param {import('../../core/Cards.js').Cards} opts.cards   the shapes
  * @param {import('./scene.js').Model} opts.model            as last drawn
  * @param {() => void} opts.onChange                          something to draw again
+ * @param {ParentNode} [opts.root]                            the app's own nodes, where its buttons are
  * @returns {{handles: Handles, paint(): void, key(e: KeyboardEvent): boolean}}
  */
-export function wireChosen({ cards, model, onChange }) {
+export function wireChosen({ cards, model, onChange, root = document }) {
   const handles = new Handles({
     onMove(mesh, how) {
       const entry = cards.chosen;
@@ -33,10 +34,10 @@ export function wireChosen({ cards, model, onChange }) {
     onChange,
   });
 
-  const modes = Object.fromEntries(Object.keys(MODES).map(name => [name, document.getElementById('handle-' + name)]));
+  const modes = Object.fromEntries(Object.keys(MODES).map(name => [name, root.querySelector('#handle-' + name)]));
   for (const [name, b] of Object.entries(modes)) b.addEventListener('click', () => mode(name));
-  const copyBtn = document.getElementById('duplicate');
-  const outBtn = document.getElementById('remove');
+  const copyBtn = root.querySelector('#duplicate');
+  const outBtn = root.querySelector('#remove');
   copyBtn.addEventListener('click', duplicate);
   outBtn.addEventListener('click', remove);
 

@@ -10,6 +10,9 @@
  *
  * Where there is no WebGPU the page opens all the same (rule 7): the chain
  * can be built, the source shows as it is, and the bar says why.
+ *
+ * A module since S9 (core/mount.js): `mount(host)` and `unmount()` — its runner's GPU memory, its
+ * source, a window followed let go of when it goes; the device is the page's. Nothing at import.
  */
 
 import { filterParams, GROUPS } from './params.js';
@@ -29,41 +32,66 @@ import { Playhead }             from '../../core/playback.js';
 import { Vault }                from '../../core/vault.js';
 import { createRunner, reachOf } from '../../core/gpu/runner.js';
 import { whyNoGpu }             from '../../core/gpu/device.js';
+import { appModule }            from '../../core/mount.js';
 
-let params, panel, bar, transport, chain;
-let followed = null;     // another window followed as the source (following.js)
-let runner = null;       // core/gpu's, or null where there is no WebGPU
-let source = null;       // source.js's handle
-let failing = '';        // why the chain does not compile, until it does
-let asked = 0;           // the latest source asked for; an older answer is dropped
-let busy = false;        // a save is running; nothing else may start
-const buttons = {};
+/** The viewer, one column of drawers, the bar below. No p5: the filters run on the GPU, the page is Canvas 2D round them. */
+const MARKUP = `
+  <main class="app-main">
+    <section class="viewer" aria-label="filter output">
+      <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+    </section>
+    <div class="app-side" id="side"></div>
+  </main>`;
 
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
+const app = appModule('filter', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
 
-/** The clock: a loop plays at its own rate, and a scrub is one frame filtered. */
-const clock = new Playhead({
-  onShow: tick => { if (transport) transport.show(tick); draw(); },
-  onState: () => { if (transport) transport.state(); if (!clock.playing) bar.rate(null); },
-});
+/** filter in `host`, started — a saved chain opened, or a window followed, if the page asks for it (core/mount.js). */
+export const mount = host => app.mount(host);
+/** filter out of its host, everything it held let go of: its keys, its runner, its source, its clock. */
+export const unmount = () => app.unmount();
+const mounted = () => !!app.scope;
+
+// One app mounted at a time: its state, made again by each mount (`start`).
+let root, canvas, ctx, clock, buttons, pending, painted;
+let params, panel, bar, transport, chain, followed, runner, source, failing, asked, busy;
+
+async function start(host, mine) {
+  root = host;
+  canvas = root.querySelector('#stage');
+  ctx = canvas.getContext('2d');
+  buttons = {};
+  params = panel = bar = transport = chain = null;
+  // A window followed as the source (following.js); core/gpu's runner, null with no WebGPU; source.js's handle.
+  followed = runner = source = null;
+  failing = '';            // why the chain does not compile, until it does
+  asked = 0;               // the latest source asked for; an older answer is dropped
+  busy = pending = false;  // a save running, nothing else may start; a paint asked for, not made
+  painted = [];            // when the last paints were, while a loop plays
+  // The clock: a loop plays at its own rate, and a scrub is one frame filtered. Stopped at the unmount.
+  clock = new Playhead({
+    onShow: tick => { if (transport) transport.show(tick); draw(); },
+    onState: () => { if (transport) transport.state(); if (!clock.playing && bar) bar.rate(null); },
+  });
+  mine.hold(() => clock.dispose());
+  mine.hold(() => { if (source) source.dispose(); source = null; });
+  try { await boot(mine); } catch (err) { if (bar) bar.announce('failed to boot: ' + err.message); throw err; }
+}
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 
-async function boot() {
+async function boot(mine) {
   params = filterParams();
-  bar = new Bar({
-    app: 'filter',
-    mount: document.querySelector('.app'),
-    keys: 'V vault · S save · space play · ← → step · drop an image',
-  });
-  panel = new ParamPanel(params, { title: 'filter', mount: document.getElementById('side'), groups: GROUPS });
+  bar = new Bar({ app: 'filter', mount: root, keys: 'V vault · S save · space play · ← → step · drop an image' });
+  panel = new ParamPanel(params, { title: 'filter', mount: root.querySelector('#side'), groups: GROUPS });
   params.on(onParamChange);
   buildDrawers();
 
-  runner = await createRunner();
+  const made = await createRunner();
+  if (mine.closed) { if (made) made.dispose(); return; }
+  runner = made;
+  mine.hold(() => { if (made) made.dispose(); });   // its GPU memory, not the device: that is the page's
   if (!runner) bar.announce(`no GPU filters here — ${whyNoGpu()}; the source shows as it is`);
-  wireKeys();
+  wireKeys(mine);
   onChainChange();
   await openRequested();
 }
@@ -76,7 +104,7 @@ async function boot() {
 async function openRequested() {
   try {
     const opened = await requested('filter');
-    if (!opened) return;
+    if (!opened || !mounted()) return;
     const { object } = opened;
     const recipe = object.recipe;
     if (!recipe) return bar.announce(`${object.id} was saved from a file, as a leaf — there is no chain to bring back`);
@@ -187,7 +215,7 @@ async function loadSource(id) {
   bar.say('opening…');
   try {
     const next = await fromVault(id);
-    if (ask !== asked) return next.dispose();        // another was chosen meanwhile
+    if (ask !== asked || !mounted()) return next.dispose();        // another was chosen meanwhile, or filter went
     setSource(next);
   } catch (err) {
     if (ask !== asked) return;
@@ -288,16 +316,14 @@ async function look() {
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
-let pending = false;
-const painted = [];      // when the last paints were, while a loop plays
-
 function draw() {
-  if (pending) return;
+  if (pending || !mounted()) return;
   pending = true;
   requestAnimationFrame(() => { pending = false; paint(); });
 }
 
 function paint() {
+  if (!mounted() || !chain) return;
   if (!source) {
     canvas.width = 480;
     canvas.height = 300;
@@ -350,10 +376,10 @@ function rate() {
 
 // ── Keys, drops, the vault ───────────────────────────────────────────────────
 
-function wireKeys() {
+function wireKeys(mine) {
   const vault = new VaultPanel();
 
-  document.addEventListener('keydown', e => {
+  mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
@@ -365,8 +391,8 @@ function wireKeys() {
   });
 
   // Dropping an image is the fastest way in, and it needs no vault.
-  document.addEventListener('dragover', e => e.preventDefault());
-  document.addEventListener('drop', e => {
+  mine.listen(document, 'dragover', e => e.preventDefault());
+  mine.listen(document, 'drop', e => {
     e.preventDefault();
     const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) loadFile(file);
@@ -376,10 +402,5 @@ function wireKeys() {
 }
 
 function refreshVaultState() {
-  Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+  Vault.refresh().then(ok => { if (bar) bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'); });
 }
-
-boot().catch(err => {
-  console.error('[filter] failed to boot:', err);
-  if (bar) bar.announce('failed to boot: ' + err.message);
-});

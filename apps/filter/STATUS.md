@@ -1,5 +1,5 @@
 # STATUS — filter
-_last touched: 2026-10-22_
+_last touched: 2026-11-04_
 
 M5's app: any picture or loop through a chain of GPU filters, on the kit in
 `core/gpu/` (`docs/core-api.md`, *gpu/*). The plan and *Done when* are in
@@ -24,6 +24,12 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
    drop shadow, palette lock.
 
 ## Works now
+
+- **A module** (S9a, 2026-11-04; `main.js` on core's `mount.js`):
+  `mount(host)` and `unmount()` — its keys and drops on the scope, its
+  clock stopped, its source disposed, its runner's GPU memory let go of,
+  never the device, which is the page's; following a window, it stops with
+  the app (`following.js`, core's `listen` and `held`) — `check-mount`.
 
 - **Another window as the source, live** (2026-10-07, M11's brick 4;
   `following.js`, `core/send.js`; `check-send`). *Send to ▸ filter* in

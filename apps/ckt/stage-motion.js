@@ -43,9 +43,11 @@ export class MotionStage {
    * @param {string[]} opts.legacy     the nine shipped dataset ids
    * @param {(action: () => Promise<?string>) => void} opts.run  the app's busy guard
    * @param {() => boolean} opts.busy
+   * @param {{ now: Date, items: object[] }} [opts.visit]  this visit: kept from one mount to the next (main.js)
    */
-  constructor({ params, panel, canvas, bar, legacy, run, busy }) {
+  constructor({ params, panel, canvas, bar, legacy, run, busy, visit = null }) {
     this.params = params;
+    this.visit = visit;
     this.panel = panel;
     this.canvas = canvas;
     this.bar = bar;
@@ -86,13 +88,21 @@ export class MotionStage {
     // The preview is drawn at the size the viewer shows it; when that changes,
     // so does the canvas.
     if (typeof ResizeObserver !== 'undefined' && canvas.parentElement) {
-      new ResizeObserver(() => { this.reframe(); this.draw(); }).observe(canvas.parentElement);
+      this.sized = new ResizeObserver(() => { this.reframe(); this.draw(); });
+      this.sized.observe(canvas.parentElement);
     }
+  }
+
+  /** Its app unmounted: the clock stopped, the canvas no longer watched. */
+  dispose() {
+    this.clock.dispose();
+    if (this.sized) this.sized.disconnect();
   }
 
   /** The things in the motion panel that are not parameters. */
   buildDrawers(run, busy) {
-    this.session = new Session({ mount: this.panel.drawer('sets').body, onPick: item => this.pickSession(item) });
+    this.session = new Session({ mount: this.panel.drawer('sets').body, onPick: item => this.pickSession(item),
+                                 ...(this.visit ? { now: this.visit.now, items: this.visit.items } : {}) });
 
     const holder = document.createElement('div');
     this.panel.drawer('player').body.prepend(holder);

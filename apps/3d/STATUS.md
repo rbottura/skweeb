@@ -1,5 +1,5 @@
 # STATUS — 3d
-_last touched: 2026-10-22_
+_last touched: 2026-11-04_
 
 M10's app (`docs/roadmap.md`, M10): 3D, from primitives up. A model is
 its shapes — each a primitive, its params, a place and a look — with a
@@ -26,6 +26,13 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
    direction, `role: 'character'`.
 
 ## Works now
+
+- **A module** (S9a, 2026-11-04; `main.js` on core's `mount.js`):
+  `mount(host)` and `unmount()` — its keys and observer on the scope, its
+  model's geometries and materials and its handles' gizmo let go of with it;
+  three's renderer is the page's, kept. And three's own frame loop, started
+  at the renderer's init and run for the page's life since M10, is stopped:
+  the renderer draws when asked (`renderer.js`) — `check-mount`.
 
 - **Primitives, made from their params** (2026-10-06; `shapes.js`,
   `tests/3d-shapes.mjs` 28). Box, sphere, cylinder, cone, torus, plane and

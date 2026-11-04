@@ -27,18 +27,28 @@ import * as Guides from './guides.js';
 import { actsOnPage, showPrint } from '../boxes/export.js';
 import { rowParams } from '../param-rows.js';
 import { Vault } from '../vault.js';
+import { held } from '../scope.js';
 
 const $ = sel => document.querySelector(sel);
 const press = node => { if (node && !node.disabled) { node.click(); return true; } return false; };
 
 let appPie = null;            // { title, items() → [{ label, run, on? }], tap() }
 let overlay = null;           // { label, on() → bool, toggle() }
+let unPie = () => {}, unOverlay = () => {};   // their holds in the app's scope: one each, the latest
 
-/** The app's own pie, on A: its choices, and what a tap does. */
-export function setAppPie(spec) { appPie = spec; }
+/** The app's own pie, on A: its choices, and what a tap does. Gone with its app (core/scope.js). */
+export function setAppPie(spec) {
+  unPie();
+  appPie = spec;
+  unPie = held(() => { if (appPie === spec) appPie = null; });
+}
 
-/** What the view's tap shows or hides, first: an app's guides over its picture. */
-export function setOverlay(spec) { overlay = spec; }
+/** What the view's tap shows or hides, first: an app's guides over its picture. Gone with its app. */
+export function setOverlay(spec) {
+  unOverlay();
+  overlay = spec;
+  unOverlay = held(() => { if (overlay === spec) overlay = null; });
+}
 
 /**
  * A pie of an enum's options, the one picked lit; a tap the next. For an

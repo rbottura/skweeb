@@ -16,6 +16,7 @@
  */
 
 import { typing } from './Palette.js';
+import { held as letGo } from './scope.js';      // `held`, here, is the key held down
 
 const HOLD_MS = 180;          // longer than a tap, shorter than a wait: the bench's 164, a little more
 
@@ -33,8 +34,12 @@ let pointer = null;           // where the pointer last was: a pie opens there
 /** What a key does: a tap, and a pie to hold — `when` false, the key is not core's this moment. */
 export function bind(code, spec) { bindings.set(code, spec); }
 
-/** Keys an app keeps for itself: core never acts on them in its page. */
-export function own(...codes) { for (const c of codes) owned.add(c); }
+/** Keys an app keeps for itself: core never acts on them in its page — core's again when it is unmounted (core/scope.js). */
+export function own(...codes) {
+  const mine = codes.filter(c => !owned.has(c));
+  for (const c of mine) owned.add(c);
+  letGo(() => { for (const c of mine) owned.delete(c); });
+}
 
 /** The bindings that answer now, for a page that lists them: [{ code, label, short, pie }]. */
 export const bound = () => [...bindings].filter(([c, b]) => !owned.has(c) && (!b.when || b.when()))

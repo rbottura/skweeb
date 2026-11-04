@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-03_
+_last touched: 2026-11-04_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open and `docs/roadmap-done.md` the
@@ -12,7 +12,22 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
+### Newest — 2026-11-04: an app a module (S9a, under way on `scene/host`)
+
+- **Every app on core's kit is `mount(host)` and `unmount()`** — particles,
+  grid, ckt, compose, map, the rig, filter, fractals, the 3D app
+  (`core/mount.js`): built in any host, taken out with nothing left — what
+  they held outside their nodes in a scope (`core/scope.js`) the unmount
+  closes: listeners, their windows in the stack and the stack's channel,
+  keys and pies, their params' steps; what ends first takes itself out of
+  the scope, and each app stops its own clock. Their pages mount them on
+  themselves — `check-mount`, which counts what an app unmounted leaves:
+  listeners, channels, intervals, frames asked for. Cards (filter's chain,
+  a model's shapes) remove a card's panel with it now — three listeners on
+  the window were left behind each time. The other apps follow, then the
+  vault app (S9b), then *cluster*, the scene (S9c).
+
+### 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
 
 - **The look and the rows**: the dark theme (S1); a value on one line — its
   box dragged, its fill, its slider only where wanted, its mark a dot when
@@ -292,13 +307,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9 on the board of `docs/plan.md`: every app a module, then the scene** —
-branch `scene/host`: first the seam, no app changed on screen — each app's
-boot (`apps/<app>/main.js`) split into `mount(host)` and `unmount()`, its
-page calling mount on itself, so the app still runs alone (rule 7); particles
-first, as the bench's. Then `apps/scene/`, one canvas the apps mount round
-(`docs/scene.md`, *The scene*). Before the scene, ask the author its name
-— "skweeb absolute scene" was a placeholder.
+**S9b on the board: the vault, an app** — branch `scene/vault` from `main`.
+Its first step: `VaultPanel` learns to open in a host of its own (`mount`,
+as ParamPanel takes one) rather than always over `document.body`, docked
+full screen; then `apps/vault/` — `index.html` mounting `main.js` on
+`core/mount.js`'s `appModule` — the vault's grid, folders, kin and detail
+over the whole page, the canvas showing the object chosen
+(`core/rebuild.js` `openFrames`); its row in `check-mount`; the gate
+`node scripts/checks.mjs --gate --since main`. Then S9c, *cluster*.
 
 ## Parked decisions
 
