@@ -14,8 +14,9 @@ sorts them.
 
 ### Newest — 2026-11-04: an app a module (S9a, under way on `scene/host`)
 
-- **particles, grid, ckt, compose, map, the rig, filter and fractals are
-  `mount(host)` and `unmount()`** (`core/mount.js`): built in any host, taken out with nothing left — what
+- **Every app on core's kit is `mount(host)` and `unmount()`** — particles,
+  grid, ckt, compose, map, the rig, filter, fractals, the 3D app
+  (`core/mount.js`): built in any host, taken out with nothing left — what
   they held outside their nodes in a scope (`core/scope.js`) the unmount
   closes: listeners, their windows in the stack and the stack's channel,
   keys and pies, their params' steps; what ends first takes itself out of
@@ -306,14 +307,13 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9a goes on, on `scene/host`: the 3D app a module, as the eight before
-it are** — its `main.js` on `core/mount.js`'s `appModule`, its markup out
-of `index.html` into the module, its state made again in `start`, its keys
-and observer on the scope; three's renderer is the page's (`renderer.js`
-`openRenderer`), kept, and a model's geometries and materials let go of
-at the unmount; then its row in `check-mount`'s `APPS`; the gate is
-`node scripts/checks.mjs --gate --since main`. Then the puppet, the same
-way, in the order of
+**S9a's last: the puppet a module** (`apps/rig/puppet/`), on `scene/host`
+— its `main.js` on `core/mount.js`'s `appModule`; at the unmount its
+camera's tracks stopped and MediaPipe's landmarker closed (`face.js`), its
+`vault:updated` through core's `listen` (`keeping.js`), its `pagehide` on
+the scope; its row in `check-mount`, on the fake camera `check-puppet`
+uses. Then S9a lands — rebased on `main`, the gate
+`node scripts/checks.mjs --gate --since main`, `--no-ff` — in the order of
 `docs/scene.md`'s *Planned, 2026-11-04*, confirmed; the gamepad stays out
 until C6. Then the vault app (S9b), then *cluster* (S9c). A push refused
 with "Permission denied (publickey)" is GitHub's, not the key's: it came
