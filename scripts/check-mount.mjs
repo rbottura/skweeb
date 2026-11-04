@@ -134,7 +134,12 @@ await page.beforeLoad(`(() => {
   window.__frames = () => frames;
 })()`);
 const held = () => page.eval(`window.__held()`);
-/** Frames asked for over a little more than half a second: a clock playing asks one each. */
+/**
+ * Frames asked for over a little more than half a second: a clock playing asks one each. Playing is
+ * three or more — a page under the load of other checks asks fewer than it would alone — and
+ * unmounted is none at all, which no load makes more.
+ */
+const PLAYING = 3;
 const framesAsked = async () => { const a = await page.eval(`window.__frames()`); await wait(600); return (await page.eval(`window.__frames()`)) - a; };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -163,15 +168,15 @@ for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, v
   c.ok(say('its own keys answer'), hasOwn(await keys()), (await keys()).join(' '));
   if (kept.length) c.ok(say(`the keys it keeps, not core's while it is mounted: ${kept.join(' ')}`), kept.every(k => !(first.keys || []).includes(k)));
   if (params) c.ok(say('its params watched for steps'), (await watched()) >= 1);
-  if (plays) c.ok(say('it plays: frames asked for'), (await framesAsked()) > 5);
+  if (plays) c.ok(say('it plays: frames asked for'), (await framesAsked()) >= PLAYING);
   let once = 0;
   if (saves && can) { await press('s'); once = await saved(); c.ok(say('S saves'), once >= 1, `${once} saved`); }
   const visited = visit ? await page.eval(visit) : null;
   if (visit) c.ok(say('what its visit keeps, made'), !!visited.session && visited.rows > visited.rowsBefore, JSON.stringify(visited));
   // A save holds the player still: played again, so what is unmounted is playing.
   if (plays) {
-    if ((await framesAsked()) < 5) await press(' ');
-    c.ok(say('playing as it is unmounted'), (await framesAsked()) > 5);
+    if ((await framesAsked()) < PLAYING) await press(' ');
+    c.ok(say('playing as it is unmounted'), (await framesAsked()) >= PLAYING);
   }
 
   // Unmounted: nothing left, nothing answering, nothing running, gone from the windows.

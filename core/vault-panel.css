@@ -252,6 +252,9 @@
 
 /* ── One object, open ──────────────────────────────────────────────────────── */
 
+/* The detail its facts only — the vault app draws the object beside it (S9b): as wide as the bench's properties. */
+.vp-detail.vp-detail--info { width: min(300px, 60%); }
+
 .vp-detail {
   position: absolute;
   top: 0;

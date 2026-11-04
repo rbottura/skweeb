@@ -57,10 +57,12 @@ export class VaultPanel {
    * @param {string} [opts.pickLabel]
    * @param {HTMLElement} [opts.mount]  docked there, always shown — the vault app's (S9b) — not over the page
    * @param {(object:object, urls:{url:?string, thumb:?string})=>void} [opts.onDetail]  an object's detail opened
+   * @param {boolean} [opts.detailPicture]  false: the detail its facts only, narrower — the page draws the object (S9b)
    */
   constructor(opts = {}) {
     this._mount     = opts.mount || null;
     this._onDetail  = opts.onDetail || null;
+    this._detailPicture = opts.detailPicture !== false;
     this._filter    = opts.filter || {};
     // Vault.list() filters on one type, the cheap query; a param's several are narrowed here.
     this._accepts   = Array.isArray(opts.accepts) && opts.accepts.length
@@ -190,6 +192,7 @@ export class VaultPanel {
     head.append(wireImport(this._root, () => this.refresh()), kin, this._trashBtn, reload, close);
     this._body = el('div', 'vp-body');
     const drawer = detailDrawer(() => this._closeDetail());
+    if (!this._detailPicture) drawer.root.classList.add('vp-detail--info');
     Object.assign(this, { _detail: drawer.root, _detailTitle: drawer.title, _detailBody: drawer.body });
     this._root.append(head, this._body, drawer.root);
     (this._mount || document.body).append(this._root);
@@ -408,6 +411,7 @@ export class VaultPanel {
       pickLabel: this._pickLabel,
       bin: this._onPick ? null : action => this._bin(action, [o.id]),
       trashed: isTrashed(o),
+      picture: this._detailPicture,
     });
   }
 }

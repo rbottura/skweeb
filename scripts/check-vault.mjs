@@ -54,6 +54,7 @@ if (from) {
   await page.until(`${V}.querySelector('.vp-detail--open .vp-name')?.textContent.length > 0`);
   const opened = await page.eval(`${V}.querySelector('.vp-detail .vp-name').textContent`);
   c.ok('a parent it does not show is named, and opens', from === 'from ' + opened, `${from} → ${opened}`);
+  c.ok('…its detail, over the page, with its picture', await page.eval(`!!${V}.querySelector('.vp-detail--open .vp-preview')`));
   await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
 } else {
   console.log('     (no group here has a parent outside it — skipping the link)');
@@ -108,6 +109,12 @@ const choose = async type => {
 await choose('still');
 c.ok('a still chosen: its detail open, and drawn in the viewer', (await page.eval(`!!document.querySelector('.vp-detail--open')`)) && (await page.eval(inked)) > 1000,
   `${await page.eval(inked)} pixels inked`);
+// The author's C (2026-11-05): beside the viewer, the detail is the object's facts, no picture of its own, narrower.
+const facts = await page.eval(`(() => { const d = document.querySelector('.vp-detail--open');
+  return { picture: !!d.querySelector('.vp-preview'), play: [...d.querySelectorAll('.vp-btn')].some(b => /Play the loop/.test(b.textContent)),
+           facts: !!d.querySelector('.vp-facts'), name: !!d.querySelector('.vp-name'), width: Math.round(d.getBoundingClientRect().width) }; })()`);
+c.ok('…its detail the facts only: no picture of its own, as wide as the bench\'s properties',
+  !facts.picture && !facts.play && facts.facts && facts.name && facts.width <= 300, JSON.stringify(facts));
 await choose('sequence');
 const t1 = await page.eval(`document.querySelector('.bar-say').textContent`);
 await new Promise(r => setTimeout(r, 800));

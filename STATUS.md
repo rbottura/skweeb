@@ -16,8 +16,9 @@ sorts them.
 
 - **The vault, an app** (`apps/vault/`): every object full screen — core's
   vault panel docked in the page — the one whose detail opens drawn large
-  beside it and played if it moves; it makes nothing, so its title bar has
-  no Save and no Export — `check-vault`, `check-mount`.
+  beside it and played if it moves, the detail its facts only (the author's
+  C, 2026-11-05); it makes nothing, so its title bar has no Save and no
+  Export — `check-vault`, `check-mount`.
 
 - **Every app on core's kit is `mount(host)` and `unmount()`** — particles,
   grid, ckt, compose, map, the rig, filter, fractals, the 3D app
@@ -269,7 +270,10 @@ compares two pages' canvases measures, never demands the pixel.
   pixels. The gamepad's print box is not on the pad.
 - **check-map's press is intermittent** (2026-11-03): "a press paints the
   cell under it" read the cell unpainted once in six runs — the pixel read a
-  little early after a real press; it passed every rerun.
+  little early after a real press; it passed every rerun. Under the load of
+  checks run together (`scripts/checks.mjs`) it fails more, and so, now and
+  then, does check-compose's "a typed transform lands where page.js says":
+  both green alone, which the runner tries before saying red.
 - **A blur's taps stop at 512 a side**; past that it wants a smaller picture.
 - **Compose's PNG export still draws its page on one canvas**, tried up to
   2480 × 3508 — its print beside it draws any sheet in tiles.

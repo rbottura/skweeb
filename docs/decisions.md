@@ -285,3 +285,15 @@ back as bitmaps — so the scene's fixed canvas is one 2D canvas handed to
 the app it mounts; each library let go of by what it holds; the vault an
 app of its own; the space of objects on a bench first (S11). The author:
 "je confirme, continue sur les prochaines étapes".
+
+## Decided since, 2026-11-05
+
+**The vault app's detail is the object's facts.** The author, seeing the
+vault app: "le viewer à droite de la grille du vault est vraiment super,
+mais ça rend presque le vp-detail obsolète sauf pour les informations".
+Three ways were put — the bench's three columns, the facts under the
+viewer, the drawer kept over the grid with its facts only — and the author
+chose the last, C: the detail keeps its place over the grid's right edge,
+loses its picture and its player — the viewer has them — and is as wide
+as the bench's properties, 300 px. Over another app, where no viewer is
+beside it, the detail keeps its picture.
