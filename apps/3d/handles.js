@@ -56,6 +56,16 @@ export class Handles {
     for (const what of ['axis', 'dragging', 'mode']) this.controls.addEventListener(what + '-changed', () => onChange());
   }
 
+  /**
+   * Its app unmounted: the gizmo's geometries and materials let go of. Not
+   * three's own `dispose`, which disconnects from an element — there is none
+   * here, and it would throw.
+   */
+  dispose() {
+    this.controls.detach();
+    this.controls.getHelper().dispose();
+  }
+
   /** On a mesh — the chosen shape's — or on none. */
   attach(mesh) {
     if (mesh) this.controls.attach(mesh);

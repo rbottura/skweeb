@@ -21,6 +21,11 @@
  * Opens with no vault (rule 7), on a box, a sphere and a torus. With no
  * WebGPU three draws with WebGL2, and the bar says so; with neither, the
  * page still opens and says why.
+ *
+ * A module since S9 (core/mount.js): `mount(host)` and `unmount()` — the
+ * model's geometries and materials and the handles' gizmo let go of when it
+ * goes; three's renderer is the page's, kept (renderer.js). index.html mounts
+ * it on itself. Nothing happens at import.
  */
 
 import { modelParams, GROUPS, SHAPE_CARDS, OPENING } from './params.js';
@@ -46,25 +51,71 @@ import { applyFrameEdit } from '../../core/frame.js';
 import { viewFactor }     from '../../core/view.js';
 import { whyNoGpu }       from '../../core/gpu/device.js';
 import { setAppPie }      from '../../core/shell/bindings.js';
+import { appModule }      from '../../core/mount.js';
 
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
-const model = new Model();
+/**
+ * The viewer, one column of drawers, the bar below; the model drawn by
+ * three.js on the page's GPU device and shown on a Canvas 2D, no p5. Over
+ * the viewer, what the chosen shape's handles do, and what else can be done
+ * to it (chosen.js).
+ */
+const MARKUP = `
+  <main class="app-main">
+    <section class="viewer" aria-label="model">
+      <div class="viewer-head">
+        <button class="nb-btn" id="handle-move" type="button" aria-pressed="true"
+                title="The chosen shape's handles move it: along an arrow, or in a square's plane [W]">move</button>
+        <button class="nb-btn" id="handle-turn" type="button" aria-pressed="false"
+                title="Its handles turn it: about an axis by its ring, or freely inside them [E]">turn</button>
+        <button class="nb-btn" id="handle-size" type="button" aria-pressed="false"
+                title="Its handles size it: stretched along one of its axes by its cube, or whole by the middle one [R]">size</button>
+        <span class="td-spacer"></span>
+        <button class="nb-btn" id="duplicate" type="button" disabled
+                title="Another of the chosen shape, beside it, chosen [D]">duplicate</button>
+        <button class="nb-btn" id="remove" type="button" disabled
+                title="Take the chosen shape out of the model [Delete]">remove</button>
+      </div>
+      <div class="viewer-stage"><canvas id="stage" width="480" height="480"></canvas></div>
+    </section>
+    <div class="app-side" id="side"></div>
+  </main>`;
 
-let params, bar, cards, shapesDrawer, chosen;
-let renderer = null;     // renderer.js's, once three has a backend
-let failing = '';        // why nothing draws, while nothing does
-let busy = false;        // a save or a download is drawing; nothing else starts
+const app = appModule('3d', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
 
-async function boot() {
-  bar = new Bar({ app: '3d', mount: document.querySelector('.app'),
+/** The 3D app in `host`, started — a saved model opened if the page asks for it (core/mount.js). */
+export const mount = host => app.mount(host);
+/** The 3D app out of its host, everything it held let go of: its keys, its model, its handles. */
+export const unmount = () => app.unmount();
+const mounted = () => !!app.scope;
+
+// One app mounted at a time: its state, made again by each mount (`start`).
+let root, canvas, ctx, model, pending;
+let params, bar, cards, shapesDrawer, chosen, renderer, failing, busy;
+
+async function start(host, mine) {
+  root = host;
+  canvas = root.querySelector('#stage');
+  ctx = canvas.getContext('2d');
+  const own = model = new Model();
+  mine.hold(() => own.dispose());          // its geometries and materials; three's renderer is the page's
+  params = bar = cards = shapesDrawer = chosen = null;
+  renderer = null;         // renderer.js's, once three has a backend
+  failing = '';            // why nothing draws, while nothing does
+  busy = pending = false;  // a save or a download drawing, nothing else starts; a paint asked for, not made
+  try { await boot(mine); } catch (err) { if (bar) bar.announce('failed to boot: ' + err.message); throw err; }
+}
+
+async function boot(mine) {
+  bar = new Bar({ app: '3d', mount: root,
                   keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · S save · V vault' });
   params = modelParams();
-  const panel = new ParamPanel(params, { title: '3d', mount: document.getElementById('side'), groups: GROUPS });
+  const panel = new ParamPanel(params, { title: '3d', mount: root.querySelector('#side'), groups: GROUPS });
 
   shapesDrawer = panel.addDrawer({ id: 'shapes', title: 'Shapes', before: 'view' });
   cards = new Cards({ ...SHAPE_CARDS, mount: shapesDrawer.body, onChange: draw, onChoose: draw });
-  chosen = wireChosen({ cards, model, onChange: draw });
+  chosen = wireChosen({ cards, model, onChange: draw, root });
+  const handles = chosen.handles;
+  mine.hold(() => handles.dispose());
   const frame = button('Frame the model  [F]', frameAll);
   frame.classList.add('td-frame');
   panel.drawer('view').body.append(frame);
@@ -74,13 +125,17 @@ async function boot() {
     applyFrameEdit(params, key);
     draw();
   });
-  new ResizeObserver(() => draw()).observe(canvas.parentElement);
+  const sized = new ResizeObserver(() => draw());
+  sized.observe(canvas.parentElement);
+  mine.hold(() => sized.disconnect());
   wirePointer({ canvas, params, onClick: chooseAt, handles: chosen.handles });
-  wireKeys();
+  wireKeys(mine);
   for (const s of OPENING) cards.add(s.id, s.params);
 
   try {
-    renderer = await openRenderer();
+    const opened = await openRenderer();
+    if (mine.closed) return;
+    renderer = opened;
     if (renderer.backend !== 'WebGPU') bar.announce(`drawn with ${renderer.backend}: ${whyNoGpu() || 'no WebGPU here'}`);
   } catch (err) {
     failing = err.message;
@@ -94,7 +149,7 @@ async function boot() {
 async function openRequested() {
   try {
     const opened = await requested('3d');
-    if (!opened) return;
+    if (!opened || !mounted()) return;
     const recipe = opened.object.recipe || {};
     params.restore(recipe);
     const unknown = cards.restore(recipe.shapes);
@@ -107,15 +162,14 @@ async function openRequested() {
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
-let pending = false;
-
 function draw() {
-  if (pending) return;
+  if (pending || !mounted()) return;
   pending = true;
   requestAnimationFrame(() => { pending = false; paint(); });
 }
 
 function paint() {
+  if (!mounted() || !params || !chosen) return;
   const v = params.values;
   const size = { width: v.width, height: v.height };
   const view = viewFactor(canvas, size, v.scale);
@@ -236,7 +290,7 @@ async function leave(action) {
     bar.announce('failed: ' + err.message);
   } finally {
     busy = false;
-    Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+    refreshVault();
     draw();
   }
 }
@@ -253,9 +307,9 @@ function save() {
 
 // ── Keys ─────────────────────────────────────────────────────────────────────
 
-function wireKeys() {
+function wireKeys(mine) {
   // The left hand (core/shell/bindings.js): A the handles' mode — move, turn, size — tapped the next.
-  const MODES = ['move', 'turn', 'size'], modeOf = m => document.getElementById('handle-' + m);
+  const MODES = ['move', 'turn', 'size'], modeOf = m => root.querySelector('#handle-' + m);
   const now = () => MODES.find(m => modeOf(m)?.getAttribute('aria-pressed') === 'true') || 'move';
   setAppPie({
     title: 'handles',
@@ -265,7 +319,7 @@ function wireKeys() {
   let vault = null;
   // Heard before the vault panel's own keys, so an Escape that closes the
   // panel is seen as that, and lets go of no shape.
-  document.addEventListener('keydown', e => {
+  mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (!vault.isOpen && chosen.key(e)) return;
@@ -275,10 +329,9 @@ function wireKeys() {
     if (e.key === 'Escape' && !vault.isOpen) cards.choose(null);
   });
   vault = new VaultPanel();
-  Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+  refreshVault();
 }
 
-boot().catch(err => {
-  console.error('[3d] failed to boot:', err);
-  if (bar) bar.announce('failed to boot: ' + err.message);
-});
+function refreshVault() {
+  Vault.refresh().then(ok => { if (bar) bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'); });
+}

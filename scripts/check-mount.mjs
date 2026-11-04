@@ -80,6 +80,8 @@ const APPS = [
     ready: `/filters on|no filters yet/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: 'fractals', own: [], plays: false, saves: true,
     ready: `/iterations/.test(document.querySelector('.bar-say')?.textContent || '')` },
+  { name: '3d', own: ['KeyQ'], plays: false, saves: true,
+    ready: `/turned .+ away/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: 'rig', own: [], kept: ['KeyR'], plays: false, saves: true, query: aDrawing,
     ready: `/[0-9]+ bones/.test(document.querySelector('.bar-say')?.textContent || '')` },
 ];
