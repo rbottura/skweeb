@@ -15,6 +15,7 @@
  *   Q D [A D]  the frame before, after; Shift ten
  *   G       the ground: its colour, or none — the author's word, 2026-11-03
  *   X       what is under the pointer reset: a value, or a drawer by its head
+ *   H       the object's states, a graph over the page (S7, core/shell/graph.js)
  *
  * DOM only when a key is pressed: it reads the page as it stands — the
  * player's buttons, the Export box, a row's params (core/param-rows.js) —
@@ -25,6 +26,7 @@ import { bind } from '../keys.js';
 import * as Guides from './guides.js';
 import { actsOnPage, showPrint } from '../boxes/export.js';
 import { rowParams } from '../param-rows.js';
+import { Vault } from '../vault.js';
 
 const $ = sel => document.querySelector(sel);
 const press = node => { if (node && !node.disabled) { node.click(); return true; } return false; };
@@ -146,5 +148,7 @@ export function installBindings() {
   });
 
   bind('KeyG', { short: 'ground', label: 'the ground, or none', when: () => !!groundChip(), tap: () => press(groundChip()) });
+  bind('KeyH', { short: 'states', label: "the object's states, as a graph over the page", when: () => !!(Vault.bound && Vault.bound.id),
+    tap: () => import('./graph.js').then(m => m.toggleGraph()) });
   bind('KeyX', { short: 'reset', label: 'reset what is under the pointer', tap: () => resetUnder() });
 }

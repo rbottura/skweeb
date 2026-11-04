@@ -113,7 +113,7 @@ export const Vault = {
    * objects again. Only a save of the kind it binds: a look saved in filter
    * stays a look.
    */
-  bind(bound) { _bound = bound ? { id: bound.id || null, type: bound.type || null, version: bound.version || null } : null; },
+  bind(bound) { _bound = bound ? { id: bound.id || null, type: bound.type || null, version: bound.version || null, strict: !!bound.strict } : null; },
 
   /** A smart object's states, a tree by their parents (S6, server/versions.js): [{ version, parent, parent2, created, title, url }]. */
   async states(id) {

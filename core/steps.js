@@ -117,6 +117,9 @@ export function redo() {
   return true;
 }
 
+/** The params of the page, as watched: what a state's recipe is laid back into (core/shell/graph.js). */
+export const watched = () => [...cur.keys()];
+
 /** How many steps there are each way. */
 export const counts = () => ({ back: back.length + (open ? 1 : 0), ahead: ahead.length });
 
