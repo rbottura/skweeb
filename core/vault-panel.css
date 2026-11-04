@@ -30,6 +30,10 @@
 
 .vp--visible { opacity: 1; visibility: visible; }
 
+/* Docked in a host of its own — the vault app's (S9b): in the page's flow, always shown. */
+.vp--docked { position: relative; inset: auto; z-index: auto; flex: 1; min-height: 0; opacity: 1; visibility: visible;
+  border-radius: var(--radius-lg); overflow: hidden; }
+
 @media (prefers-reduced-motion: reduce) { .vp { transition: none; } }
 
 .vp-head {

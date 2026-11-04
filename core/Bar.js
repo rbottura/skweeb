@@ -46,8 +46,9 @@ export class Bar {
    * @param {string} opts.app          the app's name
    * @param {HTMLElement} opts.mount   the page grid (`.app`)
    * @param {string} [opts.keys]       the few shortcuts worth showing
+   * @param {boolean} [opts.acts]      false: an app that makes nothing — no Save, no Export above it
    */
-  constructor({ app, mount, keys = '' }) {
+  constructor({ app, mount, keys = '', acts = true }) {
     this.root = el('footer', 'bar');
     this._say = el('span', 'bar-say', 'loading…');
     this._fps = el('span', 'bar-dim');
@@ -72,6 +73,7 @@ export class Bar {
     if (typeof customElements !== 'undefined' && !mount.querySelector(':scope > skw-titlebar')) {
       const top = document.createElement('skw-titlebar');
       top.setAttribute('app', app);
+      if (!acts) top.setAttribute('acts', 'none');
       mount.prepend(top);
       this._top = top;
       import('./shell/titlebar.js').catch(err => console.warn('the title bar did not load:', err.message));

@@ -15,13 +15,14 @@ import { openPalette } from '../Palette.js';
 import { actsOnPage, showPrint } from '../boxes/export.js';
 
 class SkwTitlebar extends LitElement {
-  static properties = { app: { type: String }, menu: { state: true } };
+  static properties = { app: { type: String }, acts: { type: String }, menu: { state: true } };
 
   createRenderRoot() { return this; }                 // the page's DOM: theme.css draws it, the checks find it
 
   constructor() {
     super();
     this.app = '';
+    this.acts = '';            // 'none': an app that makes nothing — the vault's — has no Save, no Export
     this.menu = null;
     this._away = e => { if (this.menu && !this.contains(e.target)) this.menu = null; };
     this._esc = e => { if (this.menu && e.key === 'Escape') { e.stopPropagation(); this.menu = null; } };
@@ -59,11 +60,11 @@ class SkwTitlebar extends LitElement {
       <button class="tb-search" type="button" title="Every control and act of the page, by name" @click=${() => openPalette()}>
         <span>Search controls and acts</span><kbd>²</kbd><kbd>Ctrl K</kbd>
       </button>
-      <div class="tb-acts">
+      ${this.acts === 'none' ? nothing : html`<div class="tb-acts">
         <button class="nb-btn nb-btn--primary tb-save" type="button" title="The app's save, into the vault [S]" @click=${() => this._save()}>Save <kbd>S</kbd></button>
         <button class="nb-btn tb-export" type="button" aria-haspopup="menu" aria-expanded=${this.menu ? 'true' : 'false'}
                 @click=${() => { this.menu = this.menu ? null : this._sections(); }}>Export ▾</button>
-      </div>
+      </div>`}
       ${this.menu ? html`
         <div class="tb-menu" role="menu">
           ${this.menu.map(s => html`
