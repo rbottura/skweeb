@@ -86,26 +86,25 @@ What a branch passes before it lands — the definition of done:
 
 1. **Rebased** on `main`.
 2. **The unit loop**, all green (`CLAUDE.md`, *Running*).
-3. **The browser checks of what it touched:**
+3. **The browser checks of what it touched**, picked by what the change
+   reaches (`scripts/reach.mjs`, since 2026-11-04): a page loads what it
+   imports, all the way down — modules, stylesheets, its own scripts — so a
+   change reaches the pages whose imports come to it, and the checks that
+   open those pages. An app's own modules reach its page; core's, every page
+   that loads them; what an app's `rebuild.js` comes to reaches every check,
+   for any page can replay an object, as do the server, the check kit, the
+   assets and a file of no kind known; the docs and the tests none.
+   `node scripts/reach.mjs --since main` says, change by change, what each
+   reaches and why.
 
-   | it touched | it runs |
-   |---|---|
-   | an app's folder | that app's checks, `check-<app>*`, and `check-print` if its drawing changed |
-   | core's panels, widgets, drawers, cards, theme | every browser check: every app is drawn with them |
-   | `core/vault*.js`, `smart.js`, `server.js`, `server/` | `check-vault`, `check-smart`, `check-page`, `check-send` |
-   | `core/live.js`, `stack*.js`, `send.js`, `place.js` | `check-live`, `check-send`, `check-page` |
-   | `core/gpu/` | `check-gpu`, `check-filters`, `check-filter`, `check-look`, `check-fractals` |
-   | `core/rebuild.js`, `print.js`, `windowed.js`, `stage/` | `check-print`, `check-compose`, `check-compose-export` |
-   | docs alone | nothing more |
+   `node scripts/checks.mjs --since main` runs them, several at a time —
+   four on the tower — the longest first; a check that fails among the
+   others is run again alone, and the run alone is the verdict, a failure
+   for the load said apart. `node scripts/checks.mjs` runs every check,
+   `node scripts/checks.mjs mount print` those by name.
 
-   Every check, one line each — the 3D poster left out, being long:
-
-   ```sh
-   for c in scripts/check-*.mjs; do
-     case $c in */check-kit.mjs|*/check-3d-poster.mjs) continue;; esac
-     printf '%-40s' "$c"; node "$c" 2>&1 | tail -1
-   done
-   ```
+   The whole gate, 2 to 4, is one command:
+   `node scripts/checks.mjs --gate --since main`.
 4. **Rule 4's lines**: `node scripts/lines.mjs`. A file past 400 lines is
    split along a seam it has, or kept whole with its reason in the script's
    `KEPT`; none passes 600; the docs every session reads stay under 400; the
