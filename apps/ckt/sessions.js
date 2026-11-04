@@ -10,7 +10,9 @@
  *
  * A session is one visit: it starts when the page opens and is named by that
  * moment. With no vault the list still works — its sets live in memory and
- * anything drawn from them saves as a leaf.
+ * anything drawn from them saves as a leaf. Since S9 the app may be mounted
+ * more than once in a visit — a scene's — and the visit is still the page's:
+ * a mount gives its moment and its sets, and the list goes on.
  */
 
 const el = (tag, cls, text) => {
@@ -27,12 +29,13 @@ export class Session {
    * @param {object} opts
    * @param {HTMLElement} opts.mount
    * @param {(item: object) => void} opts.onPick   a row was chosen
-   * @param {Date} [opts.now]
+   * @param {Date} [opts.now]           when the visit began
+   * @param {object[]} [opts.items]      the sets made this visit, as an earlier mount left them: added to, in place
    */
-  constructor({ mount, onPick, now = new Date() }) {
+  constructor({ mount, onPick, now = new Date(), items = [] }) {
     this.name = `ckt session ${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} `
               + `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    this.items = [];
+    this.items = items;
     this.current = null;
     this.onPick = onPick;
 
@@ -41,6 +44,7 @@ export class Session {
     this.empty = el('div', 'pp-empty', 'Sets you make in dots appear here.');
     this.root.append(this.empty, this.list);
     mount.prepend(this.root);
+    if (items.length) this.render();
   }
 
   /** The vault tag that files a set in this session's folder. */

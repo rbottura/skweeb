@@ -13,8 +13,10 @@
  * mounted again into another host, three times over, and as the first
  * mount was: one page grid, one title bar, one vault panel to V, as many
  * listeners, channels and intervals. Where it plays, it plays; where it
- * saves — particles with nothing chosen, grid on a still of the vault — one
- * S saves as the first mount's did. And no page said anything wrong.
+ * saves — particles and ckt with nothing chosen, grid on a still of the
+ * vault — one S saves as the first mount's did; what a visit keeps — ckt's
+ * session and the sets made in it — is kept. And no page said anything
+ * wrong.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -30,13 +32,30 @@ const A_STILL = `import('/core/vault.js').then(async ({ Vault }) => {
 })`;
 
 /**
+ * ckt's visit, which is the page's and not a mount's (apps/ckt/sessions.js):
+ * a dot-set made in dots, and the session it is filed in — the same one
+ * mounted again, the sets made before still listed.
+ */
+const CKT_VISIT = `(async () => {
+  const say = () => document.querySelector('.bar-say')?.textContent || '';
+  const rowsBefore = document.querySelectorAll('.ss-row').length;
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: '1', bubbles: true }));
+  await new Promise(r => setTimeout(r, 500));
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 's', bubbles: true }));
+  for (let i = 0; i < 150 && !/in “/.test(say()); i++) await new Promise(r => setTimeout(r, 200));
+  return { session: (say().match(/in “([^”]+)”/) || [])[1] || null, rowsBefore, rows: document.querySelectorAll('.ss-row').length };
+})()`;
+
+/**
  * The apps that are modules: their own keys, whether they play as they open,
- * what makes them ready to save — run after every mount — and when it is.
+ * what makes them ready to save — run after every mount — and when it is;
+ * what a visit keeps from one mount to the next, where an app keeps any.
  */
 const APPS = [
   { name: 'particles', own: ['KeyQ', 'KeyF'], plays: true, saves: true },
   { name: 'grid', own: [], plays: false, saves: true, prepare: A_STILL,
     ready: `/cells/.test(document.querySelector('.bar-say')?.textContent || '')` },
+  { name: 'ckt', own: [], plays: true, saves: true, visit: CKT_VISIT },
 ];
 
 const c = await startCheck();
@@ -89,7 +108,7 @@ const held = () => page.eval(`window.__held()`);
 const framesAsked = async () => { const a = await page.eval(`window.__frames()`); await wait(600); return (await page.eval(`window.__frames()`)) - a; };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-for (const { name, own, plays, saves, prepare = null, ready = null } of APPS) {
+for (const { name, own, plays, saves, prepare = null, ready = null, visit = null } of APPS) {
   const app = `import('/apps/${name}/main.js')`;
   const say = text => `${name}: ${text}`;
   const hasOwn = list => own.every(k => list.includes(k));
@@ -117,6 +136,8 @@ for (const { name, own, plays, saves, prepare = null, ready = null } of APPS) {
   if (plays) c.ok(say('it plays: frames asked for'), (await framesAsked()) > 5);
   let once = 0;
   if (saves && can) { await press('s'); once = await saved(); c.ok(say('S saves'), once >= 1, `${once} saved`); }
+  const visited = visit ? await page.eval(visit) : null;
+  if (visit) c.ok(say('what its visit keeps, made'), !!visited.session && visited.rows > visited.rowsBefore, JSON.stringify(visited));
   // A save holds the player still: played again, so what is unmounted is playing.
   if (plays) {
     if ((await framesAsked()) < 5) await press(' ');
@@ -176,6 +197,11 @@ for (const { name, own, plays, saves, prepare = null, ready = null } of APPS) {
     await press('s');
     const later = await saved();
     c.ok(say('S: the saves of one S, as at the first mount'), later === once, `${later}, against ${once}`);
+  }
+  if (visit) {
+    const again = await page.eval(visit);
+    c.ok(say('…and its visit kept: the same session, what it made still listed'),
+      again.session === visited.session && again.rowsBefore === visited.rows, `${JSON.stringify(again)}, against ${JSON.stringify(visited)}`);
   }
   const noise = c.quiet();
   c.ok(say('the console stayed quiet'), !noise.length, JSON.stringify(noise).slice(0, 300));

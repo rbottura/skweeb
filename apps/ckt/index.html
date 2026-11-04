@@ -11,29 +11,13 @@
 
 <body>
   <!--
-    Three columns, as decided 2026-09-23: stage one (dots) on the left, stage
-    two (motion) on the right, and the viewer between them with a toggle for
-    which stage it shows. The bar under all three is core's, information only.
+    The app is a module (main.js, S9): it builds itself in a host and takes
+    itself out again, so a scene can mount it too. Here, alone, its host is
+    this page.
   -->
-  <div class="app">
-    <main class="app-main">
-      <div class="app-side" id="dots-side"></div>
-
-      <section class="viewer" aria-label="ckt">
-        <div class="viewer-head">
-          <div class="nb-toggle" role="group" aria-label="The viewer shows">
-            <button class="nb-btn" id="view-dots" type="button" aria-pressed="false" title="Stage one: the cut [1]">dots</button>
-            <button class="nb-btn" id="view-motion" type="button" aria-pressed="true" title="Stage two: the sprites [2]">motion</button>
-          </div>
-          <span class="viewer-note" id="viewer-note"></span>
-        </div>
-        <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
-      </section>
-
-      <div class="app-side" id="motion-side"></div>
-    </main>
-  </div>
-
-  <script type="module" src="./main.js"></script>
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
 </body>
 </html>
