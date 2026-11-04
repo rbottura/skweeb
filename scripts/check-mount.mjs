@@ -46,16 +46,26 @@ const CKT_VISIT = `(async () => {
   return { session: (say().match(/in “([^”]+)”/) || [])[1] || null, rowsBefore, rows: document.querySelectorAll('.ss-row').length };
 })()`;
 
+/** The first still in the vault, as the server lists it: what compose is opened with, `?place=<id>`. */
+const placeAStill = async c => {
+  const { objects = [] } = await (await fetch(c.base + '/api/vault')).json();
+  const still = objects.find(r => r.type === 'still' && !(r.tags || []).includes('trash'));
+  return still ? '?place=' + encodeURIComponent(still.id) : '';
+};
+
 /**
  * The apps that are modules: their own keys, whether they play as they open,
  * what makes them ready to save — run after every mount — and when it is;
- * what a visit keeps from one mount to the next, where an app keeps any.
+ * what its page is opened with, read by every mount; what a visit keeps from
+ * one mount to the next, where an app keeps any.
  */
 const APPS = [
   { name: 'particles', own: ['KeyQ', 'KeyF'], plays: true, saves: true },
   { name: 'grid', own: [], plays: false, saves: true, prepare: A_STILL,
     ready: `/cells/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: 'ckt', own: [], plays: true, saves: true, visit: CKT_VISIT },
+  { name: 'compose', own: [], plays: false, saves: true, query: placeAStill,
+    ready: `/1 placed · .+ on the page/.test(document.querySelector('.bar-say')?.textContent || '')` },
 ];
 
 const c = await startCheck();
@@ -108,26 +118,23 @@ const held = () => page.eval(`window.__held()`);
 const framesAsked = async () => { const a = await page.eval(`window.__frames()`); await wait(600); return (await page.eval(`window.__frames()`)) - a; };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-for (const { name, own, plays, saves, prepare = null, ready = null, visit = null } of APPS) {
+for (const { name, own, plays, saves, prepare = null, ready = null, visit = null, query = null } of APPS) {
   const app = `import('/apps/${name}/main.js')`;
   const say = text => `${name}: ${text}`;
   const hasOwn = list => own.every(k => list.includes(k));
   const noOwn = list => own.every(k => !list.includes(k));
   const readied = async () => {
-    if (!prepare) return true;
-    const got = await page.eval(prepare);
-    if (!got) return false;
-    await page.until(ready, { timeout: 30000 });
-    await wait(400);
+    if (prepare && !(await page.eval(prepare))) return false;
+    if (ready) { await page.until(ready, { timeout: 30000 }); await wait(400); }
     return true;
   };
 
-  await c.go(c.base + `/apps/${name}/`);
+  await c.go(c.base + `/apps/${name}/` + (query ? await query(c) : ''));
   await page.until(`!!document.querySelector('.pp-row') && !!document.querySelector('skw-titlebar')`);
   await wait(800);
   await page.eval(`window.__saved = 0; document.addEventListener('vault:saved', () => window.__saved++)`);
   const can = await readied();
-  if (prepare) c.ok(say('ready to save: a still of the vault as its source'), can);
+  if (prepare || query) c.ok(say('ready to save: a still of the vault on it'), can);
   const first = await counts();
   const heldFirst = await held();
   c.ok(say('alone, its page mounts it, once'), first.app === 1 && first.top === 1 && first.bar === 1, JSON.stringify(first));

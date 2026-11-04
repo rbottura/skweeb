@@ -17,6 +17,11 @@
  *
  * `?place=<id>` boots with that object placed: the seam for the vault's
  * link into compose, `any → compose: place on a sheet`.
+ *
+ * A module since S9 (core/mount.js): `mount(host)` and `unmount()`, so a
+ * scene can mount another in its place — every placement's frames let go of
+ * when it goes. index.html mounts it on itself, and it runs alone as ever
+ * (rule 7). Nothing happens at import.
  */
 
 import { pageParams, placeParams, toPlacement, PAGE_GROUPS, PLACE_GROUPS, PLACEABLE } from './params.js';
@@ -42,45 +47,85 @@ import { Playhead }       from '../../core/playback.js';
 import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { requested }      from '../../core/reopen.js';
+import { appModule }      from '../../core/mount.js';
 
-const canvas = document.getElementById('page');
-const ctx = canvas.getContext('2d');
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
 
-let page, place, bar, rate, player, transport, list, listDrawer, adder, framer, placements, editing;
-const buttons = {};                // the Export drawer's: save, png, frames
-let clockFps = 0;
-let shownView = 1;                 // canvas pixels per page pixel, as last painted
-let busy = false;                  // a save or an export is drawing the page again; the player waits
-
 /**
- * The page's clock. It plays at the page's rate, and drops ticks when a
- * frame costs more than its share of time — the honest reading of what the
- * page is. Playing, a tick arrives inside an animation frame and is painted
- * in it, not in the next.
+ * The three columns of this file's head. No p5: a page is drawImage at a
+ * transform; a loop that needs p5 to replay gets it from core/rebuild.js.
  */
-const clock = new Playhead({
-  onShow: tick => {
-    if (transport) transport.show(tick);
-    if (clock.playing) paint();
-    else draw();
-  },
-  onState: () => {
-    if (transport) transport.state();
-    if (!clock.playing && rate) { rate.stop(); draw(); }         // paused, the onion skin comes back
-  },
-});
+const MARKUP = `
+  <main class="app-main">
+    <div class="app-side" id="place-side"></div>
 
-async function boot() {
-  bar = new Bar({ app: 'compose', mount: document.querySelector('.app'),
+    <section class="viewer" aria-label="the page">
+      <div class="viewer-stage"><canvas id="page" width="480" height="300"></canvas></div>
+    </section>
+
+    <div class="app-side" id="page-side"></div>
+  </main>`;
+
+const app = appModule('compose', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+
+/** compose in `host`, started — a page opened, or an object placed, if the page asks for it (core/mount.js). */
+export const mount = host => app.mount(host);
+/** compose out of its host, everything it held let go of: its keys, its placements' frames, its clock. */
+export const unmount = () => app.unmount();
+const mounted = () => !!app.scope;
+
+// One app mounted at a time: its state, made again by each mount (`start`).
+let root, canvas, ctx, clock, buttons, clockFps, shownView, busy, pending;
+let page, place, bar, rate, player, transport, list, listDrawer, adder, framer, placements, editing;
+
+async function start(at, mine) {
+  root = at;
+  canvas = root.querySelector('#page');
+  ctx = canvas.getContext('2d');
+  buttons = {};            // the Export drawer's: save, png, frames
+  clockFps = 0;
+  shownView = 1;           // canvas pixels per page pixel, as last painted
+  busy = false;            // a save or an export is drawing the page again; the player waits
+  pending = false;         // a paint asked for, not yet made
+  page = place = bar = rate = player = transport = list = listDrawer = adder = framer = placements = editing = null;
+  /*
+   * The page's clock. It plays at the page's rate, and drops ticks when a
+   * frame costs more than its share of time — the honest reading of what the
+   * page is. Playing, a tick arrives inside an animation frame and is painted
+   * in it, not in the next.
+   */
+  clock = new Playhead({
+    onShow: tick => {
+      if (transport) transport.show(tick);
+      if (clock.playing) paint();
+      else draw();
+    },
+    onState: () => {
+      if (transport) transport.state();
+      if (!clock.playing && rate) { rate.stop(); draw(); }         // paused, the onion skin comes back
+    },
+  });
+  mine.hold(() => clock.dispose());
+  try {
+    await boot(mine);
+  } catch (err) {
+    if (bar) bar.announce('failed to boot: ' + err.message);
+    throw err;
+  }
+}
+
+async function boot(mine) {
+  bar = new Bar({ app: 'compose', mount: root,
                   keys: 'drag or ← ↑ → ↓ move · [ ] order · Del remove · space play · , . frame · S save · V vault' });
   rate = new PaintRate(bar);
   page = pageParams();
   place = placeParams();
   placements = new Placements({ onChange: refresh, say: t => bar.announce(t) });
+  const held = placements;
+  mine.hold(() => held.dispose());          // every placement's frames let go of
 
-  const placePanel = new ParamPanel(place, { title: 'placed', mount: document.getElementById('place-side'), groups: PLACE_GROUPS });
-  const pagePanel = new ParamPanel(page, { title: 'page', mount: document.getElementById('page-side'), groups: PAGE_GROUPS });
+  const placePanel = new ParamPanel(place, { title: 'placed', mount: root.querySelector('#place-side'), groups: PLACE_GROUPS });
+  const pagePanel = new ParamPanel(page, { title: 'page', mount: root.querySelector('#page-side'), groups: PAGE_GROUPS });
 
   listDrawer = placePanel.addDrawer({ id: 'list', title: 'On the page', before: 'object' });
   editing = new Editing({ placements, place, page, refresh, say: t => bar.announce(t) });
@@ -127,14 +172,17 @@ async function boot() {
   });
 
   // The preview is drawn at the size the viewer shows it.
-  new ResizeObserver(() => draw()).observe(canvas.parentElement);
+  const sized = new ResizeObserver(() => draw());
+  sized.observe(canvas.parentElement);
+  mine.hold(() => sized.disconnect());
   wirePointer({ canvas, view: () => shownView, page: () => page.values, placements, tick: () => clock.tick,
                 chosen: () => editing.chosen, choose: p => editing.choose(p),
                 moveTo: (x, y) => place.set({ x, y }) });
-  wireKeys();
+  wireKeys(mine);
   refresh();
 
   await openRequested();
+  if (mine.closed) return;
   const asked = new URLSearchParams(location.search).get('place');
   // `?place=skw_…@v3`: a state of a smart object, pinned there (S6b); a bare id, as it is now.
   if (asked) { const [ref, at] = String(asked).split('@v'); editing.putOn(toPlacement({ ref, ...AT_REST, version: Number(at) || 0 })); }
@@ -148,7 +196,7 @@ async function boot() {
 async function openRequested() {
   try {
     const opened = await requested('compose');
-    if (!opened) return;
+    if (!opened || !mounted()) return;
     const { recipe } = opened.object;
     page.restore(recipe.page);
     for (const block of recipe.place || []) placements.add(block);
@@ -161,8 +209,9 @@ async function openRequested() {
 
 // ── The page's state ─────────────────────────────────────────────────────────
 
-/** The list, the clock and the page, after anything changed. */
+/** The list, the clock and the page, after anything changed — while compose is mounted: an object opening after it went has no list to go to. */
 function refresh() {
+  if (!mounted() || !list) return;
   list.render(placements.items, editing.chosen);
   listDrawer.note(placements.length ? `${placements.length} placed` : '');
   configureClock();
@@ -276,15 +325,14 @@ function frames() {
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
-let pending = false;
-
 function draw() {
-  if (pending) return;
+  if (pending || !mounted()) return;
   pending = true;
   requestAnimationFrame(() => { pending = false; paint(); });
 }
 
 function paint() {
+  if (!mounted() || !page || !editing) return;
   const v = page.values;
   const size = pageSize(v);
   const view = viewFactor(canvas, size, v.scale);
@@ -321,9 +369,9 @@ function describe() {
 
 // ── Keys ─────────────────────────────────────────────────────────────────────
 
-function wireKeys() {
+function wireKeys(mine) {
   const vault = new VaultPanel();
-  document.addEventListener('keydown', e => {
+  mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
@@ -348,10 +396,5 @@ function wireKeys() {
 }
 
 function refreshVault() {
-  Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+  Vault.refresh().then(ok => { if (bar) bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'); });
 }
-
-boot().catch(err => {
-  console.error('[compose] failed to boot:', err);
-  if (bar) bar.announce('failed to boot: ' + err.message);
-});
