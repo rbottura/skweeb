@@ -109,7 +109,9 @@ c.ok('…drawn with its second wire, dashed', await page.eval(`document.querySel
 
 // S7c: A over a state — where it goes, each link on that state.
 await page.eval(`${node(1)}.dispatchEvent(new PointerEvent('pointerenter'))`);
-await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyQ', key: 'a', bubbles: true }))`);
+// Sent where a key goes — the page's body, up through the window — not on the window itself: there,
+// the graph's catch in capture comes after core's keys, which hold A for the app's pie (core/keys.js).
+await page.eval(`document.body.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyQ', key: 'a', bubbles: true }))`);
 await page.until(`document.querySelectorAll('skw-graph .gr-gates .tb-menu-item').length >= 2`, { timeout: 15000 }).catch(() => {});
 const gates = await page.eval(`[...document.querySelectorAll('skw-graph .gr-gates .tb-menu-item')].map(b => b.textContent.trim() + ' ' + b.title)`);
 const goes = (words, url) => gates.some(g => g.startsWith(`${words} ↗ ${url}skw_`) && g.endsWith('@v1'));
