@@ -66,6 +66,7 @@ const APPS = [
   { name: 'ckt', own: [], plays: true, saves: true, visit: CKT_VISIT },
   { name: 'compose', own: [], plays: false, saves: true, query: placeAStill,
     ready: `/1 placed · .+ on the page/.test(document.querySelector('.bar-say')?.textContent || '')` },
+  { name: 'map', own: ['KeyQ'], plays: false, saves: true },
 ];
 
 const c = await startCheck();

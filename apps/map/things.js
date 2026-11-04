@@ -84,8 +84,15 @@ export class Things {
 
   remove(p) {
     this.items = this.items.filter(q => q !== p);
+    p.gone = true;                                // still opening: its frames are let go of as they come
     if (p.handle && p.handle.dispose) p.handle.dispose();
     this.onChange();
+  }
+
+  /** Every thing let go of, its frames with it — one still opening, as they come: its app unmounted. */
+  dispose() {
+    for (const p of this.items) { p.gone = true; if (p.handle && p.handle.dispose) p.handle.dispose(); p.handle = null; }
+    this.items = [];
   }
 
   /** A block edited: opened again only when it names another object. */
@@ -144,7 +151,9 @@ export class Things {
       p.title = object.title || object.id;
       p.type = object.type;
       p.thumb = thumbUrl;
-      p.handle = await openFrames(object, { url, draft: this.draft, scale: this.scale });
+      const handle = await openFrames(object, { url, draft: this.draft, scale: this.scale });
+      if (p.gone) { if (handle.dispose) handle.dispose(); return; }   // taken off, or its app gone, while it opened
+      p.handle = handle;
       p.size = sizeOf(p.handle);
     } catch (err) {
       p.error = err.message;
