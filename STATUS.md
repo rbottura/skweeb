@@ -33,6 +33,10 @@ sorts them.
   opened `@v3` saving a branch; compose pins a project placed, 0 to follow;
   Ctrl Z and Ctrl Y over the session's steps; a row's value in every state,
   by Alt click on its mark — `check-states`, `check-steps`, `check-smart`.
+- **The graph** (S7a): H opens the states over the page, see-through, panned
+  and zoomed, v1 at the bottom and a branch in a column of its own; hovered,
+  the page draws a state, clicked it goes back to it, its next save a branch
+  (`core/shell/graph.js`, `check-graph`).
 - The bench stays a page apart: https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm.
 
 ### 2026-10-21 and -22
@@ -285,14 +289,15 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S7 on the board of `docs/plan.md`: the graph over the page** — branch
-`ui/graph`: H opens the states of the object the page holds as a graph over
-the whole page, see-through, a 2D space panned and zoomed: each state a node
-with its picture (`Vault.states`'s `url`), wired to its parent, v1 at the
-bottom; hovered, the page draws it (Shift held, not); clicked, the page goes
-back to it — its save then a branch. Shift click two to compare; merge, the
-receiving one's values kept where only it changed (`parent2`). The bench's
-`bench-graph.js` and `bench-merge.js` are the sketch.
+**S7b on the board of `docs/plan.md`: compare and merge, in the graph** —
+branch `ui/merge`: Shift click two states, compared side by side, a row for
+each value that differs; one receives, one arrives, swapped by a button;
+what only the arriving one changed since their common state is taken, what
+only the receiving one changed kept, a conflict the receiving one's until
+the other is picked, row by row. Merged, the page holds the values and its
+save is a state with both parents (`parent2`, server/versions.js). The
+bench's `bench-merge.js` is the sketch. Then S7c, A over a state: the apps
+its links reach.
 
 ## Parked decisions
 
