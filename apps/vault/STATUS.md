@@ -1,5 +1,5 @@
 # STATUS — the vault, an app
-_last touched: 2026-11-04_
+_last touched: 2026-11-05_
 
 S9b on the board of `docs/plan.md`: the author's ask of 2026-11-04, "une app
 vault pour une consultation full screen du vault". In *cluster* (S9c), the
@@ -10,7 +10,11 @@ app that is open when nothing else is (`docs/scene.md`, *Planned*).
 - **Every object full screen** — core's vault panel docked in the page
   (`VaultPanel` with `mount`: in its host, always shown, no close; Escape
   closes the detail, not the panel): its grid, folders, kin, lineage switch,
-  trash, `+ pictures` and detail, as over any other app.
+  trash, `+ pictures` and detail. The detail is the object's facts only —
+  its name, facts, lineage, recipe and acts, no picture of its own, as wide
+  as the bench's properties, over the grid's right edge (`detailPicture:
+  false`): the picture is the viewer's. The author's choice of three, C,
+  2026-11-05 — against three columns and the facts under the viewer.
 - **The object whose detail opens, drawn large** beside it, as compose
   would draw it (`core/rebuild.js` `openFrames`, drafts): a still, a shape,
   a set's sheet; a loop or a page that moves played by core's player under
