@@ -112,7 +112,9 @@ export async function launch({ port, profile, width = 1600, height = 1000 }) {
     },
 
     async close() {
-      try { await first.send('Browser.close'); } catch { /* already gone */ }
+      // Asked to close, Chrome may go without a word — under the load of other checks it did: a send
+      // is answered or never, and a check waited on it for minutes, all its oks green. Three seconds, then on.
+      try { await Promise.race([first.send('Browser.close'), sleep(3000)]); } catch { /* already gone */ }
       first.ws.close();
       proc.kill();
       await sleep(300);

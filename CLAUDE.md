@@ -21,6 +21,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/map/` | M8, begun: the map editor — a room on a grid of tiles, things placed on it, what can be walked and what answers, saved as a `map`; and its player, `play/`, point and click | `apps/map/STATUS.md` |
 | `apps/rig/` | M9, begun: a drawing made of marks, rigged at its marks — its strokes its bones; poses, swings, walks by part, worms crawling; and its player, `puppet/`, worn in OBS: the author's eyes from the camera at the eyestalks' tips, the mouth on the face, the body swaying with the head; the rig's bones over it as guides; sent, kept as a smart object OBS follows | `apps/rig/STATUS.md`; for OBS, `docs/guides/obs.md` |
 | `apps/3d/` | M10, begun: primitives made from their params, seen from anywhere, drawn by three.js on the page's GPU device, saved as a `model` | `apps/3d/STATUS.md` |
+| `apps/vault/` | S9b: the vault full screen — core's vault panel docked, the object chosen drawn large and played; makes nothing | `apps/vault/STATUS.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
 | smart objects, the live stack | M11: the `skw`, and every open window one layer of a stack each draws | `docs/smart-objects.md` |
@@ -138,7 +139,7 @@ node scripts/check-filters.mjs          # filters from the stylise batch on, eac
 node scripts/check-filter.mjs           # the filter app: a chain built, a loop played, no WebGPU
 node scripts/check-filter-save.mjs      # …and what it saves: replayed, reopened, placed in compose
 node scripts/check-look.mjs             # M5's link: a look made in filter, over a placement in compose
-node scripts/check-vault.mjs            # the vault panel: kin together, folders, the lineage switch
+node scripts/check-vault.mjs            # the vault panel: kin together, folders, the lineage switch; the vault app, an object drawn as chosen
 node scripts/check-frames.mjs           # a flipbook in compose: next frames, stepped, picked up, saved
 node scripts/check-particles.mjs        # particles: a loop that closes, a burst, print scale, a set's sprites; saved, replayed, placed, a sprite sheet
 node scripts/check-particles-fields.mjs # …emitters and fields, depth, a burst's sheet; the guides dragged; a picture from outside as the sprite

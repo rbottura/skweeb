@@ -55,8 +55,12 @@ export class VaultPanel {
    * @param {string} [opts.use]  only sets offered to this use (core/uses.js)
    * @param {(row:object)=>void} [opts.onPick]   makes the cards a picker
    * @param {string} [opts.pickLabel]
+   * @param {HTMLElement} [opts.mount]  docked there, always shown — the vault app's (S9b) — not over the page
+   * @param {(object:object, urls:{url:?string, thumb:?string})=>void} [opts.onDetail]  an object's detail opened
    */
   constructor(opts = {}) {
+    this._mount     = opts.mount || null;
+    this._onDetail  = opts.onDetail || null;
     this._filter    = opts.filter || {};
     // Vault.list() filters on one type, the cheap query; a param's several are narrowed here.
     this._accepts   = Array.isArray(opts.accepts) && opts.accepts.length
@@ -88,6 +92,7 @@ export class VaultPanel {
       for (const box of this._kins) fit(box, cols);
     });
     if (ro) { ro.observe(this._body); this._held.hold(() => ro.disconnect()); }
+    if (this._mount) this.show();
 
     // A save while the panel is open should appear without being asked for; a
     // retag can move an object into a folder, or out of what a picker offers;
@@ -106,7 +111,7 @@ export class VaultPanel {
   // ── Visibility ─────────────────────────────────────────────────────────────
 
   show()   { this._open = true;  this._root.classList.add('vp--visible'); this.refresh(); }
-  hide()   { this._open = false; this._root.classList.remove('vp--visible'); this._closeDetail(); }
+  hide()   { if (this._mount) return this._closeDetail(); this._open = false; this._root.classList.remove('vp--visible'); this._closeDetail(); }
   toggle() { this._open ? this.hide() : this.show(); }
   /** Off the page, and deaf; out of its app's scope. Twice is once. */
   remove() { if (this._held.closed) return; this._unheld(); this.hide(); this._held.close(); this._root.remove(); }
@@ -140,8 +145,8 @@ export class VaultPanel {
   // ── Chrome ─────────────────────────────────────────────────────────────────
 
   _build() {
-    this._root = el('div', 'vp');
-    this._root.setAttribute('role', 'dialog');
+    this._root = el('div', this._mount ? 'vp vp--docked' : 'vp');
+    this._root.setAttribute('role', this._mount ? 'region' : 'dialog');
     this._root.setAttribute('aria-label', 'Vault');
 
     const head = el('div', 'vp-head');
@@ -160,6 +165,7 @@ export class VaultPanel {
     const close = el('button', 'vp-btn', '✕');
     close.title = 'Close (Esc)';
     close.addEventListener('click', () => this.hide());
+    close.hidden = !!this._mount;            // docked, it stays
 
     this._trashBtn = el('button', 'vp-chip vp-trash', 'trash');
     this._trashBtn.title = 'What was put away — restore it, or delete it for good';
@@ -186,7 +192,7 @@ export class VaultPanel {
     const drawer = detailDrawer(() => this._closeDetail());
     Object.assign(this, { _detail: drawer.root, _detailTitle: drawer.title, _detailBody: drawer.body });
     this._root.append(head, this._body, drawer.root);
-    document.body.append(this._root);
+    (this._mount || document.body).append(this._root);
   }
 
   // ── The grid ───────────────────────────────────────────────────────────────
@@ -383,6 +389,7 @@ export class VaultPanel {
     this._loaded = loaded.object;
     this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl, reopen, place, rig });
     this._markCurrent();
+    if (this._onDetail) this._onDetail(loaded.object, { url: loaded.url, thumb: loaded.thumbUrl });
   }
 
   _closeDetail() {

@@ -12,7 +12,12 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-04: an app a module (S9a, under way on `scene/host`)
+### Newest — 2026-11-04: every app a module (S9a), the vault an app (S9b)
+
+- **The vault, an app** (`apps/vault/`): every object full screen — core's
+  vault panel docked in the page — the one whose detail opens drawn large
+  beside it and played if it moves; it makes nothing, so its title bar has
+  no Save and no Export — `check-vault`, `check-mount`.
 
 - **Every app on core's kit is `mount(host)` and `unmount()`** — particles,
   grid, ckt, compose, map, the rig, filter, fractals, the 3D app
@@ -307,14 +312,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9b on the board: the vault, an app** — branch `scene/vault` from `main`.
-Its first step: `VaultPanel` learns to open in a host of its own (`mount`,
-as ParamPanel takes one) rather than always over `document.body`, docked
-full screen; then `apps/vault/` — `index.html` mounting `main.js` on
-`core/mount.js`'s `appModule` — the vault's grid, folders, kin and detail
-over the whole page, the canvas showing the object chosen
-(`core/rebuild.js` `openFrames`); its row in `check-mount`; the gate
-`node scripts/checks.mjs --gate --since main`. Then S9c, *cluster*.
+**S9c on the board: *cluster*, the scene** — branch `scene/cluster` from
+`main`. Its first step: `apps/cluster/` — a page with one 2D canvas fixed in
+the middle and a strip naming the apps — that mounts one app at a time round
+it through its module (`mount(host)`, `unmount()`), the vault app first, a
+second mounted in its place by a click on the strip, the first unmounted;
+`check-mount`'s counts kept across the switch. The canvas handed to the app
+(`mount(host, { canvas })`), the last frame held between two apps and the
+panels moving come after (`docs/scene.md`, *Planned, 2026-11-04*).
 
 ## Parked decisions
 

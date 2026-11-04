@@ -66,7 +66,8 @@ const placeAStill = async c => {
  * those they keep from core (`kept`, core/keys.js `own`) — whether they play as they open,
  * what makes them ready to save — run after every mount — and when it is;
  * what its page is opened with, read by every mount; what a visit keeps from
- * one mount to the next, where an app keeps any.
+ * one mount to the next, where an app keeps any; what shows it booted, where
+ * it has no panel of params (`booted`, `params: false`) — the vault's.
  */
 const APPS = [
   { name: 'particles', own: ['KeyQ', 'KeyF'], plays: true, saves: true },
@@ -82,6 +83,7 @@ const APPS = [
     ready: `/iterations/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: '3d', own: ['KeyQ'], plays: false, saves: true,
     ready: `/turned .+ away/.test(document.querySelector('.bar-say')?.textContent || '')` },
+  { name: 'vault', own: [], plays: false, saves: false, params: false, live: false, booted: '.vp-card' },
   { name: 'rig', own: [], kept: ['KeyR'], plays: false, saves: true, query: aDrawing,
     ready: `/[0-9]+ bones/.test(document.querySelector('.bar-say')?.textContent || '')` },
 ];
@@ -136,7 +138,8 @@ const held = () => page.eval(`window.__held()`);
 const framesAsked = async () => { const a = await page.eval(`window.__frames()`); await wait(600); return (await page.eval(`window.__frames()`)) - a; };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, visit = null, query = null } of APPS) {
+for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, visit = null, query = null,
+                booted = '.pp-row', params = true, live = true } of APPS) {
   const app = `import('/apps/${name}/main.js')`;
   const say = text => `${name}: ${text}`;
   const hasOwn = list => own.every(k => list.includes(k));
@@ -148,7 +151,7 @@ for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, v
   };
 
   await c.go(c.base + `/apps/${name}/` + (query ? await query(c) : ''));
-  await page.until(`!!document.querySelector('.pp-row') && !!document.querySelector('skw-titlebar')`);
+  await page.until(`!!document.querySelector('${booted}') && !!document.querySelector('skw-titlebar')`);
   await wait(800);
   await page.eval(`window.__saved = 0; document.addEventListener('vault:saved', () => window.__saved++)`);
   const can = await readied();
@@ -159,7 +162,7 @@ for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, v
   c.ok(say('alone, its page mounts it, once'), first.app === 1 && first.top === 1 && first.bar === 1, JSON.stringify(first));
   c.ok(say('its own keys answer'), hasOwn(await keys()), (await keys()).join(' '));
   if (kept.length) c.ok(say(`the keys it keeps, not core's while it is mounted: ${kept.join(' ')}`), kept.every(k => !(first.keys || []).includes(k)));
-  c.ok(say('its params watched for steps'), (await watched()) >= 1);
+  if (params) c.ok(say('its params watched for steps'), (await watched()) >= 1);
   if (plays) c.ok(say('it plays: frames asked for'), (await framesAsked()) > 5);
   let once = 0;
   if (saves && can) { await press('s'); once = await saved(); c.ok(say('S saves'), once >= 1, `${once} saved`); }
@@ -187,7 +190,7 @@ for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, v
   c.ok(say("…its own keys no more, nor the ground's"), noOwn(after) && !after.includes('KeyG'), after.join(' '));
   if (kept.length) c.ok(say(`…the keys it kept, core's again: ${kept.join(' ')}`), kept.every(k => after.includes(k)), after.join(' '));
   c.ok(say('…its params watched no more'), (await watched()) === 0);
-  c.ok(say('…a bye to the other windows'), (await page.eval(`window.__heard`)).includes('bye'), JSON.stringify(await page.eval(`window.__heard`)));
+  if (live) c.ok(say('…a bye to the other windows'), (await page.eval(`window.__heard`)).includes('bye'), JSON.stringify(await page.eval(`window.__heard`)));
   await page.eval(`window.__ch.close()`);
   c.ok(say('…its stylesheet kept: the page linked it, not the mount'),
     await page.eval(`[...document.querySelectorAll('link[rel=stylesheet]')].filter(l => l.href.endsWith('/apps/${name}/style.css')).length === 1`));
@@ -201,7 +204,7 @@ for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, v
   // Mounted again, into a host of its own, three times over: as the first.
   await page.eval(`(() => { const h = document.createElement('div'); h.id = 'host'; document.body.append(h); })()`);
   for (let i = 0; i < 3; i++) await page.eval(`${app}.then(m => m.mount(document.getElementById('host')))`);
-  await page.until(`!!document.querySelector('#host .app .pp-row')`);
+  await page.until(`!!document.querySelector('#host .app ${booted}')`);
   await wait(800);
   const again = await counts();
   const heldAgain = await held();
