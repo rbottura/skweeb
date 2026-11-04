@@ -20,6 +20,8 @@
  * stack another.
  */
 
+import { held } from './scope.js';
+
 export const STACK_CHANNEL = 'skweeb-stack';
 
 const EMPTY = { page: null, place: [], n: 0, by: '' };
@@ -52,7 +54,8 @@ export function joinStack(live, { channel } = {}) {
     : typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(STACK_CHANNEL) : null;
   let stack = EMPTY;
   const listeners = new Set();
-  const post = message => { if (ch) ch.postMessage(message); };
+  let left = false;              // gone from the windows: nothing more sent
+  const post = message => { if (ch && !left) ch.postMessage(message); };
 
   /** Whether a block is here: a vault object always; a window while it is open. */
   const here = block => !block.live || block.live === live.id || live.windows().some(w => w.id === block.live);
@@ -85,7 +88,7 @@ export function joinStack(live, { channel } = {}) {
   /** Where a window's block is, or -1. */
   const indexOf = id => view().place.findIndex(b => b.live === id);
 
-  return {
+  const shared = {
     /** The stack as it stands: `{ page, place }`, a block only while what it names is here. */
     get: view,
     /** The index of a window's block in it, or -1. */
@@ -125,11 +128,18 @@ export function joinStack(live, { channel } = {}) {
       listeners.add(fn);
       return () => listeners.delete(fn);
     },
+    /** Leave the stack: nothing more sent or heard. Twice is once. */
     leave() {
+      if (left) return;
+      left = true;
+      unheld();
       stop();
       listeners.clear();
       if (ch && !channel) ch.close();
       else if (ch) ch.onmessage = null;
     },
   };
+  let unheld = () => {};
+  unheld = held(() => shared.leave());   // its app unmounted: its channel closed, as its window's is (core/scope.js, S9)
+  return shared;
 }
