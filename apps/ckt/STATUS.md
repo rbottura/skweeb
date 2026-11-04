@@ -1,5 +1,5 @@
 # STATUS — ckt
-_last touched: 2026-10-22_
+_last touched: 2026-11-04_
 
 ColorKineType v3. Ported from v2's own source, `J:\codes\ColorKineType_v2` —
 `script.js` (stage one), `p5_opencv.js` (the blob pass), `render.js` (stage
@@ -8,6 +8,13 @@ v2 was wrong once and a whole port was built on it.
 
 ## Works now — all of it seen running in Chrome
 
+- **A module** (S9a, 2026-11-04; `main.js` on core's `mount.js`):
+  `mount(host)` and `unmount()` — its keys and drops on the scope, its
+  motion stage's clock and observer stopped (`MotionStage.dispose`), the
+  attractor's pointer on its own grid rather than the page's body. A visit
+  is the page's, not a mount's: mounted again, ckt files into the same
+  session, the sets made before it still listed (`sessions.js`) —
+  `check-mount`.
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the motion side's Export, `docs/core-export.md`): the frame on screen, a
   window at a time through `core/windowed.js` — 209 tiles against the loop
