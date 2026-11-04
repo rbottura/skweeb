@@ -131,6 +131,46 @@ What it asks, in this order:
    2D canvas; or a canvas a renderer, stacked in the same place.
 4. **The gamepad** stays outside until C6: it is p5's.
 
+### Planned, 2026-11-04 — a draft for the author
+
+Asked during S9: "il va falloir planifier correctement pour gérer les
+fonctionnalités qui utilisent des contextes de canvas différents et des
+libs extérieures", a vault app "pour une consultation full screen", and
+the space of objects tried first on a bench (S11). What S9's first bricks
+found, and what follows from it:
+
+- **The canvas is already one kind.** Every app on core's kit draws its
+  viewer on a 2D canvas: filter and fractals get an ImageBitmap back from
+  the GPU kit, the 3D app from three's renderer on an OffscreenCanvas. The
+  GPU device (`core/gpu/`) and the 3D renderer (`apps/3d/renderer.js`) are
+  one a page, opened once and kept — a mount after another costs nothing,
+  and an unmount lets go of its own textures and pipelines, never the
+  device. So the scene's fixed canvas can be one 2D canvas, handed to the
+  app it mounts — `mount(host, { canvas })` — in place of the one it makes
+  alone. Item 3 above, answered: the first of its two ways.
+- **The libraries, by what they hold.** Lit: components in the page's DOM,
+  each gone with its node. three.js: the one renderer, kept; a model's
+  geometries and materials disposed at unmount. MediaPipe and the camera
+  (the puppet): the landmarker closed and the camera's tracks stopped at
+  unmount — the light goes off. p5 (the gamepad): out of the scene until C6,
+  as above; its page alone as ever.
+- **Between two apps**, the canvas keeps the last frame of the one going
+  until the next draws its first, so the centre never flashes empty; the
+  panels leave and come as the bench has them.
+- **The vault, an app** — `apps/vault/`: VaultPanel full screen, its grid,
+  folders, kin and detail, the canvas showing the object chosen. In the
+  scene, the app that is open when nothing else is.
+- **The space** — S11's bench first, on an artifact as the bench was: the
+  objects of the vault in 3D, its parameters and its small tests, before
+  S10 builds it in the suite.
+
+The order proposed: S9 goes on — every app a module, the 2D ones first
+(particles, grid, ckt, compose, map, rig), then filter, fractals, 3d, the
+puppet; then the vault app; then the scene's host — the canvas handed over,
+the last frame held, the panels moving; S11's bench beside it; S10 last.
+The scene's name: the author's, from *cluster* or *nébuleuse* — a word of
+space that holds many objects.
+
 **Rule 7, settled by the author the same day**: "nous devons garder la
 possibilité d'avoir les apps en onglet indépendantes ou alors une scène
 générique qui peut être la *skweeb absolute scene*, l'application skweeb

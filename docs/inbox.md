@@ -24,7 +24,19 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing, 2026-11-03: the day's ideas went onto the plan as M12.
+- **2026-11-04 — the scene, planned before it is built; a vault app; the
+  space on its bench; a name.** During S9: "pour la scène modulaire il va
+  falloir planifier correctement pour gérer les fonctionnalités qui
+  utilisent des contextes de canvas différents et des libs extérieures" —
+  2D, WebGPU (filter, fractals), three.js (3d), p5 (the gamepad), MediaPipe
+  (the puppet). "Pareil il nous faudra pouvoir ouvrir une app vault pour
+  une consultation full screen du vault" — the vault an app of its own, not
+  only a panel over another. "Ne pas oublier que l'exploration 3d des
+  objets est à expérimenter, sûrement sur un artefact comme mentionné
+  hier" — S11's bench. The name: "un mot comme *cluster* ou *nébuleuse*
+  … un terme associé à l'espace spatial et qui sous-entend un concept de
+  pluralisme d'objet en son sein, peut-être que d'autres termes pourraient
+  encore mieux représenter cette idée". To sort at the session's end.
 
 ## Sorted
 
