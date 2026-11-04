@@ -14,8 +14,8 @@ sorts them.
 
 ### Newest — 2026-11-04: an app a module (S9a, under way on `scene/host`)
 
-- **particles, grid, ckt and compose are `mount(host)` and `unmount()`**
-  (`core/mount.js`): built in any host, taken out with nothing left — what
+- **particles, grid, ckt, compose and map are `mount(host)` and
+  `unmount()`** (`core/mount.js`): built in any host, taken out with nothing left — what
   they held outside their nodes in a scope (`core/scope.js`) the unmount
   closes: listeners, their windows in the stack and the stack's channel,
   keys and pies, their params' steps; what ends first takes itself out of
@@ -306,15 +306,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9a goes on, on `scene/host`: map a module, as particles, grid, ckt and
-compose are** — its `main.js` on `core/mount.js`'s `appModule`, its markup
-out of `index.html` into the module, its state made again in `start`, its
-own clock held (`mine.hold(() => clock.dispose())`), what it holds that
-the kit does not — a listener on the document, an observer — on the scope;
-its player, `play/`, the same, its `popstate` and `resize` on the window;
-then their rows in `check-mount`'s `APPS`; the gate is
-`node scripts/checks.mjs --gate --since main`. Then rig, filter, fractals,
-3d, the puppet, the same way, in the order of
+**S9a goes on, on `scene/host`: rig a module, as particles, grid, ckt,
+compose and map are** — its `main.js` on `core/mount.js`'s `appModule`, its
+markup out of `index.html` into the module, its state made again in
+`start`, its own clock held (`mine.hold(() => clock.dispose())`), what it
+holds that the kit does not — a listener on the document, an observer — on
+the scope; its `own('KeyR')` given back by core already; then its row in
+`check-mount`'s `APPS`; the gate is `node scripts/checks.mjs --gate --since
+main`. Then filter, fractals, 3d, the puppet, the same way, in the order of
 `docs/scene.md`'s *Planned, 2026-11-04*, confirmed; the gamepad stays out
 until C6. Then the vault app (S9b), then *cluster* (S9c). A push refused
 with "Permission denied (publickey)" is GitHub's, not the key's: it came
