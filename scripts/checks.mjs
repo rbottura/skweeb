@@ -108,7 +108,9 @@ if (flag('--gate')) {
   for (const [t, r] of broken) console.log(`      ${t}\n` + r.text.trim().split('\n').slice(-4).map(l => '        ' + l).join('\n'));
   const lines = await run('scripts/lines.mjs', null);
   console.log(`${lines.green ? 'ok  ' : 'FAIL'}  rule 4's lines — ${lines.text.trim().split('\n').at(-1)}`);
-  if (!lines.green) console.log(lines.text.trim().split('\n').filter(l => / no reason|past 600|over 400/.test(l)).map(l => '      ' + l).join('\n'));
+  // Everything it says but what is in order — kept with a reason, the gamepad's known four, its count.
+  const wrong = l => l.trim() && !/^past 400, kept whole|^known, until C6|to look at$|within rule 4$/.test(l);
+  if (!lines.green) console.log(lines.text.trim().split('\n').filter(wrong).map(l => '      ' + l).join('\n'));
   red += broken.length + (lines.green ? 0 : 1);
 }
 
