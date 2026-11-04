@@ -38,7 +38,8 @@ sorts them.
   the page draws a state, clicked it goes back to it, its next save a branch;
   two Shift clicked are compared and merged — taken where only the arriving
   one changed, a conflict picked row by row — its save a state with both
-  parents (S7b; `core/shell/graph.js`, `merge.js`, `check-graph`).
+  parents (S7b); A over a state, the apps it reaches, each on that state
+  (S7c; `core/shell/graph.js`, `merge.js`, `check-graph`).
 - The bench stays a page apart: https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm.
 
 ### 2026-10-21 and -22
@@ -291,12 +292,13 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S7c on the board of `docs/plan.md`: A over a state, the apps it reaches**
-— branch `ui/open-in`: in the graph, A held over a node opens a pie of the
-apps that state's links reach (core/uses.js, core/reopen.js — compose's
-placing, filter's source, the rig…), the others greyed with why; picked,
-that app opens on that state, `skw_…@vN`. Then S9, every app a module and
-the scene.
+**S9 on the board of `docs/plan.md`: every app a module, then the scene** —
+branch `scene/host`: first the seam, no app changed on screen — each app's
+boot (`apps/<app>/main.js`) split into `mount(host)` and `unmount()`, its
+page calling mount on itself, so the app still runs alone (rule 7); particles
+first, as the bench's. Then `apps/scene/`, one canvas the apps mount round
+(`docs/scene.md`, *The scene*). Before the scene, ask the author its name
+— "skweeb absolute scene" was a placeholder.
 
 ## Parked decisions
 

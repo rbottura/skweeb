@@ -153,7 +153,7 @@ node scripts/check-guides.mjs           # S8: rulers, guides out of them and bac
 node scripts/check-rows.mjs             # S2, S2b: a value on one line — its unit in its box, dragged, marked; pairs; the fold
 node scripts/check-keys.mjs             # S5b: the left hand — keys by place, tapped or held for a pie; an app's own keys kept
 node scripts/check-steps.mjs            # S6c: the session's steps — Ctrl Z, Ctrl Y; a drag one step, a Reset one
-node scripts/check-graph.mjs            # S7: H, the states as a graph over the page — hovered drawn, clicked gone back to, a branch; two compared and merged
+node scripts/check-graph.mjs            # S7: H, the states as a graph over the page — hovered drawn, clicked gone back to, a branch; two compared and merged; A, where a state goes
 node scripts/check-states.mjs           # S6b, S6d: S the next state of a smart object; a still named from it; a row's value in each state; pinned in compose
 node scripts/check-puppet.mjs           # the rig's puppet: a fake camera read once a frame, eyes and mouth worn, the body swayed, the guides, the camera switched; sent and followed by a page in OBS; parts found drawn eyes first, and told
 node scripts/vendor-mediapipe.mjs       # once a machine, before the puppet reads a face: MediaPipe into core/libs/mediapipe/, out of git
