@@ -46,6 +46,14 @@ const CKT_VISIT = `(async () => {
   return { session: (say().match(/in “([^”]+)”/) || [])[1] || null, rowsBefore, rows: document.querySelectorAll('.ss-row').length };
 })()`;
 
+/** The newest drawing of the gamepad's, as the server lists it: what the rig is opened with, `?drawing=<id>`. */
+const aDrawing = async c => {
+  const { objects = [] } = await (await fetch(c.base + '/api/vault')).json();
+  const drawn = objects.filter(r => r.type === 'still' && r.origin && r.origin.app === 'gamepad' && !(r.tags || []).includes('trash'))
+    .sort((a, b) => String(b.created).localeCompare(String(a.created)))[0];
+  return drawn ? '?drawing=' + encodeURIComponent(drawn.id) : '';
+};
+
 /** The first still in the vault, as the server lists it: what compose is opened with, `?place=<id>`. */
 const placeAStill = async c => {
   const { objects = [] } = await (await fetch(c.base + '/api/vault')).json();
@@ -54,7 +62,8 @@ const placeAStill = async c => {
 };
 
 /**
- * The apps that are modules: their own keys, whether they play as they open,
+ * The apps that are modules: their own keys — those core answers for them, and
+ * those they keep from core (`kept`, core/keys.js `own`) — whether they play as they open,
  * what makes them ready to save — run after every mount — and when it is;
  * what its page is opened with, read by every mount; what a visit keeps from
  * one mount to the next, where an app keeps any.
@@ -67,6 +76,8 @@ const APPS = [
   { name: 'compose', own: [], plays: false, saves: true, query: placeAStill,
     ready: `/1 placed · .+ on the page/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: 'map', own: ['KeyQ'], plays: false, saves: true },
+  { name: 'rig', own: [], kept: ['KeyR'], plays: false, saves: true, query: aDrawing,
+    ready: `/[0-9]+ bones/.test(document.querySelector('.bar-say')?.textContent || '')` },
 ];
 
 const c = await startCheck();
@@ -119,7 +130,7 @@ const held = () => page.eval(`window.__held()`);
 const framesAsked = async () => { const a = await page.eval(`window.__frames()`); await wait(600); return (await page.eval(`window.__frames()`)) - a; };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-for (const { name, own, plays, saves, prepare = null, ready = null, visit = null, query = null } of APPS) {
+for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, visit = null, query = null } of APPS) {
   const app = `import('/apps/${name}/main.js')`;
   const say = text => `${name}: ${text}`;
   const hasOwn = list => own.every(k => list.includes(k));
@@ -136,10 +147,12 @@ for (const { name, own, plays, saves, prepare = null, ready = null, visit = null
   await page.eval(`window.__saved = 0; document.addEventListener('vault:saved', () => window.__saved++)`);
   const can = await readied();
   if (prepare || query) c.ok(say('ready to save: a still of the vault on it'), can);
-  const first = await counts();
+  const first = { ...(await counts()) };
+  Object.defineProperty(first, 'keys', { value: await keys(), enumerable: false });
   const heldFirst = await held();
   c.ok(say('alone, its page mounts it, once'), first.app === 1 && first.top === 1 && first.bar === 1, JSON.stringify(first));
   c.ok(say('its own keys answer'), hasOwn(await keys()), (await keys()).join(' '));
+  if (kept.length) c.ok(say(`the keys it keeps, not core's while it is mounted: ${kept.join(' ')}`), kept.every(k => !(first.keys || []).includes(k)));
   c.ok(say('its params watched for steps'), (await watched()) >= 1);
   if (plays) c.ok(say('it plays: frames asked for'), (await framesAsked()) > 5);
   let once = 0;
@@ -166,6 +179,7 @@ for (const { name, own, plays, saves, prepare = null, ready = null, visit = null
   c.ok(say('…no frame asked for'), (await framesAsked()) === 0);
   const after = await keys();
   c.ok(say("…its own keys no more, nor the ground's"), noOwn(after) && !after.includes('KeyG'), after.join(' '));
+  if (kept.length) c.ok(say(`…the keys it kept, core's again: ${kept.join(' ')}`), kept.every(k => after.includes(k)), after.join(' '));
   c.ok(say('…its params watched no more'), (await watched()) === 0);
   c.ok(say('…a bye to the other windows'), (await page.eval(`window.__heard`)).includes('bye'), JSON.stringify(await page.eval(`window.__heard`)));
   await page.eval(`window.__ch.close()`);

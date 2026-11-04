@@ -20,6 +20,10 @@
  * S saves (save.js): a pose, a still — or a loop, when anything moves — its
  * recipe the values, the bones whole, their turns and waves; `?open=<id>`
  * brings one back.
+ *
+ * A module since S9 (core/mount.js): `mount(host)` and `unmount()`, so a
+ * scene can mount another in its place — R core's again when it goes.
+ * index.html mounts it on itself. Nothing happens at import.
  */
 
 import { rigParams, GROUPS } from './params.js';
@@ -47,45 +51,79 @@ import { Bar }          from '../../core/Bar.js';
 import { Vault }        from '../../core/vault.js';
 import { own }          from '../../core/keys.js';
 import { viewFactor }   from '../../core/view.js';
+import { appModule }    from '../../core/mount.js';
 
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
-const bonesBtn = document.getElementById('bones');
-const playBtn = document.getElementById('play');
 const REACH = 14;              // CSS pixels: how near a handle a press takes hold of it
 
+/** The chosen bone on the left, the viewer, the rig's drawers on the right, the bar below; Canvas 2D, no p5. */
+const MARKUP = `
+  <main class="app-main">
+    <div class="app-side" id="bone-side"></div>
+    <section class="viewer" aria-label="the rigged drawing">
+      <div class="viewer-head">
+        <button class="nb-btn" id="bones" type="button" aria-pressed="true"
+                title="The bones over the drawing, a joint at each end — never in anything saved [B]">bones</button>
+        <button class="nb-btn" id="rest" type="button"
+                title="Every bone back where it was drawn [R]">rest</button>
+        <button class="nb-btn" id="play" type="button" aria-pressed="false" disabled
+                title="The loop, playing — once a bone swings [space]">play</button>
+      </div>
+      <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+    </section>
+    <div class="app-side" id="side"></div>
+  </main>`;
+
+const app = appModule('rig', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+
+/** The rig in `host`, started — a drawing or a saved rig opened if the page asks for it (core/mount.js). */
+export const mount = host => app.mount(host);
+/** The rig out of its host, everything it held let go of: its keys, R given back to core, its clock. */
+export const unmount = () => app.unmount();
+const mounted = () => !!app.scope;
+
+// One app mounted at a time: its state, made again by each mount (`start`).
+let root, canvas, ctx, bonesBtn, playBtn, clock, pending;
 let params, bar, chosenPanel;
-let opened = null;             // the drawing, opened (frames.js openDrawing): its recipe and its sprites
-let reopened = null;           // a rig reopened: its bones, turns and waves, for the drawing to take once open
-let drawn = null;              // a drawn path's points, when the crawl follows one
-let drawing = null, bones = [], frames = null;
-let turns = [];                // the pose: a turn a bone, radians
-let waves = [];                // a wave a bone, or null where it keeps still (motion.js)
-let at = [];                   // the bones, posed at the frame on screen
-let hot = null;                // the bone whose handle is under the pointer, or held
-let chosen = null;             // the bone whose handle was pressed last
-let showBones = true;
-let asked = 0;                 // the latest drawing asked for; an older answer is dropped
-let view = 1, stage = { x: 0, y: 0, width: 1, height: 1 };
-let clockFps = 0;              // the rate the clock was fitted to
-let save = () => {};           // into the vault (leaving.js), once booted
+let opened, reopened, drawn, drawing, bones, frames, turns, waves, at, hot, chosen, showBones, asked, view, stage, clockFps, save;
 
-/** The loop's clock: what moves, moves by it. */
-const clock = new Playhead({ onShow: () => repose(), onState: () => playBtn.setAttribute('aria-pressed', String(clock.playing)) });
+function start(host, mine) {
+  root = host;
+  canvas = root.querySelector('#stage');
+  ctx = canvas.getContext('2d');
+  bonesBtn = root.querySelector('#bones');
+  playBtn = root.querySelector('#play');
+  params = bar = chosenPanel = null;
+  opened = reopened = drawn = drawing = frames = null;   // the drawing opened; a rig reopened, for it to take; a path's points
+  bones = [];
+  turns = [];                // the pose: a turn a bone, radians
+  waves = [];                // a wave a bone, or null where it keeps still (motion.js)
+  at = [];                   // the bones, posed at the frame on screen
+  hot = chosen = null;       // the bone under the pointer or held; the one pressed last
+  showBones = true;
+  asked = 0;                 // the latest drawing asked for; an older answer is dropped
+  view = 1; stage = { x: 0, y: 0, width: 1, height: 1 };
+  clockFps = 0;              // the rate the clock was fitted to
+  save = () => {};           // into the vault (leaving.js), once booted
+  pending = false;           // a paint asked for, not yet made
+  // The loop's clock: what moves, moves by it. Stopped at the unmount.
+  clock = new Playhead({ onShow: () => repose(), onState: () => playBtn.setAttribute('aria-pressed', String(clock.playing)) });
+  mine.hold(() => clock.dispose());
+  try { boot(mine); } catch (err) { if (bar) bar.announce('failed to boot: ' + err.message); throw err; }
+}
 
-function boot() {
-  bar = new Bar({ app: 'rig', mount: document.querySelector('.app'),
+function boot(mine) {
+  bar = new Bar({ app: 'rig', mount: root,
                   keys: 'drag a joint · B bones · R rest · space play · S save · V vault' });
   own('KeyR');                        // R is the rig's rest, not core's seed (core/keys.js)
   params = rigParams();
-  const panel = new ParamPanel(params, { title: 'rig', mount: document.getElementById('side'), groups: GROUPS });
+  const panel = new ParamPanel(params, { title: 'rig', mount: root.querySelector('#side'), groups: GROUPS });
   const out = ways({ bar, clock, args: () => (drawing ? { params, opened, bones, turns, waves, drawn,
                                                           title: opened.object.title || params.get('drawing'), tick: clock.tick } : null) });
   save = out.save;
   const exp = buildDrawers(panel, { rest: toRest, preset: applyPreset, still: toStill, save, download: out.download });
   new PrintPanel({ mount: exp.body, app: 'rig', object: () => out.envelope(), leave: out.leave, say: text => bar.say(text), tick: () => clock.tick });
   stackDrawer(panel, { app: 'rig', layer: () => out.envelope(), clock, save: out.save });     // a window of the stack (core/live.js)
-  chosenPanel = new ChosenBone({ mount: document.getElementById('bone-side'), onWave });
+  chosenPanel = new ChosenBone({ mount: root.querySelector('#bone-side'), onWave });
 
   params.on(key => {
     if (params.restoring) return;           // a rig reopened: openRequested() loads it whole
@@ -99,11 +137,12 @@ function boot() {
   wireJoints({ canvas, pictureOf, handleAt, choose, turn, hover: bone => { hot = bone; draw(); } });
   bonesBtn.addEventListener('click', () => toggleBones());
   playBtn.addEventListener('click', () => clock.toggle());
-  document.getElementById('rest').addEventListener('click', toRest);
-  new ResizeObserver(() => draw()).observe(canvas.parentElement);
-  wireKeys();
+  root.querySelector('#rest').addEventListener('click', toRest);
+  const sized = new ResizeObserver(() => draw());
+  sized.observe(canvas.parentElement); mine.hold(() => sized.disconnect());
+  wireKeys(mine);
   openRequested().then(was => {
-    if (was) return;
+    if (was || mine.closed) return;
     const wanted = new URLSearchParams(location.search).get('drawing');
     if (wanted) params.set('drawing', wanted);
     else load();
@@ -114,7 +153,7 @@ function boot() {
 async function openRequested() {
   try {
     const was = await requested('rig');
-    if (!was) return false;
+    if (!was || !mounted()) return false;
     const r = was.object.recipe;
     reopened = { bones: r.bones, turns: r.turns, waves: r.waves || [] };
     params.restore(r.rig);
@@ -145,7 +184,7 @@ async function load() {
   bar.say('opening…');
   try {
     const was = await openDrawing(id);
-    if (ask !== asked) return;
+    if (ask !== asked || !mounted()) return;
     opened = was;
     if (was.missing) bar.announce(`${was.missing} of its sprites would not load: their family is not on this disk`);
     rebuild('drawing');
@@ -302,10 +341,8 @@ function toggleBones(on = !showBones) {
 
 // ── Drawing ─────────────────────────────────────────────────────────────────
 
-let pending = false;
-
 function draw() {
-  if (pending) return;
+  if (pending || !mounted()) return;
   pending = true;
   requestAnimationFrame(() => { pending = false; paint(); });
 }
@@ -320,6 +357,7 @@ function pathRoom() {
 }
 
 function paint() {
+  if (!mounted()) return;
   if (!drawing || !frames) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -345,9 +383,9 @@ function paint() {
 
 // ── Keys, the vault ─────────────────────────────────────────────────────────
 
-function wireKeys() {
+function wireKeys(mine) {
   const vault = new VaultPanel();
-  document.addEventListener('keydown', e => {
+  mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
@@ -356,12 +394,5 @@ function wireKeys() {
     if (e.key === 's' || e.key === 'S') save();
     if (e.key === ' ' && moving()) { e.preventDefault(); clock.toggle(); }
   });
-  Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
-}
-
-try {
-  boot();
-} catch (err) {
-  console.error('[rig] failed to boot:', err);
-  if (bar) bar.announce('failed to boot: ' + err.message);
+  Vault.refresh().then(ok => { if (bar) bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'); });
 }
