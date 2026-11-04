@@ -14,8 +14,8 @@ sorts them.
 
 ### Newest — 2026-11-04: an app a module (S9a, under way on `scene/host`)
 
-- **particles, grid, ckt, compose, map and the rig are `mount(host)` and
-  `unmount()`** (`core/mount.js`): built in any host, taken out with nothing left — what
+- **particles, grid, ckt, compose, map, the rig and filter are
+  `mount(host)` and `unmount()`** (`core/mount.js`): built in any host, taken out with nothing left — what
   they held outside their nodes in a scope (`core/scope.js`) the unmount
   closes: listeners, their windows in the stack and the stack's channel,
   keys and pies, their params' steps; what ends first takes itself out of
@@ -306,16 +306,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9a goes on, on `scene/host`: filter a module, as particles, grid, ckt,
-compose, map and the rig are** — its `main.js` on `core/mount.js`'s
-`appModule`, its markup out of `index.html` into the module, its state made
-again in `start`, its own clock held (`mine.hold(() => clock.dispose())`),
-what it holds that the kit does not — its keys and drops on the document,
-its following of a window (`following.js`, `vault:updated`, core's
-`listen`) — on the scope, its GPU chain let go of but never the device;
+**S9a goes on, on `scene/host`: fractals a module, as the six before it
+and filter are** — its `main.js` on `core/mount.js`'s `appModule`, its
+markup out of `index.html` into the module, its state made again in
+`start`, its own clock held (`mine.hold(() => clock.dispose())`), its keys
+and observer on the scope, its GPU work let go of but never the device;
 then its row in `check-mount`'s `APPS`; the gate is
-`node scripts/checks.mjs --gate --since main`. Then fractals, 3d, the
-puppet, the same way, in the order of
+`node scripts/checks.mjs --gate --since main`. Then 3d, the puppet, the
+same way, in the order of
 `docs/scene.md`'s *Planned, 2026-11-04*, confirmed; the gamepad stays out
 until C6. Then the vault app (S9b), then *cluster* (S9c). A push refused
 with "Permission denied (publickey)" is GitHub's, not the key's: it came
