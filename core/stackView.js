@@ -23,6 +23,7 @@ import { openFrames } from './rebuild.js';
 import { Vault }      from './vault.js';
 import { placementMatrix, multiply, invert } from './place.js';
 import { compositeOf, cssBlendOf } from './blend.js';
+import { held }       from './scope.js';
 
 /** The frame a loop shows now, by the wall clock: the same in every window. */
 export const tickNow = (length, fps, now = Date.now()) => (length > 1 ? Math.floor((now / 1000) * (fps || 30)) % length : 0);
@@ -210,7 +211,7 @@ export function stackView({ live, stack, canvas: find }) {
   const sized = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
   schedule();
 
-  return {
+  const view = {
     /** Draw again now — after the app's own canvas changed size, say. */
     redraw: schedule,
     dispose() {
@@ -221,4 +222,6 @@ export function stackView({ live, stack, canvas: find }) {
       drawn.clear();
     },
   };
+  held(() => view.dispose());           // its app unmounted (core/scope.js, S9)
+  return view;
 }

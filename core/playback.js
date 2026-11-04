@@ -27,6 +27,8 @@
  * the timing falls, and a steady turn reads as a stutter.
  */
 
+import { held } from './scope.js';
+
 export class Playhead {
   /**
    * @param {object} opts
@@ -50,6 +52,7 @@ export class Playhead {
     this._raf = 0;
     this._last = 0;
     this._carry = 0;
+    held(() => this.dispose());         // its app unmounted: no frame asked for after (core/scope.js, S9)
   }
 
   get tick()    { return this._tick; }

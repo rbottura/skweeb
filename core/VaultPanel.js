@@ -38,6 +38,7 @@ import { byUse, offerNote, switchOn } from './vault-offer.js';
 import { objectCard, pickableCell, fileUrl } from './vault-card.js';
 import { arrange, kinBox, columnsIn, fit, lineageOn, rememberLineage } from './vault-kin.js';
 import { wireImport } from './vault-import.js';
+import { bag, held } from './scope.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -80,18 +81,20 @@ export class VaultPanel {
     this._kins     = [];        // their containers, refitted when the panel resizes
 
     this._build();
-    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => {
-      const cols = columnsIn(this._body.clientWidth);
-      for (const box of this._kins) fit(box, cols);
-    }).observe(this._body);
+    this._held = bag('vault panel');   // what it hears off its nodes: let go of by `remove`, or its app's unmount (S9)
+    held(() => this.remove());
+    const ro = typeof ResizeObserver !== 'undefined' && new ResizeObserver(() => {
+      for (const box of this._kins) fit(box, columnsIn(this._body.clientWidth));
+    });
+    if (ro) { ro.observe(this._body); this._held.hold(() => ro.disconnect()); }
 
     // A save while the panel is open should appear without being asked for; a
     // retag can move an object into a folder, or out of what a picker offers;
     // and `changed` is either made elsewhere — another tab, another machine.
     const live = () => { if (this._open && !this._busy) this.refresh(); };
-    for (const e of ['saved', 'duplicate', 'retagged', 'changed']) document.addEventListener('vault:' + e, live);
+    for (const e of ['saved', 'duplicate', 'retagged', 'changed']) this._held.listen(document, 'vault:' + e, live);
 
-    document.addEventListener('keydown', e => {
+    this._held.listen(document, 'keydown', e => {
       if (e.key !== 'Escape' || !this._open) return;
       if (this._current) this._closeDetail();
       else if (this._selected.size) this._select(null);
@@ -104,6 +107,8 @@ export class VaultPanel {
   show()   { this._open = true;  this._root.classList.add('vp--visible'); this.refresh(); }
   hide()   { this._open = false; this._root.classList.remove('vp--visible'); this._closeDetail(); }
   toggle() { this._open ? this.hide() : this.show(); }
+  /** Off the page, and deaf. */
+  remove() { this.hide(); this._held.close(); this._root.remove(); }
 
   get isOpen() { return this._open; }
 

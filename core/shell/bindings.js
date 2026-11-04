@@ -27,6 +27,7 @@ import * as Guides from './guides.js';
 import { actsOnPage, showPrint } from '../boxes/export.js';
 import { rowParams } from '../param-rows.js';
 import { Vault } from '../vault.js';
+import { held } from '../scope.js';
 
 const $ = sel => document.querySelector(sel);
 const press = node => { if (node && !node.disabled) { node.click(); return true; } return false; };
@@ -35,10 +36,10 @@ let appPie = null;            // { title, items() → [{ label, run, on? }], tap
 let overlay = null;           // { label, on() → bool, toggle() }
 
 /** The app's own pie, on A: its choices, and what a tap does. */
-export function setAppPie(spec) { appPie = spec; }
+export function setAppPie(spec) { appPie = spec; held(() => { if (appPie === spec) appPie = null; }); }
 
 /** What the view's tap shows or hides, first: an app's guides over its picture. */
-export function setOverlay(spec) { overlay = spec; }
+export function setOverlay(spec) { overlay = spec; held(() => { if (overlay === spec) overlay = null; }); }
 
 /**
  * A pie of an enum's options, the one picked lit; a tap the next. For an

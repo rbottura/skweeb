@@ -93,5 +93,20 @@ Steps.forTests();
   ok('…then the first', both(a), [90, 1]);
 }
 
+Steps.forTests();
+{
+  const a = fresh('a'), b = fresh('b');
+  a.set('rate', 10); later();
+  b.set('rate', 20); later();
+  a.set('rate', 30); later();
+  Steps.unwatch(a);
+  ok('unwatched: its steps gone, the others kept', Steps.counts().back, 1);
+  a.set('rate', 40); later();
+  ok('…and its changes no more steps', Steps.counts().back, 1);
+  Steps.undo();
+  ok('…a step back, in the params still watched', [a.get('rate'), b.get('rate')], [40, 90]);
+  ok('…watched no more', Steps.watched().includes(a), false);
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
