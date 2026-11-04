@@ -70,6 +70,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C3 | fonts licensed in their files | `clean/font-licences` | S | side job; Destra waits on the author |
 | C4 | two known bugs | `fix/trashed-sets`, `fix/recut-folder` | S | side jobs |
 | C9 | the checks' helpers shared | `clean/check-helpers` | S | side job |
+| C10 | the checks several at a time, picked by what a change reaches | `clean/checks` | S | landed 2026-11-04 |
 | L4 | the live view blends as a save does | `layers/isolation` | S | side job |
 | P5 | M9's brick 6: the slug from every side | `rig/views` | M | waits: the author's drawings |
 | P0 | the puppet on the author's head | `rig/puppet-defaults` | S | waits: an evening in OBS |
@@ -173,6 +174,13 @@ Every check defines its own `say`, `wait`, `row`, `set`, `scrubTo`,
 different in each. A module of them beside `check-kit.mjs`, each check
 taking what it uses: what rule 4's eased cap leaves to split is then
 seams, never copies. *Done when* no check defines a helper another has.
+
+**C10 — the checks several at a time, picked by what a change reaches** ·
+landed 2026-11-04, `clean/checks`. The author's ask, after two runs of
+every check: "il y a t-il un moyen d'accélérer le processus de check ?".
+`scripts/checks.mjs` runs them four at a time, the longest first, a failure
+again alone; `scripts/reach.mjs` picks them by the pages a change reaches;
+`--gate` adds the unit tests and rule 4 (`docs/workflow.md`, *The gate*).
 
 ## U — the UI redesigned: boxes, layout, theme
 
