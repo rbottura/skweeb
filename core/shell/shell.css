@@ -93,3 +93,27 @@ skw-pie .pie-item kbd { display: inline-grid; place-items: center; width: 16px; 
 skw-pie .pie-item--on { color: var(--accent); }
 skw-pie .pie-item--hot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 skw-pie .pie-item--hot kbd { border-color: currentColor; color: inherit; }
+
+/* ── The states, a graph over the page (S7; core/shell/graph.js) ──────────── */
+
+skw-graph { position: fixed; inset: 0; z-index: 85; display: block; }
+skw-graph .gr { position: absolute; inset: 0; overflow: hidden; background: rgba(10, 10, 12, .46); cursor: grab; touch-action: none; }
+skw-graph .gr-head { position: absolute; left: 50%; top: 46px; z-index: 2; transform: translateX(-50%); display: flex; align-items: baseline; gap: 12px;
+  padding: 6px 14px; border: 1px solid var(--line-2); border-radius: 15px; background: var(--raised); color: var(--fg-2); font: 400 12px var(--font-ui);
+  white-space: nowrap; box-shadow: 0 8px 22px var(--shadow); pointer-events: none; }
+skw-graph .gr-head b { color: var(--fg); font: 600 11px var(--font-ui); letter-spacing: .07em; text-transform: uppercase; }
+skw-graph .gr-hint { color: var(--fg-3); }
+skw-graph .gr-note { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); color: var(--fg-2); font: 400 13px var(--font-ui); }
+skw-graph .gr-space { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+skw-graph .gr-wires { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+skw-graph .gr-wire { fill: none; stroke: var(--fg-3); stroke-width: 1.5; }
+skw-graph .gr-wire--merge { stroke-dasharray: 5 4; stroke: var(--accent); }
+skw-graph .gr-node { position: absolute; width: 132px; height: 150px; display: flex; flex-direction: column; gap: 3px; padding: 5px;
+  border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--panel); color: var(--fg); text-align: left; cursor: pointer;
+  box-shadow: 0 8px 22px var(--shadow); font: 400 11.5px var(--font-ui); }
+skw-graph .gr-node img, skw-graph .gr-noimg { width: 100%; height: 96px; object-fit: contain; border-radius: 6px;
+  background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 12px 12px; }
+skw-graph .gr-v { font: 500 11px var(--font-num); color: var(--fg-2); }
+skw-graph .gr-title { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--fg-3); }
+skw-graph .gr-node--held { border-color: var(--accent); }
+skw-graph .gr-node--hot { outline: 2px solid var(--accent); outline-offset: 1px; }

@@ -77,7 +77,7 @@ const clock = new Playhead({ onShow: () => {} });
 async function boot() {
   params = puppetParams();
   bar = new Bar({ app: 'puppet', mount: document.querySelector('.app'), keys: 'S send to OBS · B guides · H alone · C straight · G guide · V vault' });
-  own('KeyG');                        // G opens the puppet's guide, not core's ground (core/keys.js)
+  own('KeyG', 'KeyH');                // G the puppet's guide, H alone — not core's ground and states (core/keys.js)
   keeping = makeKeeping({ params, follow: values => {
     params.restore(values);
     drawers.sent(true, 0);
