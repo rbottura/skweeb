@@ -14,7 +14,7 @@ sorts them.
 
 ### Newest — 2026-11-04: an app a module (S9, under way on `scene/host`)
 
-- **particles is `mount(host)` and `unmount()`** (`core/mount.js`): built
+- **particles and grid are `mount(host)` and `unmount()`** (`core/mount.js`): built
   in any host, taken out with nothing left — what it held outside its nodes
   in a scope (`core/scope.js`) its unmount closes: its listeners, its keys
   and pies, its params' steps, its window in the stack. Its page mounts it
@@ -300,16 +300,18 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9 goes on, on `scene/host`: grid a module, as particles is** — its
-`main.js` on `core/mount.js`'s `appModule`, its markup out of `index.html`
-into the module, its state made again in `start`, what it holds that the
-kit does not — a listener on the document, an observer — on the scope;
-then `check-mount` run on grid too. Then ckt, compose, filter, fractals,
-map, rig, 3d, the same way; the gamepad stays out until C6. Then
-`apps/scene/`, one canvas the apps mount round (`docs/scene.md`, *The
-scene*) — before it, ask the author its name; "skweeb absolute scene" was
-a placeholder. **The branch is not pushed**: this machine's SSH key was
-refused by GitHub on 2026-11-04 — push `scene/host` once it is set right.
+**S9 goes on, on `scene/host`: ckt a module, as particles and grid are** —
+its `main.js` on `core/mount.js`'s `appModule`, its markup out of
+`index.html` into the module, its state made again in `start`, what it
+holds that the kit does not — a listener on the document, an observer, its
+stage's clock — on the scope; then a row for ckt in `check-mount`'s
+`APPS`. Then compose, map, rig, filter, fractals, 3d, the puppet, the
+same way, in the order of `docs/scene.md`'s *Planned, 2026-11-04* — a
+draft the author is to read; the gamepad stays out until C6. Then the
+vault app, then the scene's host, its name the author's (*cluster*,
+*nébuleuse*, or better). **The branch is not pushed**: this machine's SSH
+key was refused by GitHub on 2026-11-04 — push `scene/host` once its key
+is back on the author's account.
 
 ## Parked decisions
 
