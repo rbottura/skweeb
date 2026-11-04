@@ -14,6 +14,10 @@
  *             step Ctrl Z takes back — or, for an app whose recipe is more
  *             than its params, reopened at it (`?open=…@v3`). The page then
  *             holds it, so its next save is a branch from there.
+ *   Shift clicked, two of them   compared, value by value: one receives, one
+ *             arrives, swapped by a button; merged (core/shell/merge.js), the
+ *             page has the values as a step and its next save is a state with
+ *             both as its parents (S7b).
  *
  * Dragged, it pans; the wheel zooms about the pointer; Escape or H closes it.
  * A Lit component in the page's DOM, drawn by core/shell/shell.css.
@@ -21,7 +25,8 @@
 
 import { LitElement, html, svg, nothing } from '../libs/lit/lit-all.min.js';
 import { Vault } from '../vault.js';
-import { watched, settle, around } from '../steps.js';
+import { watched, settle, around, tell } from '../steps.js';
+import { mergeBase, plan, merged } from './merge.js';
 import { partOf } from '../param-history.js';
 
 import { layout, W, H } from './layout.js';
@@ -36,13 +41,13 @@ function laid(recipe) {
 }
 
 class SkwGraph extends LitElement {
-  static properties = { states: { state: true }, hot: { state: true }, note: { state: true } };
+  static properties = { states: { state: true }, hot: { state: true }, note: { state: true }, picked: { state: true }, cmp: { state: true } };
 
   createRenderRoot() { return this; }
 
   constructor() {
     super();
-    this.states = null; this.hot = null; this.note = 'reading the states…';
+    this.states = null; this.hot = null; this.note = 'reading the states…'; this.picked = []; this.cmp = null;
     this.cam = { x: 0, y: 0, z: 1 };
     this._recipes = new Map();
     this._key = e => {
@@ -117,6 +122,61 @@ class SkwGraph extends LitElement {
     this.close();
   }
 
+  // ── Compare and merge (S7b) ──────────────────────────────────────────────
+
+  /** Shift click: a state picked, or let go; two picked, compared. */
+  _pick(v) {
+    const was = this.picked;
+    this.picked = was.includes(v) ? was.filter(x => x !== v) : [...was, v].slice(-2);
+    this.cmp = null;
+    if (this.picked.length === 2) this._compare(...this.picked);
+  }
+
+  /** Two states side by side: the page's held one receives, if it is one of them. */
+  async _compare(a, b, swap = false) {
+    const held = Vault.bound.version;
+    let [recv, inc] = b === held ? [b, a] : [a, b];
+    if (swap) [recv, inc] = [inc, recv];
+    const base = mergeBase(this.states, recv, inc);
+    const [R, I, B] = await Promise.all([recv, inc, base].map(n => (n ? this._recipe(n) : null)));
+    if (!laid(R) || !laid(I)) { this.cmp = { recv, inc, rows: [], note: 'compared by their pictures: this app keeps more than its params' }; return; }
+    const parts = watched().map((p, id) => ({ id, params: p, keys: p.keys, recv: partOf(R, p.keys), inc: partOf(I, p.keys), base: B && partOf(B, p.keys) }))
+      .filter(x => x.recv && x.inc);
+    this.cmp = { recv, inc, base, parts, rows: plan(parts) };
+  }
+
+  _take(row, take) { row.take = take; this.cmp = { ...this.cmp }; }
+
+  /** Merged: the values on the page as a step; its next save a state with both parents. */
+  _merge() {
+    const { recv, inc, parts, rows } = this.cmp, bound = Vault.bound;
+    this._unpreview();
+    for (const part of parts) around(part.params, () => part.params.restore(merged(part.recv, rows, part.id)));
+    Vault.bind({ id: bound.id, type: bound.type, version: recv, strict: bound.strict });
+    Vault.merging(inc);
+    tell(`v${inc} merged into v${recv} — S saves it, a state with both`);
+    this.close();
+  }
+
+  _panel() {
+    const c = this.cmp;
+    if (!c) return this.picked.length === 1 ? html`<div class="gr-cmp gr-cmp--wait">v${this.picked[0]} picked — Shift click another to compare</div>` : nothing;
+    const label = row => { const p = c.parts && c.parts.find(x => x.id === row.id); return (p && p.params.spec(row.key) && p.params.spec(row.key).label) || row.key; };
+    const val = v => (typeof v === 'number' ? String(Math.round(v * 1000) / 1000) : v == null ? '—' : typeof v === 'object' ? '…' : String(v));
+    return html`<div class="gr-cmp">
+      <div class="gr-cmp-head"><b>v${c.recv}</b> receives · <b>v${c.inc}</b> arrives
+        <button class="gr-cmp-swap" type="button" title="The other way round" @click=${() => this._compare(c.recv, c.inc, true)}>⇄</button></div>
+      ${c.note ? html`<div class="gr-cmp-note">${c.note}</div>` : !c.rows.length ? html`<div class="gr-cmp-note">the same values</div>` : html`
+        <div class="gr-cmp-rows">${c.rows.map(r => html`<div class=${`gr-cmp-row gr-cmp-row--${r.kind}`}>
+          <span class="gr-cmp-name">${label(r)}</span>
+          <button type="button" class=${r.take ? '' : 'on'} @click=${() => this._take(r, false)}>${val(r.recv)}</button>
+          <button type="button" class=${r.take ? 'on' : ''} @click=${() => this._take(r, true)}>${val(r.inc)}</button>
+        </div>`)}</div>
+        <div class="gr-cmp-acts"><button class="nb-btn nb-btn--primary" type="button" @click=${() => this._merge()}>Merge into v${c.recv}</button>
+          <button class="nb-btn" type="button" @click=${() => { this.picked = []; this.cmp = null; }}>Cancel</button></div>`}
+    </div>`;
+  }
+
   _fit() {
     const box = this.querySelector('.gr-space');
     if (!box || !this.states) return;
@@ -128,7 +188,7 @@ class SkwGraph extends LitElement {
   }
 
   _down(e) {
-    if (e.button !== 0 || e.target.closest('.gr-node')) return;
+    if (e.button !== 0 || e.target.closest('.gr-node, .gr-cmp')) return;
     const from = { x: e.clientX - this.cam.x, y: e.clientY - this.cam.y };
     const move = ev => { this.cam = { ...this.cam, x: ev.clientX - from.x, y: ev.clientY - from.y }; this.requestUpdate(); };
     const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
@@ -165,17 +225,18 @@ class SkwGraph extends LitElement {
         </svg>
         ${st.map(s => {
           const p = pos.get(s.version);
-          const cls = `gr-node${s.version === bound.version ? ' gr-node--held' : ''}${s.version === this.hot ? ' gr-node--hot' : ''}`;
+          const cls = `gr-node${s.version === bound.version ? ' gr-node--held' : ''}${s.version === this.hot ? ' gr-node--hot' : ''}${this.picked.includes(s.version) ? ' gr-node--picked' : ''}`;
           return html`<button class=${cls} type="button" style=${`left:${p.x}px;top:${p.y}px`}
               @pointerenter=${e => { this.hot = s.version; this._preview(s.version, e); }}
               @pointerleave=${() => { if (this.hot === s.version) this.hot = null; this._unpreview(); }}
-              @click=${() => this._go(s.version)}>
+              @click=${e => (e.shiftKey ? this._pick(s.version) : this._go(s.version))}>
             ${s.url ? html`<img src=${s.url} alt="">` : html`<span class="gr-noimg"></span>`}
             <span class="gr-v">v${s.version}${s.version === now ? ' · latest' : ''}${s.version === bound.version ? ' · held' : ''}</span>
             <span class="gr-title">${s.title}</span>
           </button>`;
         })}
       </div>
+      ${this._panel()}
     </div>`;
   }
 }

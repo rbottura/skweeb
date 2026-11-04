@@ -115,6 +115,9 @@ export const Vault = {
    */
   bind(bound) { _bound = bound ? { id: bound.id || null, type: bound.type || null, version: bound.version || null, strict: !!bound.strict } : null; },
 
+  /** The next save a merge: the state held with `v`, the one it took in, as its second parent (S7b). */
+  merging(v) { if (_bound) _bound = { ..._bound, parent2: v }; },
+
   /** A smart object's states, a tree by their parents (S6, server/versions.js): [{ version, parent, parent2, created, title, url }]. */
   async states(id) {
     const res = await fetch(API + '/' + encodeURIComponent(id) + '/states', { cache: 'no-store' });
@@ -178,7 +181,7 @@ export const Vault = {
       refs: [...new Set([...(spec.refs || []), ...parents.filter(id => String(id).startsWith('skw_') && !String(id).includes('@v'))])],   // a state named is pinned: no ref
       // Saved from the state this page holds — an older one, a branch — and, for a merge, the one it took in.
       parent: smart && _bound.id && _bound.version ? _bound.version : undefined,
-      parent2: smart && _bound.id && spec.parent2 ? spec.parent2 : undefined,
+      parent2: smart && _bound.id && (spec.parent2 || _bound.parent2) ? (spec.parent2 || _bound.parent2) : undefined,
       render: {
         ext: spec.render.ext,
         w: spec.render.w, h: spec.render.h,
