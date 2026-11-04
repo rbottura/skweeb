@@ -7,20 +7,36 @@
  *
  * Each app alone, as its page mounts it; then unmounted — nothing of it
  * left on the page, none of its own keys answering, none of its params'
- * steps, gone from the other windows with a bye — and mounted again into
- * another host, three times over, as before: one page grid, one title bar,
- * one vault panel to V, as many listeners on the document and the window as
- * the first mount had, counted from before the page loads. Where it plays
- * with nothing chosen, it plays; where S saves with nothing chosen, one S
- * saves as the first mount's did. And no page said anything wrong.
+ * steps, gone from the other windows with a bye, and nothing of it still
+ * running: no listener on the document or the window, no channel open, no
+ * interval, no frame asked for — counted from before the page loads. Then
+ * mounted again into another host, three times over, and as the first
+ * mount was: one page grid, one title bar, one vault panel to V, as many
+ * listeners, channels and intervals. Where it plays, it plays; where it
+ * saves — particles with nothing chosen, grid on a still of the vault — one
+ * S saves as the first mount's did. And no page said anything wrong.
  */
 
 import { startCheck } from './check-kit.mjs';
 
-/** The apps that are modules, and what each does with nothing chosen. */
+/** The first still in the vault, as grid's source: what it dithers, and so saves. */
+const A_STILL = `import('/core/vault.js').then(async ({ Vault }) => {
+  await Vault.refresh();
+  const id = (Vault.index || []).find(r => r.type === 'still' && !(r.tags || []).includes('trash'))?.id;
+  const { rowParams } = await import('/core/param-rows.js');
+  const o = rowParams(document.querySelector('.pp-row[data-key="source"]'));
+  if (id && o) o.params.set('source', id);
+  return id || null;
+})`;
+
+/**
+ * The apps that are modules: their own keys, whether they play as they open,
+ * what makes them ready to save — run after every mount — and when it is.
+ */
 const APPS = [
   { name: 'particles', own: ['KeyQ', 'KeyF'], plays: true, saves: true },
-  { name: 'grid', own: [], plays: false, saves: false },
+  { name: 'grid', own: [], plays: false, saves: true, prepare: A_STILL,
+    ready: `/cells/.test(document.querySelector('.bar-say')?.textContent || '')` },
 ];
 
 const c = await startCheck();
@@ -33,9 +49,15 @@ const counts = () => page.eval(`({ app: document.querySelectorAll('.app').length
 const keys = () => page.eval(`import('/core/keys.js').then(k => k.bound().map(b => b.code))`);
 const watched = () => page.eval(`import('/core/steps.js').then(s => s.watched().length)`);
 const frame = () => page.eval(`(document.querySelector('.tp .tp-time, .tp-time')?.textContent || '') + '|' + (document.querySelector('.bar-say')?.textContent || '')`);
-const saved = async () => { await page.until(`window.__saved > 0`, { timeout: 20000 }); await wait(1500); return page.eval(`window.__saved`); };
+const saved = async () => { await page.until(`window.__saved > 0`, { timeout: 30000 }); await wait(1500); return page.eval(`window.__saved`); };
 
-// Every listener on the document and the window, counted as it comes and goes: a mount's must all go.
+/*
+ * Before the page loads: every listener on the document and the window
+ * counted as it comes and goes, every channel as it opens and closes, every
+ * interval as it is set and cleared, every frame asked for — a mount's must
+ * all go with it. The check's own channel is made with the page's own
+ * BroadcastChannel, kept aside, so it is not counted.
+ */
 await page.beforeLoad(`(() => {
   const live = new Map();
   for (const [name, t] of [['document', document], ['window', window]]) {
@@ -46,46 +68,81 @@ await page.beforeLoad(`(() => {
     t.addEventListener = (type, fn, o) => { if (fn) { const k = key(type, fn, o); if (!set.has(k)) set.set(k, new Set()); set.get(k).add(fn); } return add(type, fn, o); };
     t.removeEventListener = (type, fn, o) => { const s = set.get(key(type, fn, o)); if (s) s.delete(fn); return rm(type, fn, o); };
   }
-  window.__listeners = () => Object.fromEntries([...live].map(([n, set]) => [n, [...set.values()].reduce((a, s) => a + s.size, 0)]));
+  const Channel = window.BroadcastChannel, channels = new Set();
+  window.__Channel = Channel;
+  window.BroadcastChannel = class extends Channel {
+    constructor(name) { super(name); channels.add(this); }
+    close() { channels.delete(this); return super.close(); }
+  };
+  const every = window.setInterval.bind(window), stop = window.clearInterval.bind(window), intervals = new Set();
+  window.setInterval = (fn, ms, ...rest) => { const id = every(fn, ms, ...rest); intervals.add(id); return id; };
+  window.clearInterval = id => { intervals.delete(id); return stop(id); };
+  const raf = window.requestAnimationFrame.bind(window);
+  let frames = 0;
+  window.requestAnimationFrame = fn => { frames++; return raf(fn); };
+  window.__held = () => ({ ...Object.fromEntries([...live].map(([n, set]) => [n, [...set.values()].reduce((a, s) => a + s.size, 0)])),
+    channels: channels.size, intervals: intervals.size });
+  window.__frames = () => frames;
 })()`);
-const listeners = () => page.eval(`window.__listeners()`);
+const held = () => page.eval(`window.__held()`);
+/** Frames asked for over a little more than half a second: a clock playing asks one each. */
+const framesAsked = async () => { const a = await page.eval(`window.__frames()`); await wait(600); return (await page.eval(`window.__frames()`)) - a; };
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-for (const { name, own, plays, saves } of APPS) {
+for (const { name, own, plays, saves, prepare = null, ready = null } of APPS) {
   const app = `import('/apps/${name}/main.js')`;
   const say = text => `${name}: ${text}`;
   const hasOwn = list => own.every(k => list.includes(k));
   const noOwn = list => own.every(k => !list.includes(k));
+  const readied = async () => {
+    if (!prepare) return true;
+    const got = await page.eval(prepare);
+    if (!got) return false;
+    await page.until(ready, { timeout: 30000 });
+    await wait(400);
+    return true;
+  };
 
   await c.go(c.base + `/apps/${name}/`);
   await page.until(`!!document.querySelector('.pp-row') && !!document.querySelector('skw-titlebar')`);
   await wait(800);
   await page.eval(`window.__saved = 0; document.addEventListener('vault:saved', () => window.__saved++)`);
+  const can = await readied();
+  if (prepare) c.ok(say('ready to save: a still of the vault as its source'), can);
   const first = await counts();
-  const heldFirst = await listeners();
+  const heldFirst = await held();
   c.ok(say('alone, its page mounts it, once'), first.app === 1 && first.top === 1 && first.bar === 1, JSON.stringify(first));
-  const before = await keys();
-  c.ok(say('its own keys answer'), hasOwn(before), before.join(' '));
+  c.ok(say('its own keys answer'), hasOwn(await keys()), (await keys()).join(' '));
   c.ok(say('its params watched for steps'), (await watched()) >= 1);
+  if (plays) c.ok(say('it plays: frames asked for'), (await framesAsked()) > 5);
   let once = 0;
-  if (saves) { await press('s'); once = await saved(); c.ok(say('S saves'), once >= 1, `${once} saved`); }
+  if (saves && can) { await press('s'); once = await saved(); c.ok(say('S saves'), once >= 1, `${once} saved`); }
+  // A save holds the player still: played again, so what is unmounted is playing.
+  if (plays) {
+    if ((await framesAsked()) < 5) await press(' ');
+    c.ok(say('playing as it is unmounted'), (await framesAsked()) > 5);
+  }
 
-  // Unmounted: nothing left, nothing answering, gone from the windows.
-  await page.eval(`window.__heard = []; window.__ch = new BroadcastChannel('skweeb-live');
+  // Unmounted: nothing left, nothing answering, nothing running, gone from the windows.
+  await page.eval(`window.__heard = []; window.__ch = new window.__Channel('skweeb-live');
     window.__ch.onmessage = e => window.__heard.push(e.data && e.data.kind)`);
   await page.eval(`${app}.then(m => m.unmount())`);
   await wait(300);
   const gone = await counts();
-  const heldGone = await listeners();
+  const heldGone = await held();
   c.ok(say('unmounted: no grid, no panels, no bar, no title bar, no vault panel'), Object.values(gone).every(n => n === 0), JSON.stringify(gone));
   c.ok(say('…its listeners off the document and the window'), heldGone.document < heldFirst.document && heldGone.window <= heldFirst.window,
     `${JSON.stringify(heldFirst)} → ${JSON.stringify(heldGone)}`);
+  c.ok(say('…no channel open, no interval set'), heldGone.channels === 0 && heldGone.intervals === 0, JSON.stringify(heldGone));
+  c.ok(say('…no frame asked for'), (await framesAsked()) === 0);
   const after = await keys();
   c.ok(say("…its own keys no more, nor the ground's"), noOwn(after) && !after.includes('KeyG'), after.join(' '));
   c.ok(say('…its params watched no more'), (await watched()) === 0);
   c.ok(say('…a bye to the other windows'), (await page.eval(`window.__heard`)).includes('bye'), JSON.stringify(await page.eval(`window.__heard`)));
+  await page.eval(`window.__ch.close()`);
   c.ok(say('…its stylesheet kept: the page linked it, not the mount'),
     await page.eval(`[...document.querySelectorAll('link[rel=stylesheet]')].filter(l => l.href.endsWith('/apps/${name}/style.css')).length === 1`));
-  if (saves) {
+  if (saves && can) {
     await page.eval(`window.__saved = 0`);
     await press('s');
     await wait(1200);
@@ -98,9 +155,9 @@ for (const { name, own, plays, saves } of APPS) {
   await page.until(`!!document.querySelector('#host .app .pp-row')`);
   await wait(800);
   const again = await counts();
-  const heldAgain = await listeners();
-  c.ok(say('mounted again, three times: one of each'), JSON.stringify(again) === JSON.stringify(first), `${JSON.stringify(again)}, against ${JSON.stringify(first)}`);
-  c.ok(say('…as many listeners as the first mount had'), JSON.stringify(heldAgain) === JSON.stringify(heldFirst),
+  const heldAgain = await held();
+  c.ok(say('mounted again, three times: one of each'), same(again, first), `${JSON.stringify(again)}, against ${JSON.stringify(first)}`);
+  c.ok(say('…as many listeners, channels and intervals as the first mount had'), same(heldAgain, heldFirst),
     `${JSON.stringify(heldAgain)}, against ${JSON.stringify(heldFirst)}`);
   c.ok(say('…into the host it was given'), await page.eval(`!!document.querySelector('#host > .app')`));
   c.ok(say('…its own keys back'), hasOwn(await keys()));
@@ -114,7 +171,7 @@ for (const { name, own, plays, saves } of APPS) {
   await wait(300);
   c.ok(say('V: one vault panel opens'), await page.eval(`document.querySelectorAll('.vp.vp--visible').length === 1`));
   await press('v');
-  if (saves) {
+  if (saves && can && await readied()) {
     await page.eval(`window.__saved = 0`);
     await press('s');
     const later = await saved();
