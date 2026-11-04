@@ -1,5 +1,5 @@
 # STATUS — fractals
-_last touched: 2026-10-22_
+_last touched: 2026-11-04_
 
 M7's app: fractals — escape time on the GPU kit, and a sprite copying
 itself. The plan and *Done when* are in `docs/roadmap.md`, M7 — a Julia loop that closes, redrawn exactly at print
@@ -29,6 +29,11 @@ field`.
    *Done when* is met.**
 
 ## Works now
+
+- **A module** (S9a, 2026-11-04; `main.js` on core's `mount.js`):
+  `mount(host)` and `unmount()` — its keys and observer on the scope, its
+  clock stopped, its runner's GPU memory let go of, never the device —
+  `check-mount`.
 
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the Export drawer, `docs/core-export.md`): escape time by the plane's own
