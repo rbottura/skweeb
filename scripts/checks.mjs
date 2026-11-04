@@ -35,7 +35,7 @@ import { browserChecks, reachedSince } from './reach.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TIMES = path.join(os.tmpdir(), 'skweeb-check-times.json');
-const TIMEOUT_MS = 20 * 60 * 1000;       // a check stuck: taken down, red
+const TIMEOUT_MS = 8 * 60 * 1000;        // a check stuck — a screenshot that never came, once: taken down; the longest takes a minute here
 
 const args = process.argv.slice(2);
 const flag = name => args.includes(name);
