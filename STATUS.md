@@ -35,8 +35,10 @@ sorts them.
   by Alt click on its mark — `check-states`, `check-steps`, `check-smart`.
 - **The graph** (S7a): H opens the states over the page, see-through, panned
   and zoomed, v1 at the bottom and a branch in a column of its own; hovered,
-  the page draws a state, clicked it goes back to it, its next save a branch
-  (`core/shell/graph.js`, `check-graph`).
+  the page draws a state, clicked it goes back to it, its next save a branch;
+  two Shift clicked are compared and merged — taken where only the arriving
+  one changed, a conflict picked row by row — its save a state with both
+  parents (S7b; `core/shell/graph.js`, `merge.js`, `check-graph`).
 - The bench stays a page apart: https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm.
 
 ### 2026-10-21 and -22
@@ -289,15 +291,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S7b on the board of `docs/plan.md`: compare and merge, in the graph** —
-branch `ui/merge`: Shift click two states, compared side by side, a row for
-each value that differs; one receives, one arrives, swapped by a button;
-what only the arriving one changed since their common state is taken, what
-only the receiving one changed kept, a conflict the receiving one's until
-the other is picked, row by row. Merged, the page holds the values and its
-save is a state with both parents (`parent2`, server/versions.js). The
-bench's `bench-merge.js` is the sketch. Then S7c, A over a state: the apps
-its links reach.
+**S7c on the board of `docs/plan.md`: A over a state, the apps it reaches**
+— branch `ui/open-in`: in the graph, A held over a node opens a pie of the
+apps that state's links reach (core/uses.js, core/reopen.js — compose's
+placing, filter's source, the rig…), the others greyed with why; picked,
+that app opens on that state, `skw_…@vN`. Then S9, every app a module and
+the scene.
 
 ## Parked decisions
 

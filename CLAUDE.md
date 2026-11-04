@@ -119,7 +119,7 @@ node server.js --vault D  # …owning a throwaway vault at D instead of ./vault
 
 # No runner, no dependencies, one file per concern. vault.mjs spawns its own
 # server against a temporary vault, so it never touches yours.
-for t in recorder clip export vault grid-map params steps rng playback frame trim graph-layout joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise png fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick 3d-handles 3d-modifiers 3d-look windowed stage-still live stack place smart puppet-eyes puppet-mouth puppet-sway puppet-roles; do
+for t in recorder clip export vault grid-map params steps rng playback frame trim graph-layout merge joyimage registry ckt-motion ckt-blobs uses grid-material easing grid-growth compose-page compose-time compose-placements delete gpu-filters vault-kin particles-model spritesheet noise png fractal fractal-copies fractal-motion fractal-field vault-events points map-grid map-things map-walk map-play rig-strokes rig-bones rig-motion rig-crawl 3d-shapes 3d-camera 3d-model 3d-pick 3d-handles 3d-modifiers 3d-look windowed stage-still live stack place smart puppet-eyes puppet-mouth puppet-sway puppet-roles; do
   node tests/$t.mjs || break
 done
 node scripts/lines.mjs                  # rule 4: past 400 lines, a reason; past 600, none; the gamepad's four known
@@ -153,7 +153,7 @@ node scripts/check-guides.mjs           # S8: rulers, guides out of them and bac
 node scripts/check-rows.mjs             # S2, S2b: a value on one line — its unit in its box, dragged, marked; pairs; the fold
 node scripts/check-keys.mjs             # S5b: the left hand — keys by place, tapped or held for a pie; an app's own keys kept
 node scripts/check-steps.mjs            # S6c: the session's steps — Ctrl Z, Ctrl Y; a drag one step, a Reset one
-node scripts/check-graph.mjs            # S7a: H, the states as a graph over the page — hovered drawn, clicked gone back to, a branch
+node scripts/check-graph.mjs            # S7: H, the states as a graph over the page — hovered drawn, clicked gone back to, a branch; two compared and merged
 node scripts/check-states.mjs           # S6b, S6d: S the next state of a smart object; a still named from it; a row's value in each state; pinned in compose
 node scripts/check-puppet.mjs           # the rig's puppet: a fake camera read once a frame, eyes and mouth worn, the body swayed, the guides, the camera switched; sent and followed by a page in OBS; parts found drawn eyes first, and told
 node scripts/vendor-mediapipe.mjs       # once a machine, before the puppet reads a face: MediaPipe into core/libs/mediapipe/, out of git
