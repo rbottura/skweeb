@@ -138,7 +138,7 @@ const size = c => { try { return fs.statSync(path.join(ROOT, c.file)).size; } ca
 // Never timed here: a check's length is guessed from its source's, so the long ones still go first.
 const order = [...chosen].sort((a, b) => (times[b.name] ?? size(b) * 10) - (times[a.name] ?? size(a) * 10));
 const logs = fs.mkdtempSync(path.join(os.tmpdir(), 'skweeb-checks-'));
-const log = c => path.join(logs, c.name + '.log');
+const log = (c, alone = false) => path.join(logs, c.name + (alone ? '.alone' : '') + '.log');   // a run alone kept beside the first
 const t0 = Date.now();
 const results = new Map();
 const took = {};
@@ -154,10 +154,12 @@ const serial = [...results.values()].reduce((a, r) => a + r.ms, 0);     // what 
 // Failed among the others: again, alone — the verdict is that run's.
 const again = [...results].filter(([, r]) => !r.green).map(([name]) => chosen.find(c => c.name === name));
 const verdict = new Map([...results].map(([name, r]) => [name, r.green ? 'green' : 'red']));
+const alone = new Set();               // run again alone: their verdict's log is that run's
 if (again.length && !flag('--no-again') && Math.min(jobs, chosen.length) > 1) {
   console.log(`\n${again.length} failed among the others — again, alone:`);
   for (const c of again) {
-    const r = await run(c.file, log(c));
+    const r = await run(c.file, log(c, true));
+    alone.add(c.name);
     took[c.name] = Math.round(r.ms);
     verdict.set(c.name, r.green ? 'load' : 'red');
     console.log(`  ${r.green ? 'ok  ' : 'FAIL'}  ${c.name.padEnd(18)} ${clock(r.ms).padStart(6)}   ${r.green ? 'green alone: it failed for the load' : 'red alone too'}`);
@@ -170,7 +172,10 @@ keepTimes(took);
 
 const reds = [...verdict].filter(([, v]) => v === 'red').map(([n]) => n);
 const loads = [...verdict].filter(([, v]) => v === 'load').map(([n]) => n);
-for (const name of reds) console.log(`\nFAIL  ${name}\n` + failed(results.get(name), log({ name })).map(l => '      ' + l).join('\n'));
+for (const name of reds) console.log(`\nFAIL  ${name}\n` + failed(results.get(name), log({ name }, alone.has(name))).map(l => '      ' + l).join('\n'));
+// Green alone, yet it failed among the others: what failed is said, for a check that fails for the load is to be seen to.
+for (const name of loads) console.log(`\nfailed among the others, green alone: ${name}\n`
+  + failed(results.get(name), log({ name })).map(l => '      ' + l).join('\n'));
 console.log(`\n${chosen.length} checks in ${clock(wall)}, ${clock(serial)} of work · `
   + (reds.length ? `${reds.length} red: ${reds.join(', ')}` : 'all green')
   + (loads.length ? ` · failed for the load, green alone: ${loads.join(', ')}` : '')
