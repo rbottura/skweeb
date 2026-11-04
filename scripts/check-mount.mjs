@@ -76,6 +76,8 @@ const APPS = [
   { name: 'compose', own: [], plays: false, saves: true, query: placeAStill,
     ready: `/1 placed · .+ on the page/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: 'map', own: ['KeyQ'], plays: false, saves: true },
+  { name: 'filter', own: [], plays: false, saves: true, prepare: A_STILL,
+    ready: `/filters on|no filters yet/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: 'rig', own: [], kept: ['KeyR'], plays: false, saves: true, query: aDrawing,
     ready: `/[0-9]+ bones/.test(document.querySelector('.bar-say')?.textContent || '')` },
 ];

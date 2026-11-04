@@ -16,6 +16,7 @@
  */
 
 import { fromLayer, fromVault } from './source.js';
+import { held, listen } from '../../core/scope.js';
 
 /**
  * @param {object} ctx
@@ -30,8 +31,8 @@ export function followWindows({ live, params, setSource, source, say }) {
   let asked = 0;
 
   // A smart object held as the source took a new version — saved again in its own window, or
-  // anywhere on this vault: drawn again, the player where it was (core/smart.js).
-  document.addEventListener('vault:updated', async ({ detail }) => {
+  // anywhere on this vault: drawn again, the player where it was (core/smart.js). Heard while filter is mounted.
+  listen(document, 'vault:updated', async ({ detail }) => {
     const now = source();
     if (!now || now.id !== detail.id) return;
     try {
@@ -103,6 +104,8 @@ export function followWindows({ live, params, setSource, source, say }) {
     }
     return windowId;
   }
+
+  held(() => stop());              // its app unmounted: a window followed, and a load on its way, no more
 
   return {
     take,

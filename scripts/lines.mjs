@@ -38,6 +38,7 @@ const EVERY_SESSION = new Set(['CLAUDE.md', 'STATUS.md', 'docs/plan.md']);
 const KEPT = new Map([
   ['scripts/check-3d.mjs', 'one model followed from the opening to its save: split, the save would build the model again'],
   ['apps/grid/main.js', 'one job, the params, their assets and one canvas kept in step (its head): every part reads the source, the tiles and the clock — split, the halves would share them'],
+  ['apps/filter/main.js', "a source, a chain, one canvas kept in step (its head): the save, the look and the paint each read the runner, the source and the clock — split, the halves would share them"],
   ['core/VaultPanel.js', "one panel's state read by all it does — the chips, the grid, the detail; its parts are out already (vault-*.js): what is left would share `this`"],
 ]);
 
