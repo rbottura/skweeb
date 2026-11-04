@@ -47,6 +47,17 @@ const WORDS = {
   out: 'Take it out',
 };
 
+/**
+ * An entry off the page and deaf: its card gone, and its panel removed —
+ * its keys, its params' steps (core/ParamPanel.js) — the panels of its inner
+ * list with it. A card's node going alone left all of that behind.
+ */
+function drop(entry) {
+  if (entry.inner) for (const e of entry.inner.entries) drop(e);
+  entry.panel.remove();
+  entry.card.remove();
+}
+
 export class Cards {
   /**
    * @param {object} opts
@@ -217,7 +228,7 @@ export class Cards {
     const i = this.entries.indexOf(entry);
     if (i < 0) return;
     this.entries.splice(i, 1);
-    entry.card.remove();
+    drop(entry);
     if (entry === this.chosen) this.choose(null);
     this.paint();
     this.onChange();
@@ -228,7 +239,7 @@ export class Cards {
    * chosen. What a catalogue lacks is named, not thrown — the inner lists' too.
    */
   restore(list = []) {
-    for (const e of this.entries) e.card.remove();
+    for (const e of this.entries) drop(e);
     this.entries = [];
     this.choose(null);
     const unknown = [];
