@@ -165,7 +165,9 @@ is cut from about fifty of the camera's pixels and shown larger: soft.
 - **A module** (S9a, 2026-11-04; `main.js` on core's `mount.js`):
   `mount(host)` and `unmount()` — its keys and observer on the scope, its
   clock stopped; R, kept from core while it is mounted, core's again when it
-  goes. The puppet, `puppet/`, is next to be one — `check-mount`.
+  goes — `check-mount`. The puppet, `puppet/`, stays a page of its own:
+  worn in OBS by its address, its camera its page's — the author's to say
+  otherwise (`docs/plan.md`, *Waiting on the author*).
 
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the Export drawer, `docs/core-export.md`): the pose on screen, drawn again

@@ -307,17 +307,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9a's last: the puppet a module** (`apps/rig/puppet/`), on `scene/host`
-— its `main.js` on `core/mount.js`'s `appModule`; at the unmount its
-camera's tracks stopped and MediaPipe's landmarker closed (`face.js`), its
-`vault:updated` through core's `listen` (`keeping.js`), its `pagehide` on
-the scope; its row in `check-mount`, on the fake camera `check-puppet`
-uses. Then S9a lands — rebased on `main`, the gate
-`node scripts/checks.mjs --gate --since main`, `--no-ff` — in the order of
-`docs/scene.md`'s *Planned, 2026-11-04*, confirmed; the gamepad stays out
-until C6. Then the vault app (S9b), then *cluster* (S9c). A push refused
-with "Permission denied (publickey)" is GitHub's, not the key's: it came
-and went on 2026-11-04 — retry it.
+**S9b on the board: the vault, an app** — branch `scene/vault` from `main`.
+Its first step: `VaultPanel` learns to open in a host of its own (`mount`,
+as ParamPanel takes one) rather than always over `document.body`, docked
+full screen; then `apps/vault/` — `index.html` mounting `main.js` on
+`core/mount.js`'s `appModule` — the vault's grid, folders, kin and detail
+over the whole page, the canvas showing the object chosen
+(`core/rebuild.js` `openFrames`); its row in `check-mount`; the gate
+`node scripts/checks.mjs --gate --since main`. Then S9c, *cluster*.
 
 ## Parked decisions
 
