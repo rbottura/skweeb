@@ -61,7 +61,8 @@ function start(host, mine) {
 
   bar = new Bar({ app: 'vault', mount: root, keys: 'click an object: drawn here · space play · , . frame', acts: false });
   transport = new Transport({ clock, mount: player, busy: () => false });
-  new VaultPanel({ mount: root.querySelector('#vault-side'), onDetail: (object, { url }) => show(object, url) });
+  // Its detail the facts only, narrower over the grid — the picture is the viewer's (the author's C, 2026-11-05).
+  new VaultPanel({ mount: root.querySelector('#vault-side'), detailPicture: false, onDetail: (object, { url }) => show(object, url) });
 
   const sized = new ResizeObserver(() => draw());
   sized.observe(canvas.parentElement);

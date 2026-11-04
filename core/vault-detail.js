@@ -50,49 +50,15 @@ const PICTURE = /^(png|jpe?g|webp|gif|avif|svg|bmp)$/i;
  * @param {string} [hooks.pickLabel]
  * @param {?(action:string)=>void} [hooks.bin]   'trash' | 'restore' | 'delete'; absent in a picker
  * @param {boolean} [hooks.trashed]             it is in the trash
+ * @param {boolean} [hooks.picture]             false: no picture — the page draws the object beside it
  */
 export function paintDetail(body, o, urls, hooks) {
   body.replaceChildren();
-  const renderUrl = urls.render;
   const r = o.render || {};
 
-  // The render itself when it is a picture, and the thumbnail when it is data:
-  // a dot-set's render is its dots as JSON, which an <img> shows as broken.
-  const picture = PICTURE.test(ext(r.file || '')) ? renderUrl : urls.thumb;
-  let preview;
-  if (picture) {
-    preview = el('img', 'vp-preview');
-    preview.alt = o.title || o.id;
-    preview.src = picture;
-  } else {
-    preview = el('div', 'vp-sub', 'No picture of this one.');
-  }
-  body.append(preview);
-
-  // A sequence's render is one frame of it — and so is a composition's that
-  // moves (the same test as core/rebuild.js `replayed`). The loop has no
-  // file, so playing it means rebuilding it from the recipe — imported only
-  // when asked, since that is what can pull p5 into a page that may not want it.
-  if (o.recipe && (o.type === 'sequence' || (o.render && o.render.frames > 1))) {
-    const play = el('button', 'vp-btn', '▶ Play the loop');
-    play.addEventListener('click', async () => {
-      play.disabled = true;
-      play.textContent = 'rebuilding…';
-      try {
-        const { SequenceViewer } = await import('./SequenceViewer.js');
-        const viewer = new SequenceViewer(o);
-        preview.replaceWith(viewer.node);
-        play.remove();
-        hooks.playing(viewer);
-        await viewer.start();
-      } catch (err) {
-        play.disabled = false;
-        play.textContent = '▶ Play the loop';
-        console.error('[vault] could not rebuild', o.id, err);
-      }
-    });
-    body.append(play);
-  }
+  // The picture, unless the page draws the object beside the detail — the
+  // vault app's viewer (`hooks.picture` false): then the detail is its facts.
+  if (hooks.picture !== false) paintPicture(body, o, urls, hooks);
 
   body.append(el('div', 'vp-name', o.title || '(untitled)'));
 
@@ -140,6 +106,51 @@ export function paintDetail(body, o, urls, hooks) {
   }
 
   body.append(actions(o, urls, hooks));
+}
+
+/**
+ * The detail's picture: the render when it is one, the thumbnail when the
+ * render is data — a dot-set's dots as JSON, which an <img> shows as broken —
+ * and, for a loop, a button that plays it, rebuilt from its recipe.
+ */
+function paintPicture(body, o, urls, hooks) {
+  const renderUrl = urls.render;
+  const r = o.render || {};
+  const picture = PICTURE.test(ext(r.file || '')) ? renderUrl : urls.thumb;
+  let preview;
+  if (picture) {
+    preview = el('img', 'vp-preview');
+    preview.alt = o.title || o.id;
+    preview.src = picture;
+  } else {
+    preview = el('div', 'vp-sub', 'No picture of this one.');
+  }
+  body.append(preview);
+
+  // A sequence's render is one frame of it — and so is a composition's that
+  // moves (the same test as core/rebuild.js `replayed`). The loop has no
+  // file, so playing it means rebuilding it from the recipe — imported only
+  // when asked, since that is what can pull p5 into a page that may not want it.
+  if (o.recipe && (o.type === 'sequence' || (o.render && o.render.frames > 1))) {
+    const play = el('button', 'vp-btn', '▶ Play the loop');
+    play.addEventListener('click', async () => {
+      play.disabled = true;
+      play.textContent = 'rebuilding…';
+      try {
+        const { SequenceViewer } = await import('./SequenceViewer.js');
+        const viewer = new SequenceViewer(o);
+        preview.replaceWith(viewer.node);
+        play.remove();
+        hooks.playing(viewer);
+        await viewer.start();
+      } catch (err) {
+        play.disabled = false;
+        play.textContent = '▶ Play the loop';
+        console.error('[vault] could not rebuild', o.id, err);
+      }
+    });
+    body.append(play);
+  }
 }
 
 /**
