@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-03_
+_last touched: 2026-11-04_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open and `docs/roadmap-done.md` the
@@ -12,7 +12,15 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
+### Newest — 2026-11-04: an app a module (S9, under way on `scene/host`)
+
+- **particles is `mount(host)` and `unmount()`** (`core/mount.js`): built
+  in any host, taken out with nothing left — what it held outside its nodes
+  in a scope (`core/scope.js`) its unmount closes: its listeners, its keys
+  and pies, its params' steps, its window in the stack. Its page mounts it
+  on itself — `check-mount`. The other apps follow, then the scene.
+
+### 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
 
 - **The look and the rows**: the dark theme (S1); a value on one line — its
   box dragged, its fill, its slider only where wanted, its mark a dot when
@@ -292,13 +300,16 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9 on the board of `docs/plan.md`: every app a module, then the scene** —
-branch `scene/host`: first the seam, no app changed on screen — each app's
-boot (`apps/<app>/main.js`) split into `mount(host)` and `unmount()`, its
-page calling mount on itself, so the app still runs alone (rule 7); particles
-first, as the bench's. Then `apps/scene/`, one canvas the apps mount round
-(`docs/scene.md`, *The scene*). Before the scene, ask the author its name
-— "skweeb absolute scene" was a placeholder.
+**S9 goes on, on `scene/host`: grid a module, as particles is** — its
+`main.js` on `core/mount.js`'s `appModule`, its markup out of `index.html`
+into the module, its state made again in `start`, what it holds that the
+kit does not — a listener on the document, an observer — on the scope;
+then `check-mount` run on grid too. Then ckt, compose, filter, fractals,
+map, rig, 3d, the same way; the gamepad stays out until C6. Then
+`apps/scene/`, one canvas the apps mount round (`docs/scene.md`, *The
+scene*) — before it, ask the author its name; "skweeb absolute scene" was
+a placeholder. **The branch is not pushed**: this machine's SSH key was
+refused by GitHub on 2026-11-04 — push `scene/host` once it is set right.
 
 ## Parked decisions
 

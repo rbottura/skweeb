@@ -31,6 +31,8 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `Bar.js` | the strip under every app: information only; it puts the shell in the page and tells the rulers the picture's size | **in**, 2026-09-23; the shell 2026-11-03 |
 | `shell/` | the shell the bench found, Lit components in the page's DOM (`libs/lit/`): the title bar (`titlebar.js`); the viewer's rulers, guides and tools (`rulers.js`) over `guides.js` — a size's guides, the magnet, what F places; the pies (`pie.js`) and what each key does (`bindings.js`); the states as a graph over the page, H (`graph.js`, placed by `layout.js`), two compared and merged (`merge.js`); `shell.css` | **in**, 2026-11-03: S12, S8, S5b, S7 |
 | `Guide.js` | a page of `docs/guides/` read inside an app: its markdown — headings, paragraphs, lists, code, links — on a sheet over the page, fetched when opened (`guide.css`) | **in**, 2026-10-21, the author's ask: what needs another program is written down and read where it is needed — the puppet's guide to OBS first |
+| `mount.js` | an app as a module: `appModule(app, { markup, style, start })` gives its `mount(host)` and `unmount()` — one at a time, its `.app` built in the host, its stylesheet linked where the page has not, its smart object let go of when it goes | **in**, 2026-11-04, S9: particles first |
+| `scope.js` | what a mounted app holds outside its nodes — a listener on the document, a channel, a clock, a pie: core's parts say how each is let go of (`held`, `listen`), the app's unmount closes the scope; with none open, nothing is kept, so a page alone is as before | **in**, 2026-11-04, S9 |
 | `Transport.js` | the sequence player: play, scrub, frame count | **in**, 2026-09-23 |
 | `stamps.js` | a sprite drawn once at the size and angle it shows, blitted to many (`stampFor`, `blit`); the halving of a picture nearest above a size (`mipFor`) | **in**, 2026-09-27, moved from ckt when particles needed `mipFor` |
 | `surface.js` | an off-screen canvas: OffscreenCanvas where there is one | **in**, 2026-09-27, with `stamps.js`; grid keeps its own copy |
@@ -371,8 +373,8 @@ The working procedure is the `skweeb-app` skill; the shape, in short:
 
 ```
 apps/<name>/
-  index.html      the page, main.js as a module. Opens and works on its own.
-  main.js         boot: the schema into a ParamPanel, the Bar, the player, ?open=
+  index.html      the page: mounts main.js on itself. Opens and works on its own.
+  main.js         mount(host), unmount() (core/mount.js): the panels, the Bar, the player, ?open=
   params.js       the schema, with its drawers
   frames.js       a recipe as frames: what a save draws and a replay draws
   save.js         Vault.save, its parents from consumedObjectIds()
