@@ -31,7 +31,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `docs/plan.md` | the work items of the cycle — the board: each with its branch, in order, and what waits on the author | before starting work, and when an item lands |
 | `docs/workflow.md` | a branch for each work item: merge or rebase, the gate before landing, several machines | before branching, and before landing |
 | `docs/boxes.md` | the shared boxes — Format, Ground, the player, Export, the Stack — what every app has, made once, and the layouts that place them | before touching any of them in an app |
-| `docs/scene.md` | M12: the UI the bench found, an object's states as a tree, the space of contexts, and the scene — one canvas, the apps round it | before any brick of track S |
+| `docs/scene.md` | M12: the UI the bench found, an object's states as a tree, the space of contexts, and the scene, *cluster* — one canvas, the apps round it, each a module (`core/mount.js`) | before any brick of track S |
 | `docs/decisions.md` | what was decided before today, and why, by date — the newest days; its head lists the files the older ones moved to, `docs/decisions-<from>-to-<to>.md` | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
 | `docs/inbox.md` | the author's ideas between bricks, not yet sorted | when the author has one, and at the end of a session |

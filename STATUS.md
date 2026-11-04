@@ -12,13 +12,19 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-04: an app a module (S9, under way on `scene/host`)
+### Newest — 2026-11-04: an app a module (S9a, under way on `scene/host`)
 
-- **particles and grid are `mount(host)` and `unmount()`** (`core/mount.js`): built
-  in any host, taken out with nothing left — what it held outside its nodes
-  in a scope (`core/scope.js`) its unmount closes: its listeners, its keys
-  and pies, its params' steps, its window in the stack. Its page mounts it
-  on itself — `check-mount`. The other apps follow, then the scene.
+- **particles and grid are `mount(host)` and `unmount()`**
+  (`core/mount.js`): built in any host, taken out with nothing left — what
+  they held outside their nodes in a scope (`core/scope.js`) the unmount
+  closes: listeners, their windows in the stack and the stack's channel,
+  keys and pies, their params' steps; what ends first takes itself out of
+  the scope, and each app stops its own clock. Their pages mount them on
+  themselves — `check-mount`, which counts what an app unmounted leaves:
+  listeners, channels, intervals, frames asked for. Cards (filter's chain,
+  a model's shapes) remove a card's panel with it now — three listeners on
+  the window were left behind each time. The other apps follow, then the
+  vault app (S9b), then *cluster*, the scene (S9c).
 
 ### 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
 
@@ -300,18 +306,17 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9 goes on, on `scene/host`: ckt a module, as particles and grid are** —
-its `main.js` on `core/mount.js`'s `appModule`, its markup out of
-`index.html` into the module, its state made again in `start`, what it
-holds that the kit does not — a listener on the document, an observer, its
-stage's clock — on the scope; then a row for ckt in `check-mount`'s
-`APPS`. Then compose, map, rig, filter, fractals, 3d, the puppet, the
-same way, in the order of `docs/scene.md`'s *Planned, 2026-11-04* — a
-draft the author is to read; the gamepad stays out until C6. Then the
-vault app, then the scene's host, its name the author's (*cluster*,
-*nébuleuse*, or better). **The branch is not pushed**: this machine's SSH
-key was refused by GitHub on 2026-11-04 — push `scene/host` once its key
-is back on the author's account.
+**S9a goes on, on `scene/host`: ckt a module, as particles and grid are**
+— its `main.js` on `core/mount.js`'s `appModule`, its markup out of
+`index.html` into the module, its state made again in `start`, its own
+clock held (`mine.hold(() => clock.dispose())`), what it holds that the
+kit does not — a listener on the document, an observer — on the scope;
+then a row for ckt in `check-mount`'s `APPS`. Then compose, map, rig,
+filter, fractals, 3d, the puppet, the same way, in the order of
+`docs/scene.md`'s *Planned, 2026-11-04*, confirmed; the gamepad stays out
+until C6. Then the vault app (S9b), then *cluster* (S9c). A push refused
+with "Permission denied (publickey)" is GitHub's, not the key's: it came
+and went on 2026-11-04 — retry it.
 
 ## Parked decisions
 

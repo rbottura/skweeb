@@ -131,7 +131,7 @@ What it asks, in this order:
    2D canvas; or a canvas a renderer, stacked in the same place.
 4. **The gamepad** stays outside until C6: it is p5's.
 
-### Planned, 2026-11-04 — a draft for the author
+### Planned, 2026-11-04 — confirmed the same day
 
 Asked during S9: "il va falloir planifier correctement pour gérer les
 fonctionnalités qui utilisent des contextes de canvas différents et des
@@ -164,19 +164,21 @@ found, and what follows from it:
   objects of the vault in 3D, its parameters and its small tests, before
   S10 builds it in the suite.
 
-The order proposed: S9 goes on — every app a module, the 2D ones first
+The order, the author's yes the same day — "je confirme, continue sur les
+prochaines étapes": S9 goes on — every app a module, the 2D ones first
 (particles, grid, ckt, compose, map, rig), then filter, fractals, 3d, the
 puppet; then the vault app; then the scene's host — the canvas handed over,
 the last frame held, the panels moving; S11's bench beside it; S10 last.
-The scene's name: the author's, from *cluster* or *nébuleuse* — a word of
-space that holds many objects.
+The scene's name: ***cluster***, the author's word "pour l'instant" — a
+word of space that holds many objects; its host `apps/cluster/`.
 
 **Rule 7, settled by the author the same day**: "nous devons garder la
 possibilité d'avoir les apps en onglet indépendantes ou alors une scène
 générique qui peut être la *skweeb absolute scene*, l'application skweeb
 principale et organique, nous trouverons peut-être un meilleur nom". Both,
 then: every app its own page, and the scene one more host, never the only
-one — CLAUDE.md's rule 7 says so since. The name is open.
+one — CLAUDE.md's rule 7 says so since. The name: *cluster*, for now
+(2026-11-04, `docs/decisions.md`).
 
 **The space viewer gets a bench of its own first (S11).** The author, on
 version 6: "le viewer 3d est excellent, c'est quelque chose qu'il faut que
