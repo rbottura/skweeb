@@ -97,12 +97,13 @@ async function start(at, mine) {
   busy = false;            // a save or a download is drawing; nothing else starts
   painted = [];            // when the last paints were, while playing
   pending = false;         // a paint asked for, not yet made
-  bar = transport = player = null;
-  // The clock plays the picture's frames at its rate; a tick is a time, tick / fps.
+  emit = picture = bar = transport = player = null;
+  // The clock plays the picture's frames at its rate; a tick is a time, tick / fps. Stopped at the unmount.
   clock = new Playhead({
     onShow: tick => { if (transport) transport.show(tick); draw(); },
     onState: () => { if (transport) transport.state(); if (!clock.playing && bar) bar.rate(null); },
   });
+  mine.hold(() => clock.dispose());
   try {
     await boot(mine);
   } catch (err) {

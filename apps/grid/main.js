@@ -72,7 +72,7 @@ async function start(at, mine) {
   canvas = root.querySelector('#stage');
   ctx = canvas.getContext('2d');
   buttons = {};
-  bar = transport = printing = maker = null;
+  params = panel = bar = transport = printing = maker = null;
   labelMake = () => {};    // the maker's button says what it will do
   tiles = [];              // the loaded ramp, light to dark
   tilesName = '';          // what they are called, for a save's title
@@ -94,6 +94,7 @@ async function start(at, mine) {
     onShow: tick => { if (transport) transport.show(tick); draw(); },
     onState: () => { if (transport) transport.state(); },
   });
+  mine.hold(() => clock.dispose());       // stopped at the unmount: no frame asked for after
   try {
     await boot(mine);
   } catch (err) {

@@ -215,6 +215,7 @@ export function stackView({ live, stack, canvas: find }) {
     /** Draw again now — after the app's own canvas changed size, say. */
     redraw: schedule,
     dispose() {
+      unheld();
       for (const stop of stops) stop();
       cancelAnimationFrame(raf);
       unmount();
@@ -222,6 +223,7 @@ export function stackView({ live, stack, canvas: find }) {
       drawn.clear();
     },
   };
-  held(() => view.dispose());           // its app unmounted (core/scope.js, S9)
+  let unheld = () => {};
+  unheld = held(() => view.dispose());   // its app unmounted (core/scope.js, S9)
   return view;
 }

@@ -64,7 +64,7 @@ export class Bar {
     );
     mount.append(this.root);
     this._held = bag('bar');         // what it hears off its nodes, let go of by `remove` — or its app's unmount (S9)
-    held(() => this.remove());
+    this._unheld = held(() => this.remove());
     this._holdUntil = 0;
     this._keysText = keys;
 
@@ -77,7 +77,7 @@ export class Bar {
       import('./shell/titlebar.js').catch(err => console.warn('the title bar did not load:', err.message));
     }
     if (typeof document !== 'undefined') this._held.listen(document, 'pointerover', e => this._hint(e.target), { passive: true });
-    this._viewer(app);
+    this._viewer(app, mount);
     // The left hand (S5b): keys by their place, tapped or held for a pie (core/keys.js, core/shell/bindings.js).
     if (typeof customElements !== 'undefined') {
       installKeys();
@@ -87,8 +87,10 @@ export class Bar {
     }
   }
 
-  /** Off the page, and deaf; the title bar with it, when it put one there. */
+  /** Off the page, and deaf; the title bar with it, when it put one there. Twice is once. */
   remove() {
+    if (this._held.closed) return;
+    this._unheld();
     this._held.close();
     clearTimeout(this._release);
     this.root.remove();
@@ -102,9 +104,9 @@ export class Bar {
     return [...by].map(([w, letters]) => `${letters.join(' ')} ${w}`).join(' · ');
   }
 
-  /** The rulers over the stage's padding, the viewer's tools at the end of its head — a head made if it has none. */
-  _viewer(app) {
-    const stage = typeof customElements !== 'undefined' && document.querySelector('.viewer .viewer-stage');
+  /** The rulers over the stage's padding, the viewer's tools at the end of its head — a head made if it has none. Its own app's viewer: in a scene, another may be on the page. */
+  _viewer(app, mount) {
+    const stage = typeof customElements !== 'undefined' && mount.querySelector('.viewer .viewer-stage');
     if (!stage) return;
     Guides.forApp(app);
     this._held.hold(Guides.on('say', text => this.announce(text)));

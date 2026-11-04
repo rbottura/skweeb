@@ -82,9 +82,10 @@ export class VaultPanel {
 
     this._build();
     this._held = bag('vault panel');   // what it hears off its nodes: let go of by `remove`, or its app's unmount (S9)
-    held(() => this.remove());
+    this._unheld = held(() => this.remove());
     const ro = typeof ResizeObserver !== 'undefined' && new ResizeObserver(() => {
-      for (const box of this._kins) fit(box, columnsIn(this._body.clientWidth));
+      const cols = columnsIn(this._body.clientWidth);    // read once: a fit writes, and a read after it lays out again
+      for (const box of this._kins) fit(box, cols);
     });
     if (ro) { ro.observe(this._body); this._held.hold(() => ro.disconnect()); }
 
@@ -107,8 +108,8 @@ export class VaultPanel {
   show()   { this._open = true;  this._root.classList.add('vp--visible'); this.refresh(); }
   hide()   { this._open = false; this._root.classList.remove('vp--visible'); this._closeDetail(); }
   toggle() { this._open ? this.hide() : this.show(); }
-  /** Off the page, and deaf. */
-  remove() { this.hide(); this._held.close(); this._root.remove(); }
+  /** Off the page, and deaf; out of its app's scope. Twice is once. */
+  remove() { if (this._held.closed) return; this._unheld(); this.hide(); this._held.close(); this._root.remove(); }
 
   get isOpen() { return this._open; }
 

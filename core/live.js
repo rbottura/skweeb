@@ -270,8 +270,9 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
     },
     /** Answer what another window asks of this one: `fn(args, from)`, its answer or a promise of it. */
     answer(what, fn) { answers.set(what, fn); },
-    /** Leave the windows: a `bye`, and nothing more sent or heard. */
+    /** Leave the windows: a `bye`, and nothing more sent or heard. Twice is once. */
     leave() {
+      unheld();
       bye();
       clearInterval(asking);
       clearInterval(calling);
@@ -285,6 +286,7 @@ export function joinLive({ app, layer, title = pageTitle, channel, every = 500, 
       listeners.clear();
     },
   };
-  held(() => joined.leave());          // its app unmounted: gone from the windows (core/scope.js, S9)
+  let unheld = () => {};
+  unheld = held(() => joined.leave());   // its app unmounted: gone from the windows (core/scope.js, S9)
   return joined;
 }

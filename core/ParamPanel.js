@@ -121,7 +121,7 @@ export class ParamPanel {
       this._refresh();
     });
     this._refresh();
-    held(() => this.remove());       // its app unmounted (core/scope.js, S9)
+    this._unheld = held(() => this.remove());   // its app unmounted (core/scope.js, S9)
   }
 
   show()   { this._open = true;  this._root.classList.add('pp--visible'); }
@@ -146,6 +146,7 @@ export class ParamPanel {
   remove() {
     if (this._gone) return;
     this._gone = true;
+    this._unheld();                        // gone before its app: its scope keeps nothing of it
     this._root.remove();
     if (this._unpeek) this._unpeek();
     if (this._off) this._off();
