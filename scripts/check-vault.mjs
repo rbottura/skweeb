@@ -89,6 +89,36 @@ if (shape) {
 }
 await c.shot('2-folder');
 
+// The vault, an app (S9b): the panel docked full screen, the object whose detail opens drawn beside it.
+await c.go(c.base + '/apps/vault/');
+await page.until(`document.querySelectorAll('.vp.vp--docked .vp-card').length > 0`, { timeout: 20000 });
+c.ok('the vault app: the panel docked in the page, always shown, no close',
+  await page.eval(`(() => { const vp = document.querySelector('.vp.vp--docked');
+    return !!vp && !!vp.closest('#vault-side') && getComputedStyle(vp).visibility === 'visible'
+      && [...vp.querySelectorAll(':scope > .vp-head .vp-btn')].every(b => b.textContent !== '✕' || b.hidden); })()`));
+c.ok('…nothing to save, so no Save and no Export above it', await page.eval(`!document.querySelector('skw-titlebar .tb-save, skw-titlebar .tb-export')`));
+const inked = `(() => { const cv = document.querySelector('#stage'), g = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+  let n = 0; for (let i = 3; i < g.length; i += 4) if (g[i] > 0) n++; return n; })()`;
+const choose = async type => {
+  // A card of that type, by the type it says (core/vault-card.js `.vp-type`).
+  await page.eval(`[...document.querySelectorAll('.vp-card')].find(k => k.querySelector('.vp-type')?.textContent === '${type}').click()`);
+  await page.until(`/ · ${type}/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 20000 });
+  await new Promise(r => setTimeout(r, 500));
+};
+await choose('still');
+c.ok('a still chosen: its detail open, and drawn in the viewer', (await page.eval(`!!document.querySelector('.vp-detail--open')`)) && (await page.eval(inked)) > 1000,
+  `${await page.eval(inked)} pixels inked`);
+await choose('sequence');
+const t1 = await page.eval(`document.querySelector('.bar-say').textContent`);
+await new Promise(r => setTimeout(r, 800));
+const t2 = await page.eval(`document.querySelector('.bar-say').textContent`);
+c.ok('…a sequence: drawn and played, its player under it', t1 !== t2 && /frame \d+ of \d+/.test(t2)
+  && await page.eval(`!document.querySelector('#player').hidden`), `${t1} → ${t2}`);
+const still = shown.find(r => r.type === 'still');
+await c.go(c.base + '/apps/vault/?open=' + encodeURIComponent(still.id));
+await page.until(`/ · still/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 20000 });
+c.ok('?open=<id>: drawn as it opens', (await page.eval(inked)) > 1000);
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();

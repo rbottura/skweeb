@@ -1,5 +1,6 @@
-# The vault is real files on disk and must never enter git.
-vault/
+# The vault is real files on disk and must never enter git: the one at the root —
+# not apps/vault/, the app that shows it (S9b).
+/vault/
 
 # Sprite families: 579 files, 140 MB, every one referenced by the manifest.
 # `brushes` and `timbre` are committed so a clone can boot and draw; the type
