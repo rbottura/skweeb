@@ -11,24 +11,13 @@
 
 <body>
   <!--
-    Three columns, as compose has: what the particles do on the left, the
-    picture between, the picture's own settings on the right. The bar under
-    all three is core's. No p5: Canvas 2D.
+    The app is a module (main.js, S9): it builds itself in a host and takes
+    itself out again, so a scene can mount it too. Here, alone, its host is
+    this page.
   -->
-  <div class="app">
-    <main class="app-main">
-      <div class="app-side" id="emit-side"></div>
-      <section class="viewer" aria-label="particles">
-        <div class="viewer-head">
-          <button class="nb-btn" id="guides" type="button" aria-pressed="true"
-                  title="The emitter, the fields and the pull over the preview, with handles to drag — never saved [Z]">guides</button>
-        </div>
-        <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
-      </section>
-      <div class="app-side" id="picture-side"></div>
-    </main>
-  </div>
-
-  <script type="module" src="./main.js"></script>
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
 </body>
 </html>
