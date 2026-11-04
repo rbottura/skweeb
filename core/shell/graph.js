@@ -18,6 +18,10 @@
  *             arrives, swapped by a button; merged (core/shell/merge.js), the
  *             page has the values as a step and its next save is a state with
  *             both as its parents (S7b).
+ *   A over one   the apps that state reaches, by the suite's links
+ *             (core/reopen.js): its own, compose's sheet, the rig for a
+ *             drawing of marks — each opened in a tab of its own on that
+ *             state, `@v3` (S7c).
  *
  * Dragged, it pans; the wheel zooms about the pointer; Escape or H closes it.
  * A Lit component in the page's DOM, drawn by core/shell/shell.css.
@@ -27,6 +31,8 @@ import { LitElement, html, svg, nothing } from '../libs/lit/lit-all.min.js';
 import { Vault } from '../vault.js';
 import { watched, settle, around, tell } from '../steps.js';
 import { mergeBase, plan, merged } from './merge.js';
+import { innerOf } from '../smart.js';
+import { reopenUrl, placeUrl, rigUrl } from '../reopen.js';
 import { partOf } from '../param-history.js';
 
 import { layout, W, H } from './layout.js';
@@ -41,16 +47,22 @@ function laid(recipe) {
 }
 
 class SkwGraph extends LitElement {
-  static properties = { states: { state: true }, hot: { state: true }, note: { state: true }, picked: { state: true }, cmp: { state: true } };
+  static properties = { states: { state: true }, hot: { state: true }, note: { state: true }, picked: { state: true }, cmp: { state: true }, gates: { state: true } };
 
   createRenderRoot() { return this; }
 
   constructor() {
     super();
-    this.states = null; this.hot = null; this.note = 'reading the states…'; this.picked = []; this.cmp = null;
+    this.states = null; this.hot = null; this.note = 'reading the states…'; this.picked = []; this.cmp = null; this.gates = null;
+    this._at = { x: 0, y: 0 };
     this.cam = { x: 0, y: 0, z: 1 };
     this._recipes = new Map();
     this._key = e => {
+      // A over a state: where it can go (S7c) — the graph's, not the app's pie.
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.code === 'KeyQ' || (!e.code && e.key === 'a')) && this.hot != null) {
+        e.preventDefault(); e.stopImmediatePropagation(); this._gate(this.hot); return;
+      }
+      if (e.key === 'Escape' && this.gates) { e.preventDefault(); e.stopImmediatePropagation(); this.gates = null; return; }
       if (e.key === 'Escape' || (!e.ctrlKey && !e.metaKey && !e.altKey && (e.code === 'KeyH' || e.key === 'h'))) {
         e.preventDefault(); e.stopImmediatePropagation(); this.close();
       }
@@ -122,6 +134,34 @@ class SkwGraph extends LitElement {
     this.close();
   }
 
+  // ── Where a state goes (S7c) ─────────────────────────────────────────────
+
+  /** The apps state `n` reaches, by the suite's links, each on that state. */
+  async _gate(n) {
+    const id = Vault.bound.id;
+    const { object } = await innerOf((await Vault.load(id)).object, { version: n });
+    const it = { ...object, id };
+    const at = url => url && `${url}@v${n}`;
+    const own = at(await reopenUrl(it)), sheet = at(await placeUrl(it)), rig = await rigUrl(it);
+    const app = it.origin && it.origin.app;
+    this.gates = { n, x: this._at.x, y: this._at.y, items: [
+      own && { label: `Open in ${app}`, url: own },
+      sheet && { label: 'Place in compose', url: sheet },
+      rig && { label: 'Rig this', url: rig },
+    ].filter(Boolean) };
+  }
+
+  _gatesMenu() {
+    const g = this.gates;
+    if (!g) return nothing;
+    return html`<div class="gr-gates" style=${`left:${g.x + 8}px;top:${g.y + 8}px`} role="menu">
+      <div class="gr-gates-head">v${g.n} goes to</div>
+      ${g.items.length ? g.items.map(i => html`<button class="tb-menu-item" type="button" role="menuitem" title=${i.url}
+          @click=${() => { window.open(i.url, '_blank', 'noopener'); this.gates = null; }}>${i.label} ↗</button>`)
+        : html`<div class="gr-cmp-note">nowhere the suite's links reach</div>`}
+    </div>`;
+  }
+
   // ── Compare and merge (S7b) ──────────────────────────────────────────────
 
   /** Shift click: a state picked, or let go; two picked, compared. */
@@ -188,7 +228,8 @@ class SkwGraph extends LitElement {
   }
 
   _down(e) {
-    if (e.button !== 0 || e.target.closest('.gr-node, .gr-cmp')) return;
+    if (e.button !== 0 || e.target.closest('.gr-node, .gr-cmp, .gr-gates')) return;
+    this.gates = null;
     const from = { x: e.clientX - this.cam.x, y: e.clientY - this.cam.y };
     const move = ev => { this.cam = { ...this.cam, x: ev.clientX - from.x, y: ev.clientY - from.y }; this.requestUpdate(); };
     const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
@@ -207,7 +248,7 @@ class SkwGraph extends LitElement {
   render() {
     const st = this.states, bound = Vault.bound;
     const head = html`<div class="gr-head"><b>states</b><span>${st ? `${st.length} of ${bound.id}` : ''}</span>
-      <span class="gr-hint">hover: the page draws it · click: back to it · drag: pan · wheel: zoom · Esc</span></div>`;
+      <span class="gr-hint">hover: the page draws it · click: back to it · Shift click two: compare · A: where it goes · drag: pan · wheel: zoom · Esc</span></div>`;
     if (!st) return html`<div class="gr" @pointerdown=${e => this._down(e)}>${head}<div class="gr-note">${this.note}</div></div>`;
     const pos = layout(st), now = st[st.length - 1].version;
     const wire = (a, b, dashed) => {
@@ -217,7 +258,7 @@ class SkwGraph extends LitElement {
       return svg`<path class=${dashed ? 'gr-wire gr-wire--merge' : 'gr-wire'} d=${`M${x1} ${y1} C${x1} ${y1 + 30} ${x2} ${y2 - 30} ${x2} ${y2}`}></path>`;
     };
     const w = Math.max(...[...pos.values()].map(p => p.x)) + W, h = Math.max(...[...pos.values()].map(p => p.y)) + H;
-    return html`<div class="gr" @pointerdown=${e => this._down(e)} @wheel=${e => this._wheel(e)}>
+    return html`<div class="gr" @pointerdown=${e => this._down(e)} @wheel=${e => this._wheel(e)} @pointermove=${e => { this._at = { x: e.clientX, y: e.clientY }; }}>
       ${head}
       <div class="gr-space" style=${`transform: translate(${this.cam.x}px, ${this.cam.y}px) scale(${this.cam.z})`}>
         <svg class="gr-wires" width=${w} height=${h + 60} viewBox=${`0 0 ${w} ${h + 60}`}>
@@ -236,7 +277,7 @@ class SkwGraph extends LitElement {
           </button>`;
         })}
       </div>
-      ${this._panel()}
+      ${this._panel()}${this._gatesMenu()}
     </div>`;
   }
 }

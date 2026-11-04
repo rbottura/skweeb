@@ -12,7 +12,8 @@
  * state is a branch from it, in a column of its own. Escape closes the graph.
  * Two Shift clicked are compared, the held one receiving (S7b): a conflict
  * and a value only the held one changed; merged with the conflict taken the
- * arriving way, saved, a state with both parents.
+ * arriving way, saved, a state with both parents. A over a state: the apps it
+ * reaches, each link on that state (S7c).
  * No page said anything wrong.
  */
 
@@ -105,6 +106,17 @@ c.ok('merged: the conflict picked the arriving way, the rest kept; saved, a stat
 await tapH();
 await page.until(`document.querySelectorAll('skw-graph .gr-node').length === 5`, { timeout: 15000 }).catch(() => {});
 c.ok('…drawn with its second wire, dashed', await page.eval(`document.querySelectorAll('skw-graph .gr-wire--merge').length`) === 1);
+
+// S7c: A over a state — where it goes, each link on that state.
+await page.eval(`${node(1)}.dispatchEvent(new PointerEvent('pointerenter'))`);
+await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyQ', key: 'a', bubbles: true }))`);
+await page.until(`document.querySelectorAll('skw-graph .gr-gates .tb-menu-item').length >= 2`, { timeout: 15000 }).catch(() => {});
+const gates = await page.eval(`[...document.querySelectorAll('skw-graph .gr-gates .tb-menu-item')].map(b => b.textContent.trim() + ' ' + b.title)`);
+const goes = (words, url) => gates.some(g => g.startsWith(`${words} ↗ ${url}skw_`) && g.endsWith('@v1'));
+c.ok('A over a state: the apps it reaches, each on that state', goes('Open in particles', '/apps/particles/?open=')
+  && goes('Place in compose', '/apps/compose/?place='), JSON.stringify(gates));
+const pie = await page.eval(`!!document.querySelector('skw-pie')`);
+c.ok("…the graph's, not the app's pie", !pie);
 await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
 
 const noise = c.quiet();

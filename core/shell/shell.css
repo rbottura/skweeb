@@ -135,3 +135,8 @@ skw-graph .gr-cmp-row button { height: 24px; border: 1px solid var(--line); bord
 skw-graph .gr-cmp-row button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--fg); }
 skw-graph .gr-cmp-name { color: var(--fg-2); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 skw-graph .gr-cmp-acts { display: flex; gap: 6px; justify-content: flex-end; }
+
+/* Where a state goes: A over it (S7c). */
+skw-graph .gr-gates { position: fixed; z-index: 4; min-width: 200px; display: flex; flex-direction: column; padding: 4px; cursor: default;
+  border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--raised); box-shadow: 0 14px 36px var(--shadow); }
+skw-graph .gr-gates-head { padding: 5px 8px 3px; font: 600 10.5px var(--font-ui); letter-spacing: .07em; text-transform: uppercase; color: var(--fg-3); }
