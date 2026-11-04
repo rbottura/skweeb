@@ -11,21 +11,13 @@
 
 <body>
   <!--
-    The shell from core/theme.css: the viewer, one column of drawers, and the
-    bar as a row of its own below them. No p5: grid needs drawImage into a
-    canvas and nothing else — see the note at the top of grid.js. The material
-    maker opens as a column on the left, so the dither stays in sight.
+    The app is a module (main.js, S9): it builds itself in a host and takes
+    itself out again, so a scene can mount it too. Here, alone, its host is
+    this page.
   -->
-  <div class="app">
-    <main class="app-main">
-      <div class="app-side" id="maker" hidden></div>
-      <section class="viewer" aria-label="grid output">
-        <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
-      </section>
-      <div class="app-side" id="side"></div>
-    </main>
-  </div>
-
-  <script type="module" src="./main.js"></script>
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
 </body>
 </html>

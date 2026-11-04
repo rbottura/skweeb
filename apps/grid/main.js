@@ -13,6 +13,10 @@
  * material back. There is deliberately no second drawing path:
  * the moment a preview and an export are different code, they start
  * disagreeing about something small.
+ *
+ * A module since S9 (core/mount.js): `mount(host)` and `unmount()`, so a
+ * scene can mount another in its place; index.html mounts it on itself, and
+ * it runs alone as ever (rule 7). Nothing happens at import.
  */
 
 import { gridParams, GROUPS }      from './params.js';
@@ -34,50 +38,89 @@ import { Playhead }                from '../../core/playback.js';
 import { Vault }                   from '../../core/vault.js';
 import { resolveFrame, applyFrameEdit } from '../../core/frame.js';
 import { requested }               from '../../core/reopen.js';
-
-let params, panel, bar, transport, printing;
-let tiles = [];                    // the loaded ramp, light to dark
-let tilesName = '';                // what they are called, for a save's title
-let previewTiles = null;           // the maker's tray, while it is open
-let maker;
-let labelMake = () => {};          // the maker's button says what it will do
-let source = null;                 // a handle from source.js — still or sequence
-let growth = null;                 // its frames mapped, cached, and grown (growth.js)
-let preview = null;                // the canvas the preview dithers into, reused frame to frame
-let last = null;                   // the most recent render, for saving
-let busy = false;                  // an export is running; nothing else may start
-
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
-const buttons = {};
+import { appModule }               from '../../core/mount.js';
 
 /**
- * The clock. Grid dithers the frame under it and nothing else, so a scrub —
- * and a playback — is one render rather than a thousand. It plays at the
- * source loop's own rate and drops ticks when a dither costs more than its
- * share of time, which is the honest reading of what the loop is.
+ * The shell from core/theme.css: the viewer, one column of drawers, and the
+ * bar as a row of its own below them. No p5: grid needs drawImage into a
+ * canvas and nothing else — see the note at the top of grid.js. The material
+ * maker opens as a column on the left, so the dither stays in sight.
  */
-const clock = new Playhead({
-  onShow: tick => { if (transport) transport.show(tick); draw(); },
-  onState: () => { if (transport) transport.state(); },
-});
+const MARKUP = `
+  <main class="app-main">
+    <div class="app-side" id="maker" hidden></div>
+    <section class="viewer" aria-label="grid output">
+      <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
+    </section>
+    <div class="app-side" id="side"></div>
+  </main>`;
+
+const app = appModule('grid', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+
+/** grid in `host`, started — one of its objects opened if the page asks for it (core/mount.js). */
+export const mount = host => app.mount(host);
+/** grid out of its host, everything it held let go of: its keys, its drops, its source, its clock. */
+export const unmount = () => app.unmount();
+const mounted = () => !!app.scope;
+
+// One app mounted at a time: its state, made again by each mount (`start`).
+let root, canvas, ctx, buttons, clock, params, panel, bar, transport, printing, maker, labelMake;
+let tiles, tilesName, previewTiles, source, growth, preview, last, busy, pending;
+
+async function start(at, mine) {
+  root = at;
+  canvas = root.querySelector('#stage');
+  ctx = canvas.getContext('2d');
+  buttons = {};
+  bar = transport = printing = maker = null;
+  labelMake = () => {};    // the maker's button says what it will do
+  tiles = [];              // the loaded ramp, light to dark
+  tilesName = '';          // what they are called, for a save's title
+  previewTiles = null;     // the maker's tray, while it is open
+  source = null;           // a handle from source.js — still or sequence
+  growth = null;           // its frames mapped, cached, and grown (growth.js)
+  preview = null;          // the canvas the preview dithers into, reused frame to frame
+  last = null;             // the most recent render, for saving
+  busy = false;            // an export is running; nothing else may start
+  pending = false;         // a paint asked for, not yet made
+  mine.hold(() => { if (source) source.dispose(); source = null; });
+  /*
+   * The clock. Grid dithers the frame under it and nothing else, so a scrub —
+   * and a playback — is one render rather than a thousand. It plays at the
+   * source loop's own rate and drops ticks when a dither costs more than its
+   * share of time, which is the honest reading of what the loop is.
+   */
+  clock = new Playhead({
+    onShow: tick => { if (transport) transport.show(tick); draw(); },
+    onState: () => { if (transport) transport.state(); },
+  });
+  try {
+    await boot(mine);
+  } catch (err) {
+    if (bar) bar.announce('failed to boot: ' + err.message);
+    throw err;
+  }
+}
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 
-async function boot() {
-  params = gridParams(await manifest());
+async function boot(mine) {
+  const schema = await manifest();
+  if (mine.closed) return;
+  params = gridParams(schema);
   bar = new Bar({
     app: 'grid',
-    mount: document.querySelector('.app'),
+    mount: root,
     keys: 'V vault · S save · space play · drop an image',
   });
 
-  panel = new ParamPanel(params, { title: 'grid', mount: document.getElementById('side'), groups: GROUPS });
+  panel = new ParamPanel(params, { title: 'grid', mount: root.querySelector('#side'), groups: GROUPS });
   params.on(onParamChange);
   buildDrawers();
 
   await loadTiles();
-  wireKeys();
+  if (mine.closed) return;
+  wireKeys(mine);
   draw();
   await openRequested();
 }
@@ -90,7 +133,7 @@ async function boot() {
 async function openRequested() {
   try {
     const opened = await requested('grid');
-    if (!opened) return;
+    if (!opened || !mounted()) return;
     if (opened.object.type === 'set') {
       params.set('material', opened.object.id);
       return await maker.open(opened.object.id);
@@ -116,7 +159,7 @@ function buildDrawers() {
   panel.drawer('source').body.append(open, file);
 
   maker = new Maker({
-    mount: document.getElementById('maker'),
+    mount: root.querySelector('#maker'),
     ground: () => params.get('background'),
     onTiles: t => { previewTiles = t; draw(); },
     onSaved: (set, { replaced, retired } = {}) => {
@@ -128,7 +171,7 @@ function buildDrawers() {
       refreshVaultState();
     },
     onToggle: open => {
-      document.querySelector('.app-main').classList.toggle('app-main--making', open);
+      root.querySelector('.app-main').classList.toggle('app-main--making', open);
       labelMake();
     },
     say: t => bar.announce(t),
@@ -234,7 +277,9 @@ async function loadSource(id) {
   if (!id) { setSource(null); return; }
   bar.say('opening…');
   try {
-    setSource(await fromVault(id));
+    const got = await fromVault(id);
+    if (!mounted()) { got.dispose(); return; }
+    setSource(got);
     if (source.missing.length) {
       console.warn('[grid] sprite families missing from the rebuild:', source.missing);
     }
@@ -259,15 +304,14 @@ async function loadLocalFile(file) {
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
-let pending = false;
-
 function draw() {
-  if (pending) return;
+  if (pending || !mounted()) return;
   pending = true;
   requestAnimationFrame(() => { pending = false; paint(); });
 }
 
 function paint() {
+  if (!mounted() || !params) return;
   const recipe = params.values;
 
   const use = previewTiles || tiles;
@@ -357,10 +401,10 @@ async function leave(action) {
 
 // ── Keys and drops ───────────────────────────────────────────────────────────
 
-function wireKeys() {
+function wireKeys(mine) {
   const vault = new VaultPanel();
 
-  document.addEventListener('keydown', e => {
+  mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
@@ -373,8 +417,8 @@ function wireKeys() {
   });
 
   // Dropping an image is the fastest way in, and it needs no vault.
-  document.addEventListener('dragover', e => e.preventDefault());
-  document.addEventListener('drop', e => {
+  mine.listen(document, 'dragover', e => e.preventDefault());
+  mine.listen(document, 'drop', e => {
     e.preventDefault();
     const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) loadLocalFile(file);
@@ -384,10 +428,5 @@ function wireKeys() {
 }
 
 function refreshVaultState() {
-  Vault.refresh().then(ok => bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'));
+  Vault.refresh().then(ok => { if (bar) bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'); });
 }
-
-boot().catch(err => {
-  console.error('[grid] failed to boot:', err);
-  if (bar) bar.announce('failed to boot: ' + err.message);
-});
