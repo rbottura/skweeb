@@ -178,11 +178,7 @@ taking what it uses: what rule 4's eased cap leaves to split is then
 seams, never copies. *Done when* no check defines a helper another has.
 
 **C10 — the checks several at a time, picked by what a change reaches** ·
-landed 2026-11-04, `clean/checks`. The author's ask, after two runs of
-every check: "il y a t-il un moyen d'accélérer le processus de check ?".
-`scripts/checks.mjs` runs them four at a time, the longest first, a failure
-again alone; `scripts/reach.mjs` picks them by the pages a change reaches;
-`--gate` adds the unit tests and rule 4 (`docs/workflow.md`, *The gate*).
+landed 2026-11-04, `clean/checks`: `docs/workflow.md`, *The gate*.
 
 ## U — the UI redesigned: boxes, layout, theme
 
