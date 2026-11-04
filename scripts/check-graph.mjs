@@ -10,6 +10,9 @@
  * the first is what the page draws, and left, the page is itself again.
  * Clicked, the page goes back to it and holds it: changed and saved, the new
  * state is a branch from it, in a column of its own. Escape closes the graph.
+ * Two Shift clicked are compared, the held one receiving (S7b): a conflict
+ * and a value only the held one changed; merged with the conflict taken the
+ * arriving way, saved, a state with both parents.
  * No page said anything wrong.
  */
 
@@ -72,9 +75,37 @@ const at = v => three.find(n => n.v.startsWith('v' + v));
 c.ok('saved, the new state is a branch from it, in a column of its own', three.length === 3 && at(3).x !== at(2).x
   && at(3).y === at(2).y && at(3).y < at(1).y, JSON.stringify(three));
 
+// S7b: v3 (speed 300 on v1) and v2 (rate 150) Shift clicked — compared; merged, the page has both; saved, a state with two parents.
 await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
 await wait(200);
 c.ok('Escape closes it', !(await page.eval(`!!document.querySelector('skw-graph')`)));
+await page.typeInto(`${row('speed')}.querySelector('.pp-num')`, '300');
+await save();                                          // v3 is now rate 120, speed 300 — v4, from v3
+await tapH();
+await page.until(`document.querySelectorAll('skw-graph .gr-node').length === 4`, { timeout: 15000 }).catch(() => {});
+const shift = v => page.eval(`${node(v)}.dispatchEvent(new MouseEvent('click', { shiftKey: true, bubbles: true }))`);
+await shift(4);
+await shift(2);
+await page.until(`document.querySelectorAll('skw-graph .gr-cmp-row').length >= 2`, { timeout: 15000 }).catch(() => {});
+const cmp = await page.eval(`({ head: document.querySelector('skw-graph .gr-cmp-head').textContent,
+  rows: [...document.querySelectorAll('skw-graph .gr-cmp-row')].map(r => r.querySelector('.gr-cmp-name').textContent + ':' + r.className.split('--')[1]) })`);
+cmp.head = cmp.head.split(/\s+/).join(' ').trim();
+// From their base, v1: both changed the rate — a conflict, v4's until v2's is picked; only v4 changed the speed — kept.
+c.ok('Shift click two: compared, the held one receiving, a row for each value apart', cmp.head.startsWith('v4 receives · v2 arrives')
+  && cmp.rows.includes('a second:both') && cmp.rows.includes('speed:receiving'), JSON.stringify(cmp));
+await page.click(`[...document.querySelectorAll('skw-graph .gr-cmp-row')].find(r => r.querySelector('.gr-cmp-name').textContent === 'a second').querySelectorAll('button')[1]`);
+await page.click(`[...document.querySelectorAll('skw-graph .gr-cmp-acts .nb-btn')].find(b => b.textContent.startsWith('Merge'))`);
+await wait(300);
+const both = [await rate(), +(await page.eval(`${row('speed')}.querySelector('.pp-num').value`))];
+await save();
+const tree = (await (await fetch(c.base + '/api/vault/' + held.id + '/states')).json()).states;
+const last = tree[tree.length - 1];
+c.ok('merged: the conflict picked the arriving way, the rest kept; saved, a state with both parents',
+  both[0] === 150 && both[1] === 300 && last.version === 5 && last.parent === 4 && last.parent2 === 2, JSON.stringify({ both, last }));
+await tapH();
+await page.until(`document.querySelectorAll('skw-graph .gr-node').length === 5`, { timeout: 15000 }).catch(() => {});
+c.ok('…drawn with its second wire, dashed', await page.eval(`document.querySelectorAll('skw-graph .gr-wire--merge').length`) === 1);
+await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

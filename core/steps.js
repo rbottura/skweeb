@@ -120,6 +120,9 @@ export function redo() {
 /** The params of the page, as watched: what a state's recipe is laid back into (core/shell/graph.js). */
 export const watched = () => [...cur.keys()];
 
+/** A line for the status bar, from what changes the steps — a merge (core/shell/graph.js). */
+export const tell = text => say(text);
+
 /** How many steps there are each way. */
 export const counts = () => ({ back: back.length + (open ? 1 : 0), ahead: ahead.length });
 

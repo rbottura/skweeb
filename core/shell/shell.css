@@ -117,3 +117,21 @@ skw-graph .gr-v { font: 500 11px var(--font-num); color: var(--fg-2); }
 skw-graph .gr-title { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--fg-3); }
 skw-graph .gr-node--held { border-color: var(--accent); }
 skw-graph .gr-node--hot { outline: 2px solid var(--accent); outline-offset: 1px; }
+skw-graph .gr-node--picked { box-shadow: 0 0 0 3px var(--accent-soft), 0 8px 22px var(--shadow); border-color: var(--accent); }
+
+/* Two states compared, one merged into the other (S7b). */
+skw-graph .gr-cmp { position: absolute; left: 50%; bottom: 46px; z-index: 3; transform: translateX(-50%); width: min(560px, calc(100% - 32px));
+  max-height: 46vh; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; overflow: auto; cursor: default;
+  border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--raised); box-shadow: 0 14px 36px var(--shadow); font: 400 12.5px var(--font-ui); }
+skw-graph .gr-cmp--wait { width: auto; color: var(--fg-2); }
+skw-graph .gr-cmp-head { display: flex; align-items: center; gap: 6px; color: var(--fg-2); }
+skw-graph .gr-cmp-head b { color: var(--fg); }
+skw-graph .gr-cmp-swap { margin-left: auto; width: 26px; height: 24px; border: 1px solid var(--line-2); border-radius: var(--radius); background: none; color: var(--fg-2); cursor: pointer; }
+skw-graph .gr-cmp-note { color: var(--fg-3); font-style: italic; }
+skw-graph .gr-cmp-row { display: grid; grid-template-columns: 1fr 96px 96px; gap: 6px; align-items: center; padding: 2px 0 2px 8px; border-left: 2px solid var(--line-2); }
+skw-graph .gr-cmp-row--incoming { border-left-color: var(--ok); }
+skw-graph .gr-cmp-row--both { border-left-color: var(--warn); }
+skw-graph .gr-cmp-row button { height: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--field); color: var(--fg-2); font: 400 12px var(--font-num); cursor: pointer; }
+skw-graph .gr-cmp-row button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--fg); }
+skw-graph .gr-cmp-name { color: var(--fg-2); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+skw-graph .gr-cmp-acts { display: flex; gap: 6px; justify-content: flex-end; }
