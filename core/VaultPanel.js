@@ -58,11 +58,15 @@ export class VaultPanel {
    * @param {HTMLElement} [opts.mount]  docked there, always shown — the vault app's (S9b) — not over the page
    * @param {(object:object, urls:{url:?string, thumb:?string})=>void} [opts.onDetail]  an object's detail opened
    * @param {boolean} [opts.detailPicture]  false: the detail its facts only, narrower — the page draws the object (S9b)
+   * @param {HTMLElement} [opts.detailMount]  the detail there, not over the grid — a scene's properties (S9c)
+   * @param {() => void} [opts.onClose]  the detail closed
    */
   constructor(opts = {}) {
     this._mount     = opts.mount || null;
     this._onDetail  = opts.onDetail || null;
+    this._onClose   = opts.onClose || null;
     this._detailPicture = opts.detailPicture !== false;
+    this._detailMount = opts.detailMount || null;
     this._filter    = opts.filter || {};
     // Vault.list() filters on one type, the cheap query; a param's several are narrowed here.
     this._accepts   = Array.isArray(opts.accepts) && opts.accepts.length
@@ -116,7 +120,15 @@ export class VaultPanel {
   hide()   { if (this._mount) return this._closeDetail(); this._open = false; this._root.classList.remove('vp--visible'); this._closeDetail(); }
   toggle() { this._open ? this.hide() : this.show(); }
   /** Off the page, and deaf; out of its app's scope. Twice is once. */
-  remove() { if (this._held.closed) return; this._unheld(); this.hide(); this._held.close(); this._root.remove(); }
+  remove() { if (this._held.closed) return; this._unheld(); this.hide(); this._held.close(); this._root.remove(); this._detail.remove(); }
+
+  /** The detail with its picture, or its facts only — the page drawing the object open (S9c): its paint again, if one is open. */
+  set detailPicture(on) {
+    if (this._detailPicture === !!on) return;
+    this._detailPicture = !!on;
+    this._detail.classList.toggle('vp-detail--info', !on);
+    if (this._current && this._loaded && this._urls) { this._disposeViewer(); this._paintDetail(this._loaded, this._urls); }
+  }
 
   get isOpen() { return this._open; }
 
@@ -194,7 +206,8 @@ export class VaultPanel {
     const drawer = detailDrawer(() => this._closeDetail());
     if (!this._detailPicture) drawer.root.classList.add('vp-detail--info');
     Object.assign(this, { _detail: drawer.root, _detailTitle: drawer.title, _detailBody: drawer.body });
-    this._root.append(head, this._body, drawer.root);
+    this._root.append(head, this._body);
+    (this._detailMount || this._root).append(drawer.root);
     (this._mount || document.body).append(this._root);
   }
 
@@ -390,16 +403,19 @@ export class VaultPanel {
     if (this._current !== id) return;
 
     this._loaded = loaded.object;
-    this._paintDetail(loaded.object, { render: loaded.url, thumb: loaded.thumbUrl, reopen, place, rig });
+    this._urls = { render: loaded.url, thumb: loaded.thumbUrl, reopen, place, rig };
+    this._paintDetail(loaded.object, this._urls);
     this._markCurrent();
     if (this._onDetail) this._onDetail(loaded.object, { url: loaded.url, thumb: loaded.thumbUrl });
   }
 
   _closeDetail() {
     this._disposeViewer();
+    const was = this._current;
     this._current = null;
     this._detail.classList.remove('vp-detail--open');
     this._markCurrent();
+    if (was && this._onClose) this._onClose();
   }
 
   _paintDetail(o, urls) {
