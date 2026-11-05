@@ -30,6 +30,7 @@
 
 @import '../../core/theme.css';
 @import '../../core/vault-panel.css';
+@import 'motion.css';                 /* what holds still, adapts, goes and comes at a switch (S9e) */
 
 .cluster {
   --strip: 92px;
@@ -209,8 +210,7 @@
 
 .cl-tab:hover { color: var(--fg-2); }
 .cl-tab.skw-spring { color: var(--accent); }          /* its panel would take what is dragged from the vault */
-.cl-tab[aria-selected="true"] { color: var(--fg); }
-.cl-tab[aria-selected="true"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 1px; background: var(--accent); }
+.cl-tab[aria-selected="true"] { color: var(--fg); }          /* its underline the bar's one, sliding (motion.css) */
 
 /* The panel's body: every one of its contents the same place, one shown. */
 .cl-detail, .cl-none, .cl-host .app-main > .app-side {
@@ -309,13 +309,9 @@
 
 .cl-held--going { opacity: 0; }
 
-/* The panels leaving and coming, as the bench's `swapping`: the properties out to their
-   side and faded as an app goes, in as the next comes; the viewer and the vault still. */
-.cl-tabs, .cl-detail, .cl-none, .cl-host .app-main > .app-side { transition: transform 240ms ease, opacity 240ms ease; }
-.cl-out .cl-tabs, .cl-out .cl-detail, .cl-out .cl-none, .cl-out .cl-host .app-main > .app-side { transform: translateX(28px); opacity: 0; }
+/* What leaves and comes at a switch, what holds still: motion.css (S9e). */
 @media (prefers-reduced-motion: reduce) {
-  .cl-tabs, .cl-detail, .cl-none, .cl-host .app-main > .app-side, .cl-held,
-  .cl-host .app-side .dr-body, .cl-host .app-side .dr-head::before, .cl-host .app-side .pp-title::before { transition: none; }
+  .cl-held, .cl-host .app-side .dr-body, .cl-host .app-side .dr-head::before, .cl-host .app-side .pp-title::before { transition: none; }
 }
 
 /* ── The app mounted, laid in the scene's grid ─────────────────────────────── */
@@ -337,5 +333,6 @@
 
 .cl-host .viewer > .viewer-head { grid-row: 1; height: var(--head-h); min-height: 0; }
 .cl-host .viewer > .viewer-stage { grid-row: 2; min-height: 0; }
-.cl-host .viewer > .viewer-player, .cl-host .viewer > .vault-player { grid-row: 3; min-height: 0; overflow: hidden; }
-.cl-host .viewer > .viewer-player[hidden] { display: block; visibility: hidden; }
+.cl-host .viewer > .viewer-player, .cl-host .viewer > .vault-player { grid-row: 3; grid-column: 1; min-height: 0; overflow: hidden; }
+/* An app with a player of its own — the vault's — has no use of core's strip: one strip, never two side by side. */
+.cl-host .viewer:has(> .vault-player) > .viewer-player { display: none; }

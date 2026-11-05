@@ -15,6 +15,11 @@
  * holds a field that would take it is marked, and opens as the drag rests on
  * it — the field may be in a panel not shown.
  *
+ * Its motion (S9e): the chosen tab's underline is one, sliding to the tab
+ * chosen; a panel shown by its tab, or an object's detail, comes in a short
+ * fade — over the scene's box, the same as its own, so what fades is what is
+ * in it (frames.js).
+ *
  * No DOM at import.
  */
 
@@ -46,6 +51,7 @@ export function propsTabs({ bar, detail, none }) {
   let back = null;          // the panel shown before the detail took the column
   let dragging = false;     // an object from the vault under way: the tabs whose panel would take it marked
   let said = '';            // what the bar says, as last built
+  const ink = el('span', 'cl-tabs-ink');   // the chosen tab's underline: one, sliding from tab to tab
   document.addEventListener('vault:drag', e => { dragging = !!e.detail.row; paint(); });
 
   /** The panels showing now, the detail after them. */
@@ -74,17 +80,38 @@ export function propsTabs({ bar, detail, none }) {
         b.setAttribute('aria-selected', String(t.key === on));
         b.addEventListener('click', () => choose(t.key));
         return b;
-      }));
+      }), ink);
     }
     for (const t of all) t.el.classList.toggle('cl-shown', t.key === on);
     if (!open) detail.classList.remove('cl-shown');
     none.hidden = all.length > 0;
+    underline();
+  }
+
+  /** The underline under the chosen tab — slid there, once it has been somewhere. */
+  function underline() {
+    const b = bar.querySelector('.cl-tab[aria-selected="true"]');
+    ink.hidden = !b;
+    if (!b) return;
+    const at = `translateX(${b.offsetLeft + 8}px)`, width = Math.max(0, b.offsetWidth - 16) + 'px';
+    if (ink.style.transform === at && ink.style.width === width) return;
+    ink.classList.toggle('cl-tabs-ink--placed', !!ink.style.width);     // the first time, it is put there
+    Object.assign(ink.style, { transform: at, width });
+  }
+
+  /** A panel shown by a tab, or a detail opened, comes in: a short fade. */
+  function comeIn(key) {
+    const t = tabs().find(x => x.key === key);
+    const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (t && !reduced && typeof t.el.animate === 'function') t.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'ease' });
   }
 
   function choose(key) {
+    const was = on;
     on = key;
     if (key !== DETAIL && app) kept.set(app, key);
     paint();
+    if (key !== was) comeIn(key);
   }
 
   return {
@@ -115,17 +142,21 @@ export function propsTabs({ bar, detail, none }) {
     },
     /** An object open in the scene's vault: its detail, a tab, shown. */
     showDetail(label) {
+      const was = on;
       if (on !== DETAIL) back = on;
       open = label;
       on = DETAIL;
       paint();
+      if (was !== DETAIL) comeIn(DETAIL);
     },
     /** Its detail closed: the panel shown before it, again. */
     hideDetail() {
       open = null;
+      const was = on;
       if (on === DETAIL) on = back;
       back = null;
       paint();
+      if (was === DETAIL && on) comeIn(on);
     },
     /** The tab shown: a panel's id, 'detail', or null. */
     get shown() { return on === DETAIL ? 'detail' : on; },
