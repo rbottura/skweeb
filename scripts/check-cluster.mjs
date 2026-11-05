@@ -154,6 +154,40 @@ await booted('vault');
 await page.until(`/ · still/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 20000 });
 c.ok('the vault app back: the still it drew, drawn again', (await page.eval(`document.querySelector('.bar-say').textContent`)) === drawn, drawn);
 
+// ── The links between apps, taken in place ──────────────────────────────────
+// A loose sequence particles made, as the server lists it: its card in the vault app, its detail's links.
+const everything = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
+const ofParticles = everything.find(r => r.type === 'sequence' && r.origin && r.origin.app === 'particles'
+  && !(r.tags || []).some(t => t === 'trash' || t.startsWith('folder:')));
+if (ofParticles) {
+  const detailOf = async id => {
+    await open('vault');
+    await page.eval(`document.querySelector('.vp-card[data-id="${id}"]').click()`);
+    await page.until(`!!document.querySelector('.vp-detail--open .vp-actions .vp-btn')`, { timeout: 20000 });
+  };
+  const press = text => page.eval(`[...document.querySelectorAll('.vp-detail--open .vp-actions .vp-btn')].find(b => b.textContent.startsWith(${JSON.stringify(text)})).click()`);
+  await page.eval(`window.__tabs = []; window.open = (...a) => { window.__tabs.push(a[0]); return null; }`);
+  await detailOf(ofParticles.id);
+  await press('Open in particles');
+  await booted('particles');
+  await page.until(`/opened /.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 30000 });
+  const at = await page.eval(`({ search: location.search, hash: location.hash, said: document.querySelector('.bar-say').textContent, tabs: window.__tabs.length })`);
+  c.ok('Open in particles ↗, in the vault app: particles mounted in place, on that object, no tab', at.hash === '#particles'
+    && at.search === '?open=' + encodeURIComponent(ofParticles.id) && at.said.includes(ofParticles.id) && at.tabs === 0, JSON.stringify(at));
+  await detailOf(ofParticles.id);
+  await press('Place in compose');
+  await booted('compose');
+  await page.until(`/1 placed · .+ on the page/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 30000 });
+  c.ok('Place in compose ↗: compose mounted on a page of its own with it placed', await page.eval(`location.search.startsWith('?place=') && window.__tabs.length === 0`));
+  await page.eval(`history.back()`);
+  await booted('vault');
+  await page.until(`/ · sequence/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 20000 });
+  c.ok('…Back: the vault app as it was left, the sequence it drew drawn again', await page.eval(`location.hash === '#vault' && location.search === ''`),
+    await page.eval(`document.querySelector('.bar-say').textContent`));
+} else {
+  console.log('     (no loose sequence of particles in this vault — skipping the links)');
+}
+
 // ── A switch asked while an app boots: the last asked is the one mounted ───
 await click('particles');
 await page.until(`!!document.querySelector('.cl-host > .app') && document.querySelector('skw-titlebar')?.getAttribute('app') === 'particles'`);
