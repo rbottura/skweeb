@@ -63,7 +63,7 @@ const MARKUP = `
 const app = appModule('fractals', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** fractals in `host`, started — a saved still or idle opened if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** fractals out of its host, everything it held let go of: its keys, its runner, its clock. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;

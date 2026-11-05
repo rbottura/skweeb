@@ -46,7 +46,7 @@ const MARKUP = `
 const app = appModule('filter', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** filter in `host`, started — a saved chain opened, or a window followed, if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** filter out of its host, everything it held let go of: its keys, its runner, its source, its clock. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;

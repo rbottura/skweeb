@@ -76,7 +76,7 @@ const MARKUP = `
 const app = appModule('rig', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep: () => kept() });
 
 /** The rig in `host`, started — a drawing or a saved rig opened if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** The rig out of its host, everything it held let go of: its keys, R given back to core, its clock. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;

@@ -67,7 +67,7 @@ const MARKUP = `
 const app = appModule('particles', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** particles in `host`, started — a saved one opened if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** particles out of its host, everything it held let go of: its keys, its windows, its clock. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;

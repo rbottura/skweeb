@@ -69,7 +69,7 @@ const MARKUP = `
 const app = appModule('compose', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** compose in `host`, started — a page opened, or an object placed, if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** compose out of its host, everything it held let go of: its keys, its placements' frames, its clock. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;

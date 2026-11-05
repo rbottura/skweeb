@@ -64,7 +64,7 @@ const MARKUP = `
 const app = appModule('ckt', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** ckt in `host`, started — one of its objects opened if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** ckt out of its host, everything it held let go of: its keys, its drops, its clock. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;
