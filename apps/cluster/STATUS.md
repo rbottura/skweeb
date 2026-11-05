@@ -31,6 +31,14 @@ app still opens alone on its own page; the scene is one more host.
   `requested`). Its next S is the next state of the same object. The
   vault app keeps the object it draws. What the address asks goes first:
   an app given a query — a link to it — does as it says.
+- **The links between apps are the scene's** (`scene/links`, 2026-11-05):
+  *Open in … ↗*, *Place in compose ↗* and *Rig this ↗* in the vault's
+  detail, the graph's open-in, the stack's saved page — followed through
+  core (`core/reopen.js` `follow`) — mount that app here in place of the
+  one open, the link's query with it, where alone they open a tab
+  (`takeLinks`). The app left comes back as it was: Back after *Open in
+  particles* is the vault app, the object it drew drawn again. The map's
+  player and the gamepad stay tabs: they are not the scene's apps.
 - **An app is never seen without its layout**: its stylesheet, linked by
   its mount, has loaded before its nodes are built (`core/mount.js`); taken
   out, it goes with the app — two apps' stylesheets are never on the page.
@@ -43,7 +51,8 @@ app still opens alone on its own page; the scene is one more host.
   intervals, frames asked for — and a switch cut short holding what the app
   held when it came in turn; a value moved in each app still there when it
   comes back, particles' smart object saved into again at its next state,
-  the vault app's still drawn again.
+  the vault app's still drawn again; *Open in particles* and *Place in
+  compose* taken in place from the vault app, no tab opened, and Back.
 
 ## Known
 
@@ -58,12 +67,9 @@ app still opens alone on its own page; the scene is one more host.
   from one app to the next. One canvas fixed in the middle, the last frame
   held between two apps and the panels leaving and coming are the bricks
   after (`docs/scene.md`).
-- **Open in … ↗, Place in compose ↗, Rig this ↗** open a new tab, as on any
-  page: in the scene they should mount that app in place, its object
-  reopened.
 
 ## Next
 
-The bricks of S9c left, in order (`docs/plan.md`): the links between apps
-taken by the scene; one canvas fixed in the middle and the last frame held;
-the panels leaving and coming as the bench has them.
+The bricks of S9c left, in order (`docs/plan.md`): one canvas fixed in the
+middle and the last frame held; the panels leaving and coming as the bench
+has them.

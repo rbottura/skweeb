@@ -25,6 +25,10 @@ sorts them.
   the smart object S saves into — as on an object asked for
   (`core/mount.js` `keep`, `core/reopen.js`). particles' and compose's
   ways out moved to a `leaving.js` each, as the rig's.
+- **The links between apps, in place**: in cluster, *Open in … ↗*, *Place
+  in compose ↗*, *Rig this ↗* and the graph's open-in mount that app in the
+  scene on its object, where alone they open a tab (`core/reopen.js`
+  `follow`, `takeLinks`); Back is the app before, as it was left.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -332,14 +336,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9c's next brick: the links taken in place** — branch `scene/links` from
-`main`. In cluster, *Open in … ↗*, *Place in compose ↗*, *Rig this ↗* (the
-vault's detail, `core/vault-detail.js`) and the graph's open-in
-(`core/shell/graph.js`) mount that app in the scene with its query —
-`?open=<id>#particles` — where alone they open a tab: a seam in core a
-scene takes, the tab when none does; `check-cluster` opens a still's detail
-in the vault app, takes *Open in …*, and finds its app mounted on it. Then
-one canvas and the last frame held, then the panels (`docs/scene.md`).
+**S9c's next brick: one canvas, fixed — first, how** — branch
+`scene/canvas` from `main`. Weigh the two ways `docs/scene.md` names
+(brick 3): one canvas element handed to each app — its listeners on it
+held by the scope, seven `pointer.js` and ckt's own, its classes and its 2D
+state reset — or each app's own canvas laid in one place by the scene's
+columns, the last frame a picture over it. Then the first step of the one
+chosen: the viewer's rectangle the same for every app in cluster,
+`check-cluster` measuring it across a switch.
 
 ## Parked decisions
 
