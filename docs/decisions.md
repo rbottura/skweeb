@@ -307,3 +307,12 @@ app, and a link made for an app's page opens in the scene with its
 fragment added. The host mounts each app with its own canvas and layout;
 the one canvas, as planned, is a brick of its own, where what handing it
 over costs the apps is weighed first (`docs/scene.md`).
+
+**An app mounted again comes back as it was left** (S9c). A scene that
+switches apps must not lose what one was doing, or it is worse than a
+tab. So an app taken out once booted leaves what its `keep` says — the
+recipe it would save, the frame, whether it played — with the smart
+object it is bound to, and its next mount opens on it through the path
+a saved object takes (`requested`): no second way to restore an app.
+The address goes first — an app given a query does as it says — and
+what is kept is the recipe, not the session: the steps start again.

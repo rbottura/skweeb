@@ -23,6 +23,14 @@ app still opens alone on its own page; the scene is one more host.
   graph, `core/shell/graph.js`) keeps the fragment, and so its app.
 - **A switch asked while an app boots** waits for it, and the app asked
   last is the one mounted — never one taken out halfway through its boot.
+- **An app comes back as it was left** (`scene/kept`, 2026-11-05): taken
+  out, it leaves what it was doing — the recipe it would save, the frame on
+  screen and whether it played, the smart object it is bound to — and its
+  next mount opens on that, as on an object asked for, saying "back as it
+  was left" (`keep` in each app's module, `core/mount.js`, `core/reopen.js`
+  `requested`). Its next S is the next state of the same object. The
+  vault app keeps the object it draws. What the address asks goes first:
+  an app given a query — a link to it — does as it says.
 - **An app is never seen without its layout**: its stylesheet, linked by
   its mount, has loaded before its nodes are built (`core/mount.js`); taken
   out, it goes with the app — two apps' stylesheets are never on the page.
@@ -33,13 +41,17 @@ app still opens alone on its own page; the scene is one more host.
 - `check-cluster`: every app mounted in turn, twice round, nothing more held
   after the second round than after the first — listeners, channels,
   intervals, frames asked for — and a switch cut short holding what the app
-  held when it came in turn.
+  held when it came in turn; a value moved in each app still there when it
+  comes back, particles' smart object saved into again at its next state,
+  the vault app's still drawn again.
 
 ## Known
 
-- **An app comes back as it starts**, not as it was left: its values, its
-  object bound and its steps go with it at a switch, as a page closed. The
-  next brick keeps them (`docs/plan.md`, S9c).
+- **What an app keeps is its recipe**, not its session: its steps — Ctrl Z
+  — start again, its zoom and what was chosen in it (a shape, a bone) go,
+  compose's chosen placement aside; a file opened from disk is not kept,
+  having no id, nor a window filter followed. A reload keeps nothing: the
+  page's memory is where it is kept.
 - **A switch while an app saves** takes it out mid-save: the save goes on
   in the background and lands in the vault, but nothing says so.
 - **Each app keeps its own canvas and its own layout**: the viewer moves
@@ -52,7 +64,6 @@ app still opens alone on its own page; the scene is one more host.
 
 ## Next
 
-The bricks of S9c, in order (`docs/plan.md`): an app comes back as it was
-left; the links between apps taken by the scene; one canvas fixed in the
-middle and the last frame held; the panels leaving and coming as the bench
-has them.
+The bricks of S9c left, in order (`docs/plan.md`): the links between apps
+taken by the scene; one canvas fixed in the middle and the last frame held;
+the panels leaving and coming as the bench has them.
