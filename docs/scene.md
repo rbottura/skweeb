@@ -191,9 +191,11 @@ asked during a boot waits for it; an app's stylesheet loads before its
 nodes are built, so it is never seen without its layout. In this brick each
 app keeps its own canvas and its own layout. Then, a brick each:
 
-1. **An app back as it was left** (`scene/kept`): its values, the object it
-   is bound to and its steps kept at a switch and given back at its next
-   mount — today it comes back as it starts, as a page closed.
+1. **An app back as it was left** (`scene/kept`, landed 2026-11-05): what
+   it was doing — the recipe it would save, the frame, whether it played —
+   and the smart object it is bound to, left at a switch and given back at
+   its next mount as an object asked for; what the address asks goes first.
+   Its steps start again.
 2. **The links taken in place** (`scene/links`): *Open in … ↗*, *Place in
    compose ↗*, *Rig this ↗* and the graph's open-in mount that app in the
    scene, its object reopened, where alone they open a tab.

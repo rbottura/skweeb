@@ -26,11 +26,12 @@ import { drawParticles, pictureSize } from './draw.js';
 import { loadSprites }  from '../../core/sprites.js';
 import { loadPoints }   from '../../core/points.js';
 import { loadField }    from '../../core/fields.js';
-import { saveParticles, downloadFrames, downloadSheet, APP } from './save.js';
+import { APP } from './save.js';
+import { ways } from './leaving.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
 import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }    from '../../core/StackPanel.js';
-import { requested }      from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Transport }      from '../../core/Transport.js';
@@ -63,7 +64,7 @@ const MARKUP = `
     <div class="app-side" id="picture-side"></div>
   </main>`;
 
-const app = appModule('particles', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('particles', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** particles in `host`, started — a saved one opened if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -74,7 +75,7 @@ const mounted = () => !!app.scope;
 // One app mounted at a time: its state, made again by each mount (`start`).
 let root, canvas, ctx, guidesBtn, clock, emit, picture, bar, transport, player;
 let clockFps, shownView, guidesOn, model, shown, sprites, spritesTitle, loading, spritesIn, asked;
-let given, asking, coming, busy, painted, pending;
+let given, asking, coming, leaving, painted, pending;
 
 async function start(at, mine) {
   root = at;
@@ -94,7 +95,7 @@ async function start(at, mine) {
   given = { points: null, field: null };   // what the emitter names, loaded beside the recipe
   asking = { points: 0, field: 0 };        // the latest asked for, as `asked` is
   coming = new Set();      // loads on their way in, for a reopen and a save to wait on
-  busy = false;            // a save or a download is drawing; nothing else starts
+  leaving = null;          // the ways out (leaving.js): a save or a download drawing, nothing else starts
   painted = [];            // when the last paints were, while playing
   pending = false;         // a paint asked for, not yet made
   emit = picture = bar = transport = player = null;
@@ -124,7 +125,7 @@ async function boot(mine) {
   player = side.drawer('player');
   const holder = document.createElement('div');
   player.body.prepend(holder);
-  transport = new Transport({ clock, mount: holder, busy: () => busy });
+  transport = new Transport({ clock, mount: holder, busy: () => !!leaving && leaving.busy() });
   buildExport(side);
 
   emit.on(key => {
@@ -169,12 +170,19 @@ async function openRequested() {
     await spritesIn;
     await Promise.all([...coming]);
     clock.show(Math.min(Number.isInteger(recipe.tick) ? recipe.tick : 0, clock.length - 1));
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+    if (opened.kept && opened.object.playing) clock.play();
+    bar.announce(openedLine(opened));
     return true;
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
     return false;
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): both panels, the frame on screen, whether it plays. */
+function keep() {
+  if (!emit || !picture || !clock) return null;
+  return { type: 'sequence', recipe: { emit: emit.values, picture: picture.values, tick: clock.tick }, playing: clock.playing };
 }
 
 /**
@@ -252,11 +260,14 @@ const pointsSaid = got => `${got.title}: ${got.list.length.toLocaleString('en')}
 
 // ── Leaving: a loop, a still, the frames ─────────────────────────────────────
 
-/** The Export drawer, under the picture's settings. */
+/** The Export drawer, under the picture's settings, and the ways out it offers (leaving.js). */
 function buildExport(side) {
+  leaving = ways({ bar, clock, args: () => ({ emit, picture, sprites, spritesTitle, ...given }),
+                   loading: () => loading || coming.size > 0, after: () => { refreshVault(); draw(); } });
+  const { save, leave } = leaving;
   const exp = exportBox(side, {
     vault: { save: () => save(), still: () => save({ still: true }) },
-    disk: { frames, sheet },
+    disk: { frames: leaving.frames, sheet: leaving.sheet },
   }).drawer;
   // A print of the frame on screen, drawn again at the sheet's size (core/PrintPanel.js).
   const printing = new PrintPanel({
@@ -270,54 +281,6 @@ function buildExport(side) {
   picture.on(key => { if (key === 'format') printing.follow(picture.get('format')); });
   // A window of the stack (core/live.js): what is on screen, as its print has it.
   stackDrawer(side, { app: 'particles', layer: () => printing.object(), clock, save: () => save() });
-}
-
-/** One way out for all three: the player held still, nothing else started meanwhile. */
-async function leave(action) {
-  if (busy) return;
-  if (loading || coming.size) return bar.announce('the sprites, the emitter or the field are still loading — a moment');
-  busy = true;
-  clock.pause();
-  try {
-    bar.announce(await action());
-  } catch (err) {
-    console.error('[particles] failed:', err);
-    bar.announce('failed: ' + err.message);
-  } finally {
-    busy = false;
-    refreshVault();
-    draw();
-  }
-}
-
-/** The loop, or the frame on screen as a still, into the vault (save.js). */
-function save({ still = false } = {}) {
-  return leave(async () => {
-    bar.say('saving…');
-    const tick = clock.tick;
-    const object = await saveParticles({ emit, picture, sprites, spritesTitle, ...given, tick, still });
-    if (!object) return 'no vault — downloaded instead';
-    return still ? `saved ${object.id} — frame ${tick + 1}, a still`
-      : `saved ${object.id} — ${object.render.frames} frames at ${object.render.fps} fps, its picture frame ${tick + 1}`;
-  });
-}
-
-/** The loop as a sprite sheet and its JSON, cropped to where the particles reach (save.js). */
-function sheet() {
-  return leave(async () => {
-    const out = await downloadSheet({ emit, picture, sprites, ...given, onStatus: t => bar.say(t) });
-    return `downloaded ${out.name} — ${out.frames} frames of ${out.box.w} × ${out.box.h} on a `
-      + `${out.width} × ${out.height} sheet, and its JSON`;
-  });
-}
-
-/** Every frame, zipped with its rate (save.js). */
-function frames() {
-  return leave(async () => {
-    const out = await downloadFrames({ emit, picture, sprites, ...given, onStatus: t => bar.say(t) });
-    return `downloaded ${out.frames} frames at ${out.fps} fps, ${out.width} × ${out.height} px — `
-      + 'node scripts/frames-to-video.mjs makes the video';
-  });
 }
 
 // ── The guides' switch ───────────────────────────────────────────────────────
@@ -386,8 +349,8 @@ function wireKeys(mine) {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (e.key === 's' || e.key === 'S') save();
-    if (busy || clock.length < 2) return;
+    if (e.key === 's' || e.key === 'S') leaving.save();
+    if (leaving.busy() || clock.length < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }
     if (e.key === ',') { clock.pause(); clock.step(-1); }
     if (e.key === '.') { clock.pause(); clock.step(1); }

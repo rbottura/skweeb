@@ -33,7 +33,7 @@ import { ParamPanel }   from '../../core/ParamPanel.js';
 import { VaultPanel }   from '../../core/VaultPanel.js';
 import { Bar }          from '../../core/Bar.js';
 import { Vault }        from '../../core/vault.js';
-import { requested }    from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { appModule }    from '../../core/mount.js';
 
 const KEYS = '1 2 view · ← → set · ↑ ↓ glyph · space play · , . frame · S save · V vault';
@@ -61,7 +61,7 @@ const MARKUP = `
     <div class="app-side" id="motion-side"></div>
   </main>`;
 
-const app = appModule('ckt', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('ckt', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** ckt in `host`, started — one of its objects opened if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -73,12 +73,12 @@ const mounted = () => !!app.scope;
 let visit = null;
 
 // One app mounted at a time: its state, made again by each mount (`start`).
-let root, canvas, dots, motion, bar, view, busy, resume;
+let root, canvas, dots, motion, bar, view, busy, resume, stages;
 
 async function start(at, mine) {
   root = at;
   canvas = root.querySelector('#stage');
-  dots = motion = bar = null;
+  dots = motion = bar = stages = null;
   view = 'motion';
   busy = false;            // a save or a cut is running; nothing else may start
   resume = false;          // the loop was playing when the viewer left it
@@ -98,6 +98,7 @@ async function boot(mine) {
   if (mine.closed) return;
   const dotsP = dotsParams(fonts);
   const motionP = motionParams(datasets, fams);
+  stages = { dotsP, motionP };
 
   const dotsPanel = new ParamPanel(dotsP, {
     title: 'dots', mount: root.querySelector('#dots-side'), groups: DOTS,
@@ -142,6 +143,19 @@ async function openRequested(dotsP, motionP) {
   }
   const o = opened.object;
 
+  // Back as it was left (core/mount.js): both stages' values, the one on screen, its frame.
+  if (opened.kept) {
+    dotsP.restore(o.recipe.dots);
+    motionP.restore(o.recipe.motion);
+    await Promise.all([dots.init(), motion.init()]);
+    if (!mounted()) return true;
+    show(o.view === 'dots' ? 'dots' : 'motion');
+    motion.clock.show(Math.min(o.tick || 0, motion.clock.length - 1));
+    if (o.playing && o.view !== 'dots') motion.clock.play();
+    bar.announce(openedLine(opened));
+    return true;
+  }
+
   if (o.type === 'dataset') {
     const data = await (await fetch(opened.url)).json();
     if (o.recipe) { dotsP.restore(o.recipe); await dots.init(); }
@@ -154,8 +168,15 @@ async function openRequested(dotsP, motionP) {
     if (o.type === 'sequence') motion.clock.play();
     else motion.clock.show(o.recipe.tick || 0);
   }
-  bar.announce(`opened ${o.id} — ${o.title}`);
+  bar.announce(openedLine(opened));
   return true;
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): both stages' values, the one on screen, the frame. */
+function keep() {
+  if (!stages || !motion) return null;
+  return { type: 'ckt', recipe: { dots: stages.dotsP.values, motion: stages.motionP.values }, view,
+           tick: motion.clock.tick, playing: motion.clock.playing };
 }
 
 /** Which stage the viewer shows. The other rests; both panels stay. */

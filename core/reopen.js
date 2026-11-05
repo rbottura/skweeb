@@ -11,9 +11,15 @@
  * No export or no file, and there is no link. Core learns nothing about apps —
  * except that a recording of marks is its own, as rebuild.js already knows,
  * and no app has asked to reopen one.
+ *
+ * An app mounted again in a page — a scene's, cluster's — whose address asks
+ * it nothing is opened on what it was doing when it was taken out
+ * (core/mount.js, S9c): its recipe, as a saved one's, and the smart object it
+ * was bound to, bound again — back as it was left.
  */
 
 import { Vault } from './vault.js';
+import { leftBehind } from './mount.js';
 
 /** A recipe that is a recording of marks: core replays these, and no app reopens them. */
 export const isMarks = recipe => !!recipe
@@ -87,14 +93,16 @@ export async function rigUrl(object) {
 /**
  * The object this page was asked to open, loaded — or null when it was not
  * asked. Throws, with a message fit for the bar, when the id is unknown or
- * belongs to another app.
+ * belongs to another app. Asked nothing at all, an app mounted before in this
+ * page gets what it was doing then, `kept` (core/mount.js): the address it is
+ * given — a link to it, `?drawing=`, `?place=` — goes first.
  *
  * @param {string} app   the app asking, which must be the one that made it
- * @returns {Promise<?{object:object, url:string, thumbUrl:?string}>}
+ * @returns {Promise<?{object:object, url:?string, thumbUrl:?string, kept?:boolean}>}
  */
 export async function requested(app) {
   const asked = new URLSearchParams(location.search).get('open');
-  if (!asked) return null;
+  if (!asked) return location.search ? null : leftOf(app);
   const [id, at] = asked.split('@v');            // `skw_…@v3`: a state of it, to go on from — a branch
   let loaded = await Vault.load(id);
   // A smart object: the object it binds to work on, this window bound to it — its saves are its states.
@@ -113,3 +121,21 @@ export async function requested(app) {
   if (made !== app) throw new Error(`${id} was made by ${made || 'nothing known'}, not ${app}`);
   return loaded;
 }
+
+/**
+ * What `app` was doing when it was last taken out, as an object opened — its
+ * state where a saved object's recipe would be, the smart object it was bound
+ * to bound again — or null when it left nothing.
+ */
+function leftOf(app) {
+  const left = leftBehind(app);
+  if (!left) return null;
+  if (left.bound) Vault.bind(left.bound);
+  const id = left.bound ? left.bound.id : null;
+  return { object: { ...JSON.parse(JSON.stringify(left.state)), id, title: 'as it was left', origin: { app } },
+           url: null, thumbUrl: null, kept: true };
+}
+
+/** What an app says it opened: the object asked for, or itself back as it was left. */
+export const openedLine = opened => (opened.kept ? 'back as it was left'
+  : `opened ${opened.object.id} — ${opened.object.title}`);

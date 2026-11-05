@@ -90,6 +90,70 @@ c.ok('…each app mounted again holds what it held the first time round', APPS.s
 const after = await framesAsked();
 c.ok('…and nothing asks for frames the vault alone did not', after <= still, `${still} alone, ${after} after`);
 
+// ── Back as it was left: a value changed in each app, kept across a switch ─
+/**
+ * The first number of the app's own panel that is not its size, moved one step: its key and the value it
+ * took. Its own: compose's page, the rig's — a placement's values or a bone's are the one chosen's, and
+ * nothing is chosen.
+ */
+const OWN_PANEL = { compose: '#page-side', rig: '#side' };
+const moveANumber = name => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => {
+  for (const row of document.querySelectorAll('.cl-host ${OWN_PANEL[name] || ''} .pp-row--num')) {
+    const o = rowParams(row);
+    if (!o || ['width', 'height', 'scale'].includes(o.key) || typeof o.params.get(o.key) !== 'number') continue;
+    const spec = o.params.spec(o.key), v = o.params.get(o.key), step = spec.step || 1;
+    o.params.set(o.key, spec.max != null && v + step > spec.max ? v - step : v + step);
+    return { key: o.key, value: o.params.get(o.key), was: v };
+  }
+  return null;
+})`);
+const numberNow = key => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => {
+  const row = [...document.querySelectorAll('.cl-host .pp-row--num')].find(r => rowParams(r)?.key === '${key}');
+  return row ? rowParams(row).params.get('${key}') : null;
+})`);
+const lost = [];
+for (const [name] of APPS.slice(1)) {
+  await open(name);
+  const moved = await moveANumber(name);
+  if (!moved) { lost.push(`${name}: no number to move`); continue; }
+  await wait(400);
+  await open('vault');
+  await open(name);
+  const back = await numberNow(moved.key);
+  if (back !== moved.value) lost.push(`${name}: ${moved.key} ${moved.was} → ${moved.value}, back as ${back}`);
+}
+c.ok('every app mounted again comes back as it was left: a value moved in it still where it was put', !lost.length, lost.join('; ').slice(0, 400));
+
+// A smart object made by S stays the one S saves into: its next state, across a switch.
+await open('particles');
+// The check's own ear on the saves, taken off after: what the page holds is counted again below.
+await page.eval(`window.__saved = 0; window.__onSaved = () => window.__saved++; document.addEventListener('vault:saved', window.__onSaved)`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 's', bubbles: true }))`);
+await page.until(`window.__saved > 0`, { timeout: 30000 });
+await wait(1500);
+const bound = () => page.eval(`import('/core/vault.js').then(({ Vault }) => Vault.bound && { id: Vault.bound.id, version: Vault.bound.version })`);
+const first = await bound();
+await open('grid');
+await open('particles');
+c.ok('…particles back, bound to the smart object its S made', !!first && !!first.id && JSON.stringify(await bound()) === JSON.stringify(first),
+  `${JSON.stringify(first)} → ${JSON.stringify(await bound())}`);
+c.ok('…and saying so', /back as it was left/.test(await page.eval(`document.querySelector('.bar-say')?.textContent || ''`)));
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 's', bubbles: true }))`);
+await page.until(`import('/core/vault.js').then(({ Vault }) => !!Vault.bound && Vault.bound.version === ${first ? first.version + 1 : -1})`, { timeout: 30000 });
+c.ok('…its next S the next state of the same object', true, `${first.id} v${first.version} → v${first.version + 1}`);
+await page.eval(`document.removeEventListener('vault:saved', window.__onSaved)`);
+
+// The vault app keeps the object it draws.
+await open('vault');
+await page.eval(`[...document.querySelectorAll('.vp-card')].find(k => k.querySelector('.vp-type')?.textContent === 'still').click()`);
+await page.until(`/ · still/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 20000 });
+const drawn = await page.eval(`document.querySelector('.bar-say').textContent`);
+await open('fractals');
+await click('vault');
+await booted('vault');
+await page.until(`/ · still/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 20000 });
+c.ok('the vault app back: the still it drew, drawn again', (await page.eval(`document.querySelector('.bar-say').textContent`)) === drawn, drawn);
+
 // ── A switch asked while an app boots: the last asked is the one mounted ───
 await click('particles');
 await page.until(`!!document.querySelector('.cl-host > .app') && document.querySelector('skw-titlebar')?.getAttribute('app') === 'particles'`);

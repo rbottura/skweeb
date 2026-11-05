@@ -34,11 +34,11 @@ import { endOf, showsAt } from './time.js';
 import { Editing }        from './editing.js';
 import { PlacedList }     from './list.js';
 import { wirePointer }    from './pointer.js';
-import { saveComposition, APP } from './save.js';
+import { APP }          from './save.js';
+import { ways }         from './leaving.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
 import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }    from '../../core/StackPanel.js';
-import { exportPng, exportFrames } from './export.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Transport }      from '../../core/Transport.js';
@@ -46,7 +46,7 @@ import { Bar }            from '../../core/Bar.js';
 import { Playhead }       from '../../core/playback.js';
 import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
-import { requested }      from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { appModule }      from '../../core/mount.js';
 
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
@@ -66,7 +66,7 @@ const MARKUP = `
     <div class="app-side" id="page-side"></div>
   </main>`;
 
-const app = appModule('compose', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('compose', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** compose in `host`, started — a page opened, or an object placed, if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -75,7 +75,7 @@ export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;
 
 // One app mounted at a time: its state, made again by each mount (`start`).
-let root, canvas, ctx, clock, buttons, clockFps, shownView, busy, pending;
+let root, canvas, ctx, clock, buttons, clockFps, shownView, leaving, pending;
 let page, place, bar, rate, player, transport, list, listDrawer, adder, framer, placements, editing;
 
 async function start(at, mine) {
@@ -85,7 +85,7 @@ async function start(at, mine) {
   buttons = {};            // the Export drawer's: save, png, frames
   clockFps = 0;
   shownView = 1;           // canvas pixels per page pixel, as last painted
-  busy = false;            // a save or an export is drawing the page again; the player waits
+  leaving = null;          // the ways out (leaving.js): a save or an export drawing the page again, the player waiting
   pending = false;         // a paint asked for, not yet made
   page = place = bar = rate = player = transport = list = listDrawer = adder = framer = placements = editing = null;
   /*
@@ -143,9 +143,11 @@ async function boot(mine) {
   player = pagePanel.drawer('player');
   const holder = document.createElement('div');
   player.body.prepend(holder);
-  transport = new Transport({ clock, mount: holder, busy: () => busy });
+  transport = new Transport({ clock, mount: holder, busy: () => !!leaving && leaving.busy() });
 
-  const box = exportBox(pagePanel, { before: 'ground', vault: { save }, disk: { picture: png, frames } });
+  leaving = ways({ bar, clock, page: () => page, placements: () => placements, buttons: () => Object.values(buttons), after: refreshVault });
+  const { save, leave } = leaving;
+  const box = exportBox(pagePanel, { before: 'ground', vault: { save }, disk: { picture: leaving.png, frames: leaving.frames } });
   const exp = box.drawer;
   buttons.save = box.buttons.save;
   buttons.png = box.buttons.picture;
@@ -200,11 +202,18 @@ async function openRequested() {
     const { recipe } = opened.object;
     page.restore(recipe.page);
     for (const block of recipe.place || []) placements.add(block);
-    editing.choose(placements.items[placements.length - 1] || null);
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+    const chosen = opened.kept ? opened.object.chosen : placements.length - 1;
+    editing.choose(placements.items[chosen] || null);
+    bar.announce(openedLine(opened));
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): the page, what is on it, the one chosen. */
+function keep() {
+  return page && placements ? { type: 'composition', recipe: { page: page.values, place: placements.blocks() },
+    chosen: placements.items.indexOf(editing.chosen) } : null;
 }
 
 // ── The page's state ─────────────────────────────────────────────────────────
@@ -262,67 +271,6 @@ function configureClock() {
   if (buttons.frames) buttons.frames.hidden = !placements.moving;       // a still page is its PNG
 }
 
-// ── Leaving compose: a save, a PNG, the frames ───────────────────────────────
-
-/**
- * One way out, for all three: the page and every placement as a snapshot —
- * a drag meanwhile cannot change what leaves — drawn again from exact frames
- * at the page's scale (render.js), with the player held still. A page with
- * an object that would not open, or one still opening, does not leave.
- */
-async function leave(doing, action) {
-  if (busy) return;
-  if (!placements.length) return bar.announce(`nothing to ${doing} — place something first`);
-  const lost = placements.items.find(p => p.error);
-  if (lost) return bar.announce(`${lost.title} could not be opened — take it off the page to ${doing}`);
-  if (placements.items.some(p => !p.handle)) return bar.announce(`still opening — ${doing} once everything is in`);
-
-  busy = true;
-  for (const b of Object.values(buttons)) b.disabled = true;
-  clock.pause();
-  try {
-    const recipe = JSON.parse(JSON.stringify({ page: page.values, place: placements.blocks() }));
-    bar.announce(await action(recipe));
-  } catch (err) {
-    console.error(`[compose] ${doing} failed:`, err);
-    bar.announce(`${doing} failed: ${err.message}`);
-  } finally {
-    busy = false;
-    for (const b of Object.values(buttons)) b.disabled = false;
-    refreshVault();
-  }
-}
-
-/** What prints from its own pixels, stretched, since no app can draw it again. */
-const stretchedNote = titles => (titles.length ? ` · stretched from their pixels: ${titles.join(', ')}` : '');
-
-/** The composition, into the vault (save.js), its render the tick on screen. */
-function save() {
-  return leave('save', async recipe => {
-    bar.say('saving — every object drawn again, at its size…');
-    const object = await saveComposition(recipe, { tick: clock.tick });
-    return object ? `saved ${object.id} — ${object.title}` : 'no vault — the page is downloaded instead';
-  });
-}
-
-/** The page at the tick on screen, at its scale, as a PNG (export.js). */
-function png() {
-  return leave('export', async recipe => {
-    bar.say('drawing the page at its scale…');
-    const out = await exportPng(recipe, { tick: clock.tick });
-    return `downloaded ${out.width} × ${out.height} px` + stretchedNote(out.stretched);
-  });
-}
-
-/** Every frame of a page that moves, zipped with its rate (export.js). */
-function frames() {
-  return leave('export', async recipe => {
-    const out = await exportFrames(recipe, { onStatus: t => bar.say(t) });
-    return `downloaded ${out.frames} frames at ${out.fps} fps, ${out.width} × ${out.height} px — `
-      + 'node scripts/frames-to-video.mjs makes the video' + stretchedNote(out.stretched);
-  });
-}
-
 // ── Drawing ──────────────────────────────────────────────────────────────────
 
 function draw() {
@@ -375,8 +323,8 @@ function wireKeys(mine) {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (e.key === 's' || e.key === 'S') save();
-    if (busy) return;
+    if (e.key === 's' || e.key === 'S') leaving.save();
+    if (leaving.busy()) return;
     const chosen = editing.chosen;
     if (e.key === 'Delete' && chosen) editing.takeOff(chosen);
     if (e.key === ']' && chosen) placements.move(chosen, +1);

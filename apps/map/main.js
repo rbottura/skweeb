@@ -35,7 +35,7 @@ import { saveMap, downloadPicture, recipeOf, APP } from './save.js';
 import { PrintPanel } from '../../core/PrintPanel.js';
 import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer } from '../../core/StackPanel.js';
-import { requested }    from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { loadSprites }  from '../../core/sprites.js';
 import { ParamPanel }   from '../../core/ParamPanel.js';
 import { VaultPanel }   from '../../core/VaultPanel.js';
@@ -66,7 +66,7 @@ const MARKUP = `
     <div class="app-side" id="things-side"></div>
   </main>`;
 
-const app = appModule('map', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('map', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** The map editor in `host`, started — a saved map opened if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -79,7 +79,7 @@ let root, canvas, ctx, guidesBtn, toolBtns, clock, pending;
 let map, bar, palette, editing;
 let guidesOn, tool, cells, walls, shape, tiles, tilesTitle, asked, clockFps, busy, savedId, playBtn;
 
-function start(at, mine) {
+async function start(at, mine) {
   root = at;
   canvas = root.querySelector('#stage');
   ctx = canvas.getContext('2d');
@@ -104,14 +104,14 @@ function start(at, mine) {
   clock = new Playhead({ onShow: () => draw() });
   mine.hold(() => clock.dispose());
   try {
-    boot(mine);
+    await boot(mine);
   } catch (err) {
     if (bar) bar.announce('failed to boot: ' + err.message);
     throw err;
   }
 }
 
-function boot(mine) {
+async function boot(mine) {
   bar = new Bar({ app: 'map', mount: root,
                   keys: '1 tiles · 2 things · 3 walls · A tool · Z guides · space play · Del remove · S save · V vault' });
   map = mapParams();
@@ -158,7 +158,7 @@ function boot(mine) {
   setOverlay({ label: 'guides', on: () => guidesOn, toggle: () => showGuides(!guidesOn) });
   wireKeys(mine);
   draw();
-  openRequested();
+  await openRequested();
 }
 
 /** `?open=<id>`: a saved map back to work on (core/reopen.js) — its values, its cells, its things. */
@@ -173,11 +173,17 @@ async function openRequested() {
     walls = resize(recipe.walls || [], shape, shape, 0);
     await editing.things.load(recipe.place || []);
     editing.choose(null);
-    playable(opened.object.id);
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+    playable(opened.kept ? opened.object.saved : opened.object.id);
+    bar.announce(openedLine(opened));
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): its values, cells, walls and things; the save Play opens. */
+function keep() {
+  return map && editing ? { type: 'map', recipe: { map: map.values, cells, walls, place: editing.things.blocks() },
+    saved: savedId } : null;
 }
 
 /** The cells and the walls laid out again for the map's grid: each where it was, what is new empty. */

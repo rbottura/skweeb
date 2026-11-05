@@ -18,9 +18,13 @@ sorts them.
   at a time, through their modules — a strip names them, a click mounts one
   in place of the last, nothing of it left; the vault first; the app in the
   address, `#particles`, Back to the one before, `?open=<id>` the app's to
-  read; the search finds the apps by name — `check-cluster`. An app comes
-  back as it starts, and each keeps its own canvas and layout: the bricks
-  after (`apps/cluster/STATUS.md`).
+  read; the search finds the apps by name — `check-cluster`. Each keeps its
+  own canvas and layout: the bricks after (`apps/cluster/STATUS.md`).
+- **An app back as it was left**: mounted again, asked nothing, every app
+  opens on what it was doing when it was taken out — its recipe, its frame,
+  the smart object S saves into — as on an object asked for
+  (`core/mount.js` `keep`, `core/reopen.js`). particles' and compose's
+  ways out moved to a `leaving.js` each, as the rig's.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -328,14 +332,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9c's next brick: an app back as it was left** — branch `scene/kept`
-from `main`. At a switch the scene keeps what the app going was doing — its
-params' values, the object it is bound to (`Vault.bind`), its steps — and
-gives it back when that app is mounted again, as a tab would have kept it;
-`check-cluster` changes a value in particles, mounts grid, mounts particles
-again: the value still there, and S saving the next state of the same
-object. Then the links taken in place, one canvas, the panels
-(`docs/scene.md`, *cluster, brick by brick*).
+**S9c's next brick: the links taken in place** — branch `scene/links` from
+`main`. In cluster, *Open in … ↗*, *Place in compose ↗*, *Rig this ↗* (the
+vault's detail, `core/vault-detail.js`) and the graph's open-in
+(`core/shell/graph.js`) mount that app in the scene with its query —
+`?open=<id>#particles` — where alone they open a tab: a seam in core a
+scene takes, the tab when none does; `check-cluster` opens a still's detail
+in the vault app, takes *Open in …*, and finds its app mounted on it. Then
+one canvas and the last frame held, then the panels (`docs/scene.md`).
 
 ## Parked decisions
 

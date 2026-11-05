@@ -39,7 +39,7 @@ import { Transport }      from '../../core/Transport.js';
 import { Playhead }       from '../../core/playback.js';
 import { Bar }            from '../../core/Bar.js';
 import { Vault }          from '../../core/vault.js';
-import { requested }      from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { viewFactor }     from '../../core/view.js';
 import { toPng, download } from '../../core/export.js';
@@ -60,7 +60,7 @@ const MARKUP = `
     <div class="app-side" id="side"></div>
   </main>`;
 
-const app = appModule('fractals', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('fractals', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** fractals in `host`, started — a saved still or idle opened if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -159,11 +159,18 @@ async function openRequested() {
     params.restore(opened.object.recipe);
     await spriteIn;
     fitClock();
-    if (clock.length > 1) clock.play();
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+    const { kept } = opened, at = opened.object;
+    if (kept) clock.show(Math.min(at.tick || 0, clock.length - 1));
+    if (clock.length > 1 && (!kept || at.playing)) clock.play();
+    bar.announce(openedLine(opened));
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): its values, the frame on screen, whether it plays. */
+function keep() {
+  return params ? { type: 'still', recipe: params.values, tick: clock.tick, playing: clock.playing } : null;
 }
 
 /** The clock fitted to the loop the values make: its frames at its rate, or a still's one. */
