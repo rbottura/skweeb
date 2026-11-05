@@ -46,7 +46,7 @@ import { Bar }            from '../../core/Bar.js';
 import { Playhead }       from '../../core/playback.js';
 import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
-import { requested }      from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { appModule }      from '../../core/mount.js';
 
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
@@ -66,7 +66,7 @@ const MARKUP = `
     <div class="app-side" id="page-side"></div>
   </main>`;
 
-const app = appModule('compose', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('compose', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** compose in `host`, started — a page opened, or an object placed, if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -202,11 +202,18 @@ async function openRequested() {
     const { recipe } = opened.object;
     page.restore(recipe.page);
     for (const block of recipe.place || []) placements.add(block);
-    editing.choose(placements.items[placements.length - 1] || null);
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+    const chosen = opened.kept ? opened.object.chosen : placements.length - 1;
+    editing.choose(placements.items[chosen] || null);
+    bar.announce(openedLine(opened));
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): the page, what is on it, the one chosen. */
+function keep() {
+  return page && placements ? { type: 'composition', recipe: { page: page.values, place: placements.blocks() },
+    chosen: placements.items.indexOf(editing.chosen) } : null;
 }
 
 // ── The page's state ─────────────────────────────────────────────────────────

@@ -37,7 +37,7 @@ import { Bar }                     from '../../core/Bar.js';
 import { Playhead }                from '../../core/playback.js';
 import { Vault }                   from '../../core/vault.js';
 import { resolveFrame, applyFrameEdit } from '../../core/frame.js';
-import { requested }               from '../../core/reopen.js';
+import { requested, openedLine }   from '../../core/reopen.js';
 import { appModule }               from '../../core/mount.js';
 
 /**
@@ -55,7 +55,7 @@ const MARKUP = `
     <div class="app-side" id="side"></div>
   </main>`;
 
-const app = appModule('grid', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('grid', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** grid in `host`, started — one of its objects opened if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -140,10 +140,15 @@ async function openRequested() {
       return await maker.open(opened.object.id);
     }
     params.restore(opened.object.recipe);
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+    bar.announce(openedLine(opened));
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): its values, the source with them. */
+function keep() {
+  return params ? { type: 'still', recipe: params.values } : null;
 }
 
 /**

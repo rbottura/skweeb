@@ -13,6 +13,9 @@ done** (2026-09-24).
   `listen`, and is disposed with the app — every placement's frames let go
   of, a load still running dropped. `?place=` is read by every mount, so a
   scene mounting compose on the vault's link places it — `check-mount`.
+  Mounted again, asked nothing, it comes back as it was left: the page,
+  what is on it, the one chosen (`keep`, S9c, 2026-11-05). Its ways out —
+  the save, the PNG, the frames, the print's — are `leaving.js`.
 - **A project placed at its state** (S6b, 2026-11-03): a smart object picked
   from the vault is pinned at the version it has — `at its state · 0
   follows` in its placement's Object drawer — drawn as that state, its title
@@ -230,7 +233,7 @@ waiting:
   turned sprite takes it, not what shows through beneath.
 - The picker lists shapes inside their `folder:` groups, closed, so a legacy
   sprite is two clicks away.
-- `main.js` is at 365 lines, the placement editing moved to `editing.js`;
+- `main.js` is at 348 lines, the placement editing in `editing.js`, the ways out in `leaving.js`;
   `scripts/check-compose.mjs` is at 345, and print scale has a check of its
   own.
 

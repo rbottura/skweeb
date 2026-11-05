@@ -43,7 +43,7 @@ import { openDrawing, framesOf, openPathFrom, centreOf } from './frames.js';
 import { ways }         from './leaving.js';
 import { PrintPanel }   from '../../core/PrintPanel.js';
 import { stackDrawer }  from '../../core/StackPanel.js';
-import { requested }    from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { ParamPanel }   from '../../core/ParamPanel.js';
 import { VaultPanel }   from '../../core/VaultPanel.js';
 import { Playhead }     from '../../core/playback.js';
@@ -73,7 +73,7 @@ const MARKUP = `
     <div class="app-side" id="side"></div>
   </main>`;
 
-const app = appModule('rig', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('rig', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep: () => kept() });
 
 /** The rig in `host`, started — a drawing or a saved rig opened if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -84,9 +84,9 @@ const mounted = () => !!app.scope;
 // One app mounted at a time: its state, made again by each mount (`start`).
 let root, canvas, ctx, bonesBtn, playBtn, clock, pending;
 let params, bar, chosenPanel;
-let opened, reopened, drawn, drawing, bones, frames, turns, waves, at, hot, chosen, showBones, asked, view, stage, clockFps, save;
+let opened, reopened, drawn, drawing, bones, frames, turns, waves, at, hot, chosen, showBones, asked, view, stage, clockFps, save, kept;
 
-function start(host, mine) {
+async function start(host, mine) {
   root = host;
   canvas = root.querySelector('#stage');
   ctx = canvas.getContext('2d');
@@ -104,14 +104,15 @@ function start(host, mine) {
   view = 1; stage = { x: 0, y: 0, width: 1, height: 1 };
   clockFps = 0;              // the rate the clock was fitted to
   save = () => {};           // into the vault (leaving.js), once booted
+  kept = () => null;         // what it is doing, for a scene to give back (leaving.js, core/mount.js)
   pending = false;           // a paint asked for, not yet made
   // The loop's clock: what moves, moves by it. Stopped at the unmount.
   clock = new Playhead({ onShow: () => repose(), onState: () => playBtn.setAttribute('aria-pressed', String(clock.playing)) });
   mine.hold(() => clock.dispose());
-  try { boot(mine); } catch (err) { if (bar) bar.announce('failed to boot: ' + err.message); throw err; }
+  try { await boot(mine); } catch (err) { if (bar) bar.announce('failed to boot: ' + err.message); throw err; }
 }
 
-function boot(mine) {
+async function boot(mine) {
   bar = new Bar({ app: 'rig', mount: root,
                   keys: 'drag a joint · B bones · R rest · space play · S save · V vault' });
   own('KeyR');                        // R is the rig's rest, not core's seed (core/keys.js)
@@ -120,6 +121,7 @@ function boot(mine) {
   const out = ways({ bar, clock, args: () => (drawing ? { params, opened, bones, turns, waves, drawn,
                                                           title: opened.object.title || params.get('drawing'), tick: clock.tick } : null) });
   save = out.save;
+  kept = () => out.keep() || { type: 'still', recipe: { rig: params.values, bones: [], turns: [], waves: [] } };   // no drawing: its values
   const exp = buildDrawers(panel, { rest: toRest, preset: applyPreset, still: toStill, save, download: out.download });
   new PrintPanel({ mount: exp.body, app: 'rig', object: () => out.envelope(), leave: out.leave, say: text => bar.say(text), tick: () => clock.tick });
   stackDrawer(panel, { app: 'rig', layer: () => out.envelope(), clock, save: out.save });     // a window of the stack (core/live.js)
@@ -141,12 +143,10 @@ function boot(mine) {
   const sized = new ResizeObserver(() => draw());
   sized.observe(canvas.parentElement); mine.hold(() => sized.disconnect());
   wireKeys(mine);
-  openRequested().then(was => {
-    if (was || mine.closed) return;
-    const wanted = new URLSearchParams(location.search).get('drawing');
-    if (wanted) params.set('drawing', wanted);
-    else load();
-  });
+  if (await openRequested() || mine.closed) return;
+  const wanted = new URLSearchParams(location.search).get('drawing');
+  if (wanted) params.set('drawing', wanted);
+  else load();
 }
 
 /** `?open=<id>`: a pose or a loop back to work on (core/reopen.js) — its values, bones, turns and waves. */
@@ -158,7 +158,7 @@ async function openRequested() {
     reopened = { bones: r.bones, turns: r.turns, waves: r.waves || [] };
     params.restore(r.rig);
     await load();
-    bar.announce(`opened ${was.object.id} — ${was.object.title}`);
+    bar.announce(openedLine(was));
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }

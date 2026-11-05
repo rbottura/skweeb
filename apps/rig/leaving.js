@@ -13,7 +13,8 @@ import { Vault } from '../../core/vault.js';
  * @param {object} opts.bar              core's Bar
  * @param {object} opts.clock            the loop's Playhead
  * @param {() => ?object} opts.args      save.js's arguments as things are now, or null with no drawing
- * @returns {{save: () => Promise, download: () => Promise, envelope: () => ?object, leave: (action) => Promise}}
+ * @returns {{save: () => Promise, download: () => Promise, envelope: () => ?object, keep: () => ?object,
+ *            leave: (action) => Promise}}
  */
 export function ways({ bar, clock, args }) {
   let busy = false;
@@ -57,6 +58,14 @@ export function ways({ bar, clock, args }) {
       if (!now) return null;
       const recipe = recipeOf(now);
       return { type: 'still', origin: APP, recipe, render: { w: recipe.box.w, h: recipe.box.h } };
+    },
+    /**
+     * What the rig is doing, for a scene to give back (core/mount.js): its values, bones, turns and
+     * waves, as a reopen takes them — nothing drawn, so no box; none with no drawing.
+     */
+    keep() {
+      const now = args();
+      return now ? { type: 'still', recipe: { rig: now.params.values, bones: now.bones, turns: now.turns, waves: now.waves } } : null;
     },
     /** The one way out, for a print. */
     leave: action => leave(() => action()),

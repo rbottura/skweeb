@@ -32,6 +32,10 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   and pies no more core's, its params' steps forgotten, a bye to the other
   windows, every listener it put on the document and the window off.
   `index.html` mounts it on itself; the markup it had is the module's.
+  Mounted again in a page — cluster's — it comes back as it was left: both
+  panels, the frame, playing or not (`keep`, S9c, 2026-11-05). Its ways out
+  — the save, the sheet, the frames, the print's — are `leaving.js`, as
+  the rig's.
   The first of the suite, as the bench's was — `check-mount`.
 - **The viewer's magnet and F** (S8, 2026-11-03; `pointer.js`, core's
   `shell/guides.js`): a handle dragged is pulled to the picture's edges, its

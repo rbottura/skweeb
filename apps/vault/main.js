@@ -20,7 +20,7 @@ import { Playhead }   from '../../core/playback.js';
 import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
 import { viewFactor } from '../../core/view.js';
-import { appModule }  from '../../core/mount.js';
+import { appModule, leftBehind } from '../../core/mount.js';
 
 /** The vault on the left, as wide as it needs; the object chosen in the viewer, its player under it. */
 const MARKUP = `
@@ -32,7 +32,8 @@ const MARKUP = `
     </section>
   </main>`;
 
-const app = appModule('vault', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('vault', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start,
+  keep: () => (shown ? { id: shown.id } : null) });      // the object drawn, given back as it was left
 
 /** The vault in `host`, every object in it — one drawn if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -80,7 +81,9 @@ function start(host, mine) {
     if (!mounted()) return;
     bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault');
     bar.say(ok ? 'an object chosen opens its detail, and is drawn here' : 'no vault here — start  node server.js');
-    const id = new URLSearchParams(location.search).get('open');
+    // The object the address asks for — or, asked nothing, the one drawn when the vault was last taken out (core/mount.js).
+    const left = !location.search && leftBehind('vault');
+    const id = new URLSearchParams(location.search).get('open') || (left ? left.state.id : null);
     if (ok && id) Vault.load(id).then(got => show(got.object, got.url), err => bar.announce(`could not open ${id}: ${err.message}`));
   });
   draw();

@@ -23,7 +23,7 @@ import { save as saveObject, saveLook, APP } from './save.js';
 import { PrintPanel }           from '../../core/PrintPanel.js';
 import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }          from '../../core/StackPanel.js';
-import { requested }            from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { ParamPanel }           from '../../core/ParamPanel.js';
 import { VaultPanel }           from '../../core/VaultPanel.js';
 import { Transport }            from '../../core/Transport.js';
@@ -43,7 +43,7 @@ const MARKUP = `
     <div class="app-side" id="side"></div>
   </main>`;
 
-const app = appModule('filter', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('filter', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** filter in `host`, started — a saved chain opened, or a window followed, if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -116,10 +116,15 @@ async function openRequested() {
     }
     // Saved before `edges` existed, it kept its size.
     params.restore({ edges: 'keep', ...recipe });
-    bar.announce(`opened ${object.id} — ${object.title}${lost}`);
+    bar.announce(openedLine(opened) + lost);
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): its values, its source among them, and its chain. */
+function keep() {
+  return params && chain ? { type: 'still', recipe: { ...params.values, chain: chain.recipe() } } : null;
 }
 
 /** The drawers that are not parameters: a file under Source, the chain, the player. */

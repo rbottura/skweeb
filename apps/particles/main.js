@@ -31,7 +31,7 @@ import { ways } from './leaving.js';
 import { PrintPanel }     from '../../core/PrintPanel.js';
 import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }    from '../../core/StackPanel.js';
-import { requested }      from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Transport }      from '../../core/Transport.js';
@@ -64,7 +64,7 @@ const MARKUP = `
     <div class="app-side" id="picture-side"></div>
   </main>`;
 
-const app = appModule('particles', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('particles', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** particles in `host`, started — a saved one opened if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -170,12 +170,19 @@ async function openRequested() {
     await spritesIn;
     await Promise.all([...coming]);
     clock.show(Math.min(Number.isInteger(recipe.tick) ? recipe.tick : 0, clock.length - 1));
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`);
+    if (opened.kept && opened.object.playing) clock.play();
+    bar.announce(openedLine(opened));
     return true;
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
     return false;
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): both panels, the frame on screen, whether it plays. */
+function keep() {
+  if (!emit || !picture || !clock) return null;
+  return { type: 'sequence', recipe: { emit: emit.values, picture: picture.values, tick: clock.tick }, playing: clock.playing };
 }
 
 /**

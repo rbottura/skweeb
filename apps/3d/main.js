@@ -46,7 +46,7 @@ import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { Bar }            from '../../core/Bar.js';
 import { Vault }          from '../../core/vault.js';
-import { requested }      from '../../core/reopen.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { viewFactor }     from '../../core/view.js';
 import { whyNoGpu }       from '../../core/gpu/device.js';
@@ -80,7 +80,7 @@ const MARKUP = `
     <div class="app-side" id="side"></div>
   </main>`;
 
-const app = appModule('3d', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start });
+const app = appModule('3d', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** The 3D app in `host`, started — a saved model opened if the page asks for it (core/mount.js). */
 export const mount = host => app.mount(host);
@@ -153,11 +153,15 @@ async function openRequested() {
     const recipe = opened.object.recipe || {};
     params.restore(recipe);
     const unknown = cards.restore(recipe.shapes);
-    bar.announce(`opened ${opened.object.id} — ${opened.object.title}`
-      + (unknown.length ? ` · not known here: ${unknown.join(', ')}` : ''));
+    bar.announce(openedLine(opened) + (unknown.length ? ` · not known here: ${unknown.join(', ')}` : ''));
   } catch (err) {
     bar.announce('could not open it: ' + err.message);
   }
+}
+
+/** What it is doing, for a scene to give back (core/mount.js): its values and its shapes, card for card. */
+function keep() {
+  return params && cards ? { type: 'model', recipe: { ...params.values, shapes: cards.recipe() } } : null;
 }
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
