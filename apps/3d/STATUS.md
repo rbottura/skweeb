@@ -45,6 +45,16 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   further right — in the next of eight colours. The cards are core's
   (`core/Cards.js`), the list filter's chain is too: shown or hidden, taken
   out.
+- **BEC's grid** (M13a, 2026-11-05; `grid.js`, `docs/bec.md`): BEC_2025's
+  3D grid, the catalogue's eighth — its cells X × Y × Z at a cell's size,
+  the edges drawn among the lattice's, past the joints, at a thickness, the
+  cells' faces filled, in one of BEC's three palettes. Every draw a seed of
+  the recipe, where BEC's were `random()`: `seed` which edges — R, as BEC's
+  `e`, its colours dealt anew with them — `hues` the colours alone — C, as
+  its `c` — `fill` which faces; the app's pie, A, has them with four, six
+  or eight faces filled, BEC's `q` `s` `d`. One geometry, its colours at its
+  vertices, so it has no colour row (`look.js` `dress`); modifiers, style
+  and print as every shape — `tests/3d-shapes.mjs`, `check-3d`.
 - **A stack of modifiers** (2026-10-06, brick 3; `modifiers.js` the
   catalogue, `deform.js`, `repeat.js`, `tests/3d-modifiers.mjs` 41). A
   shape's card holds, after its form, a list of modifier cards — core's

@@ -29,25 +29,21 @@ sorts them.
 - **The vault app's viewer** (S9h): an object at its ink's size, never
   stretched; its player's controls; seen closer — wheel, drag, double click
   (`core/zoom.js`); every viewer's picture fitted with an even margin.
+- **BEC's grid in the 3D app** (M13a, `apps/3d/grid.js`, `docs/bec.md`):
+  BEC_2025's cells, edges and faces in its three palettes, a shape of the
+  catalogue, every draw a seed — R new edges, C new colours, A's pie the
+  faces.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
-- **The vault, an app** (`apps/vault/`): every object full screen — core's
-  vault panel docked in the page — the one whose detail opens drawn large
-  beside it and played if it moves, the detail its facts only (the author's
-  C, 2026-11-05); it makes nothing, so its title bar has no Save and no
-  Export — `check-vault`, `check-mount`.
-- **Every app on core's kit is `mount(host)` and `unmount()`** — particles,
-  grid, ckt, compose, map, the rig, filter, fractals, the 3D app
+- **The vault, an app** (`apps/vault/`): every object full screen, the one
+  whose detail opens drawn large beside it and played if it moves, its
+  detail the facts only; it makes nothing — `check-vault`, `check-mount`.
+- **Every app on core's kit is `mount(host)` and `unmount()`**
   (`core/mount.js`): built in any host, taken out with nothing left — what
-  they held outside their nodes in a scope (`core/scope.js`) the unmount
-  closes: listeners, their windows in the stack and the stack's channel,
-  keys and pies, their params' steps; what ends first takes itself out of
-  the scope, and each app stops its own clock. Their pages mount them on
-  themselves — `check-mount`, which counts what an app unmounted leaves:
-  listeners, channels, intervals, frames asked for. Cards (filter's chain,
-  a model's shapes) remove a card's panel with it now — three listeners on
-  the window were left behind each time.
+  it held outside its nodes in a scope (`core/scope.js`) the unmount closes:
+  listeners, windows in the stack, keys and pies, steps; each app stops its
+  own clock — `check-mount`, which counts what an app unmounted leaves.
 
 ### 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
 
@@ -278,6 +274,9 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Broken / half-done
 
+- **`check-live` hangs under the gate's load** after its gamepad window —
+  twice on 2026-11-05, taken down at 8:00, green alone each time. A flake
+  of the load, noted at each merge; worth its own look (C9's helpers).
 - **The stack's live view blends over the checkerboard** where nothing is
   under a layer; a save blends over nothing — alike for most blends, not for
   screen or difference. An app's own ground is opaque: set it to none to see
@@ -336,11 +335,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M13a — BEC's grid in the 3D app** (`docs/bec.md`, the author's yes of
-2026-11-05): first read BEC_2025's `class.js` and `functions.js`, then a
-primitive of `apps/3d/shapes.js` — the cells X × Y × Z, the edges, the
-faces filled, BEC's three palettes — its card from its schema, `q s d`,
-`c`, `e` new seeds on keys. S11's version 2 once the author has scenarios.
+**The author tries BEC's grid in the 3D app** — BEC grid in its add menu;
+R, C and A's pie — and answers M13's two questions (`docs/bec.md`): a
+project as data, and the gabarit's fields. Then M13b, BEC's files into the
+vault (`scripts/import-bec.mjs`, its layers by format read in
+`C:\Users\bottu\Documents\code\BEC_2025\img`). S11's version 2 once the
+author has scenarios.
 
 ## Parked decisions
 

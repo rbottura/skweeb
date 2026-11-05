@@ -52,7 +52,11 @@ export const SHAPE_CARDS = {
   schemaOf: shapeSchema,
   groups: SHAPE_GROUPS,
   fold: true,
-  start: (id, entries) => startOf(entries.length),
+  start: (id, entries) => {
+    const at = startOf(entries.length);
+    if (SHAPES[id].ownColours) delete at.colour;         // BEC's grid: its palette's colours, none of its own
+    return at;
+  },
   words: {
     add: 'add a shape…',
     empty: 'No shapes yet. Add one.',

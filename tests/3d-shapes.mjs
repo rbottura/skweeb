@@ -34,7 +34,7 @@ const extent = g => {
 
 // ── The catalogue ────────────────────────────────────────────────────────────
 
-ok('seven shapes, in the menu\'s order', Object.keys(SHAPES), ['box', 'sphere', 'cylinder', 'cone', 'torus', 'plane', 'capsule']);
+ok('eight shapes, in the menu\'s order — BEC\'s grid the last', Object.keys(SHAPES), ['box', 'sphere', 'cylinder', 'cone', 'torus', 'plane', 'capsule', 'grid']);
 ok('each entry says its own id', Object.entries(SHAPES).every(([k, s]) => s.id === k && typeof s.label === 'string'), true);
 ok('every schema declares, as a card will', Object.keys(SHAPES).every(id => !!defineParams('3d:' + id, shapeSchema(id))), true);
 ok('a schema is the form, then place and look', Object.keys(shapeSchema('sphere')),
@@ -42,8 +42,9 @@ ok('a schema is the form, then place and look', Object.keys(shapeSchema('sphere'
 ok('a recipe from before the stretches stands as it did: each 1', ['sx', 'sy', 'sz'].map(k => valuesFor(shapeSchema('box'), { size: 2 })[k]), [1, 1, 1]);
 ok('every row is in a card\'s drawer', Object.keys(SHAPES).every(id =>
   Object.values(shapeSchema(id)).every(spec => spec.group in SHAPE_GROUPS)), true);
-ok('form rows are the form\'s, place and look every shape\'s', Object.values(SHAPES).every(s =>
-  Object.values(s.params).every(spec => spec.group === 'form')) && Object.values(PLACE).every(spec => spec.group !== 'form'), true);
+ok('form rows are the form\'s, place and look every shape\'s — a shape with colours of its own, its look too', Object.values(SHAPES).every(s =>
+  Object.values(s.params).every(spec => spec.group === 'form' || (s.ownColours && spec.group === 'look')))
+  && Object.values(PLACE).every(spec => spec.group !== 'form'), true);
 ok('what makes a box\'s geometry', formKeys('box'), ['width', 'height', 'depth']);
 let threw = '';
 try { shapeSchema('teapot'); } catch (err) { threw = err.message; }
@@ -82,6 +83,31 @@ ok('…a torus round its tube too', [finer('torus', valuesFor(shapeSchema('torus
 ok('…never fewer than it had', finer('sphere', { ...ball, segments: 128 }, 90).segments, 128);
 ok('a flat shape keeps its facets, a box has none to add, no detail changes nothing', [finer('sphere', { ...ball, shading: 'flat' }, 321).segments,
   JSON.stringify(finer('box', valuesFor(shapeSchema('box'), {}), 321)) === JSON.stringify(valuesFor(shapeSchema('box'), {})), finer('sphere', ball, 0) === ball], [48, true, true]);
+
+// ── BEC's grid (grid.js, M13a) ───────────────────────────────────────────────
+
+const { edgesOf, pick, PALETTES } = await import('../apps/3d/grid.js');
+const { Color } = await import('../core/libs/three/three.core.js');
+ok('a lattice\'s edges: along x, y and z, corner by corner', edgesOf(4, 2, 4).length, 4 * 3 * 5 + 5 * 2 * 5 + 5 * 3 * 4);
+const three = pick(10, 3, 7);
+ok('picked: so many, unique, in order, the same for the same seed', [three.length, new Set(three).size, [...three].sort((a, b) => a - b), pick(10, 3, 7)],
+  [3, 3, three, three]);
+ok('…none for none, all for more than there are', [pick(5, 0, 1), pick(5, 9, 1)], [[], [0, 1, 2, 3, 4]]);
+const grid = (values = {}) => geometry('grid', values);
+const corners = g => g.attributes.position.count;
+const places = g => JSON.stringify(Array.from(g.attributes.position.array));
+const colours = g => JSON.stringify(Array.from(g.attributes.color.array));
+ok('the grid at its defaults: 24 edges and 6 faces, a box of 24 corners each', corners(grid()), (24 + 6) * 24);
+ok('…every edge, no face: its cells, and past the joints', extent(grid({ edges: 3000, faces: 0 })), [2.08, 1.08, 2.08]);
+ok('…the same for the same values, to the vertex', places(grid()) === places(grid()) && colours(grid()) === colours(grid()), true);
+ok('…a new seed: other edges (R)', places(grid({ seed: 2 })) !== places(grid()), true);
+ok('…new hues: the same edges, their colours dealt anew (C)', [places(grid({ hues: 2 })) === places(grid()), colours(grid({ hues: 2 })) !== colours(grid())], [true, true]);
+const linear = PALETTES.bec.map(hex => { const k = new Color(hex); return [k.r, k.g, k.b].map(r3).join(); });
+const dealt = g => { const a = g.attributes.color.array, out = new Set(); for (let i = 0; i < a.length; i += 3) out.add([a[i], a[i + 1], a[i + 2]].map(r3).join()); return [...out]; };
+ok('…every colour one of the palette\'s', dealt(grid({ edges: 3000 })).every(c => linear.includes(c)), true);
+ok('…another palette, other colours', colours(grid({ palette: 'grand paris sud' })) !== colours(grid()), true);
+ok('…faces alone, so many squares', corners(grid({ edges: 0, faces: 5 })), 5 * 24);
+ok('…its schema no colour of its own: its palette is', 'colour' in shapeSchema('grid'), false);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
