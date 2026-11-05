@@ -316,3 +316,19 @@ object it is bound to, and its next mount opens on it through the path
 a saved object takes (`requested`): no second way to restore an app.
 The address goes first — an app given a query does as it says — and
 what is kept is the recipe, not the session: the steps start again.
+
+**The scene is laid as the bench is.** Asked whether cluster should take
+the bench's layout for one canvas fixed — the scene's side views on the
+left, the viewer and its player in the middle, the app's properties on
+the right, two panels as two tabs — the author: "oui tu peux prendre la
+mise en page du bench qui est super !". Tried in cluster first, each
+app's own page as it is. Its side view is the vault for now, the
+scene's; an object opened there is a tab of the properties.
+
+**Each app keeps its own canvas; the scene lays them in one place**
+(S9c). Planned on 2026-11-04 as one canvas handed to each app. Weighed
+when built: the apps put their pointer listeners and classes on their
+canvas and set its 2D state, all of which the scene would have to take
+back between two apps, for a picture the eye cannot tell apart from
+every viewer laid in the same place — which the scene's grid does — and
+the last frame held as a copy over it until the next app draws.

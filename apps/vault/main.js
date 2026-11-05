@@ -10,7 +10,9 @@
  * It makes nothing: a consultation, so no recipe, no rebuild.js, no S.
  * `?open=<id>` draws that object as it opens. With no vault it opens and says
  * so (rule 7). A module (core/mount.js): `mount(host)` and `unmount()`, its
- * page mounting it on itself. Nothing happens at import.
+ * page mounting it on itself. In a scene that has a vault of its own beside
+ * the viewer — cluster's, given as `vault` (S9c) — it builds none: it draws
+ * what that one opens (`chosen`). Nothing happens at import.
  */
 
 import { VaultPanel } from '../../core/VaultPanel.js';
@@ -36,15 +38,20 @@ const app = appModule('vault', { markup: MARKUP, style: new URL('./style.css', i
   keep: () => (shown ? { id: shown.id } : null) });      // the object drawn, given back as it was left
 
 /** The vault in `host`, every object in it — one drawn if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** The vault out of its host, everything it held let go of: its panel, the object drawn, its clock. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;
 
+/** An object a scene's vault opened (cluster's, S9c): drawn here, as one this app's own panel opened. */
+export function chosen(object, { url } = {}) {
+  if (mounted() && object) show(object, url);
+}
+
 // One app mounted at a time: its state, made again by each mount (`start`).
 let root, canvas, ctx, clock, bar, transport, player, handle, shown, asked, pending;
 
-function start(host, mine) {
+function start(host, mine, given = {}) {
   root = host;
   canvas = root.querySelector('#stage');
   ctx = canvas.getContext('2d');
@@ -63,7 +70,8 @@ function start(host, mine) {
   bar = new Bar({ app: 'vault', mount: root, keys: 'click an object: drawn here · space play · , . frame', acts: false });
   transport = new Transport({ clock, mount: player, busy: () => false });
   // Its detail the facts only, narrower over the grid — the picture is the viewer's (the author's C, 2026-11-05).
-  new VaultPanel({ mount: root.querySelector('#vault-side'), detailPicture: false, onDetail: (object, { url }) => show(object, url) });
+  // A scene with a vault of its own beside the viewer (cluster's): none here, the scene's tells `chosen`.
+  if (!given.vault) new VaultPanel({ mount: root.querySelector('#vault-side'), detailPicture: false, onDetail: (object, { url }) => show(object, url) });
 
   const sized = new ResizeObserver(() => draw());
   sized.observe(canvas.parentElement);

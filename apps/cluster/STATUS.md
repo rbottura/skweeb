@@ -8,6 +8,26 @@ app still opens alone on its own page; the scene is one more host.
 
 ## Works now
 
+- **Laid as the bench is** (`scene/canvas`, 2026-11-05 — the author's yes:
+  "tu peux prendre la mise en page du bench qui est super"): the strip of
+  apps, the scene's vault, the app's viewer and its player, its properties.
+  The app's own boxes give up their layout (`display: contents`): its title
+  bar, viewer, panels and status bar are laid in the scene's grid as they
+  are, so **every app's viewer is in the same place to the pixel** and the
+  canvas does not move; the player's strip keeps its room where nothing
+  plays (`style.css`). The vault there is the scene's, the same one
+  whatever app is round it; the vault app, mounted, builds none and draws
+  what it opens (`given.vault`, `chosen`).
+- **The properties, a tab each** (`tabs.js`): the app's panels on the right
+  one at a time — particles' two, compose's placed and page, map's map and
+  things — the one shown kept for its next mount; a panel its app shows or
+  hides, grid's maker, gains or loses its tab. An object opened in the
+  scene's vault is a tab beside them, its detail, its picture there unless
+  the vault app draws it; closed, the panel shown before it again.
+- **The last frame held** (`held.js`): as an app is taken out its frame is
+  copied over where its canvas was, and stays until the next app's canvas
+  is first drawn on — watched from its build, before the app starts
+  (`core/mount.js` `built`) — so the centre never flashes empty.
 - **One app at a time, each through its module** (`main.js`): a strip on
   the left names the suite's apps — the vault, grid, ckt, compose, filter,
   fractals, particles, map, the rig, the 3D app — and a click on one takes
@@ -63,13 +83,14 @@ app still opens alone on its own page; the scene is one more host.
   page's memory is where it is kept.
 - **A switch while an app saves** takes it out mid-save: the save goes on
   in the background and lands in the vault, but nothing says so.
-- **Each app keeps its own canvas and its own layout**: the viewer moves
-  from one app to the next. One canvas fixed in the middle, the last frame
-  held between two apps and the panels leaving and coming are the bricks
-  after (`docs/scene.md`).
+- **The panels do not move yet**: they are taken out and put in at once;
+  leaving and coming as the bench has them is the next brick.
+- **The vault beside the viewer is narrow**: its grid a column of cards,
+  its head three rows. Keys and history, the bench's other side views, are
+  not there yet; nor the bench's focus, the viewer alone.
 
 ## Next
 
-The bricks of S9c left, in order (`docs/plan.md`): one canvas fixed in the
-middle and the last frame held; the panels leaving and coming as the bench
-has them.
+S9c's last brick (`docs/plan.md`): the panels leaving and coming as the
+bench has them — out to their side as an app goes, in as the next comes,
+the viewer and the vault still.

@@ -9,8 +9,10 @@
  * never seen without its layout; its page grid, `.app`, built from its
  * markup in the host; and its smart object let go of when it goes, so the
  * next app saves into none.
- * What it does of its own is `start(root, scope)`: its state made again,
- * its panels, its clock.
+ * What it does of its own is `start(root, scope, given)`: its state made
+ * again, its panels, its clock — and what its host gives it, `given`: a
+ * scene's vault (cluster's, S9c), and `built`, told of its root once it is
+ * in the host, before it starts — the scene holding the last frame there.
  *
  * An app taken out once it has booted leaves what it was doing (S9c): what
  * its `keep` says — the recipe it would save, the frame on screen — and the
@@ -44,16 +46,16 @@ export const leftBehind = app => left.get(app) || null;
  * @param {object} opts
  * @param {string} opts.markup         the inside of its `.app`: its columns, its viewer
  * @param {string} [opts.style]        its stylesheet's URL — `new URL('./style.css', import.meta.url).href`
- * @param {(root: HTMLElement, scope: object) => (void|Promise<void>)} opts.start
+ * @param {(root: HTMLElement, scope: object, given: object) => (void|Promise<void>)} opts.start
  * @param {() => ?object} [opts.keep]  what it is doing, to be given back: `{ recipe, … }` as its reopen
  *                                     takes it — read as it is taken out, once it has booted
- * @returns {{ mount: (host?: HTMLElement) => Promise<void>, unmount: () => void,
+ * @returns {{ mount: (host?: HTMLElement, given?: {vault?: object, built?: (root: HTMLElement) => void}) => Promise<void>, unmount: () => void,
  *             readonly scope: ?object, readonly root: ?HTMLElement }}
  */
 export function appModule(app, { markup, style = null, start, keep = null }) {
   let scope = null, root = null, booted = false;
 
-  async function mount(host = document.body) {
+  async function mount(host = document.body, given = {}) {
     if (scope) unmount();
     const mine = scope = openScope(app);
     const came = style ? linked(style, mine) : null;
@@ -66,8 +68,9 @@ export function appModule(app, { markup, style = null, start, keep = null }) {
     root.innerHTML = markup;
     host.append(root);
     mine.hold(() => Vault.bind(null));
+    if (given.built) given.built(root);
     try {
-      await start(root, mine);
+      await start(root, mine, given);
       if (scope === mine) booted = true;
     } catch (err) {
       console.error(`[${app}] failed to boot:`, err);

@@ -58,7 +58,7 @@ const MARKUP = `
 const app = appModule('grid', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** grid in `host`, started — one of its objects opened if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** grid out of its host, everything it held let go of: its keys, its drops, its source, its clock. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;

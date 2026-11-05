@@ -83,7 +83,7 @@ const MARKUP = `
 const app = appModule('3d', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start, keep });
 
 /** The 3D app in `host`, started — a saved model opened if the page asks for it (core/mount.js). */
-export const mount = host => app.mount(host);
+export const mount = (host, given) => app.mount(host, given);
 /** The 3D app out of its host, everything it held let go of: its keys, its model, its handles. */
 export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;

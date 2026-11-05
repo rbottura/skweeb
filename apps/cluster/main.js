@@ -8,6 +8,16 @@
  * open when nothing else is. The name is the author's, "pour l'instant"
  * (2026-11-04): a word of space that holds many objects.
  *
+ * Laid as the bench is (the author's yes, 2026-11-05): the strip, then the
+ * scene's vault, then the app's viewer, then its properties — so the viewer,
+ * its canvas in it, is in one place whatever app is round it (style.css).
+ * The vault and the tab bar are the scene's and stay; the app brings its
+ * title bar, its viewer, its panels — a tab each (tabs.js) — and its status
+ * bar, laid in the scene's grid as they are. An object opened in the vault is
+ * a tab beside the panels, its detail; the vault app draws it. As an app is
+ * taken out its last frame is held where it was until the next draws its
+ * first (held.js): the centre never flashes empty.
+ *
  * The app mounted is the address's fragment, `#particles`: a reload comes
  * back to it, Back goes to the one before, and what the address asks of the
  * app — `?open=<id>` — is the app's to read, as on its own page. A switch
@@ -31,6 +41,9 @@
 
 import { installPalette } from '../../core/Palette.js';
 import { takeLinks }      from '../../core/reopen.js';
+import { VaultPanel }     from '../../core/VaultPanel.js';
+import { holdFrames }     from './held.js';
+import { propsTabs }      from './tabs.js';
 
 /**
  * The apps the scene mounts, in the strip's order, each loaded when first
@@ -63,8 +76,9 @@ const el = (tag, cls, text) => {
   return node;
 };
 
-let strip, host;
-let now = null;            // { name, module, n }: the app mounted, and the ask it answers
+let strip, host, vault, props, frames;
+let opened = null;         // { object, urls }: the object open in the scene's vault, for an app that draws it
+let now = null;            // { name, module, n, ready }: the app mounted, the ask it answers, whether it has started
 let wanted = null;         // { name, n }: the app last asked for — a link to the app there is an ask of its own
 let asks = 0;              // asks so far, numbering them
 let settling = null;       // the switch under way, until `wanted` is mounted
@@ -99,11 +113,26 @@ export function start(page = document.body) {
     Object.assign(a, { href: p.href, target: '_blank', rel: 'noopener', title: p.title });
     strip.append(a);
   }
+  const side = el('aside', 'cl-side');
+  side.setAttribute('aria-label', 'the vault');
+  const tabs = el('nav', 'cl-tabs');
+  tabs.setAttribute('aria-label', 'the properties');
+  tabs.setAttribute('role', 'tablist');
+  const detail = el('div', 'cl-detail');
+  const none = el('p', 'cl-none', 'An object chosen in the vault opens here.');
   host = el('div', 'cl-host');
-  scene.append(strip, host);
+  scene.append(strip, side, tabs, detail, none, host);
   page.append(scene);
 
   installPalette();                          // ² from the start: the vault has no panel to install it
+  props = propsTabs({ bar: tabs, detail, none });
+  frames = holdFrames(scene);
+  // The scene's vault, beside the viewer whatever app is round it — made before any app, so none holds it.
+  vault = new VaultPanel({
+    mount: side, detailMount: detail,
+    onDetail: (object, urls) => { opened = { object, urls }; props.showDetail(object.type); tell(); },
+    onClose: () => { opened = null; props.hideDetail(); },
+  });
   // A link to an app the scene has: that app here, in place, its query with it.
   takeLinks(url => {
     const name = appOf(url);
@@ -168,11 +197,29 @@ async function swap(ask) {
     return false;
   }
   if (wanted !== ask) return true;           // another was asked for while it came
-  if (now) now.module.unmount();
-  now = { name: ask.name, module, n: ask.n };
+  if (now) {
+    const going = host.querySelector(':scope > .app');
+    frames.take(going);                      // its last frame, held where it is
+    props.leaving();
+    now.module.unmount();
+  }
+  now = { name: ask.name, module, n: ask.n, ready: false };
   mark(ask.name);
-  await module.mount(host);
+  // Told of its root as it is built, before it starts: its panels a tab each, its canvas watched for its first frame.
+  await module.mount(host, { vault, built: root => { props.mounted(ask.name, root); frames.watch(root); } });
+  if (now && now.n === ask.n) { now.ready = true; props.paint(); tell(); }
   return true;
+}
+
+/**
+ * The app mounted told of the object open in the scene's vault, when it draws
+ * one — the vault app, `chosen` — and the detail its facts only then, the
+ * picture being the viewer's; with its picture beside any other app.
+ */
+function tell() {
+  const draws = !!(now && now.ready && typeof now.module.chosen === 'function');
+  vault.detailPicture = !draws;
+  if (draws && opened) now.module.chosen(opened.object, { url: opened.urls.url });
 }
 
 /** The strip and the page's title say which app is mounted. */
