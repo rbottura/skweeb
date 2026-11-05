@@ -16,16 +16,21 @@
  * (core/shell/graph.js) keeps its fragment, so it comes back in the same app.
  *
  * A switch asked while another is under way waits for it, and only the last
- * asked is mounted: an app is never taken out halfway through its boot. The
- * search (², Ctrl K) finds the apps by name, as it finds the viewer's tools
- * (core/Palette.js, `data-pal`). The gamepad stays outside until C6 — it
- * draws with p5 — a link to its page.
+ * asked is mounted: an app is never taken out halfway through its boot. An
+ * app taken out comes back as it was left (core/mount.js). The links between
+ * apps — *Open in …*, *Place in compose*, *Rig this*, the graph's — are the
+ * scene's to take (core/reopen.js `takeLinks`): the app a link names is
+ * mounted here in place of the one open, the link's query with it, where
+ * alone it would open a tab. The search (², Ctrl K) finds the apps by name,
+ * as it finds the viewer's tools (core/Palette.js, `data-pal`). The gamepad
+ * stays outside until C6 — it draws with p5 — a link to its page.
  *
  * Every app runs alone as ever (rule 7): the scene is one more host. Nothing
  * happens at import.
  */
 
 import { installPalette } from '../../core/Palette.js';
+import { takeLinks }      from '../../core/reopen.js';
 
 /**
  * The apps the scene mounts, in the strip's order, each loaded when first
@@ -59,10 +64,10 @@ const el = (tag, cls, text) => {
 };
 
 let strip, host;
-let now = null;            // { name, module }: the app mounted
-let wanted = null;         // the app last asked for
+let now = null;            // { name, module, n }: the app mounted, and the ask it answers
+let wanted = null;         // { name, n }: the app last asked for — a link to the app there is an ask of its own
+let asks = 0;              // asks so far, numbering them
 let settling = null;       // the switch under way, until `wanted` is mounted
-const there = () => (now ? now.name : null);
 
 /**
  * The scene on `page`: its strip, and the app the address names mounted —
@@ -99,6 +104,14 @@ export function start(page = document.body) {
   page.append(scene);
 
   installPalette();                          // ² from the start: the vault has no panel to install it
+  // A link to an app the scene has: that app here, in place, its query with it.
+  takeLinks(url => {
+    const name = appOf(url);
+    if (!name) return false;
+    history.pushState(null, '', location.pathname + url.search + '#' + name);
+    settle(name);
+    return true;
+  });
   window.addEventListener('popstate', () => settle(named() || FIRST));
   const first = named();
   if (!first) history.replaceState(null, '', location.pathname + location.search + '#' + FIRST);
@@ -112,20 +125,31 @@ function named() {
   return Object.hasOwn(APPS, name) ? name : null;
 }
 
+/** The app a link names — `/apps/particles/`, or its index.html — when the scene has it. */
+function appOf(url) {
+  const m = /^\/apps\/([^/]+)\/(?:index\.html)?$/.exec(url.pathname);
+  return m && Object.hasOwn(APPS, m[1]) ? m[1] : null;
+}
+
 /** Another app in place of the one there, the address saying so — and nothing of what the last was asked. */
 function go(name) {
-  if (name === wanted) return settling || Promise.resolve();
+  if (wanted && name === wanted.name) return settling || Promise.resolve();
   history.pushState(null, '', location.pathname + '#' + name);
   return settle(name);
 }
 
-/** `name` the app to mount; mounted once the switch under way is done, if it is still the one wanted. */
+/** `name` asked for; mounted once the switch under way is done, if it is still the ask last made. */
 function settle(name) {
-  wanted = name;
+  wanted = { name, n: ++asks };
   if (!settling) {
     settling = (async () => {
       try {
-        while (wanted !== there()) await swap(wanted);
+        while (wanted && !(now && now.n === wanted.n)) {
+          const ask = wanted;
+          if (await swap(ask) || wanted !== ask) continue;
+          wanted = now && { name: now.name, n: now.n };   // it did not load: the app there stays
+          mark(now && now.name);
+        }
       } finally {
         settling = null;
       }
@@ -134,23 +158,28 @@ function settle(name) {
   return settling;
 }
 
-/** One switch: its module loaded, the app there unmounted, this one mounted in its place. */
-async function swap(name) {
+/** One switch: its module loaded, the app there unmounted, this one mounted in its place. False if it did not load. */
+async function swap(ask) {
   let module;
   try {
-    module = await APPS[name]();
+    module = await APPS[ask.name]();
   } catch (err) {
-    console.error(`[cluster] ${name} did not load:`, err);
-    wanted = there();                        // the app there stays
-    return;
+    console.error(`[cluster] ${ask.name} did not load:`, err);
+    return false;
   }
-  if (wanted !== name) return;               // another was asked for while it came
+  if (wanted !== ask) return true;           // another was asked for while it came
   if (now) now.module.unmount();
-  now = { name, module };
+  now = { name: ask.name, module, n: ask.n };
+  mark(ask.name);
+  await module.mount(host);
+  return true;
+}
+
+/** The strip and the page's title say which app is mounted. */
+function mark(name) {
   for (const b of strip.querySelectorAll('.cl-app[data-app]')) {
     if (b.dataset.app === name) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
   }
-  document.title = `${name} — cluster — skweeb`;
-  await module.mount(host);
+  document.title = name ? `${name} — cluster — skweeb` : 'cluster — skweeb';
 }
