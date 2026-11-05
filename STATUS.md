@@ -274,6 +274,9 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Broken / half-done
 
+- **`check-live` hangs under the gate's load** after its gamepad window —
+  twice on 2026-11-05, taken down at 8:00, green alone each time. A flake
+  of the load, noted at each merge; worth its own look (C9's helpers).
 - **The stack's live view blends over the checkerboard** where nothing is
   under a layer; a save blends over nothing — alike for most blends, not for
   screen or difference. An app's own ground is opaque: set it to none to see
