@@ -211,8 +211,10 @@ app keeps its own canvas and its own layout. Then, a brick each:
    would have made the apps' listeners on it — seven `pointer.js`, ckt's
    own — the classes they set on it and its 2D state the scene's to undo,
    for a picture the eye cannot tell apart.
-4. **The panels leaving and coming** (`scene/panels`), as the bench has
-   them.
+4. **The panels leaving and coming** (`scene/panels`, landed 2026-11-05),
+   as the bench's `swapping`: the properties out to their side and faded,
+   the app going taken out once they are gone, the next app's in; the
+   viewer and the vault still. S9c done.
 
 **The space viewer gets a bench of its own first (S11).** The author, on
 version 6: "le viewer 3d est excellent, c'est quelque chose qu'il faut que

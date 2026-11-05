@@ -24,8 +24,9 @@
  * — in the same place to the pixel; the scene's vault the same one beside
  * it whatever app is mounted; an app's panels a tab each, the one shown
  * kept for its next mount; an object opened in that vault a tab of its own,
- * gone when closed; and as an app is taken out its last frame held where
- * its canvas was, gone once the next has drawn.
+ * gone when closed; and as an app is taken out its panels leaving to their
+ * side, fading, the next app's coming in, the viewer still — its last frame
+ * held where its canvas was, gone once the next has drawn.
  */
 
 import { startCheck, countHeld } from './check-kit.mjs';
@@ -134,7 +135,22 @@ const was = await page.eval(`(() => { const r = document.querySelector('.cl-host
 await page.eval(`window.__holds = []; new MutationObserver(list => { for (const m of list) for (const n of m.addedNodes)
   if (n.classList && n.classList.contains('cl-held')) { const r = n.getBoundingClientRect();
     window.__holds.push([r.left, r.top, r.width, r.height].map(Math.round).join(',')); } }).observe(document.querySelector('.cluster'), { childList: true })`);
-await open('fractals');
+/** The panel shown in the properties: how see-through, and how far moved to its side. */
+const panelLook = () => page.eval(`(() => { const s = document.querySelector('.cl-host .app-main > .app-side.cl-shown'); if (!s) return null;
+  const cs = getComputedStyle(s), m = new DOMMatrix(cs.transform === 'none' ? undefined : cs.transform);
+  return { opacity: Math.round(Number(cs.opacity) * 100) / 100, x: Math.round(m.m41) }; })()`);
+await click('fractals');
+await page.until(`document.querySelector('.cluster').classList.contains('cl-out')`, { timeout: 5000 });
+await wait(160);
+const leaving = await panelLook();
+const during = await stageBox();
+await booted('fractals');
+await page.until(`!document.querySelector('.cluster').classList.contains('cl-out')`, { timeout: 10000 });
+await wait(400);
+const came = await panelLook();
+c.ok('a switch: particles\' panels leave to their side, fading, the viewer still', !!leaving && leaving.opacity < 1 && leaving.x > 0
+  && during === places[0], `${JSON.stringify(leaving)} · the stage at ${during}`);
+c.ok('…fractals\' come in, in their place and whole', !!came && came.opacity === 1 && came.x === 0, JSON.stringify(came));
 await page.until(`!document.querySelector('.cl-held')`, { timeout: 10000 });
 const holds = await page.eval(`window.__holds`);
 c.ok('particles taken out: its last frame held where its canvas was, gone once fractals drew', holds.length === 1 && holds[0] === was,
