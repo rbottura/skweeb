@@ -19,7 +19,7 @@
  * wrong.
  */
 
-import { startCheck } from './check-kit.mjs';
+import { startCheck, countHeld } from './check-kit.mjs';
 
 /** The first still in the vault, as grid's source: what it dithers, and so saves. */
 const A_STILL = `import('/core/vault.js').then(async ({ Vault }) => {
@@ -100,47 +100,16 @@ const watched = () => page.eval(`import('/core/steps.js').then(s => s.watched().
 const frame = () => page.eval(`(document.querySelector('.tp .tp-time, .tp-time')?.textContent || '') + '|' + (document.querySelector('.bar-say')?.textContent || '')`);
 const saved = async () => { await page.until(`window.__saved > 0`, { timeout: 30000 }); await wait(1500); return page.eval(`window.__saved`); };
 
-/*
- * Before the page loads: every listener on the document and the window
- * counted as it comes and goes, every channel as it opens and closes, every
- * interval as it is set and cleared, every frame asked for — a mount's must
- * all go with it. The check's own channel is made with the page's own
- * BroadcastChannel, kept aside, so it is not counted.
- */
-await page.beforeLoad(`(() => {
-  const live = new Map();
-  for (const [name, t] of [['document', document], ['window', window]]) {
-    const add = t.addEventListener.bind(t), rm = t.removeEventListener.bind(t);
-    const key = (type, fn, o) => type + '|' + (typeof o === 'boolean' ? o : !!(o && o.capture));
-    const set = new Map();
-    live.set(name, set);
-    t.addEventListener = (type, fn, o) => { if (fn) { const k = key(type, fn, o); if (!set.has(k)) set.set(k, new Set()); set.get(k).add(fn); } return add(type, fn, o); };
-    t.removeEventListener = (type, fn, o) => { const s = set.get(key(type, fn, o)); if (s) s.delete(fn); return rm(type, fn, o); };
-  }
-  const Channel = window.BroadcastChannel, channels = new Set();
-  window.__Channel = Channel;
-  window.BroadcastChannel = class extends Channel {
-    constructor(name) { super(name); channels.add(this); }
-    close() { channels.delete(this); return super.close(); }
-  };
-  const every = window.setInterval.bind(window), stop = window.clearInterval.bind(window), intervals = new Set();
-  window.setInterval = (fn, ms, ...rest) => { const id = every(fn, ms, ...rest); intervals.add(id); return id; };
-  window.clearInterval = id => { intervals.delete(id); return stop(id); };
-  const raf = window.requestAnimationFrame.bind(window);
-  let frames = 0;
-  window.requestAnimationFrame = fn => { frames++; return raf(fn); };
-  window.__held = () => ({ ...Object.fromEntries([...live].map(([n, set]) => [n, [...set.values()].reduce((a, s) => a + s.size, 0)])),
-    channels: channels.size, intervals: intervals.size });
-  window.__frames = () => frames;
-})()`);
-const held = () => page.eval(`window.__held()`);
+// Before the page loads: what it holds outside its nodes, counted as it comes and goes (check-kit.mjs) —
+// a mount's must all go with it.
+const { held, framesAsked: asked } = await countHeld(page);
 /**
  * Frames asked for over a little more than half a second: a clock playing asks one each. Playing is
  * three or more — a page under the load of other checks asks fewer than it would alone — and
  * unmounted is none at all, which no load makes more.
  */
 const PLAYING = 3;
-const framesAsked = async () => { const a = await page.eval(`window.__frames()`); await wait(600); return (await page.eval(`window.__frames()`)) - a; };
+const framesAsked = () => asked(600);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 for (const { name, own, kept = [], plays, saves, prepare = null, ready = null, visit = null, query = null,

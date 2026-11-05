@@ -60,6 +60,57 @@ export function inner(o) {
            recipe: b.recipe ?? null, seed: b.seed ?? null, smart: true };
 }
 
+/**
+ * What a page holds outside its nodes, counted from before it loads (S9):
+ * every listener on the document and the window as it comes and goes, every
+ * channel as it opens and closes, every interval as it is set and cleared,
+ * every frame asked for — what an app holds while it is mounted, and lets go
+ * of when it is not. The page's own BroadcastChannel is kept aside as
+ * `window.__Channel`, so a check's own channel is not counted. Called before
+ * the page it counts is opened: check-mount's, check-cluster's.
+ *
+ * @param {object} page   a tab of chrome.mjs
+ * @returns {Promise<{ held: () => Promise<{document: number, window: number, channels: number, intervals: number}>,
+ *                     framesAsked: (ms?: number) => Promise<number> }>}
+ */
+export async function countHeld(page) {
+  await page.beforeLoad(`(() => {
+    const live = new Map();
+    for (const [name, t] of [['document', document], ['window', window]]) {
+      const add = t.addEventListener.bind(t), rm = t.removeEventListener.bind(t);
+      const key = (type, fn, o) => type + '|' + (typeof o === 'boolean' ? o : !!(o && o.capture));
+      const set = new Map();
+      live.set(name, set);
+      t.addEventListener = (type, fn, o) => { if (fn) { const k = key(type, fn, o); if (!set.has(k)) set.set(k, new Set()); set.get(k).add(fn); } return add(type, fn, o); };
+      t.removeEventListener = (type, fn, o) => { const s = set.get(key(type, fn, o)); if (s) s.delete(fn); return rm(type, fn, o); };
+    }
+    const Channel = window.BroadcastChannel, channels = new Set();
+    window.__Channel = Channel;
+    window.BroadcastChannel = class extends Channel {
+      constructor(name) { super(name); channels.add(this); }
+      close() { channels.delete(this); return super.close(); }
+    };
+    const every = window.setInterval.bind(window), stop = window.clearInterval.bind(window), intervals = new Set();
+    window.setInterval = (fn, ms, ...rest) => { const id = every(fn, ms, ...rest); intervals.add(id); return id; };
+    window.clearInterval = id => { intervals.delete(id); return stop(id); };
+    const raf = window.requestAnimationFrame.bind(window);
+    let frames = 0;
+    window.requestAnimationFrame = fn => { frames++; return raf(fn); };
+    window.__held = () => ({ ...Object.fromEntries([...live].map(([n, set]) => [n, [...set.values()].reduce((a, s) => a + s.size, 0)])),
+      channels: channels.size, intervals: intervals.size });
+    window.__frames = () => frames;
+  })()`);
+  return {
+    held: () => page.eval(`window.__held()`),
+    /** Frames asked for over `ms`: a clock playing asks one a frame, and nothing playing none. */
+    async framesAsked(ms = 600) {
+      const a = await page.eval(`window.__frames()`);
+      await new Promise(r => setTimeout(r, ms));
+      return (await page.eval(`window.__frames()`)) - a;
+    },
+  };
+}
+
 export async function startCheck({ keep = false } = {}) {
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'skweeb-check-'));
   const shots = path.join(work, 'shots');
