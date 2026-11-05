@@ -351,3 +351,21 @@ canvas and set its 2D state, all of which the scene would have to take
 back between two apps, for a picture the eye cannot tell apart from
 every viewer laid in the same place — which the scene's grid does — and
 the last frame held as a copy over it until the next app draws.
+
+**The legacy grid's sets stay, filed in the folder of their tiles** (S9g).
+The author: "les objets de sets de legacy grid sont trop petits et
+redondants avec les folders, est-ce qu'on pourrait s'en défaire ?" They
+are grid's materials — a ramp is a set, the folder only its tiles — and
+the dithers made with one name it as a parent, so they are not deleted:
+a set filed nowhere whose members are exactly a folder's shown members is
+shown in that folder, first, across the grid in cluster. A set's index row
+carries its members for it, as its role. To have one gone for good is
+still the trash's, by hand.
+
+**Beside an app, the vault shows the app's own first; dropping is picking**
+(S9g). "Un filtrage automatique des objets du vault issus de l'app
+courante … puis le reste": an order, not a filter — every object stays in
+sight, the app's own above a line, the rest under another, beside the vault
+app neither. And an object dropped on a field is what the field's picker
+would have handed it: the same types taken, a set switched on for the
+field's use, one step.

@@ -37,6 +37,15 @@ app still opens alone on its own page; the scene is one more host.
   it is and its acts, then lineage, trash and the kinds, scrolled. Its
   density is three tokens of core's vault panel the scene sets (`--vp-card`,
   `--vp-gap`, `--vp-pad`); the vault app's own page keeps its large cards.
+- **The scene's vault beside an app** (`scene/side-vault`, S9g, 2026-11-05):
+  still at a switch — its stylesheet is the scene's, where it came with each
+  app's and went with it, the author's "jumpy"; the app's own objects first,
+  then the rest, a line naming each part, the cards sliding to their places
+  as the order changes (`core/flip.js`); a card dragged onto a field that
+  takes it — fractals' sprite, particles' sprites — every field that would
+  lit, a folded section or a tab over one opening as the drag rests on it
+  (`core/vault-drag.js`, every app at once); a set in the folder of exactly
+  its members, first, laid across the grid at its strip's shape.
 - **The panels leave and come** (`scene/panels`, 2026-11-05), as the
   bench's `swapping`: at a switch the properties — the tabs, the panel, the
   detail — slide out to their side and fade in 240 ms, the app going is
@@ -92,6 +101,11 @@ app still opens alone on its own page; the scene is one more host.
   comes back, particles' smart object saved into again at its next state,
   the vault app's still drawn again; *Open in particles* and *Place in
   compose* taken in place from the vault app, no tab opened, and Back.
+- `check-cluster-vault`: the scene's vault the same every frame through two
+  switches; grid's own first beside grid, particles' beside particles, the
+  cards moving, no parts beside the vault app; a set across its folder; a
+  still dragged onto fractals' sprite — a sequence lighting nothing — its
+  folded section and particles' tab opening as the drag rests.
 
 ## Known
 
@@ -105,10 +119,13 @@ app still opens alone on its own page; the scene is one more host.
 - **The motion at a switch is not worked out**: the panels go out, then
   everything else of the next app appears in one frame — its title bar's
   acts, its viewer's head, its rulers, its picture at its own size, its
-  player — then the panels come in; "assez saccadées", the author found.
-  What holds still, what adapts, what goes and comes, case by case, is
-  S9e, worked out with the author (`docs/scene.md`, *The motion, case by
-  case*).
+  player — then the panels come in; "assez saccadées", the author found,
+  the canvas and the right panel's way "pas mal" after S9d. What holds
+  still, what adapts, what goes and comes, case by case, is S9e, worked out
+  with the author (`docs/scene.md`, *The motion, case by case*).
+- **A drag is the page's own**: an object dragged from another window — a
+  vault open in another tab — is not taken; and a field hidden by its `when`
+  is not lit.
 - Keys and history, the bench's other side views, are not there yet (S9f);
   nor the bench's focus, the viewer alone.
 

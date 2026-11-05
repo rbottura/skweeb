@@ -29,6 +29,18 @@ Nothing, 2026-11-05: the day's ideas went onto the plan, into
 
 ## Sorted
 
+- **2026-11-05 — cluster's vault, beside an app.** "la transition du
+  canvas et du panel droit est pas mal. le vault a une sorte de bug jumpy …
+  comme s'il se redimensionne d'un coup puis encore une fois pour redevenir
+  à la normale"; "un filtrage automatique des objets du vault issus de
+  l'app courante ouverte dans cluster puis le reste"; "un cliqué-glissé-
+  déposé depuis un objet du vault sur un champ d'input d'objet comme un
+  sprite dans fractals devrait être possible"; "les objets de sets de
+  legacy grid sont trop petits et redondants avec les folders … est-ce
+  qu'on pourrait s'en défaire ?" → S9g landed the same day, the board of
+  `docs/plan.md`; `docs/decisions.md`, 2026-11-05: the sets kept, in their
+  folder.
+
 - **2026-11-05 — BEC's layers again, the print kept vector, a project made
   by several.** BEC_2025 is the ancestor `core/formats.js` took its formats
   from: "une partie de l'interface servait à ajouter des images avec des
