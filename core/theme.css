@@ -142,8 +142,12 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px;
+  padding: 12px;
 }
+
+/* The picture fitted with an even margin round it: the rulers' bands, when there are, the stage's padding as well
+   — the margin was the bands' alone, the canvas against them on one side and off the edge on the other (S9h). */
+.viewer-stage:has(> skw-rulers .rl) { padding: 30px 12px 12px 30px; }
 
 /* The canvas sits on a checkerboard, so a transparent ground reads as one;
    the sheet's edge a fine line and a soft shadow, as paper on a desk. */

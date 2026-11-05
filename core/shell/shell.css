@@ -29,8 +29,8 @@ skw-titlebar kbd { display: inline-flex; align-items: center; height: 16px; padd
 .dr--emptied { display: none !important; }
 
 /* ── Rulers and guides (S8; core/shell/rulers.js) ────────────────────────────
-   Over the stage's padding, never the picture: the stage keeps 18 px round
-   it (theme.css .viewer-stage), and the rulers are that wide. */
+   Over the stage's padding, never the picture: the stage keeps the rulers'
+   18 px and a margin on their sides (theme.css .viewer-stage). */
 
 .viewer-stage { position: relative; }
 skw-rulers { position: absolute; inset: 0; z-index: 30; pointer-events: none; display: block; }
@@ -72,6 +72,12 @@ skw-rulers .gd-away { position: absolute; left: 26px; top: 26px; display: flex; 
 skw-rulers .gd-away span { margin-right: 4px; white-space: nowrap; }
 skw-rulers .gd-act { height: 22px; padding: 0 8px; border: 0; border-radius: var(--radius); background: none; color: var(--fg); font: 500 12px var(--font-ui); cursor: pointer; }
 skw-rulers .gd-act:hover { background: var(--accent); color: var(--accent-ink); }
+
+/* A picture seen closer (core/zoom.js): grabbed to move it, shown as pixels nearer than its own. */
+.viewer-stage.zm { overflow: hidden; cursor: grab; touch-action: none; }
+.viewer-stage.zm-held { cursor: grabbing; }
+.viewer-stage canvas.zm-pixels { image-rendering: pixelated; }
+.vault-zoom { font: 400 11.5px var(--font-num) !important; }
 
 /* The viewer's tools, at the end of its head. */
 skw-viewtools { display: flex; align-items: center; gap: 2px; margin-left: auto; }

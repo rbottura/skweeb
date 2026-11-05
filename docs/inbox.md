@@ -29,6 +29,14 @@ Nothing, 2026-11-05: the day's ideas went onto the plan, into
 
 ## Sorted
 
+- **2026-11-05 — the motion kept; the vault app's viewer; M13a.** "les
+  animations de transitions sont super comme elles sont maintenant"; in
+  the vault app, a sequence stretched — `gam_1790189754737_d12aab` — no
+  player's controls, no pan or zoom, the fit's margin at the right and the
+  bottom; "on peut passer sur la brique M13a rapidement si rien d'autre de
+  plus urgent prend la priorité". → S9h landed the same day; M13a next
+  (`docs/bec.md`); `docs/decisions.md`, 2026-11-05: the even fit.
+
 - **2026-11-05 — the planned bricks now; BEC again, as a project.** "je
   pense qu'on peut continuer celles déjà planifiées maintenant"; S11's
   bench "très prometteur mais je n'ai pas encore assez utilisé et de

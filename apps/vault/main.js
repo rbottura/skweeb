@@ -13,6 +13,12 @@
  * page mounting it on itself. In a scene that has a vault of its own beside
  * the viewer — cluster's, given as `vault` (S9c) — it builds none: it draws
  * what that one opens (`chosen`). Nothing happens at import.
+ *
+ * Drawn at its ink's size (core/rebuild.js `inkSize`): a gamepad loop's
+ * canvas is the screen it was drawn on, its frames the ink cropped out of it
+ * — drawn over the screen's shape, they were stretched (S9h). Its player is
+ * core's strip under the viewer (core/Transport.js). Seen closer by the
+ * wheel, moved by a drag, fitted again by a double click (core/zoom.js).
  */
 
 import { VaultPanel } from '../../core/VaultPanel.js';
@@ -20,8 +26,8 @@ import { Bar }        from '../../core/Bar.js';
 import { Transport }  from '../../core/Transport.js';
 import { Playhead }   from '../../core/playback.js';
 import { Vault }      from '../../core/vault.js';
-import { openFrames } from '../../core/rebuild.js';
-import { viewFactor } from '../../core/view.js';
+import { openFrames, inkSize } from '../../core/rebuild.js';
+import { closer }     from '../../core/zoom.js';
 import { appModule, leftBehind } from '../../core/mount.js';
 
 /** The vault on the left, as wide as it needs; the object chosen in the viewer, its player under it. */
@@ -30,7 +36,6 @@ const MARKUP = `
     <section class="vault-side" id="vault-side" aria-label="the vault"></section>
     <section class="viewer" aria-label="the object chosen">
       <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
-      <div class="vault-player" id="player" hidden></div>
     </section>
   </main>`;
 
@@ -49,13 +54,13 @@ export function chosen(object, { url } = {}) {
 }
 
 // One app mounted at a time: its state, made again by each mount (`start`).
-let root, canvas, ctx, clock, bar, transport, player, handle, shown, asked, pending;
+let root, canvas, ctx, clock, bar, transport, handle, shown, asked, pending, look, zoomed, laid;
 
 function start(host, mine, given = {}) {
   root = host;
   canvas = root.querySelector('#stage');
   ctx = canvas.getContext('2d');
-  player = root.querySelector('#player');
+  laid = '';                 // how the canvas was last laid: its size and place, told to the rulers only when it moves
   handle = shown = null;     // the object drawn, as frames (core/rebuild.js), and its envelope
   asked = 0;                 // the latest asked for; an older answer is dropped
   pending = false;           // a paint asked for, not yet made
@@ -67,8 +72,15 @@ function start(host, mine, given = {}) {
   mine.hold(() => clock.dispose());
   mine.hold(() => { if (handle) handle.dispose(); handle = null; });
 
-  bar = new Bar({ app: 'vault', mount: root, keys: 'click an object: drawn here · space play · , . frame', acts: false });
-  transport = new Transport({ clock, mount: player, busy: () => false });
+  bar = new Bar({ app: 'vault', mount: root, keys: 'click an object: drawn here · space play · , . frame · wheel closer · drag move · double click fit', acts: false });
+  transport = new Transport({ clock, mount: root.querySelector('.viewer'), busy: () => false });   // core's strip under the viewer
+  look = closer(canvas.parentElement, { listen: (t, type, fn, o) => mine.listen(t, type, fn, o), redraw: () => draw() });
+  // The zoom, said at the head of the viewer; pressed, the picture fitted again.
+  zoomed = document.createElement('button');
+  Object.assign(zoomed, { type: 'button', className: 'vt-btn vault-zoom', textContent: 'fit', title: 'Fit the picture — or double click it · the wheel: closer · a drag: moves it' });
+  zoomed.dataset.pal = 'Fit the picture';
+  zoomed.addEventListener('click', () => look.fit());
+  root.querySelector('.viewer-head')?.prepend(zoomed);
   // Its detail the facts only, narrower over the grid — the picture is the viewer's (the author's C, 2026-11-05).
   // A scene with a vault of its own beside the viewer (cluster's): none here, the scene's tells `chosen`.
   if (!given.vault) new VaultPanel({ mount: root.querySelector('#vault-side'), detailPicture: false, onDetail: (object, { url }) => show(object, url) });
@@ -108,8 +120,7 @@ async function show(object, url) {
     handle = next;
     shown = object;
     clock.configure({ length: Math.max(1, handle.length), fps: handle.fps || 30, loop: true });
-    transport.configure();
-    player.hidden = handle.length < 2;
+    transport.configure();                   // its strip shown only for what moves
     if (handle.length > 1) clock.play(); else { clock.pause(); clock.show(0); }
     draw();
   } catch (err) {
@@ -131,13 +142,21 @@ function paint() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     return;
   }
-  const size = { width: handle.width, height: handle.height };
-  const view = viewFactor(canvas, size, 1);
-  const w = Math.max(1, Math.round(size.width * view)), h = Math.max(1, Math.round(size.height * view));
+  const ink = inkSize(handle), at = look.lay(ink.width, ink.height);
+  const w = Math.max(1, Math.round(ink.width * at.k)), h = Math.max(1, Math.round(ink.height * at.k));
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
+  const how = [at.width, at.height, at.x, at.y, at.pixels].map(v => typeof v === 'number' ? v.toFixed(1) : v).join(' ');
+  if (how !== laid) {
+    laid = how;
+    Object.assign(canvas.style, { width: at.width + 'px', height: at.height + 'px', maxWidth: 'none', maxHeight: 'none',
+      transform: at.x || at.y ? `translate(${at.x}px, ${at.y}px)` : '' });
+    canvas.classList.toggle('zm-pixels', at.pixels);
+    zoomed.textContent = Math.abs(at.zoom - 1) < 1e-3 && !at.x && !at.y ? 'fit' : `${Math.round(at.scale * 100)} %`;
+    look.moved();
+  }
   ctx.clearRect(0, 0, w, h);
   ctx.drawImage(handle.frame(Math.min(clock.tick, handle.length - 1)), 0, 0, w, h);
-  bar.output({ width: handle.width, height: handle.height });
+  bar.output({ width: ink.width, height: ink.height });
   bar.say(`${shown.title || shown.id} · ${shown.type}` + (handle.length > 1 ? ` · frame ${clock.tick + 1} of ${handle.length}` : ''));
 }
