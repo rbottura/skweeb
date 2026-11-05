@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="cluster — the scene: the suite's apps mounted one at a time, each in place of the last.">
+  <title>cluster — skweeb</title>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!--
+    The scene (main.js, S9c): a strip naming the apps, and the one asked for
+    mounted beside it through its module — `#particles` in the address, the
+    vault when it names none. Each app's own page still mounts it alone.
+  -->
+  <script type="module">
+    import { start } from './main.js';
+    start(document.body);
+  </script>
+</body>
+</html>
