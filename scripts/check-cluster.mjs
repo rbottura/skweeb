@@ -109,36 +109,7 @@ c.ok('…and nothing asks for frames the vault alone did not', after <= still, `
 const places = [...new Set(Object.values(boxes))];
 c.ok('every app\'s viewer in the same place, to the pixel: the canvas does not move', places.length === 1, JSON.stringify(boxes).slice(0, 400));
 c.ok('…the scene\'s vault beside it all along, the same one', await page.eval(`document.querySelector('.cl-side .vp') === window.__side`));
-// Its stylesheet the scene's: between one app's and the next's it never goes, so the vault never jumps (S9g).
-await page.eval(`(() => { window.__look = new Set(); let on = true;
-  const probe = document.querySelector('.cl-side .vp-grid--top > .vp-card:not([data-type="set"])').dataset.id;
-  const look = () => { const body = document.querySelector('.cl-side .vp-body'), grid = body.querySelector('.vp-grid'),
-    card = body.querySelector('.vp-card[data-id="' + probe + '"]'), r = card.getBoundingClientRect();
-    window.__look.add([getComputedStyle(body).paddingLeft, getComputedStyle(grid).gridTemplateColumns, Math.round(r.width), Math.round(r.height)].join(' '));
-    if (on) requestAnimationFrame(look); };
-  requestAnimationFrame(look); window.__unlook = () => { on = false; return [...window.__look]; }; })()`);
-await open('fractals');
-await open('grid');
-const sizes = await page.eval(`window.__unlook()`);
-c.ok('…and still through two switches: its padding, its columns, its cards\' size the same every frame', sizes.length === 1, JSON.stringify(sizes).slice(0, 300));
-// The app's own first, then the rest (S9g): a line naming each part, the app's loose objects all in the first.
-const madeBy = Object.fromEntries(((await (await fetch(c.base + '/api/vault')).json()).objects || [])
-  .map(r => [r.id, String((r.origin && r.origin.app) || '').split('/')[0]]));
-const parts = () => page.eval(`(() => { const body = document.querySelector('.cl-side .vp-body'), grids = [...body.querySelectorAll(':scope > .vp-grid--top')];
-  const loose = g => g ? [...g.querySelectorAll(':scope > .vp-card[data-id]')].map(k => k.dataset.id) : [];
-  return { heads: [...body.querySelectorAll(':scope > .vp-part')].map(p => p.textContent), own: loose(grids[0]), rest: loose(grids[1]) }; })()`);
-const inGrid = await parts();
-c.ok('beside grid, the scene\'s vault shows grid\'s own first, then the rest', /^grid · \d+$/.test(inGrid.heads[0] || '') && /^the rest · \d+$/.test(inGrid.heads[1] || '')
-  && inGrid.own.every(id => madeBy[id] === 'grid') && !inGrid.rest.some(id => madeBy[id] === 'grid'), JSON.stringify({ heads: inGrid.heads, own: inGrid.own.length, rest: inGrid.rest.length }));
-await page.eval(`(() => { window.__moving = 0; let on = true; const side = document.querySelector('.cl-side');
-  const look = () => { window.__moving = Math.max(window.__moving, document.getAnimations().filter(a => a.effect && side.contains(a.effect.target)).length);
-    if (on) requestAnimationFrame(look); }; requestAnimationFrame(look); window.__unmove = () => { on = false; return window.__moving; }; })()`);
-await open('particles');
-const moved = await page.eval(`window.__unmove()`), inParticles = await parts();
-c.ok('…switched to particles: particles\' own first, the cards seen moving to their places', /^particles · \d+$/.test(inParticles.heads[0] || '')
-  && inParticles.own.every(id => madeBy[id] === 'particles') && moved > 0, `${inParticles.heads.join(' / ')}; ${moved} moving at once`);
-await open('vault');
-c.ok('…and the vault app beside it: every object as it came, no parts', !(await parts()).heads.length);
+// What the scene's vault does beside each app — still, the app's own first, dragged from — is check-cluster-vault's (S9g).
 const tabsNow = () => page.eval(`[...document.querySelectorAll('.cl-tabs .cl-tab')].map(t => t.textContent + (t.getAttribute('aria-selected') === 'true' ? '*' : ''))`);
 const shownSides = () => page.eval(`[...document.querySelectorAll('.cl-host .app-main > .app-side')].filter(s => getComputedStyle(s).display !== 'none').map(s => s.id)`);
 await open('particles');

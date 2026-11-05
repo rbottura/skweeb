@@ -40,6 +40,7 @@ import { arrange, kinBox, columnsIn, densityOf, fit, lineageOn, rememberLineage,
 import { wireImport } from './vault-import.js';
 import { bag, held } from './scope.js';
 import { flip } from './flip.js';
+import { takes } from './vault-drag.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -149,8 +150,8 @@ export class VaultPanel {
   /** Ask the server again, then repaint. */
   async refresh() {
     await Vault.refresh();
-    // A smart object is taken for what it binds — a project saved is a `skw` since S6b.
-    const ours = rows => rows.filter(r => !this._accepts || this._accepts.includes(r.type) || (r.type === 'skw' && this._accepts.includes(r.binds)));
+    // A smart object is taken for what it binds — a project saved is a `skw` since S6b — as a field takes one dropped.
+    const ours = rows => rows.filter(r => takes({ accepts: this._accepts }, r));
     const rows = ours(await Vault.list(this._filter));
     const trashed = ours(await Vault.list({ ...this._filter, trash: true }));
     this._trashBtn.textContent = 'trash' + (trashed.length ? ' ' + trashed.length : '');
@@ -313,7 +314,7 @@ export class VaultPanel {
   }
 
   _cardFor(row) {
-    const card = objectCard(row, { on: row.id === this._current,
+    const card = objectCard(row, { on: row.id === this._current, drag: !this._inTrash,
       onClick: e => this._modClick(e, [row.id]) || this._openDetail(row.id) });
     card.classList.toggle('vp-card--picked', this._selected.has(row.id));
     this._cards.set(row.id, card);

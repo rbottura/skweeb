@@ -335,6 +335,14 @@ textarea.pp-text { resize: vertical; }
 .pp-object-sub { margin-top: 2px; font: 400 11px var(--font-num); color: var(--fg-2); }
 .pp-object-actions { display: flex; gap: 6px; margin-top: 8px; }
 
+/* An object dragged from the vault (core/vault-drag.js): every field that would take it lit, the one under it
+   filled; a folded head over one says so — rest the drag there and it opens. */
+.pp-object-field { border-radius: var(--radius); transition: background 90ms, outline-color 90ms; }
+.skw-drop.skw-takes { outline: 1px dashed var(--accent); outline-offset: -1px; }
+.skw-drop.skw-over { outline-style: solid; background: var(--accent-soft); }
+.skw-drop.skw-takes * { pointer-events: none; }
+.dr-head.skw-spring, .pp-head .skw-spring { color: var(--accent); }
+
 /* ── The sequence player (core/Transport.js) ──────────────────────────────── */
 
 /* The player, as After Effects' preview: its buttons and timecode, the loop a ruler under them. */

@@ -6,6 +6,8 @@
  * the card is the open one and what a click does.
  */
 
+import { dragOut } from './vault-drag.js';
+
 /** Files inside an object folder are served straight from the vault. */
 export const fileUrl = (id, file) => '/vault/objects/' + id + '/' + file;
 
@@ -21,8 +23,9 @@ const el = (tag, cls, text) => {
  * @param {object} opts
  * @param {boolean} opts.on     it is the object open in the drawer
  * @param {(e:MouseEvent)=>void} opts.onClick
+ * @param {boolean} [opts.drag]  dragged onto a field that takes it (vault-drag.js) — not from the trash
  */
-export function objectCard(row, { on, onClick }) {
+export function objectCard(row, { on, onClick, drag = true }) {
   const card = el('button', 'vp-card' + (on ? ' vp-card--on' : ''));
   card.type = 'button';
   card.dataset.id = row.id;            // the object it shows: a scene, a check, finds it by its id
@@ -50,6 +53,7 @@ export function objectCard(row, { on, onClick }) {
 
   card.append(meta);
   card.addEventListener('click', onClick);
+  if (drag) dragOut(card, row);
   return card;
 }
 

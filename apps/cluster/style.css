@@ -156,6 +156,7 @@
 .cl-side .vp-kin > .vp-card ~ .vp-card::before, .cl-side .vp-kin > .vp-cell ~ .vp-cell::before { display: none; }
 /* A folder two pictures wide, its name kept; open, its strip across the grid. */
 .cl-side .vp-fcard { grid-column: span 2; }
+.cl-side .vp-fcard--open, .cl-side .vp-fcard--open:hover { color: var(--fg); box-shadow: 0 0 0 2px var(--accent); }
 .cl-side .vp-fcard::before { top: -6px; height: 6px; }
 .cl-side .vp-fcard .vp-meta { padding: 3px 6px 4px; }
 .cl-side .vp-fcard .vp-name { font-size: 11px; }
@@ -207,6 +208,7 @@
 }
 
 .cl-tab:hover { color: var(--fg-2); }
+.cl-tab.skw-spring { color: var(--accent); }          /* its panel would take what is dragged from the vault */
 .cl-tab[aria-selected="true"] { color: var(--fg); }
 .cl-tab[aria-selected="true"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 1px; background: var(--accent); }
 
