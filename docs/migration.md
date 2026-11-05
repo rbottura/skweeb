@@ -93,3 +93,19 @@ gitignored and live in `sketch-2-print`.
 
 **p5 versions across the three:** 1.5.0, 1.5.0, 1.9.0. The suite picks one and
 every app uses instance mode against it.
+
+**BEC_2025** — a fourth ancestor, never ported: `core/formats.js` took its
+formats. Measured 2026-11-05 for its layers (inbox, that day). A p5 sketch in
+WEBGL: a 3D grid and its parameters, made for a communication project's art
+direction with the designer of its identity, whom the README credits, and
+deployed on Netlify. Each format marked `hasLayers` — poster, landscape,
+portrait, square — has two slots of pictures, the titles and the infos: one
+of the designer's PNGs with alpha, listed by format in `assets/urls.json`
+(`#` for none), or a JPG or PNG uploaded. At export `printOutLayers` merges
+three canvases, bottom first — the titles, the grid's render, the infos —
+into one PNG at the export's pixel density (`saveCanvas`), so the type is
+pixels: sharp on a screen, soft in print. `p5.capture` is in its libraries,
+commented out of the page; the grid's edges are set back from a JSON
+(`applyNewSettings`), and saving presets was still the README's to-do.
+The source is on disk at
+`C:\Users\bottu\Documents\code\BEC_2025`; read it, not this.

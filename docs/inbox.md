@@ -24,9 +24,35 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing, 2026-11-04: the day's ideas went onto the plan and into `docs/scene.md`.
+Nothing, 2026-11-05: the day's ideas went onto the plan, into
+`docs/scene.md` and into the roadmap's *Still open*.
 
 ## Sorted
+
+- **2026-11-05 — BEC's layers again, the print kept vector, a project made
+  by several.** BEC_2025 is the ancestor `core/formats.js` took its formats
+  from: "une partie de l'interface servait à ajouter des images avec des
+  couches alpha devant le rendu du viewer pour ainsi itérer les versions de
+  générations de la grille pour jouer avec la modularité et l'infinité du
+  système et sélectionner les images, séquences et lots de paramètres qu'on
+  curatait nous-mêmes … ces images sont des compositions de textes donc pas
+  idéal car la rasterisation de texte produisait des images de mauvaise
+  qualité pour l'impression". Then: "j'aimerais ouvrir skweeb à cette vision
+  d'avoir des fonctionnalités soit de chargement de couches overlay issues
+  de pdf ou fichiers images comme BEC mais en augmentant la fonctionnalité
+  pour l'imprimer sans perdre la qualité vectorielle des données textes,
+  voire collaborer en live sur l'appli avec 2 utilisateurs au moins, l'un
+  sur une app de composition de texte (ou mise en page) l'autre sur l'app
+  de particules ou cluster pour paramétrer le système visuel choisi … un
+  troisième qui upload (ou même plus loin, modifie en ligne) sa font
+  customisée pour le projet … 2 creative coders, l'un typo et l'autre sur
+  des formes graphiques plus illustratives et un 3e étant designer
+  graphique qui gère les gabarits des formats, les positions des éléments,
+  leur taille". What BEC's layers did, read in its source, is in
+  `docs/migration.md`. → the roadmap's *Still open*, 3: what is there
+  already and what is missing; a milestone, and when, on the board's
+  *Waiting on the author*; BEC's layers by format, a field for the gabarit
+  (S8) to weigh.
 
 - **2026-11-05 — cluster seen: one panel, a closer vault, the motion, the
   player's lanes, the space now.** "pour la mise du bench initial je me

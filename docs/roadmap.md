@@ -352,6 +352,32 @@ plan it was built to, is in `apps/compose/STATUS.md`.
 2. **The online skweeboteque.** Wanted, not now — it needs a server, and it is
    also what turns sandboxing from theory into work. Nothing in the local design
    blocks it; the vault interface is the seam it would go behind.
+3. **A project made by several, BEC's way** (inbox, 2026-11-05). Wanted:
+   pictures and PDF pages laid over the render or under it, by format, as
+   BEC_2025 laid its titles and infos (`docs/migration.md`); a print that
+   keeps their type vector; a project's people live on one stack — a
+   typographer setting text, an illustrator on particles or cluster, a
+   designer holding the formats' gabarits, places and sizes; one day the
+   project's own font uploaded, then edited. There already: a PNG with
+   alpha comes in by *+ pictures*, a `shape`, and goes on the Stack over or
+   under any app's canvas at an opacity and a blend (M11); the stack saves
+   as a page, printed in tiles — pixels throughout. Missing: the layers by
+   format, which is a gabarit (S8's type, its fields the author's); a PDF's
+   page as a layer, drawn by pdf.js; the print as a PDF — the render's
+   tiles as pictures, the layers' pages embedded as they are by pdf-lib,
+   and PDF has CSS's blends, so a stack's opacity and blend cost no pixels;
+   the suite's own text as text, its font embedded, as OFL allows —
+   compose's "no PDF for now" reopened. And the live stack across browsers:
+   one browser's today (`BroadcastChannel`), another hearing only saved
+   versions by the server's events; relayed by the server, each person's
+   window keeps its own layer, one writer a layer as now. Off the tailnet,
+   a machine shared by Tailscale keeps its rule; a server open to the web
+   is 2's question. The project's font is a `font` object with its licence
+   record (rule 5) — and a PDF brings its fonts embedded, rule 5's to say
+   whether that is a font entering the vault. The libraries are the
+   author's call (rule 8), as is which app sets the text — ckt, compose, or
+   one of its own. A milestone, and when: `docs/plan.md`, *Waiting on the
+   author*.
 Closed, their reasoning by date in the decisions: video output (2026-09-22,
 frames plus ffmpeg — no muxer); WebGPU over WebGL2 for the GPU kit, and a GPU
 render replaying within a tolerance across machines (both 2026-09-26); M10's

@@ -142,7 +142,13 @@ Each with what happens if nothing is said.
   puppet would turn the camera on there, and its address — rewritten every
   change — would be the scene's. If nothing is said: pages of their own.
 - **The gabarit, a type** (S8): a format and its guides as an object, made
-  for its format (`docs/scene.md`) — its fields to confirm before S8.
+  for its format (`docs/scene.md`) — its fields to confirm before S8; BEC's
+  layers by format, titles under the render and infos over it, one to weigh.
+- **A project made by several** (inbox, 2026-11-05; the roadmap's *Still
+  open*, 3): pictures and PDFs laid over the render, the print kept vector,
+  a typographer, an illustrator and a designer live on one stack. A
+  milestone, and when; pdf.js and pdf-lib; the app that sets the text; a
+  machine shared beyond the tailnet. If nothing is said: after M12.
 - **Notes on each app** (U9): given in part on the bench, 2026-11-03.
 - **The slug's back and side**, drawn in the gamepad as the front was (P5).
 - **An evening in OBS with the puppet** (P0): sway, rise, wobble and the
