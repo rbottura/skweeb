@@ -24,6 +24,12 @@ app still opens alone on its own page; the scene is one more host.
   hides, grid's maker, gains or loses its tab. An object opened in the
   scene's vault is a tab beside them, its detail, its picture there unless
   the vault app draws it; closed, the panel shown before it again.
+- **The panels leave and come** (`scene/panels`, 2026-11-05), as the
+  bench's `swapping`: at a switch the properties — the tabs, the panel, the
+  detail — slide out to their side and fade in 240 ms, the app going is
+  taken out once they are gone, and the next app's slide in; the viewer and
+  the vault do not move. Asked again meanwhile, they go out once; with less
+  motion asked of the system, none.
 - **The last frame held** (`held.js`): as an app is taken out its frame is
   copied over where its canvas was, and stays until the next app's canvas
   is first drawn on — watched from its build, before the app starts
@@ -83,14 +89,13 @@ app still opens alone on its own page; the scene is one more host.
   page's memory is where it is kept.
 - **A switch while an app saves** takes it out mid-save: the save goes on
   in the background and lands in the vault, but nothing says so.
-- **The panels do not move yet**: they are taken out and put in at once;
-  leaving and coming as the bench has them is the next brick.
 - **The vault beside the viewer is narrow**: its grid a column of cards,
   its head three rows. Keys and history, the bench's other side views, are
   not there yet; nor the bench's focus, the viewer alone.
 
 ## Next
 
-S9c's last brick (`docs/plan.md`): the panels leaving and coming as the
-bench has them — out to their side as an app goes, in as the next comes,
-the viewer and the vault still.
+S9c is done. What the scene asks next is the author's to see first: the
+bench's layout in the apps' own pages, or cluster as it is; the bench's
+other side views — the keys, the history — and its focus, the viewer
+alone; then S11's bench for the space of objects (`docs/plan.md`).

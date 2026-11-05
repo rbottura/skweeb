@@ -12,28 +12,18 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-05: *cluster*, the scene's host (S9c)
+### Newest — 2026-11-05: *cluster*, the scene (S9c, its five bricks)
 
-- **cluster** (`apps/cluster/`): the suite's apps mounted in one page one
-  at a time, through their modules — a strip names them, a click mounts one
-  in place of the last, nothing of it left; the vault first; the app in the
-  address, `#particles`, Back to the one before, `?open=<id>` the app's to
-  read; the search finds the apps by name — `check-cluster`. Each keeps its
-  own canvas and layout: the bricks after (`apps/cluster/STATUS.md`).
-- **An app back as it was left**: mounted again, asked nothing, every app
-  opens on what it was doing when it was taken out — its recipe, its frame,
-  the smart object S saves into — as on an object asked for
-  (`core/mount.js` `keep`, `core/reopen.js`). particles' and compose's
-  ways out moved to a `leaving.js` each, as the rig's.
-- **The links between apps, in place**: in cluster, *Open in … ↗*, *Place
-  in compose ↗*, *Rig this ↗* and the graph's open-in mount that app in the
-  scene on its object, where alone they open a tab (`core/reopen.js`
-  `follow`, `takeLinks`); Back is the app before, as it was left.
-- **The bench's layout, the canvas fixed** (the author's yes): in cluster
-  the strip, the scene's vault, the viewer — in one place to the pixel for
-  every app — and the properties, an app's panels a tab each, an object
-  opened in the vault a tab beside them; the last frame of the app going
-  held over its canvas until the next draws.
+- **cluster** (`apps/cluster/`, `apps/cluster/STATUS.md`): the suite's apps
+  in one page one at a time, through their modules, laid as the bench is —
+  the author's yes — a strip of apps, the scene's vault, the viewer in one
+  place to the pixel for every app, the properties an app's panels a tab
+  each; at a switch the panels leave and the next app's come, its last
+  frame held over its canvas until the next draws. The app in the address,
+  `#particles`; mounted again it comes back as it was left, recipe, frame
+  and smart object (`core/mount.js` `keep`); *Open in … ↗* and the other
+  links between apps mount theirs in place (`core/reopen.js` `follow`) —
+  `check-cluster`. particles' and compose's ways out are a `leaving.js`.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -42,7 +32,6 @@ sorts them.
   beside it and played if it moves, the detail its facts only (the author's
   C, 2026-11-05); it makes nothing, so its title bar has no Save and no
   Export — `check-vault`, `check-mount`.
-
 - **Every app on core's kit is `mount(host)` and `unmount()`** — particles,
   grid, ckt, compose, map, the rig, filter, fractals, the 3D app
   (`core/mount.js`): built in any host, taken out with nothing left — what
@@ -341,12 +330,13 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9c's last brick: the panels leaving and coming** — branch
-`scene/panels` from `main`. As the bench does (its `swapping`, 240 ms): at a
-switch the app's panels and its tabs slide out to their side and fade, the
-next app's come in, the viewer and the scene's vault still; the app going is
-taken out once its panels are gone, so two apps' stylesheets never meet.
-`check-cluster` sees the panels move and the viewer not.
+**The author looks at cluster** — `node server.js`, then
+`http://127.0.0.1:3000/apps/cluster/`: S9c is done, and the bench's layout
+was to be shown before it spreads. Then, by what the author says, one of:
+the bench's layout in the apps' own pages; the scene's other side views —
+the keys, the history — and the bench's focus, the viewer alone; or S11,
+the space viewer's own bench, on an artifact as the first bench was
+(`docs/scene.md`, *The space viewer gets a bench of its own first*).
 
 ## Parked decisions
 
