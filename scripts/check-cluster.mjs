@@ -109,6 +109,18 @@ c.ok('…and nothing asks for frames the vault alone did not', after <= still, `
 const places = [...new Set(Object.values(boxes))];
 c.ok('every app\'s viewer in the same place, to the pixel: the canvas does not move', places.length === 1, JSON.stringify(boxes).slice(0, 400));
 c.ok('…the scene\'s vault beside it all along, the same one', await page.eval(`document.querySelector('.cl-side .vp') === window.__side`));
+// Its stylesheet the scene's: between one app's and the next's it never goes, so the vault never jumps (S9g).
+await page.eval(`(() => { window.__look = new Set(); let on = true;
+  const probe = document.querySelector('.cl-side .vp-grid--top > .vp-card:not([data-type="set"])').dataset.id;
+  const look = () => { const body = document.querySelector('.cl-side .vp-body'), grid = body.querySelector('.vp-grid'),
+    card = body.querySelector('.vp-card[data-id="' + probe + '"]'), r = card.getBoundingClientRect();
+    window.__look.add([getComputedStyle(body).paddingLeft, getComputedStyle(grid).gridTemplateColumns, Math.round(r.width), Math.round(r.height)].join(' '));
+    if (on) requestAnimationFrame(look); };
+  requestAnimationFrame(look); window.__unlook = () => { on = false; return [...window.__look]; }; })()`);
+await open('fractals');
+await open('grid');
+const sizes = await page.eval(`window.__unlook()`);
+c.ok('…and still through two switches: its padding, its columns, its cards\' size the same every frame', sizes.length === 1, JSON.stringify(sizes).slice(0, 300));
 const tabsNow = () => page.eval(`[...document.querySelectorAll('.cl-tabs .cl-tab')].map(t => t.textContent + (t.getAttribute('aria-selected') === 'true' ? '*' : ''))`);
 const shownSides = () => page.eval(`[...document.querySelectorAll('.cl-host .app-main > .app-side')].filter(s => getComputedStyle(s).display !== 'none').map(s => s.id)`);
 await open('particles');

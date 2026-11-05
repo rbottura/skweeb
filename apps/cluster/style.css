@@ -21,9 +21,15 @@
    end of the tabs' row — the author, the same day: "une liste de catégories
    dépliables mais tout dans une même section". The vault beside the viewer
    is a grid of pictures, four columns: "une vue trop restreinte" else.
+
+   The vault's stylesheet is the scene's, as the vault is: every app imports
+   it too, and an app's stylesheet goes as the app does — so between one app
+   and the next the vault had none, and jumped (the author, 2026-11-05: "comme
+   s'il se redimensionne d'un coup puis encore une fois").
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
+@import '../../core/vault-panel.css';
 
 .cluster {
   --strip: 92px;
