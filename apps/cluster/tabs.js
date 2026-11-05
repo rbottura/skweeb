@@ -11,6 +11,10 @@
  * each is only shown or not (`cl-shown`). One the app hides or shows — grid's
  * maker — loses or gains its tab as it does.
  *
+ * An object dragged from the vault (core/vault-drag.js): a tab whose panel
+ * holds a field that would take it is marked, and opens as the drag rests on
+ * it — the field may be in a panel not shown.
+ *
  * No DOM at import.
  */
 
@@ -40,6 +44,9 @@ export function propsTabs({ bar, detail, none }) {
   let open = null;          // the detail's label — its object's type — while one is open
   let on = null;            // the tab shown: a panel's id, or DETAIL
   let back = null;          // the panel shown before the detail took the column
+  let dragging = false;     // an object from the vault under way: the tabs whose panel would take it marked
+  let said = '';            // what the bar says, as last built
+  document.addEventListener('vault:drag', e => { dragging = !!e.detail.row; paint(); });
 
   /** The panels showing now, the detail after them. */
   function tabs() {
@@ -49,17 +56,26 @@ export function propsTabs({ bar, detail, none }) {
     return out;
   }
 
+  /**
+   * The tabs as they are. Asked often — on every change in the app's panels, a frame's readout among them —
+   * the bar is built again only when what it says changed: a tab hovered, or rested on by a drag, stays itself.
+   */
   function paint() {
     const all = tabs();
     if (!all.some(t => t.key === on)) on = (all.find(t => t.key === (app && kept.get(app))) || all[0] || {}).key || null;
-    bar.replaceChildren(...all.map(t => {
-      const b = el('button', 'cl-tab' + (t.key === DETAIL ? ' cl-tab--detail' : ''), t.label);
-      b.type = 'button';
-      b.setAttribute('role', 'tab');
-      b.setAttribute('aria-selected', String(t.key === on));
-      b.addEventListener('click', () => choose(t.key));
-      return b;
-    }));
+    const takes = all.map(t => dragging && t.key !== on && !!t.el.querySelector('.skw-takes'));
+    const says = JSON.stringify([all.map(t => [t.key, t.label]), on, takes]);
+    if (says !== said) {
+      said = says;
+      bar.replaceChildren(...all.map((t, i) => {
+        const b = el('button', 'cl-tab' + (t.key === DETAIL ? ' cl-tab--detail' : '') + (takes[i] ? ' skw-spring' : ''), t.label);
+        b.type = 'button';
+        b.setAttribute('role', 'tab');
+        b.setAttribute('aria-selected', String(t.key === on));
+        b.addEventListener('click', () => choose(t.key));
+        return b;
+      }));
+    }
     for (const t of all) t.el.classList.toggle('cl-shown', t.key === on);
     if (!open) detail.classList.remove('cl-shown');
     none.hidden = all.length > 0;

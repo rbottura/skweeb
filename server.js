@@ -142,8 +142,12 @@ function indexRow(o) {
     // …and what it binds (S6b: an app's project), so a picker that takes a sequence takes one made a smart object.
     ...(o.type === 'skw' ? { version: o.version || 1, binds: (o.recipe && o.recipe.type) || null } : {}),
     // What a set was made as — null for none — so a picker can tell a material
-    // from a brush family without opening every folder (core/uses.js).
-    ...(o.type === 'set' ? { role: o.recipe && typeof o.recipe.role === 'string' ? o.recipe.role : null } : {}),
+    // from a brush family without opening every folder (core/uses.js); and its
+    // members, so the vault files a set with the folder holding exactly them.
+    ...(o.type === 'set' ? {
+      role: o.recipe && typeof o.recipe.role === 'string' ? o.recipe.role : null,
+      members: o.recipe && Array.isArray(o.recipe.members) ? o.recipe.members.filter(id => typeof id === 'string') : [],
+    } : {}),
   };
 }
 

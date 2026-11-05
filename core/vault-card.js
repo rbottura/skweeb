@@ -6,6 +6,8 @@
  * the card is the open one and what a click does.
  */
 
+import { dragOut } from './vault-drag.js';
+
 /** Files inside an object folder are served straight from the vault. */
 export const fileUrl = (id, file) => '/vault/objects/' + id + '/' + file;
 
@@ -21,13 +23,16 @@ const el = (tag, cls, text) => {
  * @param {object} opts
  * @param {boolean} opts.on     it is the object open in the drawer
  * @param {(e:MouseEvent)=>void} opts.onClick
+ * @param {boolean} [opts.drag]  dragged onto a field that takes it (vault-drag.js) — not from the trash
  */
-export function objectCard(row, { on, onClick }) {
+export function objectCard(row, { on, onClick, drag = true }) {
   const card = el('button', 'vp-card' + (on ? ' vp-card--on' : ''));
   card.type = 'button';
   card.dataset.id = row.id;            // the object it shows: a scene, a check, finds it by its id
   card.dataset.type = row.type;        // what it is, for a grid of pictures alone to mark (cluster's)
   card.title = `${row.title || row.id} — ${row.type}`;
+  // A set's picture is a strip of its members: its shape, for a host that lays it across the grid (cluster's).
+  if (row.type === 'set' && row.render && row.render.w && row.render.h) card.style.setProperty('--vp-ratio', `${row.render.w} / ${row.render.h}`);
 
   const img = el('img', 'vp-thumb');
   img.loading = 'lazy';
@@ -48,6 +53,7 @@ export function objectCard(row, { on, onClick }) {
 
   card.append(meta);
   card.addEventListener('click', onClick);
+  if (drag) dragOut(card, row);
   return card;
 }
 

@@ -223,6 +223,19 @@ app keeps its own canvas and its own layout. Then, a brick each:
    sections fold in it with a hairline between and a chevron, the height
    moving; the vault a grid of pictures, four columns, its density three
    tokens of core's vault panel the scene sets.
+6. **The scene's vault, beside an app** (S9g, `scene/side-vault`, landed
+   2026-11-05). The author, on S9d: "la transition du canvas et du panel
+   droit est pas mal", but the vault "jumpy … comme s'il se redimensionne
+   d'un coup puis encore une fois" — its stylesheet came with each app's and
+   went with it, so between two apps it had none: the scene's now. Then
+   "un filtrage automatique des objets du vault issus de l'app courante …
+   puis le reste": the app's own first, a line naming each part, the cards
+   sliding to their places (`core/flip.js`). An object dragged from it onto
+   a field that takes it — "comme un sprite dans fractals" — every field
+   that would lit, a folded section or a tab over one opening as the drag
+   rests on it (`core/vault-drag.js`). And the legacy grid's sets, "trop
+   petits et redondants avec les folders": kept, grid's materials, each in
+   the folder of exactly its tiles, first, across the grid.
 
 ### The motion, case by case (S9e) — asked 2026-11-05
 
@@ -236,7 +249,9 @@ rapide soit-elle selon le cas de figure, pareil pour adapter le player en
 circonstances". The jolt today is the middle of a switch: the panels out
 (240 ms), then everything else of the next app in one frame — its title
 bar's acts, its viewer's head, its rulers, its picture at its own size, its
-player or none, its status bar — then the panels in (240 ms).
+player or none, its status bar — then the panels in (240 ms). Seen
+again by the author after S9d: the canvas and the right panel's way "pas
+mal"; the vault's jump was its stylesheet (S9g).
 
 Three kinds of element, the proposal to go through:
 

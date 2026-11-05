@@ -25,6 +25,11 @@ sorts them.
   and smart object (`core/mount.js` `keep`); *Open in … ↗* and the other
   links between apps mount theirs in place (`core/reopen.js` `follow`) —
   `check-cluster`. particles' and compose's ways out are a `leaving.js`.
+- **The scene's vault beside an app** (S9g): still at a switch, its
+  stylesheet the scene's; the app's own objects first, the cards sliding
+  (`core/flip.js`); a card dragged onto any app's object field
+  (`core/vault-drag.js`); a set in the folder of its tiles —
+  `check-cluster-vault`.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -256,11 +261,12 @@ all of them, and all pass (2026-11-05). Newest: `scope` and `reach`
 before them M11's — `live`, `stack`, `place`, `smart` — the print's —
 `windowed`, `stage-still`, `png` — and the 3D app's seven.
 
-Thirty-four browser checks, each a command in `CLAUDE.md`, run several at a
+Thirty-five browser checks, each a command in `CLAUDE.md`, run several at a
 time by `scripts/checks.mjs`: each its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-cluster`, the scene, and
+throws or its console is not quiet. Newest: `check-cluster-vault`, the
+scene's vault beside each app (S9g); `check-cluster`, the scene, and
 `check-mount`, an app unmounted with nothing left (S9); `check-puppet`, the
 puppet on a fake camera, sent and followed by a page in OBS; M11's four —
 `check-live`, `check-send`, `check-smart`, `check-page` — `check-print`
@@ -333,9 +339,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 **The author tries S11's bench** — https://claude.ai/artifact/W6qyTQ6hG45rkaLWD4nwYL,
 version 1 (`docs/scene.md`, *The space viewer gets a bench of its own
-first*): its five tests, its parameters, *Keep* for what works. And goes
-through S9e's cases, the motion at a switch, in `docs/scene.md`. Then, by
-what is said: the bench's version 2, or S9e's first pass in cluster.
+first*): its five tests, its parameters, *Keep* for what works — and
+S9g in cluster, the vault beside each app, a card dragged onto a field.
+And goes through S9e's cases, the motion at a switch, in `docs/scene.md`.
+Then, by what is said: the bench's version 2, or S9e's first pass in
+cluster.
 
 ## Parked decisions
 

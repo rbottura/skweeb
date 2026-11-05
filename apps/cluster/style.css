@@ -21,9 +21,15 @@
    end of the tabs' row — the author, the same day: "une liste de catégories
    dépliables mais tout dans une même section". The vault beside the viewer
    is a grid of pictures, four columns: "une vue trop restreinte" else.
+
+   The vault's stylesheet is the scene's, as the vault is: every app imports
+   it too, and an app's stylesheet goes as the app does — so between one app
+   and the next the vault had none, and jumped (the author, 2026-11-05: "comme
+   s'il se redimensionne d'un coup puis encore une fois").
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
+@import '../../core/vault-panel.css';
 
 .cluster {
   --strip: 92px;
@@ -136,6 +142,10 @@
 .cl-side .vp-card--on, .cl-side .vp-card--on:hover { background: none; box-shadow: 0 0 0 2px var(--accent); }
 .cl-side .vp-thumb { border: 0; background-size: 8px 8px; }
 .cl-side .vp-card:not(.vp-fcard) > .vp-meta { display: none; }
+/* A set is a row of its members — a ramp, a family: across the grid, its picture at its own shape,
+   first in the folder of its members when it has one (core/vault-folder.js). */
+.cl-side .vp-card[data-type="set"] { grid-column: 1 / -1; }
+.cl-side .vp-card[data-type="set"] > .vp-thumb { aspect-ratio: var(--vp-ratio, 6); max-height: 72px; }
 /* A sequence says so: a small play at its corner. */
 .cl-side .vp-card[data-type="sequence"]::after { content: ""; position: absolute; right: 4px; bottom: 4px; border: 4px solid transparent;
   border-right: 0; border-left: 6px solid var(--fg); filter: drop-shadow(0 0 1px #000); pointer-events: none; }
@@ -146,6 +156,7 @@
 .cl-side .vp-kin > .vp-card ~ .vp-card::before, .cl-side .vp-kin > .vp-cell ~ .vp-cell::before { display: none; }
 /* A folder two pictures wide, its name kept; open, its strip across the grid. */
 .cl-side .vp-fcard { grid-column: span 2; }
+.cl-side .vp-fcard--open, .cl-side .vp-fcard--open:hover { color: var(--fg); box-shadow: 0 0 0 2px var(--accent); }
 .cl-side .vp-fcard::before { top: -6px; height: 6px; }
 .cl-side .vp-fcard .vp-meta { padding: 3px 6px 4px; }
 .cl-side .vp-fcard .vp-name { font-size: 11px; }
@@ -197,6 +208,7 @@
 }
 
 .cl-tab:hover { color: var(--fg-2); }
+.cl-tab.skw-spring { color: var(--accent); }          /* its panel would take what is dragged from the vault */
 .cl-tab[aria-selected="true"] { color: var(--fg); }
 .cl-tab[aria-selected="true"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 1px; background: var(--accent); }
 

@@ -157,9 +157,12 @@ export function wireImport(root, onDone) {
   button.addEventListener('click', () => input.click());
   input.addEventListener('change', () => run(input.files));
   root.append(input);
-  root.addEventListener('dragover', e => { e.preventDefault(); root.classList.add('vp--drop'); });
+  // Files only: a card dragged out of the vault (vault-drag.js) is not pictures coming in.
+  const files = e => !!e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+  root.addEventListener('dragover', e => { if (!files(e)) return; e.preventDefault(); root.classList.add('vp--drop'); });
   root.addEventListener('dragleave', e => { if (e.target === root) root.classList.remove('vp--drop'); });
   root.addEventListener('drop', e => {
+    if (!files(e)) return;
     // Stopped here: an app may take a drop on its page as its own source (filter does).
     e.preventDefault();
     e.stopPropagation();

@@ -11,9 +11,10 @@
  * Laid as the bench is (the author's yes, 2026-11-05): the strip, then the
  * scene's vault, then the app's viewer, then its properties — so the viewer,
  * its canvas in it, is in one place whatever app is round it (style.css).
- * The vault and the tab bar are the scene's and stay; the app brings its
- * title bar, its viewer, its panels — a tab each (tabs.js) — and its status
- * bar, laid in the scene's grid as they are. An object opened in the vault is
+ * The vault and the tab bar are the scene's and stay — the vault showing the
+ * app's own objects first, then the rest, its cards sliding to their places
+ * (S9g); the app brings its title bar, its viewer, its panels — a tab each
+ * (tabs.js) — and its status bar, laid in the scene's grid as they are. An object opened in the vault is
  * a tab beside the panels, its detail; the vault app draws it. As an app is
  * taken out its last frame is held where it was until the next draws its
  * first (held.js): the centre never flashes empty. And its panels leave
@@ -221,6 +222,7 @@ async function swap(ask) {
     now.ready = true;
     props.paint();
     tell();
+    vault.first = ask.name === FIRST ? null : ask.name;   // its own objects first in the scene's vault, then the rest
     await frame();                           // laid out where they leave from, before they move
     // Its panels in — unless another app was asked for meanwhile: they stay out, and it comes.
     if (now && now.n === ask.n && wanted === ask) scene.classList.remove('cl-out');

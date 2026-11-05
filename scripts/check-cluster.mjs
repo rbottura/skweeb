@@ -109,6 +109,7 @@ c.ok('…and nothing asks for frames the vault alone did not', after <= still, `
 const places = [...new Set(Object.values(boxes))];
 c.ok('every app\'s viewer in the same place, to the pixel: the canvas does not move', places.length === 1, JSON.stringify(boxes).slice(0, 400));
 c.ok('…the scene\'s vault beside it all along, the same one', await page.eval(`document.querySelector('.cl-side .vp') === window.__side`));
+// What the scene's vault does beside each app — still, the app's own first, dragged from — is check-cluster-vault's (S9g).
 const tabsNow = () => page.eval(`[...document.querySelectorAll('.cl-tabs .cl-tab')].map(t => t.textContent + (t.getAttribute('aria-selected') === 'true' ? '*' : ''))`);
 const shownSides = () => page.eval(`[...document.querySelectorAll('.cl-host .app-main > .app-side')].filter(s => getComputedStyle(s).display !== 'none').map(s => s.id)`);
 await open('particles');

@@ -124,6 +124,32 @@ export function arrange(shown, all, { kin, folderOf }) {
 }
 
 /**
+ * The app that made a row — its origin's, `rig/puppet` the rig's.
+ * @returns {string}
+ */
+export const madeBy = row => String((row.origin && row.origin.app) || '').split('/')[0];
+
+/**
+ * The app's own first, then the rest — the scene's vault beside an app (the
+ * author, 2026-11-05: "un filtrage automatique des objets du vault issus de
+ * l'app courante ouverte dans cluster puis le reste"). Arranged after, a
+ * folder or a kin holding one of the app's sits with the app's, so the items
+ * holding none come after every one that holds some (`holds`).
+ *
+ * @param {object[]} rows   newest first, and so each part
+ * @param {string} app
+ * @returns {{ rows: object[], own: number }}  the rows in that order, and how many are the app's
+ */
+export function ownFirst(rows, app) {
+  const own = rows.filter(r => madeBy(r) === app);
+  return { rows: [...own, ...rows.filter(r => madeBy(r) !== app)], own: own.length };
+}
+
+/** Whether one of `arrange`'s items holds a row the app made. */
+export const holds = (item, app) =>
+  (item.row ? [item.row] : item.kin ? item.kin.members : item.rows).some(r => madeBy(r) === app);
+
+/**
  * How many columns the grid has at a width — vault-panel.css: cards of 150px
  * at least, 14px gaps, 16px of padding each side; or the density a host set
  * (`densityOf`).

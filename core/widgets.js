@@ -20,6 +20,7 @@
 
 import * as Registry from './registry.js';
 import { Vault }     from './vault.js';
+import { dropOn }    from './vault-drag.js';
 import { numberBox, boxed, paintFill } from './numbox.js';
 
 const el = (tag, cls, text) => {
@@ -179,7 +180,8 @@ export const WIDGETS = {
    * lineage there is — nothing else records a parent.
    */
   object: ({ key, spec, value, set, panel }) => {
-    const wrap = el('div');
+    const wrap = el('div', 'pp-object-field');
+    dropOn(wrap, spec, row => set(row.id));      // or dragged here from the vault (core/vault-drag.js)
     const face = el('div', 'pp-object');
     const thumb = el('img', 'pp-object-thumb');
     thumb.alt = '';
@@ -202,7 +204,7 @@ export const WIDGETS = {
         thumb.removeAttribute('src');
         name.className = 'pp-object-name pp-empty';
         name.textContent = 'nothing chosen';
-        sub.textContent = (spec.accepts || []).join(' or ') || 'any object';
+        sub.textContent = ((spec.accepts || []).join(' or ') || 'any object') + ' · drop one here';
         return;
       }
       name.className = 'pp-object-name';

@@ -31,14 +31,16 @@
 import { Vault, isTrashed } from './vault.js';
 import { paintBar, deleteFlow } from './vault-trash.js';
 import { paintDetail, detailDrawer } from './vault-detail.js';
-import { folder, folderOf } from './vault-folder.js';
+import { folder, folderOf, filedWith } from './vault-folder.js';
 export { folderOf };
 import { reopenUrl, placeUrl, rigUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
 import { objectCard, pickableCell, fileUrl } from './vault-card.js';
-import { arrange, kinBox, columnsIn, densityOf, fit, lineageOn, rememberLineage } from './vault-kin.js';
+import { arrange, kinBox, columnsIn, densityOf, fit, lineageOn, rememberLineage, ownFirst, holds } from './vault-kin.js';
 import { wireImport } from './vault-import.js';
 import { bag, held } from './scope.js';
+import { flip } from './flip.js';
+import { takes } from './vault-drag.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -132,13 +134,24 @@ export class VaultPanel {
 
   get isOpen() { return this._open; }
 
+  /**
+   * The app whose own objects come first, then the rest, a line naming each
+   * part — the scene's vault beside that app (cluster) — or null, none.
+   * Laid again from the top, the cards sliding to their places.
+   */
+  set first(app) {
+    if ((app || null) === (this._first || null)) return;
+    this._first = app || null;
+    if (this._painted) this._paint(() => { this._body.scrollTop = 0; });
+  }
+
   // ── Data ───────────────────────────────────────────────────────────────────
 
   /** Ask the server again, then repaint. */
   async refresh() {
     await Vault.refresh();
-    // A smart object is taken for what it binds — a project saved is a `skw` since S6b.
-    const ours = rows => rows.filter(r => !this._accepts || this._accepts.includes(r.type) || (r.type === 'skw' && this._accepts.includes(r.binds)));
+    // A smart object is taken for what it binds — a project saved is a `skw` since S6b — as a field takes one dropped.
+    const ours = rows => rows.filter(r => takes({ accepts: this._accepts }, r));
     const rows = ours(await Vault.list(this._filter));
     const trashed = ours(await Vault.list({ ...this._filter, trash: true }));
     this._trashBtn.textContent = 'trash' + (trashed.length ? ' ' + trashed.length : '');
@@ -213,7 +226,15 @@ export class VaultPanel {
 
   // ── The grid ───────────────────────────────────────────────────────────────
 
-  _paint() {
+  /** The grid laid again — and, once it has been, each card seen sliding to its new place (core/flip.js). */
+  _paint(then) {
+    const lay = () => { this._lay(); if (then) then(); };
+    if (this._painted && this._open) flip(this._body, lay, { selector: ':scope > .vp-part, :scope > .vp-grid--top > [data-flip]' });
+    else lay();
+    this._painted = true;
+  }
+
+  _lay() {
     this._body.replaceChildren();
     this._cards = new Map();
     this._tiles = [];
@@ -247,20 +268,36 @@ export class VaultPanel {
       ? shown.length + ' objects'
       : shown.length + ' of ' + this._rows.length;
 
-    // Rows come newest first, so a folder or a kin sits where its newest member would.
-    const grid = el('div', 'vp-grid vp-grid--top');
+    // Rows come newest first, so a folder or a kin sits where its newest member would. Beside an app, its
+    // own first, then the rest: a grid each under a line, so the dense packing never mixes them.
+    const app = this._inTrash ? null : this._first, order = app ? ownFirst(shown, app) : { rows: shown, own: 0 };
     const cols = columnsIn(this._body.clientWidth, densityOf(this._body));
+    let grid, rest = false;
+    const part = (key, text) => {
+      if (app) {
+        const head = el('div', 'vp-part', text);
+        head.dataset.flip = 'part:' + key;
+        this._body.append(head);
+      }
+      this._body.append(grid = el('div', 'vp-grid vp-grid--top'));
+    };
+    part('own', `${app} · ${order.own || 'nothing yet'}`);
     this._kins = [];
-    for (const item of arrange(shown, Vault.index, { kin: this._kinOn && !this._inTrash, folderOf })) {
-      if (item.row) grid.append(this._cardFor(item.row));
+    const put = (node, key) => { node.dataset.flip = key; grid.append(node); };
+    for (const item of arrange(order.rows, Vault.index, { kin: this._kinOn && !this._inTrash, folderOf: filedWith(shown) })) {
+      if (app && !rest && !holds(item, app)) { rest = true; part('rest', `the rest · ${shown.length - order.own}`); }
+      if (item.row) put(this._cardFor(item.row), 'o:' + item.row.id);
       else if (item.kin) {
         const box = kinBox(item.kin, { card: row => this._cardFor(row), open: id => this._openDetail(id),
           select: (e, ids) => this._modClick(e, ids), cols });
         this._kins.push(box);
-        grid.append(box);
-      } else grid.append(...this._folder(item.folder, item.rows));
+        put(box, 'k:' + item.kin.members[0].id);
+      } else {
+        const [tile, strip] = this._folder(item.folder, item.rows);
+        put(tile, 'f:' + item.folder);
+        put(strip, 's:' + item.folder);
+      }
     }
-    this._body.append(grid);
   }
 
   _folder(name, rows) {
@@ -277,7 +314,7 @@ export class VaultPanel {
   }
 
   _cardFor(row) {
-    const card = objectCard(row, { on: row.id === this._current,
+    const card = objectCard(row, { on: row.id === this._current, drag: !this._inTrash,
       onClick: e => this._modClick(e, [row.id]) || this._openDetail(row.id) });
     card.classList.toggle('vp-card--picked', this._selected.has(row.id));
     this._cards.set(row.id, card);
