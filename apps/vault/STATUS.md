@@ -25,11 +25,12 @@ app that is open when nothing else is (`docs/scene.md`, *Planned*).
   and says so (rule 7).
 - **A module** (`core/mount.js`): `mount(host)` and `unmount()`, its page
   mounting it on itself — `check-mount`; the app itself — `check-vault`.
+- **In cluster** (S9c, 2026-11-05): the scene's vault is beside the viewer,
+  so the app builds no panel of its own there (`given.vault`); it draws what
+  that one opens (`chosen`), the detail its facts only in the properties.
 
 ## Next
 
-- In *cluster*: the canvas is the scene's, handed to the app mounted
-  (`docs/scene.md`); the vault app draws there what is chosen.
 - Choosing by the keyboard — the arrows through the grid — as the gamepad
   will want; a filter by the app that made an object, as the vault panel's
   chips have by type.
