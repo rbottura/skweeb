@@ -196,9 +196,11 @@ app keeps its own canvas and its own layout. Then, a brick each:
    and the smart object it is bound to, left at a switch and given back at
    its next mount as an object asked for; what the address asks goes first.
    Its steps start again.
-2. **The links taken in place** (`scene/links`): *Open in … ↗*, *Place in
-   compose ↗*, *Rig this ↗* and the graph's open-in mount that app in the
-   scene, its object reopened, where alone they open a tab.
+2. **The links taken in place** (`scene/links`, landed 2026-11-05): *Open
+   in … ↗*, *Place in compose ↗*, *Rig this ↗*, the graph's open-in and the
+   stack's saved page, followed through core (`core/reopen.js` `follow`),
+   mount that app in the scene with the link's query, where alone they open
+   a tab; the app left comes back as it was.
 3. **One canvas, fixed; the last frame held** (`scene/canvas`): the viewer
    in one place whatever app is round it — the bench's columns — and the
    frame of the app going kept until the next draws its first. Handing one

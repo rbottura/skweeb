@@ -45,7 +45,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S2b | S2's rest: the unit in the box, the fold of rows seldom touched, a pair on one line | `ui/rows-more` | S | landed 2026-11-03 |
 | S9a | every app a module: `mount(host)`, `unmount()`, a scope | `scene/host` | M | landed 2026-11-04: the nine on core's kit; the players' pages wait on the author |
 | S9b | the vault, an app: full screen, the canvas showing what is chosen | `scene/vault`, `ui/vault-info` | S | landed 2026-11-04; its detail the facts only, the author's C, 2026-11-05 |
-| S9c | *cluster*, the scene: the host; an app back as it was left; the links taken in place; one canvas fixed, the last frame held; the panels moving | `scene/cluster`, `scene/kept`, `scene/links`, `scene/canvas`, `scene/panels` | L | the host landed 2026-11-05; an app back as it was left 2026-11-05; the rest ready, in that order |
+| S9c | *cluster*, the scene: the host; an app back as it was left; the links taken in place; one canvas fixed, the last frame held; the panels moving | `scene/cluster`, `scene/kept`, `scene/links`, `scene/canvas`, `scene/panels` | L | landed 2026-11-05: the host, an app back as it was left, the links; one canvas, then the panels, ready |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
 | S11 | the space viewer's own bench | — | M | side bench, before S10 |
 | U8a | the shared boxes: one contract, Export first | — | — | → S3 |
@@ -123,6 +123,12 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
+- **The scene's layout, for one canvas fixed** (S9c, `scene/canvas`): one
+  layout for every app in cluster, so the viewer stays where it is — the
+  bench's: the scene's side views on the left (the vault, the keys, the
+  history), the viewer and its player in the middle, the app's properties
+  on the right, two panels as two tabs. Each app's own page as it is. If
+  nothing is said: that, tried first in cluster, shown before it spreads.
 - **The players in cluster** (S9a): map's player (`play/`) and the rig's
   puppet stay pages of their own — a playable map is an export, a puppet
   worn is a performance OBS follows by its address. Mounted in cluster, the
@@ -197,23 +203,9 @@ data (`docs/decisions.md`): a column ran 2.14 screens as it opened; the
 shared drawers closed, 1.54; a row on one line, 1.32; the shared boxes
 out of the column, 1.23.
 
-**U8a — the shared boxes: one contract, Export first** · `ui/boxes` · M.
-Every app builds by hand what every app has — Format, Ground, the player,
-Export with core's print, the Stack — each placed, titled and worded its
-own way: "Save this frame", "Save this frame as a still", "Save to the
-vault", for one act. Its spec first, `docs/boxes.md`: the inventory, app by
-app, and the contract — a box is a component with a title and a body,
-mounted wherever a layout puts it, declared by an app as data; today's
-drawers are the first layout, so nothing moves on screen. Then the Export
-box: an app declares what it saves — a still, a sequence, a smart object,
-L10's three — what it downloads — a picture, the frames, a sprite sheet —
-and its own acts — ckt's brush family, filter's look, map's play link — and
-core draws them alike, with the print. *Done when* every app's export is
-that box, and its checks find the same acts by the same words.
+**U8a — the shared boxes: one contract, Export first** · → S3, landed 2026-11-03.
 
-**U8b — the player and the Stack, as boxes** · `ui/boxes-player-stack` ·
-S. core's Transport and `stackDrawer`, mounted through the contract rather
-than into a drawer each app adds where it can.
+**U8b — the player and the Stack, as boxes** · → S3, landed 2026-11-03.
 
 **U8c — Format and Ground, mounted anywhere** · `ui/boxes-format` · S.
 `ParamPanel` learns to mount a group of the schema outside its column,
@@ -224,9 +216,7 @@ it lives in five different drawers.
 each app and writes what is in the way and what is wanted where — the
 brief of U11.
 
-**U10 — the new theme** · `ui/theme` · M. Waits on the author's
-description. What is already so prepares it: the look is tokens in
-`core/theme.css`, and an app's stylesheet says only how its columns lie.
+**U10 — the new theme** · → S1, landed 2026-11-03, from the author's description.
 
 **U11 — the new layout** · `ui/layout` · L. From U9's notes, in U10's
 theme, on U8's boxes: where the clock, the frame, the output, the layers
@@ -253,18 +243,7 @@ a save blends over nothing. And the author's of 2026-10-22: every app saves
 a still, a sequence or a smart object, and a smart object is followed
 wherever it is used.
 
-**L10 — saved three ways: S, then 1 2 3** · `layers/save-three` · M. S
-opens a sheet over the viewer in every app on core's kit: **1** a still,
-the frame on screen; **2** a sequence, the loop; **3** a smart object,
-what is on screen kept live. The keys by their place (`event.code`, the
-digits and the keypad's): & é " on the author's AZERTY. What an app cannot
-make is greyed — 2 where nothing moves — and Enter, or S again, repeats
-the last choice, so S S is the save of before. A smart object is M11's:
-what is on screen bound (`Vault.bind`), its next save of that kind its next
-version — the sheet says *v3 → v4*, and offers a new one instead. Each app
-declares what it saves in U8a's Export box; the sheet is drawn from that.
-The gamepad comes with C6. *Done when* every app's check saves through the
-sheet, and a smart object saved twice is two versions of one id.
+**L10 — saved three ways: S, then 1 2 3** · → S3 and S6, landed 2026-11-03: S the next state of a smart object, E's menu the rest.
 
 **L11 — a smart object followed wherever it is picked** · `layers/follow` ·
 M. The author's example: a 3D smart object as a particle sprite, drawn

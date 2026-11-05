@@ -25,6 +25,7 @@ const el = (tag, cls, text) => {
 export function objectCard(row, { on, onClick }) {
   const card = el('button', 'vp-card' + (on ? ' vp-card--on' : ''));
   card.type = 'button';
+  card.dataset.id = row.id;            // the object it shows: a scene, a check, finds it by its id
 
   const img = el('img', 'vp-thumb');
   img.loading = 'lazy';
