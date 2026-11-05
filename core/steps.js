@@ -17,7 +17,9 @@
  * What an app sets itself while it boots, before a hand has touched the
  * page, is where the steps start from too — not a step to go back over.
  *
- * ParamPanel watches every panel's params; core/Bar.js says each step.
+ * ParamPanel watches every panel's params; core/Bar.js says each step. A
+ * page that lists them — cluster's History (S9f) — reads `list()`, hears
+ * `onSteps`, and goes to one with `go`.
  * No DOM at import.
  */
 
@@ -30,6 +32,7 @@ const back = [], ahead = [];   // the steps behind, and those gone back over
 const cur = new Map();         // params → its values after its latest change: a step's before, its after
 const offs = new Map();        // params → what stops hearing it
 const ears = new Set();
+const lists = new Set();       // what hears the steps change: one taken, gone back over or on
 let open = null;               // { params, before, at }: the step being made
 let replaying = false;
 let installed = false;
@@ -39,9 +42,13 @@ let clock = () => (typeof performance !== 'undefined' ? performance.now() : Date
 const snap = params => params.values;          // a deep copy already (core/params.js)
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const say = text => { for (const fn of ears) fn(text); };
+const changed = () => { for (const fn of lists) fn(); };
 
 /** Hear each step taken back or on, in words for the status bar. */
 export function onStep(fn) { ears.add(fn); return () => ears.delete(fn); }
+
+/** Hear the steps change — one begun, made, taken back or on: a page listing them paints again. */
+export function onSteps(fn) { lists.add(fn); return () => lists.delete(fn); }
 
 /** Every change of these params a step from here on. */
 export function watch(params) {
@@ -76,9 +83,11 @@ function heard(params) {
   }
   const now = clock();
   if (open && (open.params !== params || now - open.at > BURST_MS)) settle();
+  const begun = !open;
   if (!open) { open = { params, before: cur.get(params) }; ahead.length = 0; }
   open.at = now;
   cur.set(params, values);
+  if (begun) changed();
 }
 
 /** The step being made, made: what tests and going back start with. */
@@ -90,6 +99,7 @@ export function settle() {
   if (same(after, before)) return;
   back.push({ params, before, after });
   if (back.length > KEEP) back.shift();
+  changed();
 }
 
 /** A change made at once, as one step — a panel's Reset, which arrives as a restore. */
@@ -103,6 +113,7 @@ export function around(params, fn) {
   if (same(after, before)) return;
   back.push({ params, before, after });
   ahead.length = 0;
+  changed();
 }
 
 function replay(params, values) {
@@ -119,6 +130,7 @@ export function undo() {
   replay(st.params, st.before);
   ahead.push(st);
   say(`a step back${back.length ? ` · ${back.length} more` : ''}`);
+  changed();
   return true;
 }
 
@@ -130,7 +142,37 @@ export function redo() {
   replay(st.params, st.after);
   back.push(st);
   say(`a step on${ahead.length ? ` · ${ahead.length} more` : ''}`);
+  changed();
   return true;
+}
+
+/** A value as a step's line says it: a number to three places, a word, a short list; anything else, as "…". */
+const shortly = v => typeof v === 'number' ? String(Math.round(v * 1000) / 1000)
+  : typeof v === 'string' ? (v.length > 16 ? v.slice(0, 15) + '…' : v)
+  : typeof v === 'boolean' ? (v ? 'on' : 'off') : v == null ? '—' : '…';
+
+/** What a step changed, in a line: the value and where it went, or how many. */
+function described({ params, before = {}, after = {} }) {
+  const keys = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter(k => !same(before[k], after[k]));
+  if (keys.length !== 1) return `${keys.length} values${params.app ? ' · ' + params.app : ''}`;
+  const spec = typeof params.spec === 'function' ? params.spec(keys[0]) : null;
+  return `${(spec && spec.label) || keys[0]} ${shortly(before[keys[0]])} → ${shortly(after[keys[0]])}`;
+}
+
+/**
+ * The steps as a page lists them, oldest first: what each changed, and whether it is taken or gone back over —
+ * the one being made among those taken. `go(i)` is the page after the ith of them; `go(-1)`, before any.
+ */
+export function list() {
+  const made = open ? [...back, { ...open, after: cur.get(open.params) }] : back;
+  return [...made.map(st => ({ label: described(st), ahead: false })), ...[...ahead].reverse().map(st => ({ label: described(st), ahead: true }))];
+}
+
+/** The page as it was after step `i` of `list()` — every step up to it taken, none after; -1, before any. */
+export function go(i) {
+  settle();
+  while (back.length > i + 1 && undo());
+  while (back.length < i + 1 && ahead.length && redo());
 }
 
 /** The params of the page, as watched: what a state's recipe is laid back into (core/shell/graph.js). */

@@ -50,7 +50,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9g | the scene's vault beside an app: still at a switch, the app's own first, dragged onto a field, a set in its folder | `scene/side-vault` | S | landed 2026-11-05 |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
 | S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | first pass landed 2026-11-05, the proposal as written; the rest with the author's eye (`docs/scene.md`) |
-| S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | after S11 |
+| S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | landed 2026-11-05 |
 | S13 | the player's lanes: a composition's sequences a lane each, one opened there | `compose/lanes` | M | waits: worked out with the author, with S9e |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
 | U8a | the shared boxes: one contract, Export first | — | — | → S3 |

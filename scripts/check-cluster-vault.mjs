@@ -13,8 +13,11 @@
  * folder, its first, across the grid. An object dragged from it: every field
  * that would take it lit — a sequence lights none of fractals' — a folded
  * section over one opening as the drag rests on its head, and a tab of the
- * properties as well; dropped, the field's value, nothing left lit. And no
- * page said anything wrong.
+ * properties as well; dropped, the field's value, nothing left lit. The
+ * side's other views (S9f): the keys, the left hand drawn as the app has it,
+ * a key lit while it is down; the history, a value changed one step in it,
+ * clicked back to where it opened and on again, a state saved by S listed
+ * and marked here. And no page said anything wrong.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -131,6 +134,38 @@ const tab = await page.eval(`(async () => { ${DRAG}
 })()`);
 c.ok('…a field in a panel not shown: its tab marked, opened as the drag rests on it', tab.marked.length === 1 && tab.lit
   && !tab.shown.includes('picture-side'), JSON.stringify(tab));
+
+// ── The side's other views: the keys, the history (S9f) ─────────────────────
+const side = name => page.eval(`document.querySelector('.cl-sides .cl-tab[data-side="${name}"]').click()`);
+await side('keys');
+const keys = await page.eval(`(() => { const v = document.querySelector('.cl-keys');
+  const k = v.querySelector('.ck-key[data-code="KeyR"]'), t = v.querySelector('.ck-key[data-code="KeyT"]');
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyT', key: 't' }));     // a key that does nothing here: lit, and nothing done
+  const lit = t.classList.contains('ck-key--lit') && t.classList.contains('ck-key--free');
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyT', key: 't' }));
+  return { shown: !v.hidden && document.querySelector('.cl-side').hidden, keys: v.querySelectorAll('.ck-key').length,
+    r: k.querySelector('.ck-cap').textContent + ' ' + k.querySelector('.ck-act').textContent, pie: k.classList.contains('ck-key--pie'), lit,
+    after: t.classList.contains('ck-key--lit'), listed: v.querySelectorAll('.ck-binds li').length }; })()`);
+c.ok('the side\'s keys: the left hand, R a new seed and a pie, lit while down; every key listed', keys.shown && keys.keys === 15
+  && keys.r === 'R again' && keys.pie && keys.lit && !keys.after && keys.listed > 5, JSON.stringify(keys));
+await c.shot('3-keys');
+await side('history');
+const before = await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { const o = rowParams(document.querySelector('.cl-host .pp-row[data-key="seed"]'));
+  const was = o.params.get('seed'); window.dispatchEvent(new PointerEvent('pointerdown')); o.params.set('seed', was + 1); return was; })`);
+await page.until(`[...document.querySelectorAll('.cl-history .ch-step')].some(b => /seed/.test(b.textContent))`, { timeout: 5000 });
+const story = await page.eval(`(async () => { const v = document.querySelector('.cl-history'), steps = () => [...v.querySelectorAll('.ch-step')];
+  const listed = steps().map(b => b.textContent), now = steps().findIndex(b => b.classList.contains('ch-step--now'));
+  const seed = () => import('/core/param-rows.js').then(({ rowParams }) => rowParams(document.querySelector('.cl-host .pp-row[data-key="seed"]')).params.get('seed'));
+  steps()[0].click(); await new Promise(r => setTimeout(r, 200)); const back = await seed();
+  steps().at(-1).click(); await new Promise(r => setTimeout(r, 200)); const on = await seed();
+  return { listed, now, back, on }; })()`);
+c.ok('…the history: a value changed, a step in it; clicked back to where it opened, and on again', story.now === story.listed.length - 1
+  && story.listed.some(t => /seed/.test(t)) && story.back === before && story.on === before + 1, JSON.stringify(story));
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 's', bubbles: true }))`);
+await page.until(`!!document.querySelector('.cl-history .ch-state--here')`, { timeout: 30000 });
+c.ok('…S: the state it saved listed, marked as the one the page holds', await page.eval(`/^v\\d+/.test(document.querySelector('.cl-history .ch-state--here').textContent)`));
+await c.shot('4-history');
+await side('vault');
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

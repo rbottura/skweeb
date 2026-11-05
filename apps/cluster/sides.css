@@ -1,0 +1,97 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   sides.css — cluster's side, on the left (S9f; sides.js): its views a tab
+   each — the vault, the keys, the history — the tab bar its head as the
+   properties' is on the right, the view under it in one box. The side is
+   the scene's: it holds still at a switch. Imported by style.css.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.cl-sides {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+  margin-top: var(--gap);
+  padding: 0 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--panel);
+  box-shadow: inset 0 -1px 0 var(--line);
+}
+.cl-sides::-webkit-scrollbar { display: none; }
+
+.cl-keys, .cl-history { grid-column: 2; grid-row: 3; min-height: 0; margin-bottom: var(--gap); overflow: auto; padding: 10px;
+  border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--panel);
+  scrollbar-width: thin; }
+.cl-keys[hidden], .cl-history[hidden] { display: none; }
+.cl-keys kbd, .cl-history kbd { display: inline-flex; align-items: center; height: 16px; padding: 0 4px; border: 1px solid var(--line-2);
+  border-radius: 3px; font: 500 10px/1 var(--font-num); color: var(--fg-2); white-space: nowrap; }
+
+/* ── The keys: the left hand, staggered as a keyboard is ──────────────────── */
+
+.ck-intro { margin: 0 0 10px; color: var(--fg-2); font-size: 12px; line-height: 1.45; }
+.ck-board { display: flex; flex-direction: column; gap: 3px; }
+.ck-row { display: flex; gap: 3px; }
+.ck-row:nth-child(2) { padding-left: 10px; }
+.ck-row:nth-child(3) { padding-left: 20px; }
+.ck-key { position: relative; flex: none; width: 38px; height: 38px; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 4px 5px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--field); line-height: 1; overflow: hidden;
+  transition: background 80ms, border-color 80ms; }
+.ck-cap { font: 600 11px var(--font-ui); color: var(--fg); }
+.ck-act { font-size: 8.5px; color: var(--fg-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ck-key--pie { border-color: var(--accent); }
+.ck-key--pie::after { content: ""; position: absolute; right: 4px; top: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.ck-key--free { background: none; border-style: dashed; }
+.ck-key--free .ck-cap { color: var(--fg-3); }
+.ck-key--lit { background: var(--accent); border-color: var(--accent); }
+.ck-key--lit .ck-cap, .ck-key--lit .ck-act { color: var(--accent-ink); }
+.ck-legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 4px; color: var(--fg-3); font-size: 11px; }
+.ck-l::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 4px; vertical-align: -1px; border-radius: 3px;
+  border: 1px solid var(--line-2); background: var(--field); }
+.ck-l--pie::before { border-color: var(--accent); }
+.ck-l--free::before { border-style: dashed; background: none; }
+.ck-l--lit::before { border-color: var(--accent); background: var(--accent); }
+.ck-binds { list-style: none; margin: 6px 0 0; padding: 0; }
+.ck-binds li { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px; align-items: baseline; padding: 4px 0;
+  border-top: 1px solid var(--line); font-size: 12px; color: var(--fg-2); }
+.ck-binds kbd { justify-self: start; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── The history: the session's steps, the object's states ────────────────── */
+
+.ch-head { margin: 12px 0 4px; font: 600 10.5px var(--font-ui); letter-spacing: 0.07em; text-transform: uppercase; color: var(--fg-3); }
+.ch-head:first-child { margin-top: 0; }
+.ch-list { list-style: none; margin: 0; padding: 0; }
+.ch-step { width: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 6px; align-items: center; height: 22px; padding: 0 4px;
+  border: 0; border-radius: var(--radius); background: none; color: var(--fg-2); font: 400 12px var(--font-ui); text-align: left; cursor: pointer;
+  transition: background 90ms, color 90ms; }
+.ch-step:hover { background: var(--hover); color: var(--fg); }
+.ch-step::before { content: ""; width: 7px; height: 7px; margin-left: 3px; border-radius: 50%; border: 1px solid var(--fg-3); background: var(--fg-3); }
+.ch-step > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-step--ahead { color: var(--fg-3); }
+.ch-step--ahead::before { background: none; border-style: dashed; }
+.ch-step--now { color: var(--fg); }
+.ch-step--now::before { border-color: var(--accent); background: var(--accent); }
+.ch-state { width: 100%; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: 34px;
+  padding: 3px 4px; border: 0; border-radius: var(--radius); background: none; color: var(--fg); text-align: left; cursor: pointer;
+  transition: background 90ms; }
+.ch-state:hover { background: var(--hover); }
+.ch-state--here, .ch-state--here:hover { background: var(--accent-soft); cursor: default; }
+.ch-state img { width: 28px; height: 28px; object-fit: contain; border-radius: 3px;
+  background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 8px 8px; }
+.ch-what { display: flex; align-items: baseline; gap: 8px; min-width: 0; white-space: nowrap; overflow: hidden; }
+.ch-what b { font: 600 12px var(--font-num); }
+.ch-when { color: var(--fg-3); font: 400 10.5px var(--font-num); }
+.ch-here { color: var(--accent); font-size: 11px; }
+.ch-none { padding: 4px; color: var(--fg-3); font-size: 12px; }
+.ch-graph { display: flex; align-items: center; gap: 8px; margin-top: 10px; height: 24px; padding: 0 8px; border: 1px solid var(--line-2);
+  border-radius: var(--radius); background: var(--raised); color: var(--fg); font: 400 12px var(--font-ui); cursor: pointer; }
+.ch-graph:hover { background: var(--sel); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-key, .ch-step, .ch-state { transition: none; }
+}

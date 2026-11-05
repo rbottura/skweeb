@@ -31,6 +31,7 @@
 @import '../../core/theme.css';
 @import '../../core/vault-panel.css';
 @import 'motion.css';                 /* what holds still, adapts, goes and comes at a switch (S9e) */
+@import 'sides.css';                  /* the side's views: the vault, the keys, the history (S9f) */
 
 .cluster {
   --strip: 92px;
@@ -122,11 +123,13 @@
    it is shown — and its objects a grid of pictures, four columns: the name
    and the type in a card's title, the rest in its detail. */
 
-.cl-side { grid-column: 2; grid-row: 2 / 4; min-height: 0; margin-block: var(--gap); display: flex; flex-direction: column;
+.cl-side { grid-column: 2; grid-row: 3; min-height: 0; margin-bottom: var(--gap); display: flex; flex-direction: column;
   --vp-card: 50px; --vp-gap: 6px; --vp-pad: 8px; }
-.cl-side .vp--docked { border: 1px solid var(--line); background: var(--panel); }
+.cl-side[hidden] { display: none; }
+/* Its tab says what it is (sides.css): the panel's own title not again, its box joined to the tab bar. */
+.cl-side .vp--docked { border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--panel); }
+.cl-side .vp-title { display: none; }
 .cl-side .vp-head { gap: 4px; padding: 4px 6px 4px 10px; background: none; border-bottom: 1px solid var(--line); }
-.cl-side .vp-title { font: 600 11px var(--font-ui); letter-spacing: 0.07em; color: var(--fg-2); }
 .cl-side .vp-count { margin-right: auto; font: 400 11px var(--font-num); color: var(--fg-3); }
 .cl-side .vp-spacer { flex: 0 0 100%; height: 0; order: 1; }
 .cl-side .vp-head > .vp-chip { order: 2; }
