@@ -12,27 +12,20 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-05: *cluster*, the scene (S9c, its five bricks)
+### Newest — 2026-11-05: *cluster*, the scene (S9c to S9g)
 
 - **cluster** (`apps/cluster/`, `apps/cluster/STATUS.md`): the suite's apps
   in one page one at a time, through their modules, laid as the bench is —
-  the author's yes — a strip of apps, the scene's vault, the viewer in one
-  place to the pixel for every app, the properties one panel as the
-  bench's — the app's panels a tab each, their sections folded in it — and
-  the vault four columns of pictures (S9d); at a switch the panels leave
-  and the next app's come, its last frame held until the next draws. The app in the address,
-  `#particles`; mounted again it comes back as it was left, recipe, frame
-  and smart object (`core/mount.js` `keep`); *Open in … ↗* and the other
-  links between apps mount theirs in place (`core/reopen.js` `follow`) —
-  `check-cluster`. particles' and compose's ways out are a `leaving.js`.
-- **The motion at a switch, a first pass** (S9e): the scene's frames
-  under every app's boxes, so none blinks; what is in them goes and comes;
-  the frame held moved onto the next picture; the tab's underline sliding.
-- **The scene's vault beside an app** (S9g): still at a switch, its
-  stylesheet the scene's; the app's own objects first, the cards sliding
-  (`core/flip.js`); a card dragged onto any app's object field
-  (`core/vault-drag.js`); a set in the folder of its tiles —
-  `check-cluster-vault`.
+  a strip of apps, the side, the viewer in one place to the pixel for every
+  app, the properties one panel, the app's panels a tab each (S9d). At a
+  switch its boxes hold still and what is in them goes and comes, the last
+  frame held and moved onto the next (S9e's first pass). The side's views:
+  the vault — the app's own objects first, a card dragged onto any app's
+  object field (`core/vault-drag.js`), a set in its folder (S9g) — the keys,
+  the history (S9f). The app in the address, `#particles`; mounted again it
+  comes back as it was left (`core/mount.js` `keep`); the links between
+  apps mount theirs in place (`core/reopen.js` `follow`) — `check-cluster`,
+  `check-cluster-vault`. particles' and compose's ways out are a `leaving.js`.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -344,8 +337,8 @@ compares two pages' canvases measures, never demands the pixel.
 of different formats, particles to ckt — and says, case by case, what to
 change (`docs/scene.md`, *The motion, case by case*); and answers M13's
 questions (`docs/bec.md`, *Waiting on the author*). Meanwhile the board's
-next: S9f, the keys and the history as side views. S11's version 2 once
-the author has scenarios for it.
+next: L11, a smart object followed wherever it is picked. S11's version 2
+once the author has scenarios for it.
 
 ## Parked decisions
 

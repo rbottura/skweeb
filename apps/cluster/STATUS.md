@@ -58,6 +58,16 @@ app still opens alone on its own page; the scene is one more host.
   (`core/mount.js` `built`) — so the centre never flashes empty. Then it
   moves onto the next picture at its size, covering the changing box, and
   the two cross (S9e).
+- **The side's views** (`scene/side-views`, S9f, 2026-11-05; `sides.js`):
+  the vault, the keys, the history, a tab each, the bar the side's head as
+  the properties' is theirs. The keys (`keys-view.js`): the left hand as the
+  app mounted has it, by place — a tap's act on each key, a dot where a hold
+  opens a pie, dashed where it does nothing here — a key lit while down,
+  and every key the page answers to listed, the app's own from its status
+  bar. The history (`history-view.js`): the session's steps, what each
+  changed, a click going back or on to one (`core/steps.js` `list`, `go`);
+  the object's states, newest first, the one held marked, a click going
+  back to one as the graph's does (`core/shell/graph.js` `backTo`); H.
 - **What holds still at a switch** (`scene/motion`, S9e's first pass,
   2026-11-05): the scene's frames under the app's boxes, the same as them
   (`frames.js`) — title bar, viewer with its head, rulers' bands and
@@ -115,7 +125,9 @@ app still opens alone on its own page; the scene is one more host.
   switches; grid's own first beside grid, particles' beside particles, the
   cards moving, no parts beside the vault app; a set across its folder; a
   still dragged onto fractals' sprite — a sequence lighting nothing — its
-  folded section and particles' tab opening as the drag rests.
+  folded section and particles' tab opening as the drag rests; the side's
+  keys drawn, a key lit while down; the history's steps gone back and on
+  by a click, the state S saved marked as held.
 
 ## Known
 
@@ -133,8 +145,8 @@ app still opens alone on its own page; the scene is one more host.
 - **A drag is the page's own**: an object dragged from another window — a
   vault open in another tab — is not taken; and a field hidden by its `when`
   is not lit.
-- Keys and history, the bench's other side views, are not there yet (S9f);
-  nor the bench's focus, the viewer alone.
+- The bench's focus, the viewer alone, is not there yet; nor its bench
+  view, the theme's settings.
 
 ## Next
 

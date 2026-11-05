@@ -237,6 +237,14 @@ app keeps its own canvas and its own layout. Then, a brick each:
    petits et redondants avec les folders": kept, grid's materials, each in
    the folder of exactly its tiles, first, across the grid.
 
+7. **The side's other views** (S9f, `scene/side-views`, landed
+   2026-11-05), the bench's: the vault, the keys, the history, a tab each
+   on the left as the properties are on the right. The keys, the left hand
+   as the app mounted has it, by place, a key lit while down, and every key
+   the page answers to; the history, the session's steps clicked back or on
+   to, and the object's states, the one held marked, clicked back to as in
+   the graph — which H opens.
+
 ### The motion, case by case (S9e) — asked 2026-11-05
 
 The author, on S9c: "les transitions sont assez saccadées, on va
