@@ -45,7 +45,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S2b | S2's rest: the unit in the box, the fold of rows seldom touched, a pair on one line | `ui/rows-more` | S | landed 2026-11-03 |
 | S9a | every app a module: `mount(host)`, `unmount()`, a scope | `scene/host` | M | landed 2026-11-04: the nine on core's kit; the players' pages wait on the author |
 | S9b | the vault, an app: full screen, the canvas showing what is chosen | `scene/vault`, `ui/vault-info` | S | landed 2026-11-04; its detail the facts only, the author's C, 2026-11-05 |
-| S9c | *cluster*, the scene: one 2D canvas handed to the app mounted, the last frame held, the panels moving | `scene/cluster` | L | ready |
+| S9c | *cluster*, the scene: the host; an app back as it was left; the links taken in place; one canvas fixed, the last frame held; the panels moving | `scene/cluster`, `scene/kept`, `scene/links`, `scene/canvas`, `scene/panels` | L | the host landed 2026-11-05; the rest ready, in that order |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
 | S11 | the space viewer's own bench | — | M | side bench, before S10 |
 | U8a | the shared boxes: one contract, Export first | — | — | → S3 |

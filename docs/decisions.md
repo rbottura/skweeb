@@ -297,3 +297,13 @@ chose the last, C: the detail keeps its place over the grid's right edge,
 loses its picture and its player — the viewer has them — and is as wide
 as the bench's properties, 300 px. Over another app, where no viewer is
 beside it, the detail keeps its picture.
+
+**The scene's address is its fragment** (S9c, its host). `#particles`
+names the app *cluster* has mounted; the query stays what it is on an
+app's own page — the app's to read, `?open=<id>` — and is left behind at a
+switch, so the next app is asked nothing the last one was. So a page that
+sets its query — the graph going back to a state — reloads into the same
+app, and a link made for an app's page opens in the scene with its
+fragment added. The host mounts each app with its own canvas and layout;
+the one canvas, as planned, is a brick of its own, where what handing it
+over costs the apps is weighed first (`docs/scene.md`).

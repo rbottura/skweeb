@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-04_
+_last touched: 2026-11-05_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open and `docs/roadmap-done.md` the
@@ -12,7 +12,17 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-04: every app a module (S9a), the vault an app (S9b)
+### Newest — 2026-11-05: *cluster*, the scene's host (S9c)
+
+- **cluster** (`apps/cluster/`): the suite's apps mounted in one page one
+  at a time, through their modules — a strip names them, a click mounts one
+  in place of the last, nothing of it left; the vault first; the app in the
+  address, `#particles`, Back to the one before, `?open=<id>` the app's to
+  read; the search finds the apps by name — `check-cluster`. An app comes
+  back as it starts, and each keeps its own canvas and layout: the bricks
+  after (`apps/cluster/STATUS.md`).
+
+### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
 - **The vault, an app** (`apps/vault/`): every object full screen — core's
   vault panel docked in the page — the one whose detail opens drawn large
@@ -30,8 +40,7 @@ sorts them.
   themselves — `check-mount`, which counts what an app unmounted leaves:
   listeners, channels, intervals, frames asked for. Cards (filter's chain,
   a model's shapes) remove a card's panel with it now — three listeners on
-  the window were left behind each time. The other apps follow, then the
-  vault app (S9b), then *cluster*, the scene (S9c).
+  the window were left behind each time.
 
 ### 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
 
@@ -236,18 +245,21 @@ sorts them.
 
 ## Tests
 
-Fifty-eight files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-10-22). Newest: the puppet's four —
+Sixty-four files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-11-05). Newest: `scope` and `reach`
+(2026-11-04); before them the puppet's four —
 `puppet-eyes` (27), `puppet-mouth` (15), `puppet-sway` (24), `puppet-roles`
 (17): the eyes and the mouth cut and worn, the sway, the parts found;
 before them M11's — `live`, `stack`, `place`, `smart` — the print's —
 `windowed`, `stage-still`, `png` — and the 3D app's seven.
 
-Twenty-five browser checks, each a command in `CLAUDE.md`: its own server on a
+Thirty-four browser checks, each a command in `CLAUDE.md`, run several at a
+time by `scripts/checks.mjs`: each its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-puppet`, the puppet on
-a fake camera, sent and followed by a page in OBS; before it M11's four —
+throws or its console is not quiet. Newest: `check-cluster`, the scene, and
+`check-mount`, an app unmounted with nothing left (S9); `check-puppet`, the
+puppet on a fake camera, sent and followed by a page in OBS; M11's four —
 `check-live`, `check-send`, `check-smart`, `check-page` — `check-print`
 (20), `check-3d-poster` (8) and `check-3d` (58). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
@@ -316,14 +328,14 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9c on the board: *cluster*, the scene** — branch `scene/cluster` from
-`main`. Its first step: `apps/cluster/` — a page with one 2D canvas fixed in
-the middle and a strip naming the apps — that mounts one app at a time round
-it through its module (`mount(host)`, `unmount()`), the vault app first, a
-second mounted in its place by a click on the strip, the first unmounted;
-`check-mount`'s counts kept across the switch. The canvas handed to the app
-(`mount(host, { canvas })`), the last frame held between two apps and the
-panels moving come after (`docs/scene.md`, *Planned, 2026-11-04*).
+**S9c's next brick: an app back as it was left** — branch `scene/kept`
+from `main`. At a switch the scene keeps what the app going was doing — its
+params' values, the object it is bound to (`Vault.bind`), its steps — and
+gives it back when that app is mounted again, as a tab would have kept it;
+`check-cluster` changes a value in particles, mounts grid, mounts particles
+again: the value still there, and S saving the next state of the same
+object. Then the links taken in place, one canvas, the panels
+(`docs/scene.md`, *cluster, brick by brick*).
 
 ## Parked decisions
 

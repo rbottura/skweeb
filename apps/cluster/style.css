@@ -1,0 +1,94 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — cluster, the scene
+
+   Everything that looks like the suite comes from core, and each app brings
+   its own layout as it is mounted (core/mount.js). The scene says only its
+   own: the strip of apps on the left, as the bench's activity bar, and the
+   host the app mounted fills.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+
+.cluster {
+  --strip: 92px;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: var(--strip) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.cl-host { min-width: 0; min-height: 0; }
+.cl-host > .app { height: 100%; }
+
+/* The strip: the scene's mark at the height of the app's title bar, then the apps, one line each. */
+.cl-strip {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow-y: auto;
+  padding-bottom: var(--gap);
+  border-right: 1px solid var(--line);
+  background: var(--frame);
+}
+
+.cl-head {
+  flex: none;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  margin-bottom: var(--gap);
+  border-bottom: 1px solid var(--line);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cl-mark { width: 14px; height: 14px; flex: none; border-radius: 4px; background: conic-gradient(from 200deg, var(--accent), #d9481c, var(--accent)); }
+
+/* One mark at the page's head: the scene's, not the app's again beside it. */
+.cluster skw-titlebar .tb-mark { display: none; }
+
+.cl-app {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 26px;
+  margin: 0 6px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--fg-3);
+  font: 400 12.5px var(--font-ui);
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cl-app:hover { color: var(--fg); background: var(--hover); }
+.cl-app[aria-current="page"] { color: var(--fg); background: var(--hover); }
+.cl-app[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.cl-sep { flex: none; height: 1px; margin: 6px 12px; background: var(--line); }
+
+/* Narrow: the strip a row above the app. */
+@media (max-width: 900px) {
+  .cluster { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .cl-strip { flex-direction: row; overflow: auto hidden; padding: 4px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .cl-head { height: auto; margin: 0 6px 0 4px; padding: 0; border-bottom: 0; }
+  .cl-sep { width: 1px; height: auto; margin: 4px 6px; }
+  .cl-app[aria-current="page"]::before { left: 8px; right: 8px; top: auto; bottom: -4px; width: auto; height: 2px; }
+}
