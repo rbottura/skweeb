@@ -201,7 +201,7 @@ c.ok('…the frame held moving onto ckt\'s picture — another format — at its
 // The scene's frames, under every app's boxes and the same as them; the title bar's brand and search the scene's (S9e).
 const framed = await page.eval(`(() => { const at = q => { const n = document.querySelector(q); if (!n) return null; const r = n.getBoundingClientRect();
     return [r.left, r.top, r.width, r.height].map(Math.round).join(','); };
-  const pairs = [['.cl-fr-view', '.cl-host .viewer'], ['.cl-fr-head', '.cl-host .viewer-head'], ['.cl-fr-player', '.cl-host .viewer > .viewer-player, .cl-host .viewer > .vault-player'],
+  const pairs = [['.cl-fr-view', '.cl-host .viewer'], ['.cl-fr-head', '.cl-host .viewer-head'], ['.cl-fr-player', '.cl-host .viewer > .viewer-player'],
     ['.cl-fr-props', '.cl-host .app-main > .app-side.cl-shown'], ['.cl-fr-top', '.cl-host skw-titlebar'], ['.cl-fr-bar', '.cl-host footer.bar']];
   const off = pairs.filter(([a, b]) => !at(a) || at(a) !== at(b)).map(([a, b]) => a + ' ' + at(a) + ' / ' + at(b));
   return { off, search: getComputedStyle(document.querySelector('.cl-host skw-titlebar .tb-search')).visibility, named: document.querySelector('.cl-fr-app').textContent }; })()`);

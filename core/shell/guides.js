@@ -96,6 +96,9 @@ export function setDoc(w, h) {
 /** Screen pixels per picture pixel, from the rulers: how near the magnet pulls. */
 export function setZoom(z) { if (z > 0) s.z = z; }
 
+/** The picture moved on the screen — panned, zoomed — its size the same: what is drawn over it laid again. */
+export function moved() { changed(); }
+
 /** Rulers or magnet, on or off; remembered. */
 export function toggle(what) {
   if (what !== 'rulers' && what !== 'magnet') return;

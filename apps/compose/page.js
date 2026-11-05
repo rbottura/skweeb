@@ -56,19 +56,11 @@ export function hitTest(point, layers, page) {
 }
 
 /**
- * An object's own size on a page: its ink over the whole loop, the `bounds`
- * a handle gives (core/rebuild.js) — all of a still or a dither, and the part
- * of a recording's canvas its marks ever reach. A gamepad loop's canvas is
- * the screen it was drawn on, mostly empty, and its render is cropped to the
- * ink; so is it here, so that it is centred and fitted by what can be seen.
- *
- * @param {object} handle   from core/rebuild.js
- * @returns {{width, height}}
+ * An object's own size on a page: its ink over the whole loop (core/rebuild.js
+ * `inkSize`) — so that it is centred and fitted by what can be seen. Core's
+ * since the vault app shows by it too (S9h).
  */
-export function inkSize(handle) {
-  const b = handle.bounds;
-  return b && b.w > 0 && b.h > 0 ? { width: b.w, height: b.h } : { width: handle.width, height: handle.height };
-}
+export { inkSize } from '../../core/rebuild.js';
 
 /**
  * Draw a page.

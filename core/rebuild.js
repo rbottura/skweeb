@@ -138,6 +138,22 @@ export function drawFrameInto(ctx, canvas, box, frame, w, h) {
 }
 
 /**
+ * The size an object shows at: its ink. All of a still or a dither; of a
+ * recording, the part of its canvas its marks ever reach — a gamepad loop's
+ * canvas is the screen it was drawn on, mostly empty, and its render is
+ * cropped to the ink, as `frame(i)` is. Shown at the canvas's size, the ink
+ * would be stretched over it (the author, 2026-11-05: "la séquence se fait
+ * stretch dans le viewer"). compose places by it; the vault app shows by it.
+ *
+ * @param {{width, height, bounds?: {w, h}}} handle   from `openFrames`
+ * @returns {{width: number, height: number}}
+ */
+export function inkSize(handle) {
+  const b = handle.bounds;
+  return b && b.w > 0 && b.h > 0 ? { width: b.w, height: b.h } : { width: handle.width, height: handle.height };
+}
+
+/**
  * The maximum depth of a rebuild chain.
  *
  * A cycle cannot happen — a parent is always an object that already existed,

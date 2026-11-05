@@ -135,12 +135,59 @@ await choose('sequence');
 const t1 = await page.eval(`document.querySelector('.bar-say').textContent`);
 await new Promise(r => setTimeout(r, 800));
 const t2 = await page.eval(`document.querySelector('.bar-say').textContent`);
-c.ok('…a sequence: drawn and played, its player under it', t1 !== t2 && /frame \d+ of \d+/.test(t2)
-  && await page.eval(`!document.querySelector('#player').hidden`), `${t1} → ${t2}`);
+const strip = await page.eval(`(() => { const p = document.querySelector('.viewer > .viewer-player'); if (!p || p.hidden) return null;
+  const r = p.getBoundingClientRect(); return { height: Math.round(r.height), play: !!p.querySelector('.tp-count'), scrub: !!p.querySelector('.tp-scrub') }; })()`);
+c.ok('…a sequence: drawn and played, the controls of its player under it (S9h)', t1 !== t2 && /frame \d+ of \d+/.test(t2)
+  && !!strip && strip.height > 20 && strip.play && strip.scrub, `${t1} → ${t2} · ${JSON.stringify(strip)}`);
 const still = shown.find(r => r.type === 'still');
 await c.go(c.base + '/apps/vault/?open=' + encodeURIComponent(still.id));
 await page.until(`/ · still/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 20000 });
 c.ok('?open=<id>: drawn as it opens', (await page.eval(inked)) > 1000);
+
+// ── The vault app's viewer (S9h): an object at its ink's shape, fitted evenly, seen closer ──
+const gamepadLoop = shown.find(r => r.type === 'sequence' && r.origin && r.origin.app === 'gamepad' && r.render && r.render.w && r.render.h);
+if (gamepadLoop) {
+  await c.go(c.base + '/apps/vault/?open=' + encodeURIComponent(gamepadLoop.id));
+  await page.until(`/ · sequence/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 30000 });
+  await new Promise(r => setTimeout(r, 600));
+  const box = () => page.eval(`(() => { const k = document.querySelector('#stage'), st = k.parentElement, r = k.getBoundingClientRect(), s = st.getBoundingClientRect(), cs = getComputedStyle(st);
+    const pad = ['Left', 'Top', 'Right', 'Bottom'].map(e => parseFloat(cs['padding' + e]));
+    return { w: k.width, h: k.height, x: r.left + r.width / 2, y: r.top + r.height / 2, cw: r.width, ch: r.height,
+      gaps: [r.left - s.left - pad[0], r.top - s.top - pad[1], s.right - pad[2] - r.right, s.bottom - pad[3] - r.bottom].map(Math.round),
+      cls: k.className, said: document.querySelector('.vault-zoom')?.textContent }; })()`);
+  const fitted = await box();
+  const ink = gamepadLoop.render.w / gamepadLoop.render.h;
+  c.ok('a gamepad loop drawn at the shape of its ink, not of its screen: never stretched', Math.abs(fitted.w / fitted.h - ink) < 0.02,
+    `${fitted.w}×${fitted.h} against ${gamepadLoop.render.w}×${gamepadLoop.render.h}`);
+  const [l, t, r, b] = fitted.gaps;
+  c.ok('…fitted with an even margin: as far from the rulers as from the edges', Math.abs(l - r) <= 1 && Math.abs(t - b) <= 1 && Math.min(l, t) >= 0
+    && fitted.said === 'fit', JSON.stringify(fitted.gaps));
+  await page.eval(`(() => { const k = document.querySelector('#stage'), r = k.getBoundingClientRect();
+    k.parentElement.dispatchEvent(new WheelEvent('wheel', { deltaY: -300, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, bubbles: true, cancelable: true })); })()`);
+  await new Promise(r => setTimeout(r, 200));
+  const near = await box();
+  c.ok('…the wheel: closer about the pointer, the point under it staying', near.cw > fitted.cw * 1.4 && Math.abs(near.x - fitted.x) < 2 && Math.abs(near.y - fitted.y) < 2
+    && /%$/.test(near.said || ''), `${Math.round(fitted.cw)} → ${Math.round(near.cw)} px wide, ${near.said}`);
+  await page.eval(`(() => { const st = document.querySelector('#stage').parentElement, r = st.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const at = (type, dx, dy) => st.dispatchEvent(new PointerEvent(type, { pointerId: 7, button: 0, buttons: 1, clientX: x + dx, clientY: y + dy, bubbles: true }));
+    at('pointerdown', 0, 0); at('pointermove', 60, 40); at('pointerup', 60, 40); })()`);
+  await new Promise(r => setTimeout(r, 200));
+  const moved = await box();
+  c.ok('…a drag moves it', Math.abs(moved.x - near.x - 60) < 2 && Math.abs(moved.y - near.y - 40) < 2, `${Math.round(moved.x - near.x)}, ${Math.round(moved.y - near.y)}`);
+  await page.eval(`(() => { const st = document.querySelector('#stage').parentElement, r = st.getBoundingClientRect();
+    for (let i = 0; i < 12; i++) st.dispatchEvent(new WheelEvent('wheel', { deltaY: -400, clientX: r.left + 40, clientY: r.top + 60, bubbles: true, cancelable: true })); })()`);
+  await new Promise(r => setTimeout(r, 200));
+  const pixels = await box();
+  c.ok('…closer than its own pixels: shown as pixels, its canvas no bigger than the picture', pixels.cls.includes('zm-pixels')
+    && pixels.w <= gamepadLoop.render.w + 1, `${pixels.w}×${pixels.h}, ${pixels.said}`);
+  await page.eval(`document.querySelector('#stage').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))`);
+  await new Promise(r => setTimeout(r, 200));
+  const again = await box();
+  c.ok('…a double click: fitted again', Math.abs(again.cw - fitted.cw) < 1 && Math.abs(again.x - fitted.x) < 1 && again.said === 'fit', again.said);
+  await c.shot('3-vault-viewer');
+} else {
+  console.log('     (no gamepad loop in this vault — skipping the viewer)');
+}
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

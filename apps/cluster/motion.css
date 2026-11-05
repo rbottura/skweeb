@@ -45,9 +45,8 @@
 /* ── Adapting ──────────────────────────────────────────────────────────────── */
 
 /* The player's strip always there: hidden, it is empty, not gone. */
-.cl-host .viewer > .viewer-player[hidden], .cl-host .viewer > .vault-player[hidden] { display: block; visibility: visible; }
-.cl-host .viewer > .viewer-player[hidden] > *, .cl-host .viewer > .vault-player[hidden] > * { opacity: 0; visibility: hidden; }
-.cl-host .viewer > .vault-player { background: var(--panel); }
+.cl-host .viewer > .viewer-player[hidden] { display: block; visibility: visible; }
+.cl-host .viewer > .viewer-player[hidden] > * { opacity: 0; visibility: hidden; }
 
 /* The chosen tab's underline, one, sliding. */
 .cl-tabs { position: relative; }
@@ -61,10 +60,10 @@
 
 .cl-host skw-titlebar .tb-acts, .cl-fr-app, .cl-host .viewer > .viewer-head > *, .cl-host skw-rulers .rl > *,
 .cl-host skw-rulers > :not(.rl):not(.rl-corner), .cl-host footer.bar > *, .cl-tabs > *, .cl-none,
-.cl-host .viewer > .viewer-player > *, .cl-host .viewer > .vault-player > * { transition: opacity 160ms ease, visibility 160ms; }
+.cl-host .viewer > .viewer-player > * { transition: opacity 160ms ease, visibility 160ms; }
 .cl-out .cl-host skw-titlebar .tb-acts, .cl-out .cl-fr-app, .cl-out .cl-host .viewer > .viewer-head > *, .cl-out .cl-host skw-rulers .rl > *,
 .cl-out .cl-host skw-rulers > :not(.rl):not(.rl-corner), .cl-out .cl-host footer.bar > *, .cl-out .cl-tabs > *, .cl-out .cl-none,
-.cl-out .cl-host .viewer > .viewer-player > *, .cl-out .cl-host .viewer > .vault-player > * { opacity: 0; }
+.cl-out .cl-host .viewer > .viewer-player > * { opacity: 0; }
 .cl-tabs-ink { transition: transform 180ms cubic-bezier(0.2, 0.7, 0.2, 1), width 180ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 160ms ease; }
 .cl-tabs-ink:not(.cl-tabs-ink--placed) { transition: opacity 160ms ease; }
 
@@ -77,5 +76,5 @@
 @media (prefers-reduced-motion: reduce) {
   .cl-host skw-titlebar .tb-acts, .cl-fr-app, .cl-host .viewer > .viewer-head > *, .cl-host skw-rulers .rl > *,
   .cl-host skw-rulers > :not(.rl):not(.rl-corner), .cl-host footer.bar > *, .cl-tabs > *, .cl-none, .cl-tabs-ink,
-  .cl-host .viewer > .viewer-player > *, .cl-host .viewer > .vault-player > *, .cl-host .app-main > .app-side > *, .cl-detail > * { transition: none; }
+  .cl-host .viewer > .viewer-player > *, .cl-host .app-main > .app-side > *, .cl-detail > * { transition: none; }
 }
