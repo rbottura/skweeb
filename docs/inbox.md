@@ -29,6 +29,20 @@ Nothing, 2026-11-05: the day's ideas went onto the plan, into
 
 ## Sorted
 
+- **2026-11-05 — the planned bricks now; BEC again, as a project.** "je
+  pense qu'on peut continuer celles déjà planifiées maintenant"; S11's
+  bench "très prometteur mais je n'ai pas encore assez utilisé et de
+  visions de scénario pour pousser les fonctionnalités maintenant, nous y
+  reviendrons très bientôt"; "j'ai très envie de réutiliser le projet BEC
+  2025 et les quelques scénarios qu'il a introduits … comment on crée un
+  objet de type projet … qui encapsule un objet, ici du contexte de l'app
+  3d qui serait la grille 3d de l'app BEC originelle et embarque aussi la
+  possibilité de charger les paramètres et leurs évènements … et jouer avec
+  les scénarios de couches de textes, les itérations, les sauvegardes de
+  versions, la visualisation de ses versions, leur comparaison". → S9e
+  next, its proposal as written; S11's version 2 later; M13 proposed,
+  `docs/bec.md`, waiting on the author in `docs/plan.md`.
+
 - **2026-11-05 — cluster's vault, beside an app.** "la transition du
   canvas et du panel droit est pas mal. le vault a une sorte de bug jumpy …
   comme s'il se redimensionne d'un coup puis encore une fois pour redevenir

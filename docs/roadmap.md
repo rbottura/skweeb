@@ -21,6 +21,7 @@ item, is the board in `docs/plan.md`. Here, the milestones still open.
 | M10 | 3D: meshes, from primitives up | bricks 1 to 4 of six, below |
 | M11 | the live stack, and smart objects | done 2026-10-07; what it left is L in `docs/plan.md` |
 | M12 | the scene: one canvas, the suite round it | planned 2026-11-03 — `docs/scene.md`; track S in `docs/plan.md` |
+| M13 | BEC again: its grid in the 3D app, its layers by format, the project one page | proposed 2026-11-05 — `docs/bec.md`; waits on the author |
 
 ## The links
 
@@ -352,7 +353,8 @@ plan it was built to, is in `apps/compose/STATUS.md`.
 2. **The online skweeboteque.** Wanted, not now — it needs a server, and it is
    also what turns sandboxing from theory into work. Nothing in the local design
    blocks it; the vault interface is the seam it would go behind.
-3. **A project made by several, BEC's way** (inbox, 2026-11-05). Wanted:
+3. **A project made by several, BEC's way** (inbox, 2026-11-05) — after
+   BEC itself, M13 (`docs/bec.md`). Wanted:
    pictures and PDF pages laid over the render or under it, by format, as
    BEC_2025 laid its titles and infos (`docs/migration.md`); a print that
    keeps their type vector; a project's people live on one stack — a
