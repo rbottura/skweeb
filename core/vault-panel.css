@@ -166,6 +166,12 @@
    row. The tab sits in the grid's gap. */
 .vp-grid--top { grid-auto-flow: row dense; }
 
+/* Beside an app (cluster's), its own objects first, then the rest: a line naming each part, over a grid of its own. */
+.vp-part { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font: 600 10px var(--font-ui);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); white-space: nowrap; }
+.vp-part::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.vp-grid--top + .vp-part { margin-top: 14px; }
+
 .vp-fcard {
   position: relative;
   align-self: start;

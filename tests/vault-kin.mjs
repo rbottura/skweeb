@@ -83,5 +83,16 @@ ok('…and where its members are not shown — a picker of sets — it is not', 
 const filed = arrange([SAME, T2, T1], [SAME, T2, T1], { kin: true, folderOf: fileOf });
 ok('…arranged, it is in their folder, not beside it', filed.map(i => i.folder ? i.folder + ':' + i.rows.map(r => r.id) : i.row.id), ['stones:SAME,T2,T1']);
 
+// The app's own first, then the rest: a kin holding one of the app's with the app's, so the parts never mix.
+const { ownFirst, holds, madeBy } = await import('../core/vault-kin.js');
+const by = (r, app) => ({ ...r, origin: { app } });
+const mixed = [by(USER, 'compose'), by(LIVE, 'particles'), by(L, 'rig/puppet'), by(C, 'grid'), by(B, 'particles'), by(A, 'grid')];
+const order = ownFirst(mixed, 'particles');
+ok('the app\'s own first, newest first in each part', [order.rows.map(r => r.id), order.own], [['LIVE', 'B', 'USER', 'L', 'C', 'A'], 2]);
+const parts = arrange(order.rows, mixed, { kin: true, folderOf: () => null }).map(i => holds(i, 'particles'));
+ok('…arranged, every item holding one of its own before every item holding none', [parts.indexOf(false) === parts.lastIndexOf(true) + 1, parts],
+  [true, [true, true, false]]);
+ok('…the rig\'s puppet made by the rig', madeBy(by(L, 'rig/puppet')), 'rig');
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
