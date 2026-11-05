@@ -336,9 +336,10 @@ compares two pages' canvases measures, never demands the pixel.
 **The author sees S9e's first pass in cluster** — switching between apps
 of different formats, particles to ckt — and says, case by case, what to
 change (`docs/scene.md`, *The motion, case by case*); and answers M13's
-questions (`docs/bec.md`, *Waiting on the author*). Meanwhile the board's
-next: L11, a smart object followed wherever it is picked. S11's version 2
-once the author has scenarios for it.
+questions (`docs/bec.md`, *Waiting on the author*). Then, on the author's
+yes, M13a — BEC's grid in the 3D app; else the board's next, L11 — a smart
+object followed wherever it is picked. S11's version 2 once the author has
+scenarios for it.
 
 ## Parked decisions
 
