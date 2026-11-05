@@ -108,5 +108,26 @@ Steps.forTests();
   ok('…watched no more', Steps.watched().includes(a), false);
 }
 
+// Listed, as cluster's History has them (S9f): what each changed, taken or gone back over; gone to by its place.
+Steps.forTests();
+{
+  const p = fresh('listed');
+  let heard = 0;
+  const off = Steps.onSteps(() => heard++);
+  p.set('rate', 100); later();
+  p.set('rate', 110); later();
+  p.set('seed', 7); later();
+  Steps.settle();
+  ok('the steps listed, oldest first, what each changed', Steps.list().map(s => s.label), ['rate 90 → 100', 'rate 100 → 110', 'seed 1 → 7']);
+  Steps.go(0);
+  ok('gone to the first: every step after it gone back over', [both(p), Steps.list().map(s => s.ahead)], [[100, 1], [false, true, true]]);
+  Steps.go(2);
+  ok('…and on to the last again', both(p), [110, 7]);
+  Steps.go(-1);
+  ok('…and before any: where they started', both(p), [90, 1]);
+  ok('…each change of them heard', heard > 5, true);
+  off();
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

@@ -51,6 +51,9 @@ import { VaultPanel }     from '../../core/VaultPanel.js';
 import { holdFrames }     from './held.js';
 import { propsTabs }      from './tabs.js';
 import { stillFrames }    from './frames.js';
+import { sideViews }      from './sides.js';
+import { keysView }       from './keys-view.js';
+import { historyView }    from './history-view.js';
 
 /**
  * The apps the scene mounts, in the strip's order, each loaded when first
@@ -83,7 +86,7 @@ const el = (tag, cls, text) => {
   return node;
 };
 
-let scene, strip, host, vault, props, frames, boxes;
+let scene, strip, host, vault, props, frames, boxes, sides;
 let opened = null;         // { object, urls }: the object open in the scene's vault, for an app that draws it
 let now = null;            // { name, module, n, ready }: the app mounted, the ask it answers, whether it has started
 let wanted = null;         // { name, n }: the app last asked for — a link to the app there is an ask of its own
@@ -120,8 +123,15 @@ export function start(page = document.body) {
     Object.assign(a, { href: p.href, target: '_blank', rel: 'noopener', title: p.title });
     strip.append(a);
   }
+  const sideBar = el('nav', 'cl-sides');        // the side's views, a tab each: the vault, the keys, the history (S9f)
+  sideBar.setAttribute('aria-label', 'the side');
+  sideBar.setAttribute('role', 'tablist');
   const side = el('aside', 'cl-side');
   side.setAttribute('aria-label', 'the vault');
+  const keys = el('section', 'cl-keys');
+  keys.setAttribute('aria-label', 'the keys');
+  const story = el('section', 'cl-history');
+  story.setAttribute('aria-label', 'the history');
   const tabs = el('nav', 'cl-tabs');
   tabs.setAttribute('aria-label', 'the properties');
   tabs.setAttribute('role', 'tablist');
@@ -129,7 +139,7 @@ export function start(page = document.body) {
   const none = el('p', 'cl-none', 'An object chosen in the vault opens here.');
   host = el('div', 'cl-host');
   boxes = stillFrames();                     // under everything an app lays in the grid: its boxes, still (S9e)
-  scene.append(strip, ...boxes.nodes, side, tabs, detail, none, host);
+  scene.append(strip, ...boxes.nodes, sideBar, side, keys, story, tabs, detail, none, host);
   page.append(scene);
 
   installPalette();                          // ² from the start: the vault has no panel to install it
@@ -141,6 +151,11 @@ export function start(page = document.body) {
     onDetail: (object, urls) => { opened = { object, urls }; props.showDetail(object.type); tell(); },
     onClose: () => { opened = null; props.hideDetail(); },
   });
+  sides = sideViews(sideBar, [
+    { key: 'vault', label: 'vault', el: side },
+    { key: 'keys', label: 'keys', el: keys, paint: keysView(keys).paint },
+    { key: 'history', label: 'history', el: story, paint: historyView(story, { shown: () => !!sides && sides.shown === 'history' }).paint },
+  ]);
   // A link to an app the scene has: that app here, in place, its query with it.
   takeLinks(url => {
     const name = appOf(url);
@@ -228,6 +243,7 @@ async function swap(ask) {
     props.paint();
     tell();
     vault.first = ask.name === FIRST ? null : ask.name;   // its own objects first in the scene's vault, then the rest
+    sides.paint();                           // its keys, its steps and states, if the side shows them
     await frame();                           // laid out where they leave from, before they move
     // Its panels in — unless another app was asked for meanwhile: they stay out, and it comes.
     if (now && now.n === ask.n && wanted === ask) scene.classList.remove('cl-out');

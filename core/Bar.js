@@ -68,6 +68,7 @@ export class Bar {
     this._unheld = held(() => this.remove());
     this._holdUntil = 0;
     this._keysText = keys;
+    this.root.dataset.keys = keys;          // the app's own, for a page that lists every key (cluster's Keys, S9f)
 
     // The title bar: the app, the search, Save and Export (core/shell/titlebar.js).
     if (typeof customElements !== 'undefined' && !mount.querySelector(':scope > skw-titlebar')) {

@@ -122,15 +122,11 @@ class SkwGraph extends LitElement {
     this._kept = null;
   }
 
-  /** Back to state `n`: in place as a step, or reopened at it. */
+  /** Back to state `n`: in place as a step, or reopened at it (`backTo`). */
   async _go(n) {
     const recipe = await this._recipe(n);
-    const parts = laid(recipe);
-    const bound = Vault.bound;
-    if (!parts) { location.search = `?open=${encodeURIComponent(bound.id)}@v${n}`; return; }
     this._unpreview();
-    for (const [p, part] of parts) around(p, () => p.restore(part));
-    Vault.bind({ id: bound.id, type: bound.type, version: n, strict: bound.strict });
+    await backTo(n, recipe);
     this.close();
   }
 
@@ -285,6 +281,32 @@ class SkwGraph extends LitElement {
 if (!customElements.get('skw-graph')) customElements.define('skw-graph', SkwGraph);
 
 /** H: open the graph over the page, or close it. */
+/** State `n`'s recipe, of the object `id`: the newest is the object itself, an older one its kept version. */
+async function recipeAt(id, n) {
+  const now = (await Vault.load(id)).object;
+  const at = (now.version || 1) === n ? now : await Vault.version(id, n);
+  return (at && at.recipe && at.recipe.recipe) || null;
+}
+
+/**
+ * Back to state `n` of the object the page holds: in place, a step Ctrl Z takes back, where the page's params
+ * hold all of its recipe — or reopened at it, `?open=…@vN`. The page then holds it: its next save is a branch
+ * from there. The graph's click, and cluster's History's (S9f).
+ *
+ * @param {number} n
+ * @param {?object} [recipe]  state n's, when already read
+ * @returns {Promise<boolean>}  false when the page holds no object
+ */
+export async function backTo(n, recipe) {
+  const bound = Vault.bound;
+  if (!bound || !bound.id) return false;
+  const parts = laid(recipe === undefined ? await recipeAt(bound.id, n) : recipe);
+  if (!parts) { location.search = `?open=${encodeURIComponent(bound.id)}@v${n}`; return true; }
+  for (const [p, part] of parts) around(p, () => p.restore(part));
+  Vault.bind({ id: bound.id, type: bound.type, version: n, strict: bound.strict });
+  return true;
+}
+
 export function toggleGraph() {
   const open = document.querySelector('skw-graph');
   if (open) { open.close(); return; }

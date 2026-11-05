@@ -23,6 +23,8 @@
  * No DOM at import.
  */
 
+import { inkFor, comeIn as fadeIn } from './ink.js';
+
 const DETAIL = '\u0000detail';      // the detail's key: no panel can be named so
 
 const el = (tag, cls, text) => {
@@ -51,7 +53,7 @@ export function propsTabs({ bar, detail, none }) {
   let back = null;          // the panel shown before the detail took the column
   let dragging = false;     // an object from the vault under way: the tabs whose panel would take it marked
   let said = '';            // what the bar says, as last built
-  const ink = el('span', 'cl-tabs-ink');   // the chosen tab's underline: one, sliding from tab to tab
+  const ink = inkFor(bar);   // the chosen tab's underline: one, sliding from tab to tab
   document.addEventListener('vault:drag', e => { dragging = !!e.detail.row; paint(); });
 
   /** The panels showing now, the detail after them. */
@@ -80,30 +82,18 @@ export function propsTabs({ bar, detail, none }) {
         b.setAttribute('aria-selected', String(t.key === on));
         b.addEventListener('click', () => choose(t.key));
         return b;
-      }), ink);
+      }), ink.node);
     }
     for (const t of all) t.el.classList.toggle('cl-shown', t.key === on);
     if (!open) detail.classList.remove('cl-shown');
     none.hidden = all.length > 0;
-    underline();
-  }
-
-  /** The underline under the chosen tab — slid there, once it has been somewhere. */
-  function underline() {
-    const b = bar.querySelector('.cl-tab[aria-selected="true"]');
-    ink.hidden = !b;
-    if (!b) return;
-    const at = `translateX(${b.offsetLeft + 8}px)`, width = Math.max(0, b.offsetWidth - 16) + 'px';
-    if (ink.style.transform === at && ink.style.width === width) return;
-    ink.classList.toggle('cl-tabs-ink--placed', !!ink.style.width);     // the first time, it is put there
-    Object.assign(ink.style, { transform: at, width });
+    ink.place();
   }
 
   /** A panel shown by a tab, or a detail opened, comes in: a short fade. */
   function comeIn(key) {
     const t = tabs().find(x => x.key === key);
-    const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (t && !reduced && typeof t.el.animate === 'function') t.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'ease' });
+    if (t) fadeIn(t.el);
   }
 
   function choose(key) {
