@@ -25,6 +25,9 @@ sorts them.
   and smart object (`core/mount.js` `keep`); *Open in … ↗* and the other
   links between apps mount theirs in place (`core/reopen.js` `follow`) —
   `check-cluster`. particles' and compose's ways out are a `leaving.js`.
+- **The motion at a switch, a first pass** (S9e): the scene's frames
+  under every app's boxes, so none blinks; what is in them goes and comes;
+  the frame held moved onto the next picture; the tab's underline sliding.
 - **The scene's vault beside an app** (S9g): still at a switch, its
   stylesheet the scene's; the app's own objects first, the cards sliding
   (`core/flip.js`); a card dragged onto any app's object field
@@ -337,13 +340,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**The author tries S11's bench** — https://claude.ai/artifact/W6qyTQ6hG45rkaLWD4nwYL,
-version 1 (`docs/scene.md`, *The space viewer gets a bench of its own
-first*): its five tests, its parameters, *Keep* for what works — and
-S9g in cluster, the vault beside each app, a card dragged onto a field.
-And goes through S9e's cases, the motion at a switch, in `docs/scene.md`.
-Then, by what is said: the bench's version 2, or S9e's first pass in
-cluster.
+**The author sees S9e's first pass in cluster** — switching between apps
+of different formats, particles to ckt — and says, case by case, what to
+change (`docs/scene.md`, *The motion, case by case*); and answers M13's
+questions (`docs/bec.md`, *Waiting on the author*). Meanwhile the board's
+next: S9f, the keys and the history as side views. S11's version 2 once
+the author has scenarios for it.
 
 ## Parked decisions
 

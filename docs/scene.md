@@ -270,6 +270,23 @@ Three kinds of element, the proposal to go through:
   bar's words — each a short fade, the panel's with a slide, the next
   app's coming as soon as it is built rather than after a wait.
 
+**Its first pass** (`scene/motion`, landed 2026-11-05, the proposal as
+written — "on peut continuer celles déjà planifiées"): the scene draws its
+own frames under the app's boxes, the same as them (`apps/cluster/frames.js`)
+— the title bar's line, the viewer's box with its head, its rulers' bands
+and its player's strip, the properties' box, the status bar's line — so as
+one app goes and before the next is built, no box blinks; the brand and the
+search are the scene's, only the app's name and acts change. What is in
+the boxes goes and comes in 160 ms — the title bar's acts, the viewer's
+head, the rulers' marks, the player, the status bar's words, the tabs —
+the panel's contents slide out and in inside a box that holds still. The
+frame held moves onto the next picture at its size, its own covering the
+changing box, and the two cross (`held.js`); the chosen tab's underline is
+one, sliding; a panel shown by its tab fades in; the player's strip is
+always there, empty where nothing plays (`motion.css`). Left for the
+author's eye: the next app's contents wait for its boot to come in; the
+rulers' numbers and the viewer's own tools go and come rather than adapt.
+
 The cases: a still to a still (grid → fractals), a still to a sequence
 (grid → particles) and back, a sequence to a sequence of another length,
 to and from the vault app, an object opened in the vault beside, a link
