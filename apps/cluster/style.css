@@ -15,6 +15,12 @@
    page. So the viewer is in the same place for every app, and the canvas in
    it does not move; its head and the player's strip keep one height each,
    the player's kept where there is none, so the stage keeps one size.
+
+   The properties are one panel, as the bench's: the tabs its head, the
+   app's sections folded inside it with a hairline between, its Reset at the
+   end of the tabs' row — the author, the same day: "une liste de catégories
+   dépliables mais tout dans une même section". The vault beside the viewer
+   is a grid of pictures, four columns: "une vue trop restreinte" else.
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
@@ -23,18 +29,20 @@
   --strip: 92px;
   --vault-w: 256px;           /* the bench's side view */
   --props-w: 300px;           /* the bench's properties */
-  --tabs-h: 30px;
+  --tabs-h: 36px;             /* the gap over the properties, and their head — the tabs, 30 px */
   --head-h: 37px;             /* a viewer's head: the app's buttons, its tools */
   --player-h: 59px;           /* the player under the viewer — or its room, where nothing plays */
+  --cl-chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   height: 100vh;
   display: grid;
   grid-template-columns: var(--strip) var(--vault-w) minmax(0, 1fr) var(--props-w);
   grid-template-rows: 38px var(--tabs-h) minmax(0, 1fr) var(--bar-h);
   column-gap: var(--gap);
   background: var(--frame);
+  interpolate-size: allow-keywords;   /* a section's height animated as it folds — Chrome 129 on; at once elsewhere */
 }
 
-/* ── The scene's own: the strip, the vault, the tab bar, the detail ────────── */
+/* ── The scene's own: the strip ────────────────────────────────────────────── */
 
 .cl-strip {
   grid-column: 1;
@@ -101,12 +109,52 @@
 
 .cl-sep { flex: none; height: 1px; margin: 6px 12px; background: var(--line); }
 
-/* The vault, the scene's: its grid docked beside the viewer, its detail a tab of the properties.
-   Narrow, its kinds of object are one row, scrolled — not four. */
-.cl-side { grid-column: 2; grid-row: 2 / 4; min-height: 0; margin-block: var(--gap); display: flex; flex-direction: column; }
-.cl-side .vp-head { gap: 6px; padding: 8px 10px; }
-.cl-side .vp-filters { flex: 1 0 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; order: 1; }
+/* ── The vault, the scene's ───────────────────────────────────────────────────
+   Docked beside the viewer, its detail a tab of the properties; laid as the
+   bench's side view — its head two rows, what it is and its acts, then how
+   it is shown — and its objects a grid of pictures, four columns: the name
+   and the type in a card's title, the rest in its detail. */
+
+.cl-side { grid-column: 2; grid-row: 2 / 4; min-height: 0; margin-block: var(--gap); display: flex; flex-direction: column;
+  --vp-card: 50px; --vp-gap: 6px; --vp-pad: 8px; }
+.cl-side .vp--docked { border: 1px solid var(--line); background: var(--panel); }
+.cl-side .vp-head { gap: 4px; padding: 4px 6px 4px 10px; background: none; border-bottom: 1px solid var(--line); }
+.cl-side .vp-title { font: 600 11px var(--font-ui); letter-spacing: 0.07em; color: var(--fg-2); }
+.cl-side .vp-count { margin-right: auto; font: 400 11px var(--font-num); color: var(--fg-3); }
+.cl-side .vp-spacer { flex: 0 0 100%; height: 0; order: 1; }
+.cl-side .vp-head > .vp-chip { order: 2; }
+.cl-side .vp-filters { order: 3; flex: 1 1 0; min-width: 0; flex-wrap: nowrap; gap: 2px; overflow-x: auto; scrollbar-width: none; }
 .cl-side .vp-filters::-webkit-scrollbar { display: none; }
+.cl-side .vp-btn, .cl-side .vp-chip { flex: none; min-height: 22px; padding: 0 6px; border: 0; border-radius: var(--radius); background: none;
+  box-shadow: none; color: var(--fg-3); font: 400 11.5px var(--font-ui); transition: background 90ms, color 90ms; }
+.cl-side .vp-btn:hover, .cl-side .vp-chip:hover { background: var(--hover); color: var(--fg); }
+.cl-side .vp-btn:active { transform: none; }
+.cl-side .vp-chip--on, .cl-side .vp-chip--on:hover { background: var(--sel); color: var(--fg); }
+
+.cl-side .vp-card { position: relative; border: 0; border-radius: 6px; overflow: hidden; background: none; transition: box-shadow 90ms; }
+.cl-side .vp-card:hover { transform: none; box-shadow: 0 0 0 1px var(--line-2); }
+.cl-side .vp-card--on, .cl-side .vp-card--on:hover { background: none; box-shadow: 0 0 0 2px var(--accent); }
+.cl-side .vp-thumb { border: 0; background-size: 8px 8px; }
+.cl-side .vp-card:not(.vp-fcard) > .vp-meta { display: none; }
+/* A sequence says so: a small play at its corner. */
+.cl-side .vp-card[data-type="sequence"]::after { content: ""; position: absolute; right: 4px; bottom: 4px; border: 4px solid transparent;
+  border-right: 0; border-left: 6px solid var(--fg); filter: drop-shadow(0 0 1px #000); pointer-events: none; }
+/* Kin close together, their order read left to right: no room for an arrow. */
+.cl-side .vp-kin { padding: 17px 3px 3px; }
+.cl-side .vp-kin-head { top: 3px; left: 4px; right: 4px; font-size: 9px; }
+.cl-side .vp-kin-name { padding: 0 4px; }
+.cl-side .vp-kin > .vp-card ~ .vp-card::before, .cl-side .vp-kin > .vp-cell ~ .vp-cell::before { display: none; }
+/* A folder two pictures wide, its name kept; open, its strip across the grid. */
+.cl-side .vp-fcard { grid-column: span 2; }
+.cl-side .vp-fcard::before { top: -6px; height: 6px; }
+.cl-side .vp-fcard .vp-meta { padding: 3px 6px 4px; }
+.cl-side .vp-fcard .vp-name { font-size: 11px; }
+.cl-side .vp-fcard .vp-sub { font-size: 10px; }
+.cl-side .vp-fstrip > .vp-grid { padding: 6px; }
+
+/* ── The properties: one panel, as the bench's ─────────────────────────────────
+   Its tabs are its head; under them, in the same place, the app's panel
+   shown, an object's detail, or a word when there is nothing. */
 
 .cl-tabs {
   grid-column: 4;
@@ -118,15 +166,22 @@
   margin: var(--gap) var(--gap) 0 0;
   padding: 0 6px;
   overflow-x: auto;
+  scrollbar-width: none;
   border: 1px solid var(--line);
   border-bottom: 0;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   background: var(--panel);
+  box-shadow: inset 0 -1px 0 var(--line);       /* the head's line, the chosen tab's over it */
 }
+
+.cl-tabs::-webkit-scrollbar { display: none; }
+/* Room at its end for the panel's Reset, laid over it. */
+.cluster:has(.cl-host .app-main > .app-side.cl-shown > .pp:first-child > .pp-head) .cl-tabs { padding-right: 64px; }
 
 .cl-tab {
   position: relative;
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
   padding: 0 8px;
   border: 0;
   background: none;
@@ -134,28 +189,102 @@
   font: 600 11px var(--font-ui);
   letter-spacing: 0.07em;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
+  transition: color 90ms;
 }
 
 .cl-tab:hover { color: var(--fg-2); }
 .cl-tab[aria-selected="true"] { color: var(--fg); }
 .cl-tab[aria-selected="true"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 1px; background: var(--accent); }
 
-/* Every one of the properties' cells is the same place: under the tabs, one shown. */
-.cl-detail, .cl-none, .cl-host .app-main > .app-side { grid-column: 4; grid-row: 3; min-height: 0; margin: 0 var(--gap) var(--gap) 0; }
-.cl-detail { display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-top: 0; background: var(--panel);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+/* The panel's body: every one of its contents the same place, one shown. */
+.cl-detail, .cl-none, .cl-host .app-main > .app-side {
+  grid-column: 4;
+  grid-row: 3;
+  min-height: 0;
+  margin: 0 var(--gap) var(--gap) 0;
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--panel);
+}
+
+.cl-detail { display: none; flex-direction: column; overflow: hidden; }
 .cl-detail.cl-shown { display: flex; }
 .cl-detail .vp-detail { position: static; flex: 1; width: auto; min-height: 0; transform: none; visibility: visible; transition: none; border-left: 0; }
 .cl-detail .vp-detail.vp-detail--info { width: auto; }
 /* Its tab says what it is: its head keeps only the close. */
 .cl-detail .vp-detail-head { padding: 4px 8px; background: none; justify-content: flex-end; }
 .cl-detail .vp-detail-head > .vp-title { display: none; }
-.cl-none { padding: 14px; color: var(--fg-3); font-size: 12px; border: 1px solid var(--line); border-top: 0; background: var(--panel);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.cl-none { padding: 14px; color: var(--fg-3); font-size: 12px; }
 .cl-none[hidden] { display: none; }
 
-/* The last frame of the app going, over where it was, until the next draws its first (held.js). */
+/* ── The app's panel in it ─────────────────────────────────────────────────────
+   Its title is its tab's, its Reset at the end of the tabs' row; its loose
+   rows, its sections and its lists of cards one column, a hairline between
+   each — no box of their own. A section folds, its chevron turned. */
+
+.cl-host .app-main > .app-side { position: relative; display: flex; flex-direction: column; }
+.cl-host .app-main > .app-side:not(.cl-shown), .cl-host .app-main > .app-side[hidden] { display: none; }
+.cl-host .app-main > .vault-side { display: none; }
+.cl-host .app-side .pp--docked { background: none; }
+.cl-host .app-side .pp-body { padding: 0 0 8px; }
+
+.cl-host .app-main > .app-side > .pp:first-child > .pp-head {
+  position: absolute;
+  z-index: 2;
+  top: calc(var(--gap) - var(--tabs-h));
+  right: 5px;
+  height: calc(var(--tabs-h) - var(--gap));
+  margin: 0;
+  padding: 0;
+  gap: 2px;
+  border: 0;
+  background: none;
+}
+
+.cl-host .app-main > .app-side > .pp:first-child > .pp-head > .pp-title { display: none; }
+.cl-host .app-side .pp-head > .pp-btn { min-height: 22px; padding: 0 6px; border: 0; border-radius: var(--radius); background: none;
+  color: var(--fg-3); font: 400 11.5px var(--font-ui); transition: background 90ms, color 90ms; }
+.cl-host .app-side .pp-head > .pp-btn:hover { background: var(--hover); color: var(--fg); }
+
+.cl-host .app-side .pp-loose:not(:empty) { margin: 0; padding: 4px 10px 6px; border: 0; border-bottom: 1px solid var(--line); background: none; }
+
+.cl-host .app-side .dr { overflow: visible; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; }
+.cl-host .app-side .dr + .dr { margin-top: 0; }
+.cl-host .app-side .dr-head { min-height: 26px; gap: 4px; padding: 0 8px 0 6px; transition: color 90ms, background 90ms; }
+.cl-host .app-side .dr--open > .dr-head { border-bottom: 0; }
+.cl-host .app-side .dr-head::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  -webkit-mask: var(--cl-chev) center / 14px no-repeat;
+  mask: var(--cl-chev) center / 14px no-repeat;
+  transform: rotate(-90deg);
+  transition: transform 120ms ease;
+}
+.cl-host .app-side .dr--open > .dr-head::before { transform: none; }
+.cl-host .app-side .dr-body { display: block; height: 0; padding: 0 10px; overflow: hidden; opacity: 0; visibility: hidden;
+  transition: height 160ms ease, padding 160ms ease, opacity 160ms ease, visibility 160ms; }
+.cl-host .app-side .dr--open > .dr-body { height: auto; padding: 1px 10px 6px; opacity: 1; visibility: visible; }
+
+.cl-host .app-side .pp-cards { gap: 0; }
+.cl-host .app-side .pp-card + .pp-card { border-top: 1px solid var(--line); }
+.cl-host .app-side .pp-card > .pp > .pp-head { min-height: 26px; margin: 0; padding: 2px 2px 2px 6px; border: 0; border-radius: var(--radius);
+  background: none; color: var(--fg-2); transition: background 90ms, color 90ms; }
+.cl-host .app-side .pp-card--chosen > .pp > .pp-head { background: var(--accent-soft); color: var(--fg); }
+.cl-host .app-side .pp-card--foldable > .pp > .pp-head > .pp-title::before { content: ""; width: 12px; height: 12px; margin-right: 4px; vertical-align: -2px;
+  background: currentColor; -webkit-mask: var(--cl-chev) center / 12px no-repeat; mask: var(--cl-chev) center / 12px no-repeat; transition: transform 120ms ease; }
+.cl-host .app-side .pp-card--folded > .pp > .pp-head > .pp-title::before { transform: rotate(-90deg); }
+.cl-host .app-side .pp-cards-add { margin-top: 6px; }
+
+/* ── The last frame of the app going, over where it was, until the next draws its first (held.js) ── */
+
 .cl-held {
   position: fixed;
   z-index: 30;
@@ -173,7 +302,8 @@
 .cl-tabs, .cl-detail, .cl-none, .cl-host .app-main > .app-side { transition: transform 240ms ease, opacity 240ms ease; }
 .cl-out .cl-tabs, .cl-out .cl-detail, .cl-out .cl-none, .cl-out .cl-host .app-main > .app-side { transform: translateX(28px); opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
-  .cl-tabs, .cl-detail, .cl-none, .cl-host .app-main > .app-side, .cl-held { transition: none; }
+  .cl-tabs, .cl-detail, .cl-none, .cl-host .app-main > .app-side, .cl-held,
+  .cl-host .app-side .dr-body, .cl-host .app-side .dr-head::before, .cl-host .app-side .pp-title::before { transition: none; }
 }
 
 /* ── The app mounted, laid in the scene's grid ─────────────────────────────── */
@@ -197,11 +327,3 @@
 .cl-host .viewer > .viewer-stage { grid-row: 2; min-height: 0; }
 .cl-host .viewer > .viewer-player, .cl-host .viewer > .vault-player { grid-row: 3; min-height: 0; overflow: hidden; }
 .cl-host .viewer > .viewer-player[hidden] { display: block; visibility: hidden; }
-
-/* The panels: one shown, under its tab; the app's own vault gives way to the scene's. */
-.cl-host .app-main > .app-side { display: flex; flex-direction: column; }
-.cl-host .app-main > .app-side:not(.cl-shown), .cl-host .app-main > .app-side[hidden] { display: none; }
-.cl-host .app-main > .app-side > .pp { border-top-left-radius: 0; border-top-right-radius: 0; }
-/* Its tab says its name: its head keeps only what it does — Reset. */
-.cl-host .app-main > .app-side > .pp > .pp-head > .pp-title { display: none; }
-.cl-host .app-main > .vault-side { display: none; }

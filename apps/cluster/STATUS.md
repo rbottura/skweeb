@@ -18,12 +18,25 @@ app still opens alone on its own page; the scene is one more host.
   plays (`style.css`). The vault there is the scene's, the same one
   whatever app is round it; the vault app, mounted, builds none and draws
   what it opens (`given.vault`, `chosen`).
-- **The properties, a tab each** (`tabs.js`): the app's panels on the right
-  one at a time — particles' two, compose's placed and page, map's map and
-  things — the one shown kept for its next mount; a panel its app shows or
-  hides, grid's maker, gains or loses its tab. An object opened in the
-  scene's vault is a tab beside them, its detail, its picture there unless
-  the vault app draws it; closed, the panel shown before it again.
+- **The properties, one panel as the bench's** (`scene/props`, 2026-11-05 —
+  the author: "une liste de catégories dépliables mais tout dans une même
+  section"): the tabs are its head, the panel's Reset at the end of their
+  row; under them the app's sections fold, a hairline between each and no
+  box of their own, a chevron turned, the height moving as one opens or
+  shuts; a list of cards — the 3D app's shapes — rows the same way. Each
+  of the app's panels a tab (`tabs.js`) — particles' two, compose's placed
+  and page, map's map and things — the one shown kept for its next mount;
+  a panel its app shows or hides, grid's maker, gains or loses its tab. An
+  object opened in the scene's vault is a tab beside them, its detail, its
+  picture there unless the vault app draws it; closed, the panel shown
+  before it again.
+- **The scene's vault, four columns of pictures** (`scene/props`): the
+  author's "peut-être 3 colonnes ou 4" — a card is its picture, its name
+  and type its title, a sequence marked by a small play; kin and folders
+  kept, a folder two pictures wide with its name; the head two rows, what
+  it is and its acts, then lineage, trash and the kinds, scrolled. Its
+  density is three tokens of core's vault panel the scene sets (`--vp-card`,
+  `--vp-gap`, `--vp-pad`); the vault app's own page keeps its large cards.
 - **The panels leave and come** (`scene/panels`, 2026-11-05), as the
   bench's `swapping`: at a switch the properties — the tabs, the panel, the
   detail — slide out to their side and fade in 240 ms, the app going is
@@ -89,13 +102,20 @@ app still opens alone on its own page; the scene is one more host.
   page's memory is where it is kept.
 - **A switch while an app saves** takes it out mid-save: the save goes on
   in the background and lands in the vault, but nothing says so.
-- **The vault beside the viewer is narrow**: its grid a column of cards,
-  its head three rows. Keys and history, the bench's other side views, are
-  not there yet; nor the bench's focus, the viewer alone.
+- **The motion at a switch is not worked out**: the panels go out, then
+  everything else of the next app appears in one frame — its title bar's
+  acts, its viewer's head, its rulers, its picture at its own size, its
+  player — then the panels come in; "assez saccadées", the author found.
+  What holds still, what adapts, what goes and comes, case by case, is
+  S9e, worked out with the author (`docs/scene.md`, *The motion, case by
+  case*).
+- Keys and history, the bench's other side views, are not there yet (S9f);
+  nor the bench's focus, the viewer alone.
 
 ## Next
 
-S9c is done. What the scene asks next is the author's to see first: the
-bench's layout in the apps' own pages, or cluster as it is; the bench's
-other side views — the keys, the history — and its focus, the viewer
-alone; then S11's bench for the space of objects (`docs/plan.md`).
+S9e, the motion case by case, once the author has gone through the cases
+of `docs/scene.md` (*The motion, case by case*); S11's bench first, the
+author's "au plus vite". Then the keys and the history as side views
+(S9f). What cluster settles flows onto the apps' own pages after — the
+author's order, 2026-11-05.

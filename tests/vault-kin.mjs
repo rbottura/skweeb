@@ -63,8 +63,10 @@ ok('with the switch off, every loose object on its own',
   arrange(newestFirst, all, { kin: false, folderOf }).filter(i => i.row).map(i => i.row.id),
   ['USER', 'LIVE', 'PAGE', 'S2', 'S1', 'Y', 'X', 'L', 'C', 'B', 'A']);
 
-// How many columns the grid has: 150px cards, 14px gaps, 16px padding each side.
+// How many columns the grid has: 150px cards, 14px gaps, 16px padding each side —
+// or at the density a host set: cluster's vault, 50px pictures, 6px gaps, 8px padding.
 ok('columns at the panel\'s widths', [columnsIn(200), columnsIn(360), columnsIn(1600)], [1, 2, 9]);
+ok('…and at a density a host set', [columnsIn(244, { card: 50, gap: 6, pad: 8 }), columnsIn(190, { card: 50, gap: 6, pad: 8 })], [4, 3]);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

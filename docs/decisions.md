@@ -325,6 +325,25 @@ mise en page du bench qui est super !". Tried in cluster first, each
 app's own page as it is. Its side view is the vault for now, the
 scene's; an object opened there is a tab of the properties.
 
+**The properties one panel, as the bench's; the vault four columns** (S9d).
+The author, on cluster: "pour la mise du bench initial je me souviens avoir
+un panel droit avec 2 onglets et une liste de catégories dépliables mais
+tout dans une même section, ici je vois plusieurs sections" — and the
+vault's grid, where an object took the column's width: "peut-être 3
+colonnes ou 4 serait pas mal". The bench's panel taken back: its tabs its
+head, the sections a column inside it with a hairline between. Four
+columns of pictures, the names in their titles, the rest in the detail.
+
+**At a switch the viewer stays, and whatever changes moves** — the author's
+principle for the scene's motion, the same day: "le viewer ne devrait
+quasiment pas bouger entre 2 apps, les règles toujours ou adapter avec une
+animation … tout élément qui transitionne même très légèrement doit avoir
+une animation aussi fine et rapide soit-elle", the player adapting as
+well. Which element does what, case by case, is worked out with the author
+(S9e, `docs/scene.md`). The corrections are cluster's first: "ses
+modifications couleront plus naturellement sur les pages propres aux apps
+après". And S11's bench "au plus vite", ahead of S9e's rest.
+
 **Each app keeps its own canvas; the scene lays them in one place**
 (S9c). Planned on 2026-11-04 as one canvas handed to each app. Weighed
 when built: the apps put their pointer listeners and classes on their

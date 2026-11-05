@@ -17,9 +17,10 @@ sorts them.
 - **cluster** (`apps/cluster/`, `apps/cluster/STATUS.md`): the suite's apps
   in one page one at a time, through their modules, laid as the bench is —
   the author's yes — a strip of apps, the scene's vault, the viewer in one
-  place to the pixel for every app, the properties an app's panels a tab
-  each; at a switch the panels leave and the next app's come, its last
-  frame held over its canvas until the next draws. The app in the address,
+  place to the pixel for every app, the properties one panel as the
+  bench's — the app's panels a tab each, their sections folded in it — and
+  the vault four columns of pictures (S9d); at a switch the panels leave
+  and the next app's come, its last frame held until the next draws. The app in the address,
   `#particles`; mounted again it comes back as it was left, recipe, frame
   and smart object (`core/mount.js` `keep`); *Open in … ↗* and the other
   links between apps mount theirs in place (`core/reopen.js` `follow`) —
@@ -330,13 +331,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**The author looks at cluster** — `node server.js`, then
-`http://127.0.0.1:3000/apps/cluster/`: S9c is done, and the bench's layout
-was to be shown before it spreads. Then, by what the author says, one of:
-the bench's layout in the apps' own pages; the scene's other side views —
-the keys, the history — and the bench's focus, the viewer alone; or S11,
-the space viewer's own bench, on an artifact as the first bench was
-(`docs/scene.md`, *The space viewer gets a bench of its own first*).
+**S11, the space viewer's bench** — the author's "au plus vite",
+2026-11-05: on an artifact as the first bench was, the vault's objects in
+3D, its parameters and its small tests (`docs/scene.md`, *The space viewer
+gets a bench of its own first*). Then S9e, the motion at a switch, case by
+case, once the author has gone through the proposal in `docs/scene.md`.
 
 ## Parked decisions
 
