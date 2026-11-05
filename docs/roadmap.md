@@ -21,7 +21,7 @@ item, is the board in `docs/plan.md`. Here, the milestones still open.
 | M10 | 3D: meshes, from primitives up | bricks 1 to 4 of six, below |
 | M11 | the live stack, and smart objects | done 2026-10-07; what it left is L in `docs/plan.md` |
 | M12 | the scene: one canvas, the suite round it | planned 2026-11-03 — `docs/scene.md`; track S in `docs/plan.md` |
-| M13 | BEC again: its grid in the 3D app, its layers by format, the project one page | proposed 2026-11-05 — `docs/bec.md`; waits on the author |
+| M13 | BEC again: its grid in the 3D app, its layers by format, the project one page | `docs/bec.md`: M13a, the grid, landed 2026-11-05; b to d next |
 
 ## The links
 

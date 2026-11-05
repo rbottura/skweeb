@@ -378,3 +378,14 @@ and 12 px on every side (12 alone where the rulers are off), the picture
 centred in what they leave: in every app at once, as what cluster settles
 flows to the apps' own pages. And the vault app's object is drawn at its
 ink, as compose places it — `inkSize` core's, one rule for both.
+
+**BEC's keys, the suite's places** (M13a). BEC_2025 drew its grid anew by
+`q` `s` `d` (faces), `c` (colours) and `e` (edges), each `random()`. In the
+suite S saves, E exports and Q and D step frames, by place: so each draw is
+a seed of the recipe (rule 2) and BEC's keys land where the suite has room —
+`e` on R, "again", a new seed of which edges, the colours dealt anew with
+them as BEC did; `c` on C, new hues alone; `q` `s` `d` in the 3D app's pie,
+A, four, six or eight faces filled. The grid is the catalogue's eighth shape,
+one geometry with its colours at its vertices, so it has no colour of its
+own.
+

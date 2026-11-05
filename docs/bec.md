@@ -65,13 +65,16 @@ to draw, never code that arrives with it.
 
 ## The bricks
 
-1. **M13a — BEC's grid in the 3D app** · `3d/grid` · M. A primitive of
-   the catalogue (`apps/3d/shapes.js`): the cells X × Y × Z, their size,
-   the edges' count, offset and thickness, the faces filled, the palette —
-   BEC's three — each a param of its card; `q` `s` `d`, `c` and `e` new
-   seeds of the recipe, acts on keys and in the search; an edge picked in
-   the view, on or off, its colour. Its edges animated waits for the 3D
-   app's motion (P1, P2).
+1. **M13a — BEC's grid in the 3D app** · `3d/grid` · M · *landed
+   2026-11-05* (`apps/3d/grid.js`). A primitive of the catalogue: the cells
+   X × Y × Z, their size, the edges' count, offset and thickness, the faces
+   filled, BEC's three palettes, each a param of its card. BEC's keys are
+   the suite's already — S saves, E exports, Q and D step frames — so its
+   `e` is R, a new `seed`, the colours dealt anew with the edges as BEC
+   did; its `c` is C, new `hues`; its `q` `s` `d`, four, six or eight
+   faces, are in the 3D app's pie, A. Still to come: an edge picked in the
+   view, on or off, its colour — a list in the recipe, a decision of its
+   own; and its edges animated, with the 3D app's motion (P1, P2).
 2. **M13b — BEC's files into the vault** · `bec/import` · S.
    `scripts/import-bec.mjs`: the titles and infos of each format, shapes
    with alpha filed by format; the palettes; presets as `params`.
