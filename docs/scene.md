@@ -245,6 +245,15 @@ app keeps its own canvas and its own layout. Then, a brick each:
    to, and the object's states, the one held marked, clicked back to as in
    the graph — which H opens.
 
+8. **The vault app's viewer** (S9h, `scene/vault-viewer`, landed
+   2026-11-05). The author: a sequence "stretch dans le viewer", no player's
+   controls, no pan or zoom, and the fit "laisse une petite marge … à droite
+   et en bas". An object drawn at its ink (`core/rebuild.js` `inkSize`); its
+   player core's strip; seen closer by the wheel, moved by a drag, fitted by
+   a double click (`core/zoom.js`); every viewer's picture fitted with an
+   even margin, the rulers' bands aside. The motion, the author's word: "les
+   animations de transitions sont super comme elles sont maintenant".
+
 ### The motion, case by case (S9e) — asked 2026-11-05
 
 The author, on S9c: "les transitions sont assez saccadées, on va

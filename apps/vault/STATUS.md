@@ -18,7 +18,16 @@ app that is open when nothing else is (`docs/scene.md`, *Planned*).
 - **The object whose detail opens, drawn large** beside it, as compose
   would draw it (`core/rebuild.js` `openFrames`, drafts): a still, a shape,
   a set's sheet; a loop or a page that moves played by core's player under
-  it, space, `,` `.` to step.
+  it, space, `,` `.` to step. At its ink's size (`inkSize`, S9h, 2026-11-05):
+  a gamepad loop's canvas is the screen it was drawn on and its frames the
+  ink cut out of it — drawn over the screen's shape, it was stretched, the
+  author's `gam_1790189754737_d12aab`. Its player is core's strip under the
+  viewer: the app's own was left empty since S12, the controls gone.
+- **Seen closer** (`core/zoom.js`, S9h): the wheel zooms about the pointer,
+  a drag moves the picture, a double click — or the zoom said at the head of
+  the viewer — fits it again; nearer than its own pixels it is shown as
+  pixels, in a canvas no bigger than the picture. Fitted with an even margin
+  round it, the rulers' bands aside (theme.css, every app's viewer).
 - **`?open=<id>`** draws that object as the page opens.
 - **It makes nothing**: no recipe, no `rebuild.js`, no S; its title bar has
   no Save and no Export (`Bar` with `acts: false`). With no vault it opens

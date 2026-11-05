@@ -48,6 +48,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9c | *cluster*, the scene: the host; an app back as it was left; the links taken in place; one canvas fixed, the last frame held; the panels moving | `scene/cluster`, `scene/kept`, `scene/links`, `scene/canvas`, `scene/panels` | L | landed 2026-11-05, its five bricks: the host, an app back as it was left, the links, one canvas in the bench's layout, the panels |
 | S9d | cluster closer to the bench: the properties one panel, its sections folded in it; the vault four columns of pictures | `scene/props` | S | landed 2026-11-05 |
 | S9g | the scene's vault beside an app: still at a switch, the app's own first, dragged onto a field, a set in its folder | `scene/side-vault` | S | landed 2026-11-05 |
+| S9h | the vault app's viewer: an object at its ink's size, its player's controls, seen closer, an even fit | `scene/vault-viewer` | S | landed 2026-11-05 |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
 | S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | first pass landed 2026-11-05, the proposal as written; the rest with the author's eye (`docs/scene.md`) |
 | S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | landed 2026-11-05 |
@@ -144,11 +145,9 @@ Each with what happens if nothing is said.
 - **The gabarit, a type** (S8): a format and its guides as an object, made
   for its format (`docs/scene.md`) — its fields to confirm before S8; BEC's
   layers by format, titles under the render and infos over it, one to weigh.
-- **BEC again, M13** (inbox, 2026-11-05; `docs/bec.md`): BEC_2025's
-  grid a primitive of the 3D app, its keys seeds, its files in the vault,
-  its layers by format a gabarit, the project one page with its states.
-  Whether, and when; the grid in the 3D app; a project as data. If nothing
-  is said: M13a after S9e and S9f.
+- **BEC again, M13** (inbox, 2026-11-05; `docs/bec.md`): the author's yes
+  to M13a, 2026-11-05 — "on peut passer sur la brique M13a rapidement".
+  Still theirs: a project as data (M13b, M13d), the gabarit's fields (M13c).
 - **A project made by several** (the roadmap's *Still open*, 3): after
   BEC — PDF layers, the print kept vector, people live on one stack;
   pdf.js and pdf-lib; the app that sets the text; beyond the tailnet.

@@ -26,6 +26,9 @@ sorts them.
   comes back as it was left (`core/mount.js` `keep`); the links between
   apps mount theirs in place (`core/reopen.js` `follow`) — `check-cluster`,
   `check-cluster-vault`. particles' and compose's ways out are a `leaving.js`.
+- **The vault app's viewer** (S9h): an object at its ink's size, never
+  stretched; its player's controls; seen closer — wheel, drag, double click
+  (`core/zoom.js`); every viewer's picture fitted with an even margin.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -333,13 +336,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**The author sees S9e's first pass in cluster** — switching between apps
-of different formats, particles to ckt — and says, case by case, what to
-change (`docs/scene.md`, *The motion, case by case*); and answers M13's
-questions (`docs/bec.md`, *Waiting on the author*). Then, on the author's
-yes, M13a — BEC's grid in the 3D app; else the board's next, L11 — a smart
-object followed wherever it is picked. S11's version 2 once the author has
-scenarios for it.
+**M13a — BEC's grid in the 3D app** (`docs/bec.md`, the author's yes of
+2026-11-05): first read BEC_2025's `class.js` and `functions.js`, then a
+primitive of `apps/3d/shapes.js` — the cells X × Y × Z, the edges, the
+faces filled, BEC's three palettes — its card from its schema, `q s d`,
+`c`, `e` new seeds on keys. S11's version 2 once the author has scenarios.
 
 ## Parked decisions
 

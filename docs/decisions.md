@@ -369,3 +369,12 @@ sight, the app's own above a line, the rest under another, beside the vault
 app neither. And an object dropped on a field is what the field's picker
 would have handed it: the same types taken, a set switched on for the
 field's use, one step.
+
+**Every viewer's picture fitted with an even margin** (S9h). The stage's
+padding was the rulers' 18 px all round, so a picture fitted against the
+rulers on two sides and 18 px off the edges on the other two — "une petite
+marge … à droite et en bas selon le format". It is now the rulers' bands
+and 12 px on every side (12 alone where the rulers are off), the picture
+centred in what they leave: in every app at once, as what cluster settles
+flows to the apps' own pages. And the vault app's object is drawn at its
+ink, as compose places it — `inkSize` core's, one rule for both.
