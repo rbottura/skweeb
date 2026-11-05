@@ -278,6 +278,21 @@ comme une petite loop infinie" while the space is open. A bench of its own,
 "avec son lot de paramètres et de petits tests", since the vault itself is
 to be explored this way soon.
 
+Its bench, version 1 on 2026-11-05, the author's "au plus vite":
+https://claude.ai/artifact/W6qyTQ6hG45rkaLWD4nwYL — private, the author's;
+its source the published files, `space-bench.html` and five `sb-*.js`. The
+vault's objects, shaped as the index's rows, each on the layer of the app
+that made it — or the author's own vault, read from its folder in the
+browser and nowhere else. What v6 lacked, answered: a press that does not
+move is a click, one that moves turns the space (Shift, the right button
+or Space held: moves it); the wheel eased, settling on a layer, the depth a
+ruler under the space to travel along; what is under the pointer lifted
+and named, what a click does said in the status bar; the layers in front
+of the one gone to seen through, staired and faded, a parameter each. The
+passage loops along the chosen's bridges, or down a chain of seven apps.
+Five small tests, a question each; the author's settings kept in its store
+(`kept`), as the first bench's were.
+
 ## The bricks
 
 Track S on the board, in this order; each a branch, landed after the gate

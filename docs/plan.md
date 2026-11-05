@@ -47,7 +47,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9b | the vault, an app: full screen, the canvas showing what is chosen | `scene/vault`, `ui/vault-info` | S | landed 2026-11-04; its detail the facts only, the author's C, 2026-11-05 |
 | S9c | *cluster*, the scene: the host; an app back as it was left; the links taken in place; one canvas fixed, the last frame held; the panels moving | `scene/cluster`, `scene/kept`, `scene/links`, `scene/canvas`, `scene/panels` | L | landed 2026-11-05, its five bricks: the host, an app back as it was left, the links, one canvas in the bench's layout, the panels |
 | S9d | cluster closer to the bench: the properties one panel, its sections folded in it; the vault four columns of pictures | `scene/props` | S | landed 2026-11-05 |
-| S11 | the space viewer's own bench, on an artifact | — | M | ready: the author's "au plus vite", 2026-11-05 |
+| S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`): the author's to try |
 | S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | waits: the cases gone through with the author (`docs/scene.md`) |
 | S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | after S11 |
 | S13 | the player's lanes: a composition's sequences a lane each, one opened there | `compose/lanes` | M | waits: worked out with the author, with S9e |

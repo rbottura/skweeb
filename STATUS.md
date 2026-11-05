@@ -331,11 +331,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S11, the space viewer's bench** — the author's "au plus vite",
-2026-11-05: on an artifact as the first bench was, the vault's objects in
-3D, its parameters and its small tests (`docs/scene.md`, *The space viewer
-gets a bench of its own first*). Then S9e, the motion at a switch, case by
-case, once the author has gone through the proposal in `docs/scene.md`.
+**The author tries S11's bench** — https://claude.ai/artifact/W6qyTQ6hG45rkaLWD4nwYL,
+version 1 (`docs/scene.md`, *The space viewer gets a bench of its own
+first*): its five tests, its parameters, *Keep* for what works. And goes
+through S9e's cases, the motion at a switch, in `docs/scene.md`. Then, by
+what is said: the bench's version 2, or S9e's first pass in cluster.
 
 ## Parked decisions
 
