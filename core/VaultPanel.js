@@ -36,7 +36,7 @@ export { folderOf };
 import { reopenUrl, placeUrl, rigUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
 import { objectCard, pickableCell, fileUrl } from './vault-card.js';
-import { arrange, kinBox, columnsIn, fit, lineageOn, rememberLineage } from './vault-kin.js';
+import { arrange, kinBox, columnsIn, densityOf, fit, lineageOn, rememberLineage } from './vault-kin.js';
 import { wireImport } from './vault-import.js';
 import { bag, held } from './scope.js';
 
@@ -94,7 +94,7 @@ export class VaultPanel {
     this._held = bag('vault panel');   // what it hears off its nodes: let go of by `remove`, or its app's unmount (S9)
     this._unheld = held(() => this.remove());
     const ro = typeof ResizeObserver !== 'undefined' && new ResizeObserver(() => {
-      const cols = columnsIn(this._body.clientWidth);    // read once: a fit writes, and a read after it lays out again
+      const cols = columnsIn(this._body.clientWidth, densityOf(this._body));   // read once: a fit writes, and a read after it lays out again
       for (const box of this._kins) fit(box, cols);
     });
     if (ro) { ro.observe(this._body); this._held.hold(() => ro.disconnect()); }
@@ -249,7 +249,7 @@ export class VaultPanel {
 
     // Rows come newest first, so a folder or a kin sits where its newest member would.
     const grid = el('div', 'vp-grid vp-grid--top');
-    const cols = columnsIn(this._body.clientWidth);
+    const cols = columnsIn(this._body.clientWidth, densityOf(this._body));
     this._kins = [];
     for (const item of arrange(shown, Vault.index, { kin: this._kinOn && !this._inTrash, folderOf })) {
       if (item.row) grid.append(this._cardFor(item.row));

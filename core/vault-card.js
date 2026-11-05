@@ -26,6 +26,8 @@ export function objectCard(row, { on, onClick }) {
   const card = el('button', 'vp-card' + (on ? ' vp-card--on' : ''));
   card.type = 'button';
   card.dataset.id = row.id;            // the object it shows: a scene, a check, finds it by its id
+  card.dataset.type = row.type;        // what it is, for a grid of pictures alone to mark (cluster's)
+  card.title = `${row.title || row.id} — ${row.type}`;
 
   const img = el('img', 'vp-thumb');
   img.loading = 'lazy';

@@ -123,8 +123,24 @@ export function arrange(shown, all, { kin, folderOf }) {
   return items;
 }
 
-/** How many columns the grid has at a width — vault-panel.css: 150px cards, 14px gaps, 16px padding. */
-export const columnsIn = width => Math.max(1, Math.floor((width - 32 + 14) / (150 + 14)));
+/**
+ * How many columns the grid has at a width — vault-panel.css: cards of 150px
+ * at least, 14px gaps, 16px of padding each side; or the density a host set
+ * (`densityOf`).
+ */
+export const columnsIn = (width, { card = 150, gap = 14, pad = 16 } = {}) =>
+  Math.max(1, Math.floor((width - 2 * pad + gap) / (card + gap)));
+
+/**
+ * The grid's density where it is: vault-panel.css's tokens `--vp-card`,
+ * `--vp-gap` and `--vp-pad`, which a host sets to lay the grid closer —
+ * cluster's vault beside the viewer, four columns of pictures.
+ */
+export function densityOf(body) {
+  const s = getComputedStyle(body);
+  const px = name => parseFloat(s.getPropertyValue(name)) || undefined;
+  return { card: px('--vp-card'), gap: px('--vp-gap'), pad: px('--vp-pad') };
+}
 
 /** A container's span: its members, no more than the grid's columns. */
 export function fit(box, cols) {
