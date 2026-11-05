@@ -180,6 +180,34 @@ then: every app its own page, and the scene one more host, never the only
 one — CLAUDE.md's rule 7 says so since. The name: *cluster*, for now
 (2026-11-04, `docs/decisions.md`).
 
+### *cluster*, brick by brick — 2026-11-05
+
+The host first (`scene/cluster`, landed 2026-11-05; `apps/cluster/`): a
+strip naming the apps, one mounted at a time through its module, the vault
+first. The app is the address's fragment, `#particles`, so what the query
+asks — `?open=<id>` — stays the app's, as on its own page, and a page that
+sets its query to go back to a state reloads into the same app; a switch
+asked during a boot waits for it; an app's stylesheet loads before its
+nodes are built, so it is never seen without its layout. In this brick each
+app keeps its own canvas and its own layout. Then, a brick each:
+
+1. **An app back as it was left** (`scene/kept`): its values, the object it
+   is bound to and its steps kept at a switch and given back at its next
+   mount — today it comes back as it starts, as a page closed.
+2. **The links taken in place** (`scene/links`): *Open in … ↗*, *Place in
+   compose ↗*, *Rig this ↗* and the graph's open-in mount that app in the
+   scene, its object reopened, where alone they open a tab.
+3. **One canvas, fixed; the last frame held** (`scene/canvas`): the viewer
+   in one place whatever app is round it — the bench's columns — and the
+   frame of the app going kept until the next draws its first. Handing one
+   canvas element over, as planned, makes the apps' listeners on their
+   canvas — seven `pointer.js`, ckt's own — and the classes they set on it
+   the scope's, and its 2D state reset between two apps; each app keeping
+   its canvas in that one place, the last frame a picture over it, asks
+   nothing of them. Which, weighed in that brick.
+4. **The panels leaving and coming** (`scene/panels`), as the bench has
+   them.
+
 **The space viewer gets a bench of its own first (S11).** The author, on
 version 6: "le viewer 3d est excellent, c'est quelque chose qu'il faut que
 j'explore absolument" — but the pan takes the clicks, the wheel is not
