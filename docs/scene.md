@@ -215,6 +215,59 @@ app keeps its own canvas and its own layout. Then, a brick each:
    as the bench's `swapping`: the properties out to their side and faded,
    the app going taken out once they are gone, the next app's in; the
    viewer and the vault still. S9c done.
+5. **The properties one panel; the vault four columns** (S9d,
+   `scene/props`, landed 2026-11-05). The author, on S9c: "un panel droit
+   avec 2 onglets et une liste de catégories dépliables mais tout dans une
+   même section", and the vault's grid "minifier … peut-être 3 colonnes ou
+   4". So the tabs are the panel's head, its Reset at their end, the app's
+   sections fold in it with a hairline between and a chevron, the height
+   moving; the vault a grid of pictures, four columns, its density three
+   tokens of core's vault panel the scene sets.
+
+### The motion, case by case (S9e) — asked 2026-11-05
+
+The author, on S9c: "les transitions sont assez saccadées, on va
+travailler ça ensemble en pensant selon les cas de figures quels sont les
+éléments qui transitionnent et lesquels ne bougent pas, et lesquels
+s'adaptent … le viewer ne devrait quasiment pas bouger entre 2 apps, les
+règles toujours ou adapter avec une animation, d'ailleurs tout élément qui
+transitionne même très légèrement doit avoir une animation aussi fine et
+rapide soit-elle selon le cas de figure, pareil pour adapter le player en
+circonstances". The jolt today is the middle of a switch: the panels out
+(240 ms), then everything else of the next app in one frame — its title
+bar's acts, its viewer's head, its rulers, its picture at its own size, its
+player or none, its status bar — then the panels in (240 ms).
+
+Three kinds of element, the proposal to go through:
+
+- **Still**, never moving nor fading: the strip, the scene's vault, the
+  frames — the viewer's, the properties' box and its tab bar, the title
+  bar's and the status bar's. The properties' box is the app's today: the
+  scene's, it would stay while what is in it changes.
+- **Adapting**, the same element given a new value, animated in place:
+  the picture's frame, from one app's format to the next — the frame held
+  moves and resizes into the next canvas's place, then gives way to it; the
+  rulers, always there, the vault app's too, their numbers following the
+  format; the player's strip, always there, its controls coming or going
+  with the sequence; the chosen tab's underline sliding to its tab.
+- **Going and coming**, what one app has and the next has not: its panel's
+  contents, its viewer head's own buttons, its title bar's acts, its status
+  bar's words — each a short fade, the panel's with a slide, the next
+  app's coming as soon as it is built rather than after a wait.
+
+The cases: a still to a still (grid → fractals), a still to a sequence
+(grid → particles) and back, a sequence to a sequence of another length,
+to and from the vault app, an object opened in the vault beside, a link
+taken in place, Back, a tab of the same app, a switch asked mid-switch;
+less motion asked of the system, none. And the one the author names as a
+problem: **a composition of several sequences** — one player, where "il
+faudrait aussi des players ou des bancs d'intégration de la séquence dans
+le player pour visualiser ou modifier un objet qu'on souhaiterait
+modifier, un peu comme dans after effect et dans le player du gamepad" —
+the player's lanes, S13: each sequence placed a lane under the player's
+ruler, its start and its length, the one chosen opened there to be seen
+alone or changed, as After Effects' layers in its timeline and the
+gamepad's stack of clips (`apps/gamepad/ui/TimelinePanel.js`).
 
 **The space viewer gets a bench of its own first (S11).** The author, on
 version 6: "le viewer 3d est excellent, c'est quelque chose qu'il faut que
@@ -245,6 +298,7 @@ at once, so every browser check runs at each gate.
 | S10 | the space of contexts, and the bridge | `scene/space` | — |
 | S11 | the space viewer's own bench: its parameters, its small tests | — | before S10, a side bench |
 | S12 | the bench's shell in every app, ahead of S8: title bar, the player under the viewer, hints | `ui/shell` | — |
+| S13 | the player's lanes: a composition's sequences a lane each, one opened there to be seen or changed | `compose/lanes` | compose's timeline |
 
 S12 came forward on the author's word of 2026-11-03 — the bench's
 interface is what every app should have first — and with it the

@@ -46,8 +46,12 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9a | every app a module: `mount(host)`, `unmount()`, a scope | `scene/host` | M | landed 2026-11-04: the nine on core's kit; the players' pages wait on the author |
 | S9b | the vault, an app: full screen, the canvas showing what is chosen | `scene/vault`, `ui/vault-info` | S | landed 2026-11-04; its detail the facts only, the author's C, 2026-11-05 |
 | S9c | *cluster*, the scene: the host; an app back as it was left; the links taken in place; one canvas fixed, the last frame held; the panels moving | `scene/cluster`, `scene/kept`, `scene/links`, `scene/canvas`, `scene/panels` | L | landed 2026-11-05, its five bricks: the host, an app back as it was left, the links, one canvas in the bench's layout, the panels |
+| S9d | cluster closer to the bench: the properties one panel, its sections folded in it; the vault four columns of pictures | `scene/props` | S | landed 2026-11-05 |
+| S11 | the space viewer's own bench, on an artifact | — | M | ready: the author's "au plus vite", 2026-11-05 |
+| S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | waits: the cases gone through with the author (`docs/scene.md`) |
+| S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | after S11 |
+| S13 | the player's lanes: a composition's sequences a lane each, one opened there | `compose/lanes` | M | waits: worked out with the author, with S9e |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
-| S11 | the space viewer's own bench | — | M | side bench, before S10 |
 | U8a | the shared boxes: one contract, Export first | — | — | → S3 |
 | U8b | the player and the Stack, as boxes | — | — | → S3 |
 | U8c | Format and Ground, mounted anywhere | — | — | → S4 |
@@ -122,6 +126,15 @@ placed panel are L's. The side jobs touch neither and run any time.
 ## Waiting on the author
 
 Each with what happens if nothing is said.
+
+- **The motion, case by case** (S9e): what holds still at a switch, what
+  adapts, what goes and comes — the proposal in `docs/scene.md`, *The
+  motion, case by case*, the author's to go through: "on va travailler ça
+  ensemble". If nothing is said: the proposal as written.
+- **The player's lanes** (S13): a composition of several sequences, each a
+  lane in the player, one opened there to be seen or changed — as After
+  Effects' timeline, as the gamepad's clips. Its shape worked out with the
+  author before it is a branch.
 
 - **The players in cluster** (S9a): map's player (`play/`) and the rig's
   puppet stay pages of their own — a playable map is an export, a puppet

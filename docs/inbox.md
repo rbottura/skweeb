@@ -28,6 +28,24 @@ Nothing, 2026-11-04: the day's ideas went onto the plan and into `docs/scene.md`
 
 ## Sorted
 
+- **2026-11-05 — cluster seen: one panel, a closer vault, the motion, the
+  player's lanes, the space now.** "pour la mise du bench initial je me
+  souviens avoir un panel droit avec 2 onglets et une liste de catégories
+  dépliables mais tout dans une même section … et minifier la grille des
+  objets du vault à gauche … peut-être 3 colonnes ou 4"; "les transitions
+  sont assez saccadées on va travailler ça ensemble en pensant selon les
+  cas de figures"; a composition of several sequences wanting "des players
+  ou des bancs d'intégration de la séquence dans le player … un peu comme
+  dans after effect et dans le player du gamepad"; "la vue latérale du
+  vault suffit pour le moment, les touches et historiques sont bien, on
+  peut les ajouter tout de suite si ça prend pas bcp de temps sinon pour
+  plus tard"; "appliquons les corrections à clusters … et commençons le
+  bench de l'espace 3d de navigation au plus vite". → S9d landed (the
+  panel, the vault); S11 next; S9e the motion, its cases in
+  `docs/scene.md` for the author; S9f the keys and the history, after
+  S11; S13 the player's lanes, with S9e — the board of `docs/plan.md`;
+  `docs/decisions.md`, 2026-11-05.
+
 - **2026-11-04 — the scene, planned before it is built; a vault app; the
   space on its bench; a name.** During S9: "pour la scène modulaire il va
   falloir planifier correctement pour gérer les fonctionnalités qui
