@@ -306,7 +306,8 @@ try {
   }));
   const rows = (await (await fetch(BASE + '/api/vault')).json()).objects;
   ok('a set row carries its role', rows.find(r => r.id === set.out.object.id).role, 'brush-family');
-  ok('other rows carry none', 'role' in rows.find(r => r.id === o.id), false);
+  ok('…and its members, so the vault can file it with their folder', rows.find(r => r.id === set.out.object.id).members, [o.id]);
+  ok('other rows carry neither', ['role', 'members'].some(k => k in rows.find(r => r.id === o.id)), false);
   const roleless = await post(sequence({
     type: 'set', title: 'no role', recipe: { members: [o.id] },
     render: { ext: 'png', w: 5, h: 5, data: png(5, 5).toString('base64') },

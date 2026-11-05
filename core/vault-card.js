@@ -28,6 +28,8 @@ export function objectCard(row, { on, onClick }) {
   card.dataset.id = row.id;            // the object it shows: a scene, a check, finds it by its id
   card.dataset.type = row.type;        // what it is, for a grid of pictures alone to mark (cluster's)
   card.title = `${row.title || row.id} — ${row.type}`;
+  // A set's picture is a strip of its members: its shape, for a host that lays it across the grid (cluster's).
+  if (row.type === 'set' && row.render && row.render.w && row.render.h) card.style.setProperty('--vp-ratio', `${row.render.w} / ${row.render.h}`);
 
   const img = el('img', 'vp-thumb');
   img.loading = 'lazy';

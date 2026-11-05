@@ -217,7 +217,9 @@ particles. `recipe.role` says what a set was
   means nowhere.
 
 A set's index row carries its `role`, copied out of the recipe, so a picker can
-apply the default without opening every set. A material is a set with
+apply the default without opening every set — and its `members`, so the vault
+panel files a set with the folder holding exactly them (since 2026-11-05: the
+legacy grid's materials, a folder of tiles and a set of the same tiles). A material is a set with
 `role: "material"`, its members ordered light to dark — grid maps the darkest
 pixels to the last member — with `recipe.ground`, the ground that order was
 measured on, and `recipe.name`: the vault dedups on content, so a material

@@ -68,5 +68,20 @@ ok('with the switch off, every loose object on its own',
 ok('columns at the panel\'s widths', [columnsIn(200), columnsIn(360), columnsIn(1600)], [1, 2, 9]);
 ok('…and at a density a host set', [columnsIn(244, { card: 50, gap: 6, pad: 8 }), columnsIn(190, { card: 50, gap: 6, pad: 8 })], [4, 3]);
 
+// A set filed with the folder holding exactly its members — the legacy grid's: a folder of tiles, a set of them.
+const { filedWith } = await import('../core/vault-folder.js');
+const tile = (id, folder) => ({ id, type: 'shape', tags: ['folder:' + folder] });
+const T1 = tile('T1', 'stones'), T2 = tile('T2', 'stones'), T3 = tile('T3', 'tiles');
+const set = (id, members, tags = []) => ({ id, type: 'set', tags, members });
+const SAME = set('SAME', ['T2', 'T1']), SOME = set('SOME', ['T1']), BOTH = set('BOTH', ['T1', 'T3']),
+  OWN = set('OWN', ['T1', 'T2'], ['folder:earlier materials']), OLD = set('OLD');
+const fileOf = filedWith([SAME, SOME, BOTH, OWN, OLD, T1, T2, T3]);
+ok('a set of exactly a folder\'s members is filed with them', fileOf(SAME), 'stones');
+ok('…one of some of them, or of two folders\', is not', [fileOf(SOME), fileOf(BOTH)], [null, null]);
+ok('…one with a folder of its own keeps it; one from an older index stays loose', [fileOf(OWN), fileOf(OLD)], ['earlier materials', null]);
+ok('…and where its members are not shown — a picker of sets — it is not', filedWith([SAME, OWN])(SAME), null);
+const filed = arrange([SAME, T2, T1], [SAME, T2, T1], { kin: true, folderOf: fileOf });
+ok('…arranged, it is in their folder, not beside it', filed.map(i => i.folder ? i.folder + ':' + i.rows.map(r => r.id) : i.row.id), ['stones:SAME,T2,T1']);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

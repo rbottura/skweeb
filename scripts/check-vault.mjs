@@ -10,11 +10,13 @@
  * it does not show, and that name opens it; the head's `lineage` switch lays
  * them out one by one and back. A folder reads as a folder: a card shorter
  * than an object's, its members a small peek; it opens, and closes from its
- * strip's head.
+ * strip's head. A set of exactly a folder's members is in that folder, first,
+ * and not beside it (S9g).
  */
 
 import { startCheck } from './check-kit.mjs';
 import { kinOf } from '../core/vault-kin.js';
+import { filedWith, folderOf } from '../core/vault-folder.js';
 
 const c = await startCheck();
 const { page } = c;
@@ -23,7 +25,8 @@ const V = `document.querySelector('.vp--visible')`;
 // What the panel should show, worked out here from the same index.
 const all = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
 const shown = all.filter(r => !(r.tags || []).includes('trash'));
-const loose = shown.filter(r => !(r.tags || []).some(t => t.startsWith('folder:')));
+const fileOf = filedWith(shown);
+const loose = shown.filter(r => !fileOf(r));
 const groups = [...new Set(kinOf(loose, all).values())];
 // The order the grid meets them in: where each group's newest member is.
 const firstAt = g => Math.min(...g.members.map(m => loose.indexOf(m)));
@@ -87,6 +90,19 @@ if (shape) {
   c.ok('it opens, and closes from its strip\'s head', true);
 } else {
   console.log('     (no folder and object both here — skipping the folder)');
+}
+// A set filed with the folder holding exactly its members — the legacy grid's materials: in it, first; not beside it.
+const filedSet = shown.find(r => r.type === 'set' && !folderOf(r) && fileOf(r));
+if (filedSet) {
+  const name = fileOf(filedSet);
+  c.ok('a set of exactly a folder\'s members is not beside it', await page.eval(`!${V}.querySelector('.vp-grid--top > .vp-card[data-id="${filedSet.id}"]')`),
+    `${filedSet.title} → ${name}`);
+  await page.click(`${V}.querySelector('.vp-fcard[data-folder=${JSON.stringify(name).replace(/"/g, '\\"')}]')`);
+  await page.until(`${V}.querySelector('.vp-fstrip:not([hidden]) .vp-card') !== null`);
+  c.ok('…it is in that folder, its first', await page.eval(`${V}.querySelector('.vp-fstrip:not([hidden]) .vp-grid > .vp-card')?.dataset.id`) === filedSet.id);
+  await page.click(`${V}.querySelector('.vp-fstrip:not([hidden]) .vp-fstrip-head')`);
+} else {
+  console.log('     (no set here holds exactly a folder\'s members — skipping the filing)');
 }
 await c.shot('2-folder');
 

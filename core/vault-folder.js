@@ -9,6 +9,11 @@
  * row instead of breaking it.
  *
  * A folder is a view, not a place: see docs/object-model.md, *Tags that group*.
+ *
+ * A set whose members are exactly a folder's is filed with them, first: the
+ * legacy grid's materials came in as a folder of tiles and a set of the same
+ * tiles, and a set beside its folder said the same thing twice, smaller — the
+ * author, 2026-11-05: "trop petits et redondants avec les folders".
  */
 
 /** The folder a row is filed in, from its `folder:` tag, or null. */
@@ -16,6 +21,34 @@ export const folderOf = row => {
   const tag = (row.tags || []).find(t => typeof t === 'string' && t.startsWith('folder:'));
   return tag ? tag.slice('folder:'.length) : null;
 };
+
+/**
+ * Where each of `rows` is filed: its own `folder:` tag; or, a set filed
+ * nowhere, the folder that holds exactly its members among these rows — so a
+ * picker that shows sets and no tiles files none. Reads index rows only: a
+ * set's row carries its members (server.js).
+ *
+ * @param {object[]} rows  what the grid shows
+ * @returns {(row: object) => ?string}
+ */
+export function filedWith(rows) {
+  const held = new Map();                 // a folder → the ids it holds here
+  const where = new Map();                // an id → its folder
+  for (const r of rows) {
+    const name = folderOf(r);
+    if (!name) continue;
+    if (!held.has(name)) held.set(name, new Set());
+    held.get(name).add(r.id);
+    where.set(r.id, name);
+  }
+  const sets = new Map();
+  for (const r of rows) {
+    if (r.type !== 'set' || folderOf(r) || !Array.isArray(r.members) || !r.members.length) continue;
+    const name = where.get(r.members[0]), ids = name && held.get(name);
+    if (ids && ids.size === new Set(r.members).size && r.members.every(id => ids.has(id))) sets.set(r.id, name);
+  }
+  return row => folderOf(row) || sets.get(row.id) || null;
+}
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -50,12 +83,15 @@ const icon = () => {
  * @returns {[Element, Element]} the card and its strip, to go into the grid in that order
  */
 export function folder({ name, rows, open, thumb, card, onToggle, select }) {
+  const sets = rows.filter(r => r.type === 'set');
+  rows = [...sets, ...rows.filter(r => r.type !== 'set')];   // a set filed with its members leads them
   const tile = el('button', 'vp-card vp-fcard');
   tile.type = 'button';
-  tile.title = 'Folder — ' + rows.length + ' objects';
+  tile.dataset.folder = name;
+  tile.title = 'Folder — ' + rows.length + ' objects' + (sets.length ? ', ' + (sets.length === 1 ? 'a set of them' : sets.length + ' sets') : '');
 
   const pics = el('div', 'vp-fthumb');
-  const few = rows.slice(0, 4);
+  const few = rows.slice(sets.length).concat(sets).slice(0, 4);   // its members' pictures, a set's strip last
   pics.dataset.n = few.length;
   for (const row of few) {
     const img = el('img');

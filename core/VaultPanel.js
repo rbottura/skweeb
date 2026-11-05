@@ -31,7 +31,7 @@
 import { Vault, isTrashed } from './vault.js';
 import { paintBar, deleteFlow } from './vault-trash.js';
 import { paintDetail, detailDrawer } from './vault-detail.js';
-import { folder, folderOf } from './vault-folder.js';
+import { folder, folderOf, filedWith } from './vault-folder.js';
 export { folderOf };
 import { reopenUrl, placeUrl, rigUrl } from './reopen.js';
 import { byUse, offerNote, switchOn } from './vault-offer.js';
@@ -251,7 +251,7 @@ export class VaultPanel {
     const grid = el('div', 'vp-grid vp-grid--top');
     const cols = columnsIn(this._body.clientWidth, densityOf(this._body));
     this._kins = [];
-    for (const item of arrange(shown, Vault.index, { kin: this._kinOn && !this._inTrash, folderOf })) {
+    for (const item of arrange(shown, Vault.index, { kin: this._kinOn && !this._inTrash, folderOf: filedWith(shown) })) {
       if (item.row) grid.append(this._cardFor(item.row));
       else if (item.kin) {
         const box = kinBox(item.kin, { card: row => this._cardFor(row), open: id => this._openDetail(id),
