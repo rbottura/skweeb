@@ -25,6 +25,7 @@ import {
   BoxGeometry, SphereGeometry, CylinderGeometry, ConeGeometry,
   TorusGeometry, PlaneGeometry, CapsuleGeometry,
 } from '../../core/libs/three/three.core.js';
+import { gridGeometry, PALETTES } from './grid.js';
 
 /** A card's drawers: what the shape is, where it stands, how it looks. */
 export const SHAPE_GROUPS = {
@@ -85,6 +86,28 @@ export const SHAPES = {
     params: { radius: size('radius', 0.35), length: size('length between the caps', 0.8), segments: round('segments round', 32) },
     geometry: v => new CapsuleGeometry(v.radius, v.length, Math.max(2, Math.round(v.segments / 4)), v.segments),
   },
+  /**
+   * BEC_2025's grid (grid.js; M13a, docs/bec.md): cells, the edges drawn among theirs and the faces filled,
+   * each draw a seed — R a new `seed`, C new `hues`. Its colours are its palette's, so it has no colour of its own.
+   */
+  grid: {
+    id: 'grid', label: 'BEC grid', ownColours: true,
+    params: {
+      cellsX: { type: 'int', min: 1, max: 16, default: 4, label: 'cells along x', group: form },
+      cellsY: { type: 'int', min: 1, max: 16, default: 2, label: 'cells up, y', group: form },
+      cellsZ: { type: 'int', min: 1, max: 16, default: 4, label: 'cells along z', group: form },
+      cell: size('a cell', 0.5),
+      edges: { type: 'int', min: 0, max: 3000, default: 24, label: 'edges drawn', group: form },
+      seed: { type: 'int', min: 0, max: 999999, default: 1, label: 'which edges (R)', group: form },
+      thickness: { type: 'range', min: 0.002, max: 1, step: 'any', log: true, default: 0.035, label: 'thickness', group: form },
+      overhang: { type: 'range', min: 0, max: 1, step: 'any', default: 0.08, label: 'past the joints', group: form },
+      faces: { type: 'int', min: 0, max: 3000, default: 6, label: 'faces filled', group: form },
+      fill: { type: 'int', min: 0, max: 999999, default: 1, label: 'which faces', group: form },
+      palette: { type: 'enum', options: Object.keys(PALETTES), default: 'bec', display: 'chips', label: 'palette', group: 'look' },
+      hues: { type: 'int', min: 0, max: 999999, default: 1, label: 'colours dealt (C)', group: 'look' },
+    },
+    geometry: v => gridGeometry(v),
+  },
 };
 
 const place = 'place';
@@ -108,11 +131,12 @@ export const PLACE = {
   shading: { type: 'enum', options: ['smooth', 'flat'], default: 'smooth', display: 'chips', label: 'shading', group: 'look' },
 };
 
-/** A shape's whole schema: its form, then its place and look. */
+/** A shape's whole schema: its form, then its place and look — no colour for one whose colours are its own. */
 export function shapeSchema(id) {
   const shape = SHAPES[id];
   if (!shape) throw new Error(`3d: no shape "${id}"`);
-  return { ...shape.params, ...PLACE };
+  const { colour, ...rest } = PLACE;
+  return { ...shape.params, ...(shape.ownColours ? rest : PLACE) };
 }
 
 /** The keys that make a shape's geometry: change one and the mesh is made again. */

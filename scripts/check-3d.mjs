@@ -388,6 +388,35 @@ for (let i = 0; i < 100 && !file; i++) {
 const size = file ? (b => [b.readUInt32BE(16), b.readUInt32BE(20)])(fs.readFileSync(file)) : [0, 0];
 c.ok('the PNG is the format at its scale', size[0] === 2160 && size[1] === 2160, size.join(' × '));
 
+// ── BEC's grid (M13a; apps/3d/grid.js): a shape of the catalogue, its colours its palette's, its draws seeds ──
+
+await c.go(c.base + '/apps/3d/');
+await page.until(drawn, { timeout: 30000 });
+await keep();
+await page.typeInto(`[...document.querySelectorAll('.pp-cards-add')].find(m => !m.closest('.pp-card'))`, 'grid');
+await page.until(`${cards}.length === 4`, { timeout: 10000 }).catch(() => {});
+await wait(600);
+const bec = await changed();
+c.ok('BEC\'s grid added from the menu: drawn and chosen, no colour of its own', (await page.eval(`${cards}.length`)) === 4 && bec.share > 0.01
+  && (await choice()) === 'folded folded folded chosen' && !(await page.eval(`!!${cardRow(3, 'colour')}`)), JSON.stringify(bec));
+const cardNumber = name => page.eval(`Number(${cardRow(3, name)}?.querySelector('.pp-num')?.value)`);
+const tapKey = k => page.eval(`(() => { for (const type of ['keydown', 'keyup'])
+  document.dispatchEvent(new KeyboardEvent(type, { code: 'Key${k.toUpperCase()}', key: '${k}', bubbles: true })); })()`);
+const edgesWere = await cardNumber('which edges (R)'), huesWere = await cardNumber('colours dealt (C)');
+await tapKey('f');                                   // the whole model in view: the grid came in beside the others
+await wait(600);
+await keep();
+await tapKey('r');
+await wait(600);
+const byR = await changed();
+c.ok('…R, as BEC\'s e: other edges drawn, its seed the next', (await cardNumber('which edges (R)')) === edgesWere + 1 && byR.share > 0.0005, JSON.stringify(byR));
+await keep();
+await tapKey('c');
+await wait(600);
+const byC = await changed();
+c.ok('…C, as BEC\'s c: its colours dealt anew', (await cardNumber('colours dealt (C)')) === huesWere + 1 && byC.share > 0.0005, JSON.stringify(byC));
+await c.shot('4-bec-grid');
+
 // ── With no WebGPU: three falls back to WebGL2, as on the laptop's Intel ────
 
 const stub = await page.beforeLoad(`Object.defineProperty(navigator, 'gpu', { value: undefined, configurable: true });`);

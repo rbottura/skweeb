@@ -107,7 +107,7 @@ async function start(host, mine) {
 
 async function boot(mine) {
   bar = new Bar({ app: '3d', mount: root,
-                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · S save · V vault' });
+                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · S save · V vault · R C a BEC grid anew' });
   params = modelParams();
   const panel = new ParamPanel(params, { title: '3d', mount: root.querySelector('#side'), groups: GROUPS });
 
@@ -315,9 +315,18 @@ function wireKeys(mine) {
   // The left hand (core/shell/bindings.js): A the handles' mode — move, turn, size — tapped the next.
   const MODES = ['move', 'turn', 'size'], modeOf = m => root.querySelector('#handle-' + m);
   const now = () => MODES.find(m => modeOf(m)?.getAttribute('aria-pressed') === 'true') || 'move';
+  // BEC's grid chosen (grid.js, M13a): its draws again, as BEC's keys had them — new edges (R, core's),
+  // new colours (C), so many faces filled (q s d: four, six, eight).
+  const grid = () => (cards.chosen && cards.chosen.item.id === 'grid' ? cards.chosen.params : null);
+  const again = (p, key) => p.set(key, p.get(key) + 1);
+  const becActs = p => [
+    { label: 'new edges', run: () => again(p, 'seed') },
+    { label: 'new colours', run: () => again(p, 'hues') },
+    ...[4, 6, 8].map(n => ({ label: `${n} faces filled`, on: p.get('faces') === n, run: () => { p.set('faces', n); again(p, 'fill'); } })),
+  ];
   setAppPie({
     title: 'handles',
-    items: () => MODES.map(m => ({ label: m, on: now() === m, run: () => modeOf(m)?.click() })),
+    items: () => [...MODES.map(m => ({ label: m, on: now() === m, run: () => modeOf(m)?.click() })), ...(grid() ? becActs(grid()) : [])],
     tap: () => modeOf(MODES[(MODES.indexOf(now()) + 1) % MODES.length])?.click(),
   });
   let vault = null;
@@ -330,6 +339,7 @@ function wireKeys(mine) {
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (e.key === 'f' || e.key === 'F') frameAll();
+    if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey && grid()) again(grid(), 'hues');   // BEC's c
     if (e.key === 'Escape' && !vault.isOpen) cards.choose(null);
   });
   vault = new VaultPanel();

@@ -78,7 +78,10 @@ export function dress(mesh, id, values, bands) {
     mesh.material = toon ? new MeshToonMaterial() : new MeshStandardMaterial();
   }
   const m = mesh.material;
-  m.color.set(values.colour);
+  // A shape whose colours are its own — BEC's grid, a colour at each vertex (grid.js) — is drawn in them, untinted.
+  const own = !!(mesh.geometry && mesh.geometry.getAttribute('color'));
+  if (m.vertexColors !== own) { m.vertexColors = own; m.needsUpdate = true; }
+  m.color.set(own ? '#ffffff' : values.colour);
   if (toon) {
     if (m.gradientMap !== rampOf(bands)) {
       m.gradientMap = rampOf(bands);
