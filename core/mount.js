@@ -4,9 +4,11 @@
  *
  * What every app's mount does the same: one at a time — a mount over a
  * mounted one unmounts it first; a scope opened for all it will hold
- * (core/scope.js); its page grid, `.app`, built from its markup in the host;
- * its stylesheet linked where its page has not linked it — a scene's; and
- * its smart object let go of when it goes, so the next app saves into none.
+ * (core/scope.js); its stylesheet linked where its page has not linked it —
+ * a scene's, cluster's — and loaded before anything is built, so the app is
+ * never seen without its layout; its page grid, `.app`, built from its
+ * markup in the host; and its smart object let go of when it goes, so the
+ * next app saves into none.
  * What it does of its own is `start(root, scope)`: its state made again,
  * its panels, its clock.
  *
@@ -32,11 +34,15 @@ export function appModule(app, { markup, style = null, start }) {
   async function mount(host = document.body) {
     if (scope) unmount();
     const mine = scope = openScope(app);
+    const came = style ? linked(style, mine) : null;
+    if (came) {
+      await came;
+      if (scope !== mine) return;            // unmounted while its stylesheet came
+    }
     root = document.createElement('div');
     root.className = 'app';
     root.innerHTML = markup;
     host.append(root);
-    if (style) linked(style, mine);
     mine.hold(() => Vault.bind(null));
     try {
       await start(root, mine);
@@ -50,16 +56,25 @@ export function appModule(app, { markup, style = null, start }) {
     const was = scope, node = root;
     scope = root = null;
     was.close();
-    node.remove();
+    if (node) node.remove();                 // none yet, while its stylesheet comes
   }
 
   return { mount, unmount, get scope() { return scope; }, get root() { return root; } };
 }
 
-/** A stylesheet the page has not linked, linked for as long as the scope is open. */
+/**
+ * A stylesheet the page has not linked, linked for as long as the scope is
+ * open. Back, when it links one, what comes once it has loaded — or failed,
+ * after which the app is built all the same; null when the page has it.
+ */
 function linked(href, scope) {
-  if ([...document.querySelectorAll('link[rel="stylesheet"]')].some(l => l.href === href)) return;
+  if ([...document.querySelectorAll('link[rel="stylesheet"]')].some(l => l.href === href)) return null;
   const link = Object.assign(document.createElement('link'), { rel: 'stylesheet', href });
+  const came = new Promise(done => {
+    link.addEventListener('load', done, { once: true });
+    link.addEventListener('error', done, { once: true });
+  });
   document.head.append(link);
   scope.hold(() => link.remove());
+  return came;
 }

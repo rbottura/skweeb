@@ -7,7 +7,9 @@
  * panel's row (its `.pp-name`), found under its drawer's title; an act is a
  * drawer's button (an Export box's, a pose's). A row or an act added
  * tomorrow is found the day it exists. The viewer's tools, outside any
- * drawer, carry their words in `data-pal`. Enter on a control opens its drawer,
+ * drawer, carry their words in `data-pal` — and where they are in
+ * `data-pal-where`, the viewer when they say nothing: cluster's apps, its
+ * strip (apps/cluster/). Enter on a control opens its drawer,
  * brings the row into view and puts the hand on it — a number's box selected
  * for typing; Enter on an act presses it.
  *
@@ -102,10 +104,10 @@ function gather() {
     if (!text) continue;
     out.push({ label: text, detail: titleOf(drawer), act: true, run: () => { opened(drawer); b.click(); } });
   }
-  // The viewer's tools and offers (core/shell/rulers.js), by the words they carry.
+  // The viewer's tools and offers (core/shell/rulers.js), by the words they carry; a scene's apps (apps/cluster/).
   for (const b of document.querySelectorAll('[data-pal]')) {
     if (b.disabled || b.closest('[hidden]') || b.closest('.pal')) continue;
-    out.push({ label: b.dataset.pal, detail: 'Viewer', act: true, run: () => b.click() });
+    out.push({ label: b.dataset.pal, detail: b.dataset.palWhere || 'Viewer', act: true, run: () => b.click() });
   }
   return out;
 }
