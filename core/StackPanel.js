@@ -25,6 +25,7 @@ import { defineParams } from './params.js';
 import { ParamPanel }   from './ParamPanel.js';
 import { VaultPanel }   from './VaultPanel.js';
 import { Vault }        from './vault.js';
+import { follow }       from './reopen.js';
 
 /** A layer's rows: how it meets what is under it, and where it sits on the page. */
 export const LAYER_PARAMS = {
@@ -101,6 +102,12 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
       const open = el('a', 'pp-stack-open', 'open it in compose ↗');
       open.href = new URL('../compose/?open=' + encodeURIComponent(page.id), location.href).href;
       open.target = '_blank';
+      // A plain click follows it — in a scene, compose in place (core/reopen.js); Ctrl or the middle button, a tab.
+      open.addEventListener('click', e => {
+        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        e.preventDefault();
+        follow(open.href);
+      });
       said.append(open);
     } catch (err) {
       say('the stack was not saved: ' + err.message);

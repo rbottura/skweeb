@@ -9,6 +9,7 @@
  */
 
 import { Vault } from './vault.js';
+import { follow } from './reopen.js';
 import { USES, usesOf, retagFor, hasUseTags } from './uses.js';
 
 const el = (tag, cls, text) => {
@@ -224,14 +225,16 @@ function actions(o, urls, hooks) {
   const row = el('div', 'vp-actions');
   const renderUrl = urls.render;
 
-  // Back into the app that made it, in a tab of its own, so whatever is open
-  // here stays as it is. A picker's first action is its own, so this one is
-  // only the primary when nothing is being picked.
+  // Back into the app that made it: in a tab of its own, so whatever is open
+  // here stays as it is — or, in a scene, mounted in place of the app open,
+  // which comes back as it was left (core/reopen.js `follow`). A picker's
+  // first action is its own, so this one is only the primary when nothing is
+  // being picked.
   if (urls.reopen) {
     const reopen = el('button', 'vp-btn' + (hooks.pick ? '' : ' vp-btn--primary'),
       'Open in ' + o.origin.app + ' ↗');
     reopen.title = urls.reopen;
-    reopen.addEventListener('click', () => window.open(urls.reopen, '_blank', 'noopener'));
+    reopen.addEventListener('click', () => follow(urls.reopen));
     row.append(reopen);
   }
 
@@ -240,7 +243,7 @@ function actions(o, urls, hooks) {
   if (urls.place && !hooks.pick) {
     const place = el('button', 'vp-btn', 'Place in compose ↗');
     place.title = urls.place;
-    place.addEventListener('click', () => window.open(urls.place, '_blank', 'noopener'));
+    place.addEventListener('click', () => follow(urls.place));
     row.append(place);
   }
 
@@ -248,7 +251,7 @@ function actions(o, urls, hooks) {
   if (urls.rig && !hooks.pick) {
     const rig = el('button', 'vp-btn', 'Rig this ↗');
     rig.title = urls.rig;
-    rig.addEventListener('click', () => window.open(urls.rig, '_blank', 'noopener'));
+    rig.addEventListener('click', () => follow(urls.rig));
     row.append(rig);
   }
 

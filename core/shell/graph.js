@@ -32,7 +32,7 @@ import { Vault } from '../vault.js';
 import { watched, settle, around, tell } from '../steps.js';
 import { mergeBase, plan, merged } from './merge.js';
 import { innerOf } from '../smart.js';
-import { reopenUrl, placeUrl, rigUrl } from '../reopen.js';
+import { reopenUrl, placeUrl, rigUrl, follow } from '../reopen.js';
 import { partOf } from '../param-history.js';
 
 import { layout, W, H } from './layout.js';
@@ -157,7 +157,7 @@ class SkwGraph extends LitElement {
     return html`<div class="gr-gates" style=${`left:${g.x + 8}px;top:${g.y + 8}px`} role="menu">
       <div class="gr-gates-head">v${g.n} goes to</div>
       ${g.items.length ? g.items.map(i => html`<button class="tb-menu-item" type="button" role="menuitem" title=${i.url}
-          @click=${() => { window.open(i.url, '_blank', 'noopener'); this.gates = null; }}>${i.label} ↗</button>`)
+          @click=${() => { this.gates = null; follow(i.url); }}>${i.label} ↗</button>`)
         : html`<div class="gr-cmp-note">nowhere the suite's links reach</div>`}
     </div>`;
   }

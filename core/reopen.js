@@ -16,6 +16,10 @@
  * it nothing is opened on what it was doing when it was taken out
  * (core/mount.js, S9c): its recipe, as a saved one's, and the smart object it
  * was bound to, bound again — back as it was left.
+ *
+ * And the links themselves are followed here (`follow`): each a tab of its
+ * own, as ever — or, in a scene that has taken them (`takeLinks`), that app
+ * mounted there in place, its query with it.
  */
 
 import { Vault } from './vault.js';
@@ -134,6 +138,35 @@ function leftOf(app) {
   const id = left.bound ? left.bound.id : null;
   return { object: { ...JSON.parse(JSON.stringify(left.state)), id, title: 'as it was left', origin: { app } },
            url: null, thumbUrl: null, kept: true };
+}
+
+/** The page that takes the links in place — a scene — or null: each opens a tab. */
+let taker = null;
+
+/**
+ * A scene takes the links between apps (S9c): `take(url)` mounts the app
+ * the URL names, its query with it, and says true — false for one it does
+ * not have. Back, what gives them up again.
+ *
+ * @param {(url: URL) => boolean} take
+ * @returns {() => void}
+ */
+export function takeLinks(take) {
+  taker = take;
+  return () => { if (taker === take) taker = null; };
+}
+
+/**
+ * A link to an app's page — *Open in …*, *Place in compose*, *Rig this*,
+ * the graph's — followed: taken in place by a scene that has the app, or in
+ * a tab of its own, so whatever is open here stays as it is.
+ *
+ * @param {string} url
+ */
+export function follow(url) {
+  const to = new URL(url, location.href);
+  if (taker && to.origin === location.origin && taker(to)) return;
+  window.open(to.href, '_blank', 'noopener');
 }
 
 /** What an app says it opened: the object asked for, or itself back as it was left. */
