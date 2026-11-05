@@ -117,7 +117,7 @@ const opening = await tabsNow();
 c.ok('particles\' two panels, a tab each, the first shown', same(opening, ['particles*', 'picture']) && same(await shownSides(), ['emit-side']), JSON.stringify(opening));
 await page.eval(`[...document.querySelectorAll('.cl-tabs .cl-tab')].find(t => t.textContent === 'picture').click()`);
 c.ok('…its picture\'s tab: that panel shown, the other not', same(await shownSides(), ['picture-side']) && same(await tabsNow(), ['particles', 'picture*']));
-const ink = await page.eval(`(async () => { const ink = document.querySelector('.cl-tabs-ink'), moving = ink.getAnimations().some(a => a.transitionProperty === 'transform');
+const ink = await page.eval(`(async () => { const ink = document.querySelector('.cl-tabs > .cl-tabs-ink'), moving = ink.getAnimations().some(a => a.transitionProperty === 'transform');
   await new Promise(r => setTimeout(r, 300));
   const t = [...document.querySelectorAll('.cl-tabs .cl-tab')].find(b => b.textContent === 'picture').getBoundingClientRect(), r = ink.getBoundingClientRect();
   return { moving, under: Math.abs(r.left - t.left - 8) <= 1 && Math.abs(r.width - t.width + 16) <= 1 && Math.abs(r.bottom - t.bottom) <= 1 }; })()`);
