@@ -16,7 +16,10 @@
  * bar, laid in the scene's grid as they are. An object opened in the vault is
  * a tab beside the panels, its detail; the vault app draws it. As an app is
  * taken out its last frame is held where it was until the next draws its
- * first (held.js): the centre never flashes empty.
+ * first (held.js): the centre never flashes empty. And its panels leave
+ * first, as the bench's do — out to their side, faded — then the next app's
+ * come in, the viewer and the vault still: the app going is taken out once
+ * its panels are gone, so two apps' stylesheets never meet.
  *
  * The app mounted is the address's fragment, `#particles`: a reload comes
  * back to it, Back goes to the one before, and what the address asks of the
@@ -76,7 +79,7 @@ const el = (tag, cls, text) => {
   return node;
 };
 
-let strip, host, vault, props, frames;
+let scene, strip, host, vault, props, frames;
 let opened = null;         // { object, urls }: the object open in the scene's vault, for an app that draws it
 let now = null;            // { name, module, n, ready }: the app mounted, the ask it answers, whether it has started
 let wanted = null;         // { name, n }: the app last asked for — a link to the app there is an ask of its own
@@ -91,7 +94,7 @@ let settling = null;       // the switch under way, until `wanted` is mounted
  * @returns {Promise<void>}  once that app is mounted
  */
 export function start(page = document.body) {
-  const scene = el('div', 'cluster');
+  scene = el('div', 'cluster');
   strip = el('nav', 'cl-strip');
   strip.setAttribute('aria-label', 'the apps');
   const head = el('div', 'cl-head');
@@ -176,8 +179,9 @@ function settle(name) {
         while (wanted && !(now && now.n === wanted.n)) {
           const ask = wanted;
           if (await swap(ask) || wanted !== ask) continue;
-          wanted = now && { name: now.name, n: now.n };   // it did not load: the app there stays
+          wanted = now && { name: now.name, n: now.n };   // it did not load: the app there stays, its panels in
           mark(now && now.name);
+          scene.classList.remove('cl-out');
         }
       } finally {
         settling = null;
@@ -198,6 +202,12 @@ async function swap(ask) {
   }
   if (wanted !== ask) return true;           // another was asked for while it came
   if (now) {
+    // Its panels out first, as the bench's: the viewer and the vault stay; asked again meanwhile, out once.
+    if (!scene.classList.contains('cl-out')) {
+      scene.classList.add('cl-out');
+      if (!still()) await wait(MOVE_MS);
+      if (wanted !== ask) return true;
+    }
     const going = host.querySelector(':scope > .app');
     frames.take(going);                      // its last frame, held where it is
     props.leaving();
@@ -207,7 +217,14 @@ async function swap(ask) {
   mark(ask.name);
   // Told of its root as it is built, before it starts: its panels a tab each, its canvas watched for its first frame.
   await module.mount(host, { vault, built: root => { props.mounted(ask.name, root); frames.watch(root); } });
-  if (now && now.n === ask.n) { now.ready = true; props.paint(); tell(); }
+  if (now && now.n === ask.n) {
+    now.ready = true;
+    props.paint();
+    tell();
+    await frame();                           // laid out where they leave from, before they move
+    // Its panels in — unless another app was asked for meanwhile: they stay out, and it comes.
+    if (now && now.n === ask.n && wanted === ask) scene.classList.remove('cl-out');
+  }
   return true;
 }
 
@@ -221,6 +238,12 @@ function tell() {
   vault.detailPicture = !draws;
   if (draws && opened) now.module.chosen(opened.object, { url: opened.urls.url });
 }
+
+/** The bench's: a panel leaves, or comes, in this long. */
+const MOVE_MS = 240;
+const still = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(done => setTimeout(done, ms));
+const frame = () => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
 
 /** The strip and the page's title say which app is mounted. */
 function mark(name) {

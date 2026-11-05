@@ -168,6 +168,14 @@
 
 .cl-held--going { opacity: 0; }
 
+/* The panels leaving and coming, as the bench's `swapping`: the properties out to their
+   side and faded as an app goes, in as the next comes; the viewer and the vault still. */
+.cl-tabs, .cl-detail, .cl-none, .cl-host .app-main > .app-side { transition: transform 240ms ease, opacity 240ms ease; }
+.cl-out .cl-tabs, .cl-out .cl-detail, .cl-out .cl-none, .cl-out .cl-host .app-main > .app-side { transform: translateX(28px); opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .cl-tabs, .cl-detail, .cl-none, .cl-host .app-main > .app-side, .cl-held { transition: none; }
+}
+
 /* ── The app mounted, laid in the scene's grid ─────────────────────────────── */
 
 .cl-host, .cl-host > .app, .cl-host .app-main { display: contents; }
