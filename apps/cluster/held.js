@@ -9,15 +9,20 @@
  * handed over and nothing asked of an app: as one is taken out, its frame is
  * copied onto a canvas of the scene's, over the spot it filled; the next
  * app's canvas is watched from the moment it is built, before the app starts
- * (core/mount.js `built`) — the first thing drawn on it, a clear included,
- * and the copy fades. One that never draws — a boot that failed — lets it go
- * after a few seconds.
+ * (core/mount.js `built`) — the first thing drawn on it, a clear included.
+ * Then the frame held adapts (S9e): it moves and takes the size of the next
+ * app's picture, its own picture covering it unstretched, the next one
+ * hidden meanwhile — and the two cross, the next shown as the held one
+ * fades. One that never draws — a boot that failed — lets it go after a few
+ * seconds; with less motion asked of the system, it only fades.
  *
  * No DOM at import.
  */
 
 const LONGEST_MS = 3000;    // a held frame outlives no app by more than this
 const FADE_MS = 140;
+const MOVE_MS = 220;        // from one app's picture to the next's
+const reduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /** What draws on a 2D canvas: the first of these called is the app's first frame. */
 const DRAWS = ['clearRect', 'fillRect', 'drawImage', 'putImageData', 'fill', 'stroke', 'fillText'];
@@ -66,7 +71,7 @@ export function holdFrames(scene) {
       over = true;
       if (ctx) for (const name of DRAWS) delete ctx[name];      // its own methods again, the prototype's
       clearTimeout(timer);
-      fade(held);
+      if (ctx) adapt(held, canvas); else fade(held);           // no picture of its own yet to go to
     };
     if (ctx) {
       for (const name of DRAWS) {
@@ -75,6 +80,25 @@ export function holdFrames(scene) {
       }
     }
     timer = setTimeout(done, ctx ? LONGEST_MS : 0);
+  }
+
+  /**
+   * The held frame from where it is to where the next picture is, at its size — its own picture covering
+   * the box as it changes shape, never stretched — the next hidden until the two cross.
+   */
+  function adapt(c, canvas) {
+    const to = canvas.isConnected ? canvas.getBoundingClientRect() : null, from = c.getBoundingClientRect();
+    const same = to && ['left', 'top', 'width', 'height'].every(k => Math.abs(to[k] - from[k]) < 1);
+    if (!to || to.width < 1 || to.height < 1 || same || reduced() || typeof c.animate !== 'function') return fade(c);
+    canvas.style.opacity = '0';
+    const box = r => ({ left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+    const move = c.animate([box(from), box(to)], { duration: MOVE_MS, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)', fill: 'forwards' });
+    const cross = () => {
+      canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: FADE_MS, easing: 'ease' });
+      canvas.style.removeProperty('opacity');
+      fade(c);
+    };
+    move.finished.then(cross, cross);
   }
 
   function fade(c) {

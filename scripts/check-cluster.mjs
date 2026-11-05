@@ -117,6 +117,11 @@ const opening = await tabsNow();
 c.ok('particles\' two panels, a tab each, the first shown', same(opening, ['particles*', 'picture']) && same(await shownSides(), ['emit-side']), JSON.stringify(opening));
 await page.eval(`[...document.querySelectorAll('.cl-tabs .cl-tab')].find(t => t.textContent === 'picture').click()`);
 c.ok('…its picture\'s tab: that panel shown, the other not', same(await shownSides(), ['picture-side']) && same(await tabsNow(), ['particles', 'picture*']));
+const ink = await page.eval(`(async () => { const ink = document.querySelector('.cl-tabs-ink'), moving = ink.getAnimations().some(a => a.transitionProperty === 'transform');
+  await new Promise(r => setTimeout(r, 300));
+  const t = [...document.querySelectorAll('.cl-tabs .cl-tab')].find(b => b.textContent === 'picture').getBoundingClientRect(), r = ink.getBoundingClientRect();
+  return { moving, under: Math.abs(r.left - t.left - 8) <= 1 && Math.abs(r.width - t.width + 16) <= 1 && Math.abs(r.bottom - t.bottom) <= 1 }; })()`);
+c.ok('…the bar\'s one underline sliding under it (S9e)', ink.moving && ink.under, JSON.stringify(ink));
 await open('fractals');
 c.ok('…fractals: its one panel, its one tab', same(await tabsNow(), ['fractal*']) && same(await shownSides(), ['side']), JSON.stringify(await tabsNow()));
 await open('particles');
@@ -158,32 +163,50 @@ c.ok('…with its picture, particles drawing its own', await page.eval(`!!docume
 await page.eval(`document.querySelector('.cl-detail .vp-detail-head .vp-btn').click()`);
 c.ok('…closed: its tab gone, the panel shown before it shown again', same(await tabsNow(), ['particles', 'picture*']) && same(await shownSides(), ['picture-side']));
 
-// The last frame held: particles playing, taken out for fractals — its frame over where its canvas was, until fractals draws.
+// The last frame held: particles playing, taken out for ckt — its frame over where its canvas was, until ckt draws: another format, so it moves.
 const was = await page.eval(`(() => { const r = document.querySelector('.cl-host .viewer-stage > canvas').getBoundingClientRect();
   return [r.left, r.top, r.width, r.height].map(Math.round).join(','); })()`);
 await page.eval(`window.__holds = []; new MutationObserver(list => { for (const m of list) for (const n of m.addedNodes)
   if (n.classList && n.classList.contains('cl-held')) { const r = n.getBoundingClientRect();
     window.__holds.push([r.left, r.top, r.width, r.height].map(Math.round).join(',')); } }).observe(document.querySelector('.cluster'), { childList: true })`);
-/** The panel shown in the properties: how see-through, and how far moved to its side. */
-const panelLook = () => page.eval(`(() => { const s = document.querySelector('.cl-host .app-main > .app-side.cl-shown'); if (!s) return null;
-  const cs = getComputedStyle(s), m = new DOMMatrix(cs.transform === 'none' ? undefined : cs.transform);
-  return { opacity: Math.round(Number(cs.opacity) * 100) / 100, x: Math.round(m.m41) }; })()`);
-await click('fractals');
+// The frame held, every frame it is there: where it is, and its size (S9e: it adapts onto the next picture).
+await page.eval(`(() => { window.__path = []; let on = true; const look = () => { const h = document.querySelector('.cl-held');
+  if (h) { const r = h.getBoundingClientRect(); window.__path.push([r.left, r.top, r.width, r.height].map(Math.round).join(',')); }
+  if (on) requestAnimationFrame(look); }; requestAnimationFrame(look); window.__unpath = () => { on = false; return window.__path; }; })()`);
+/** The panel shown in the properties: how see-through its contents, and how far moved to its side; its box, still (S9e). */
+const panelLook = () => page.eval(`(() => { const s = document.querySelector('.cl-host .app-main > .app-side.cl-shown'); if (!s || !s.firstElementChild) return null;
+  const cs = getComputedStyle(s.firstElementChild), m = new DOMMatrix(cs.transform === 'none' ? undefined : cs.transform), box = getComputedStyle(s);
+  return { opacity: Math.round(Number(cs.opacity) * 100) / 100, x: Math.round(m.m41), box: box.transform === 'none' && box.opacity === '1' }; })()`);
+await click('ckt');
 await page.until(`document.querySelector('.cluster').classList.contains('cl-out')`, { timeout: 5000 });
 await wait(160);
 const leaving = await panelLook();
 const during = await stageBox();
-await booted('fractals');
+await booted('ckt');
 await page.until(`!document.querySelector('.cluster').classList.contains('cl-out')`, { timeout: 10000 });
 await wait(400);
 const came = await panelLook();
-c.ok('a switch: particles\' panels leave to their side, fading, the viewer still', !!leaving && leaving.opacity < 1 && leaving.x > 0
-  && during === places[0], `${JSON.stringify(leaving)} · the stage at ${during}`);
-c.ok('…fractals\' come in, in their place and whole', !!came && came.opacity === 1 && came.x === 0, JSON.stringify(came));
+c.ok('a switch: particles\' panel\'s contents leave to their side, fading, its box and the viewer still', !!leaving && leaving.opacity < 1
+  && leaving.x > 0 && leaving.box && during === places[0], `${JSON.stringify(leaving)} · the stage at ${during}`);
+c.ok('…ckt\'s come in, in their place and whole', !!came && came.opacity === 1 && came.x === 0 && came.box, JSON.stringify(came));
 await page.until(`!document.querySelector('.cl-held')`, { timeout: 10000 });
-const holds = await page.eval(`window.__holds`);
-c.ok('particles taken out: its last frame held where its canvas was, gone once fractals drew', holds.length === 1 && holds[0] === was,
+const holds = await page.eval(`window.__holds`), path = await page.eval(`window.__unpath()`);
+const cktAt = await page.eval(`(() => { const r = document.querySelector('.cl-host .viewer-stage > canvas:not(.stack-layer)').getBoundingClientRect();
+  return [r.left, r.top, r.width, r.height].map(Math.round).join(','); })()`);
+const near = (a, b) => !!a && a.split(',').every((v, i) => Math.abs(v - b.split(',')[i]) <= 2);
+c.ok('particles taken out: its last frame held where its canvas was, gone once ckt drew', holds.length === 1 && holds[0] === was,
   `${JSON.stringify(holds)} against ${was}`);
+c.ok('…the frame held moving onto ckt\'s picture — another format — at its size, before it went', path.length > 2 && near(path[0], was)
+  && !near(was, cktAt) && near(path.at(-1), cktAt), `${path[0]} → ${path.at(-1)}, ckt's at ${cktAt}, ${path.length} frames`);
+// The scene's frames, under every app's boxes and the same as them; the title bar's brand and search the scene's (S9e).
+const framed = await page.eval(`(() => { const at = q => { const n = document.querySelector(q); if (!n) return null; const r = n.getBoundingClientRect();
+    return [r.left, r.top, r.width, r.height].map(Math.round).join(','); };
+  const pairs = [['.cl-fr-view', '.cl-host .viewer'], ['.cl-fr-head', '.cl-host .viewer-head'], ['.cl-fr-player', '.cl-host .viewer > .viewer-player, .cl-host .viewer > .vault-player'],
+    ['.cl-fr-props', '.cl-host .app-main > .app-side.cl-shown'], ['.cl-fr-top', '.cl-host skw-titlebar'], ['.cl-fr-bar', '.cl-host footer.bar']];
+  const off = pairs.filter(([a, b]) => !at(a) || at(a) !== at(b)).map(([a, b]) => a + ' ' + at(a) + ' / ' + at(b));
+  return { off, search: getComputedStyle(document.querySelector('.cl-host skw-titlebar .tb-search')).visibility, named: document.querySelector('.cl-fr-app').textContent }; })()`);
+c.ok('…and under it all the scene\'s frames, each where the app\'s box is, its size; the brand and the search the scene\'s', !framed.off.length
+  && framed.search === 'hidden' && framed.named === 'ckt', JSON.stringify(framed).slice(0, 400));
 
 // ── Back as it was left: a value changed in each app, kept across a switch ─
 /**

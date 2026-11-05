@@ -17,10 +17,12 @@
  * (tabs.js) — and its status bar, laid in the scene's grid as they are. An object opened in the vault is
  * a tab beside the panels, its detail; the vault app draws it. As an app is
  * taken out its last frame is held where it was until the next draws its
- * first (held.js): the centre never flashes empty. And its panels leave
- * first, as the bench's do — out to their side, faded — then the next app's
- * come in, the viewer and the vault still: the app going is taken out once
- * its panels are gone, so two apps' stylesheets never meet.
+ * first, then moved onto it (held.js): the centre never flashes empty. Its
+ * boxes hold still — the scene's own frames lie under them, the same
+ * (frames.js) — and what is in them goes first, the panel's contents out to
+ * their side as the bench's do, then the next app's come in (motion.css,
+ * S9e): the app going is taken out once its contents are gone, so two apps'
+ * stylesheets never meet.
  *
  * The app mounted is the address's fragment, `#particles`: a reload comes
  * back to it, Back goes to the one before, and what the address asks of the
@@ -48,6 +50,7 @@ import { takeLinks }      from '../../core/reopen.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
 import { holdFrames }     from './held.js';
 import { propsTabs }      from './tabs.js';
+import { stillFrames }    from './frames.js';
 
 /**
  * The apps the scene mounts, in the strip's order, each loaded when first
@@ -80,7 +83,7 @@ const el = (tag, cls, text) => {
   return node;
 };
 
-let scene, strip, host, vault, props, frames;
+let scene, strip, host, vault, props, frames, boxes;
 let opened = null;         // { object, urls }: the object open in the scene's vault, for an app that draws it
 let now = null;            // { name, module, n, ready }: the app mounted, the ask it answers, whether it has started
 let wanted = null;         // { name, n }: the app last asked for — a link to the app there is an ask of its own
@@ -125,7 +128,8 @@ export function start(page = document.body) {
   const detail = el('div', 'cl-detail');
   const none = el('p', 'cl-none', 'An object chosen in the vault opens here.');
   host = el('div', 'cl-host');
-  scene.append(strip, side, tabs, detail, none, host);
+  boxes = stillFrames();                     // under everything an app lays in the grid: its boxes, still (S9e)
+  scene.append(strip, ...boxes.nodes, side, tabs, detail, none, host);
   page.append(scene);
 
   installPalette();                          // ² from the start: the vault has no panel to install it
@@ -211,6 +215,7 @@ async function swap(ask) {
     }
     const going = host.querySelector(':scope > .app');
     frames.take(going);                      // its last frame, held where it is
+    scene.classList.toggle('cl-rulers', !!(going && going.querySelector('skw-rulers .rl')));   // the frames' bands as its rulers were
     props.leaving();
     now.module.unmount();
   }
@@ -249,6 +254,7 @@ const frame = () => new Promise(done => requestAnimationFrame(() => requestAnima
 
 /** The strip and the page's title say which app is mounted. */
 function mark(name) {
+  boxes.name(name);
   for (const b of strip.querySelectorAll('.cl-app[data-app]')) {
     if (b.dataset.app === name) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');

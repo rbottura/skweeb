@@ -55,7 +55,17 @@ app still opens alone on its own page; the scene is one more host.
 - **The last frame held** (`held.js`): as an app is taken out its frame is
   copied over where its canvas was, and stays until the next app's canvas
   is first drawn on — watched from its build, before the app starts
-  (`core/mount.js` `built`) — so the centre never flashes empty.
+  (`core/mount.js` `built`) — so the centre never flashes empty. Then it
+  moves onto the next picture at its size, covering the changing box, and
+  the two cross (S9e).
+- **What holds still at a switch** (`scene/motion`, S9e's first pass,
+  2026-11-05): the scene's frames under the app's boxes, the same as them
+  (`frames.js`) — title bar, viewer with its head, rulers' bands and
+  player's strip, properties, status bar — so no box blinks between two
+  apps; the brand and the search the scene's. What is in the boxes goes
+  and comes (`motion.css`), the panel's contents sliding in a box that
+  stays; the tab's underline one, sliding; a panel shown by its tab
+  fading in; the player's strip always there.
 - **One app at a time, each through its module** (`main.js`): a strip on
   the left names the suite's apps — the vault, grid, ckt, compose, filter,
   fractals, particles, map, the rig, the 3D app — and a click on one takes
@@ -116,13 +126,10 @@ app still opens alone on its own page; the scene is one more host.
   page's memory is where it is kept.
 - **A switch while an app saves** takes it out mid-save: the save goes on
   in the background and lands in the vault, but nothing says so.
-- **The motion at a switch is not worked out**: the panels go out, then
-  everything else of the next app appears in one frame — its title bar's
-  acts, its viewer's head, its rulers, its picture at its own size, its
-  player — then the panels come in; "assez saccadées", the author found,
-  the canvas and the right panel's way "pas mal" after S9d. What holds
-  still, what adapts, what goes and comes, case by case, is S9e, worked out
-  with the author (`docs/scene.md`, *The motion, case by case*).
+- **The motion's first pass only** (S9e): the next app's contents wait for
+  its boot before they come in; the rulers' numbers and the viewer's own
+  tools go and come rather than adapt; the cases are the author's to go
+  through (`docs/scene.md`, *The motion, case by case*).
 - **A drag is the page's own**: an object dragged from another window — a
   vault open in another tab — is not taken; and a field hidden by its `when`
   is not lit.

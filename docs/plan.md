@@ -49,7 +49,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9d | cluster closer to the bench: the properties one panel, its sections folded in it; the vault four columns of pictures | `scene/props` | S | landed 2026-11-05 |
 | S9g | the scene's vault beside an app: still at a switch, the app's own first, dragged onto a field, a set in its folder | `scene/side-vault` | S | landed 2026-11-05 |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
-| S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | waits: the cases gone through with the author (`docs/scene.md`) |
+| S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | first pass landed 2026-11-05, the proposal as written; the rest with the author's eye (`docs/scene.md`) |
 | S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | after S11 |
 | S13 | the player's lanes: a composition's sequences a lane each, one opened there | `compose/lanes` | M | waits: worked out with the author, with S9e |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
@@ -128,10 +128,9 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
-- **The motion, case by case** (S9e): what holds still at a switch, what
-  adapts, what goes and comes — the proposal in `docs/scene.md`, *The
-  motion, case by case*, the author's to go through: "on va travailler ça
-  ensemble". If nothing is said: the proposal as written.
+- **The motion, case by case** (S9e): its first pass is the proposal as
+  written (`docs/scene.md`); what the author sees in it, case by case — "on
+  va travailler ça ensemble" — is its next pass.
 - **The player's lanes** (S13): a composition of several sequences, each a
   lane in the player, one opened there to be seen or changed — as After
   Effects' timeline, as the gamepad's clips. Its shape worked out with the

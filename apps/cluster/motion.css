@@ -1,0 +1,81 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   motion.css — cluster at a switch (S9e; docs/scene.md, *The motion, case by
+   case*, the proposal as written — the author, 2026-11-05: "on peut
+   continuer celles déjà planifiées"): what holds still, what adapts, what
+   goes and comes. Imported by style.css.
+
+   Still: the scene's frames (frames.js), under the app's boxes and the same
+   as them, so no box blinks between two apps; the title bar's brand and its
+   search, the scene's. Adapting: the frame held, onto the next picture
+   (held.js); the chosen tab's underline, sliding (tabs.js); the player's
+   strip, always there, what is in it coming and going. Going and coming:
+   what is in the boxes — the title bar's acts, the viewer's head, the
+   rulers' marks, the player, the status bar's words, the tabs, the panel's
+   contents with a slide — out as an app goes (`cl-out`), in as the next is
+   up. With less motion asked of the system, nothing moves.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* ── Still: the frames, under every app's ───────────────────────────────────── */
+
+.cl-fr { min-width: 0; min-height: 0; pointer-events: none; }
+.cl-fr-top { grid-column: 2 / -1; grid-row: 1; display: flex; align-items: center; gap: 12px; padding: 0 184px 0 12px;
+  border-bottom: 1px solid var(--line); pointer-events: auto; }
+.cl-fr-top kbd { display: inline-flex; align-items: center; height: 16px; padding: 0 4px; border: 1px solid var(--line-2); border-radius: 3px;
+  font: 500 10px/1 var(--font-num); color: var(--fg-2); }
+.cl-fr-view { grid-column: 3; grid-row: 2 / 4; margin-block: var(--gap); display: grid; grid-template-rows: var(--head-h) minmax(0, 1fr) var(--player-h);
+  overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--view); }
+.cl-fr-head { background: var(--panel); border-bottom: 1px solid var(--line); }
+.cl-fr-stage { position: relative; }
+/* The rulers' bands, when the app going had rulers: the corner's line is the top band's own. */
+.cl-rulers .cl-fr-stage::before, .cl-rulers .cl-fr-stage::after { content: ""; position: absolute; left: 0; top: 0; background: var(--panel); }
+.cl-rulers .cl-fr-stage::after { bottom: 0; width: 18px; border-right: 1px solid var(--line-2); }
+.cl-rulers .cl-fr-stage::before { right: 0; z-index: 1; height: 18px; border-bottom: 1px solid var(--line-2);
+  background: linear-gradient(var(--line-2), var(--line-2)) 17px 0 / 1px 100% no-repeat, var(--panel); }
+.cl-fr-player { background: var(--panel); border-top: 1px solid var(--line); }
+.cl-fr-props { grid-column: 4; grid-row: 3; margin: 0 var(--gap) var(--gap) 0; border: 1px solid var(--line); border-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--panel); }
+.cl-fr-bar { grid-column: 2 / -1; grid-row: 4; border-top: 1px solid var(--line); background: var(--frame); }
+
+/* The app's title bar over the scene's: its own brand and search laid out, not shown, and taking no press — the
+   scene's under them do; its acts its own. */
+.cl-host skw-titlebar { background: none; border-bottom-color: transparent; pointer-events: none; }
+.cl-host skw-titlebar .tb-brand, .cl-host skw-titlebar .tb-search { visibility: hidden; }
+.cl-host skw-titlebar .tb-acts, .cl-host skw-titlebar .tb-menu { pointer-events: auto; }
+
+/* ── Adapting ──────────────────────────────────────────────────────────────── */
+
+/* The player's strip always there: hidden, it is empty, not gone. */
+.cl-host .viewer > .viewer-player[hidden], .cl-host .viewer > .vault-player[hidden] { display: block; visibility: visible; }
+.cl-host .viewer > .viewer-player[hidden] > *, .cl-host .viewer > .vault-player[hidden] > * { opacity: 0; visibility: hidden; }
+.cl-host .viewer > .vault-player { background: var(--panel); }
+
+/* The chosen tab's underline, one, sliding. */
+.cl-tabs { position: relative; }
+.cl-tabs-ink { position: absolute; left: 0; bottom: 0; height: 1px; background: var(--accent); pointer-events: none; }
+.cl-tabs-ink[hidden] { display: none; }
+
+/* The frame held, its picture covering its box as it takes the next picture's (held.js). */
+.cl-held { object-fit: cover; }
+
+/* ── Going and coming ──────────────────────────────────────────────────────── */
+
+.cl-host skw-titlebar .tb-acts, .cl-fr-app, .cl-host .viewer > .viewer-head > *, .cl-host skw-rulers .rl > *,
+.cl-host skw-rulers > :not(.rl):not(.rl-corner), .cl-host footer.bar > *, .cl-tabs > *, .cl-none,
+.cl-host .viewer > .viewer-player > *, .cl-host .viewer > .vault-player > * { transition: opacity 160ms ease, visibility 160ms; }
+.cl-out .cl-host skw-titlebar .tb-acts, .cl-out .cl-fr-app, .cl-out .cl-host .viewer > .viewer-head > *, .cl-out .cl-host skw-rulers .rl > *,
+.cl-out .cl-host skw-rulers > :not(.rl):not(.rl-corner), .cl-out .cl-host footer.bar > *, .cl-out .cl-tabs > *, .cl-out .cl-none,
+.cl-out .cl-host .viewer > .viewer-player > *, .cl-out .cl-host .viewer > .vault-player > * { opacity: 0; }
+.cl-tabs-ink { transition: transform 180ms cubic-bezier(0.2, 0.7, 0.2, 1), width 180ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 160ms ease; }
+.cl-tabs-ink:not(.cl-tabs-ink--placed) { transition: opacity 160ms ease; }
+
+/* The panel's contents, as the bench's `swapping`: out to their side and faded, in as the next app's come —
+   their box still, so what moves is clipped by it. */
+.cl-host .app-main > .app-side { overflow-x: clip; }
+.cl-host .app-main > .app-side > *, .cl-detail > * { transition: transform 240ms ease, opacity 240ms ease; }
+.cl-out .cl-host .app-main > .app-side > *, .cl-out .cl-detail > * { transform: translateX(28px); opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-host skw-titlebar .tb-acts, .cl-fr-app, .cl-host .viewer > .viewer-head > *, .cl-host skw-rulers .rl > *,
+  .cl-host skw-rulers > :not(.rl):not(.rl-corner), .cl-host footer.bar > *, .cl-tabs > *, .cl-none, .cl-tabs-ink,
+  .cl-host .viewer > .viewer-player > *, .cl-host .viewer > .vault-player > *, .cl-host .app-main > .app-side > *, .cl-detail > * { transition: none; }
+}
