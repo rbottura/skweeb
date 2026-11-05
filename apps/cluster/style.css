@@ -2,26 +2,43 @@
    style.css — cluster, the scene
 
    Everything that looks like the suite comes from core, and each app brings
-   its own layout as it is mounted (core/mount.js). The scene says only its
-   own: the strip of apps on the left, as the bench's activity bar, and the
-   host the app mounted fills.
+   its own stylesheet as it is mounted (core/mount.js). The scene says where
+   things go, as the bench has them — the author's yes, 2026-11-05: the strip
+   of apps, the scene's vault, the viewer and its player, the properties:
+
+     strip │ vault │ the app's viewer │ the app's panels, a tab each
+           │       │ its player       │
+
+   The app's own boxes — `.app`, `.app-main` — give up their layout
+   (`display: contents`): its title bar, viewer, panels and status bar are
+   laid in this grid as they are, whatever columns the app has on its own
+   page. So the viewer is in the same place for every app, and the canvas in
+   it does not move; its head and the player's strip keep one height each,
+   the player's kept where there is none, so the stage keeps one size.
    ────────────────────────────────────────────────────────────────────────────── */
 
 @import '../../core/theme.css';
 
 .cluster {
   --strip: 92px;
+  --vault-w: 256px;           /* the bench's side view */
+  --props-w: 300px;           /* the bench's properties */
+  --tabs-h: 30px;
+  --head-h: 37px;             /* a viewer's head: the app's buttons, its tools */
+  --player-h: 59px;           /* the player under the viewer — or its room, where nothing plays */
   height: 100vh;
   display: grid;
-  grid-template-columns: var(--strip) minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: var(--strip) var(--vault-w) minmax(0, 1fr) var(--props-w);
+  grid-template-rows: 38px var(--tabs-h) minmax(0, 1fr) var(--bar-h);
+  column-gap: var(--gap);
+  background: var(--frame);
 }
 
-.cl-host { min-width: 0; min-height: 0; }
-.cl-host > .app { height: 100%; }
+/* ── The scene's own: the strip, the vault, the tab bar, the detail ────────── */
 
-/* The strip: the scene's mark at the height of the app's title bar, then the apps, one line each. */
 .cl-strip {
+  grid-column: 1;
+  grid-row: 1 / -1;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -84,11 +101,99 @@
 
 .cl-sep { flex: none; height: 1px; margin: 6px 12px; background: var(--line); }
 
-/* Narrow: the strip a row above the app. */
-@media (max-width: 900px) {
-  .cluster { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .cl-strip { flex-direction: row; overflow: auto hidden; padding: 4px; border-right: 0; border-bottom: 1px solid var(--line); }
-  .cl-head { height: auto; margin: 0 6px 0 4px; padding: 0; border-bottom: 0; }
-  .cl-sep { width: 1px; height: auto; margin: 4px 6px; }
-  .cl-app[aria-current="page"]::before { left: 8px; right: 8px; top: auto; bottom: -4px; width: auto; height: 2px; }
+/* The vault, the scene's: its grid docked beside the viewer, its detail a tab of the properties.
+   Narrow, its kinds of object are one row, scrolled — not four. */
+.cl-side { grid-column: 2; grid-row: 2 / 4; min-height: 0; margin-block: var(--gap); display: flex; flex-direction: column; }
+.cl-side .vp-head { gap: 6px; padding: 8px 10px; }
+.cl-side .vp-filters { flex: 1 0 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; order: 1; }
+.cl-side .vp-filters::-webkit-scrollbar { display: none; }
+
+.cl-tabs {
+  grid-column: 4;
+  grid-row: 2;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+  margin: var(--gap) var(--gap) 0 0;
+  padding: 0 6px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--panel);
 }
+
+.cl-tab {
+  position: relative;
+  flex: none;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--fg-3);
+  font: 600 11px var(--font-ui);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.cl-tab:hover { color: var(--fg-2); }
+.cl-tab[aria-selected="true"] { color: var(--fg); }
+.cl-tab[aria-selected="true"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 1px; background: var(--accent); }
+
+/* Every one of the properties' cells is the same place: under the tabs, one shown. */
+.cl-detail, .cl-none, .cl-host .app-main > .app-side { grid-column: 4; grid-row: 3; min-height: 0; margin: 0 var(--gap) var(--gap) 0; }
+.cl-detail { display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-top: 0; background: var(--panel);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.cl-detail.cl-shown { display: flex; }
+.cl-detail .vp-detail { position: static; flex: 1; width: auto; min-height: 0; transform: none; visibility: visible; transition: none; border-left: 0; }
+.cl-detail .vp-detail.vp-detail--info { width: auto; }
+/* Its tab says what it is: its head keeps only the close. */
+.cl-detail .vp-detail-head { padding: 4px 8px; background: none; justify-content: flex-end; }
+.cl-detail .vp-detail-head > .vp-title { display: none; }
+.cl-none { padding: 14px; color: var(--fg-3); font-size: 12px; border: 1px solid var(--line); border-top: 0; background: var(--panel);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.cl-none[hidden] { display: none; }
+
+/* The last frame of the app going, over where it was, until the next draws its first (held.js). */
+.cl-held {
+  position: fixed;
+  z-index: 30;
+  pointer-events: none;
+  outline: 1px solid var(--line-2);
+  box-shadow: 0 10px 30px var(--shadow);
+  background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 16px 16px;
+  transition: opacity 140ms;
+}
+
+.cl-held--going { opacity: 0; }
+
+/* ── The app mounted, laid in the scene's grid ─────────────────────────────── */
+
+.cl-host, .cl-host > .app, .cl-host .app-main { display: contents; }
+
+.cl-host skw-titlebar { grid-column: 2 / -1; grid-row: 1; }
+.cl-host footer.bar { grid-column: 2 / -1; grid-row: 4; }
+
+/* The viewer: one place, one size — its head, its stage, the player's strip or the room for it. */
+.cl-host .app-main > .viewer {
+  grid-column: 3;
+  grid-row: 2 / 4;
+  min-height: 0;
+  margin-block: var(--gap);
+  display: grid;
+  grid-template-rows: var(--head-h) minmax(0, 1fr) var(--player-h);
+}
+
+.cl-host .viewer > .viewer-head { grid-row: 1; height: var(--head-h); min-height: 0; }
+.cl-host .viewer > .viewer-stage { grid-row: 2; min-height: 0; }
+.cl-host .viewer > .viewer-player, .cl-host .viewer > .vault-player { grid-row: 3; min-height: 0; overflow: hidden; }
+.cl-host .viewer > .viewer-player[hidden] { display: block; visibility: hidden; }
+
+/* The panels: one shown, under its tab; the app's own vault gives way to the scene's. */
+.cl-host .app-main > .app-side { display: flex; flex-direction: column; }
+.cl-host .app-main > .app-side:not(.cl-shown), .cl-host .app-main > .app-side[hidden] { display: none; }
+.cl-host .app-main > .app-side > .pp { border-top-left-radius: 0; border-top-right-radius: 0; }
+/* Its tab says its name: its head keeps only what it does — Reset. */
+.cl-host .app-main > .app-side > .pp > .pp-head > .pp-title { display: none; }
+.cl-host .app-main > .vault-side { display: none; }
