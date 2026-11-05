@@ -45,7 +45,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S2b | S2's rest: the unit in the box, the fold of rows seldom touched, a pair on one line | `ui/rows-more` | S | landed 2026-11-03 |
 | S9a | every app a module: `mount(host)`, `unmount()`, a scope | `scene/host` | M | landed 2026-11-04: the nine on core's kit; the players' pages wait on the author |
 | S9b | the vault, an app: full screen, the canvas showing what is chosen | `scene/vault`, `ui/vault-info` | S | landed 2026-11-04; its detail the facts only, the author's C, 2026-11-05 |
-| S9c | *cluster*, the scene: the host; an app back as it was left; the links taken in place; one canvas fixed, the last frame held; the panels moving | `scene/cluster`, `scene/kept`, `scene/links`, `scene/canvas`, `scene/panels` | L | landed 2026-11-05: the host, an app back as it was left, the links; one canvas, then the panels, ready |
+| S9c | *cluster*, the scene: the host; an app back as it was left; the links taken in place; one canvas fixed, the last frame held; the panels moving | `scene/cluster`, `scene/kept`, `scene/links`, `scene/canvas`, `scene/panels` | L | landed 2026-11-05: the host, an app back as it was left, the links, one canvas in the bench's layout; the panels, ready |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
 | S11 | the space viewer's own bench | — | M | side bench, before S10 |
 | U8a | the shared boxes: one contract, Export first | — | — | → S3 |
@@ -123,12 +123,6 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
-- **The scene's layout, for one canvas fixed** (S9c, `scene/canvas`): one
-  layout for every app in cluster, so the viewer stays where it is — the
-  bench's: the scene's side views on the left (the vault, the keys, the
-  history), the viewer and its player in the middle, the app's properties
-  on the right, two panels as two tabs. Each app's own page as it is. If
-  nothing is said: that, tried first in cluster, shown before it spreads.
 - **The players in cluster** (S9a): map's player (`play/`) and the rig's
   puppet stay pages of their own — a playable map is an export, a puppet
   worn is a performance OBS follows by its address. Mounted in cluster, the

@@ -29,6 +29,11 @@ sorts them.
   in compose ↗*, *Rig this ↗* and the graph's open-in mount that app in the
   scene on its object, where alone they open a tab (`core/reopen.js`
   `follow`, `takeLinks`); Back is the app before, as it was left.
+- **The bench's layout, the canvas fixed** (the author's yes): in cluster
+  the strip, the scene's vault, the viewer — in one place to the pixel for
+  every app — and the properties, an app's panels a tab each, an object
+  opened in the vault a tab beside them; the last frame of the app going
+  held over its canvas until the next draws.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -336,14 +341,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9c's next brick: one canvas, fixed — first, how** — branch
-`scene/canvas` from `main`. Weigh the two ways `docs/scene.md` names
-(brick 3): one canvas element handed to each app — its listeners on it
-held by the scope, seven `pointer.js` and ckt's own, its classes and its 2D
-state reset — or each app's own canvas laid in one place by the scene's
-columns, the last frame a picture over it. Then the first step of the one
-chosen: the viewer's rectangle the same for every app in cluster,
-`check-cluster` measuring it across a switch.
+**S9c's last brick: the panels leaving and coming** — branch
+`scene/panels` from `main`. As the bench does (its `swapping`, 240 ms): at a
+switch the app's panels and its tabs slide out to their side and fade, the
+next app's come in, the viewer and the scene's vault still; the app going is
+taken out once its panels are gone, so two apps' stylesheets never meet.
+`check-cluster` sees the panels move and the viewer not.
 
 ## Parked decisions
 

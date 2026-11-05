@@ -201,14 +201,16 @@ app keeps its own canvas and its own layout. Then, a brick each:
    stack's saved page, followed through core (`core/reopen.js` `follow`),
    mount that app in the scene with the link's query, where alone they open
    a tab; the app left comes back as it was.
-3. **One canvas, fixed; the last frame held** (`scene/canvas`): the viewer
-   in one place whatever app is round it — the bench's columns — and the
-   frame of the app going kept until the next draws its first. Handing one
-   canvas element over, as planned, makes the apps' listeners on their
-   canvas — seven `pointer.js`, ckt's own — and the classes they set on it
-   the scope's, and its 2D state reset between two apps; each app keeping
-   its canvas in that one place, the last frame a picture over it, asks
-   nothing of them. Which, weighed in that brick.
+3. **One canvas, fixed; the last frame held** (`scene/canvas`, landed
+   2026-11-05): the bench's layout, the author's yes — the strip, the
+   scene's vault, the viewer, the properties, an app's panels a tab each —
+   every app's parts laid in the scene's grid as they are (`display:
+   contents`), so its viewer is in one place to the pixel; the frame of the
+   app going held over its canvas until the next draws its first. Each app
+   keeps its own canvas: weighed in the brick, handing one element over
+   would have made the apps' listeners on it — seven `pointer.js`, ckt's
+   own — the classes they set on it and its 2D state the scene's to undo,
+   for a picture the eye cannot tell apart.
 4. **The panels leaving and coming** (`scene/panels`), as the bench has
    them.
 
