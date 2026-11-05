@@ -120,6 +120,34 @@ await open('fractals');
 c.ok('…fractals: its one panel, its one tab', same(await tabsNow(), ['fractal*']) && same(await shownSides(), ['side']), JSON.stringify(await tabsNow()));
 await open('particles');
 c.ok('…particles again: the tab it showed shown again', same(await tabsNow(), ['particles', 'picture*']) && same(await shownSides(), ['picture-side']));
+// One panel, as the bench's: the tabs its head, the panel's Reset at the end of their row; its sections one
+// column under them, no box and no gap; a section folds, its height moving; the scene's vault four columns.
+const look = await page.eval(`(() => {
+  const side = document.querySelector('.cl-host .app-main > .app-side.cl-shown'), tabs = document.querySelector('.cl-tabs').getBoundingClientRect();
+  const reset = side.querySelector(':scope > .pp > .pp-head > .pp-btn').getBoundingClientRect(), box = side.getBoundingClientRect();
+  const drs = [...side.querySelectorAll(':scope > .pp > .pp-body > .dr')].filter(d => getComputedStyle(d).display !== 'none');
+  const gaps = drs.slice(1).map((d, i) => Math.round(d.getBoundingClientRect().top - drs[i].getBoundingClientRect().bottom));
+  const boxed = drs.filter(d => { const s = getComputedStyle(d); return s.borderTopWidth !== '0px' || s.borderLeftWidth !== '0px' || parseFloat(s.borderTopLeftRadius) > 0; });
+  return { sections: drs.length, gaps: [...new Set(gaps)], boxed: boxed.length, joined: Math.round(box.top - tabs.bottom),
+    reset: reset.top >= tabs.top && reset.bottom <= tabs.bottom && reset.right <= tabs.right,
+    columns: getComputedStyle(document.querySelector('.cl-side .vp-grid')).gridTemplateColumns.split(' ').length };
+})()`);
+c.ok('the properties one panel: the tabs its head, Reset at their end, its sections a column with no gap and no box',
+  look.sections > 1 && same(look.gaps, [0]) && !look.boxed && look.joined === 0 && look.reset, JSON.stringify(look));
+const fold = await page.eval(`(async () => {
+  const dr = document.querySelector('.cl-host .app-main > .app-side.cl-shown .dr.dr--open'), body = dr.querySelector(':scope > .dr-body');
+  const open = Math.round(body.getBoundingClientRect().height);
+  dr.querySelector(':scope > .dr-head').click();
+  const moving = body.getAnimations().some(a => a.transitionProperty === 'height');
+  await new Promise(r => setTimeout(r, 450));
+  const shut = Math.round(body.getBoundingClientRect().height), seen = getComputedStyle(body).visibility;
+  dr.querySelector(':scope > .dr-head').click();
+  await new Promise(r => setTimeout(r, 450));
+  return { open, moving, shut, seen, again: Math.round(body.getBoundingClientRect().height) };
+})()`);
+c.ok('…a section folds, its height moving to none, and opens again as it was', fold.moving && fold.shut === 0 && fold.seen === 'hidden'
+  && fold.again === fold.open, JSON.stringify(fold));
+c.ok('…the scene\'s vault, a grid of pictures four columns wide', look.columns === 4, `${look.columns} columns`);
 // An object opened in the scene's vault: its detail a tab beside the panels, gone when it closes.
 await page.eval(`[...document.querySelectorAll('.cl-side .vp-card')].find(k => k.querySelector('.vp-type')?.textContent === 'still').click()`);
 await page.until(`!!document.querySelector('.cl-detail.cl-shown .vp-detail--open .vp-name')`, { timeout: 20000 });
