@@ -97,6 +97,8 @@ function start(host, mine, given = {}) {
     if (e.key === '.') { clock.pause(); clock.step(1); }
   });
 
+  // The count follows the vault: a set or a palette made here, an object saved anywhere (core/vault.js, `vault:changed`).
+  mine.listen(document, 'vault:changed', e => { if (Number.isFinite(e.detail && e.detail.count)) bar.vault(`${e.detail.count} in vault`); });
   Vault.refresh().then(ok => {
     if (!mounted()) return;
     bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault');
