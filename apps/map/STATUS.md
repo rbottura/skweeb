@@ -1,5 +1,5 @@
 # STATUS — map
-_last touched: 2026-11-04_
+_last touched: 2026-11-06_
 
 M8's app: the map editor, and a room first (`docs/roadmap.md`, M8). A map
 is the field's word for a level; the playable map is its export, as video
@@ -16,11 +16,27 @@ is a loop's, and nothing a player does enters a recipe.
 3. **The player, point and click** — done 2026-10-02: `play/`, what answers
    outlined under the pointer, a sign shown over the map, a warp followed.
    Then M9, the rig (`docs/roadmap.md`): the avatar's body, and its walk.
-4. **An avatar** — grid movement, ZQSD / WASD / arrows, E, tap to walk.
+4. **An avatar** — done 2026-11-06 (P4): grid movement, ZQSD / WASD /
+   arrows, a pad, E, tap to walk; a character worn.
 5. **Baked and published** — a static bundle, the embed mode.
 6. **Toys** — pushed, then rolled.
 
 ## Works now
+
+- **The player's avatar** (P4, 2026-11-06; `play/avatar.js`, `walk.js`,
+  `tests/map-walk.mjs`, `check-map-play`). On the spawn — through a warp,
+  on the warp back — wearing what stands there: a character
+  (`core/character.js`), its direction's loop, the left the right mirrored
+  when there are three; any other object, facing every way; nothing, a disc
+  with a nose. It walks a cell at a time, 240 ms a cell, drawn between the
+  two, among the things by its row: ZQSD or WASD by where the keys are
+  (`event.code`), the arrows, a pad's cross or stick; walls and solid
+  things stop it, turning it to face them. A step onto a warp takes it
+  through. E — or Enter, space, the pad's A — uses what it faces: a sign
+  read, a warp gone through; again, the sign put away. A tap walks it to a
+  cell by the shortest way (`pathTo`, breadth first, round every warp but
+  the one it ends on); a tap on what answers still uses it. Its loop plays
+  while it walks, its stance standing. Where it stands is the player's.
 
 - **The editor a module** (S9a, 2026-11-04; `main.js` on core's
   `mount.js`): `mount(host)` and `unmount()` — its keys and observer on the
@@ -149,11 +165,7 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## Next single step
 
-**Brick 4, an avatar that walks — P4 on the board of `docs/plan.md`**, P3
-having defined a character (`core/character.js`, 2026-11-06: `waysOf` a
-loop by direction, a left mirrored; made by hand in the vault panel). It
-waits on no drawing: with no character the avatar is any loop, facing
-every way. ZQSD or WASD by `event.code`, the arrows, a gamepad's stick; E
-uses what it faces; a tap walks to a cell by the shortest way over
-`walkable`; where it stands lives in the player, never in a recipe. Then
-P7, a worm's path across the map, and P8, brick 5.
+**P7 — a worm's path across the map** (`docs/plan.md`, *P*): a path drawn on
+the map that a thing follows across the room, as the rig's worm crawls round
+its path, its loop closing on the map's clock. Then P8, brick 5, baked and
+published. Neither is next on the board: L11 is.

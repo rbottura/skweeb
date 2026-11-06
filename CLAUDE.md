@@ -18,7 +18,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/filter/` | M5: any picture or loop through a chain of GPU filters | `apps/filter/STATUS.md` |
 | `apps/fractals/` | M7: escape time on the GPU kit, a sprite copying itself, idles, and a field for particles | `apps/fractals/STATUS.md` |
 | `apps/particles/` | M6: particles as a function of time — loops that close, frames that stand alone | `apps/particles/STATUS.md` |
-| `apps/map/` | M8, begun: the map editor — a room on a grid of tiles, things placed on it, what can be walked and what answers, saved as a `map`; and its player, `play/`, point and click | `apps/map/STATUS.md` |
+| `apps/map/` | M8, begun: the map editor — a room on a grid of tiles, things placed on it, what can be walked and what answers, saved as a `map`; and its player, `play/`, point and click, an avatar walking it | `apps/map/STATUS.md` |
 | `apps/rig/` | M9, begun: a drawing made of marks, rigged at its marks — its strokes its bones; poses, swings, walks by part, worms crawling; and its player, `puppet/`, worn in OBS: the author's eyes from the camera at the eyestalks' tips, the mouth on the face, the body swaying with the head; the rig's bones over it as guides; sent, kept as a smart object OBS follows | `apps/rig/STATUS.md`; for OBS, `docs/guides/obs.md` |
 | `apps/3d/` | M10, begun: primitives made from their params — BEC_2025's grid among them (M13a, `grid.js`) — seen from anywhere, turned on a turntable (`motion.js`), drawn by three.js on the page's GPU device, saved as a `model` | `apps/3d/STATUS.md`; for the grid, `docs/bec.md` |
 | `apps/vault/` | S9b: the vault full screen — core's vault panel docked, the object chosen drawn large at its ink and played, seen closer (`core/zoom.js`); makes only what is made of objects by hand, a palette first (V1) | `apps/vault/STATUS.md`; `docs/workshop.md` |
@@ -150,7 +150,7 @@ node scripts/check-particles-links.mjs  # particles from other apps' objects: a 
 node scripts/check-sheet-engine.mjs     # that sheet loaded and played by Phaser 3, fetched into the page only
 node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag; copies of a star; idles of both families saved and placed
 node scripts/check-map.mjs              # M8's map editor: tiles, walls, things and their events; saved, replayed, reopened, placed in compose
-node scripts/check-map-play.mjs         # M8's player: what answers outlined, a sign shown, a warp followed and back
+node scripts/check-map-play.mjs         # M8's player: what answers outlined, a sign shown, a warp followed and back; its avatar walked, a character worn
 node scripts/check-rig.mjs              # M9's rig: bones from strokes, a pose and a loop saved, presets by part, a crawl round a path
 node scripts/check-3d-poster.mjs        # the 120×176 poster at 300 dpi, once: 77 tiles into one streamed PNG, checked whole
 node scripts/check-print.mjs            # every app's print in tiles against its object drawn whole; a gamepad still from its marks; the gamepad's print box; the 3D app's print panel
