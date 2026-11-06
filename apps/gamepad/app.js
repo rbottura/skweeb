@@ -17,7 +17,7 @@ import { TimelinePanel }       from './ui/TimelinePanel.js';
 import { VaultPanel }          from '../../core/VaultPanel.js';
 import { PrintBox }            from './ui/PrintBox.js';
 import { joinLive, savedBy }   from '../../core/live.js';
-import { Vault }               from '../../core/vault.js';
+import { Vault, isTrashed }    from '../../core/vault.js';
 import { offers }              from '../../core/uses.js';
 import { createSketch,
          setFamilyIndex, setSpriteIndex, setPatternIndex,
@@ -126,7 +126,9 @@ async function registerVaultFamilies() {
   try {
     if (!(await Vault.refresh())) return;
 
-    const sets = Vault.index.filter(row => row.type === 'set');
+    // Not a set in the trash: what is there is offered to nothing (core/vault.js) — and the gamepad reopens no
+    // recording, so none drawn with one needs it here; core replays those itself (C4).
+    const sets = Vault.index.filter(row => row.type === 'set' && !isTrashed(row));
     if (!sets.length) return;
 
     let added = 0;

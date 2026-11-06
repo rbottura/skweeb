@@ -21,7 +21,7 @@
  */
 
 import * as Registry from '../../core/registry.js';
-import { Vault }     from '../../core/vault.js';
+import { Vault, isTrashed } from '../../core/vault.js';
 import { offers }    from '../../core/uses.js';
 
 const GAMEPAD_MANIFEST = '/apps/gamepad/brush-manifest.json';
@@ -59,7 +59,8 @@ async function vaultFamilies() {
       const { object } = await Vault.load(row.id);
       if (!offers(object, 'sprites')) continue;   // the envelope: rows may lack the role
       const fam = Registry.registerFamily(Registry.familyFromSet(object, Vault.index));
-      if (fam) out.push({ id: fam.id, count: fam.count, label: row.title || row.id });
+      // A set in the trash stays known — what was made with it draws as it was — but is offered no more (C4).
+      if (fam && !isTrashed(row)) out.push({ id: fam.id, count: fam.count, label: row.title || row.id });
     } catch (err) {
       console.warn('[ckt] a sprite set would not load:', row.id, err.message);
     }
