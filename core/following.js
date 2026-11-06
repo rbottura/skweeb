@@ -1,9 +1,11 @@
 /**
- * following.js — filter's source as another window's layer, live (M11,
- * brick 4; core/send.js).
+ * following.js — an app's source as another window's layer, live (M11,
+ * brick 4; core/send.js): filter's since then, and grid's since L5
+ * (2026-11-06) — moved here from filter when a second app took windows,
+ * each handing it its own two ways to open a source.
  *
  * Sent here by *Send to ▸* in another window, or named in the address
- * (`?live=<window id>`), filter's source is what that window has on screen:
+ * (`?live=<window id>`), the app's source is what that window has on screen:
  * its layer, the envelope its save would write (core/live.js), drawn by
  * core/rebuild.js — and drawn again whenever it changes there, a moment
  * after the last change, so a slider dragged there is not a hundred
@@ -15,23 +17,24 @@
  * filter saves over what it kept, then follows the window again.
  */
 
-import { fromLayer, fromVault } from './source.js';
-import { held, listen } from '../../core/scope.js';
+import { held, listen } from './scope.js';
 
 /**
  * @param {object} ctx
  * @param {object} ctx.live                    this window, core/live.js's
- * @param {object} ctx.params                  filter's
+ * @param {object} ctx.params                  the app's: its `source` an object param
  * @param {(source: object, opts: object) => void} ctx.setSource
- * @param {() => ?object} ctx.source           what filter has now
+ * @param {() => ?object} ctx.source           what the app has now
  * @param {(text: string) => void} ctx.say
+ * @param {(id: string) => Promise<object>} ctx.fromVault       the app's source from the vault
+ * @param {(layer: object, opts: {title: string}) => Promise<object>} ctx.fromLayer   …from a window's layer
  */
-export function followWindows({ live, params, setSource, source, say }) {
+export function followWindows({ live, params, setSource, source, say, fromVault, fromLayer }) {
   let followed = null;             // { windowId, stop }
   let asked = 0;
 
   // A smart object held as the source took a new version — saved again in its own window, or
-  // anywhere on this vault: drawn again, the player where it was (core/smart.js). Heard while filter is mounted.
+  // anywhere on this vault: drawn again, the player where it was (core/smart.js). Heard while the app is mounted.
   listen(document, 'vault:updated', async ({ detail }) => {
     const now = source();
     if (!now || now.id !== detail.id) return;

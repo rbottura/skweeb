@@ -65,7 +65,7 @@ export async function openObject(object, opts = {}) {
   const k = opts.scale > 0 ? opts.scale : 1;
   let parent;
   try {
-    // A vault object by id; or, from a window followed live, its envelope carried whole (following.js).
+    // A vault object by id; or, from a window followed live, its envelope carried whole (core/following.js).
     parent = typeof recipe.source === 'object'
       ? await fromLayer(recipe.source, { draft: !!opts.draft, scale: k, depth: opts.depth })
       : await fromVault(recipe.source, { draft: !!opts.draft, scale: k, depth: opts.depth });

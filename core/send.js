@@ -13,7 +13,7 @@
  */
 
 /** The apps that take another window as their source. */
-export const TAKERS = ['filter'];
+export const TAKERS = ['filter', 'grid'];      // grid since L5, 2026-11-06
 
 /**
  * Send this window to `target`: its window found, or opened.

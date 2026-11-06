@@ -13,8 +13,12 @@
  * object, since filter will hold it (core/smart.js); the filter
  * saved names what particles kept as its source and its parent, and goes
  * on following particles after. Sent again, the filter window open takes it
- * without another opening. And no page said anything wrong. Needs WebGPU,
- * for filter draws nothing without it.
+ * without another opening. And first, from a particles window of its own,
+ * *Send to ▸ grid* (L5): a grid window opened following it, live; saved,
+ * particles first, a smart object grid names as its source and parent, and
+ * grid following it again — no GPU needed for that part. And no page said
+ * anything wrong. Needs WebGPU for the rest, for filter draws nothing
+ * without it.
  */
 
 import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
@@ -29,6 +33,32 @@ const barSay = `(document.querySelector('.bar-say')?.textContent || '')`;
 
 await c.go(c.base + '/apps/particles/');
 await page.until(`!!${sendButton}`, { timeout: 20000 });
+
+// L5: Send to ▸ grid, from a particles window of its own — grid needs no GPU. A grid window opened, its source
+// particles, live; saved, particles saves itself first, a smart object, grid naming it; then grid follows again.
+const sender = await c.tab(c.base + '/apps/particles/');
+const gridButton = `[...document.querySelectorAll('.pp-stack-sends .pp-stack-btn')].find(b => b.textContent === 'Send to ▸ grid')`;
+await sender.until(`!!${gridButton}`, { timeout: 20000 }).catch(() => {});
+await sender.pointer(await sender.eval(`(() => { const b = ${gridButton}; b.scrollIntoView({ block: 'center' });
+  const r = b.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()`));
+const grid = await c.found(url => url.includes('/apps/grid/?live='), { timeout: 15000 });
+await grid.until(`${barSay}.includes('its source: the particles window, live')`, { timeout: 30000 }).catch(() => {});
+c.ok('Send to ▸ grid opens a grid window, its source particles, live', (await grid.eval(barSay)).includes('the particles window, live'),
+  await grid.eval(barSay));
+await wait(1500);
+const gridBefore = new Set(((await (await fetch(c.base + '/api/vault')).json()).objects || []).map(o => o.id));
+await grid.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent.startsWith('Save to the vault'))`);
+await grid.until(`/^saved |failed/.test(${barSay})`, { timeout: 90000 }).catch(() => {});
+const gridNew = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).filter(o => !gridBefore.has(o.id));
+const gridKept = gridNew.find(o => o.origin && o.origin.app === 'particles');
+const gridMade = gridNew.find(o => o.origin && o.origin.app === 'grid');
+const gridFull = gridMade ? inner(await (await fetch(c.base + '/api/vault/' + gridMade.id)).json()) : null;
+c.ok('saved in grid: particles saves itself first, a smart object, and grid names it its source and parent', !!gridKept && gridKept.type === 'skw'
+  && !!gridFull && gridFull.recipe.source === gridKept.id && gridFull.parents.includes(gridKept.id),
+  gridFull ? `${gridFull.id} source ${gridFull.recipe.source}` : await grid.eval(barSay));
+await grid.until(`${barSay}.includes('its source: the particles window, live')`, { timeout: 20000 }).catch(() => {});
+c.ok('…and grid follows particles again', (await grid.eval(barSay)).includes('the particles window, live'), await grid.eval(barSay));
+
 const gpu = await page.eval(`(async () => !!(navigator.gpu && await navigator.gpu.requestAdapter()))()`);
 if (!gpu) {
   console.log('     no WebGPU here: filter draws nothing, and Send to ▸ filter goes unchecked');

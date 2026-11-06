@@ -98,8 +98,8 @@ sorts them.
   composition every window keeps — a layer from a window or the vault, put
   on, moved, taken off, its opacity and blend by CSS's names — and each
   window draws it round its own canvas, a loop at the wall clock's frame.
-- **Send to ▸ filter** (`core/send.js`, `apps/filter/following.js`): a
-  window as filter's source, live; saved, the window saves itself first.
+- **Send to ▸ filter, ▸ grid** (`core/send.js`, `core/following.js`): a
+  window as their source, live — grid's since L5; saved, the window first.
 - **Smart objects** (`core/smart.js`, `server/versions.js`): a `skw` saved
   by its app through its own save, the window bound; saved again, a
   version, and every page holding it drawn again (`vault:updated`) — and
@@ -342,10 +342,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L5 — grid takes a window** (`docs/plan.md`, *L*): `TAKERS` in
-`core/send.js` gains grid — a window as grid's source, followed live as
-filter follows one (`apps/filter/following.js`), saved as a smart object
-when grid saves. M13c, the gabarit, waits on its fields — the author's.
+**P2 — the 3D app's shape swung** (`docs/plan.md`, *P*; `apps/3d/STATUS.md`):
+a shape's place swung on a wave, as the rig swings a bone — a phase a
+shape, a whole number of swings in the turntable's loop so it still
+closes. M13c, the gabarit, waits on its fields — the author's.
 
 ## Parked decisions
 
