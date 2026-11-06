@@ -66,9 +66,9 @@ In the order the main thread takes them; side jobs and waits at the end.
 | P3 | a character, defined once | `core/character` | S | landed 2026-11-06 |
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | landed 2026-11-06 |
 | L11 | a smart object followed wherever it is picked | `layers/follow` | M | landed 2026-11-06 |
-| L1 | pins | `layers/pins` | M | ready |
+| L1 | pins | `layers/pins` | M | landed 2026-11-06 |
 | L3 | no cycle | `layers/cycles` | S | ready |
-| L2 | flatten | `layers/flatten` | S | needs L1 |
+| L2 | flatten | `layers/flatten` | S | ready |
 | L6 | edit in place | `layers/edit` | S | ready |
 | L5 | grid takes a window | `layers/grid-takes` | M | ready |
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
@@ -267,13 +267,9 @@ wherever it is used.
 landed 2026-11-06: an object field holding one hears its versions, the app
 loading it again (`params.following`); a model's picture a sprite.
 
-**L1 — pins** · `layers/pins` · M. A placement of a smart object carries
-its `version`, shown in compose's placed panel and in the Stack drawer —
-*follows the latest*, or *kept at v3* — with a switch. Kept, it draws what
-was kept (`core/smart.js` `innerOf`, there already) and no longer follows;
-a page keeps the version in its block. *Done when* `check-smart` keeps a
-page at v1, saves the smart object again, and the page still draws v1
-while a page that follows draws v2.
+**L1 — pins** · `layers/pins` · landed 2026-11-06: compose's since S6b, a
+project placed at its state; the live stack's too, a smart object's layer
+kept at a state by its row, in its block and in the page it saves.
 
 **L3 — no cycle** · `layers/cycles` · S. `Vault.save` walks the refs and
 refuses a page that would come to hold itself, naming the chain; the server
