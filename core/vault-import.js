@@ -46,8 +46,15 @@ function hasAlpha(bitmap) {
   return false;
 }
 
-/** One file into the vault, as a shape or a still. */
-async function importOne(file) {
+/**
+ * One picture into the vault, as a shape or a still, titled and tagged as asked — the panel's `+ pictures`
+ * and an importer of a project's files alike (apps/vault/bec-import.js, M13b).
+ *
+ * @param {Blob} file
+ * @param {{title: string, tags?: string[], note?: string}} o
+ * @returns {Promise<{object: ?object, bitmap: ?ImageBitmap}>}
+ */
+export async function bringIn(file, { title, tags = [], note = '' }) {
   const bitmap = await createImageBitmap(file);
   try {
     const sprite = hasAlpha(bitmap);
@@ -60,8 +67,9 @@ async function importOne(file) {
     }
     const object = await Vault.save({
       type: sprite ? 'shape' : 'still',
-      title: titleOf(file.name),
-      tags: ['import', ...(sprite ? ['sprite'] : [])],
+      title,
+      tags: [...tags, ...(sprite ? ['sprite'] : [])],
+      note,
       origin: IMPORT_ORIGIN,
       recipe: null,
       seed: null,
@@ -74,6 +82,9 @@ async function importOne(file) {
     bitmap.close();
   }
 }
+
+/** One file into the vault, as a shape or a still, named for its file. */
+const importOne = file => bringIn(file, { title: titleOf(file.name), tags: ['import'] });
 
 /**
  * Pictures into the vault: each a shape or a still, and several a set too.
