@@ -365,3 +365,17 @@
 
 /* Pictures dragged over the panel (vault-import.js): it will take them. */
 .vp--drop { outline: 1px dashed var(--accent); outline-offset: -6px; }
+
+/* A palette made by hand (vault-palette.js, V1): its name, a strip of its swatches, a row each — a colour, its
+   name, sooner, later, out — and Keep. */
+.vp-pal-title { display: block; width: 100%; height: 26px; margin: 6px 0 8px; padding: 0 8px; border: 1px solid var(--line-2);
+  border-radius: var(--radius); background: var(--field); color: var(--fg); font: 500 13px var(--font-ui); }
+.vp-pal-strip { display: flex; height: 28px; margin-bottom: 8px; border-radius: var(--radius); overflow: hidden; outline: 1px solid var(--line-2); }
+.vp-pal-strip > span { flex: 1; }
+.vp-pal-list { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.vp-pal-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) repeat(3, 24px); gap: 4px; align-items: center; }
+.vp-pal-colour { width: 30px; height: 24px; padding: 0; border: 1px solid var(--line-2); border-radius: var(--radius); background: none; cursor: pointer; }
+.vp-pal-name { min-width: 0; height: 24px; padding: 0 6px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--field); color: var(--fg); font: 400 12px var(--font-ui); }
+.vp-pal-move { min-width: 0; height: 24px; padding: 0; }
+

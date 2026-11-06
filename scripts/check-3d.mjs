@@ -415,6 +415,17 @@ await tapKey('c');
 await wait(600);
 const byC = await changed();
 c.ok('…C, as BEC\'s c: its colours dealt anew', (await cardNumber('colours dealt (C)')) === huesWere + 1 && byC.share > 0.0005, JSON.stringify(byC));
+// …a palette of the vault (V1, apps/3d/palettes.js): made by hand, named by the grid, its colours the grid's.
+const pal = await page.eval(`import('/core/vault-palette.js').then(({ savePalette }) => savePalette({ title: 'magenta and cyan', colours: ['#ff00ff', '#00ffff'] })).then(o => o && o.id)`);
+const tinted = () => page.eval(`(() => { const c = document.getElementById('stage'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let n = 0; for (let i = 0; i < d.length; i += 4) { const [r, g, b] = [d[i], d[i + 1], d[i + 2]];
+    if ((r > g + 60 && b > g + 60) || (g > r + 60 && b > r + 60 && g > 90)) n++; } return n; })()`);
+const tintedBefore = await tinted();
+await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${cardRow(3, 'a palette of the vault')}).params.set('colours', ${JSON.stringify(pal)}))`);
+await page.until(`(() => { const c = document.getElementById('stage'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > d[i + 1] + 60 && d[i + 2] > d[i + 1] + 60) n++; return n > 200; })()`, { timeout: 10000 }).catch(() => {});
+const tintedAfter = await tinted();
+c.ok('…a palette of the vault named: the grid drawn in its colours', !!pal && tintedAfter > tintedBefore + 200, `${tintedBefore} → ${tintedAfter} magenta or cyan`);
 await c.shot('4-bec-grid');
 
 // ── With no WebGPU: three falls back to WebGL2, as on the laptop's Intel ────

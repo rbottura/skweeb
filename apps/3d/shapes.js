@@ -104,6 +104,8 @@ export const SHAPES = {
       faces: { type: 'int', min: 0, max: 3000, default: 6, label: 'faces filled', group: form },
       fill: { type: 'int', min: 0, max: 999999, default: 1, label: 'which faces', group: form },
       palette: { type: 'enum', options: Object.keys(PALETTES), default: 'bec', display: 'chips', label: 'palette', group: 'look' },
+      /** One of the vault's palettes in place of its own three (V1; palettes.js): BEC 2027's, made by hand. */
+      colours: { type: 'object', accepts: ['palette'], label: 'a palette of the vault', group: 'look' },
       hues: { type: 'int', min: 0, max: 999999, default: 1, label: 'colours dealt (C)', group: 'look' },
     },
     geometry: v => gridGeometry(v),

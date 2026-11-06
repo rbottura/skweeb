@@ -30,9 +30,10 @@ sorts them.
   stretched; its player's controls; seen closer — wheel, drag, double click
   (`core/zoom.js`); every viewer's picture fitted with an even margin.
 - **BEC's grid in the 3D app** (M13a, `apps/3d/grid.js`, `docs/bec.md`):
-  BEC_2025's cells, edges and faces in its three palettes, a shape of the
-  catalogue, every draw a seed — R new edges, C new colours, A's pie the
-  faces.
+  BEC_2025's cells, edges and faces in its three palettes — or a palette
+  of the vault — every draw a seed: R new edges, C new colours, A's pie.
+- **A palette, a type** (V1, `core/vault-palette.js`, `docs/workshop.md`):
+  made by hand in the vault panel, *+ palette*; edited as a new one.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -335,12 +336,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**The author tries BEC's grid in the 3D app** — BEC grid in its add menu;
-R, C and A's pie — and answers M13's two questions (`docs/bec.md`): a
-project as data, and the gabarit's fields. Then M13b, BEC's files into the
-vault (`scripts/import-bec.mjs`, its layers by format read in
-`C:\Users\bottu\Documents\code\BEC_2025\img`). S11's version 2 once the
-author has scenarios.
+**M13b — BEC_2025's files into the vault, in a folder `bec_2025`**
+(`docs/bec.md`): `scripts/import-bec.mjs`, its three palettes as palettes
+and its layers by format read in
+`C:\Users\bottu\Documents\code\BEC_2025\img`. Then V3 and V2, groups and
+sets by hand; M13c waits on the gabarit's fields.
 
 ## Parked decisions
 

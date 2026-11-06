@@ -29,6 +29,13 @@ app that is open when nothing else is (`docs/scene.md`, *Planned*).
   pixels, in a canvas no bigger than the picture. Fitted with an even margin
   round it, the rulers' bands aside (theme.css, every app's viewer).
 - **`?open=<id>`** draws that object as the page opens.
+- **A palette, made by hand** (V1, 2026-11-06; `core/vault-palette.js`,
+  `docs/workshop.md`): *+ palette* in the panel's head — its name, its
+  swatches, each a colour and a name, moved, taken out, one added — kept,
+  an object of the vault, its picture their strip; *Edit its colours* in a
+  palette's detail, kept as a new palette, the first its parent. Its origin
+  is the vault app, so a palette reopens here (`rebuild.js`) — the panel's
+  every link asked an app that had none, a 404 in every console.
 - **It makes nothing**: no recipe, no `rebuild.js`, no S; its title bar has
   no Save and no Export (`Bar` with `acts: false`). With no vault it opens
   and says so (rule 7).
