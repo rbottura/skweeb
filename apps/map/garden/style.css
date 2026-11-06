@@ -1,0 +1,27 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — the garden (M14)
+
+   Everything that looks like the suite comes from core. The garden says only
+   its layout: its panels, the garden, the treatment and the flower faced.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../../core/theme.css';
+@import '../../../core/param-panel.css';
+@import '../../../core/cards.css';
+@import '../../../core/stack-panel.css';
+@import '../../../core/vault-panel.css';
+
+.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
+
+/* A click walks the gardener there (main.js). */
+.viewer-stage canvas { cursor: pointer; touch-action: none; image-rendering: auto; }
+
+/* The flower faced, as the treatment would make it, growing (treatment.js). */
+.gd-preview {
+  display: block;
+  max-width: 100%;
+  margin: 8px auto 4px;
+  background: repeating-conic-gradient(var(--nb-check-a) 0 25%, var(--nb-check-b) 0 50%) 0 0 / 10px 10px;
+}
+
+.gd-line { margin: 4px 0 2px; font: 400 11px var(--font-num); color: var(--fg-2); }

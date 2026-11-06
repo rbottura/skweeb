@@ -30,6 +30,15 @@ day before that became bricks done went with them.
 
 ## Sorted
 
+- **2026-11-06 — iterations of flowers: a garden.** A brief of the author's
+  own, `docs/iterations-modifications.md`: "une fleur est une recette
+  d'événements, à laquelle on peut appliquer une série ordonnée de
+  transformations", wanted at once — "je n'ai bientôt plus d'usage de
+  claude pour la semaine … ce système une fois en place me permettra de
+  jouer avec skweeb pendant ce temps". → M14 in `docs/roadmap.md`; M14a,
+  the garden, landed the same day (`apps/map/STATUS.md`); M14b and M14c on
+  the board; the players in cluster, S9i; `docs/decisions.md`, 2026-11-06.
+
 - **2026-11-05 — the planned bricks now; BEC again, as a project.** "je
   pense qu'on peut continuer celles déjà planifiées maintenant"; S11's
   bench "très prometteur mais je n'ai pas encore assez utilisé et de

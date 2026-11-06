@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="garden — a map you garden in: flowers drawn in the gamepad, changed by a chain of modifiers, planted generation after generation.">
+  <title>garden — skweeb</title>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!--
+    The garden is a module (main.js, M14): it builds itself in a host and
+    takes itself out again, so a scene — cluster — can mount it too. Here,
+    alone, its host is this page.
+  -->
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
+</body>
+</html>
