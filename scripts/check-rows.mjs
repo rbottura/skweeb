@@ -88,6 +88,26 @@ await wait(400);
 const hand = await page.eval(`({ shown: getComputedStyle(${row('bleed')}).display !== 'none', focus: document.activeElement === ${row('bleed')}.querySelector('.pp-num') })`);
 c.ok('the search reaches a folded row, and opens its fold', found[0] === 'Format › bleed px' && hand.shown && hand.focus, JSON.stringify({ found: found.slice(0, 2), hand }));
 
+// ── The sliders and boxes the author found stuck in fractals (2026-11-06) ────
+// A slider with `step: 'any'` read its step as NaN, and the param put its default back; a count's slider went by
+// fives; a box dragged went a whole step a pixel. Each moved by hand here, as the panel has it.
+await c.go(c.base + '/apps/fractals/');
+await page.until(`!!${row('cx')} && !!${row('cx')}.querySelector('.pp-range')`, { timeout: 30000 });
+const slide = (key, v) => page.eval(`(() => { const s = ${row(key)}.querySelector('.pp-range'); s.value = String(${v});
+  s.dispatchEvent(new Event('input', { bubbles: true })); return import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row(key)}).params.get('${key}')); })()`);
+c.ok('a slider with no grid moves its value — a fractal\'s centre', (await slide('cx', 1.25)) === 1.25 && (await slide('cx', -2.5)) === -2.5);
+const cx0 = await num('cx');
+const xb = await rectOf(`${row('cx')}.querySelector('.pp-num')`);
+await page.pointer([xb[0] + xb[2] / 2, xb[1] + xb[3] / 2], [xb[0] + xb[2] / 2 + 40, xb[1] + xb[3] / 2], 8);
+await wait(200);
+const cx1 = await num('cx');
+c.ok('…its box dragged moves it too, a little for a little', Number.isFinite(cx1) && cx1 > cx0 && cx1 - cx0 < 2, `${cx0} → ${cx1}`);
+await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row('family')}).params.set('family', 'copies'))`);
+await page.until(`!!${row('depth')} && !${row('depth')}.hidden`, { timeout: 10000 });
+c.ok('a count\'s slider stops at every whole value, not at fives', (await slide('depth', 7.4)) === 7 && (await slide('depth', 8.6)) === 9);
+c.ok('a stepped range\'s slider, five of its steps from its least — a turn of 0.5°, 2.5° a stop', (await slide('twist', 10.3)) === 10
+  && (await slide('twist', 11.4)) === 12.5);
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();
