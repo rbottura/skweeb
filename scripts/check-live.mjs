@@ -39,10 +39,11 @@ await page.until(`!!document.querySelector('.pp-stack-adds .pp-stack-btn')`, { t
 c.ok('particles alone: its drawer says so, nothing stacked yet', (await page.eval(note)) === 'Alone in this browser · nothing stacked yet'
   && JSON.stringify(await page.eval(adds)) === '["＋ this window","＋ from the vault…"]', `${await page.eval(note)} ${JSON.stringify(await page.eval(adds))}`);
 
-// Filter on one of its own objects, so that it has a loop on screen to stack.
+// Filter on one of its own objects, so that it has a loop on screen to stack — the newest that moves: a still
+// filter saved since (the author's "thumb · glitch", 2026-11-06) has no loop to stack.
 const index = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
-const saved = index.filter(o => o.origin && o.origin.app === 'filter' && !(o.tags || []).some(t => t === 'trash' || t === 'leaf'))
-  .sort((a, b) => (b.created || '').localeCompare(a.created || ''))[0];
+const saved = index.filter(o => o.origin && o.origin.app === 'filter' && !(o.tags || []).some(t => t === 'trash' || t === 'leaf')
+  && o.render && o.render.frames > 1).sort((a, b) => (b.created || '').localeCompare(a.created || ''))[0];
 const gpu = await page.eval(`(async () => !!(navigator.gpu && await navigator.gpu.requestAdapter()))()`);
 const shown = !!(saved && gpu);
 const filter = await c.tab(c.base + '/apps/filter/' + (shown ? '?open=' + saved.id : ''));
