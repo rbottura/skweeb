@@ -24,13 +24,10 @@
 
 import { BufferGeometry, Float32BufferAttribute, Color } from '../../core/libs/three/three.core.js';
 import { makeRng } from '../../core/rng.js';
+import { PALETTES } from './bec-palettes.js';
 
 /** BEC's palettes — its identity's colours: the original first, then the two its source kept beside it. */
-export const PALETTES = {
-  bec: ['#0073dc', '#e40514', '#00a773', '#ffd400', '#000000'],
-  mix: ['#1a9eda', '#da214b', '#00a773', '#ffcb04', '#000000'],
-  'grand paris sud': ['#1a9eda', '#da214b', '#21a654', '#ffcb04', '#000000'],
-};
+export { PALETTES };
 
 /** Every edge of an X × Y × Z lattice of cells, in one order: along x, then y, then z, corner by corner. */
 export function edgesOf(nx, ny, nz) {

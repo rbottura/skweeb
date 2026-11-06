@@ -75,7 +75,13 @@ to draw, never code that arrives with it.
    faces, are in the 3D app's pie, A. Still to come: an edge picked in the
    view, on or off, its colour — a list in the recipe, a decision of its
    own; and its edges animated, with the 3D app's motion (P1, P2).
-2. **M13b — BEC's files into the vault** · `bec/import` · S.
+2. **M13b — BEC's files into the vault** · `bec/import` · S · *landed
+   2026-11-06*, and run into the vault: 28 pictures — the layers of four
+   formats as BEC's `assets/urls.json` lists them, and six of its others —
+   and three palettes, 31 objects in `bec_2025`. On another machine's vault:
+   `node scripts/import-bec.mjs <BEC_2025> --vault <its vault>`; run twice,
+   it makes nothing new. Its colour range is a PDF, which the vault has no
+   type for.
    `scripts/import-bec.mjs`: the titles and infos of each format, shapes
    with alpha; BEC's three palettes as palettes (V1, `docs/workshop.md`) —
    all in one folder, `bec_2025`, the author's word of 2026-11-06: "un

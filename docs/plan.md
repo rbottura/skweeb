@@ -50,7 +50,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9g | the scene's vault beside an app: still at a switch, the app's own first, dragged onto a field, a set in its folder | `scene/side-vault` | S | landed 2026-11-05 |
 | S9h | the vault app's viewer: an object at its ink's size, its player's controls, seen closer, an even fit | `scene/vault-viewer` | S | landed 2026-11-05 |
 | M13a | BEC's grid, a primitive of the 3D app: cells, edges, faces, palettes, every draw a seed | `3d/grid` | M | landed 2026-11-05 (`docs/bec.md`) |
-| M13b | BEC's files into the vault, in a folder `bec_2025`: titles and infos by format, its palettes | `bec/import` | S | ready: the author's yes, 2026-11-06 — "un groupe ou dossier de ce nom" |
+| M13b | BEC's files into the vault, in a folder `bec_2025`: titles and infos by format, its palettes | `bec/import` | S | landed 2026-11-06, and run: 31 objects in `bec_2025` |
 | V1 | the palette, a type: made by hand in the vault panel, edited as a new one, BEC's grid drawn in one | `vault/palette` | M | landed 2026-11-06 (`docs/workshop.md`) |
 | V2 | a set by hand: the pictures selected, in their order, a set of a role | `vault/set` | S | after M13b |
 | V3 | groups by hand: the selection into a group, out of it, a group renamed | `vault/groups` | S | after M13b |

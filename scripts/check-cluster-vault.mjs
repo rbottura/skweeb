@@ -38,7 +38,7 @@ await wait(800);
 
 // ── Still through a switch: its stylesheet never gone between two apps' ──────
 await page.eval(`(() => { window.__look = new Set(); let on = true;
-  const probe = document.querySelector('.cl-side .vp-grid--top > .vp-card:not([data-type="set"])').dataset.id;
+  const probe = document.querySelector('.cl-side .vp-grid--top > .vp-card[data-id]:not([data-type="set"])').dataset.id;   // an object's, not a folder's
   const look = () => { const body = document.querySelector('.cl-side .vp-body'), grid = body.querySelector('.vp-grid'),
     r = body.querySelector('.vp-card[data-id="' + probe + '"]').getBoundingClientRect();
     window.__look.add([getComputedStyle(body).paddingLeft, getComputedStyle(grid).gridTemplateColumns, Math.round(r.width), Math.round(r.height)].join(' '));

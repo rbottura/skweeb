@@ -34,6 +34,9 @@ sorts them.
   of the vault — every draw a seed: R new edges, C new colours, A's pie.
 - **A palette, a type** (V1, `core/vault-palette.js`, `docs/workshop.md`):
   made by hand in the vault panel, *+ palette*; edited as a new one.
+- **BEC_2025 in the vault** (M13b, `scripts/import-bec.mjs`): its layers by
+  format, its other pictures and its three palettes, 31 objects in the
+  folder `bec_2025`.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -336,11 +339,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M13b — BEC_2025's files into the vault, in a folder `bec_2025`**
-(`docs/bec.md`): `scripts/import-bec.mjs`, its three palettes as palettes
-and its layers by format read in
-`C:\Users\bottu\Documents\code\BEC_2025\img`. Then V3 and V2, groups and
-sets by hand; M13c waits on the gabarit's fields.
+**V3 — groups by hand** (`docs/workshop.md`): the vault panel's selection
+— Ctrl or Shift click — *into a group…*, a new name or one there is, as
+`folder:<name>` tags; out of one; a group renamed. Then V2, a set by hand.
+M13c, the gabarit, waits on its fields — the author's.
 
 ## Parked decisions
 
