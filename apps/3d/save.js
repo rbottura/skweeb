@@ -41,7 +41,19 @@ export function titleOf(shapes) {
  * @returns {Promise<?object>}   the envelope, or null when there is no vault
  */
 export async function saveModel({ params, shapes, renderer, tick = 0 }) {
-  const recipe = { ...params.values, shapes };
+  return saveRecipe({ ...params.values, shapes }, { renderer, tick, parents: params.consumedObjectIds() });
+}
+
+/**
+ * A recipe of the 3D app's drawn and saved: a `model`, or its loop a `sequence` — the app's S, its project's next
+ * state; or, `state` false, an object of its own, a side of it (sides.js, P6).
+ *
+ * @param {object} recipe
+ * @param {object} o   { renderer, tick, parents, state, title, tags } — `title` and `tags` over what it would say
+ * @returns {Promise<?object>}
+ */
+export async function saveRecipe(recipe, { renderer, tick = 0, parents = [], state = true, title = null, tags = [] }) {
+  const shapes = recipe.shapes || [];
   await readPalettes(recipe);                          // drawn in the vault's palettes its shapes name, as they are seen
   const frames = openModel(recipe, { renderer });
   try {
@@ -52,13 +64,13 @@ export async function saveModel({ params, shapes, renderer, tick = 0 }) {
     const how = loopOf(recipe);               // turning, or its shapes swinging (motion.js, P2)
     return await Vault.save({
       type: loop ? 'sequence' : 'model',
-      state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
-      title: titleOf(shapes) + (loop ? ` · ${how.turns ? 'turning' : 'swinging'} ×${frames.length}` : ''),
-      tags: ['3d', ...kinds, ...(loop ? ['loop', ...(how.turns ? ['turntable'] : []), ...(how.swings ? ['swing'] : [])] : [])],
+      state,                              // S: the project's next state, its smart object's (S6b, core/vault.js)
+      title: title || titleOf(shapes) + (loop ? ` · ${how.turns ? 'turning' : 'swinging'} ×${frames.length}` : ''),
+      tags: ['3d', ...kinds, ...(loop ? ['loop', ...(how.turns ? ['turntable'] : []), ...(how.swings ? ['swing'] : [])] : []), ...tags],
       origin: APP,
       seed: null,
       recipe,
-      parents: [...params.consumedObjectIds(), ...palettesIn(recipe)],   // and the palettes its shapes are drawn in
+      parents: [...parents, ...palettesIn(recipe)],   // and the palettes its shapes are drawn in
       render: { blob, ext: 'png', w: shown.width, h: shown.height,
                 ...(loop ? { frames: frames.length, fps: frames.fps, loop: true } : {}) },
       thumb: await thumbFromBlob(blob),

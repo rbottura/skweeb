@@ -73,7 +73,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L5 | grid takes a window | `layers/grid-takes` | M | landed 2026-11-06 |
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
 | P2 | M10's brick 5: a shape swung | `3d/swing` | M | landed 2026-11-06 |
-| P6 | M10's brick 6: a model from every side | `3d/sides` | S | ready |
+| P6 | M10's brick 6: a model from every side | `3d/sides` | S | landed 2026-11-06 |
 | P7 | a worm's path across the map | `map/paths` | M | ready |
 | P8 | M8's brick 5: baked and published | `map/bake` | L | ready |
 | C3 | fonts licensed in their files | `clean/font-licences` | S | side job; Destra waits on the author |
@@ -354,8 +354,8 @@ lives in the player, never in a recipe (M8's rule).
 back and the side drawn in the gamepad as the front was, named the same by
 the rig, a walk saved for each direction, kept as P3's set.
 
-**P6 — M10's brick 6: a model from every side** · `3d/sides` · S. A model
-drawn from four or eight yaws, a loop each, kept as P3's set.
+**P6 — M10's brick 6: a model from every side** · `3d/sides` · landed
+2026-11-06: four sides, each its own object, and a character of them.
 
 **P7 — a worm's path across the map** · `map/paths` · M. A path drawn on
 the map that a thing follows across the room, so a crawling worm goes

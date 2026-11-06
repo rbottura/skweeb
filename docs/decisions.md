@@ -253,6 +253,12 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**A model's sides are the eye turned round it** (P6). Down is the model as
+it is framed, facing the eye; left the eye a quarter round to its left,
+right the other way, up from behind — four objects of their own, frozen
+acts, no turntable among them — and a character of the four. Eight sides
+wait, as the character's eight directions do.
+
 **A shape swings one of its place keys** (P2). What swings is named by the
 place key it moves — a turn, a move, its size — so the wave needs no table
 of its own, and an old recipe, which names none, stands still. A shape that

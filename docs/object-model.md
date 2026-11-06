@@ -274,7 +274,8 @@ the same rule: eight, or five, the lefts left out. The count is the rule;
 no field says which member is which, so a character a delete cuts a member
 from is read by its new count — made again, it is right. Offered to the
 map by default (`use:character`, *map character*) for its avatar (P4);
-made by hand in the vault panel as a set is, its members loops.
+made by hand in the vault panel as a set is, its members loops — or by
+the 3D app from a model's four sides (P6, `apps/3d/sides.js`).
 
 ## The recipe contract
 
