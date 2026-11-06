@@ -274,6 +274,37 @@ await page.until(`(document.querySelector('.vp-detail--open') || {}).textContent
 c.ok('…its detail opened, where it is switched on where it goes', true);
 await page.until(`import('/core/vault.js').then(({ Vault }) => Vault.refresh().then(() => document.body.textContent.includes(Vault.index.length + ' in vault')))`, { timeout: 10000 });
 c.ok('…and the vault app\'s count with it', true);
+
+// ── A character by hand (P3, core/character.js): three loops — down, right, up — the left the right mirrored ──
+await c.go(c.base + '/apps/vault/');
+await page.until(`document.querySelectorAll('.vp-grid--top > .vp-card[data-id]').length >= 2`, { timeout: 20000 });
+const loops = await page.eval(`import('/core/vault.js').then(({ Vault }) => Vault.refresh().then(() => {
+  const seqs = new Set(Vault.index.filter(r => r.type === 'sequence' && r.render && r.render.file).map(r => r.id));
+  return [...document.querySelectorAll('.vp-card[data-id]')].filter(k => !k.closest('[hidden]') && seqs.has(k.dataset.id)).slice(0, 3).map(k => k.dataset.id); }))`);
+c.ok('three loops in the vault to make a character of', loops.length === 3, loops.join(' '));
+await ctrlClick(loops[0]);
+await ctrlClick(loops[1]);
+await press('A set of these…');
+const startsAs = await page.eval(`document.querySelector('.vp-bar .vp-set-role').value`);
+await named('.vp-bar', 'two loops');
+await page.until(`/a character is/.test(document.querySelector('.vp-bar .vp-bar-say')?.textContent || '')`, { timeout: 5000 });
+c.ok('loops and no pictures: the form starts on a character — and two are none, as it says', startsAs === 'character', startsAs);
+await page.eval(`document.querySelector('.vp-bar .vp-group-name').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+await ctrlClick(loops[2]);
+await press('A set of these…');
+await named('.vp-bar', 'a walker');
+await page.until(`import('/core/vault.js').then(({ Vault }) => Vault.index.some(r => r.type === 'set' && r.title === 'a walker'))`, { timeout: 20000 });
+const walker = await page.eval(`import('/core/vault.js').then(async ({ Vault }) => {
+  const row = Vault.index.find(r => r.type === 'set' && r.title === 'a walker');
+  const { object } = await Vault.load(row.id);
+  const { characterOf } = await import('/core/character.js');
+  const { usesOf } = await import('/core/uses.js');
+  return { members: object.recipe.members, role: object.recipe.role, w: object.render.w, h: object.render.h, ways: characterOf(object), uses: [...usesOf(object)] }; })`);
+c.ok('…three: a character, its loops in the order picked, its sheet one row', walker.role === 'character'
+  && JSON.stringify(walker.members) === JSON.stringify(loops) && walker.w === 3 * 96 && walker.h === 96, JSON.stringify(walker).slice(0, 300));
+c.ok('…down, right, up: its left the right, mirrored — offered to the map', !!walker.ways && walker.ways.left.id === loops[1]
+  && walker.ways.left.mirrored && walker.ways.up.id === loops[2] && walker.uses.join() === 'character', JSON.stringify(walker.ways));
+await c.shot('6-a-character');
 await c.shot('5-a-set');
 
 const noise = c.quiet();

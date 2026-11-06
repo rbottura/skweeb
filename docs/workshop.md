@@ -43,7 +43,9 @@ in one; *its colours* from a picture, still to come.
 ## V2 — a set, by hand
 
 *Landed 2026-11-06* — the bar's *A set of these…*, a name and a role
-(`core/vault-set.js`); made, its detail opens on its switches.
+(`core/vault-set.js`); made, its detail opens on its switches. A
+character's loops too, the same day (P3, `core/character.js`): loops and
+no pictures selected, the form starts on *map character*.
 
 The pictures selected, in the order they were picked: *a set of these* —
 a name and what it is made as, a brush family, a material, sprites, a

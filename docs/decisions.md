@@ -253,6 +253,11 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**A character's count is its rule** (P3). Four members are down, left,
+right, up; three, down, right, up, the left the right mirrored — no field
+beside the members, as the fields were taken on 2026-10-22. A character a
+delete cuts is read by its new count: made again, it is right.
+
 **A turntable turns the model** (P1). The sun turns with the eye by
 default, so every side comes round into the light, as on a turntable under
 a studio's lamps; the eye walked round under the world's sun — the drag's
