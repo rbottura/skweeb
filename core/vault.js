@@ -32,6 +32,8 @@
  * `Vault.index` keeps it, because a set looks its members up there.
  */
 
+import { cycleOf, chainSaid } from './cycles.js';
+
 const API = '/api/vault';
 
 export const TRASH = 'trash';
@@ -192,6 +194,13 @@ export const Vault = {
       thumb: spec.thumb ? { ext: spec.thumb.ext, data: await toBase64(spec.thumb.blob) } : null,
     };
 
+    // A smart object saved again that would come to hold itself is refused before it is sent, the chain named (L3).
+    if (smart && _bound.id) {
+      const row = id => _index.find(r => r.id === id) || {};
+      const chain = cycleOf(_bound.id, body.refs, id => row(id).refs);
+      if (chain) throw new Error('it would hold itself: ' + chainSaid(chain, id => row(id).title));
+    }
+
     let res;
     try {
       const again = smart && _bound.id;
@@ -214,7 +223,7 @@ export const Vault = {
     dispatch(out.status === 'duplicate' ? 'vault:duplicate' : 'vault:saved',
              { id: object.id, type: object.type });
     if (out.status === 'updated') {
-      _index = _index.map(row => (row.id === object.id ? { ...row, version: object.version, render: object.render } : row));
+      _index = _index.map(row => (row.id === object.id ? { ...row, version: object.version, render: object.render, refs: object.refs || [] } : row));
       updated({ id: object.id, version: object.version });
     } else if (out.status !== 'duplicate') {
       _index.unshift(object);

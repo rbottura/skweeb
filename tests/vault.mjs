@@ -369,6 +369,17 @@ try {
   ok('as is a merge with itself', (await put(skw.id, { recipe: bound(1), render: smartPng([0, 0, 0, 255]), parent: 4, parent2: 4 })).code, 400);
   ok('an ordinary object has no states', (await fetch(BASE + '/api/vault/' + o.id + '/states')).status, 409);
 
+  // No page that comes to hold itself (L3): A, B holding A; A saved again holding B — refused, the chain named.
+  const pageA = (await post(sequence({ type: 'skw', title: 'page a', origin: { app: 'compose', version: '1.0.0' },
+    recipe: bound(10), render: smartPng([10, 0, 0, 255]) }))).out.object;
+  const pageB = (await post(sequence({ type: 'skw', title: 'page b', origin: { app: 'compose', version: '1.0.0' },
+    recipe: bound(11), render: smartPng([0, 10, 0, 255]), refs: [pageA.id] }))).out.object;
+  const looped = await put(pageA.id, { recipe: bound(12), render: smartPng([0, 0, 10, 255]), refs: [pageB.id] });
+  ok('A saved again holding B, which holds A: refused, the chain named', [looped.code, looped.out.chain],
+    [409, [pageA.id, pageB.id, pageA.id]]);
+  ok('…and nothing of it written: A still at version 1', (await (await fetch(BASE + '/api/vault/' + pageA.id)).json()).version, 1);
+  ok('holding nothing of itself, it is saved', (await put(pageA.id, { recipe: bound(12), render: smartPng([0, 0, 10, 255]), refs: [] })).code, 200);
+
   // ── Method routing ─────────────────────────────────────────────────────────
   ok('PUT on the collection is refused',
      (await fetch(BASE + '/api/vault', { method: 'PUT' })).status, 405);

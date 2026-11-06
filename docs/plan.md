@@ -67,7 +67,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | landed 2026-11-06 |
 | L11 | a smart object followed wherever it is picked | `layers/follow` | M | landed 2026-11-06 |
 | L1 | pins | `layers/pins` | M | landed 2026-11-06 |
-| L3 | no cycle | `layers/cycles` | S | ready |
+| L3 | no cycle | `layers/cycles` | S | landed 2026-11-06 |
 | L2 | flatten | `layers/flatten` | S | ready |
 | L6 | edit in place | `layers/edit` | S | ready |
 | L5 | grid takes a window | `layers/grid-takes` | M | ready |
@@ -271,10 +271,9 @@ loading it again (`params.following`); a model's picture a sprite.
 project placed at its state; the live stack's too, a smart object's layer
 kept at a state by its row, in its block and in the page it saves.
 
-**L3 — no cycle** · `layers/cycles` · S. `Vault.save` walks the refs and
-refuses a page that would come to hold itself, naming the chain; the server
-refuses it too. *Done when* `tests/smart.mjs` makes A hold B hold A, and
-the save is refused.
+**L3 — no cycle** · `layers/cycles` · landed 2026-11-06: a smart object's
+next state that would come to hold itself refused, the chain named, by
+`Vault.save` and the server alike (`core/cycles.js`).
 
 **L2 — flatten** · `layers/flatten` · S. A smart placement made ordinary:
 drawn at its version, saved as a still or a loop with

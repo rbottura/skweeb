@@ -253,6 +253,11 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**A cycle is refused twice** (L3). A smart object's next state whose refs
+lead back to it is refused by the page before it sends and by the server
+after: the page to say so at once, the server because a page is not the
+only thing that writes. The chain is named, by title where it has one.
+
 **The live stack follows; a row keeps a state** (L1). Compose places a
 project at its state, as the author asked on 2026-11-03 (S6b); the stack is
 the live composition, so a smart object's layer in it follows its states,
