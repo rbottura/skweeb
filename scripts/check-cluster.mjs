@@ -34,7 +34,7 @@ import { startCheck, countHeld } from './check-kit.mjs';
 /** The strip's apps, in its order, and what shows each has booted — as check-mount has them. */
 const APPS = [
   ['vault', 'footer.bar'], ['grid', '.pp-row'], ['ckt', '.pp-row'], ['compose', '.pp-row'], ['filter', '.pp-row'],
-  ['fractals', '.pp-row'], ['particles', '.pp-row'], ['map', '.pp-row'], ['rig', '.pp-row'], ['3d', '.pp-row'],
+  ['fractals', '.pp-row'], ['particles', '.pp-row'], ['map', '.pp-row'], ['garden', '.pp-row'], ['rig', '.pp-row'], ['3d', '.pp-row'],
 ];
 const BOOTED = Object.fromEntries(APPS);
 
@@ -44,10 +44,10 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 const { held, framesAsked } = await countHeld(page);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-/** What is on the page: its grids, title bars, bars, the app named in the title bar, the apps' stylesheets linked. */
+/** What is on the page: its grids, title bars, bars, the app named in the title bar, the apps' stylesheets linked — the garden's the map's page's own. */
 const counts = () => page.eval(`({ app: document.querySelectorAll('.app').length, top: document.querySelectorAll('skw-titlebar').length,
   bar: document.querySelectorAll('footer.bar').length, named: document.querySelector('skw-titlebar')?.getAttribute('app') || null,
-  sheets: [...document.querySelectorAll('link[rel=stylesheet]')].map(l => (l.href.match(/\\/apps\\/([^/]+)\\/style\\.css$/) || [])[1]).filter(Boolean) })`);
+  sheets: [...document.querySelectorAll('link[rel=stylesheet]')].map(l => (l.href.match(/\\/apps\\/(?:[^/]+\\/)?([^/]+)\\/style\\.css$/) || [])[1]).filter(Boolean) })`);
 const marked = () => page.eval(`[...document.querySelectorAll('.cl-app[aria-current="page"]')].map(b => b.dataset.app)`);
 const booted = (name, timeout = 30000) =>
   page.until(`!!document.querySelector('.cl-host > .app ${BOOTED[name]}') && document.querySelector('skw-titlebar')?.getAttribute('app') === '${name}'`, { timeout });
