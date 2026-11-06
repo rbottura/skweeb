@@ -7,6 +7,13 @@ luminance picking a member of an ordered ramp of tiles. Ported from
 `docs/migration.md` for what came across and what did not.
 
 ## Works right now — seen in Chrome
+
+- **Another window as its source, live** (L5, 2026-11-06; `source.js`
+  `fromLayer`, core/following.js; `check-send`): *Send to ▸ grid* in
+  another app's Stack drawer, or `?live=<window id>` — the window's layer
+  dithered as it changes, the player where it was; saved, the window saves
+  itself first, a smart object, and grid names it its source and parent,
+  then follows it again. What it says of it is held on the bar.
 - **Prints at a sheet's size and a dpi** (2026-10-06; core's print panel in
   the Export drawer, `docs/core-export.md`): a dither in tiles, its cells
   worked out once a frame and each window drawn through them
@@ -157,11 +164,8 @@ luminance picking a member of an ordered ramp of tiles. Ported from
   wins over the sort.
 
 ## Next single step
-- **L5 on the board of `docs/plan.md`: grid takes a window** — another app's
-  window as grid's source, followed live as filter follows one
-  (`apps/filter/following.js`), saved as a smart object when grid saves.
-  Until then nothing grid-only: U1 and U2 change grid's column with every
-  app's.
+- Nothing grid-only on the board: U1 and U2 change grid's column with
+  every app's.
 
 ## Parked decisions
 - **No p5 in this app** — and none required by the suite since 2026-09-26

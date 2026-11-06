@@ -190,7 +190,8 @@ for most blends over a light board, not for screen or difference; an exact
 preview would want the layers in a group of their own.
 
 **Send to ▸** (`core/send.js`): what one window has on screen, as another
-app's source — filter's, first. The other app's window, open, is asked to
+app's source — filter's, first, and grid's since L5 (2026-11-06), the two
+following through one module (`core/following.js`). The other app's window, open, is asked to
 take it; with none, one opens beside this, its address naming this window,
 and takes it once it hears it. The taker follows the layer, carried whole
 in its own: filter's recipe holds its source's envelope while it is live,

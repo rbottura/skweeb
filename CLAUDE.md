@@ -155,7 +155,7 @@ node scripts/check-rig.mjs              # M9's rig: bones from strokes, a pose a
 node scripts/check-3d-poster.mjs        # the 120×176 poster at 300 dpi, once: 77 tiles into one streamed PNG, checked whole
 node scripts/check-print.mjs            # every app's print in tiles against its object drawn whole; a gamepad still from its marks; the gamepad's print box; the 3D app's print panel
 node scripts/check-live.mjs             # M11: windows of one browser sharing a stack, each drawing it round its own canvas
-node scripts/check-send.mjs             # M11: Send to ▸ filter — a window opened, following particles; saved, particles first
+node scripts/check-send.mjs             # M11: Send to ▸ filter — a window opened, following particles; saved, particles first; ▸ grid too (L5)
 node scripts/check-smart.mjs            # M11: smart objects — saved, versioned, drawn again wherever they are held
 node scripts/check-follow.mjs           # L11: a model saved again in the 3D app, particles' sprites drawn again in another window; L1, a stack's layer kept at a state; L2, flattened in compose; L6, edited in place
 node scripts/check-page.mjs             # M11 done: the stack saved as a page of smart objects that follows its windows

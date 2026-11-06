@@ -70,7 +70,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L3 | no cycle | `layers/cycles` | S | landed 2026-11-06 |
 | L2 | flatten | `layers/flatten` | S | landed 2026-11-06 |
 | L6 | edit in place | `layers/edit` | S | landed 2026-11-06 |
-| L5 | grid takes a window | `layers/grid-takes` | M | ready |
+| L5 | grid takes a window | `layers/grid-takes` | M | landed 2026-11-06 |
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
 | P2 | M10's brick 5: a shape swung | `3d/swing` | M | ready |
 | P6 | M10's brick 6: a model from every side | `3d/sides` | S | ready |
@@ -288,10 +288,9 @@ detail lists its versions, each with the picture it had (`versions/vN.*`,
 numbered, never scanned — rule 3), and takes one back as the newest
 version, so nothing kept is lost.
 
-**L5 — grid takes a window** · `layers/grid-takes` · M. `TAKERS` in
-`core/send.js` gains grid: a window as grid's source, followed live as
-filter follows one (`apps/filter/following.js` the model), saved as a smart
-object when grid saves.
+**L5 — grid takes a window** · `layers/grid-takes` · landed 2026-11-06:
+*Send to ▸ grid*, a window as grid's source, live; saved, the window first,
+a smart object — the following moved to `core/following.js`.
 
 **L4 — the live view blends as a save does** · `layers/isolation` · S, a
 side job. The stage is a group already (`isolation: isolate`,

@@ -29,10 +29,10 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
   `mount(host)` and `unmount()` — its keys and drops on the scope, its
   clock stopped, its source disposed, its runner's GPU memory let go of,
   never the device, which is the page's; following a window, it stops with
-  the app (`following.js`, core's `listen` and `held`) — `check-mount`.
+  the app (`core/following.js`, core's `listen` and `held`) — `check-mount`.
 
 - **Another window as the source, live** (2026-10-07, M11's brick 4;
-  `following.js`, `core/send.js`; `check-send`). *Send to ▸ filter* in
+  `core/following.js` — filter's, until grid took windows too (L5) — `core/send.js`; `check-send`). *Send to ▸ filter* in
   another app's Stack drawer, or `?live=<window id>`: the source is what
   that window has on screen — its layer, the envelope its save would write —
   drawn again a moment after each change there, so a slider dragged there

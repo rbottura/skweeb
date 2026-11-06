@@ -253,6 +253,12 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**Two takers, one following** (L5). When grid took windows as filter does,
+filter's following moved to core, each app handing it its two ways to open
+a source — a copy would have drifted. A smart source at a new version is
+the following's to draw again, the player kept; the field said again
+(L11) is let be in both apps, so it is drawn once.
+
 **Edited in place, a kept placement follows** (L6). Compose places a
 project at its state, nothing changing unless asked (S6b); *Edit in <app>
 ↗* is the asking — the page is to draw what is made of it — so a placement
