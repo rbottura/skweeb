@@ -38,7 +38,8 @@ ok('eight shapes, in the menu\'s order — BEC\'s grid the last', Object.keys(SH
 ok('each entry says its own id', Object.entries(SHAPES).every(([k, s]) => s.id === k && typeof s.label === 'string'), true);
 ok('every schema declares, as a card will', Object.keys(SHAPES).every(id => !!defineParams('3d:' + id, shapeSchema(id))), true);
 ok('a schema is the form, then place and look', Object.keys(shapeSchema('sphere')),
-   ['radius', 'segments', 'x', 'y', 'z', 'turnX', 'turnY', 'turnZ', 'size', 'sx', 'sy', 'sz', 'colour', 'shading']);
+   ['radius', 'segments', 'x', 'y', 'z', 'turnX', 'turnY', 'turnZ', 'size', 'sx', 'sy', 'sz', 'colour', 'shading',
+    'swingBy', 'swingTurn', 'swingMove', 'swingSize', 'swingCycles', 'swingPhase']);
 ok('a recipe from before the stretches stands as it did: each 1', ['sx', 'sy', 'sz'].map(k => valuesFor(shapeSchema('box'), { size: 2 })[k]), [1, 1, 1]);
 ok('every row is in a card\'s drawer', Object.keys(SHAPES).every(id =>
   Object.values(shapeSchema(id)).every(spec => spec.group in SHAPE_GROUPS)), true);

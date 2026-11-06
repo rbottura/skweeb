@@ -20,12 +20,22 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
    displace by seeded noise, twist, bend, mirror, array.
 4. **A look** — done 2026-10-06: toon shading on a ramp, shadows, an
    outline.
-5. **Motion**: a turntable — done 2026-11-06 (P1) — or a transform swung
-   as the rig swings a bone (P2), every loop closing.
+5. **Motion** — done 2026-11-06: a turntable (P1), and a shape's place
+   swung as the rig swings a bone (P2), every loop closing.
 6. **For the game**: a model drawn from four or eight sides, a set by
    direction, `role: 'character'`.
 
 ## Works now
+
+- **A shape swung** (P2, 2026-11-06; `shapes.js` *Swing*, `motion.js`
+  `swungAt`, `tests/3d-camera.mjs`, `check-3d-turntable`). Each card's Swing
+  drawer: what swings — a turn about an axis, up and down or along x or z,
+  its size — as far either way (degrees, units, a share of its size), its
+  cycles in the loop and its phase, as the rig swings a bone. A shape that
+  swings makes the model a loop, turning or not, and plays it at once; each
+  frame its shapes are placed again, their forms kept. A swinging shape has
+  no handles: one would write the wave's moment into its place. S saves its
+  loop, titled *swinging*.
 
 - **A turntable** (P1, 2026-11-06; `motion.js`, `tests/3d-camera.mjs`,
   `check-3d-turntable`). The Motion drawer's turns — 0 a still, ±1, ±2 — a
@@ -220,10 +230,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**Brick 5's second: a shape swung** (P2, `3d/swing`). A shape's place
-swung on a wave, as the rig swings a bone — a phase a shape, a whole number
-of swings in the turntable's loop so it still closes; then P6, a model from
-every side, once P3 has defined a character.
+**Brick 6: a model from every side** (P6, `3d/sides`): the model drawn from
+four or eight yaws, a loop each — its turntable's, or its swing's — kept as
+a character (`core/character.js`): down, left, right, up, the left the right
+mirrored when it is left out, for the map's avatar to wear.
 
 ## Parked
 

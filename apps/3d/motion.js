@@ -18,29 +18,58 @@
  * the model turns — from the frame's index alone: any frame drawn on its
  * own, as fractals' idles and the rig's loops are. Pure: Node runs it
  * (tests/3d-camera.mjs).
+ *
+ * And a shape swung (P2, 2026-11-06): its place on a wave, as the rig
+ * swings a bone — a turn about an axis, a move along one, its size — as far
+ * either way as it says, a whole number of cycles in the loop and at its
+ * phase, so frame `length` is frame 0 here too. A shape that swings makes
+ * the model a loop, turning or not.
  */
 
 const motion = 'motion';
 const TURNING = { turns: { not: 0 } };
+const RAD = Math.PI / 180;
 
-/** The motion's rows, for the app's schema. */
+/** The motion's rows, for the app's schema: the loop's length and rate are a swung shape's too (P2). */
 export const MOTION_PARAMS = {
   turns:   { type: 'int', min: -2, max: 2, default: 0, label: 'turns a loop', group: motion },
   turning: { type: 'enum', options: ['the model', 'the eye'], default: 'the model', display: 'chips', label: 'what turns', group: motion, when: TURNING },
-  length:  { type: 'int', min: 2, max: 600, default: 72, label: 'loop, frames', group: motion, when: TURNING },
-  fps:     { type: 'int', min: 1, max: 60, default: 24, label: 'fps', group: motion, when: TURNING },
+  length:  { type: 'int', min: 2, max: 600, default: 72, label: 'loop, frames', group: motion },
+  fps:     { type: 'int', min: 1, max: 60, default: 24, label: 'fps', group: motion },
 };
 
+/** Whether a shape swings: on, and its `swingBy` a place key, not `none` (shapes.js). */
+export const swings = shape => !!shape && shape.on !== false && !!shape.params
+  && typeof shape.params.swingBy === 'string' && shape.params.swingBy !== 'none';
+
 /**
- * The loop the values make: its frames and their rate — a still's one frame when nothing turns, and in
- * a recipe saved before the turntable, which has no `turns`.
+ * The loop the values make: its frames and their rate — a still's one frame when nothing turns or
+ * swings, and in a recipe saved before the turntable, which has no `turns`.
  *
- * @returns {{length: number, fps: number, loop: boolean, turns: number}}
+ * @returns {{length: number, fps: number, loop: boolean, turns: number, swings: boolean}}
  */
 export function loopOf(v) {
   const turns = Math.round(Number(v && v.turns) || 0);
-  if (!turns) return { length: 1, fps: 0, loop: false, turns: 0 };
-  return { length: Math.max(2, Math.round(Number(v.length) || 72)), fps: Math.max(1, Number(v.fps) || 24), loop: true, turns };
+  const swung = !!v && Array.isArray(v.shapes) && v.shapes.some(swings);
+  if (!turns && !swung) return { length: 1, fps: 0, loop: false, turns: 0, swings: false };
+  return { length: Math.max(2, Math.round(Number(v.length) || 72)), fps: Math.max(1, Number(v.fps) || 24), loop: true, turns, swings: swung };
+}
+
+/**
+ * A shape at frame `i` of a loop `length` long: its swing's place key moved on its wave — whole cycles, so
+ * frame `length` is frame 0 — or the shape itself, when it does not swing.
+ */
+export function swungAt(shape, i, length) {
+  if (!swings(shape) || !(length > 0)) return shape;
+  const p = shape.params, key = p.swingBy;
+  const cycles = Math.max(1, Math.round(Number(p.swingCycles) || 1));
+  const k = ((cycles * Math.round(Number(i) || 0)) % length + length) % length;
+  const wave = Math.sin((2 * Math.PI * k) / length + (Number(p.swingPhase) || 0) * RAD);
+  const base = Number.isFinite(Number(p[key])) ? Number(p[key]) : key === 'size' ? 1 : 0;
+  const moved = key.startsWith('turn') ? base + (p.swingTurn ?? 20) * wave
+    : key === 'size' ? base * (1 + (p.swingSize ?? 0.15) * wave)
+    : base + (p.swingMove ?? 0.25) * wave;
+  return { ...shape, params: { ...p, [key]: moved } };
 }
 
 /** How far round frame `i` is turned, in degrees: whole steps of the loop, i modulo its length. */
@@ -51,9 +80,11 @@ export function turnedAt(v, i) {
   return (360 * turns * k) / length;
 }
 
-/** The values frame `i` is seen with: the yaw turned on, and the sun with it when the model turns. */
+/** The values frame `i` is seen with: the yaw turned on, the sun with it when the model turns, its shapes swung. */
 export function seenAt(v, i) {
+  const { length, swings: swung } = loopOf(v);
   const by = turnedAt(v, i);
-  if (!by) return v;
-  return { ...v, yaw: v.yaw + by, ...(v.turning === 'the eye' ? {} : { sunYaw: v.sunYaw + by }) };
+  let out = by ? { ...v, yaw: v.yaw + by, ...(v.turning === 'the eye' ? {} : { sunYaw: v.sunYaw + by }) } : v;
+  if (swung) out = { ...out, shapes: v.shapes.map(s => swungAt(s, i, length)) };
+  return out;
 }

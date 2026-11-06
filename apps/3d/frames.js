@@ -7,7 +7,8 @@
  * its values make (camera.js), drawn by the page's one renderer
  * (renderer.js) over the recipe's ground. A model that does not turn is
  * one frame; one that turns, its loop (motion.js) — frame i seen from where
- * the turntable has it, the sun turned with the eye when the model turns.
+ * the turntable has it, the sun turned with the eye when the model turns —
+ * and one whose shapes swing, its loop too, each shape where its wave has it.
  *
  * ── Sizes ──────────────────────────────────────────────────────────────────
  *
@@ -56,10 +57,12 @@ export function openModel(recipe, { renderer, scale = 1 }) {
   const fine = scale > 1 ? sharper(w, h, renderer) : {};
   const model = new Model().update(recipe, fine);
   const motion = loopOf(recipe);
-  // Frame i's values: where the turntable has the eye, the sun with it as the model turns.
+  // Frame i's values: where the turntable has the eye, the sun with it as the model turns — its swung shapes
+  // placed again (P2), their forms kept, so no geometry is made again.
   const at = i => {
     const v = seenAt(recipe, i);
-    if (motion.loop && v.turning !== 'the eye') model.light(v, fine);
+    if (motion.swings) model.update(v, fine);
+    else if (motion.loop && v.turning !== 'the eye') model.light(v, fine);
     return v;
   };
   const outline = outlineOf(recipe) * 0.002;

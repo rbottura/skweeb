@@ -31,8 +31,18 @@ import { gridGeometry, PALETTES } from './grid.js';
 export const SHAPE_GROUPS = {
   form:  { label: 'Form', open: true },
   place: { label: 'Place', open: false },
+  swing: { label: 'Swing', open: false },
   look:  { label: 'Look', open: true },
 };
+
+/**
+ * What can swing in a shape's place (P2, 2026-11-06; motion.js `swungAt`): the place key it moves — a turn
+ * about an axis, a move along one, its size — or nothing.
+ */
+export const SWINGS = ['none', 'turnY', 'turnX', 'turnZ', 'y', 'x', 'z', 'size'];
+const SWING_LABELS = { none: 'nothing', turnY: 'turned about y', turnX: 'turned about x', turnZ: 'turned about z',
+  y: 'up and down', x: 'along x', z: 'along z', size: 'its size' };
+const swinging = { swingBy: { not: 'none' } };
 
 const form = 'form';
 const size = (label, d) => ({ type: 'range', min: 0.01, max: 50, step: 'any', log: true, default: d, label, group: form });
@@ -131,6 +141,16 @@ export const PLACE = {
   colour: { type: 'color', default: '#ffd60a', label: 'colour', group: 'look' },
   /** Smooth reads as round; flat shows the facets the segments make. */
   shading: { type: 'enum', options: ['smooth', 'flat'], default: 'smooth', display: 'chips', label: 'shading', group: 'look' },
+  /** Its place on a wave, as the rig swings a bone (P2): whole cycles in the model's loop, so it closes. */
+  swingBy:     { type: 'enum', options: SWINGS, labels: SWING_LABELS, default: 'none', label: 'what swings', group: 'swing' },
+  swingTurn:   { type: 'range', min: 0, max: 180, step: 0.5, default: 20, label: 'as far, either way', unit: '°', group: 'swing',
+                 when: { swingBy: ['turnY', 'turnX', 'turnZ'] } },
+  swingMove:   { type: 'range', min: 0, max: 20, step: 'any', default: 0.25, label: 'as far, either way', group: 'swing',
+                 when: { swingBy: ['y', 'x', 'z'] } },
+  swingSize:   { type: 'range', min: 0, max: 0.9, step: 0.01, default: 0.15, label: 'as far, a share of its size', group: 'swing',
+                 when: { swingBy: 'size' } },
+  swingCycles: { type: 'int', min: 1, max: 12, default: 1, label: 'cycles a loop', group: 'swing', when: swinging },
+  swingPhase:  { type: 'range', min: -180, max: 180, step: 1, default: 0, label: 'phase', unit: '°', group: 'swing', when: swinging },
 };
 
 /** A shape's whole schema: its form, then its place and look — no colour for one whose colours are its own. */

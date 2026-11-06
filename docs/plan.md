@@ -72,7 +72,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L6 | edit in place | `layers/edit` | S | landed 2026-11-06 |
 | L5 | grid takes a window | `layers/grid-takes` | M | landed 2026-11-06 |
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
-| P2 | M10's brick 5: a shape swung | `3d/swing` | M | ready |
+| P2 | M10's brick 5: a shape swung | `3d/swing` | M | landed 2026-11-06 |
 | P6 | M10's brick 6: a model from every side | `3d/sides` | S | ready |
 | P7 | a worm's path across the map | `map/paths` | M | ready |
 | P8 | M8's brick 5: baked and published | `map/bake` | L | ready |
@@ -332,9 +332,8 @@ model's and its motion, the model its parent, as the rig's loops are; 3 a
 smart object of whichever is on screen. Replayed by `rebuild.js`, played
 in compose. Its player is the player box, U8b's.
 
-**P2 — M10's brick 5: a shape swung** · `3d/swing` · M. A shape's place
-swung on a wave, as the rig swings a bone, a phase a shape, every loop
-closing.
+**P2 — M10's brick 5: a shape swung** · `3d/swing` · landed 2026-11-06: a
+card's *Swing* — a place key on a wave, whole cycles in the model's loop.
 
 **P3 — a character, defined once** · `core/character` · S. The fields the
 author took on 2026-10-22, "on adaptera sûrement plus tard": a `set`,
