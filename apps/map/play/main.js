@@ -27,7 +27,8 @@ import { thingAt, boxOf } from '../things.js';
 import { answers, signOf, latestMap } from './maps.js';
 import { Sign }      from './sign.js';
 import { Avatar }    from './avatar.js';
-import { spawnOf, arrival, pathTo, faceTo, ahead, warpAt, answeringAt as answeringOn } from '../walk.js';
+import { Steering, stride } from '../steering.js';
+import { spawnOf, arrival, pathTo, ahead, warpAt, answeringAt as answeringOn } from '../walk.js';
 import { Vault }     from '../../../core/vault.js';
 import { Playhead }  from '../../../core/playback.js';
 
@@ -48,9 +49,7 @@ const clock = new Playhead({ onShow: () => draw() });
 
 /** Who walks it: where it stands lives here, never in a recipe. */
 const avatar = new Avatar();
-const held = [];          // the ways whose keys are down, the last pressed last
-let queued = null;        // a way pressed since the last frame: a tap of a key is a step, however short
-let padA = false;         // the pad's A as it was, so a press is one
+const steer = new Steering();   // its keys held and tapped, and the pad (../steering.js)
 
 function say(text) {
   note.textContent = text || '';
@@ -151,13 +150,11 @@ canvas.addEventListener('click', e => {
   if (p) return use(p);
   // Anywhere else: walked there by the shortest way, from where its step under way ends.
   const way = pathTo(room.recipe, avatar.bound, { col: Math.floor(pt.x / room.m.tile), row: Math.floor(pt.y / room.m.tile) });
-  if (way) { avatar.path = way; queued = null; }
+  if (way) { avatar.path = way; steer.queued = null; }
 });
 
 // ── The avatar's keys, its pad, its steps ───────────────────────────────────
 
-/** By where the key is, not what it prints: ZQSD on an AZERTY keyboard is WASD's place. */
-const WAYS = { KeyW: 'up', ArrowUp: 'up', KeyS: 'down', ArrowDown: 'down', KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right' };
 const USE = new Set(['KeyE', 'Enter', 'Space']);
 
 document.addEventListener('keydown', e => {
@@ -165,22 +162,16 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape' || USE.has(e.code)) { e.preventDefault(); sign.close(); }
     return;
   }
-  const way = WAYS[e.code];
-  if (way) {
+  if (steer.press(e)) {
     e.preventDefault();
-    if (!held.includes(way)) held.push(way);
-    if (!e.repeat) queued = way;
     avatar.path = [];
   } else if (USE.has(e.code) && !e.repeat) {
     e.preventDefault();
     useAhead();
   }
 });
-document.addEventListener('keyup', e => {
-  const i = held.indexOf(WAYS[e.code]);
-  if (i >= 0) held.splice(i, 1);
-});
-window.addEventListener('blur', () => { held.length = 0; });
+document.addEventListener('keyup', e => steer.release(e));
+window.addEventListener('blur', () => { steer.held.length = 0; });
 
 /** E: what the avatar faces, used — a sign read, a warp gone through. */
 function useAhead() {
@@ -191,48 +182,22 @@ function useAhead() {
   else if (b && b.event === 'warp') go(b.to);
 }
 
-/** The first pad there is: its cross or its stick as a way, its A pressed now and not before. */
-function readPad() {
-  const pad = navigator.getGamepads ? [...navigator.getGamepads()].find(Boolean) : null;
-  if (!pad) return { way: null, use: false };
-  const down = i => !!(pad.buttons[i] && pad.buttons[i].pressed);
-  const a = down(0), use = a && !padA;
-  padA = a;
-  const [x = 0, y = 0] = pad.axes;
-  const way = down(12) ? 'up' : down(13) ? 'down' : down(14) ? 'left' : down(15) ? 'right'
-    : Math.max(Math.abs(x), Math.abs(y)) < 0.5 ? null : Math.abs(x) > Math.abs(y) ? (x < 0 ? 'left' : 'right') : (y < 0 ? 'up' : 'down');
-  return { way, use };
-}
-
-/** Every frame: the step under way moved on, a warp stepped onto gone through, the next step taken. */
+/** Every frame: the step under way moved on, a warp stepped onto gone through, the next step taken (../steering.js). */
 function walk(now) {
   requestAnimationFrame(walk);
-  const pad = readPad();
+  const pad = steer.pad();
   if (!room) return;
   if (sign.isOpen) { if (pad.use) sign.close(); return; }
   if (pad.use) useAhead();
-  const was = avatar.face;
-  const arrived = avatar.advance(now);
-  const warp = arrived && warpAt(room.recipe, arrived.col, arrived.row);
-  if (warp) {
+  const step = stride(avatar, room.recipe, now, () => steer.next(pad.way), cell => {
+    const warp = warpAt(room.recipe, cell.col, cell.row);
+    if (!warp) return false;
     avatar.stand();
-    held.length = 0;
-    queued = null;
-    return void go(warp.to);
-  }
-  if (!avatar.walking) {
-    const way = queued || held[held.length - 1] || pad.way;
-    queued = null;
-    let stepped = false;
-    if (way) stepped = avatar.go(way, room.recipe, now);
-    else if (avatar.path.length) {
-      stepped = avatar.go(faceTo(avatar.at, avatar.path[0]), room.recipe, now);
-      if (stepped) avatar.path.shift();
-      else avatar.path = [];
-    }
-    if (!stepped) avatar.stand();
-  }
-  if (avatar.walking || arrived || avatar.face !== was) paint();
+    steer.clear();
+    go(warp.to);
+    return true;
+  });
+  if (step.moved && !step.stopped) paint();
 }
 requestAnimationFrame(walk);
 window.addEventListener('popstate', e => openFromUrl((e.state && e.state.from) || null));
