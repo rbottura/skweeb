@@ -12,18 +12,14 @@ sorts them.
 
 ### Newest — 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop
 
-- **cluster** (`apps/cluster/`, `apps/cluster/STATUS.md`): the suite's apps
-  in one page one at a time, through their modules, laid as the bench is —
-  a strip of apps, the side, the viewer in one place to the pixel for every
-  app, the properties one panel, the app's panels a tab each (S9d). At a
-  switch its boxes hold still and what is in them goes and comes, the last
-  frame held and moved onto the next (S9e's first pass). The side's views:
-  the vault — the app's own objects first, a card dragged onto any app's
-  object field (`core/vault-drag.js`), a set in its folder (S9g) — the keys,
-  the history (S9f). The app in the address, `#particles`; mounted again it
-  comes back as it was left (`core/mount.js` `keep`); the links between
-  apps mount theirs in place (`core/reopen.js` `follow`) — `check-cluster`,
-  `check-cluster-vault`. particles' and compose's ways out are a `leaving.js`.
+- **cluster** (`apps/cluster/STATUS.md`): the apps in one page one at a
+  time, through their modules, laid as the bench is — a strip, the side,
+  the viewer in one place, the properties one panel, the app's panels a tab
+  each (S9d); at a switch its boxes still, what is in them going and coming
+  (S9e's first pass). The side's views: the vault — the app's own first, a
+  card dragged onto an object field (`core/vault-drag.js`), a set in its
+  folder (S9g) — the keys, the history (S9f). The app in the address; back
+  as it was left (`core/mount.js` `keep`); links mounted in place.
 - **The vault app's viewer** (S9h): an object at its ink's size, never
   stretched; its player's controls; seen closer — wheel, drag, double click
   (`core/zoom.js`); every viewer's picture fitted with an even margin.
