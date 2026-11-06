@@ -157,7 +157,7 @@ node scripts/check-print.mjs            # every app's print in tiles against its
 node scripts/check-live.mjs             # M11: windows of one browser sharing a stack, each drawing it round its own canvas
 node scripts/check-send.mjs             # M11: Send to ▸ filter — a window opened, following particles; saved, particles first
 node scripts/check-smart.mjs            # M11: smart objects — saved, versioned, drawn again wherever they are held
-node scripts/check-follow.mjs           # L11: a model saved again in the 3D app, particles' sprites drawn again in another window; L1, a stack's layer kept at a state; L2, flattened in compose
+node scripts/check-follow.mjs           # L11: a model saved again in the 3D app, particles' sprites drawn again in another window; L1, a stack's layer kept at a state; L2, flattened in compose; L6, edited in place
 node scripts/check-page.mjs             # M11 done: the stack saved as a page of smart objects that follows its windows
 node scripts/check-palette.mjs          # S5: ² or Ctrl K, every control and act of the page by name; Enter takes it
 node scripts/check-guides.mjs           # S8: rulers, guides out of them and back, the magnet, F placing the handle pressed

@@ -62,7 +62,10 @@ JavaScript to someone else's browser.
   state — its block, and the page the stack saves, carry it (L1). And
   compose's *Flatten* makes a smart placement ordinary (L2,
   `apps/compose/flatten.js`): its state saved as an object of its own kind,
-  `parents: ["skw_…@vN"]` and no refs, the placement pointing at it.
+  `parents: ["skw_…@vN"]` and no refs, the placement pointing at it. Its
+  *Edit in <app> ↗* — and the stack row's ✎ — opens its app on it, bound,
+  Photoshop's double click (L6): a placement kept at a state follows then,
+  and what is saved there is drawn on the page.
 - `overrides` — per-placement param values, so two placements of one definition
   can differ. Free, because params are data.
 - `at` — **when**, in frames, measured from the composition's own start.

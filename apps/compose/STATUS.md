@@ -7,6 +7,10 @@ done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome
 
+- **Edit in <app> ↗** (L6, 2026-11-06; `check-follow`): the chosen smart
+  placement's app opened on it, bound — its next save its next state, drawn
+  here; kept at a state, the placement follows from then on. A change of
+  state, kept or following, opens a placement again (`placements.js`).
 - **Flatten** (L2, 2026-11-06; `flatten.js`, `check-follow`): the chosen
   smart placement made ordinary — the state it is placed at saved as an
   object of its own kind, its recipe and picture of then, `parents:

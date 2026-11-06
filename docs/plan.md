@@ -69,7 +69,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L1 | pins | `layers/pins` | M | landed 2026-11-06 |
 | L3 | no cycle | `layers/cycles` | S | landed 2026-11-06 |
 | L2 | flatten | `layers/flatten` | S | landed 2026-11-06 |
-| L6 | edit in place | `layers/edit` | S | ready |
+| L6 | edit in place | `layers/edit` | S | landed 2026-11-06 |
 | L5 | grid takes a window | `layers/grid-takes` | M | ready |
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
 | P2 | M10's brick 5: a shape swung | `3d/swing` | M | ready |
@@ -279,10 +279,9 @@ next state that would come to hold itself refused, the chain named, by
 a smart placement saved as an object of its own at its state, `parents:
 ["skw_…@vN"]`, no refs; the kin and the delete read `@vN`.
 
-**L6 — edit in place** · `layers/edit` · S. A smart placement offers *Edit
-in <app> ↗*, in compose's placed panel and a row of the stack: its app
-opened on `?open=skw_…`, the window bound, so its next save is the next
-version and every page holding it follows — Photoshop's double-click.
+**L6 — edit in place** · `layers/edit` · landed 2026-11-06: compose's
+*Edit in <app> ↗* and the stack row's ✎ — its app opened on it, bound; a
+placement kept at a state follows from then on.
 
 **L7 — versions in the vault** · `layers/versions` · S. A smart object's
 detail lists its versions, each with the picture it had (`versions/vN.*`,
