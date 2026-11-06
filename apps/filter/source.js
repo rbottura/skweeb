@@ -90,7 +90,7 @@ export async function fromVault(id, { draft = true, scale = 1, depth } = {}) {
 }
 
 /**
- * Another window's layer, live (following.js; core/live.js): what it has on
+ * Another window's layer, live (core/following.js; core/live.js): what it has on
  * screen, the envelope its save would write. No id until that window saves
  * it; `layer` is kept, for filter's own layer to carry (main.js).
  *

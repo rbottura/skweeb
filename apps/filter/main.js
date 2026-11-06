@@ -17,8 +17,8 @@
 
 import { filterParams, GROUPS } from './params.js';
 import { Chain }                from './chain.js';
-import { fromVault, fromFile }  from './source.js';
-import { followWindows }        from './following.js';
+import { fromVault, fromFile, fromLayer } from './source.js';
+import { followWindows }        from '../../core/following.js';
 import { save as saveObject, saveLook, APP } from './save.js';
 import { PrintPanel }           from '../../core/PrintPanel.js';
 import { exportBox }      from '../../core/boxes/export.js';
@@ -61,7 +61,7 @@ async function start(host, mine) {
   ctx = canvas.getContext('2d');
   buttons = {};
   params = panel = bar = transport = chain = null;
-  // A window followed as the source (following.js); core/gpu's runner, null with no WebGPU; source.js's handle.
+  // A window followed as the source (core/following.js); core/gpu's runner, null with no WebGPU; source.js's handle.
   followed = runner = source = null;
   failing = '';            // why the chain does not compile, until it does
   asked = 0;               // the latest source asked for; an older answer is dropped
@@ -161,7 +161,7 @@ function buildDrawers() {
   // A window of the stack (core/live.js): what is on screen, as its print has it.
   const stacked = stackDrawer(panel, { app: 'filter', layer: () => printing.object(), clock,
     save: () => save(), take: id => followed && followed.take(id) });
-  followed = followWindows({ live: stacked.live, params, setSource, source: () => source, say: t => bar.say(t) });
+  followed = followWindows({ live: stacked.live, params, setSource, source: () => source, say: t => bar.say(t), fromVault, fromLayer });
   showLoopControls();
 }
 
@@ -184,6 +184,8 @@ function button(label, onClick, primary = false) {
 }
 
 async function onParamChange(key, value) {
+  // A smart source at its new version is core/following.js's to draw again, the player where it was (L11).
+  if (key === 'source' && params.following) return;
   if (key === 'source' && value && followed) followed.stop();
   if (key === 'source') await loadSource(value);
   if (key === 'edges' || key === 'seed') draw();

@@ -67,6 +67,19 @@ export async function fromVault(id, opts = {}) {
   return stillHandle(await createImageBitmap(blob), id);
 }
 
+/**
+ * Another window's layer, live (core/following.js; L5, 2026-11-06): what it
+ * has on screen, the envelope its save would write, rebuilt as a sequence is
+ * — a still among them, one frame long. No id until that window saves it;
+ * `layer` kept beside it, as filter keeps one.
+ *
+ * @param {object} layer          an envelope, never saved
+ * @param {{title?: string}} [o]
+ */
+export async function fromLayer(layer, { title = 'a window' } = {}) {
+  return { ...(await sequenceHandle(layer, null, { draft: true })), title, layer };
+}
+
 // ── The two handles ──────────────────────────────────────────────────────────
 
 function stillHandle(bitmap, id) {

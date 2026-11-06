@@ -25,7 +25,8 @@ import { rampUsage }               from './map.js';
 import { manifest, ramp, materialTiles } from './materials.js';
 import { Maker }                   from './maker.js';
 import { Growth }                  from './growth.js';
-import { fromFile, fromVault }     from './source.js';
+import { fromFile, fromVault, fromLayer } from './source.js';
+import { followWindows }           from '../../core/following.js';
 import { saveStill, saveSequence, APP } from './save.js';
 import { PrintPanel }              from '../../core/PrintPanel.js';
 import { exportBox }      from '../../core/boxes/export.js';
@@ -66,6 +67,7 @@ const mounted = () => !!app.scope;
 // One app mounted at a time: its state, made again by each mount (`start`).
 let root, canvas, ctx, buttons, clock, params, panel, bar, transport, printing, maker, labelMake;
 let tiles, tilesName, previewTiles, source, growth, preview, last, busy, pending;
+let followed;            // a window followed as the source (core/following.js, L5)
 
 async function start(at, mine) {
   root = at;
@@ -78,6 +80,7 @@ async function start(at, mine) {
   tilesName = '';          // what they are called, for a save's title
   previewTiles = null;     // the maker's tray, while it is open
   source = null;           // a handle from source.js — still or sequence
+  followed = null;
   growth = null;           // its frames mapped, cached, and grown (growth.js)
   preview = null;          // the canvas the preview dithers into, reused frame to frame
   last = null;             // the most recent render, for saving
@@ -208,7 +211,11 @@ function buildDrawers() {
       const v = params.values, f = resolveFrame(v, source.content, source), z = Math.max(0.01, v.scale || 1);
       return { type: 'still', origin: APP, recipe: v, render: { w: Math.max(1, Math.round(f.width * z)), h: Math.max(1, Math.round(f.height * z)) } };
     } });
-  stackDrawer(panel, { app: 'grid', layer: () => printing.object(), clock, save: () => save() });     // a window of the stack (core/live.js)
+  // A window of the stack (core/live.js) — and since L5 a taker of another window as its source, live.
+  const stacked = stackDrawer(panel, { app: 'grid', layer: () => printing.object(), clock, save: () => save(),
+    take: id => followed && followed.take(id) });
+  // What it says are events — a window taken, its source changed — held on the bar: grid's paint says its cells every frame.
+  followed = followWindows({ live: stacked.live, params, setSource, source: () => source, say: t => bar.announce(t), fromVault, fromLayer });
 
   showLoopControls();
 }
@@ -234,6 +241,9 @@ async function onParamChange(key, value) {
   if (key === 'material') labelMake();
   if (key === 'ramp' || key === 'material') await loadTiles();
   if (key === 'background' && maker) maker.setGround();
+  // A smart source at its new version is core/following.js's to draw again, the player where it was (L11, L5).
+  if (key === 'source' && params.following) return;
+  if (key === 'source' && value && followed) followed.stop();
   if (key === 'source') await loadSource(value);
 
   applyFrameEdit(params, key, source && source.content);
@@ -266,16 +276,19 @@ async function loadTiles() {
 }
 
 /** Replace whatever is being dithered, disposing what was there. */
-function setSource(next) {
+/** A new source; the same loop again — a window followed, changed — keeps the player where it was (L5). */
+function setSource(next, { keep = false } = {}) {
+  const same = keep && source && next && source.frames === next.frames && source.fps === next.fps;
   if (source) source.dispose();
   source = next;
   growth = next ? new Growth(next, { draft: true }) : null;   // the preview never reads back
-  clock.configure({
+  if (!same) clock.configure({
     length: next ? next.frames : 0,
     fps: next ? next.fps : 0,
     loop: next ? next.loop : true,
   });
   showLoopControls();
+  draw();
 }
 
 /** A vault object. Where a sequence is rebuilt from its recipe — the slow part of choosing one. */
@@ -367,6 +380,12 @@ async function save({ keepFrames = false } = {}) {
   if (busy) return;
   if (!source || !last) return bar.announce('nothing to save yet');
   if (maker && maker.isOpen) return bar.announce('save the material first, or close the maker — the dither on screen is the tray');
+  let again = null;        // a window followed: it saves itself first, a smart object, and is followed again after (L5)
+  try {
+    again = await followed.saveSourceFirst();
+  } catch (err) {
+    return bar.announce('save failed: ' + err.message);
+  }
 
   clock.pause();
   busy = true;
@@ -393,6 +412,7 @@ async function save({ keepFrames = false } = {}) {
   } finally {
     busy = false;
     refreshVaultState();
+    if (again) followed.take(again);
   }
 }
 
