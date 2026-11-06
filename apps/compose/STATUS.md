@@ -7,6 +7,12 @@ done** (2026-09-24).
 
 ## Works now — all of it seen running in Chrome
 
+- **Flatten** (L2, 2026-11-06; `flatten.js`, `check-follow`): the chosen
+  smart placement made ordinary — the state it is placed at saved as an
+  object of its own kind, its recipe and picture of then, `parents:
+  ["skw_…@vN"]` and no refs; the placement points at it. Flattened again,
+  the vault hands the first back.
+
 - **A module** (S9a, 2026-11-04; `main.js` on core's `mount.js`):
   `mount(host)` and `unmount()` — its keys and observer on the scope, its
   clock stopped; `placements.js` hears `vault:updated` through core's

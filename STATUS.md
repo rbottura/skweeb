@@ -106,7 +106,7 @@ sorts them.
   every object field holding it, in any app (L11, 2026-11-06).
 - **The stack saved as a page** (`core/stackSave.js`): every window a smart
   object, the page compose's, whose placements blend. Pins in compose and
-  the stack (L1), no page that holds itself (L3); flatten, overrides are L.
+  the stack (L1), no page holding itself (L3), compose's *Flatten* (L2).
 
 ### M10 — 3D (`apps/3d/STATUS.md`, four bricks of six and a turntable)
 
@@ -296,7 +296,8 @@ compares two pages' canvases measures, never demands the pixel.
 - **Two checks are intermittent under the load of checks run together**,
   green alone, which the runner tries before saying red: check-compose's
   "a typed transform lands where page.js says", and check-rig's "a swing,
-  and the loop plays by itself" — 0 values moved, twice on 2026-11-06.
+  and the loop plays by itself" — 0 values moved, twice on 2026-11-06;
+  check-puppet and check-live hung once each that day, taken down at 8:00.
   check-map's press, which found the vault panel still fading out over the
   map, waits for the map to be under the pointer since 2026-11-06.
 - **A blur's taps stop at 512 a side**; past that it wants a smaller picture.
@@ -341,11 +342,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L2 — flatten** (`docs/plan.md`, *L*): a smart placement made ordinary —
-drawn at its version, saved as a still or a loop with `parents:
-["skw_…@vN"]` and no refs, the placement pointing at it; the vault's kin
-and its delete learn that a parent may carry `@vN`. M13c, the gabarit,
-waits on its fields — the author's.
+**L6 — edit in place** (`docs/plan.md`, *L*): a smart placement offers
+*Edit in <app> ↗* in compose's placed panel and a row of the stack — its
+app opened on `?open=skw_…`, the window bound, so its next save is the next
+version and every page holding it follows. M13c, the gabarit, waits on
+its fields — the author's.
 
 ## Parked decisions
 

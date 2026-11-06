@@ -59,7 +59,7 @@ gallery/                      ← in git, deployed
 | `origin.version` | the app version that wrote the recipe. An old recipe in a newer app is a migration, not a crash. |
 | `recipe` | app-specific, JSON-serializable, complete. Anything not in here is lost. |
 | `seed` | the integer every `rng()` in that render was drawn from. No seed, no re-render. `null` is correct only when the render used no randomness at all — true of the gamepad, which draws exactly what you drew. |
-| `parents` | **made from.** Historical, frozen, for lineage. |
+| `parents` | **made from.** Historical, frozen, for lineage. A parent may name a smart object's state, `skw_…@v3` — a flattened placement's (L2): it is that object's, at that state. |
 | `refs` | **depends on.** Live, for invalidation. See *Smart objects*. |
 | `version` | `skw` only: the state it is at, 1 when made, the next number at each save (server/versions.js). |
 | `parent` | `skw` only, from version 2: the state this one was saved from — the one before it, or an older one for a **branch**. Agreed 2026-11-03 (S6). A state kept before then has none and reads as the line it was: N's parent is N − 1. |
