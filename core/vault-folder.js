@@ -16,6 +16,8 @@
  * author, 2026-11-05: "trop petits et redondants avec les folders".
  */
 
+import { nameForm } from './vault-name.js';
+
 /** The folder a row is filed in, from its `folder:` tag, or null. */
 export const folderOf = row => {
   const tag = (row.tags || []).find(t => typeof t === 'string' && t.startsWith('folder:'));
@@ -80,9 +82,10 @@ const icon = () => {
  * @param {(open:boolean)=>void} f.onToggle     so the panel can reopen it on repaint
  * @param {(e:MouseEvent)=>boolean} [f.select]  takes a click first: true when it
  *   was a selection (a ctrl-click), which then does not open the folder
+ * @param {?(name: string) => void} [f.rename]   the group renamed from its strip (V3); none in a picker
  * @returns {[Element, Element]} the card and its strip, to go into the grid in that order
  */
-export function folder({ name, rows, open, thumb, card, onToggle, select }) {
+export function folder({ name, rows, open, thumb, card, onToggle, select, rename = null }) {
   const sets = rows.filter(r => r.type === 'set');
   rows = [...sets, ...rows.filter(r => r.type !== 'set')];   // a set filed with its members leads them
   const tile = el('button', 'vp-card vp-fcard');
@@ -114,15 +117,28 @@ export function folder({ name, rows, open, thumb, card, onToggle, select }) {
   strip.hidden = true;
   let filled = false;
   const fill = () => {
-    const head = el('button', 'vp-fstrip-head');
-    head.type = 'button';
-    head.title = 'Close this folder';
-    head.append(icon(), el('span', 'vp-fstrip-name', name),
-      el('span', 'vp-fstrip-count', rows.length + ''), el('span', 'vp-fstrip-x', '✕'));
-    head.addEventListener('click', () => set(false));
+    const top = el('div', 'vp-fstrip-top');
+    const paintTop = () => {
+      const head = el('button', 'vp-fstrip-head');
+      head.type = 'button';
+      head.title = 'Close this folder';
+      head.append(icon(), el('span', 'vp-fstrip-name', name),
+        el('span', 'vp-fstrip-count', rows.length + ''), el('span', 'vp-fstrip-x', '✕'));
+      head.addEventListener('click', () => set(false));
+      top.replaceChildren(head);
+      if (rename) {
+        const again = el('button', 'vp-btn vp-fstrip-rename', 'rename');
+        again.type = 'button';
+        again.title = 'Rename this group — every object in it with it';
+        again.addEventListener('click', () => nameForm(top, { label: 'the group renamed', value: name, act: 'Rename',
+          onName: to => rename(to), onCancel: paintTop }));
+        top.append(again);
+      }
+    };
+    paintTop();
     const grid = el('div', 'vp-grid');
     for (const row of rows) grid.append(card(row));
-    strip.append(head, grid);
+    strip.append(top, grid);
     filled = true;
   };
 

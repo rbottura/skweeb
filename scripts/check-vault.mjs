@@ -221,6 +221,34 @@ c.ok('…its colours edited: a new palette, the first its parent and as it was',
   && (edited.parents || []).includes(first.id) && (await (await fetch(c.base + '/api/vault/' + first.id)).json()).recipe.colours[1] === '#7a7a7a',
   JSON.stringify(edited && { colours: edited.recipe.colours, parents: edited.parents }));
 
+// ── Groups by hand (V3, core/vault-groups.js): selected into one, renamed, one out ──
+await c.go(c.base + '/apps/vault/');
+await page.until(`document.querySelectorAll('.vp-grid--top > .vp-card[data-id]').length >= 2`, { timeout: 20000 });
+const two = await page.eval(`[...document.querySelectorAll('.vp-grid--top > .vp-card[data-id]')].slice(0, 2).map(k => k.dataset.id)`);
+const ctrlClick = id => page.eval(`document.querySelector('.vp-card[data-id="${id}"]').dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }))`);
+const press = text => page.eval(`[...document.querySelectorAll('.vp-bar .vp-btn')].find(b => b.textContent === ${JSON.stringify(text)}).click()`);
+const named = (where, name) => page.eval(`(() => { const f = document.querySelector('${where} .vp-group-name'); f.value = ${JSON.stringify(name)};
+  f.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); })()`);
+const tagsOf = async id => ((await (await fetch(c.base + '/api/vault/' + id)).json()).tags || []);
+for (const id of two) await ctrlClick(id);
+await page.until(`/2 objects selected/.test(document.querySelector('.vp-bar')?.textContent || '')`, { timeout: 5000 });
+await press('Into a group…');
+await named('.vp-bar', 'a group of two');
+await page.until(`!!document.querySelector('.vp-fcard[data-folder="a group of two"]')`, { timeout: 10000 });
+c.ok('two selected, into a group: a folder of them, by the name given', (await Promise.all(two.map(tagsOf))).every(t => t.includes('folder:a group of two')));
+await page.until(`!!document.querySelector('.vp-fstrip:not([hidden]) .vp-fstrip-rename')`, { timeout: 5000 });
+await page.eval(`document.querySelector('.vp-fstrip:not([hidden]) .vp-fstrip-rename').click()`);
+await named('.vp-fstrip:not([hidden])', 'two, renamed');
+await page.until(`!!document.querySelector('.vp-fcard[data-folder="two, renamed"]') && !document.querySelector('.vp-fcard[data-folder="a group of two"]')`, { timeout: 10000 });
+c.ok('…renamed from its strip, every member with it', (await Promise.all(two.map(tagsOf))).every(t => t.includes('folder:two, renamed') && !t.includes('folder:a group of two')));
+await page.until(`!!document.querySelector('.vp-fstrip:not([hidden]) .vp-card[data-id="${two[0]}"]')`, { timeout: 5000 });
+await ctrlClick(two[0]);
+await press('Into a group…');
+await press('Out of their group');
+await page.until(`fetch('/api/vault/${two[0]}').then(r => r.json()).then(o => !(o.tags || []).some(t => t.startsWith('folder:')))`, { timeout: 10000 });
+c.ok('…one out of its group: loose again, the other still in it', (await tagsOf(two[1])).includes('folder:two, renamed'));
+await c.shot('4-groups');
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();

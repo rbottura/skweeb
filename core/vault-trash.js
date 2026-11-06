@@ -37,7 +37,7 @@ const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
  * @param {number} s.selected
  * @param {boolean} s.inTrash    the panel is showing the trash
  * @param {number} s.shown       objects on screen, for "select all"
- * @param {(action:'trash'|'restore'|'delete'|'all'|'none')=>void} s.act
+ * @param {(action:'trash'|'restore'|'delete'|'all'|'none'|'group')=>void} s.act
  */
 export function paintBar(bar, { selected, inTrash, shown, act }) {
   bar.replaceChildren();
@@ -54,7 +54,8 @@ export function paintBar(bar, { selected, inTrash, shown, act }) {
       bar.append(button('Restore', '', () => act('restore')),
         button('Delete for good…', 'vp-btn--danger', () => act('delete')));
     } else {
-      bar.append(button('Move to trash', 'vp-btn--primary', () => act('trash')));
+      bar.append(button('Into a group…', '', () => act('group')),     // V3, vault-groups.js
+        button('Move to trash', 'vp-btn--primary', () => act('trash')));
     }
     bar.append(button('Clear', '', () => act('none')));
   } else if (shown) {

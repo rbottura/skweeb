@@ -41,6 +41,8 @@ import { wireImport } from './vault-import.js';
 import { bag, held } from './scope.js';
 import { flip } from './flip.js';
 import { paletteEditor } from './vault-palette.js';
+import { groupsIn, fileIn } from './vault-groups.js';
+import { nameForm } from './vault-name.js';
 import { takes } from './vault-drag.js';
 
 const el = (tag, cls, text) => {
@@ -316,6 +318,8 @@ export class VaultPanel {
       card: row => this._cardFor(row),
       onToggle: on => on ? this._openFolders.add(name) : this._openFolders.delete(name),
       select: e => this._modClick(e, ids),
+      // A group renamed from its strip: the members its tag holds, the new name theirs (V3).
+      rename: this._onPick ? null : to => this._regroup(rows.filter(r => folderOf(r) === name).map(r => r.id), to),
     });
     this._tiles.push([tile, ids]);
     return [tile, strip];
@@ -352,8 +356,25 @@ export class VaultPanel {
     paintBar(this._bar, {
       selected: this._selected.size, inTrash: this._inTrash, shown: this._shown.length,
       act: a => a === 'all' ? this._select(this._shown.map(r => r.id))
-        : a === 'none' ? this._select(null) : this._bin(a, [...this._selected]),
+        : a === 'none' ? this._select(null) : a === 'group' ? this._groupForm() : this._bin(a, [...this._selected]),
     });
+  }
+
+  /** The selection into a group, a new one or one there is, or out of the one it is in (V3, vault-groups.js). */
+  _groupForm() {
+    const ids = [...this._selected];
+    const grouped = ids.some(id => folderOf(Vault.index.find(r => r.id === id) || {}));
+    nameForm(this._bar, { label: `${ids.length} into a group`, offer: groupsIn(Vault.index), act: 'File them',
+      onName: name => this._regroup(ids, name), onOut: grouped ? () => this._regroup(ids, null) : null, onCancel: () => this._paintBar() });
+  }
+
+  /** These objects into `name`, or out of every group — then one repaint, the group filled open. */
+  async _regroup(ids, name) {
+    this._busy = true;
+    try { await fileIn(ids, name); } finally { this._busy = false; }
+    for (const id of ids) this._selected.delete(id);
+    if (name) this._openFolders.add(name);
+    await this.refresh();
   }
 
   /** Trash, restore or delete for good — then one repaint, however many moved. */
