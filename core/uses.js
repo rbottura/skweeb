@@ -41,6 +41,8 @@ export const USES = [
   { id: 'tileset',  app: 'map',       label: 'map tileset',        role: 'tileset' },
   /** P3: a character's loops by direction (core/character.js), for the map's avatar to wear (P4). */
   { id: 'character', app: 'map',      label: 'map character',      role: 'character' },
+  /** M14: drawings that keep their marks, for the garden's gardener to plant (apps/map/garden/). */
+  { id: 'garden',   app: 'map',       label: 'garden flowers',     role: 'flowers' },
 ];
 
 const isUseTag = t => typeof t === 'string' && t.startsWith(USE_PREFIX);

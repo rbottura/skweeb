@@ -19,7 +19,7 @@
  */
 
 import { Vault }         from './vault.js';
-import { familyFromSet, loadManifest, getSpriteUrl } from './registry.js';
+import { familyFromSet, loadManifest, getSpriteUrl, spriteCount } from './registry.js';
 
 const GAMEPAD_MANIFEST = '/apps/gamepad/brush-manifest.json';
 
@@ -96,4 +96,30 @@ export async function familySprite(familyId, index) {
     }
   }
   return url ? image(url) : null;
+}
+
+/**
+ * How many sprites a family has that marks name — a family of the gamepad's
+ * manifest, or a vault set the gamepad drew with — or 0 when neither knows
+ * it: what keeps an image's number within its family (the garden, M14).
+ *
+ * @param {string} familyId
+ * @returns {Promise<number>}
+ */
+export async function familySize(familyId) {
+  try {
+    await loadManifest(GAMEPAD_MANIFEST);
+    const n = spriteCount(familyId);
+    if (n) return n;
+  } catch {
+    // No manifest to read: only a vault set can answer.
+  }
+  if (!/_\d+_[0-9a-z]+$/.test(String(familyId))) return 0;
+  try {
+    const { object } = await Vault.load(familyId);
+    const family = object.type === 'set' ? familyFromSet(object, Vault.index || []) : null;
+    return family ? family.urls.length : 0;
+  } catch {
+    return 0;
+  }
 }

@@ -111,7 +111,7 @@ const { picturesIn, rolesToMake, nameFor, setEnvelope } = await import('../core/
 const pic = (id, type, title) => ({ id, type, title, render: { file: 'render.png' } });
 const held = [pic('S1', 'shape', 'one'), pic('Q1', 'sequence', 'loop'), pic('T1', 'still', 'two'), { id: 'N1', type: 'shape' }, pic('S2', 'shape', 'three')];
 ok('a set\'s members: the pictures selected, in the order picked', picturesIn(['S2', 'Q1', 'S1', 'N1', 'T1', 'gone'], held).map(r => r.id), ['S2', 'S1', 'T1']);
-ok('…what it is made as: each role a use defaults to, and none', rolesToMake().map(r => r.role), ['brush-family', 'material', 'tileset', 'character', null]);
+ok('…what it is made as: each role a use defaults to, and none', rolesToMake().map(r => r.role), ['brush-family', 'material', 'tileset', 'character', 'flowers', null]);
 const { membersIn } = await import('../core/vault-set.js');
 ok('…a character\'s members its loops too, in the order picked', membersIn(['Q1', 'S1', 'N1'], held, 'character').map(r => r.id), ['Q1', 'S1']);
 ok('…its name before one is given', [nameFor(held.slice(0, 1)), nameFor([held[0], held[2], held[4]])], ['one', 'one … three (3)']);
