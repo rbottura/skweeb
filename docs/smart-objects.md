@@ -126,7 +126,11 @@ state it was saved from — a window holds one (`Vault.bind`'s `version`), and
 one reopened at an older state, `?open=skw_…@v3`, saves a **branch** — and a
 merge its `parent2`. `GET /api/vault/<id>/states` lists them (`Vault.states`). Past versions are
 immutable, so a pin is a real promise. Nothing else in the vault has
-versions, because nothing else is meant to be edited after the fact.
+versions, because nothing else is meant to be edited after the fact. A next
+state whose `refs` lead back to it — A holding B holding A — is refused, the
+chain named, by `Vault.save` before it is sent and by the server, 409
+(L3, `core/cycles.js`): drawing it would never end. A new object closes
+none, since nothing holds its id yet.
 
 **Invalidation.** Saving a `.skw` emits `vault:updated { id, version }` — on
 every page of the vault, the server's event stream naming it (core/vault.js

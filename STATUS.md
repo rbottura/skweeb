@@ -106,7 +106,7 @@ sorts them.
   every object field holding it, in any app (L11, 2026-11-06).
 - **The stack saved as a page** (`core/stackSave.js`): every window a smart
   object, the page compose's, whose placements blend. Pins in compose and
-  the stack (L1); what M11 left — flatten, no cycle, overrides — is L.
+  the stack (L1), no page that holds itself (L3); flatten, overrides are L.
 
 ### M10 — 3D (`apps/3d/STATUS.md`, four bricks of six and a turntable)
 
@@ -341,10 +341,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L3 — no cycle** (`docs/plan.md`, *L*): `Vault.save` walks the refs and
-refuses a page that would come to hold itself, naming the chain; the server
-refuses it too — `tests/smart.mjs` makes A hold B hold A, refused. M13c,
-the gabarit, waits on its fields — the author's.
+**L2 — flatten** (`docs/plan.md`, *L*): a smart placement made ordinary —
+drawn at its version, saved as a still or a loop with `parents:
+["skw_…@vN"]` and no refs, the placement pointing at it; the vault's kin
+and its delete learn that a parent may carry `@vN`. M13c, the gabarit,
+waits on its fields — the author's.
 
 ## Parked decisions
 
