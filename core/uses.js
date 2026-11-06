@@ -39,6 +39,8 @@ export const USES = [
   { id: 'copies',   app: 'fractals',  label: 'fractal copies',     role: 'brush-family' },
   /** M8's map editor: a set's members as the tiles a map's cells are painted with. */
   { id: 'tileset',  app: 'map',       label: 'map tileset',        role: 'tileset' },
+  /** P3: a character's loops by direction (core/character.js), for the map's avatar to wear (P4). */
+  { id: 'character', app: 'map',      label: 'map character',      role: 'character' },
 ];
 
 const isUseTag = t => typeof t === 'string' && t.startsWith(USE_PREFIX);

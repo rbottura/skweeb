@@ -37,10 +37,10 @@ const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
  * @param {number} s.selected
  * @param {boolean} s.inTrash    the panel is showing the trash
  * @param {number} s.shown       objects on screen, for "select all"
- * @param {number} [s.pictures]  how many of the selected are pictures, for "a set of these" (V2, vault-set.js)
+ * @param {number} [s.members]   how many of the selected a set can hold — pictures, a character's loops — for "a set of these" (V2, vault-set.js)
  * @param {(action:'trash'|'restore'|'delete'|'all'|'none'|'group'|'set')=>void} s.act
  */
-export function paintBar(bar, { selected, inTrash, shown, pictures = 0, act }) {
+export function paintBar(bar, { selected, inTrash, shown, members = 0, act }) {
   bar.replaceChildren();
   bar.hidden = !selected && !inTrash;
   if (bar.hidden) return;
@@ -55,7 +55,7 @@ export function paintBar(bar, { selected, inTrash, shown, pictures = 0, act }) {
       bar.append(button('Restore', '', () => act('restore')),
         button('Delete for good…', 'vp-btn--danger', () => act('delete')));
     } else {
-      if (pictures) bar.append(button('A set of these…', '', () => act('set')));   // V2, vault-set.js
+      if (members) bar.append(button('A set of these…', '', () => act('set')));   // V2, vault-set.js
       bar.append(button('Into a group…', '', () => act('group')),     // V3, vault-groups.js
         button('Move to trash', 'vp-btn--primary', () => act('trash')));
     }

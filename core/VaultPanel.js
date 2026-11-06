@@ -43,7 +43,7 @@ import { flip } from './flip.js';
 import { paletteEditor } from './vault-palette.js';
 import { groupsIn, fileIn } from './vault-groups.js';
 import { nameForm } from './vault-name.js';
-import { picturesIn, setForm } from './vault-set.js';
+import { setsCanHold, setForm } from './vault-set.js';
 import { takes } from './vault-drag.js';
 
 const el = (tag, cls, text) => {
@@ -356,14 +356,14 @@ export class VaultPanel {
     if (!this._bar) return;
     paintBar(this._bar, {
       selected: this._selected.size, inTrash: this._inTrash, shown: this._shown.length,
-      pictures: picturesIn([...this._selected], Vault.index).length,
+      members: setsCanHold([...this._selected], Vault.index),
       act: a => a === 'all' ? this._select(this._shown.map(r => r.id))
         : a === 'none' ? this._select(null) : a === 'group' ? this._groupForm() : a === 'set' ? this._setForm()
         : this._bin(a, [...this._selected]),
     });
   }
 
-  /** The pictures selected, a set by hand — in the order they were picked; made, its detail opened (V2, vault-set.js). */
+  /** The pictures selected — a character's loops — a set by hand, in the order they were picked; made, its detail opened (V2, P3). */
   _setForm() {
     setForm(this._bar, { ids: [...this._selected], onCancel: () => this._paintBar(),
       onMade: async set => { this._selected.clear(); await this.refresh(); this._openDetail(set.id); } });
