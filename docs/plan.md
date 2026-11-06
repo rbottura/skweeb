@@ -56,6 +56,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | V3 | groups by hand: the selection into a group, out of it, a group renamed | `vault/groups` | S | landed 2026-11-06 |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
+| M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
+| S9i | the players in cluster: the rig's puppet, the map's player — modules on `core/mount.js`, as the garden is | `scene/players` | S | ready: "devrait y être", the author, 2026-11-06 |
+| M14b | modifiers from another app's values: particles adding marks with a sprite of their own, filter's look | — | M | waits: its shape, worked out with the author |
+| M14c | two flowers crossed: a generation of two parents, RimWorld's genes | — | M | later, the author's word |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
 | S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | first pass landed 2026-11-05, the proposal as written; the rest with the author's eye (`docs/scene.md`) |
 | S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | landed 2026-11-05 |
@@ -139,11 +143,15 @@ Each with what happens if nothing is said.
   Effects' timeline, as the gamepad's clips. Its shape worked out with the
   author before it is a branch.
 
-- **The players in cluster** (S9a): map's player (`play/`) and the rig's
-  puppet stay pages of their own — a playable map is an export, a puppet
-  worn is a performance OBS follows by its address. Mounted in cluster, the
-  puppet would turn the camera on there, and its address — rewritten every
-  change — would be the scene's. If nothing is said: pages of their own.
+- **The players in cluster** (S9a): answered 2026-11-06 — the puppet "pas
+  encore présent dans le cluster mais devrait y être" — S9i, `ready`. Its
+  care: mounted, the puppet turns the camera on in the scene, and its
+  address, rewritten every change, is the scene's.
+- **Modifiers from another app** (M14b): "il faudra qu'on réfléchisse à
+  comment on peut créer un objet qui serait un modificateur de recette en
+  captant un lot de paramètres d'une de ces apps comme filter ou particules
+  … le modificateur de particules ajouterait des marques dans la recette de
+  la fleur avec un sprite de rendu associé". Its shape with the author.
 - **The gabarit, a type** (S8): a format and its guides as an object, made
   for its format (`docs/scene.md`) — its fields to confirm before S8; BEC's
   layers by format, titles under the render and infos over it, one to weigh.

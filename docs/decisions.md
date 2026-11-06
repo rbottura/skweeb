@@ -334,3 +334,26 @@ give what the hand moved; a count's slider stops at every whole value; a
 box dragged crosses its range in four hundred pixels whatever its step.
 The five-steps rule of 2026-11-03 stays for continuous ranges.
 
+
+**The garden: a flower is its marks, a generation the chain's work** (M14a,
+the author's brief, `docs/iterations-modifications.md`, and the answers of
+the same day). The player is the map's avatar — "très simplement un sprite
+… pour bouger dessus et faire quelques actions" — so the garden is a map,
+walked as the player walks one, and the map editor's own page as the puppet
+is the rig's: "une sous catégorie de map", mounted in cluster. Its flowers
+are drawings the author makes and picks, "une collection d'objets produits
+au gamepad … avec leurs recettes": a set made as *flowers*. A modifier acts
+on marks and on parts of the drawing's order — "la première moitié, le 1er
+et 3ème quart". "Si on a une recette, on a automatiquement une séquence":
+a flower grows as its marks come, and their order and pace are modifiers
+too. A generation keeps its marks, not only its source and chain: it stands
+without its source, every app that draws marks draws it, and it is the next
+one's source; its picture is drawn from its marks at its size, never taken
+off the garden. The garden plants: what a gardener does is saved — a
+flower in the vault, a garden as a map's next state — where M8's player
+keeps nothing, and stays so. A mirror copies its marks round the flower's
+middle: the gamepad's patterns turn sprites over but round the canvas's
+middle, and a mark has no field to turn one over. Later, the author's:
+modifiers from another app's values (M14b) — "le modificateur de particules
+ajouterait des marques dans la recette de la fleur avec un sprite de rendu
+associé"; two flowers crossed (M14c), "pour plus tard".

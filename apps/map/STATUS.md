@@ -140,6 +140,53 @@ is a loop's, and nothing a player does enters a recipe.
   changes size keeps each cell where it was (`grid.js`, for the tiles to
   come). Opens as plain files with no vault.
 
+## The garden (M14)
+
+The author's brief, in French, is `docs/iterations-modifications.md`: a
+flower is a recipe of marks, and an ordered chain of modifiers makes its
+next generation. `garden/` is the map editor's own page, as the puppet is
+the rig's, and a module cluster mounts.
+
+- **A map gardened in** (M14a, 2026-11-06; `garden/main.js`, `check-garden`).
+  The gardener walks it as the player's avatar walks a map — ZQSD or WASD by
+  where the keys are, the arrows, a pad, a click walking there
+  (`steering.js`, out of the player for it) — wearing what the Garden drawer
+  says, else what stands on the spawn. Facing a flower — any still that keeps
+  its marks, the gamepad's or the garden's — E plants its next generation on
+  the bare earth nearest it; facing bare earth, E plants the flower in hand,
+  of a set offered to the garden (`use:garden`, *garden flowers*, a set made
+  as flowers), 1 to 9 choosing which; Delete uproots the flower faced, which
+  stays in the vault. Ctrl S keeps the garden — S walks here — as a `map`,
+  the next state of its smart object; *open a garden* in the Garden drawer
+  opens one saved, as `?open=<id>` does. With no garden asked for, bare
+  earth: twelve by eight.
+- **Every flower grows** as its marks come (`beds.js`, `growth.js`): drawn
+  by the garden from its marks at the size it is shown, never its picture
+  stretched — each at its `t`, the whole in the Garden drawer's seconds — as
+  it is planted, and the garden's when it opens, one after another.
+- **The treatment** (`treatment.js`, `modifiers.js`): the chain in hand, a
+  card each (core/Cards.js), in the order they act — *image* (one, changed
+  every n marks, shifted, at random), *size*, *turn* (by, more and more
+  along the order, at random), *position* (spread, moved, shaken, turned
+  round), *mirror* (a copy, or turned over), *copies around*, *thin out*,
+  *brush symmetry* (the gamepad's pattern), *growth order* (shuffled,
+  reversed, from the middle out, from the edge in) and *growth pace*. Each
+  acts on parts of the drawing's order — `parts` 4, `which` "1 3", the first
+  and third quarters; a turn goes round the middle, or the first or the last
+  mark drawn, the flower's heart. Its random draws come from the seed, R a
+  new one. Beside it, the flower faced as the chain would make it, growing.
+- **A generation** (`flower.js`): a `still` whose recipe is a gamepad
+  still's — `canvas`, `frame` round its ink, `marks` — and `garden`, `{
+  source, chain, seed, generation, name }`; its source its parent, titled
+  *name · gN*. Core draws it at any scale, compose places it, the rig takes
+  it, and it is the source of the next.
+
+Known: a mirror's sprites are not turned over — a mark has no field for it,
+so a round brush mirrors exactly and a letter keeps its hand; the family a
+mark draws from is not yet a modifier; a garden's planting is kept only by
+its save; a flower's picture in the vault is drawn by the garden at its own
+size, the gamepad's by the gamepad.
+
 ## Known
 
 - No Format drawer: a map's size is its grid. What it is drawn at for the
@@ -165,9 +212,9 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## Next single step
 
-**P7 — a worm's path across the map** (`docs/plan.md`, *P*): a path drawn on
-the map that a thing follows across the room, as the rig's worm crawls round
-its path, its loop closing on the map's clock. Then P8, brick 5, baked and
-published. Neither is next on the board: both wait on the author's yes — P7
-for a thing's path, a field of the map's recipe (fields are the author's),
-P8 for its bundle.
+**The garden, played**: the author's week in it says what is next — M14b,
+modifiers taken from another app's values, its shape worked out together;
+the family a mark draws from as a modifier. **P7 — a worm's path across the
+map** (`docs/plan.md`, *P*) and P8, brick 5, baked and published, wait on
+the author's yes — P7 for a thing's path, a field of the map's recipe
+(fields are the author's), P8 for its bundle.
