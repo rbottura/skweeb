@@ -46,6 +46,10 @@ ok('and the group names that parent', groups.get('X').outside.map(r => r.id), ['
 ok('a page comes after everything placed on it', ids(groups.get('PAGE')), ['S1', 'S2', 'PAGE']);
 ok('refs join as parents do', ids(groups.get('USER')), ['LIVE', 'USER']);
 
+// A state named — a flattened placement's parent, `LIVE@v2` (L2) — joins the object it names.
+const FLAT = row('FLAT', { parents: ['LIVE@v2'] });
+ok('made from a state of an object, it is that object\'s kin', ids(kinOf([FLAT, LIVE, USER], [FLAT, LIVE, USER]).get('FLAT')), ['LIVE', 'USER', 'FLAT']);
+
 // Older after newer when lineage says so: a child made from something younger is still after it.
 const Q = row('Q', { at: 100 }), R = row('R', { parents: ['Q'], at: 50 });
 ok('a parent before its child, whatever their dates', ids(kinOf([Q, R], [Q, R]).get('R')), ['Q', 'R']);

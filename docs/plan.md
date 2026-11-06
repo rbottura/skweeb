@@ -68,7 +68,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L11 | a smart object followed wherever it is picked | `layers/follow` | M | landed 2026-11-06 |
 | L1 | pins | `layers/pins` | M | landed 2026-11-06 |
 | L3 | no cycle | `layers/cycles` | S | landed 2026-11-06 |
-| L2 | flatten | `layers/flatten` | S | ready |
+| L2 | flatten | `layers/flatten` | S | landed 2026-11-06 |
 | L6 | edit in place | `layers/edit` | S | ready |
 | L5 | grid takes a window | `layers/grid-takes` | M | ready |
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
@@ -275,11 +275,9 @@ kept at a state by its row, in its block and in the page it saves.
 next state that would come to hold itself refused, the chain named, by
 `Vault.save` and the server alike (`core/cycles.js`).
 
-**L2 — flatten** · `layers/flatten` · S. A smart placement made ordinary:
-drawn at its version, saved as a still or a loop with
-`parents: ["skw_…@vN"]` and no refs, the placement pointing at it — the
-way out when a chain gets too clever. The vault's kin and its delete learn
-that a parent may carry `@vN`.
+**L2 — flatten** · `layers/flatten` · landed 2026-11-06: compose's *Flatten*,
+a smart placement saved as an object of its own at its state, `parents:
+["skw_…@vN"]`, no refs; the kin and the delete read `@vN`.
 
 **L6 — edit in place** · `layers/edit` · S. A smart placement offers *Edit
 in <app> ↗*, in compose's placed panel and a row of the stack: its app

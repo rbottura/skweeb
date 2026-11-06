@@ -59,7 +59,10 @@ JavaScript to someone else's browser.
   `version` and not `at`: `docs/decisions.md`, 2026-09-22. Compose places a
   project at its state (S6b), its row *at its state · 0 follows*; the live
   stack's layer of a smart object follows, and the same row keeps it at a
-  state — its block, and the page the stack saves, carry it (L1).
+  state — its block, and the page the stack saves, carry it (L1). And
+  compose's *Flatten* makes a smart placement ordinary (L2,
+  `apps/compose/flatten.js`): its state saved as an object of its own kind,
+  `parents: ["skw_…@vN"]` and no refs, the placement pointing at it.
 - `overrides` — per-placement param values, so two placements of one definition
   can differ. Free, because params are data.
 - `at` — **when**, in frames, measured from the composition's own start.

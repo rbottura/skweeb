@@ -12,7 +12,9 @@
  * says the new version; and following is no step of particles' history. The
  * same smart object a layer of particles' stack (L1): its row keeps it at a
  * state, a window's layer has none, and the page the stack saves places it
- * at that state. And no page said anything wrong. Needs a 3D backend:
+ * at that state. Placed in compose at its state, and flattened (L2): a
+ * model of its own, its parent that state, no refs, the placement pointing
+ * at it. And no page said anything wrong. Needs a 3D backend:
  * WebGPU, or WebGL2.
  */
 
@@ -109,6 +111,26 @@ await parts.until(`/^saved |not saved/.test(${said})`, { timeout: 120000 }).catc
 const pageMade = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).find(o => !before.has(o.id) && o.type === 'composition');
 const kept = pageMade ? (await (await fetch(c.base + '/api/vault/' + pageMade.id)).json()).recipe.place.find(b => b.ref === skw) : null;
 c.ok('…kept at version 1, the page the stack saves places it at version 1', !!kept && kept.version === 1, kept ? JSON.stringify(kept) : await parts.eval(said));
+
+// L2: the same smart object placed in compose — at its state, as S6b places a project — and flattened.
+const compose = await c.tab(c.base + '/apps/compose/');
+const plAct = label => `[...document.querySelectorAll('.pl-actions .nb-btn')].find(b => b.textContent === ${JSON.stringify(label)})`;
+await compose.until(`!!${plAct('Add…')}`, { timeout: 20000 });
+await compose.click(plAct('Add…'));
+await compose.until(`!!${card}`, { timeout: 20000 }).catch(() => {});
+await compose.click(`${card}?.closest('.vp-cell')?.querySelector('.vp-use')`);
+await compose.until(`document.querySelectorAll('#place-side .pl-row').length === 1`, { timeout: 30000 }).catch(() => {});
+await compose.until(`!!${plAct('Flatten')} && !${plAct('Flatten')}.disabled`, { timeout: 10000 }).catch(() => {});
+c.ok('placed in compose, the smart object can be flattened', await compose.eval(`!!${plAct('Flatten')} && !${plAct('Flatten')}.disabled`));
+await compose.click(plAct('Flatten'));
+await compose.until(`/^flattened: |could not flatten/.test(${say})`, { timeout: 30000 }).catch(() => {});
+const flatId = ((await compose.eval(say)).match(/ — (\S+)$/) || [])[1];
+const flat = flatId ? await (await fetch(c.base + '/api/vault/' + flatId)).json() : null;
+c.ok('flattened: a model of its own, made from the state it was placed at, holding nothing', !!flat && flat.type === 'model'
+  && JSON.stringify(flat.parents) === JSON.stringify([skw + '@v2']) && !(flat.refs || []).length,
+  flat ? JSON.stringify({ type: flat.type, parents: flat.parents, refs: flat.refs }) : await compose.eval(say));
+await compose.until(`${plAct('Flatten')}?.disabled`, { timeout: 10000 }).catch(() => {});
+c.ok('…the placement pointing at it, nothing left there to flatten', await compose.eval(`!!${plAct('Flatten')}?.disabled`));
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));

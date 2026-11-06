@@ -176,6 +176,15 @@ try {
     render: { ext: 'png', w: 2, h: 2, data: png().toString('base64') } });
   ok('the vault still saves after', again.out.status, 'created');
 
+  // A parent that names a state — a flattened placement's, `E@v2` (L2) — is a parent of the object it names.
+  const E = await make('still', 'E');
+  const F = await make('still', 'F', { parents: [E + '@v2'] });
+  await trash(E);
+  const flatPlan = await del({ ids: [E], dry: true });
+  ok('made from a state of E, F is made from E', flatPlan.out.dependents.map(d => d.title), ['F']);
+  await del({ ids: [E], dependents: 'detach' });
+  ok('…and cut loose with it, its parent goes', (await get(F)).parents, []);
+
   const realAfter = fs.existsSync(realObjects) ? fs.readdirSync(realObjects).length : -1;
   ok('your own vault was not touched', realAfter, realBefore);
 } finally {
