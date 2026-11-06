@@ -29,6 +29,11 @@ app that is open when nothing else is (`docs/scene.md`, *Planned*).
   pixels, in a canvas no bigger than the picture. Fitted with an even margin
   round it, the rulers' bands aside (theme.css, every app's viewer).
 - **`?open=<id>`** draws that object as the page opens.
+- **A set, by hand** (V2, 2026-11-06; `core/vault-set.js`): the pictures
+  selected, in the order they were picked, *a set of these…* — a name and
+  a role, each a use's default, or none; its picture a contact sheet, a
+  material's one row; made, its detail opens where its uses are switched.
+  The app's count follows the vault (`vault:changed`).
 - **Groups, by hand** (V3, 2026-11-06; `core/vault-groups.js`): the panel's
   selection — Ctrl or Shift click — *into a group…*, a name typed or one
   there is, or *out of their group*; a group's strip *rename*, every

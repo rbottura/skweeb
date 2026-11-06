@@ -253,6 +253,11 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**A set by hand keeps the order it was picked in** (V2). Its members are
+the pictures selected, in the order of the clicks; a material made so has
+no ground — its order the hand's, not measured. Its role is one a use
+defaults to, or none, and its switches are its detail's, as every set's.
+
 **A group is a folder, one at most** (V3). Groups by hand are `folder:`
 tags, as the folders the apps make: a view, never a place. Filed in a group,
 an object leaves the one it was in — a tree of groups waits for a want of it.

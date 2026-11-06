@@ -52,7 +52,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M13a | BEC's grid, a primitive of the 3D app: cells, edges, faces, palettes, every draw a seed | `3d/grid` | M | landed 2026-11-05 (`docs/bec.md`) |
 | M13b | BEC's files into the vault, in a folder `bec_2025`: titles and infos by format, its palettes | `bec/import` | S | landed 2026-11-06, and run: 31 objects in `bec_2025` |
 | V1 | the palette, a type: made by hand in the vault panel, edited as a new one, BEC's grid drawn in one | `vault/palette` | M | landed 2026-11-06 (`docs/workshop.md`) |
-| V2 | a set by hand: the pictures selected, in their order, a set of a role | `vault/set` | S | ready |
+| V2 | a set by hand: the pictures selected, in their order, a set of a role | `vault/set` | S | landed 2026-11-06 |
 | V3 | groups by hand: the selection into a group, out of it, a group renamed | `vault/groups` | S | landed 2026-11-06 |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
@@ -62,7 +62,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S13 | the player's lanes: a composition's sequences a lane each, one opened there | `compose/lanes` | M | waits: worked out with the author, with S9e |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
 | — | U8a U8b U8c, L10, L7, U10, U11: taken up by track S | — | — | → S3, S4, S6, S7, S1, S9 |
-| P1 | M10's brick 5: a turntable | `3d/turntable` | M | needs S3 |
+| P1 | M10's brick 5: a turntable | `3d/turntable` | M | ready: S3 landed 2026-11-03 |
 | P3 | a character, defined once | `core/character` | S | ready |
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | needs P3 |
 | L11 | a smart object followed wherever it is picked | `layers/follow` | M | ready |

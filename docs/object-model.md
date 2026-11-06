@@ -258,6 +258,14 @@ at once come in each so, and as a `set` of them in their names' order,
 default. The vault dedups on bytes: a file brought in twice, under any
 name, is the first object it made.
 
+**Sets by hand.** Since 2026-11-06 a set is also made in the vault panel
+(V2, `core/vault-set.js`): the pictures selected — shapes and stills — in
+the order they were picked; a name, and a role or none; `origin.app:
+"vault"`, as a palette's; `recipe.name` beside the members, so the same
+members named again are another set. A material made so has no `ground`:
+its order is the hand's — the first the lightest, the last the darkest —
+not one measured; grid's maker, opening it, measures it again on its own.
+
 ## The recipe contract
 
 Three things are the entire contract between an app and the suite, and what
