@@ -88,8 +88,6 @@ export async function openMap(recipe, { scale = 1, draft = false } = {}) {
       drawMap(ctx, m, scale, { cells: recipe.cells || [], tiles, layers: things.layers(i, m) });
       return tile;
     },
-    dispose() {
-      for (const p of things.items) if (p.handle && p.handle.dispose) p.handle.dispose();
-    },
+    dispose() { things.dispose(); },         // its things' frames, and their ear for new versions (things.js)
   };
 }

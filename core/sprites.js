@@ -1,6 +1,7 @@
 /**
  * sprites.js — a vault object as sprites to draw with: a set's members in
- * its order, or one shape or still.
+ * its order, or one picture — a shape, a still, a 3D model — or a smart
+ * object binding one, followed at its versions (L11).
  *
  * A set is an ordered list of objects (docs/object-model.md, *Sets*); each
  * member's render is one sprite, as core/registry.js reads a set as a
@@ -22,11 +23,12 @@ import { familyFromSet, loadManifest, getSpriteUrl } from './registry.js';
 
 const GAMEPAD_MANIFEST = '/apps/gamepad/brush-manifest.json';
 
-const _images = new Map();         // url → Promise<?ImageBitmap>
+const _images = new Map();         // url, or url and version → Promise<?ImageBitmap>
 
-function image(url) {
-  if (!_images.has(url)) {
-    _images.set(url, (async () => {
+/** A picture, decoded once — by its address, or by `key`: a smart object's at each version, its address the same (L11). */
+function image(url, key = url) {
+  if (!_images.has(key)) {
+    _images.set(key, (async () => {
       try {
         const res = await fetch(url);
         return res.ok ? await createImageBitmap(await res.blob()) : null;
@@ -35,24 +37,30 @@ function image(url) {
       }
     })());
   }
-  return _images.get(url);
+  return _images.get(key);
 }
+
+/** What gives one sprite, its render: a picture — and a 3D model's, the author's sprite of 2026-10-22 (L11). */
+const PICTURES = new Set(['shape', 'still', 'model']);
 
 /**
  * The sprites an object gives: a set's members as images, in its order — or
- * one shape or still, its render, the sprite of every particle. Members that
- * would not load are left out, and said.
+ * one picture, a shape, a still or a model, its render, the sprite of every
+ * particle. A smart object is the object it binds, its render its latest
+ * state's, read again at each new version (L11). Members that would not load
+ * are left out, and said.
  *
- * @param {string} id   a set, a shape or a still in the vault
+ * @param {string} id   a set, a picture, or a smart object binding one, in the vault
  * @returns {Promise<{title: string, images: ImageBitmap[], missing: number}>}
  */
 export async function loadSprites(id) {
-  const { object, url } = await Vault.load(id);
-  if (object.type === 'shape' || object.type === 'still') {
-    const one = await image(url);
+  let { object, url } = await Vault.load(id);
+  if (object.type === 'skw') object = (await import('./smart.js')).unwrap(object);
+  if (PICTURES.has(object.type)) {
+    const one = await image(url, object.version ? `${url}#v${object.version}` : url);
     return { title: object.title || id, images: one ? [one] : [], missing: one ? 0 : 1 };
   }
-  if (object.type !== 'set') throw new Error(`${id} is a ${object.type}, not a set or a sprite`);
+  if (object.type !== 'set') throw new Error(`${id} is a ${object.type}, not a set or a picture`);
   const family = familyFromSet(object, Vault.index || []);
   if (!family) throw new Error(`${object.title || id} has no members`);
   const loaded = await Promise.all(family.urls.map(image));

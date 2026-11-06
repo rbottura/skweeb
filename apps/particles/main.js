@@ -136,7 +136,7 @@ async function boot(mine) {
   picture.on(key => {
     applyFrameEdit(picture, key);
     if (key === 'fps') remake();
-    else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'));
+    else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'), { following: picture.following });
     else draw();
   });
   const sized = new ResizeObserver(() => draw());
@@ -206,13 +206,18 @@ function remake() {
   draw();
 }
 
-/** A set chosen as the sprites (sprites.js): dots until it is in, and dots if it will not come. */
-async function chooseSprites(id) {
+/**
+ * A set chosen as the sprites (sprites.js): dots until it is in, and dots if it will not come. A smart object
+ * held, at its new version (L11): the sprites on screen kept until the new ones are in — no dots between.
+ */
+async function chooseSprites(id, { following = false } = {}) {
   const ask = ++asked;
-  sprites = null;
-  spritesTitle = '';
-  loading = !!id;
-  draw();
+  if (!following) {
+    sprites = null;
+    spritesTitle = '';
+    loading = !!id;
+    draw();
+  }
   if (!id) return;
   try {
     const set = await loadSprites(id);

@@ -120,7 +120,7 @@ async function boot(mine) {
         clock.play();
       }
     }
-    if (key === 'sprite') spriteIn = chooseSprite(params.get('sprite'));
+    if (key === 'sprite') spriteIn = chooseSprite(params.get('sprite'), { following: params.following });
     fitClock();
     draw();
   });
@@ -190,10 +190,12 @@ function fitClock() {
 }
 
 /** The copies' sprite (core/sprites.js): dots until it is in, and dots if it will not come. */
-async function chooseSprite(id) {
+async function chooseSprite(id, { following = false } = {}) {
   const ask = ++asked;
-  sprites = null;
-  spriteTitle = '';
+  if (!following) {               // a smart object held, at its new version (L11): the sprite on screen kept until the new one is in
+    sprites = null;
+    spriteTitle = '';
+  }
   if (!id) return draw();
   try {
     const got = await loadSprites(id);

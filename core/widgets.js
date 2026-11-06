@@ -218,9 +218,10 @@ export const WIDGETS = {
       try {
         const { object, thumbUrl } = await Vault.load(id);
         name.textContent = object.title || object.id;
-        sub.textContent = object.type
+        sub.textContent = (object.type === 'skw' ? `${object.recipe?.type || 'smart'} · v${object.version || 1}` : object.type)
           + (object.render && object.render.w ? '  ' + object.render.w + '×' + object.render.h : '');
-        if (thumbUrl) thumb.src = thumbUrl;
+        // A smart object's picture is at one address at every version: asked for by its version, so the new one shows (L11).
+        if (thumbUrl) thumb.src = object.version ? `${thumbUrl}?v=${object.version}` : thumbUrl;
       } catch {
         // The vault may be absent or the object gone. Say so; keep the value,
         // which is still what the recipe holds.

@@ -275,5 +275,34 @@ ok('and its values round trip', JSON.parse(JSON.stringify(every.values)), every.
 every.set('b', 2.7);
 ok('int rounds rather than snapping', every.get('b'), 3);
 
+// L11: an object param holding a smart object hears its versions — said again, `following`, no edit.
+// No page here: a document of events stands in for one, as the vault's `vault:updated` reaches every app.
+globalThis.document = new EventTarget();
+const version = id => document.dispatchEvent(new CustomEvent('vault:updated', { detail: { id, version: 2 } }));
+const held = defineParams('t', { sprite: { type: 'object', accepts: ['still'] }, other: { type: 'object' }, n: { type: 'int', min: 0, max: 9, default: 1 } });
+const said = [];
+held.on((key, value, p) => said.push([key, value, p.following]));
+held.set('sprite', 'skw_1_a');
+version('skw_1_a');
+version('skw_2_b');
+ok('a smart object held: its new version said again, following — another\'s not', said,
+  [['sprite', 'skw_1_a', false], ['sprite', 'skw_1_a', true]]);
+ok('…and following is over once it is said', held.following, false);
+said.length = 0;
+held.set('sprite', 'skw_1_a@v1');
+version('skw_1_a');
+ok('pinned at a state, it follows nothing', said, [['sprite', 'skw_1_a@v1', false]]);
+said.length = 0;
+held.set('sprite', null);
+version('skw_1_a');
+held.set('other', 'shape_1_c');
+version('shape_1_c');
+ok('let go of, or not a smart object, nothing is heard', said, [['sprite', null, false], ['other', 'shape_1_c', false]]);
+said.length = 0;
+held.restore({ sprite: 'skw_1_a' });
+version('skw_1_a');
+ok('a recipe arriving holding one hears it too', said.map(s => s[2]), [false, false, true]);
+delete globalThis.document;
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
