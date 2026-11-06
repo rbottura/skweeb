@@ -249,6 +249,33 @@ await page.until(`fetch('/api/vault/${two[0]}').then(r => r.json()).then(o => !(
 c.ok('…one out of its group: loose again, the other still in it', (await tagsOf(two[1])).includes('folder:two, renamed'));
 await c.shot('4-groups');
 
+// ── A set by hand (V2, core/vault-set.js): three pictures, picked out of the grid's order, a material ──
+await c.go(c.base + '/apps/vault/');
+await page.until(`document.querySelectorAll('.vp-grid--top > .vp-card[data-id]').length >= 2`, { timeout: 20000 });
+const pics = await page.eval(`import('/core/vault.js').then(({ Vault }) => Vault.refresh().then(() => {
+  const pictures = new Set(Vault.index.filter(r => (r.type === 'shape' || r.type === 'still') && r.render).map(r => r.id));
+  return [...document.querySelectorAll('.vp-card[data-id]')].filter(k => !k.closest('[hidden]') && pictures.has(k.dataset.id)).slice(0, 3).map(k => k.dataset.id); }))`);
+const picked = [pics[2], pics[0], pics[1]];
+for (const id of picked) await ctrlClick(id);
+await page.until(`[...document.querySelectorAll('.vp-bar .vp-btn')].some(b => b.textContent === 'A set of these…')`, { timeout: 5000 });
+await press('A set of these…');
+await page.eval(`document.querySelector('.vp-bar .vp-set-role').value = 'material'`);
+await named('.vp-bar', 'three by hand');
+await page.until(`import('/core/vault.js').then(({ Vault }) => Vault.index.some(r => r.type === 'set' && r.title === 'three by hand'))`, { timeout: 20000 });
+const made = await page.eval(`import('/core/vault.js').then(async ({ Vault }) => {
+  const row = Vault.index.find(r => r.type === 'set' && r.title === 'three by hand');
+  const { object } = await Vault.load(row.id);
+  return { members: object.recipe.members, role: object.recipe.role, w: object.render.w, h: object.render.h, app: object.origin.app, id: row.id }; })`);
+c.ok('three pictures picked, a set of them: its members in the order they were picked, not the grid\'s',
+  JSON.stringify(made.members) === JSON.stringify(picked), JSON.stringify([made.members, picked]));
+c.ok('…made as a material, its picture one row of them, made in the vault', made.role === 'material' && made.w === 3 * 96 && made.h === 96 && made.app === 'vault',
+  JSON.stringify(made));
+await page.until(`(document.querySelector('.vp-detail--open') || {}).textContent?.includes('three by hand')`, { timeout: 10000 });
+c.ok('…its detail opened, where it is switched on where it goes', true);
+await page.until(`import('/core/vault.js').then(({ Vault }) => Vault.refresh().then(() => document.body.textContent.includes(Vault.index.length + ' in vault')))`, { timeout: 10000 });
+c.ok('…and the vault app\'s count with it', true);
+await c.shot('5-a-set');
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();

@@ -32,9 +32,9 @@ sorts them.
 - **BEC's grid in the 3D app** (M13a, `apps/3d/grid.js`, `docs/bec.md`):
   BEC_2025's cells, edges and faces in its three palettes — or a palette
   of the vault — every draw a seed: R new edges, C new colours, A's pie.
-- **A palette, a type; groups by hand** (V1, V3; `docs/workshop.md`): made in
+- **The vault's workshop** (V1–V3, `docs/workshop.md`): a palette made in
   the vault panel, *+ palette*, edited as a new one; its selection into a
-  group or out of one, a group renamed from its strip.
+  group or out of one, a group renamed; the pictures selected, a set.
 - **BEC_2025 in the vault** (M13b, `scripts/import-bec.mjs`): its layers by
   format, its other pictures and its three palettes, 31 objects in the
   folder `bec_2025`.
@@ -340,11 +340,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**V2 — a set by hand** (`docs/workshop.md`): the vault panel's selection of
-pictures, in the order they were picked, *a set of these* — a name, and what
-it is made as: a brush family, a material, sprites, a tileset — its members
-by id, its picture a contact sheet (`core/sheet.js`). M13c, the gabarit,
-waits on its fields — the author's.
+**P1 — the 3D app's turntable** (`apps/3d/STATUS.md`, *Next single step*):
+a Motion drawer — turns 0, ±1, ±2, a length in frames, a rate; frame i seen
+from the yaw plus 360° × turns × i / length, the last meeting the first;
+played in the view by core's Playhead; the loop a `sequence` through E's
+menu, the model its parent. M13c, the gabarit, waits on its fields — the
+author's.
 
 ## Parked decisions
 

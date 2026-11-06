@@ -42,6 +42,9 @@ in one; *its colours* from a picture, still to come.
 
 ## V2 — a set, by hand
 
+*Landed 2026-11-06* — the bar's *A set of these…*, a name and a role
+(`core/vault-set.js`); made, its detail opens on its switches.
+
 The pictures selected, in the order they were picked: *a set of these* —
 a name and what it is made as, a brush family, a material, sprites, a
 tileset — a `set` as the object model has it, its members by id, offered

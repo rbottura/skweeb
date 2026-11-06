@@ -1,7 +1,8 @@
 /**
  * vault-name.js — a name asked for in place, in the vault panel: a group's
- * (V3, vault-groups.js) — the selection's bar, a group's strip. A field, the
- * names there are offered as it is typed, its act on Enter, Escape for none.
+ * (V3, vault-groups.js) — the selection's bar, a group's strip — or a set's
+ * (V2, vault-set.js). A field, the names there are offered as it is typed,
+ * its act on Enter, Escape for none.
  *
  * DOM only when it is drawn.
  */
@@ -24,14 +25,16 @@ const el = (tag, cls, text) => {
  * @param {string} o.label                      what the field is for
  * @param {string} [o.value]                    the name it starts with
  * @param {string[]} [o.offer]                  names offered — the groups there are
+ * @param {string} [o.placeholder]
+ * @param {Node[]} [o.extra]                    what else is asked, after the name — a set's role
  * @param {string} o.act                        the button's word
  * @param {(name: string) => void} o.onName     the name, once given
  * @param {?() => void} [o.onOut]               a second act, out of every group — where any is grouped
  * @param {() => void} o.onCancel
  */
-export function nameForm(at, { label, value = '', offer = [], act, onName, onOut = null, onCancel }) {
+export function nameForm(at, { label, value = '', offer = [], placeholder = 'a group’s name', extra = [], act, onName, onOut = null, onCancel }) {
   const field = el('input', 'vp-group-name');
-  Object.assign(field, { type: 'text', value, placeholder: 'a group’s name' });
+  Object.assign(field, { type: 'text', value, placeholder });
   field.setAttribute('aria-label', label);
   const list = el('datalist');
   list.id = 'vp-groups-' + Math.random().toString(36).slice(2);
@@ -45,7 +48,7 @@ export function nameForm(at, { label, value = '', offer = [], act, onName, onOut
     if (e.key === 'Enter') { e.preventDefault(); give(); }
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onCancel(); }
   });
-  const parts = [el('span', 'vp-bar-say', label), field, list, go];
+  const parts = [el('span', 'vp-bar-say', label), field, list, ...extra, go];
   if (onOut) {
     const out = el('button', 'vp-btn', 'Out of their group');
     out.type = 'button';

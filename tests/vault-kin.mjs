@@ -102,5 +102,16 @@ ok('…already in it: nothing changes', regroup({ tags: ['folder:new'] }, 'new')
 ok('…out of every group, none named', regroup({ tags: ['folder:a', 'y'] }, ''), { add: [], remove: ['folder:a'] });
 ok('the groups there are, by name', groupsIn([{ tags: ['folder:b'] }, { tags: ['folder:a'] }, { tags: [] }, { tags: ['folder:b'] }]), ['a', 'b']);
 
+// A set by hand (vault-set.js, V2): the pictures among the selection, in the order picked; what it is made as.
+const { picturesIn, rolesToMake, nameFor, setEnvelope } = await import('../core/vault-set.js');
+const pic = (id, type, title) => ({ id, type, title, render: { file: 'render.png' } });
+const held = [pic('S1', 'shape', 'one'), pic('Q1', 'sequence', 'loop'), pic('T1', 'still', 'two'), { id: 'N1', type: 'shape' }, pic('S2', 'shape', 'three')];
+ok('a set\'s members: the pictures selected, in the order picked', picturesIn(['S2', 'Q1', 'S1', 'N1', 'T1', 'gone'], held).map(r => r.id), ['S2', 'S1', 'T1']);
+ok('…what it is made as: each role a use defaults to, and none', rolesToMake().map(r => r.role), ['brush-family', 'material', 'tileset', null]);
+ok('…its name before one is given', [nameFor(held.slice(0, 1)), nameFor([held[0], held[2], held[4]])], ['one', 'one … three (3)']);
+ok('…its recipe: members, role, name — no role when none',
+  [setEnvelope({ members: ['A'], role: 'material', name: 'm' }).recipe, setEnvelope({ members: ['A'], role: null, name: 'n' }).recipe],
+  [{ members: ['A'], role: 'material', name: 'm' }, { members: ['A'], name: 'n' }]);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
