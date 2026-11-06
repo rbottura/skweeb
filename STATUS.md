@@ -138,7 +138,7 @@ sorts them.
   Brick 6, the slug from every side, waits on the author's drawings (P5).
   Its player, the puppet, is under *Newest*.
 
-### M8 — the map editor (`apps/map/STATUS.md`, three bricks of six; the player)
+### M8 — the map editor (`apps/map/STATUS.md`, four bricks of six; the player)
 
 - **A map on a grid of large tiles** (2026-09-30): a tileset — any set,
   offered as a *map tileset* (`core/uses.js`) — painted into cells with no
@@ -149,7 +149,8 @@ sorts them.
 - **Walls, and things that answer** (2026-10-02): a wall a flag a cell; a
   sign, a warp to a map by its name, the spawn, RPG Maker's way. **The
   player** (`play/`): a saved map, point and click — what answers outlined,
-  a sign shown, a warp followed and back.
+  a sign shown, a warp followed and back. Its avatar (P4, 2026-11-06): on
+  the spawn, wearing a character; ZQSD, the arrows, a pad; E; a tap walks.
 
 ### M7 — fractals (`apps/fractals/STATUS.md`, done 2026-09-30)
 
@@ -291,13 +292,12 @@ compares two pages' canvases measures, never demands the pixel.
   fit a 120×176 sheet at 300 dpi, a tall one is enlarged a little, and the
   print says by how much. A shape, or a picture from outside, has only its
   pixels. The gamepad's print box is not on the pad.
-- **check-map's press is intermittent** (2026-11-03): "a press paints the
-  cell under it" read the cell unpainted once in six runs — the pixel read a
-  little early after a real press; it passed every rerun. Under the load of
-  checks run together (`scripts/checks.mjs`) it fails more, and so, now and
-  then, does check-compose's "a typed transform lands where page.js says":
-  both green alone, which the runner tries before saying red — check-map
-  so in two gates of 2026-11-06.
+- **Two checks are intermittent under the load of checks run together**,
+  green alone, which the runner tries before saying red: check-compose's
+  "a typed transform lands where page.js says", and check-rig's "a swing,
+  and the loop plays by itself" — 0 values moved, twice on 2026-11-06.
+  check-map's press, which found the vault panel still fading out over the
+  map, waits for the map to be under the pointer since 2026-11-06.
 - **A blur's taps stop at 512 a side**; past that it wants a smaller picture.
 - **Compose's PNG export still draws its page on one canvas**, tried up to
   2480 × 3508 — its print beside it draws any sheet in tiles.
@@ -340,10 +340,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**P4 — the map's avatar walks** (`apps/map/STATUS.md`, *Next single
-step*): in the player, a character on the spawn — or any loop, facing every
-way — ZQSD or WASD by `event.code`, the arrows; its direction's loop from
-`core/character.js` `waysOf`, a left drawn mirrored. M13c, the gabarit,
+**L11 — a smart object followed wherever it is picked** (`docs/plan.md`,
+*L*): core's object param offers a smart object where the kind it binds is
+accepted, hears its versions and says it changed — particles' sprites
+drawn again when the 3D app saves the model again. M13c, the gabarit,
 waits on its fields — the author's.
 
 ## Parked decisions

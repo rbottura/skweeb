@@ -253,6 +253,13 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**The avatar wears what stands on the spawn** (P4). No field names it: the
+spawn's thing is what it wears — a character, or any object, facing every
+way — so a map is made walkable in the editor, as everything else on it
+is. Its keys are by place (`event.code`), ZQSD where WASD is; a sign it
+reads faced is solid, as Pokémon's are, so a step does not take it onto
+it; a step onto a warp goes through, a tap on one still uses it.
+
 **A character's count is its rule** (P3). Four members are down, left,
 right, up; three, down, right, up, the left the right mirrored — no field
 beside the members, as the fields were taken on 2026-10-22. A character a

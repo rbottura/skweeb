@@ -92,7 +92,12 @@ await page.until(`document.querySelectorAll('.mp-tile').length === 4`, { timeout
 c.ok('three pictures dropped in, picked as the tileset: three tiles and the eraser',
   (await page.eval(`document.querySelectorAll('.mp-tile').length`)) === 4, await page.eval(say));
 
-await page.pointer(await onScreen(cellMid(2), cellMid(2), 768));
+// Under the gate's load the press found the vault panel still fading out over the map (120 ms, longer then):
+// pressed once the map is what is under the pointer, and read once its paint has come (STATUS, 2026-11-03).
+const press1 = await onScreen(cellMid(2), cellMid(2), 768);
+await page.until(`document.elementFromPoint(${press1[0]}, ${press1[1]})?.id === 'stage'`, { timeout: 10000 }).catch(() => {});
+await page.pointer(press1);
+for (let i = 0; i < 50 && !colour(await pixel(cellMid(2), cellMid(2), 768), RED); i++) await new Promise(r => setTimeout(r, 100));
 c.ok('a press paints the cell under it', colour(await pixel(cellMid(2), cellMid(2), 768), RED), JSON.stringify(await pixel(cellMid(2), cellMid(2), 768)));
 await page.pointer(await onScreen(cellMid(0), cellMid(5), 768), await onScreen(cellMid(6), cellMid(5), 768), 2);
 const along = [];
