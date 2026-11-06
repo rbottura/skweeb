@@ -253,6 +253,13 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**Edited in place, a kept placement follows** (L6). Compose places a
+project at its state, nothing changing unless asked (S6b); *Edit in <app>
+↗* is the asking — the page is to draw what is made of it — so a placement
+kept at a state follows from then on, and says so. A change of state, kept
+or following, opens a placement again: it did not, and a row changed drew
+nothing new.
+
 **Flattened, a state is a parent** (L2). A flattened placement is an
 object of the kind its smart object binds, its parent that object at the
 state it was placed at — `skw_…@vN`, no ref — so it follows nothing, and

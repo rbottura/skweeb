@@ -44,8 +44,9 @@ export class PlacedList {
    * @param {() => void} opts.onRemove
    * @param {(by: number) => void} opts.onMove   +1 forward, -1 backward
    * @param {() => void} [opts.onFlatten]  the chosen smart placement made ordinary (flatten.js, L2)
+   * @param {() => void} [opts.onEdit]     the chosen smart placement edited in its app, in place (L6)
    */
-  constructor({ mount, onChoose, onAdd, onAddFrame, onRemove, onMove, onFlatten = () => {} }) {
+  constructor({ mount, onChoose, onAdd, onAddFrame, onRemove, onMove, onFlatten = () => {}, onEdit = () => {} }) {
     this.onChoose = onChoose;
     this.root = el('div', 'pl');
     this.rows = el('div', 'pl-rows');
@@ -57,7 +58,9 @@ export class PlacedList {
       { title: 'After the chosen one, in its place, for as long: a flipbook’s next frame' });
     this.flat = button('Flatten', onFlatten,
       { title: 'The smart object made ordinary: its state, an object of its own, the placement pointing at it' });
-    actions.append(button('Add…', onAdd, { primary: true }), this.frame, this.up, this.down, this.flat, this.remove);
+    this.edit = button('Edit ↗', onEdit,
+      { title: 'In its app, bound to it: its next save is its next state, and the page draws it' });
+    actions.append(button('Add…', onAdd, { primary: true }), this.frame, this.up, this.down, this.edit, this.flat, this.remove);
     this.root.append(this.rows, actions);
     mount.append(this.root);
   }
@@ -68,6 +71,8 @@ export class PlacedList {
    */
   render(items, chosen) {
     this.flat.disabled = !(chosen && flattens(chosen.block));
+    this.edit.disabled = this.flat.disabled;
+    this.edit.textContent = chosen && chosen.app && !this.edit.disabled ? `Edit in ${chosen.app} ↗` : 'Edit ↗';
     this.rows.replaceChildren();
     if (!items.length) this.rows.append(el('div', 'pp-empty', 'Nothing placed yet.'));
     for (let i = items.length - 1; i >= 0; i--) {

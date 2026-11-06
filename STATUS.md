@@ -106,7 +106,7 @@ sorts them.
   every object field holding it, in any app (L11, 2026-11-06).
 - **The stack saved as a page** (`core/stackSave.js`): every window a smart
   object, the page compose's, whose placements blend. Pins in compose and
-  the stack (L1), no page holding itself (L3), compose's *Flatten* (L2).
+  the stack (L1), no page holding itself (L3), *Flatten* (L2), *Edit ↗* (L6).
 
 ### M10 — 3D (`apps/3d/STATUS.md`, four bricks of six and a turntable)
 
@@ -342,11 +342,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L6 — edit in place** (`docs/plan.md`, *L*): a smart placement offers
-*Edit in <app> ↗* in compose's placed panel and a row of the stack — its
-app opened on `?open=skw_…`, the window bound, so its next save is the next
-version and every page holding it follows. M13c, the gabarit, waits on
-its fields — the author's.
+**L5 — grid takes a window** (`docs/plan.md`, *L*): `TAKERS` in
+`core/send.js` gains grid — a window as grid's source, followed live as
+filter follows one (`apps/filter/following.js`), saved as a smart object
+when grid saves. M13c, the gabarit, waits on its fields — the author's.
 
 ## Parked decisions
 

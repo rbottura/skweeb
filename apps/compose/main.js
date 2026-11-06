@@ -47,7 +47,7 @@ import { Bar }            from '../../core/Bar.js';
 import { Playhead }       from '../../core/playback.js';
 import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
-import { requested, openedLine } from '../../core/reopen.js';
+import { requested, openedLine, reopenUrl, follow } from '../../core/reopen.js';
 import { appModule }      from '../../core/mount.js';
 
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
@@ -134,7 +134,8 @@ async function boot(mine) {
                           onChoose: p => { editing.choose(p); toFrameOf(p); },
                           onRemove: () => editing.chosen && editing.takeOff(editing.chosen),
                           onMove: by => editing.chosen && placements.move(editing.chosen, by),
-                          onFlatten: () => flattenChosen() });
+                          onFlatten: () => flattenChosen(),
+                          onEdit: () => editChosen() });
   adder = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'Place this',
                            onPick: o => editing.putOn(toPlacement({ ref: o.id, ...AT_REST, version: o.type === 'skw' ? (o.version || 1) : 0 })) });   // a project placed at its state of the moment (S6b)
   framer = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'The next frame',
@@ -343,6 +344,29 @@ function wireKeys(mine) {
     if (e.key === '.') { clock.pause(); clock.step(1); }
   });
   refreshVault();
+}
+
+/**
+ * The chosen smart placement edited in place (L6): its app opened on it, bound, so its next save is its next
+ * state — Photoshop's double click. Kept at a state, the placement follows from now on: asked to edit it here,
+ * the page draws what is made of it (S6b placed it at its state, nothing changing unless asked).
+ */
+async function editChosen() {
+  const p = editing && editing.chosen;
+  if (!p || !flattens(p.block)) return;
+  try {
+    const url = await reopenUrl((await Vault.load(p.block.ref)).object);
+    if (!url) return bar.announce(`${p.title}: its app cannot open it to edit`);
+    if (Number.isInteger(p.block.version)) {
+      const { version: was, ...block } = p.block;
+      await placements.update(p, block);
+      editing.choose(p);
+      bar.announce(`${p.title} follows its states now: what is saved there is drawn here`);
+    }
+    follow(url);
+  } catch (err) {
+    bar.announce('could not open it to edit: ' + err.message);
+  }
 }
 
 /** The chosen smart placement made ordinary, the placement pointing at what it was (flatten.js, L2). */
