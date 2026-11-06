@@ -277,6 +277,15 @@ map by default (`use:character`, *map character*) for its avatar (P4);
 made by hand in the vault panel as a set is, its members loops — or by
 the 3D app from a model's four sides (P6, `apps/3d/sides.js`).
 
+**Flowers** (M14a, 2026-11-06, `apps/map/garden/`): a set, `role:
+"flowers"`, of drawings that keep their marks, offered to the garden by
+default (`use:garden`, *garden flowers*) for its gardener to plant. A
+generation the garden plants is a `still` as the gamepad's is — its recipe
+`canvas`, `frame` and `marks`, so core draws it, at any scale — and
+`garden`, what made it: `{ source, chain, seed, generation, name }`, the
+chain `[{ id, params, on }]` as core/Cards.js keeps a list. Its source is
+its parent; `origin.app` is `map`, the garden being the map editor's page.
+
 ## The recipe contract
 
 Three things are the entire contract between an app and the suite, and what

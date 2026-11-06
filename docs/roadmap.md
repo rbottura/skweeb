@@ -22,6 +22,7 @@ item, is the board in `docs/plan.md`. Here, the milestones still open.
 | M11 | the live stack, and smart objects | done 2026-10-07; what it left is L in `docs/plan.md` |
 | M12 | the scene: one canvas, the suite round it | planned 2026-11-03 — `docs/scene.md`; track S in `docs/plan.md` |
 | M13 | BEC again: its grid in the 3D app, its layers by format, the project one page | `docs/bec.md`: M13a, the grid, landed 2026-11-05; b to d next |
+| M14 | the garden: flowers drawn, changed by a chain of modifiers, planted generation after generation | M14a, the garden, landed 2026-11-06 — below |
 
 ## The links
 
@@ -334,6 +335,10 @@ The apps stay pages of their own, in tabs, linked by the live stack.
 without the canvas moving, each app's checks green; and its states' graph
 shows both layers and the bridge between them. Its spec, the bench and the
 bricks: `docs/scene.md`. Rule 7's wording is the author's to settle first.
+
+**M14 — the garden.** The author's brief, `docs/iterations-modifications.md`
+(2026-11-06): a flower drawn in the gamepad is a recipe of marks, a chain of
+modifiers its next generation. M14a landed that day (`apps/map/STATUS.md`).
 
 ## Decided before, 2026-09-21 to -23
 

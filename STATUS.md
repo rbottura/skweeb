@@ -10,8 +10,15 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop
+### Newest — 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop, the garden
 
+- **The garden** (M14a, `apps/map/garden/`, `apps/map/STATUS.md`, *The
+  garden*): a map gardened in, alone or in cluster. The gardener walks it as
+  the player's avatar does; facing a flower — a drawing that keeps its
+  marks — E plants its next generation beside it: its marks through a chain
+  of modifiers, each on parts of the drawing's order, saved as a still, its
+  source its parent; on bare earth, a flower of the set in hand. Every
+  flower grows as its marks come; Ctrl S keeps the garden, a map's state.
 - **cluster** (`apps/cluster/STATUS.md`): the apps in one page one at a
   time, through their modules, laid as the bench is — a strip, the side,
   the viewer in one place, the properties one panel, the app's panels a tab
@@ -250,20 +257,20 @@ sorts them.
 
 ## Tests
 
-Sixty-four files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-11-05). Newest: `scope` and `reach`
-(2026-11-04); before them the puppet's four —
+Sixty-six files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-11-06). Newest: `garden`, the garden's
+modifiers and growth (M14); `scope` and `reach` (2026-11-04); the puppet's four —
 `puppet-eyes` (27), `puppet-mouth` (15), `puppet-sway` (24), `puppet-roles`
 (17): the eyes and the mouth cut and worn, the sway, the parts found;
 before them M11's — `live`, `stack`, `place`, `smart` — the print's —
 `windowed`, `stage-still`, `png` — and the 3D app's seven.
 
-Thirty-five browser checks, each a command in `CLAUDE.md`, run several at a
+Thirty-eight browser checks, each a command in `CLAUDE.md`, run several at a
 time by `scripts/checks.mjs`: each its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-cluster-vault`, the
-scene's vault beside each app (S9g); `check-cluster`, the scene, and
+throws or its console is not quiet. Newest: `check-garden`, the garden
+(M14a); `check-cluster-vault`, the scene's vault beside each app (S9g); `check-cluster`, the scene, and
 `check-mount`, an app unmounted with nothing left (S9); `check-puppet`, the
 puppet on a fake camera, sent and followed by a page in OBS; M11's four —
 `check-live`, `check-send`, `check-smart`, `check-page` — `check-print`
@@ -314,16 +321,12 @@ compares two pages' canvases measures, never demands the pixel.
   `ui/TimelinePanel.js` (547) and `ui/ParamPanel.js` (500) — C6 — and
   `scripts/check-3d.mjs` (414), kept whole with its reason.
   `core/VaultPanel.js` stands at 399.
-- **A 3D model is a still until brick 5** (P1); its handles turn about the
-  world's axes only; nothing in it is undone; a shadow's darkness and map
-  are fixed; not yet seen on the laptop itself, where it should draw with
-  WebGL2 (`apps/3d/STATUS.md`, *Known*).
-- **Trashed brush sets still show in the gamepad and in ckt** (C4); a cut-loose
-  set or page keeps its old picture until saved again.
+- **A 3D model's handles turn about the world's axes only**; nothing in it
+  is undone; a shadow's darkness and map are fixed; not yet seen on the
+  laptop itself, where it should draw with WebGL2 (`apps/3d/STATUS.md`).
+- **A cut-loose set or page keeps its old picture** until saved again.
 - **`detached` is a new envelope field**, for cutting loose — written up as
   decided; the author may want to confirm it (`docs/plan.md`, *Waiting*).
-- **An identical re-cut does not join the new session folder**: dedup hands
-  back the old object with its old tags (C4).
 - **Five sprite names mean two pictures** in `brushes` against v2's
   `sprites/`. A cleanup must never renumber `brushes`: marks name sprites
   by index — the rig's poses too.
@@ -338,11 +341,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L4 — the live view blends as a save does** (`docs/plan.md`, *L*, a side
-job): the stack's layers in a group of their own inside the stage, the
-checkerboard behind it, so screen and difference meet nothing where nothing
-is under them. The main thread waits on the author: P7's path, a field of
-the map's recipe; P8's bundle; M13c's fields.
+**S9i — the players in cluster** (`docs/plan.md`, the author's yes of
+2026-11-06): the rig's puppet and the map's player mounted in the scene as
+the garden is, each a module on `core/mount.js`. Beside it, L4, a side job.
+The main thread waits on the author otherwise: the garden played, then
+M14b's shape; P7's path, a field of the map's recipe; P8's bundle; M13c's
+fields.
 
 ## Parked decisions
 
