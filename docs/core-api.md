@@ -98,7 +98,7 @@ object's, not the panel's.
 included, with `params.restoring` true while it does. A listener that chains
 one value to another — the frame's link — leaves a restore alone: a recipe
 arriving is not an edit. (Until 2026-09-23 it went back silently, and Reset
-moved no widget.)
+moved no widget.) An object field holding a smart object is said again at its new version, `params.following` true (L11).
 
 ## The UI kit — decided 2026-09-23
 

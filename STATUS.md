@@ -102,7 +102,8 @@ sorts them.
   window as filter's source, live; saved, the window saves itself first.
 - **Smart objects** (`core/smart.js`, `server/versions.js`): a `skw` saved
   by its app through its own save, the window bound; saved again, a
-  version, and every page holding it drawn again (`vault:updated`).
+  version, and every page holding it drawn again (`vault:updated`) — and
+  every object field holding it, in any app (L11, 2026-11-06).
 - **The stack saved as a page** (`core/stackSave.js`): every window a smart
   object, the page compose's, whose placements blend. What M11 left — pins,
   flatten, no cycle, more takers, overrides — is L in `docs/plan.md`.
@@ -340,11 +341,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L11 — a smart object followed wherever it is picked** (`docs/plan.md`,
-*L*): core's object param offers a smart object where the kind it binds is
-accepted, hears its versions and says it changed — particles' sprites
-drawn again when the 3D app saves the model again. M13c, the gabarit,
-waits on its fields — the author's.
+**L1 — pins** (`docs/plan.md`, *L*): a placement of a smart object carries
+its `version` — *follows the latest*, or *kept at v3* — shown in compose's
+placed panel and the Stack drawer, with a switch; kept, it draws what was
+kept (`core/smart.js` `innerOf`). M13c, the gabarit, waits on its fields —
+the author's.
 
 ## Parked decisions
 
