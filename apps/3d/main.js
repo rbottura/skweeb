@@ -14,9 +14,14 @@
  * shape has handles, drawn over the picture from a scene of their own, and
  * can be duplicated or taken out (chosen.js, handles.js).
  *
- * What leaves (save.js) is drawn again by frames.js at the format's size
+ * What leaves (leaving.js, save.js) is drawn again by frames.js at the format's size
  * times its scale: a `model` into the vault, S, or a PNG. rebuild.js replays
  * one for the vault and compose; `?open=` brings one back.
+ *
+ * A model can turn, on a turntable (motion.js, P1): its Motion drawer's
+ * turns, a loop's frames and its rate. Core's clock plays it in the view —
+ * space, and , . a frame — its handles hidden while it plays; S saves its
+ * loop, a `sequence`, its picture the frame on screen; E's menu every frame.
  *
  * Opens with no vault (rule 7), on a box, a sphere and a torus. With no
  * WebGPU three draws with WebGL2, and the bar says so; with neither, the
@@ -29,18 +34,19 @@
  */
 
 import { modelParams, GROUPS, SHAPE_CARDS, OPENING } from './params.js';
+import { loopOf, seenAt } from './motion.js';
 import { Model }          from './scene.js';
 import { drawModel }      from './frames.js';
 import { frameAround, cameraFor } from './camera.js';
 import { openRenderer }   from './renderer.js';
-import { saveModel, downloadPicture, titleOf, APP } from './save.js';
+import { titleOf }        from './save.js';
+import { ways }           from './leaving.js';
 import { wirePointer }    from './pointer.js';
 import { pick }           from './pick.js';
 import { boxOnPicture, drawChosen } from './guides.js';
 import { wireChosen }     from './chosen.js';
-import { PrintPanel }     from '../../core/PrintPanel.js';
-import { exportBox }      from '../../core/boxes/export.js';
-import { stackDrawer }    from '../../core/StackPanel.js';
+import { Transport }      from '../../core/Transport.js';
+import { Playhead }       from '../../core/playback.js';
 import { Cards }          from '../../core/Cards.js';
 import { ParamPanel }     from '../../core/ParamPanel.js';
 import { VaultPanel }     from '../../core/VaultPanel.js';
@@ -89,8 +95,9 @@ export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;
 
 // One app mounted at a time: its state, made again by each mount (`start`).
-let root, canvas, ctx, model, pending;
-let params, bar, cards, shapesDrawer, chosen, renderer, failing, busy;
+let root, canvas, ctx, model;
+let params, bar, cards, shapesDrawer, chosen, renderer, failing, pending, leaving;
+let clock, transport, player, framesButton, clockAt;   // the turntable's (motion.js)
 
 async function start(host, mine) {
   root = host;
@@ -101,13 +108,22 @@ async function start(host, mine) {
   params = bar = cards = shapesDrawer = chosen = null;
   renderer = null;         // renderer.js's, once three has a backend
   failing = '';            // why nothing draws, while nothing does
-  busy = pending = false;  // a save or a download drawing, nothing else starts; a paint asked for, not made
+  pending = false;         // a paint asked for, not made
+  leaving = null;          // the ways out (leaving.js): a save or a download drawing, nothing else starts
+  transport = player = framesButton = null;
+  clockAt = '';            // the loop the clock was fitted to
+  // The clock plays a turntable's frames at its rate; a model that does not turn is one frame. Stopped at the unmount.
+  clock = new Playhead({
+    onShow: tick => { if (transport) transport.show(tick); draw(); },
+    onState: () => { if (transport) transport.state(); draw(); },
+  });
+  mine.hold(() => clock.dispose());
   try { await boot(mine); } catch (err) { if (bar) bar.announce('failed to boot: ' + err.message); throw err; }
 }
 
 async function boot(mine) {
   bar = new Bar({ app: '3d', mount: root,
-                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · S save · V vault · R C a BEC grid anew' });
+                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · space play · , . frame · S save · V vault · R C a BEC grid anew' });
   params = modelParams();
   const panel = new ParamPanel(params, { title: '3d', mount: root.querySelector('#side'), groups: GROUPS });
 
@@ -120,10 +136,18 @@ async function boot(mine) {
   const frame = button('Frame the model  [F]', frameAll);
   frame.classList.add('td-frame');
   panel.drawer('view').body.append(frame);
-  buildExport(panel);
+  player = panel.addDrawer({ id: 'player', title: 'Sequence player', before: 'format' });
+  transport = new Transport({ clock, mount: player.body, busy: () => !!leaving && leaving.busy() });
+  leaving = ways(panel, { bar, params, clock,
+    now: () => ({ shapes: cards.recipe(), renderer, why: failing || 'three is still starting' }),
+    after: () => { refreshVault(); draw(); } });
+  framesButton = leaving.frames;
 
   params.on(key => {
     applyFrameEdit(params, key);
+    fitClock();
+    // Turns given where there were none: the turntable plays at once. A recipe arriving keeps its clock still.
+    if (key === 'turns' && !params.restoring && loopOf(params.values).loop && !clock.playing) clock.play();
     draw();
   });
   const sized = new ResizeObserver(() => draw());
@@ -143,8 +167,30 @@ async function boot(mine) {
     bar.announce('nothing here draws in 3D — ' + err.message);
   }
   await openRequested();
+  fitClock();
   draw();
 }
+
+/** The clock fitted to the turntable the values make (motion.js): its frames at its rate, or one still frame. */
+function fitClock() {
+  if (!params || !transport) return;
+  const { length, fps, loop } = loopOf(params.values);
+  const key = `${length}@${fps}`;
+  if (key !== clockAt) {
+    const was = clock.playing && loop;
+    clock.configure({ length, fps: fps || 24, loop: true });
+    transport.configure();
+    clockAt = key;
+    if (was) clock.play();
+    else clock.pause();
+  }
+  player.hidden = !loop;
+  if (framesButton) framesButton.hidden = !loop;
+  player.note(loop ? `${length} frames · ${(length / fps).toFixed(2)} s, a loop` : '');
+}
+
+/** The values the frame on screen is seen with: the turntable's, at the clock's tick (motion.js). */
+const seen = () => seenAt(params.values, loopOf(params.values).loop ? clock.tick : 0);
 
 /** `?open=<id>`: a saved model back to work on (core/reopen.js), shape for shape. */
 async function openRequested() {
@@ -193,13 +239,15 @@ function paint() {
     if (failing) bar.say('nothing draws here — ' + failing);
     return;
   }
-  model.update({ ...v, shapes });
-  const camera = cameraFor(v, w, h);
-  const part = model.partAt(cards.chosenIndex);
+  const at = seen();                       // the frame on screen: the turntable's, the sun with it as the model turns
+  model.update({ ...at, shapes });
+  const camera = cameraFor(at, w, h);
+  // Its handles and its box hidden while it plays: a turning picture is watched, not worked on.
+  const part = clock.playing ? null : model.partAt(cards.chosenIndex);
   const { handles } = chosen;
   handles.attach(part && part.mesh);
   handles.see(camera);
-  drawModel(ctx, renderer, model, v, w, h, camera);
+  drawModel(ctx, renderer, model, at, w, h, camera);
   const box = part && boxOnPicture(part.mesh, camera, w, h);
   if (box) drawChosen(ctx, box, w / Math.max(1, canvas.getBoundingClientRect().width));
   if (handles.shown) {
@@ -207,13 +255,14 @@ function paint() {
     ctx.drawImage(gizmo, 0, 0);
     gizmo.close();
   }
-  bar.say(describe(v, shapes));
+  bar.say(describe(at, shapes));
 }
 
-/** The bar's line: what the model is, where it is seen from, and WebGL2 when that is what draws. */
+/** The bar's line: what the model is, where it is seen from — on a turntable, the frame's — and WebGL2 when that draws. */
 function describe(v, shapes) {
   const lens = v.lens === 'orthographic' ? 'orthographic' : `${v.fov}° lens`;
-  return `${titleOf(shapes)} · turned ${Math.round(v.yaw)}°, raised ${Math.round(v.pitch)}°, `
+  const yaw = (((Math.round(v.yaw) + 180) % 360) + 360) % 360 - 180;
+  return `${titleOf(shapes)} · turned ${yaw}°, raised ${Math.round(v.pitch)}°, `
     + `${+v.distance.toPrecision(3)} away · ${lens}` + (renderer.backend === 'WebGPU' ? '' : ` · ${renderer.backend}`);
 }
 
@@ -223,7 +272,7 @@ function describe(v, shapes) {
  */
 function chooseAt([x, y]) {
   if (!renderer) return;
-  const hit = pick(model, cameraFor(params.values, canvas.width, canvas.height), x, y);
+  const hit = pick(model, cameraFor(seen(), canvas.width, canvas.height), x, y);
   if (hit) shapesDrawer.open = true;
   cards.choose(hit ? hit.index : null);
 }
@@ -237,7 +286,7 @@ function frameAll() {
   params.set(frameAround(v, round.centre, round.radius, v.width, v.height));
 }
 
-// ── Leaving ──────────────────────────────────────────────────────────────────
+// ── A button of the panel's — the ways out are leaving.js's ─────────────────
 
 function button(label, onClick, primary = false) {
   const b = document.createElement('button');
@@ -246,68 +295,6 @@ function button(label, onClick, primary = false) {
   b.textContent = label;
   b.addEventListener('click', onClick);
   return b;
-}
-
-function buildExport(panel) {
-  const exp = exportBox(panel, {
-    before: 'format',
-    vault: { save },
-    disk: {
-      picture: () => leave(async () => {
-        bar.say('drawing…');
-        const out = await downloadPicture({ params, shapes: cards.recipe(), renderer });
-        return `downloaded ${out.width} × ${out.height} px`;
-      }),
-    },
-  }).drawer;
-  const printing = buildPrint(exp);
-  // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(panel, { app: '3d', layer: () => printing.object(), save: () => save() });
-}
-
-/**
- * A print (core/PrintPanel.js): the model as it stands, drawn again at a
- * sheet's size and a dpi a window at a time (frames.js `window`) — no
- * preview, one file. Its rows are its own, never the recipe's; a print
- * format chosen in the Format drawer becomes its sheet.
- */
-function buildPrint(exp) {
-  const printing = new PrintPanel({
-    mount: exp.body, app: '3d', leave, say: text => bar.say(text), format: params.values.format,
-    object: () => renderer && ({
-      type: 'model', origin: APP, recipe: { ...params.values, shapes: cards.recipe() },
-      render: { w: Math.round(params.values.width * params.values.scale), h: Math.round(params.values.height * params.values.scale) },
-    }),
-  });
-  params.on(key => { if (key === 'format') printing.follow(params.values.format); });
-  return printing;
-}
-
-/** One way out: nothing else started, what happened said. */
-async function leave(action) {
-  if (busy) return;
-  if (!renderer) return bar.announce('nothing draws here — ' + (failing || 'three is still starting'));
-  busy = true;
-  try {
-    bar.announce(await action());
-  } catch (err) {
-    console.error('[3d] failed:', err);
-    bar.announce('failed: ' + err.message);
-  } finally {
-    busy = false;
-    refreshVault();
-    draw();
-  }
-}
-
-/** The model as it stands into the vault (save.js). */
-function save() {
-  return leave(async () => {
-    bar.say('saving…');
-    const object = await saveModel({ params, shapes: cards.recipe(), renderer });
-    if (!object) return 'no vault — downloaded instead';
-    return `saved ${object.id} — ${object.title}`;
-  });
 }
 
 // ── Keys ─────────────────────────────────────────────────────────────────────
@@ -337,8 +324,15 @@ function wireKeys(mine) {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (!vault.isOpen && chosen.key(e)) return;
+    // A turntable's clock (motion.js): space plays it or holds it, , and . a frame back and on.
+    if (loopOf(params.values).loop && [' ', ',', '.'].includes(e.key)) {
+      e.preventDefault();
+      if (e.key === ' ') clock.toggle();
+      else { clock.pause(); clock.step(e.key === ',' ? -1 : 1); }
+      return;
+    }
     if (e.key === 'v' || e.key === 'V') vault.toggle();
-    if (e.key === 's' || e.key === 'S') save();
+    if (e.key === 's' || e.key === 'S') leaving.save();
     if (e.key === 'f' || e.key === 'F') frameAll();
     if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey && grid()) again(grid(), 'hues');   // BEC's c
     if (e.key === 'Escape' && !vault.isOpen) cards.choose(null);

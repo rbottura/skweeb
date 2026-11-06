@@ -5,8 +5,9 @@
  * A recipe is the app's values — view, light, ground, format — and its
  * shapes (scene.js). A frame is the scene built from it, seen by the camera
  * its values make (camera.js), drawn by the page's one renderer
- * (renderer.js) over the recipe's ground. A model is a still for now: one
- * frame. Motion is M10's fifth brick.
+ * (renderer.js) over the recipe's ground. A model that does not turn is
+ * one frame; one that turns, its loop (motion.js) — frame i seen from where
+ * the turntable has it, the sun turned with the eye when the model turns.
  *
  * ── Sizes ──────────────────────────────────────────────────────────────────
  *
@@ -27,6 +28,7 @@
 import { Model } from './scene.js';
 import { cameraFor } from './camera.js';
 import { outlineOf } from './look.js';
+import { loopOf, seenAt } from './motion.js';
 import { surface } from '../../core/surface.js';
 
 /**
@@ -51,26 +53,34 @@ export function openModel(recipe, { renderer, scale = 1 }) {
   const own = recipe.scale || 1;
   const px = own * scale;
   const w = Math.max(1, Math.round(recipe.width * px)), h = Math.max(1, Math.round(recipe.height * px));
-  const model = new Model().update(recipe, scale > 1 ? sharper(w, h, renderer) : {});
+  const fine = scale > 1 ? sharper(w, h, renderer) : {};
+  const model = new Model().update(recipe, fine);
+  const motion = loopOf(recipe);
+  // Frame i's values: where the turntable has the eye, the sun with it as the model turns.
+  const at = i => {
+    const v = seenAt(recipe, i);
+    if (motion.loop && v.turning !== 'the eye') model.light(v, fine);
+    return v;
+  };
   const outline = outlineOf(recipe) * 0.002;
   let canvas = null, ctx = null;                 // the whole frame's, when one is asked for
   let tile = null, tileCtx = null;               // a window's, as large as the largest asked
 
   return {
-    length: 1,
-    fps: 0,
-    loop: false,
+    length: motion.length,
+    fps: motion.fps,
+    loop: motion.loop,
     width: Math.max(1, Math.round(recipe.width * own)),
     height: Math.max(1, Math.round(recipe.height * own)),
     scale,
     model,
 
-    frame() {
+    frame(i = 0) {
       if (!canvas) {
         canvas = surface(w, h);
         ctx = canvas.getContext('2d');
       }
-      drawModel(ctx, renderer, model, recipe, w, h);
+      drawModel(ctx, renderer, model, at(i), w, h);
       return canvas;
     },
 
@@ -79,14 +89,15 @@ export function openModel(recipe, { renderer, scale = 1 }) {
         tile = surface(Math.max(win.w, tile ? tile.width : 0), Math.max(win.h, tile ? tile.height : 0));
         tileCtx = tile.getContext('2d');
       }
-      const camera = cameraFor(recipe, w, h);
+      const v = at(i);
+      const camera = cameraFor(v, w, h);
       camera.setViewOffset(w, h, win.x, win.y, win.w, win.h);
       if (model.ink) {
         // A push of a share of the whole height, in this window's height; the window's proportions.
         model.ink.width.value = outline * (h / win.h);
         model.ink.aspect.value = win.w / win.h;
       }
-      drawModel(tileCtx, renderer, model, recipe, win.w, win.h, camera);
+      drawModel(tileCtx, renderer, model, v, win.w, win.h, camera);
       if (model.ink) {
         model.ink.width.value = outline;
         model.ink.aspect.value = w / h;

@@ -82,5 +82,21 @@ ok('a narrow picture frames by its width: further', tall.distance > framed.dista
 const ortho = frameAround(view({ lens: 'orthographic', fov: 40 }), round.centre, round.radius, 400, 400);
 ok('orthographic: half the height is the sphere and its margin', r3(halfHeight({ ...view({ fov: 40 }), ...ortho })), r3(1.5 * 1.15));
 
+// ── The turntable (motion.js, P1): the eye's path in time, a loop that closes to the bit ──
+const { loopOf, seenAt, turnedAt, MOTION_PARAMS } = await import('../apps/3d/motion.js');
+const turning = { yaw: 30, sunYaw: -35, turns: 1, turning: 'the model', length: 72, fps: 24 };
+ok('nothing turns: one frame, a still — and in a recipe saved before the turntable', [loopOf({ ...turning, turns: 0 }), loopOf({ yaw: 30 })],
+  [{ length: 1, fps: 0, loop: false, turns: 0 }, { length: 1, fps: 0, loop: false, turns: 0 }]);
+ok('a turn: its frames at its rate, a loop', loopOf(turning), { length: 72, fps: 24, loop: true, turns: 1 });
+ok('frame i turned 360° × turns × i / length: a quarter at 18, twice as far at two turns',
+  [turnedAt(turning, 18), turnedAt({ ...turning, turns: 2 }, 18), turnedAt({ ...turning, turns: -1 }, 18)], [90, 180, -90]);
+ok('the frame after the last is the first, to the bit', JSON.stringify(seenAt(turning, 72)) === JSON.stringify(seenAt(turning, 0))
+  && JSON.stringify(seenAt(turning, -1)) === JSON.stringify(seenAt(turning, 71)), true);
+ok('…and frame 0 is the recipe itself', seenAt(turning, 0) === turning, true);
+ok('the model turns: the sun turns with the eye', [seenAt(turning, 18).yaw, seenAt(turning, 18).sunYaw], [120, 55]);
+ok('the eye turns: the sun stays in the world', [seenAt({ ...turning, turning: 'the eye' }, 18).yaw, seenAt({ ...turning, turning: 'the eye' }, 18).sunYaw], [120, -35]);
+ok('its rows: turns from −2 to 2, the rest only when it turns', [MOTION_PARAMS.turns.min, MOTION_PARAMS.turns.max, MOTION_PARAMS.turns.default,
+  JSON.stringify(MOTION_PARAMS.length.when)], [-2, 2, 0, '{"turns":{"not":0}}']);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
