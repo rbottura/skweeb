@@ -192,6 +192,7 @@ if (gamepadLoop) {
 // ── A palette, made by hand in the vault (V1, core/vault-palette.js) ─────────
 await c.go(c.base + '/apps/vault/');
 await page.until(`!!document.querySelector('.vp-make')`, { timeout: 20000 });
+const palettesBefore = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).filter(r => r.type === 'palette').length;
 await page.eval(`document.querySelector('.vp-make').click()`);
 await page.until(`document.querySelectorAll('.vp-pal-row').length === 3`, { timeout: 5000 });
 await page.eval(`(() => { const set = (n, v, ev = 'input') => { n.value = v; n.dispatchEvent(new Event(ev, { bubbles: true })); };
@@ -213,8 +214,8 @@ await page.until(`document.querySelectorAll('.vp-pal-row').length === 4`, { time
 await page.eval(`(() => { const n = document.querySelectorAll('.vp-pal-row')[1].querySelector('.vp-pal-colour'); n.value = '#00a773';
   n.dispatchEvent(new Event('input', { bubbles: true }));
   [...document.querySelectorAll('.vp-detail .vp-btn')].find(b => /^Keep/.test(b.textContent)).click(); })()`);
-await page.until(`import('/core/vault.js').then(({ Vault }) => Vault.refresh().then(() => Vault.index.filter(r => r.type === 'palette').length === 2))`, { timeout: 20000 });
-const second = (await palettes()).find(r => r.id !== first.id);
+await page.until(`import('/core/vault.js').then(({ Vault }) => Vault.refresh().then(() => Vault.index.filter(r => r.type === 'palette').length === ${palettesBefore + 2}))`, { timeout: 20000 });
+const second = (await palettes()).find(r => (r.parents || []).includes(first.id));
 const edited = second && (await (await fetch(c.base + '/api/vault/' + second.id)).json());
 c.ok('…its colours edited: a new palette, the first its parent and as it was', !!edited && edited.recipe.colours[1] === '#00a773'
   && (edited.parents || []).includes(first.id) && (await (await fetch(c.base + '/api/vault/' + first.id)).json()).recipe.colours[1] === '#7a7a7a',

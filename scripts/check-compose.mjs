@@ -125,8 +125,10 @@ try {
     const mx = placementMatrix(t, { width: still.render.w, height: still.render.h }, SHEET);
     const pts = [[0, 0], [still.render.w, 0], [still.render.w, still.render.h], [0, still.render.h]]
       .map(p => onPage(mx, p).map(v => v * view));
-    const want = [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])),
-                  Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
+    // What lies past the canvas's edges is not drawn: the want is the canvas's part of it — a large still,
+    // BEC's since 2026-11-06, reaches past the top at this transform.
+    const want = [Math.max(0, Math.min(...pts.map(p => p[0]))), Math.max(0, Math.min(...pts.map(p => p[1]))),
+                  Math.min(s.w, Math.max(...pts.map(p => p[0]))), Math.min(s.h, Math.max(...pts.map(p => p[1])))];
     const off = s.ink ? Math.max(...s.ink.map((v, i) => Math.abs(v - want[i]))) : Infinity;
     ok('a typed transform lands where page.js says', off <= 3,
        `ink ${JSON.stringify(s.ink)} against ${JSON.stringify(want.map(Math.round))}`);
