@@ -13,7 +13,9 @@
  * frame on screen; drawn again by its app, that frame is its render, and
  * frame 72 is frame 0; core's replay plays it, 72 frames. Every frame
  * downloads, a zip of 72 PNGs and its meta. Turned back to none, the player
- * goes and S saves a model again. And no page said anything wrong.
+ * goes and S saves a model again. And with no turn, the sphere swung up and
+ * down (P2): a loop again, a quarter of its wave another picture, no handles
+ * on it, S its loop titled swinging. And no page said anything wrong.
  *
  * Apart from check-3d, which follows one still model from its opening to
  * its save.
@@ -139,6 +141,26 @@ const still = await saved();
 c.ok('…S saves a model again, the next state of the same smart object', !!still && still.type === 'model' && !!o && still.id === o.id,
   still ? `${still.type} ${still.id} v${still.version}` : 'nothing saved');
 await c.shot('2-still-again');
+
+// P2: no turn, but the sphere swung up and down — its card's Swing — the model a loop again, its handles gone.
+const cards = `[...document.querySelectorAll('.pp-card')].filter(c => !c.parentElement.closest('.pp-card'))`;
+const cardRow = (i, name) => `[...${cards}[${i}].querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const how = await page.eval(`(() => { const row = ${cardRow(1, 'what swings')}; if (!row) return 'no row';
+  const sel = row.querySelector('select');
+  if (sel) { sel.value = 'y'; sel.dispatchEvent(new Event('change', { bubbles: true })); return 'select'; }
+  const chip = [...row.querySelectorAll('button')].find(b => b.textContent === 'up and down'); if (chip) chip.click(); return chip ? 'chip' : 'none'; })()`);
+await page.until(`!!${strip} && !${strip}.hidden && !!document.querySelector('.tp-play.tp-playing')`, { timeout: 10000 }).catch(() => {});
+c.ok('the sphere swung up and down: the model a loop, playing at once, with no turn', /\/ 72$/.test(await count()) && await playing(), `${how} · ${await count()}`);
+await key(' ');
+await page.until(`!document.querySelector('.tp-play.tp-playing')`, { timeout: 5000 }).catch(() => {});
+await scrubTo(0); await wait(300); await keep('s0');
+await scrubTo(18); await wait(300); await keep('s18');
+const bobbed = await apart('s0', 's18');
+c.ok('…a quarter of its wave on, another picture — and a shape that swings has no handles to drag its moment into its place',
+  bobbed > 0.002 && (await green()) === 0, `${(bobbed * 100).toFixed(2)}% apart · ${await green()} green`);
+const swung = await saved();
+c.ok('…S saves its loop, titled as it swings', !!swung && swung.type === 'sequence' && swung.title === 'box, sphere, torus · swinging ×72'
+  && swung.recipe.shapes[1].params.swingBy === 'y', swung ? `${swung.type} "${swung.title}"` : 'nothing saved');
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));

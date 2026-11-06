@@ -34,7 +34,7 @@
  */
 
 import { modelParams, GROUPS, SHAPE_CARDS, OPENING } from './params.js';
-import { loopOf, seenAt } from './motion.js';
+import { loopOf, seenAt, swings } from './motion.js';
 import { Model }          from './scene.js';
 import { drawModel }      from './frames.js';
 import { frameAround, cameraFor } from './camera.js';
@@ -128,7 +128,9 @@ async function boot(mine) {
   const panel = new ParamPanel(params, { title: '3d', mount: root.querySelector('#side'), groups: GROUPS });
 
   shapesDrawer = panel.addDrawer({ id: 'shapes', title: 'Shapes', before: 'view' });
-  cards = new Cards({ ...SHAPE_CARDS, mount: shapesDrawer.body, onChange: draw, onChoose: draw });
+  // A card changed: the loop fitted again — a shape set swinging makes the model one, and plays it (P2).
+  cards = new Cards({ ...SHAPE_CARDS, mount: shapesDrawer.body, onChange: () => { const was = clock.length > 1; fitClock();
+    if (!was && clock.length > 1 && !clock.playing) clock.play(); draw(); }, onChoose: draw });
   model.onInks = () => draw();             // a palette of the vault a shape names, come: drawn again in it (palettes.js)
   chosen = wireChosen({ cards, model, onChange: draw, root });
   const handles = chosen.handles;
@@ -174,7 +176,7 @@ async function boot(mine) {
 /** The clock fitted to the turntable the values make (motion.js): its frames at its rate, or one still frame. */
 function fitClock() {
   if (!params || !transport) return;
-  const { length, fps, loop } = loopOf(params.values);
+  const { length, fps, loop } = loopOf({ ...params.values, shapes: cards ? cards.recipe() : [] });
   const key = `${length}@${fps}`;
   if (key !== clockAt) {
     const was = clock.playing && loop;
@@ -189,8 +191,11 @@ function fitClock() {
   player.note(loop ? `${length} frames · ${(length / fps).toFixed(2)} s, a loop` : '');
 }
 
-/** The values the frame on screen is seen with: the turntable's, at the clock's tick (motion.js). */
-const seen = () => seenAt(params.values, loopOf(params.values).loop ? clock.tick : 0);
+/** The values the frame on screen is seen with, its shapes with them: the turntable's and their swings', at the clock's tick (motion.js). */
+const seen = () => {
+  const v = { ...params.values, shapes: cards.recipe() };
+  return seenAt(v, loopOf(v).loop ? clock.tick : 0);
+};
 
 /** `?open=<id>`: a saved model back to work on (core/reopen.js), shape for shape. */
 async function openRequested() {
@@ -239,11 +244,13 @@ function paint() {
     if (failing) bar.say('nothing draws here — ' + failing);
     return;
   }
-  const at = seen();                       // the frame on screen: the turntable's, the sun with it as the model turns
-  model.update({ ...at, shapes });
+  const at = seen();                       // the frame on screen: the turntable's, the sun with it, its shapes swung
+  model.update(at);
   const camera = cameraFor(at, w, h);
-  // Its handles and its box hidden while it plays: a turning picture is watched, not worked on.
-  const part = clock.playing ? null : model.partAt(cards.chosenIndex);
+  // Its handles and its box hidden while it plays — a moving picture is watched, not worked on — and on a
+  // shape that swings: a handle would write the wave's moment into its place (P2).
+  const still = !clock.playing && !(cards.chosen && swings({ params: cards.chosen.params.values }));
+  const part = still ? model.partAt(cards.chosenIndex) : null;
   const { handles } = chosen;
   handles.attach(part && part.mesh);
   handles.see(camera);

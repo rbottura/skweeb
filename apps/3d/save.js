@@ -15,6 +15,7 @@
 
 import { readPalettes, palettesIn } from './palettes.js';
 import { openModel }     from './frames.js';
+import { loopOf }        from './motion.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { toPng, download, runFrames, zipStore, frameName, crc32 } from '../../core/export.js';
@@ -48,11 +49,12 @@ export async function saveModel({ params, shapes, renderer, tick = 0 }) {
     const shown = frames.frame(loop ? tick % frames.length : 0);
     const blob = await toPng(shown);
     const kinds = [...new Set(shapes.filter(s => s.on !== false && SHAPES[s.id]).map(s => s.id))];
+    const how = loopOf(recipe);               // turning, or its shapes swinging (motion.js, P2)
     return await Vault.save({
       type: loop ? 'sequence' : 'model',
       state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
-      title: titleOf(shapes) + (loop ? ` · turning ×${frames.length}` : ''),
-      tags: ['3d', ...kinds, ...(loop ? ['loop', 'turntable'] : [])],
+      title: titleOf(shapes) + (loop ? ` · ${how.turns ? 'turning' : 'swinging'} ×${frames.length}` : ''),
+      tags: ['3d', ...kinds, ...(loop ? ['loop', ...(how.turns ? ['turntable'] : []), ...(how.swings ? ['swing'] : [])] : [])],
       origin: APP,
       seed: null,
       recipe,

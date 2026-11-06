@@ -86,8 +86,8 @@ ok('orthographic: half the height is the sphere and its margin', r3(halfHeight({
 const { loopOf, seenAt, turnedAt, MOTION_PARAMS } = await import('../apps/3d/motion.js');
 const turning = { yaw: 30, sunYaw: -35, turns: 1, turning: 'the model', length: 72, fps: 24 };
 ok('nothing turns: one frame, a still — and in a recipe saved before the turntable', [loopOf({ ...turning, turns: 0 }), loopOf({ yaw: 30 })],
-  [{ length: 1, fps: 0, loop: false, turns: 0 }, { length: 1, fps: 0, loop: false, turns: 0 }]);
-ok('a turn: its frames at its rate, a loop', loopOf(turning), { length: 72, fps: 24, loop: true, turns: 1 });
+  [{ length: 1, fps: 0, loop: false, turns: 0, swings: false }, { length: 1, fps: 0, loop: false, turns: 0, swings: false }]);
+ok('a turn: its frames at its rate, a loop', loopOf(turning), { length: 72, fps: 24, loop: true, turns: 1, swings: false });
 ok('frame i turned 360° × turns × i / length: a quarter at 18, twice as far at two turns',
   [turnedAt(turning, 18), turnedAt({ ...turning, turns: 2 }, 18), turnedAt({ ...turning, turns: -1 }, 18)], [90, 180, -90]);
 ok('the frame after the last is the first, to the bit', JSON.stringify(seenAt(turning, 72)) === JSON.stringify(seenAt(turning, 0))
@@ -95,8 +95,24 @@ ok('the frame after the last is the first, to the bit', JSON.stringify(seenAt(tu
 ok('…and frame 0 is the recipe itself', seenAt(turning, 0) === turning, true);
 ok('the model turns: the sun turns with the eye', [seenAt(turning, 18).yaw, seenAt(turning, 18).sunYaw], [120, 55]);
 ok('the eye turns: the sun stays in the world', [seenAt({ ...turning, turning: 'the eye' }, 18).yaw, seenAt({ ...turning, turning: 'the eye' }, 18).sunYaw], [120, -35]);
-ok('its rows: turns from −2 to 2, the rest only when it turns', [MOTION_PARAMS.turns.min, MOTION_PARAMS.turns.max, MOTION_PARAMS.turns.default,
-  JSON.stringify(MOTION_PARAMS.length.when)], [-2, 2, 0, '{"turns":{"not":0}}']);
+ok('its rows: turns from −2 to 2, what turns only when it turns, the loop\'s length always — a swing\'s too',
+  [MOTION_PARAMS.turns.min, MOTION_PARAMS.turns.max, MOTION_PARAMS.turns.default, JSON.stringify(MOTION_PARAMS.turning.when), MOTION_PARAMS.length.when],
+  [-2, 2, 0, '{"turns":{"not":0}}', undefined]);
+
+// A shape swung (P2): its place on a wave, whole cycles in the loop — frame `length` frame 0 again.
+const { swungAt, swings } = await import('../apps/3d/motion.js');
+const bob = { id: 'sphere', on: true, params: { y: 1, size: 2, turnY: 10, swingBy: 'y', swingMove: 0.5, swingCycles: 1, swingPhase: 0 } };
+ok('a shape that swings makes the model a loop, turning or not', loopOf({ turns: 0, length: 60, fps: 30, shapes: [bob] }),
+  { length: 60, fps: 30, loop: true, turns: 0, swings: true });
+ok('…one that is off, or swings nothing, does not', [swings({ ...bob, on: false }), swings({ ...bob, params: { ...bob.params, swingBy: 'none' } })], [false, false]);
+ok('up and down: as far either way, a quarter round its top, half round where it began', [0, 15, 30, 45].map(i => +swungAt(bob, i, 60).params.y.toFixed(6)),
+  [1, 1.5, 1, 0.5]);
+ok('…frame 60 is frame 0, to the bit; two cycles twice as quick', [swungAt(bob, 60, 60).params.y === swungAt(bob, 0, 60).params.y,
+  +swungAt({ ...bob, params: { ...bob.params, swingCycles: 2 } }, 15, 60).params.y.toFixed(6)], [true, 1]);
+ok('turned, in degrees; its size, a share of it; at its phase', [swungAt({ ...bob, params: { ...bob.params, swingBy: 'turnY', swingTurn: 20 } }, 15, 60).params.turnY,
+  swungAt({ ...bob, params: { ...bob.params, swingBy: 'size', swingSize: 0.5 } }, 15, 60).params.size,
+  +swungAt({ ...bob, params: { ...bob.params, swingPhase: 90 } }, 0, 60).params.y.toFixed(6)], [30, 3, 1.5]);
+ok('…and seen at a frame, its shapes swung with it', seenAt({ turns: 0, length: 60, fps: 30, yaw: 0, shapes: [bob] }, 15).shapes[0].params.y, 1.5);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
