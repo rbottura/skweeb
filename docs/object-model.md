@@ -81,6 +81,12 @@ A folder is a view, not a place. Every object still lives at
 folder by losing a tag. The objects worth seeing on their own — a still, a
 loop, the `set` itself — carry no folder tag and stay at the top.
 
+Since 2026-11-06 a folder is also made by hand, a *group* (V3,
+`core/vault-groups.js`, `docs/workshop.md`): the panel's selection into one,
+a new name or one there is, or out of the one it is in; a group renamed,
+every member's tag with it. One at most: filed in another, an object leaves
+the first.
+
 ## Tags change
 
 Everything about an object is fixed when it is saved — except its tags.

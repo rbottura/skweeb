@@ -50,6 +50,9 @@ families were made by their apps; this is a set made by the hand.
 
 ## V3 — groups
 
+*Landed 2026-11-06* — the bar's *Into a group…*, *Out of their group*, and
+*rename* at a group's strip (`core/vault-groups.js`, `core/vault-name.js`).
+
 The folders, by hand: the selection *into a group…*, a new name or one
 there is — `folder:<name>`, a view and not a place (`docs/object-model.md`,
 *Tags that group*); out of a group; a group renamed, every member's tag

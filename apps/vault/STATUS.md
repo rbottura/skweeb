@@ -29,6 +29,10 @@ app that is open when nothing else is (`docs/scene.md`, *Planned*).
   pixels, in a canvas no bigger than the picture. Fitted with an even margin
   round it, the rulers' bands aside (theme.css, every app's viewer).
 - **`?open=<id>`** draws that object as the page opens.
+- **Groups, by hand** (V3, 2026-11-06; `core/vault-groups.js`): the panel's
+  selection — Ctrl or Shift click — *into a group…*, a name typed or one
+  there is, or *out of their group*; a group's strip *rename*, every
+  member's `folder:` tag with it — everywhere the panel is.
 - **A palette, made by hand** (V1, 2026-11-06; `core/vault-palette.js`,
   `docs/workshop.md`): *+ palette* in the panel's head — its name, its
   swatches, each a colour and a name, moved, taken out, one added — kept,

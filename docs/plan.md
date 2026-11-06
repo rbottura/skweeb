@@ -52,8 +52,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M13a | BEC's grid, a primitive of the 3D app: cells, edges, faces, palettes, every draw a seed | `3d/grid` | M | landed 2026-11-05 (`docs/bec.md`) |
 | M13b | BEC's files into the vault, in a folder `bec_2025`: titles and infos by format, its palettes | `bec/import` | S | landed 2026-11-06, and run: 31 objects in `bec_2025` |
 | V1 | the palette, a type: made by hand in the vault panel, edited as a new one, BEC's grid drawn in one | `vault/palette` | M | landed 2026-11-06 (`docs/workshop.md`) |
-| V2 | a set by hand: the pictures selected, in their order, a set of a role | `vault/set` | S | after M13b |
-| V3 | groups by hand: the selection into a group, out of it, a group renamed | `vault/groups` | S | after M13b |
+| V2 | a set by hand: the pictures selected, in their order, a set of a role | `vault/set` | S | ready |
+| V3 | groups by hand: the selection into a group, out of it, a group renamed | `vault/groups` | S | landed 2026-11-06 |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
