@@ -27,6 +27,7 @@
 import { renderFrame }   from './render.js';
 import { loopFrames }    from './motion.js';
 import { Vault }         from '../../core/vault.js';
+import { regroup }       from '../../core/vault-groups.js';
 import { thumbFromCanvas, thumbFromBlob } from '../../core/thumb.js';
 import { runFrames, toPng, zipStore, frameName, download } from '../../core/export.js';
 
@@ -52,7 +53,7 @@ export async function saveDataset({ params, data, entries, preview, fromFile, fo
     : recipe.input === 'glyphs' ? `${entries[0]}–${entries[entries.length - 1]}`
     : JSON.stringify(recipe.text.slice(0, 24));
 
-  return Vault.save({
+  const object = await Vault.save({
     type: 'dataset',
     title: `${what} · ${data.length} × ${points} dots`,
     tags: ['ckt', 'dataset', recipe.input].concat(fromFile ? ['leaf'] : [], folder ? [folder] : []),
@@ -63,6 +64,16 @@ export async function saveDataset({ params, data, entries, preview, fromFile, fo
     render: { blob, ext: 'json', w: recipe.width, h: recipe.height },
     thumb: await thumbFromCanvas(preview),
   });
+  // The same dots cut again: the vault hands back the object it had, its tags of then — filed now with this
+  // visit's session, its one folder (core/vault-groups.js), so the session holds what was cut in it (C4).
+  if (object && folder && !(object.tags || []).includes(folder)) {
+    try {
+      object.tags = (await Vault.retag(object.id, regroup(object, folder.slice('folder:'.length)))).tags;
+    } catch (err) {
+      console.warn('[ckt] the dots cut again stayed in the session they were cut in:', err.message);
+    }
+  }
+  return object;
 }
 
 /** What a stage-two piece is called: its dots, its glyph, its attractor. */
