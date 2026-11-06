@@ -1,18 +1,16 @@
 # STATUS — skweeb
-_last touched: 2026-11-05_
+_last touched: 2026-11-06_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
-`docs/roadmap.md` the milestones still open and `docs/roadmap-done.md` the
-done ones; `docs/plan.md` the work items and their branches;
-`docs/decisions.md` why things are as they are. Rewritten on 2026-10-02,
-when it had grown to 557 lines, and on 2026-10-22, M11's bricks folded into
-what works: what each day added is in its app's file, here only what works.
+`docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
+ones; `docs/plan.md` the work items; `docs/decisions.md` why things are as
+they are. What each day added is in its app's file, here only what works.
 Ideas the author has between bricks wait in `docs/inbox.md` until a session
 sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-05: *cluster*, the scene (S9c to S9g)
+### Newest — 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop
 
 - **cluster** (`apps/cluster/`, `apps/cluster/STATUS.md`): the suite's apps
   in one page one at a time, through their modules, laid as the bench is —
@@ -34,10 +32,9 @@ sorts them.
   of the vault — every draw a seed: R new edges, C new colours, A's pie.
 - **The vault's workshop** (V1–V3, `docs/workshop.md`): a palette made in
   the vault panel, *+ palette*, edited as a new one; its selection into a
-  group or out of one, a group renamed; the pictures selected, a set.
-- **BEC_2025 in the vault** (M13b, `scripts/import-bec.mjs`): its layers by
-  format, its other pictures and its three palettes, 31 objects in the
-  folder `bec_2025`.
+  group or out of one, a group renamed; the pictures selected, a set. And
+  BEC_2025 in it (M13b, `scripts/import-bec.mjs`): its layers by format,
+  its other pictures, its three palettes — 31 objects in `bec_2025`.
 
 ### 2026-11-04: every app a module (S9a), the vault an app (S9b)
 
@@ -109,14 +106,15 @@ sorts them.
   object, the page compose's, whose placements blend. What M11 left — pins,
   flatten, no cycle, more takers, overrides — is L in `docs/plan.md`.
 
-### M10 — 3D (`apps/3d/STATUS.md`, four bricks of six, 2026-10-06)
+### M10 — 3D (`apps/3d/STATUS.md`, four bricks of six and a turntable)
 
 - **Primitives made from their params**, each a card (`core/Cards.js`, out
   of filter for it); an orbit view; three r186 on core's GPU device, WebGL2
   where there is none; a `model` keeps values, never a vertex — saved,
   replayed, drawn again at scale 2, placed. Picked by a click, moved by
   three's handles; a stack of modifiers per shape; a style — toon bands, an
-  outline, shadows. Brick 5, a turntable, is P1 on the board.
+  outline, shadows. Brick 5's turntable (P1, 2026-11-06, `motion.js`): a
+  model turned ±1 or ±2 times a loop, played, saved as a `sequence`.
 
 ### The print, in every app (2026-10-06; `docs/core-export.md`)
 
@@ -285,8 +283,8 @@ compares two pages' canvases measures, never demands the pixel.
 - **The stack's live view blends over the checkerboard** where nothing is
   under a layer; a save blends over nothing — alike for most blends, not for
   screen or difference. An app's own ground is opaque: set it to none to see
-  what is under its layer (L4). The gamepad and the 3D app have no clock in
-  the stack: the gamepad has no drawer, the 3D app's model does not move yet.
+  what is under its layer (L4). The gamepad has no clock in the stack: it
+  has no drawer.
 - **A gamepad loop prints enlarged where it is large**: p5 replays it with
   no window, so it is drawn whole as large as a canvas allows — most loops
   fit a 120×176 sheet at 300 dpi, a tall one is enlarged a little, and the
@@ -297,7 +295,8 @@ compares two pages' canvases measures, never demands the pixel.
   little early after a real press; it passed every rerun. Under the load of
   checks run together (`scripts/checks.mjs`) it fails more, and so, now and
   then, does check-compose's "a typed transform lands where page.js says":
-  both green alone, which the runner tries before saying red.
+  both green alone, which the runner tries before saying red — check-map
+  so in two gates of 2026-11-06.
 - **A blur's taps stop at 512 a side**; past that it wants a smaller picture.
 - **Compose's PNG export still draws its page on one canvas**, tried up to
   2480 × 3508 — its print beside it draws any sheet in tiles.
@@ -340,12 +339,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**P1 — the 3D app's turntable** (`apps/3d/STATUS.md`, *Next single step*):
-a Motion drawer — turns 0, ±1, ±2, a length in frames, a rate; frame i seen
-from the yaw plus 360° × turns × i / length, the last meeting the first;
-played in the view by core's Playhead; the loop a `sequence` through E's
-menu, the model its parent. M13c, the gabarit, waits on its fields — the
-author's.
+**P3 — a character, defined once** (`docs/plan.md`, *P*): a `set`,
+`role: 'character'`, its members loops by direction in RPG Maker's order —
+down, left, right, up — a row of `core/uses.js`, *map character*, and of
+`docs/object-model.md`, with a test; made by hand in the vault panel as V2
+makes a set, its members sequences. M13c, the gabarit, waits on its
+fields — the author's.
 
 ## Parked decisions
 

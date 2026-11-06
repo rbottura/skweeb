@@ -253,6 +253,13 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**A turntable turns the model** (P1). The sun turns with the eye by
+default, so every side comes round into the light, as on a turntable under
+a studio's lamps; the eye walked round under the world's sun — the drag's
+way, its dark side coming round — is the other choice, a row. A model that
+turns saves as a `sequence`, as fractals' idles and the rig's loops do: what
+moves is one, and a smart object's states may be either.
+
 **A set by hand keeps the order it was picked in** (V2). Its members are
 the pictures selected, in the order of the clicks; a material made so has
 no ground — its order the hand's, not measured. Its role is one a use

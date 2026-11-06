@@ -20,12 +20,26 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
    displace by seeded noise, twist, bend, mirror, array.
 4. **A look** — done 2026-10-06: toon shading on a ramp, shadows, an
    outline.
-5. **Motion**: a turntable, or a transform swung as the rig swings a bone,
-   every loop closing.
+5. **Motion**: a turntable — done 2026-11-06 (P1) — or a transform swung
+   as the rig swings a bone (P2), every loop closing.
 6. **For the game**: a model drawn from four or eight sides, a set by
    direction, `role: 'character'`.
 
 ## Works now
+
+- **A turntable** (P1, 2026-11-06; `motion.js`, `tests/3d-camera.mjs`,
+  `check-3d-turntable`). The Motion drawer's turns — 0 a still, ±1, ±2 — a
+  loop's frames and its fps: frame i seen from the yaw plus 360° × turns ×
+  i / length, i modulo the length, so the loop closes to the bit. What
+  turns: the model, the sun turned with the eye so every side comes round
+  into the light — or the eye, walked round under the world's sun, as a
+  drag turns round it. Core's clock plays it in the view, under it core's
+  player — space, and , . a frame — a turn given plays at once, the handles
+  hidden while it plays. S saves its loop, a `sequence` with the model's
+  recipe and its turn, its picture the frame on screen; rebuild.js replays
+  it, compose plays it; E's menu downloads every frame for frames-to-video;
+  the print and the stack's window take the frame on screen. The ways out
+  are `leaving.js`, out of main.js along the rig's seam (`apps/rig/leaving.js`).
 
 - **A module** (S9a, 2026-11-04; `main.js` on core's `mount.js`):
   `mount(host)` and `unmount()` — its keys and observer on the scope, its
@@ -206,18 +220,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**Brick 5's first: a turntable.** A Motion drawer: turns a loop — 0 still,
-±1, ±2 — its length in frames and its rate; frame i seen from the yaw plus
-360° × turns × i / length, so frame `length` is frame 0 to the bit.
-frames.js's `openModel` gives that many frames at that rate; core's
-Playhead plays them in the view, space to stop, the handles hidden while
-it plays. S saves through the sheet every app gets first (L10), the
-author's answer of 2026-10-22: 1 the model as it stands, 2 the loop — a
-`sequence`, as the rig's loops are, its recipe the model's and its motion —
-3 a smart object of either, that a particle sprite or a placement follows.
-Replayed by rebuild.js; compose plays it. P1 on the board, after L10; then
-P2, a shape's place swung on a wave as the rig swings a bone, and P6, a
-model from every side, once P3 has defined a character.
+**Brick 5's second: a shape swung** (P2, `3d/swing`). A shape's place
+swung on a wave, as the rig swings a bone — a phase a shape, a whole number
+of swings in the turntable's loop so it still closes; then P6, a model from
+every side, once P3 has defined a character.
 
 ## Parked
 

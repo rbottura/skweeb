@@ -17,7 +17,7 @@ placed, titled and worded its own way.
 |---|---|---|
 | **Format** | a schema group, core's `frameParams()` (`core/frame.js`), less what an app has no use for, drawn by `ParamPanel` as a drawer | grid whole; ckt's motion side; compose, particles less `zoom`; fractals, 3d less `zoom` and `bleed`. None in map (its size is its grid), filter (its source's), the rig (its drawing's), the puppet |
 | **Ground** | one `type: 'ground'` row, in whatever group the app put it | its own drawer in grid, ckt, compose (*paper*); fractals' *copies*, particles' *look*, map's *map*, 3d's light, the puppet's *For OBS* |
-| **Player** | core's `Transport` on core's `Playhead`, mounted by the app | a drawer added for it in grid, filter, fractals; a holder in the *player* group's drawer in ckt, compose, particles. The rig's loop in its Motion drawer, the map's clock: no transport. None in 3d yet |
+| **Player** | core's `Transport` on core's `Playhead`, mounted by the app | a drawer added for it in grid, filter, fractals; a holder in the *player* group's drawer in ckt, compose, particles. The rig's loop in its Motion drawer, the map's clock: no transport. A drawer for it in 3d since its turntable (P1) |
 | **Export** | a drawer the app adds, *Export*, filled with its own buttons, core's `PrintPanel` inside | every app, placed before *format*, *ground*, or last |
 | **Stack** | core's `stackDrawer(panel, …)`, which adds its own drawer | every app but the gamepad and the puppet |
 | Vault, Bar, Guide | `VaultPanel`, `Bar`, `Guide` — components already | every app; the Guide in the puppet |
@@ -34,7 +34,7 @@ What the Export drawers say, for what are a handful of acts:
 | particles | *Save the loop to the vault [S]*, *Save this frame as a still* | *Download every frame (zip)*, *Download a sprite sheet* | |
 | map | *Save to the vault [S]* | *Download the picture (PNG)* | *Play the last save ↗* |
 | rig | *Save to the vault [S]* | *Download the frame (PNG)* | |
-| 3d | *Save to the vault [S]* | *Download the picture (PNG)* | |
+| 3d | *Save to the vault [S]* | *Download the picture (PNG)*, *Download every frame (zip)* — a turntable's | |
 
 And in every one, core's print panel: a sheet, a dpi, *Print it*.
 
