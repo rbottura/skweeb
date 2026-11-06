@@ -12,10 +12,12 @@
  * says the new version; and following is no step of particles' history. The
  * same smart object a layer of particles' stack (L1): its row keeps it at a
  * state, a window's layer has none, and the page the stack saves places it
- * at that state. Placed in compose at its state, and flattened (L2): a
- * model of its own, its parent that state, no refs, the placement pointing
- * at it. And no page said anything wrong. Needs a 3D backend:
- * WebGPU, or WebGL2.
+ * at that state; its row's ✎ opens it in the 3D app, following again (L6).
+ * Placed in compose at its state, *Edit in 3d ↗* — the 3D app opened on it,
+ * bound, the placement following; saved there, version 3 drawn in compose
+ * (L6) — and flattened (L2): a model of its own, its parent that state, no
+ * refs, the placement pointing at it. And no page said anything wrong.
+ * Needs a 3D backend: WebGPU, or WebGL2.
  */
 
 import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
@@ -112,7 +114,18 @@ const pageMade = ((await (await fetch(c.base + '/api/vault')).json()).objects ||
 const kept = pageMade ? (await (await fetch(c.base + '/api/vault/' + pageMade.id)).json()).recipe.place.find(b => b.ref === skw) : null;
 c.ok('…kept at version 1, the page the stack saves places it at version 1', !!kept && kept.version === 1, kept ? JSON.stringify(kept) : await parts.eval(said));
 
-// L2: the same smart object placed in compose — at its state, as S6b places a project — and flattened.
+// L6: the layer edited in place, from its row — its app opened on it; kept at a state, it follows again.
+const pencil = `[...document.querySelectorAll('.pp-stack-row')].find(r => /from the vault/.test(r.textContent))?.querySelector('.pp-stack-btn[title^="edit it"]')`;
+const windowPencil = await parts.eval(`!![...document.querySelectorAll('.pp-stack-row')].find(r => !/from the vault/.test(r.textContent))?.querySelector('.pp-stack-btn[title^="edit it"]')`);
+await parts.eval(`window.__opened = []; window.open = u => { window.__opened.push(String(u)); return null; }`);   // what it opens, read here
+await parts.click(pencil);
+await parts.until(`window.__opened.length > 0`, { timeout: 10000 }).catch(() => {});
+await wait(300);
+const opened = await parts.eval(`window.__opened[0] || ''`);
+c.ok('its row edits it in its app — the 3D app opened on it; a window\'s row has none', !windowPencil && opened.includes('/apps/3d/?open=' + skw), opened);
+c.ok('…kept at a state, the layer follows again', Number(await parts.eval(`${stateRow}?.querySelector('.pp-num')?.value`)) === 0);
+
+// L2, L6: the same smart object placed in compose — at its state, as S6b places a project — edited in place, and flattened.
 const compose = await c.tab(c.base + '/apps/compose/');
 const plAct = label => `[...document.querySelectorAll('.pl-actions .nb-btn')].find(b => b.textContent === ${JSON.stringify(label)})`;
 await compose.until(`!!${plAct('Add…')}`, { timeout: 20000 });
@@ -122,12 +135,31 @@ await compose.click(`${card}?.closest('.vp-cell')?.querySelector('.vp-use')`);
 await compose.until(`document.querySelectorAll('#place-side .pl-row').length === 1`, { timeout: 30000 }).catch(() => {});
 await compose.until(`!!${plAct('Flatten')} && !${plAct('Flatten')}.disabled`, { timeout: 10000 }).catch(() => {});
 c.ok('placed in compose, the smart object can be flattened', await compose.eval(`!!${plAct('Flatten')} && !${plAct('Flatten')}.disabled`));
+
+// Edited in place: Edit in 3d — the 3D app opened on it, bound; the placement, kept at its state, follows now.
+await compose.until(`!!${plAct('Edit in 3d ↗')}`, { timeout: 10000 }).catch(() => {});
+// A real press, as a hand's: a window a script's click opens, the browser holds back.
+await compose.pointer(await compose.eval(`(() => { const b = ${plAct('Edit in 3d ↗')}; b.scrollIntoView({ block: 'center' });
+  const r = b.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()`));
+const editor = await c.found(url => url.includes('/apps/3d/?open=' + skw), { timeout: 15000 });
+await editor.until(`/^opened /.test(${say})`, { timeout: 30000 }).catch(() => {});
+c.ok('Edit in 3d: the 3D app opened on it, the placement following now', /^opened /.test(await editor.eval(say))
+  && /follows its states now/.test(await compose.eval(say)), `${await editor.eval(say)} · ${await compose.eval(say)}`);
+await editor.typeInto(`${row('turned')}?.querySelector('.pp-num')`, '75');
+await wait(300);
+await editor.eval(`document.querySelector('.bar-say').textContent = ''`);
+await editor.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
+await editor.until(`/^saved |failed/.test(${say})`, { timeout: 60000 }).catch(() => {});
+await compose.until(`${say}.includes('drawn again, version 3')`, { timeout: 30000 }).catch(() => {});
+c.ok('…saved there, its next state: the page in compose draws it, version 3', (await compose.eval(say)).includes('drawn again, version 3'),
+  `${await editor.eval(say)} · ${await compose.eval(say)}`);
+
 await compose.click(plAct('Flatten'));
 await compose.until(`/^flattened: |could not flatten/.test(${say})`, { timeout: 30000 }).catch(() => {});
 const flatId = ((await compose.eval(say)).match(/ — (\S+)$/) || [])[1];
 const flat = flatId ? await (await fetch(c.base + '/api/vault/' + flatId)).json() : null;
 c.ok('flattened: a model of its own, made from the state it was placed at, holding nothing', !!flat && flat.type === 'model'
-  && JSON.stringify(flat.parents) === JSON.stringify([skw + '@v2']) && !(flat.refs || []).length,
+  && JSON.stringify(flat.parents) === JSON.stringify([skw + '@v3']) && !(flat.refs || []).length,
   flat ? JSON.stringify({ type: flat.type, parents: flat.parents, refs: flat.refs }) : await compose.eval(say));
 await compose.until(`${plAct('Flatten')}?.disabled`, { timeout: 10000 }).catch(() => {});
 c.ok('…the placement pointing at it, nothing left there to flatten', await compose.eval(`!!${plAct('Flatten')}?.disabled`));

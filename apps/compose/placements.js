@@ -122,7 +122,9 @@ export class Placements {
 
   /** An entry's block, changed. Naming another object, or another look, opens it again. */
   update(p, block) {
-    const other = block.ref !== p.block.ref || (block.look || null) !== (p.block.look || null);
+    // Another object, another look — or another state of a smart object, kept at one or following (L1, L6).
+    const at = b => (Number.isInteger(b.version) ? b.version : 'latest');
+    const other = block.ref !== p.block.ref || (block.look || null) !== (p.block.look || null) || at(block) !== at(p.block);
     p.block = block;
     if (other) p.opening = this.open(p);
     return p.opening;
@@ -142,6 +144,7 @@ export class Placements {
       if (token !== p.loads) { handle.dispose(); return p; }
       if (!handle.length) { handle.dispose(); throw new Error('it rebuilt to no frames'); }
       Object.assign(p, { title: object.title || object.id, type: object.type, thumb,
+                         app: (object.origin && object.origin.app) || null,       // what edits it in place (L6)
                          handle, size: inkSize(handle), refs: object.refs || [] });
       const missing = handle.missing || [];
       if (missing.length) this.say(`${p.title} is drawn without ${missing.join(', ')}: not on this machine`);

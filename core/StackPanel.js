@@ -25,7 +25,7 @@ import { defineParams } from './params.js';
 import { ParamPanel }   from './ParamPanel.js';
 import { VaultPanel }   from './VaultPanel.js';
 import { Vault }        from './vault.js';
-import { follow }       from './reopen.js';
+import { follow, reopenUrl } from './reopen.js';
 
 /** A layer's rows: how it meets what is under it, and where it sits on the page. */
 export const LAYER_PARAMS = {
@@ -171,6 +171,8 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
       row.dataset.app = b.live ? name : 'vault';
       row.append(el('span', 'pp-stack-app', name), el('span', 'pp-stack-what', what));
       if (b.live === live.id) row.append(el('span', 'pp-stack-tag', 'this window'));
+      // A smart object's layer edited in place (L6): its app opened on it, bound — following it again if it was kept.
+      if (b.ref && b.ref.startsWith('skw_')) row.append(button('✎', 'edit it in its app: its next save drawn here', () => editInPlace(i, b)));
       row.append(button('▲', 'up the stack', () => stack.move(i, i + 1)),
         button('▼', 'down the stack', () => stack.move(i, i - 1)),
         button('×', 'off the stack', () => stack.remove(i)));
@@ -198,6 +200,18 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
         picker.show();
       }),
     );
+  }
+
+  /** A smart object's layer, in its app: opened on it, the window bound; kept at a state, it follows from now on. */
+  async function editInPlace(i, b) {
+    try {
+      const url = await reopenUrl((await Vault.load(b.ref)).object);
+      if (!url) return;
+      if (Number.isInteger(b.version)) stack.set(i, { version: 0 });
+      follow(url);
+    } catch (err) {
+      console.warn('[stack] could not open it to edit:', err);
+    }
   }
 
   // A vault object's title, from the index: asked once, and only for one it cannot name.
