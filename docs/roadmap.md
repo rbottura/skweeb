@@ -260,7 +260,8 @@ is seven strokes and fifteen bones, its chains named rightly by guess; it
 walks, waddles, idles; a snake undulates in place and slithers round a path;
 every loop closes. Brick 6 waits on the author's views.
 
-**M10 — 3D: meshes, from primitives up.** Chosen by the author on
+**M10 — 3D: meshes, from primitives up.** *Its six bricks done 2026-11-06;
+its links below still open.* Chosen by the author on
 2026-10-06, while M9's last brick waits on the slug's views: "a simple thing
 to generate and manipulate some real basic primitives". Meshes, not the
 ray-marched distance fields planned when 3D was parked, for what meshes open

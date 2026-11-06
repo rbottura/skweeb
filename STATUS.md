@@ -108,15 +108,15 @@ sorts them.
   object, the page compose's, whose placements blend. Pins in compose and
   the stack (L1), no page holding itself (L3), *Flatten* (L2), *Edit ↗* (L6).
 
-### M10 — 3D (`apps/3d/STATUS.md`, five bricks of six)
+### M10 — 3D (`apps/3d/STATUS.md`, its six bricks done 2026-11-06)
 
 - **Primitives made from their params**, each a card (`core/Cards.js`, out
   of filter for it); an orbit view; three r186 on core's GPU device, WebGL2
   where there is none; a `model` keeps values, never a vertex — saved,
   replayed, drawn again at scale 2, placed. Picked by a click, moved by
   three's handles; a stack of modifiers per shape; a style — toon bands, an
-  outline, shadows. Brick 5 (2026-11-06, `motion.js`): a turntable (P1), a
-  shape swung (P2) — played, saved as a `sequence`.
+  outline, shadows. Brick 5 (`motion.js`): a turntable (P1), a shape swung
+  (P2), saved as a `sequence`; brick 6, its sides a character (P6).
 
 ### The print, in every app (2026-10-06; `docs/core-export.md`)
 
@@ -342,10 +342,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**P6 — the 3D model from every side** (`docs/plan.md`, *P*;
-`apps/3d/STATUS.md`): four or eight yaws, a loop each, kept as a character
-(`core/character.js`) for the map's avatar. M13c, the gabarit, waits on its
-fields — the author's.
+**P7 — a worm's path across the map** (`docs/plan.md`, *P*): a path drawn on
+the map that a thing follows across the room, as the rig's worm crawls round
+its own path, its loop closing on the map's clock. M13c, the gabarit, waits
+on its fields — the author's.
 
 ## Parked decisions
 

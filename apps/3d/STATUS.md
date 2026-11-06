@@ -22,10 +22,19 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
    outline.
 5. **Motion** — done 2026-11-06: a turntable (P1), and a shape's place
    swung as the rig swings a bone (P2), every loop closing.
-6. **For the game**: a model drawn from four or eight sides, a set by
-   direction, `role: 'character'`.
+6. **For the game** — done 2026-11-06 (P6): a model drawn from four sides,
+   a set by direction, `role: 'character'`; eight later.
 
 ## Works now
+
+- **A model from every side** (P6, 2026-11-06; `sides.js`, `save.js`
+  `saveRecipe`, `check-3d-turntable`). Export's own act, *Save it from every
+  side — a character*: the model drawn from four yaws in RPG Maker's order —
+  down as framed, left the eye a quarter round to its left, right the other
+  way, up from behind — each its own object, a loop when its shapes swing,
+  no turntable; and a character of the four (`core/character.js`), its
+  sheet one row, for the map's avatar to wear. Each side is a frozen act,
+  naming the state the page holds.
 
 - **A shape swung** (P2, 2026-11-06; `shapes.js` *Swing*, `motion.js`
   `swungAt`, `tests/3d-camera.mjs`, `check-3d-turntable`). Each card's Swing
@@ -230,10 +239,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**Brick 6: a model from every side** (P6, `3d/sides`): the model drawn from
-four or eight yaws, a loop each — its turntable's, or its swing's — kept as
-a character (`core/character.js`): down, left, right, up, the left the right
-mirrored when it is left out, for the map's avatar to wear.
+**M10's six bricks are done.** What the roadmap has after them is links,
+each its own: a gamepad stroke turned on a lathe or swept as a tube; type
+extruded from the suite's fonts; a fractal or a dither as a height field;
+OBJ and glTF out and in — none on the board yet, the author's to order.
 
 ## Parked
 
