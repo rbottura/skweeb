@@ -74,10 +74,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
 | P2 | M10's brick 5: a shape swung | `3d/swing` | M | landed 2026-11-06 |
 | P6 | M10's brick 6: a model from every side | `3d/sides` | S | landed 2026-11-06 |
-| P7 | a worm's path across the map | `map/paths` | M | ready |
+| P7 | a worm's path across the map | `map/paths` | M | waits: a thing's path, a field of the map's recipe — the author's yes |
 | P8 | M8's brick 5: baked and published | `map/bake` | L | ready |
 | C3 | fonts licensed in their files | `clean/font-licences` | S | side job; Destra waits on the author |
-| C4 | two known bugs | `fix/trashed-sets`, `fix/recut-folder` | S | side jobs |
+| C4 | two known bugs | `fix/trashed-sets`, `fix/recut-folder` | S | landed 2026-11-06 |
 | C9 | the checks' helpers shared | `clean/check-helpers` | S | side job |
 | C10 | the checks several at a time, picked by what a change reaches | `clean/checks` | S | landed 2026-11-04 |
 | C11 | the sliders and boxes: a slider with no grid moving, a count's by one, a box dragged by the hand | `fix/sliders` | S | landed 2026-11-06 |
@@ -182,10 +182,9 @@ job. Rule 5: `assets/fonts/` lacks its `OFL.txt` files, and Destra's
 licence is to be named in its own (`docs/fonts.md`; the roadmap's *Still
 open*, 1). *Done when* every face has its licence beside it.
 
-**C4 — two known bugs** · `fix/trashed-sets`, `fix/recut-folder` · S each,
-side jobs, one commit each. Trashed brush sets still offered in the gamepad
-and in ckt; an identical re-cut in ckt handed back as the old object with
-its old tags, so it never joins the new session's folder.
+**C4 — two known bugs** · `fix/trashed-sets`, `fix/recut-folder` · landed
+2026-11-06: a set in the trash offered no more in the gamepad and ckt; the
+same dots cut again filed with this visit's session.
 
 **C5 — the unit loop on GitHub** · `clean/ci` · S. A workflow that runs
 every `tests/*.mjs` on Node 22 at each push — a red mark on a branch before
