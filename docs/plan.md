@@ -75,7 +75,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | P2 | M10's brick 5: a shape swung | `3d/swing` | M | landed 2026-11-06 |
 | P6 | M10's brick 6: a model from every side | `3d/sides` | S | landed 2026-11-06 |
 | P7 | a worm's path across the map | `map/paths` | M | waits: a thing's path, a field of the map's recipe — the author's yes |
-| P8 | M8's brick 5: baked and published | `map/bake` | L | ready |
+| P8 | M8's brick 5: baked and published | `map/bake` | L | waits: the bundle a static site serves — the author's yes |
 | C3 | fonts licensed in their files | `clean/font-licences` | S | side job; Destra waits on the author |
 | C4 | two known bugs | `fix/trashed-sets`, `fix/recut-folder` | S | landed 2026-11-06 |
 | C9 | the checks' helpers shared | `clean/check-helpers` | S | side job |

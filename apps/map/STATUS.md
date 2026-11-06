@@ -168,4 +168,6 @@ is a loop's, and nothing a player does enters a recipe.
 **P7 — a worm's path across the map** (`docs/plan.md`, *P*): a path drawn on
 the map that a thing follows across the room, as the rig's worm crawls round
 its path, its loop closing on the map's clock. Then P8, brick 5, baked and
-published. Neither is next on the board: L11 is.
+published. Neither is next on the board: both wait on the author's yes — P7
+for a thing's path, a field of the map's recipe (fields are the author's),
+P8 for its bundle.

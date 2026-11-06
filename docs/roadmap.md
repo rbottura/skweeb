@@ -16,9 +16,9 @@ item, is the board in `docs/plan.md`. Here, the milestones still open.
 | M5 | filters, and the GPU kit under them | *Done when* met 2026-09-26; its catalogue open, below |
 | M6 | particles | done 2026-09-27 |
 | M7 | fractals | *Done when* met 2026-09-30; its bricks open, below |
-| M8 | the map editor, and a room first | bricks 1 to 3 of six, below |
+| M8 | the map editor, and a room first | bricks 1 to 4 of six, below |
 | M9 | the rig: bones, walks, and worms | bricks 1 to 5 of six, and the puppet, below |
-| M10 | 3D: meshes, from primitives up | bricks 1 to 4 of six, below |
+| M10 | 3D: meshes, from primitives up | its six bricks done 2026-11-06; its links open, below |
 | M11 | the live stack, and smart objects | done 2026-10-07; what it left is L in `docs/plan.md` |
 | M12 | the scene: one canvas, the suite round it | planned 2026-11-03 — `docs/scene.md`; track S in `docs/plan.md` |
 | M13 | BEC again: its grid in the 3D app, its layers by format, the project one page | `docs/bec.md`: M13a, the grid, landed 2026-11-05; b to d next |
@@ -204,13 +204,15 @@ the portfolio's iframe, on a phone as on a laptop, with no vault and no
 WebGPU. The link: `any → map: a thing in the room`; tilesets and characters
 are uses.
 
-*So far:* bricks 1 to 3 of six (`apps/map/STATUS.md`). 2026-09-30: tiles
+*So far:* bricks 1 to 4 of six (`apps/map/STATUS.md`). 2026-09-30: tiles
 painted from any set offered as a tileset; things from the vault on cells,
 back to front by row, loops playing; a `map` saved, replayed to the pixel,
 reopened, placed in compose — the link, `any → map: a thing in the room`.
 2026-10-02: walls apart from the tiles, solid things; events on things as
 RPG Maker has them — a sign, a warp to a map by its name, the spawn; and
 the player, `play/`, point and click — a sign shown, a warp followed.
+2026-11-06: its avatar (P4) — on the spawn, wearing a character, walked by
+ZQSD, the arrows or a pad, E to use, a tap to walk.
 
 **M9 — the rig: bones, walks, and worms.** Chosen by the author on
 2026-10-02, from the inbox, to come **between M8's bricks 3 and 4**: the
