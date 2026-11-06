@@ -379,3 +379,10 @@
   background: var(--field); color: var(--fg); font: 400 12px var(--font-ui); }
 .vp-pal-move { min-width: 0; height: 24px; padding: 0; }
 
+
+/* Groups by hand (vault-groups.js, V3): the bar's name asked for in place; a group's strip, renamed from its top. */
+.vp-group-name { flex: 1 1 140px; min-width: 100px; height: 24px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--radius);
+  background: var(--field); color: var(--fg); font: 400 12px var(--font-ui); }
+.vp-fstrip-top { display: flex; align-items: stretch; gap: 4px; flex-wrap: wrap; }
+.vp-fstrip-top > .vp-fstrip-head { flex: 1; min-width: 0; }
+.vp-fstrip-rename { flex: none; }

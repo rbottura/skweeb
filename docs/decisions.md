@@ -253,6 +253,10 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**A group is a folder, one at most** (V3). Groups by hand are `folder:`
+tags, as the folders the apps make: a view, never a place. Filed in a group,
+an object leaves the one it was in — a tree of groups waits for a want of it.
+
 **A slider's grid** (C11). `step: 'any'` has none — a slider and a box
 give what the hand moved; a count's slider stops at every whole value; a
 box dragged crosses its range in four hundred pixels whatever its step.

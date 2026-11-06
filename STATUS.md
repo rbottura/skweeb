@@ -32,8 +32,9 @@ sorts them.
 - **BEC's grid in the 3D app** (M13a, `apps/3d/grid.js`, `docs/bec.md`):
   BEC_2025's cells, edges and faces in its three palettes — or a palette
   of the vault — every draw a seed: R new edges, C new colours, A's pie.
-- **A palette, a type** (V1, `core/vault-palette.js`, `docs/workshop.md`):
-  made by hand in the vault panel, *+ palette*; edited as a new one.
+- **A palette, a type; groups by hand** (V1, V3; `docs/workshop.md`): made in
+  the vault panel, *+ palette*, edited as a new one; its selection into a
+  group or out of one, a group renamed from its strip.
 - **BEC_2025 in the vault** (M13b, `scripts/import-bec.mjs`): its layers by
   format, its other pictures and its three palettes, 31 objects in the
   folder `bec_2025`.
@@ -339,10 +340,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**V3 — groups by hand** (`docs/workshop.md`): the vault panel's selection
-— Ctrl or Shift click — *into a group…*, a new name or one there is, as
-`folder:<name>` tags; out of one; a group renamed. Then V2, a set by hand.
-M13c, the gabarit, waits on its fields — the author's.
+**V2 — a set by hand** (`docs/workshop.md`): the vault panel's selection of
+pictures, in the order they were picked, *a set of these* — a name, and what
+it is made as: a brush family, a material, sprites, a tileset — its members
+by id, its picture a contact sheet (`core/sheet.js`). M13c, the gabarit,
+waits on its fields — the author's.
 
 ## Parked decisions
 

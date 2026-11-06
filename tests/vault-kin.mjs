@@ -94,5 +94,13 @@ ok('…arranged, every item holding one of its own before every item holding non
   [true, [true, true, false]]);
 ok('…the rig\'s puppet made by the rig', madeBy(by(L, 'rig/puppet')), 'rig');
 
+// Groups by hand (vault-groups.js, V3): a folder tag, one at most, its name made sure of.
+const { regroup, groupsIn, groupName } = await import('../core/vault-groups.js');
+ok('a group\'s name, trimmed, its spaces one', groupName('  bec   2027 '), 'bec 2027');
+ok('into a group: its folder tag, any other let go of', regroup({ tags: ['x', 'folder:old'] }, 'new'), { add: ['folder:new'], remove: ['folder:old'] });
+ok('…already in it: nothing changes', regroup({ tags: ['folder:new'] }, 'new'), { add: [], remove: [] });
+ok('…out of every group, none named', regroup({ tags: ['folder:a', 'y'] }, ''), { add: [], remove: ['folder:a'] });
+ok('the groups there are, by name', groupsIn([{ tags: ['folder:b'] }, { tags: ['folder:a'] }, { tags: [] }, { tags: ['folder:b'] }]), ['a', 'b']);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
