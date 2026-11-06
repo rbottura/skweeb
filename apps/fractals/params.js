@@ -46,7 +46,7 @@ const start = SHAPES.triangle.start;
 /** A sprite copying itself (copies.js). */
 const COPY_PARAMS = {
   /** What is copied: one shape or still, or a set — a member a generation, or a branch. */
-  sprite:   { type: 'object', accepts: ['set', 'shape', 'still'], use: 'copies', label: 'sprite', group: 'copies' },
+  sprite:   { type: 'object', accepts: ['set', 'shape', 'still', 'model'], use: 'copies', label: 'sprite', group: 'copies' },
   shape:    { type: 'enum', options: Object.keys(SHAPES), default: 'triangle', display: 'chips', label: 'shape', group: 'copies' },
   depth:    { type: 'int', min: 0, max: 60, default: start.depth, label: 'generations', group: 'copies' },
   show:     { type: 'enum', options: ['every', 'last'], default: start.show, display: 'chips', label: 'drawn',

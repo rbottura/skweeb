@@ -65,7 +65,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | P1 | M10's brick 5: a turntable | `3d/turntable` | M | landed 2026-11-06 |
 | P3 | a character, defined once | `core/character` | S | landed 2026-11-06 |
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | landed 2026-11-06 |
-| L11 | a smart object followed wherever it is picked | `layers/follow` | M | ready |
+| L11 | a smart object followed wherever it is picked | `layers/follow` | M | landed 2026-11-06 |
 | L1 | pins | `layers/pins` | M | ready |
 | L3 | no cycle | `layers/cycles` | S | ready |
 | L2 | flatten | `layers/flatten` | S | needs L1 |
@@ -264,19 +264,8 @@ wherever it is used.
 **L10 — saved three ways: S, then 1 2 3** · → S3 and S6, landed 2026-11-03: S the next state of a smart object, E's menu the rest.
 
 **L11 — a smart object followed wherever it is picked** · `layers/follow` ·
-M. The author's example: a 3D smart object as a particle sprite, drawn
-again in particles when the model is changed and saved in the 3D app.
-Today only compose's placements, filter's source, the stack's layers and
-the puppet hear a new version (`vault:updated`), and core's loaders —
-`sprites.js`, `points.js`, `fields.js` — know nothing of a smart object,
-where `openFrames` unwraps one. So core's object param, the picker every
-app takes an object with, offers a smart object wherever the kind it binds
-is accepted, and holding one, hears its versions and says it changed: the
-app loads it again as if picked again, the loaders unwrapping it as
-`openFrames` does. Every picker at once — particles' sprites and emitter,
-grid's source, a map's things, the rig's drawing. *Done when* a check
-saves a model again in one window, and particles' sprites change in
-another, with no reload.
+landed 2026-11-06: an object field holding one hears its versions, the app
+loading it again (`params.following`); a model's picture a sprite.
 
 **L1 — pins** · `layers/pins` · M. A placement of a smart object carries
 its `version`, shown in compose's placed panel and in the Stack drawer —

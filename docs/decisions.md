@@ -253,6 +253,13 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**A smart object held is followed, and that is no edit** (L11). An object
+field holding one hears its versions and says itself again, `following`
+true: the app loads it again, as if picked again, and its history takes no
+step — the author did nothing there. One pinned at a state follows
+nothing. A 3D model's picture is a sprite, as a still's is: the author's
+example of 2026-10-22.
+
 **The avatar wears what stands on the spawn** (P4). No field names it: the
 spawn's thing is what it wears — a character, or any object, facing every
 way — so a map is made walkable in the editor, as everything else on it

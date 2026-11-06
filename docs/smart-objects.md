@@ -49,7 +49,12 @@ JavaScript to someone else's browser.
 }
 ```
 
-- `version: "latest"` — live. Editing the definition updates this placement.
+- `version: "latest"` — live. Editing the definition updates this placement —
+  and since L11 (2026-11-06) every object field holding one, in any app:
+  core's params hear its versions (`vault:updated`) and say the field again,
+  `params.following` true, so the app loads it again as if picked again —
+  no step of its history; one pinned, `skw_…@v3`, follows nothing.
+  Particles' and fractals' sprites take a 3D model's picture, followed so.
 - `version: 4` — pinned. An old composition keeps looking as it did. Why
   `version` and not `at`: `docs/decisions.md`, 2026-09-22.
 - `overrides` — per-placement param values, so two placements of one definition

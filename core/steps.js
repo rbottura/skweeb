@@ -74,7 +74,7 @@ export function unwatch(params) {
 }
 
 function heard(params) {
-  if (replaying) return;
+  if (replaying || params.following) return;      // a smart object held, at its new version: no step (L11)
   const values = snap(params);
   if (params.restoring || !touched) {          // a recipe arriving, or the app setting itself up: the steps start from it
     if (open && open.params === params) open = null;

@@ -24,6 +24,8 @@
  * Emits on document:  'params:changed' { app, key, value }
  */
 
+import { listen } from './scope.js';
+
 /**
  * How each declared type is coerced coming back in. A recipe is JSON that may
  * have been written by an older version of the app, so every one of these
@@ -229,6 +231,7 @@ export function defineParams(app, schema) {
   const values = {};
   const listeners = new Set();
   let restoring = false;
+  let following = false;
 
   const defaults = () => {
     const out = {};
@@ -280,6 +283,7 @@ export function defineParams(app, schema) {
         changed.push([key, next]);
       }
       for (const [key, value] of changed) announce(key, value);
+      if (changed.length) hear();
       return changed.length;
     },
 
@@ -311,11 +315,15 @@ export function defineParams(app, schema) {
       } finally {
         restoring = false;
       }
+      hear();
       return params;
     },
 
     /** True while a restore is announcing: a whole recipe, not an edit. */
     get restoring() { return restoring; },
+
+    /** True while a smart object an object param holds is said again, at its new version: no edit (L11). */
+    get following() { return following; },
 
     reset() { return params.restore({}); },
 
@@ -344,6 +352,30 @@ export function defineParams(app, schema) {
       return () => listeners.delete(fn);
     },
   };
+
+  // L11, 2026-11-06: an object param holding a smart object hears its versions (core/vault.js `vault:updated`)
+  // and says it changed — the same value said again, `following` true while it is heard — so the app loads it
+  // again as if picked again, and it is no edit (core/steps.js). One pinned at a state, `skw_…@v3`, follows
+  // nothing. Heard only while one is held; held by the app mounted now (core/scope.js), off at its unmount.
+  const objects = keys.filter(k => schema[k].type === 'object');
+  const smart = v => typeof v === 'string' && v.startsWith('skw_') && !v.includes('@');
+  let hearing = null;
+  function hear() {
+    if (!objects.length || typeof document === 'undefined') return;
+    const holds = objects.some(k => smart(values[k]));
+    if (holds && !hearing) {
+      hearing = listen(document, 'vault:updated', ({ detail }) => {
+        const id = detail && detail.id;
+        const held = id ? objects.filter(k => values[k] === id) : [];
+        if (!held.length) return;
+        following = true;
+        try { for (const k of held) announce(k, values[k]); } finally { following = false; }
+      });
+    } else if (!holds && hearing) {
+      hearing();
+      hearing = null;
+    }
+  }
 
   Object.assign(values, defaults());
   return params;

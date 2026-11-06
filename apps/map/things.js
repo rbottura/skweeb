@@ -21,6 +21,7 @@
 
 import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
+import { listen }     from '../../core/scope.js';
 import { tickAt, framesOnPage } from '../../core/playback.js';
 
 /** A new thing's block: one tile wide, on a cell. */
@@ -68,6 +69,18 @@ export class Things {
     this.onChange = onChange;
     this.draft = draft;
     this.scale = scale;
+    // A smart object standing on the map took a new version (core/vault.js `vault:updated`): opened again,
+    // drawn as it is now, wherever the map is — the editor, the player, a replay (L11).
+    this._off = typeof document === 'undefined' ? () => {} : listen(document, 'vault:updated', ({ detail }) => {
+      for (const p of this.items) if (detail && p.block.ref === detail.id) this._again(p);
+    });
+  }
+
+  /** A thing opened again, its block the same: what it names changed. */
+  _again(p) {
+    if (p.handle && p.handle.dispose) p.handle.dispose();
+    Object.assign(p, { handle: null, size: null, error: null, tick: -1, image: null });
+    p.opening = this._open(p);
   }
 
   /** The blocks, as the map's recipe keeps them. */
@@ -93,6 +106,7 @@ export class Things {
   dispose() {
     for (const p of this.items) { p.gone = true; if (p.handle && p.handle.dispose) p.handle.dispose(); p.handle = null; }
     this.items = [];
+    this._off();
   }
 
   /** A block edited: opened again only when it names another object. */

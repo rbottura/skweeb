@@ -98,9 +98,8 @@ async function open(id, from) {
   }
 }
 
-function dispose(things) {
-  for (const p of things.items) if (p.handle && p.handle.dispose) p.handle.dispose();
-}
+/** A map's things let go of: their frames, and their ear for new versions (things.js). */
+function dispose(things) { things.dispose(); }
 
 /** A warp: the latest map of its name, the way back kept in the browser's history. */
 async function go(name) {
