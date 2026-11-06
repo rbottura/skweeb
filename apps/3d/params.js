@@ -1,6 +1,6 @@
 /**
- * params.js — the 3D app's schema: the view, the light, the style, and the
- * format.
+ * params.js — the 3D app's schema: the view, the light, the style, the
+ * motion — a turntable (motion.js) — and the format.
  *
  * The shapes are not here. A model's shapes are a list, each entry with the
  * schema of its own primitive (shapes.js), so they live beside the params as
@@ -18,6 +18,7 @@ import { frameParams, DERIVED } from '../../core/frame.js';
 import { VIEW_PARAMS } from './camera.js';
 import { LIGHT_PARAMS } from './scene.js';
 import { STYLE_PARAMS } from './look.js';
+import { MOTION_PARAMS } from './motion.js';
 import { SHAPES, SHAPE_GROUPS, shapeSchema, startOf } from './shapes.js';
 import { MODIFIERS } from './modifiers.js';
 
@@ -26,6 +27,7 @@ export const GROUPS = {
   view:   { label: 'View', open: true },
   light:  { label: 'Light', open: true },
   style:  { label: 'Style', open: true },
+  motion: { label: 'Motion', open: false },
   format: { label: 'Format', open: false },
 };
 
@@ -35,6 +37,7 @@ export function modelParams() {
     ...VIEW_PARAMS,
     ...LIGHT_PARAMS,
     ...STYLE_PARAMS,
+    ...MOTION_PARAMS,
     ...frame,
     format: { ...frame.format, options: frame.format.options.filter(o => !DERIVED.includes(o)) },
   });

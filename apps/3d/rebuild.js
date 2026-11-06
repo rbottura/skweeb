@@ -19,9 +19,11 @@ import { openRenderer } from './renderer.js';
 import { unknownIn } from './scene.js';
 import { drawFrameInto, openPicture } from '../../core/rebuild.js';
 
-const isModel = object => !!(object && object.type === 'model' && object.recipe && Array.isArray(object.recipe.shapes));
+// A model, or the loop of one that turns — a `sequence` its save makes (motion.js): the same recipe either way.
+const isModel = object => !!(object && (object.type === 'model' || object.type === 'sequence')
+  && object.recipe && Array.isArray(object.recipe.shapes));
 
-/** `?open=<id>` brings a model back, its shapes and its view as they were. */
+/** `?open=<id>` brings a model back, its shapes and its view as they were — and its turntable. */
 export const reopens = isModel;
 
 /** Drawn again at any scale: a model is a function of its recipe (frames.js, *Sizes*). */

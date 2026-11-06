@@ -133,13 +133,21 @@ export class Model {
       part.mesh.material.dispose();
     }
 
-    const v = recipe || {};
+    return this.light(recipe || {}, { shadowMap });
+  }
+
+  /**
+   * The light from the values — the sun's way and strength, the fill, the shadows fitted to them: the last
+   * of `update`, and alone a turntable's frame, the sun turned with the eye (motion.js).
+   * @returns {Model} this
+   */
+  light(v, { shadowMap = 2048 } = {}) {
     const d = direction(num(v.sunYaw, LIGHT_PARAMS.sunYaw.default), num(v.sunPitch, LIGHT_PARAMS.sunPitch.default));
     this.sun.position.set(d[0] * 10, d[1] * 10, d[2] * 10);
     this.sun.target.position.set(0, 0, 0);
     this.sun.intensity = num(v.sun, LIGHT_PARAMS.sun.default);
     this.fill.intensity = num(v.ambient, LIGHT_PARAMS.ambient.default);
-    shade(this, shadowsOf(recipe), shadowMap);
+    shade(this, shadowsOf(v), shadowMap);
     this.scene.updateMatrixWorld(true);
     return this;
   }

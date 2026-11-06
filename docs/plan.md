@@ -62,7 +62,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S13 | the player's lanes: a composition's sequences a lane each, one opened there | `compose/lanes` | M | waits: worked out with the author, with S9e |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
 | — | U8a U8b U8c, L10, L7, U10, U11: taken up by track S | — | — | → S3, S4, S6, S7, S1, S9 |
-| P1 | M10's brick 5: a turntable | `3d/turntable` | M | ready: S3 landed 2026-11-03 |
+| P1 | M10's brick 5: a turntable | `3d/turntable` | M | landed 2026-11-06 |
 | P3 | a character, defined once | `core/character` | S | ready |
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | needs P3 |
 | L11 | a smart object followed wherever it is picked | `layers/follow` | M | ready |
@@ -72,8 +72,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L6 | edit in place | `layers/edit` | S | ready |
 | L5 | grid takes a window | `layers/grid-takes` | M | ready |
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
-| P2 | M10's brick 5: a shape swung | `3d/swing` | M | needs P1 |
-| P6 | M10's brick 6: a model from every side | `3d/sides` | S | needs P1, P3 |
+| P2 | M10's brick 5: a shape swung | `3d/swing` | M | ready |
+| P6 | M10's brick 6: a model from every side | `3d/sides` | S | needs P3 |
 | P7 | a worm's path across the map | `map/paths` | M | needs P4 |
 | P8 | M8's brick 5: baked and published | `map/bake` | L | needs P4 |
 | C3 | fonts licensed in their files | `clean/font-licences` | S | side job; Destra waits on the author |
