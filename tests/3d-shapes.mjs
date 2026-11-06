@@ -108,6 +108,10 @@ ok('…every colour one of the palette\'s', dealt(grid({ edges: 3000 })).every(c
 ok('…another palette, other colours', colours(grid({ palette: 'grand paris sud' })) !== colours(grid()), true);
 ok('…faces alone, so many squares', corners(grid({ edges: 0, faces: 5 })), 5 * 24);
 ok('…its schema no colour of its own: its palette is', 'colour' in shapeSchema('grid'), false);
+const given = SHAPES.grid.geometry({ ...valuesFor(shapeSchema('grid'), { edges: 3000 }), inks: ['#ff00ff', '#00ffff'] });
+const magenta = (k => [k.r, k.g, k.b].map(r3).join())(new Color('#ff00ff')), cyan = (k => [k.r, k.g, k.b].map(r3).join())(new Color('#00ffff'));
+ok('…a palette of the vault, given as its colours: drawn in them alone (V1)', dealt(given).sort(), [magenta, cyan].sort());
+ok('…and a field to name one, a palette of the vault', shapeSchema('grid').colours.type + ' ' + shapeSchema('grid').colours.accepts, 'object palette');
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

@@ -40,6 +40,7 @@ import { arrange, kinBox, columnsIn, densityOf, fit, lineageOn, rememberLineage,
 import { wireImport } from './vault-import.js';
 import { bag, held } from './scope.js';
 import { flip } from './flip.js';
+import { paletteEditor } from './vault-palette.js';
 import { takes } from './vault-drag.js';
 
 const el = (tag, cls, text) => {
@@ -62,11 +63,13 @@ export class VaultPanel {
    * @param {boolean} [opts.detailPicture]  false: the detail its facts only, narrower — the page draws the object (S9b)
    * @param {HTMLElement} [opts.detailMount]  the detail there, not over the grid — a scene's properties (S9c)
    * @param {() => void} [opts.onClose]  the detail closed
+   * @param {(label: string) => void} [opts.onEditor]  the detail holds an editor, not an object — a palette made (V1)
    */
   constructor(opts = {}) {
     this._mount     = opts.mount || null;
     this._onDetail  = opts.onDetail || null;
     this._onClose   = opts.onClose || null;
+    this._onEditor  = opts.onEditor || null;
     this._detailPicture = opts.detailPicture !== false;
     this._detailMount = opts.detailMount || null;
     this._filter    = opts.filter || {};
@@ -214,7 +217,12 @@ export class VaultPanel {
       this._paint();
     });
 
-    head.append(wireImport(this._root, () => this.refresh()), kin, this._trashBtn, reload, close);
+    // What is made of objects, for every app (V1, docs/workshop.md): a palette, by hand.
+    const palette = el('button', 'vp-btn vp-make', '+ palette');
+    palette.title = 'A palette of colours, made by hand — for every app that takes one';
+    palette.hidden = !!this._onPick;
+    palette.addEventListener('click', () => this._editPalette(null));
+    head.append(wireImport(this._root, () => this.refresh()), palette, kin, this._trashBtn, reload, close);
     this._body = el('div', 'vp-body');
     const drawer = detailDrawer(() => this._closeDetail());
     if (!this._detailPicture) drawer.root.classList.add('vp-detail--info');
@@ -446,6 +454,21 @@ export class VaultPanel {
     if (this._onDetail) this._onDetail(loaded.object, { url: loaded.url, thumb: loaded.thumbUrl });
   }
 
+  /** The palette editor in the detail: a new palette, or one edited — kept, a new object, its detail opened. */
+  _editPalette(from) {
+    this._disposeViewer();
+    this._current = from ? from.id : null;
+    this._markCurrent();
+    this._detailTitle.textContent = 'PALETTE';
+    this._detail.classList.add('vp-detail--open');
+    if (this._onEditor) this._onEditor('palette');
+    paletteEditor(this._detailBody, {
+      from,
+      onKept: async saved => { await this.refresh(); if (saved) this._openDetail(saved.id); },
+      onCancel: () => (from ? this._openDetail(from.id) : this._closeDetail()),
+    });
+  }
+
   _closeDetail() {
     this._disposeViewer();
     const was = this._current;
@@ -463,6 +486,7 @@ export class VaultPanel {
       pick: this._onPick ? picked => this._use(picked.id) : null,
       pickLabel: this._pickLabel,
       bin: this._onPick ? null : action => this._bin(action, [o.id]),
+      editPalette: this._onPick ? null : () => this._editPalette(o),
       trashed: isTrashed(o),
       picture: this._detailPicture,
     });

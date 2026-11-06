@@ -52,6 +52,7 @@ const PICTURE = /^(png|jpe?g|webp|gif|avif|svg|bmp)$/i;
  * @param {?(action:string)=>void} [hooks.bin]   'trash' | 'restore' | 'delete'; absent in a picker
  * @param {boolean} [hooks.trashed]             it is in the trash
  * @param {boolean} [hooks.picture]             false: no picture — the page draws the object beside it
+ * @param {?() => void} [hooks.editPalette]      a palette's: its colours edited, as a new palette
  */
 export function paintDetail(body, o, urls, hooks) {
   body.replaceChildren();
@@ -277,6 +278,13 @@ function actions(o, urls, hooks) {
   });
 
   row.append(open, save, copy);
+
+  // A palette's colours, edited: a new palette, this one its parent (V1, core/vault-palette.js).
+  if (o.type === 'palette' && hooks.editPalette && !hooks.trashed) {
+    const edit = el('button', 'vp-btn', 'Edit its colours');
+    edit.addEventListener('click', () => hooks.editPalette());
+    row.prepend(edit);
+  }
 
   if (hooks.pick) {
     const pick = el('button', 'vp-btn vp-btn--primary', hooks.pickLabel || 'Use this');

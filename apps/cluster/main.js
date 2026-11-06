@@ -150,6 +150,7 @@ export function start(page = document.body) {
     mount: side, detailMount: detail,
     onDetail: (object, urls) => { opened = { object, urls }; props.showDetail(object.type); tell(); },
     onClose: () => { opened = null; props.hideDetail(); },
+    onEditor: label => props.showDetail(label),   // a palette made by hand, its editor a tab of the properties (V1)
   });
   sides = sideViews(sideBar, [
     { key: 'vault', label: 'vault', el: side },

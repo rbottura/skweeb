@@ -113,6 +113,7 @@ async function boot(mine) {
 
   shapesDrawer = panel.addDrawer({ id: 'shapes', title: 'Shapes', before: 'view' });
   cards = new Cards({ ...SHAPE_CARDS, mount: shapesDrawer.body, onChange: draw, onChoose: draw });
+  model.onInks = () => draw();             // a palette of the vault a shape names, come: drawn again in it (palettes.js)
   chosen = wireChosen({ cards, model, onChange: draw, root });
   const handles = chosen.handles;
   mine.hold(() => handles.dispose());

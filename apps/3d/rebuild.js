@@ -13,6 +13,7 @@
  * catalogue does not know is `missing`, and the rest drawn.
  */
 
+import { readPalettes } from './palettes.js';
 import { openModel } from './frames.js';
 import { openRenderer } from './renderer.js';
 import { unknownIn } from './scene.js';
@@ -39,6 +40,7 @@ export async function openObject(object, opts = {}) {
     return openPicture(object, opts.url);
   }
 
+  await readPalettes(object.recipe);                  // a palette of the vault a shape names, its colours from the first frame
   const frames = openModel(object.recipe, { renderer, scale: opts.scale > 0 ? opts.scale : 1 });
   const box = { x: 0, y: 0, w: frames.width, h: frames.height };
   return {

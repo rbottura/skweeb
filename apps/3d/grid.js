@@ -82,12 +82,15 @@ const SIDES = [['left', 0, -1], ['right', 0, 1], ['top', 1, 1], ['bottom', 1, -1
 /**
  * The grid's geometry for its values.
  *
- * @param {object} v   its card's: cellsX, cellsY, cellsZ, cell, edges, seed, thickness, overhang, faces, fill, palette, hues
+ * @param {object} v   its card's: cellsX, cellsY, cellsZ, cell, edges, seed, thickness, overhang, faces, fill, palette, hues;
+ *                     and `inks`, the colours of the vault's palette its `colours` names, once read (palettes.js)
  * @returns {BufferGeometry}
  */
 export function gridGeometry(v) {
   const nx = v.cellsX, ny = v.cellsY, nz = v.cellsZ, c = v.cell, half = c / 2;
-  const palette = (PALETTES[v.palette] || PALETTES.bec).map(hex => { const k = new Color(hex); return [k.r, k.g, k.b]; });
+  // A palette of the vault, given as its colours (`inks`, palettes.js) — or one of BEC's own three.
+  const inks = Array.isArray(v.inks) && v.inks.length ? v.inks : PALETTES[v.palette] || PALETTES.bec;
+  const palette = inks.map(hex => { const k = new Color(hex); return [k.r, k.g, k.b]; });
   const at = (i, n) => (i - n / 2) * c;                      // a corner along an axis: the lattice centred on the origin
   const out = { position: [], normal: [], color: [], index: [] };
 

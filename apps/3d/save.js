@@ -9,6 +9,7 @@
  * `consumedObjectIds()`: none yet, since a shape is made from nothing.
  */
 
+import { readPalettes, palettesIn } from './palettes.js';
 import { openModel }     from './frames.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
@@ -36,6 +37,7 @@ export function titleOf(shapes) {
  */
 export async function saveModel({ params, shapes, renderer }) {
   const recipe = { ...params.values, shapes };
+  await readPalettes(recipe);                          // drawn in the vault's palettes its shapes name, as they are seen
   const frames = openModel(recipe, { renderer });
   try {
     const shown = frames.frame(0);
@@ -49,7 +51,7 @@ export async function saveModel({ params, shapes, renderer }) {
       origin: APP,
       seed: null,
       recipe,
-      parents: params.consumedObjectIds(),
+      parents: [...params.consumedObjectIds(), ...palettesIn(recipe)],   // and the palettes its shapes are drawn in
       render: { blob, ext: 'png', w: shown.width, h: shown.height },
       thumb: await thumbFromBlob(blob),
     });

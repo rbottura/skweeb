@@ -22,6 +22,7 @@
 import {
   Scene, Mesh, MeshStandardMaterial, DirectionalLight, AmbientLight, Box3, Sphere,
 } from '../../core/libs/three/three.core.js';
+import { inksOf } from './palettes.js';
 import { SHAPES, shapeSchema, formKeys, finer } from './shapes.js';
 import { MODIFIERS, modify } from './modifiers.js';
 import { dress, bandsOf, outline, outlineOf, inkOf, inkUp, shade, shadowsOf } from './look.js';
@@ -69,7 +70,7 @@ export function unknownIn(recipe) {
 }
 
 /** What a shape's geometry is made from — its form's values and its stack: equal, the same mesh kept. */
-const formOf = (id, values, stack) => id + ':' + JSON.stringify([formKeys(id).map(k => values[k]), stack]);
+const formOf = (id, values, stack) => id + ':' + JSON.stringify([formKeys(id).map(k => values[k]), values.inks || null, stack]);
 
 export class Model {
   constructor() {
@@ -107,7 +108,9 @@ export class Model {
     if (lined && !this.ink) this.ink = inkOf();
     if (this.ink) inkUp(this.ink, recipe);
     shapes.forEach(({ id, values, index, stack }, i) => {
-      const made = finer(id, values, detail);
+      // A palette of the vault the shape names, its colours beside its values once read (palettes.js).
+      const inks = values.colours ? inksOf(values.colours, this.onInks) : null;
+      const made = { ...finer(id, values, detail), ...(inks ? { inks } : {}) };
       const form = formOf(id, made, stack);
       let part = this.parts[i];
       if (!part) {
