@@ -13,7 +13,11 @@
  * words over the map, and Escape puts them away; the exit leads to the
  * latest map called the hall, and the browser's back button comes back; a
  * name opens the latest map so called; the editor's Play is there for a map
- * it opened. Needs no GPU, and brings what it needs.
+ * it opened. And its avatar (P4): on the spawn, facing its way; D a step —
+ * by where the key is — and a wall stops it; a tap walks it there by the
+ * shortest way; the solid poster faced turns it without a step, and E reads
+ * it; a step onto the exit takes it to the hall, on the warp back. Needs no
+ * GPU, and brings what it needs.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -48,21 +52,35 @@ const made = await page.eval(`(async () => {
   const shape = async (title, fill, round = true, w = 64, h = 64) => { const blob = await picture(w, h, fill, round);
     return (await Vault.save({ type: 'shape', title, tags: ['import'], origin: { app: 'import', version: '1.0.0' }, seed: null,
       recipe: null, render: { blob, ext: 'png', w, h }, thumb: await thumbFromBlob(blob) })).id; };
-  const map = async (values, place) => { const m = { ...mapParams().values, ...values };
+  const map = async (values, place, walled = []) => { const m = { ...mapParams().values, ...values };
+    const walls = new Array(m.cols * m.rows).fill(0); for (const [c, r] of walled) walls[r * m.cols + c] = 1;
     const blob = await picture(m.cols * m.tile, m.rows * m.tile, m.ground, false);
     return (await Vault.save({ type: 'map', title: m.name, tags: ['map'], origin: { app: 'map', version: '1.0.0' }, seed: null,
-      recipe: { map: m, cells: new Array(m.cols * m.rows).fill(-1), walls: new Array(m.cols * m.rows).fill(0), place },
+      recipe: { map: m, cells: new Array(m.cols * m.rows).fill(-1), walls, place },
       parents: [], render: { blob, ext: 'png', w: m.cols * m.tile, h: m.rows * m.tile }, thumb: await thumbFromBlob(blob) })).id; };
   const poster = await shape('a poster', '#2a9d4b', false), big = await shape('the poster, large', '#7b2cbf', false, 96, 128);
   const dot = await shape('a dot', '#f28c28');
   const room = await map({ name: 'a room', cols: 6, rows: 5, tile: 64, ground: '#fffdf6' }, [
-    { ref: poster, col: 1, row: 1, width: 1, event: 'sign', says: 'hello from the room', shows: big },
+    { ref: poster, col: 1, row: 1, width: 1, event: 'sign', says: 'hello from the room', shows: big, solid: true },
     { ref: dot, col: 3, row: 2, width: 1 },
-    { ref: null, col: 4, row: 4, width: 1, event: 'warp', to: 'the hall' }]);
+    { ref: null, col: 4, row: 4, width: 1, event: 'warp', to: 'the hall' },
+    { ref: null, col: 0, row: 4, width: 1, event: 'spawn', face: 'right' }], [[2, 4]]);
   const hall = await map({ name: 'the hall', cols: 4, rows: 3, tile: 64, ground: '#dfe9ff' }, [
     { ref: null, col: 0, row: 0, width: 1, event: 'warp', to: 'a room' }]);
+  // A character (core/character.js): down the poster, right a sprite red on its left half, up the large poster —
+  // three, so its left is its right, mirrored; on the yard's spawn.
+  const halfBlob = await (() => { const c = new OffscreenCanvas(64, 64), g = c.getContext('2d'); g.fillStyle = '#d8342a'; g.fillRect(0, 0, 32, 64);
+    return c.convertToBlob({ type: 'image/png' }); })();
+  const half = (await Vault.save({ type: 'shape', title: 'half a sprite', tags: ['import'], origin: { app: 'import', version: '1.0.0' }, seed: null,
+    recipe: null, render: { blob: halfBlob, ext: 'png', w: 64, h: 64 }, thumb: await thumbFromBlob(halfBlob) })).id;
+  const sheet = await picture(288, 96, '#888888', false);
+  const walker = (await Vault.save({ type: 'set', title: 'a walker', tags: [], origin: { app: 'vault', version: '1.0.0' }, seed: null,
+    recipe: { members: [poster, half, big], role: 'character', name: 'a walker' }, parents: [],
+    render: { blob: sheet, ext: 'png', w: 288, h: 96 }, thumb: await thumbFromBlob(sheet) })).id;
+  const yard = await map({ name: 'the yard', cols: 3, rows: 3, tile: 64, ground: '#fffdf6' }, [
+    { ref: walker, col: 1, row: 1, width: 1, event: 'spawn', face: 'down' }]);
   await Vault.refresh();
-  return { poster, big, dot, room, hall }; })()`);
+  return { poster, big, dot, room, hall, yard }; })()`);
 c.ok('a room and a hall in the vault, joined by warps', !!(made.room && made.hall), JSON.stringify(made));
 
 // ── Played ──────────────────────────────────────────────────────────────────
@@ -112,6 +130,76 @@ await c.shot('1-sign');
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
 await wait(200);
 c.ok('Escape puts it away', await page.eval(`document.getElementById('sign').hidden`));
+
+// ── Its avatar (P4, play/avatar.js) ─────────────────────────────────────────
+
+const DARK = [17, 17, 17], NOSE = [255, 214, 10], GROUND = [255, 253, 246];
+/** The avatar's disc on a cell: dark left of its middle; its nose the way it faces. */
+const standsOn = (col, row, w = 384) => pixel(col * 64 + 18, row * 64 + 32, w).then(p => colour(p, DARK));
+const noseAt = (col, row, dx, dy, w = 384) => pixel(col * 64 + 32 + dx * 14, row * 64 + 32 + dy * 14, w).then(p => colour(p, NOSE));
+const press = async code => {
+  await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { code: '${code}', key: '?', bubbles: true }))`);
+  await wait(40);
+  await page.eval(`document.dispatchEvent(new KeyboardEvent('keyup', { code: '${code}', key: '?', bubbles: true }))`);
+};
+const settles = async () => { await wait(700); };
+c.ok('its avatar on the spawn, facing its way: nothing stands there, so a disc with a nose', await standsOn(0, 4) && await noseAt(0, 4, 1, 0),
+  JSON.stringify(await pixel(18, 4 * 64 + 32, 384)));
+await press('KeyD');
+await settles();
+c.ok('D — by where the key is, ZQSD\'s place too — a step right', await standsOn(1, 4) && colour(await pixel(18, 4 * 64 + 32, 384), GROUND));
+await press('KeyD');
+await settles();
+c.ok('…and a wall stops it, still facing right', await standsOn(1, 4) && await noseAt(1, 4, 1, 0));
+await page.pointer(await onScreen(mid(1), mid(2), 384));
+await page.until(`(() => { const c = document.getElementById('room'), k = c.width / 384;
+  const d = c.getContext('2d').getImageData(Math.round((64 + 18) * k), Math.round((2 * 64 + 32) * k), 1, 1).data;
+  return d[0] < 40 && d[1] < 40 && d[2] < 40; })()`, { timeout: 8000 }).catch(() => {});
+c.ok('a tap on the map walks it there by the shortest way', await standsOn(1, 2) && !(await standsOn(1, 4)));
+await press('KeyW');
+await settles();
+c.ok('the solid poster ahead: it turns to face it, and does not step', await standsOn(1, 2) && await noseAt(1, 2, 0, -1));
+await press('KeyE');
+await page.until(`!document.getElementById('sign').hidden`, { timeout: 8000 }).catch(() => {});
+c.ok('…and E reads it', (await page.eval(`document.querySelector('.play-sign-says').textContent`)) === 'hello from the room'
+  && !(await page.eval(`document.getElementById('sign').hidden`)));
+await c.shot('1b-the-avatar-reads');
+await press('KeyE');
+await wait(200);
+c.ok('…E again puts it away', await page.eval(`document.getElementById('sign').hidden`));
+await page.pointer(await onScreen(mid(4), mid(3), 384));
+await page.until(`(() => { const c = document.getElementById('room'), k = c.width / 384;
+  const d = c.getContext('2d').getImageData(Math.round((4 * 64 + 18) * k), Math.round((3 * 64 + 32) * k), 1, 1).data;
+  return d[0] < 40 && d[1] < 40 && d[2] < 40; })()`, { timeout: 8000 }).catch(() => {});
+await press('KeyS');
+await page.until(`document.title.startsWith('the hall')`, { timeout: 30000 }).catch(() => {});
+await wait(500);
+c.ok('a step onto the exit takes it through, to the hall — on the warp back', (await page.eval('document.title')).startsWith('the hall')
+  && await standsOn(0, 0, 256), await page.eval('document.title'));
+await c.shot('1c-through-the-exit');
+await page.eval(`history.back()`);
+await page.until(`document.title.startsWith('a room')`, { timeout: 30000 }).catch(() => {});
+await wait(500);
+c.ok('…and back, on the room\'s spawn again', await standsOn(0, 4));
+
+// A character worn: the yard's spawn names one — its down, then its left the right mirrored, then its right.
+const RED = [216, 52, 42];
+await c.go(c.base + '/apps/map/play/?map=' + made.yard);
+await page.until(`document.title.startsWith('the yard') && !${note}`, { timeout: 30000 }).catch(() => {});
+await wait(800);
+c.ok('a character on the spawn, worn — facing down, its down', colour(await pixel(mid(1), mid(1), 192), GREEN), JSON.stringify(await pixel(mid(1), mid(1), 192)));
+await press('KeyA');
+await settles();
+const lefts = [await pixel(48, mid(1), 192), await pixel(16, mid(1), 192)];
+c.ok('…a step left: its right, mirrored — red on the right half', colour(lefts[0], RED) && !colour(lefts[1], RED), JSON.stringify(lefts));
+await press('KeyD');
+await settles();
+const rights = [await pixel(64 + 16, mid(1), 192), await pixel(64 + 48, mid(1), 192)];
+c.ok('…a step right: its right as it is — red on the left half', colour(rights[0], RED) && !colour(rights[1], RED), JSON.stringify(rights));
+await c.shot('1d-a-character');
+await c.go(c.base + '/apps/map/play/?map=' + made.room);
+await page.until(`document.title.startsWith('a room') && !${note}`, { timeout: 30000 }).catch(() => {});
+await wait(300);
 
 await page.pointer(await onScreen(mid(4), mid(4), 384));
 await page.until(`document.title.startsWith('the hall')`, { timeout: 30000 }).catch(() => {});

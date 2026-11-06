@@ -2,7 +2,12 @@
  * main.js — the player: a map from the vault, played. M8's third brick, point
  * and click: what answers is outlined under the pointer, and a press uses it —
  * a sign shows over the map (sign.js), a warp leads to the latest map of its
- * name. The avatar comes in the fourth brick, and with the fifth the player
+ * name. The fourth, its avatar (avatar.js, P4): on the spawn, wearing what
+ * stands there; it walks a cell at a time — ZQSD or WASD by where the keys
+ * are, the arrows, a gamepad's stick or its cross — walls and solid things
+ * stopping it, a step onto a warp taking it through, to the warp back; E —
+ * or Enter, space, the pad's A — uses what it faces; a tap on the map walks
+ * it there by the shortest way (walk.js `pathTo`). With the fifth the player
  * reads a baked bundle instead of the vault (docs/roadmap.md, M8).
  *
  *   /apps/map/play/?map=<id>      a saved map
@@ -21,6 +26,8 @@ import { mapSize }   from '../grid.js';
 import { thingAt, boxOf } from '../things.js';
 import { answers, signOf, latestMap } from './maps.js';
 import { Sign }      from './sign.js';
+import { Avatar }    from './avatar.js';
+import { spawnOf, arrival, pathTo, faceTo, ahead, warpAt, answeringAt as answeringOn } from '../walk.js';
 import { Vault }     from '../../../core/vault.js';
 import { Playhead }  from '../../../core/playback.js';
 
@@ -38,6 +45,12 @@ let view = 1;             // canvas pixels per map pixel
 
 /** The map's clock: its loops play, each at its own speed. */
 const clock = new Playhead({ onShow: () => draw() });
+
+/** Who walks it: where it stands lives here, never in a recipe. */
+const avatar = new Avatar();
+const held = [];          // the ways whose keys are down, the last pressed last
+let queued = null;        // a way pressed since the last frame: a tap of a key is a step, however short
+let padA = false;         // the pad's A as it was, so a press is one
 
 function say(text) {
   note.textContent = text || '';
@@ -68,6 +81,12 @@ async function open(id, from) {
     if (room) dispose(room.things);
     room = { id, m: recipe.map, recipe, tiles: parts.tiles, things: parts.things, from };
     hover = null;
+    // Through a warp, on the warp back; else on the spawn — wearing what stands there, or what it wore (avatar.js).
+    avatar.place(arrival(recipe, from));
+    const spawn = spawnOf(recipe);
+    const wears = spawn.from != null ? recipe.place[spawn.from].ref || null : null;
+    if (wears || avatar.ref === undefined) await avatar.wear(wears);
+    if (ask !== asked) return;
     document.title = `${room.m.name || 'a map'} — skweeb`;
     const length = parts.things.length(room.m.fps);
     clock.configure({ length, fps: room.m.fps, loop: true });
@@ -127,12 +146,96 @@ canvas.addEventListener('pointerleave', () => {
   draw();
 });
 canvas.addEventListener('click', e => {
-  const p = room ? answeringAt(pointOf(e)) : null;
-  if (p) use(p);
+  if (!room) return;
+  const pt = pointOf(e);
+  const p = answeringAt(pt);
+  if (p) return use(p);
+  // Anywhere else: walked there by the shortest way, from where its step under way ends.
+  const way = pathTo(room.recipe, avatar.bound, { col: Math.floor(pt.x / room.m.tile), row: Math.floor(pt.y / room.m.tile) });
+  if (way) { avatar.path = way; queued = null; }
 });
+
+// ── The avatar's keys, its pad, its steps ───────────────────────────────────
+
+/** By where the key is, not what it prints: ZQSD on an AZERTY keyboard is WASD's place. */
+const WAYS = { KeyW: 'up', ArrowUp: 'up', KeyS: 'down', ArrowDown: 'down', KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right' };
+const USE = new Set(['KeyE', 'Enter', 'Space']);
+
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && sign.isOpen) sign.close();
+  if (sign.isOpen) {
+    if (e.key === 'Escape' || USE.has(e.code)) { e.preventDefault(); sign.close(); }
+    return;
+  }
+  const way = WAYS[e.code];
+  if (way) {
+    e.preventDefault();
+    if (!held.includes(way)) held.push(way);
+    if (!e.repeat) queued = way;
+    avatar.path = [];
+  } else if (USE.has(e.code) && !e.repeat) {
+    e.preventDefault();
+    useAhead();
+  }
 });
+document.addEventListener('keyup', e => {
+  const i = held.indexOf(WAYS[e.code]);
+  if (i >= 0) held.splice(i, 1);
+});
+window.addEventListener('blur', () => { held.length = 0; });
+
+/** E: what the avatar faces, used — a sign read, a warp gone through. */
+function useAhead() {
+  if (!room || avatar.walking) return;
+  const at = ahead(avatar.at, avatar.face);
+  const b = answeringOn(room.recipe, at.col, at.row);
+  if (b && b.event === 'sign') sign.show(signOf(b));
+  else if (b && b.event === 'warp') go(b.to);
+}
+
+/** The first pad there is: its cross or its stick as a way, its A pressed now and not before. */
+function readPad() {
+  const pad = navigator.getGamepads ? [...navigator.getGamepads()].find(Boolean) : null;
+  if (!pad) return { way: null, use: false };
+  const down = i => !!(pad.buttons[i] && pad.buttons[i].pressed);
+  const a = down(0), use = a && !padA;
+  padA = a;
+  const [x = 0, y = 0] = pad.axes;
+  const way = down(12) ? 'up' : down(13) ? 'down' : down(14) ? 'left' : down(15) ? 'right'
+    : Math.max(Math.abs(x), Math.abs(y)) < 0.5 ? null : Math.abs(x) > Math.abs(y) ? (x < 0 ? 'left' : 'right') : (y < 0 ? 'up' : 'down');
+  return { way, use };
+}
+
+/** Every frame: the step under way moved on, a warp stepped onto gone through, the next step taken. */
+function walk(now) {
+  requestAnimationFrame(walk);
+  const pad = readPad();
+  if (!room) return;
+  if (sign.isOpen) { if (pad.use) sign.close(); return; }
+  if (pad.use) useAhead();
+  const was = avatar.face;
+  const arrived = avatar.advance(now);
+  const warp = arrived && warpAt(room.recipe, arrived.col, arrived.row);
+  if (warp) {
+    avatar.stand();
+    held.length = 0;
+    queued = null;
+    return void go(warp.to);
+  }
+  if (!avatar.walking) {
+    const way = queued || held[held.length - 1] || pad.way;
+    queued = null;
+    let stepped = false;
+    if (way) stepped = avatar.go(way, room.recipe, now);
+    else if (avatar.path.length) {
+      stepped = avatar.go(faceTo(avatar.at, avatar.path[0]), room.recipe, now);
+      if (stepped) avatar.path.shift();
+      else avatar.path = [];
+    }
+    if (!stepped) avatar.stand();
+  }
+  if (avatar.walking || arrived || avatar.face !== was) paint();
+}
+requestAnimationFrame(walk);
 window.addEventListener('popstate', e => openFromUrl((e.state && e.state.from) || null));
 window.addEventListener('resize', () => draw());
 
@@ -156,8 +259,12 @@ function paint() {
   if (canvas.height !== h) canvas.height = h;
   canvas.style.width = `${Math.round(size.width * fit)}px`;
   canvas.style.height = `${Math.round(size.height * fit)}px`;
-  drawMap(ctx, room.m, view, { cells: room.recipe.cells || [], tiles: room.tiles,
-                               layers: room.things.layers(clock.tick, room.m) });
+  // The avatar among the things, by the row it stands on; the spawn's own thing is what it wears.
+  const layers = room.things.layers(clock.tick, room.m, b => b.event === 'spawn');
+  const me = avatar.layer(room.m, performance.now());
+  const after = layers.findIndex(l => l.row > me.row);
+  layers.splice(after < 0 ? layers.length : after, 0, me);
+  drawMap(ctx, room.m, view, { cells: room.recipe.cells || [], tiles: room.tiles, layers });
   if (hover) outline(hover);
 }
 

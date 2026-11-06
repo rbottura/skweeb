@@ -20,6 +20,10 @@
  * on that map's warp back — the first whose `to` names the map it left, as
  * Pokémon pairs its doors — or at its spawn when there is none. Arriving on
  * a warp is not stepping onto it: only a step from another cell goes through.
+ *
+ * The avatar's steps (P4): the cell ahead, what answers there for E, the
+ * warp a step goes through, and the shortest way to a cell a tap names —
+ * through no warp but the one it ends on.
  */
 
 /** The ways the avatar can face, the first its default. */
@@ -104,4 +108,74 @@ export function arrival(recipe, from) {
   const { cols, rows } = recipe.map;
   const within = (n, most) => Math.min(Math.max(0, Math.round(n) || 0), most);
   return { col: within(place[at].col, cols - 1), row: within(place[at].row, rows - 1), face: FACES[0], by: at };
+}
+
+// ── The avatar's steps (M8's fourth brick, P4, 2026-11-06; play/avatar.js) ──
+
+/** One step each way the avatar can face, as a column and a row. */
+export const STEPS = { down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] };
+
+/** The cell one step from `at` the way it faces. */
+export function ahead(at, face) {
+  const [dx, dy] = STEPS[face] || STEPS.down;
+  return { col: at.col + dx, row: at.row + dy };
+}
+
+/** The way one cell is from another: the larger of the two moves, a tie the column's. */
+export function faceTo(from, to) {
+  const dx = to.col - from.col, dy = to.row - from.row;
+  return Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? 'up' : 'down') : (dx < 0 ? 'left' : 'right');
+}
+
+/** Whether a block stands on a cell: its feet there, its width covering it as a solid thing's would. */
+const covers = (block, col, row) => blockedBy({ ...block, solid: true }).some(c => c.col === col && c.row === row);
+
+/** What answers on a cell — a sign or a warp standing on it — or null: what E uses, faced. */
+export function answeringAt(recipe, col, row) {
+  return (recipe.place || []).find(b => b && (b.event === 'sign' || b.event === 'warp') && covers(b, col, row)) || null;
+}
+
+/** The warp on a cell — what a step onto it goes through — or null. */
+export function warpAt(recipe, col, row) {
+  return (recipe.place || []).find(b => b && b.event === 'warp' && covers(b, col, row)) || null;
+}
+
+/**
+ * The shortest way from one cell to another over cells that can be walked:
+ * the cells stepped on in turn, `to` the last — breadth first, the ways
+ * tried in FACES' order, so it is always the same way. A warp is gone
+ * through only at the end: one on the way would take the avatar elsewhere.
+ *
+ * @returns {?{col: number, row: number}[]}  empty when it is there already;
+ *          null when `to` cannot be walked, or no way reaches it
+ */
+export function pathTo(recipe, from, to) {
+  const { cols, rows } = recipe.map;
+  if (!walkable(recipe, to.col, to.row)) return null;
+  if (from.col === to.col && from.row === to.row) return [];
+  const open = walkGrid(recipe);
+  const goal = to.row * cols + to.col;
+  const warps = new Set();
+  for (const b of recipe.place || []) {
+    if (b && b.event === 'warp') for (const c of blockedBy({ ...b, solid: true })) warps.add(c.row * cols + c.col);
+  }
+  const start = from.row * cols + from.col;
+  const came = new Map([[start, -1]]);
+  const queue = [start];
+  for (let k = 0; k < queue.length; k++) {
+    const at = queue[k], col = at % cols, row = Math.floor(at / cols);
+    for (const face of FACES) {
+      const [dx, dy] = STEPS[face];
+      const c = col + dx, r = row + dy, next = r * cols + c;
+      if (c < 0 || r < 0 || c >= cols || r >= rows || came.has(next) || !open[next] || (warps.has(next) && next !== goal)) continue;
+      came.set(next, at);
+      if (next === goal) {
+        const way = [];
+        for (let i = goal; i !== start; i = came.get(i)) way.unshift({ col: i % cols, row: Math.floor(i / cols) });
+        return way;
+      }
+      queue.push(next);
+    }
+  }
+  return null;
 }

@@ -68,6 +68,27 @@ ok('through a warp, it arrives on the warp back, facing out', arrival(hall, 'a r
 ok('from a map with no warp back, at the spawn', arrival(hall, 'the garden'), { col: 0, row: 0, face: 'right', by: null });
 ok('with no map left, at the spawn', arrival(hall, null).by, null);
 
+// The avatar's steps (P4): ahead, the way it faces, what answers, the shortest way.
+const { ahead, faceTo, answeringAt, warpAt, pathTo } = await import('../apps/map/walk.js');
+ok('the cell ahead, each way', FACES.map(f => ahead({ col: 1, row: 1 }, f)),
+   [{ col: 1, row: 2 }, { col: 1, row: 0 }, { col: 0, row: 1 }, { col: 2, row: 1 }]);
+ok('the way a cell is from another, a tie the column\'s', [faceTo({ col: 1, row: 1 }, { col: 1, row: 3 }), faceTo({ col: 1, row: 1 }, { col: 0, row: 1 }),
+  faceTo({ col: 1, row: 1 }, { col: 2, row: 2 })], ['down', 'left', 'right']);
+const signed = { map, walls, place: [{ ref: 'p', col: 2, row: 0, event: 'sign', says: 'hi' }, { col: 0, row: 2, event: 'warp', to: 'out' },
+                                     { ref: 'w', col: 2, row: 2, width: 3, event: 'sign' }] };
+ok('what answers on a cell: a sign there, a warp there, a wide sign across its width', [answeringAt(signed, 2, 0)?.says,
+  answeringAt(signed, 0, 2)?.to, answeringAt(signed, 3, 2)?.ref, answeringAt(signed, 0, 0)], ['hi', 'out', 'w', null]);
+ok('the warp a step onto a cell goes through — not a sign', [warpAt(signed, 0, 2)?.to, warpAt(signed, 2, 0)], ['out', null]);
+ok('the shortest way round a wall, the same way every time', pathTo(recipe, { col: 0, row: 0 }, { col: 2, row: 0 }),
+   [{ col: 0, row: 1 }, { col: 1, row: 1 }, { col: 2, row: 1 }, { col: 2, row: 0 }]);
+ok('…there already: no step; to a wall, or off the map: no way', [pathTo(recipe, { col: 2, row: 1 }, { col: 2, row: 1 }),
+  pathTo(recipe, { col: 0, row: 0 }, { col: 1, row: 0 }), pathTo(recipe, { col: 0, row: 0 }, { col: 9, row: 0 })], [[], null, null]);
+const shut = { map, walls: [0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0] };
+ok('…shut in, no way out', pathTo(shut, { col: 0, row: 0 }, { col: 3, row: 2 }), null);
+const door = { map, walls: [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0], place: [{ col: 3, row: 1, event: 'warp', to: 'a room' }] };
+ok('…a warp on the way is gone round, or there is no way', pathTo(door, { col: 0, row: 0 }, { col: 0, row: 2 }), null);
+ok('…and one at the end is gone through', pathTo(door, { col: 0, row: 0 }, { col: 3, row: 1 }).at(-1), { col: 3, row: 1 });
+
 ok('a map is made of its things and what its signs show', partsOf([
   { ref: 'a', event: 'sign', shows: 'b' }, { ref: 'a' }, { ref: null, event: 'warp', to: 'hall', shows: 'c' },
   { ref: null, event: 'sign', shows: 'd' }]), ['a', 'b', 'd']);

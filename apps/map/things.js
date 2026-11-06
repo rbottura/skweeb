@@ -121,13 +121,17 @@ export class Things {
     return Math.max(1, ...this.items.map(p => (p.handle ? framesOnPage(p.handle, fps) : 1)));
   }
 
-  /** What the map draws at one of its ticks: `{ image, box }`, back to front. */
-  layers(tick, m) {
+  /**
+   * What the map draws at one of its ticks: `{ image, box, row }`, back to front, each with the row it
+   * stands on — so the player puts its avatar among them — and less the blocks `skip` says, the spawn
+   * there: the avatar wears what stands on it (play/avatar.js).
+   */
+  layers(tick, m, skip = null) {
     const out = [];
     for (const p of drawOrder(this.items)) {
-      if (!p.handle) continue;
+      if (!p.handle || (skip && skip(p.block))) continue;
       const image = this._frame(p, tickAt(tick, p.handle, m.fps));
-      if (image) out.push({ image, box: boxOf(p.block, p.size, m.tile) });
+      if (image) out.push({ image, box: boxOf(p.block, p.size, m.tile), row: p.block.row });
     }
     return out;
   }
