@@ -24,34 +24,11 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing, 2026-11-05: the day's ideas went onto the plan, into
-`docs/scene.md` and into the roadmap's *Still open*.
+Nothing, 2026-11-06: the day's ideas went onto the plan and landed — C11,
+the workshop V1 to V3, BEC_2025's folder (M13b) — and the entries of the
+day before that became bricks done went with them.
 
 ## Sorted
-
-- **2026-11-06 — sliders that do not move; a palette, a type; a workshop
-  across the apps; BEC_2025's folder, for BEC 2027.** "des éléments pp-num
-  et des sliders dans fractals notamment où les valeurs ne changent pas en
-  bougeant le slider, certains steps aussi sont trop grands ou un peu
-  buggués"; "la palette de couleur de bec me fait penser que l'objet
-  palette de couleur doit exister, et il nous faut un endroit pour accéder
-  à des fonctions d'édition inter app comme la création de palette de
-  couleurs, la création de set custom en sélectionnant les images qu'on
-  veut, et aussi des groupes d'objets pour ranger le vault à terme"; "pour
-  les assets de bec_2025 on peut avoir un groupe ou dossier de ce nom avec
-  tous les éléments concernés; sachant que j'aimerais utiliser cette
-  application pour tester des rendus graphiques de l'édition bec_2027".
-  → C11 and V1 landed the same day; V2 and V3 on the board of
-  `docs/plan.md`, their plan `docs/workshop.md`; M13b answered, a folder
-  `bec_2025` (`docs/bec.md`); `docs/decisions.md`, 2026-11-06.
-
-- **2026-11-05 — the motion kept; the vault app's viewer; M13a.** "les
-  animations de transitions sont super comme elles sont maintenant"; in
-  the vault app, a sequence stretched — `gam_1790189754737_d12aab` — no
-  player's controls, no pan or zoom, the fit's margin at the right and the
-  bottom; "on peut passer sur la brique M13a rapidement si rien d'autre de
-  plus urgent prend la priorité". → S9h and M13a landed the same day
-  (`docs/bec.md`); `docs/decisions.md`, 2026-11-05: the even fit, BEC's keys.
 
 - **2026-11-05 — the planned bricks now; BEC again, as a project.** "je
   pense qu'on peut continuer celles déjà planifiées maintenant"; S11's
@@ -66,18 +43,6 @@ Nothing, 2026-11-05: the day's ideas went onto the plan, into
   versions, la visualisation de ses versions, leur comparaison". → S9e
   next, its proposal as written; S11's version 2 later; M13 proposed,
   `docs/bec.md`, waiting on the author in `docs/plan.md`.
-
-- **2026-11-05 — cluster's vault, beside an app.** "la transition du
-  canvas et du panel droit est pas mal. le vault a une sorte de bug jumpy …
-  comme s'il se redimensionne d'un coup puis encore une fois pour redevenir
-  à la normale"; "un filtrage automatique des objets du vault issus de
-  l'app courante ouverte dans cluster puis le reste"; "un cliqué-glissé-
-  déposé depuis un objet du vault sur un champ d'input d'objet comme un
-  sprite dans fractals devrait être possible"; "les objets de sets de
-  legacy grid sont trop petits et redondants avec les folders … est-ce
-  qu'on pourrait s'en défaire ?" → S9g landed the same day, the board of
-  `docs/plan.md`; `docs/decisions.md`, 2026-11-05: the sets kept, in their
-  folder.
 
 - **2026-11-05 — BEC's layers again, the print kept vector, a project made
   by several.** BEC_2025 is the ancestor `core/formats.js` took its formats

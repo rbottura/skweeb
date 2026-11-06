@@ -342,10 +342,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**P7 — a worm's path across the map** (`docs/plan.md`, *P*): a path drawn on
-the map that a thing follows across the room, as the rig's worm crawls round
-its own path, its loop closing on the map's clock. M13c, the gabarit, waits
-on its fields — the author's.
+**L4 — the live view blends as a save does** (`docs/plan.md`, *L*, a side
+job): the stack's layers in a group of their own inside the stage, the
+checkerboard behind it, so screen and difference meet nothing where nothing
+is under them. The main thread waits on the author: P7's path, a field of
+the map's recipe; P8's bundle; M13c's fields.
 
 ## Parked decisions
 
