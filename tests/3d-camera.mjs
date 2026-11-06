@@ -114,5 +114,13 @@ ok('turned, in degrees; its size, a share of it; at its phase', [swungAt({ ...bo
   +swungAt({ ...bob, params: { ...bob.params, swingPhase: 90 } }, 0, 60).params.y.toFixed(6)], [30, 3, 1.5]);
 ok('…and seen at a frame, its shapes swung with it', seenAt({ turns: 0, length: 60, fps: 30, yaw: 0, shapes: [bob] }, 15).shapes[0].params.y, 1.5);
 
+// A model from every side (sides.js, P6): RPG Maker's order, the eye turned round it, no turntable.
+const { SIDES, sideRecipe } = await import('../apps/3d/sides.js');
+const { DIRECTIONS } = await import('../core/character.js');
+ok('its sides in a character\'s order', SIDES.map(s => s[0]), DIRECTIONS);
+ok('…each the eye turned round it — down as framed, left a quarter, right the other way, up from behind — and none turning',
+  SIDES.map(([, by]) => { const r = sideRecipe({ yaw: 30, turns: 1, length: 72 }, by); return [r.yaw, r.turns]; }),
+  [[30, 0], [120, 0], [-60, 0], [210, 0]]);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

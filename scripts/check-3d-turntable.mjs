@@ -15,7 +15,9 @@
  * downloads, a zip of 72 PNGs and its meta. Turned back to none, the player
  * goes and S saves a model again. And with no turn, the sphere swung up and
  * down (P2): a loop again, a quarter of its wave another picture, no handles
- * on it, S its loop titled swinging. And no page said anything wrong.
+ * on it, S its loop titled swinging. And from every side (P6): four sides
+ * in RPG Maker's order, the eye turned round it, and a character of them.
+ * And no page said anything wrong.
  *
  * Apart from check-3d, which follows one still model from its opening to
  * its save.
@@ -161,6 +163,20 @@ c.ok('…a quarter of its wave on, another picture — and a shape that swings h
 const swung = await saved();
 c.ok('…S saves its loop, titled as it swings', !!swung && swung.type === 'sequence' && swung.title === 'box, sphere, torus · swinging ×72'
   && swung.recipe.shapes[1].params.swingBy === 'y', swung ? `${swung.type} "${swung.title}"` : 'nothing saved');
+
+// P6: the model from every side — Export's own act — four sides and a character of them, for the map's avatar.
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Save it from every side — a character')`);
+await page.until(`/^saved 4 sides|failed/.test(${say})`, { timeout: 120000 }).catch(() => {});
+const setId = ((await page.eval(say)).match(/ — (\S+)$/) || [])[1];
+const set = setId ? await (await fetch(c.base + '/api/vault/' + setId)).json() : null;
+const sides = set ? await Promise.all(set.recipe.members.map(async id => (await fetch(c.base + '/api/vault/' + id)).json())) : [];
+c.ok('from every side: four sides saved, and a character of them in RPG Maker\'s order', !!set && set.recipe.role === 'character'
+  && sides.length === 4 && sides.map(o => o.title.split(' · ').pop()).join() === 'down,left,right,up',
+  set ? `${set.title}: ${sides.map(o => o.title).join(' | ')}` : await page.eval(say));
+c.ok('…each the eye turned round it, none turning — the sphere swinging still, each a loop', sides.length === 4
+  && sides.every(o => o.type === 'sequence' && o.recipe.turns === 0) && sides.map(o => o.recipe.yaw - sides[0].recipe.yaw).join() === '0,90,-90,180',
+  JSON.stringify(sides.map(o => [o.type, o.recipe.yaw, o.recipe.turns])));
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));

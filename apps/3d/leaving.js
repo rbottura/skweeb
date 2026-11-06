@@ -12,6 +12,7 @@
  */
 
 import { saveModel, downloadPicture, downloadFrames, APP } from './save.js';
+import { saveSides } from './sides.js';
 import { PrintPanel }  from '../../core/PrintPanel.js';
 import { exportBox }   from '../../core/boxes/export.js';
 import { stackDrawer } from '../../core/StackPanel.js';
@@ -73,6 +74,11 @@ export function ways(panel, { bar, params, clock, now, after }) {
         return `downloaded ${out.frames} frames at ${out.fps} fps — node scripts/frames-to-video.mjs makes the video`;
       }),
     },
+    // The model from every side, a character for the map's avatar to wear (sides.js, P6).
+    acts: [{ id: 'sides', label: 'Save it from every side — a character', run: () => leave(async args => {
+      const { set, sides } = await saveSides({ ...args, onStatus: t => bar.say(t) });
+      return `saved ${sides.length} sides and their character — ${set.id}`;
+    }) }],
   });
 
   // A print: the model as it stands — on a turntable, the frame on screen — drawn again at a sheet's size and a

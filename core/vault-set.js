@@ -37,7 +37,7 @@ export const SET_ORIGIN = PALETTE_ORIGIN;
 
 /** What a set's members can be: a picture, its render one image — and a character's, its loops too. */
 const PICTURES = new Set(['shape', 'still']);
-const MEMBERS = { [CHARACTER]: new Set(['sequence', 'shape', 'still']) };
+const MEMBERS = { [CHARACTER]: new Set(['sequence', 'shape', 'still', 'model']) };   // a 3D model's sides among them (P6)
 
 /** What among `ids` a set of `role` can hold, in their order — the selection's, the order it was picked in. */
 export const membersIn = (ids, rows, role = null) => {
