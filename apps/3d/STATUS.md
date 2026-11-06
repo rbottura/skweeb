@@ -54,7 +54,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   its `c` — `fill` which faces; the app's pie, A, has them with four, six
   or eight faces filled, BEC's `q` `s` `d`. One geometry, its colours at its
   vertices, so it has no colour row (`look.js` `dress`); modifiers, style
-  and print as every shape — `tests/3d-shapes.mjs`, `check-3d`.
+  and print as every shape — `tests/3d-shapes.mjs`, `check-3d`. Or drawn
+  in a palette of the vault (V1, `palettes.js`): its *a palette of the
+  vault* names one, its colours read once for the page, before a replay,
+  a print or a save — which names it among its parents.
 - **A stack of modifiers** (2026-10-06, brick 3; `modifiers.js` the
   catalogue, `deform.js`, `repeat.js`, `tests/3d-modifiers.mjs` 41). A
   shape's card holds, after its form, a list of modifier cards — core's

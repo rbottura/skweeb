@@ -29,6 +29,22 @@ Nothing, 2026-11-05: the day's ideas went onto the plan, into
 
 ## Sorted
 
+- **2026-11-06 — sliders that do not move; a palette, a type; a workshop
+  across the apps; BEC_2025's folder, for BEC 2027.** "des éléments pp-num
+  et des sliders dans fractals notamment où les valeurs ne changent pas en
+  bougeant le slider, certains steps aussi sont trop grands ou un peu
+  buggués"; "la palette de couleur de bec me fait penser que l'objet
+  palette de couleur doit exister, et il nous faut un endroit pour accéder
+  à des fonctions d'édition inter app comme la création de palette de
+  couleurs, la création de set custom en sélectionnant les images qu'on
+  veut, et aussi des groupes d'objets pour ranger le vault à terme"; "pour
+  les assets de bec_2025 on peut avoir un groupe ou dossier de ce nom avec
+  tous les éléments concernés; sachant que j'aimerais utiliser cette
+  application pour tester des rendus graphiques de l'édition bec_2027".
+  → C11 and V1 landed the same day; V2 and V3 on the board of
+  `docs/plan.md`, their plan `docs/workshop.md`; M13b answered, a folder
+  `bec_2025` (`docs/bec.md`); `docs/decisions.md`, 2026-11-06.
+
 - **2026-11-05 — the motion kept; the vault app's viewer; M13a.** "les
   animations de transitions sont super comme elles sont maintenant"; in
   the vault app, a sequence stretched — `gam_1790189754737_d12aab` — no

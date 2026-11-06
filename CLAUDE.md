@@ -21,7 +21,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `apps/map/` | M8, begun: the map editor — a room on a grid of tiles, things placed on it, what can be walked and what answers, saved as a `map`; and its player, `play/`, point and click | `apps/map/STATUS.md` |
 | `apps/rig/` | M9, begun: a drawing made of marks, rigged at its marks — its strokes its bones; poses, swings, walks by part, worms crawling; and its player, `puppet/`, worn in OBS: the author's eyes from the camera at the eyestalks' tips, the mouth on the face, the body swaying with the head; the rig's bones over it as guides; sent, kept as a smart object OBS follows | `apps/rig/STATUS.md`; for OBS, `docs/guides/obs.md` |
 | `apps/3d/` | M10, begun: primitives made from their params — BEC_2025's grid among them (M13a, `grid.js`) — seen from anywhere, drawn by three.js on the page's GPU device, saved as a `model` | `apps/3d/STATUS.md`; for the grid, `docs/bec.md` |
-| `apps/vault/` | S9b: the vault full screen — core's vault panel docked, the object chosen drawn large at its ink and played, seen closer (`core/zoom.js`); makes nothing | `apps/vault/STATUS.md` |
+| `apps/vault/` | S9b: the vault full screen — core's vault panel docked, the object chosen drawn large at its ink and played, seen closer (`core/zoom.js`); makes only what is made of objects by hand, a palette first (V1) | `apps/vault/STATUS.md`; `docs/workshop.md` |
 | `apps/cluster/` | S9c: *cluster*, the scene — the apps mounted one at a time through their modules, a strip naming them, the vault first; laid as the bench is, the scene's vault four columns of pictures — the app's own first, a card dragged onto a field — the viewer in one place, the properties one panel — the app's panels a tab each (`tabs.js`), its sections folded in it — at a switch its boxes still and what is in them going and coming (`frames.js`, `motion.css`), the last frame held and moved onto the next (`held.js`); the side's views — the vault, the keys, the history (`sides.js`); `#<app>` in the address | `apps/cluster/STATUS.md`, `docs/scene.md` |
 | `vault/` | every object ever made. Real files. **Not in git.** | `docs/object-model.md` |
 | `gallery/` | the published subset. In git, deploys to the web. | `docs/object-model.md` |
@@ -36,6 +36,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `docs/scene.md` | M12: the UI the bench found, an object's states as a tree, the space of contexts, and the scene, *cluster* — one canvas, the apps round it, each a module (`core/mount.js`) | before any brick of track S |
 | `docs/decisions.md` | what was decided before today, and why, by date — the newest days; its head lists the files the older ones moved to, `docs/decisions-<from>-to-<to>.md` | before reopening a decision |
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
+| `docs/workshop.md` | V, the vault's workshop: what is made of objects for every app — a palette, a set by hand, groups | before touching palettes, hand-made sets or groups |
 | `docs/bec.md` | M13, proposed: BEC_2025's scenarios in skweeb — its grid in the 3D app, its layers by format, the project one page | before any brick of M13 |
 | `docs/inbox.md` | the author's ideas between bricks, not yet sorted | when the author has one, and at the end of a session |
 

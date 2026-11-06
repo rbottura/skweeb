@@ -77,7 +77,11 @@ to draw, never code that arrives with it.
    own; and its edges animated, with the 3D app's motion (P1, P2).
 2. **M13b — BEC's files into the vault** · `bec/import` · S.
    `scripts/import-bec.mjs`: the titles and infos of each format, shapes
-   with alpha filed by format; the palettes; presets as `params`.
+   with alpha; BEC's three palettes as palettes (V1, `docs/workshop.md`) —
+   all in one folder, `bec_2025`, the author's word of 2026-11-06: "un
+   groupe ou dossier de ce nom avec tous les éléments concernés". The
+   suite is to try BEC 2027's first renders: "tester des rendus graphiques
+   de l'édition bec_2027".
 3. **M13c — the gabarit, a type** · `ui/gabarit` · M. S8's gabarit — a
    format and its guides — and its layers, under the render and over it,
    BEC's titles and infos; chosen with the format in any app, laid on the

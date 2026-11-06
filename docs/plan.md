@@ -50,7 +50,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9g | the scene's vault beside an app: still at a switch, the app's own first, dragged onto a field, a set in its folder | `scene/side-vault` | S | landed 2026-11-05 |
 | S9h | the vault app's viewer: an object at its ink's size, its player's controls, seen closer, an even fit | `scene/vault-viewer` | S | landed 2026-11-05 |
 | M13a | BEC's grid, a primitive of the 3D app: cells, edges, faces, palettes, every draw a seed | `3d/grid` | M | landed 2026-11-05 (`docs/bec.md`) |
-| M13b | BEC's files into the vault: titles and infos by format, palettes, presets | `bec/import` | S | waits: a project as data, the author's yes |
+| M13b | BEC's files into the vault, in a folder `bec_2025`: titles and infos by format, its palettes | `bec/import` | S | ready: the author's yes, 2026-11-06 — "un groupe ou dossier de ce nom" |
+| V1 | the palette, a type: made by hand in the vault panel, edited as a new one, BEC's grid drawn in one | `vault/palette` | M | landed 2026-11-06 (`docs/workshop.md`) |
+| V2 | a set by hand: the pictures selected, in their order, a set of a role | `vault/set` | S | after M13b |
+| V3 | groups by hand: the selection into a group, out of it, a group renamed | `vault/groups` | S | after M13b |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
@@ -58,10 +61,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | landed 2026-11-05 |
 | S13 | the player's lanes: a composition's sequences a lane each, one opened there | `compose/lanes` | M | waits: worked out with the author, with S9e |
 | S10 | the space of contexts, and the bridge | `scene/space` | L | needs S7, S9c, S11 |
-| U8a | the shared boxes: one contract, Export first | — | — | → S3 |
-| U8b | the player and the Stack, as boxes | — | — | → S3 |
-| U8c | Format and Ground, mounted anywhere | — | — | → S4 |
-| L10 | saved three ways: S, then 1 2 3 | — | — | → S3 and S6: S saves the next state |
+| — | U8a U8b U8c, L10, L7, U10, U11: taken up by track S | — | — | → S3, S4, S6, S7, S1, S9 |
 | P1 | M10's brick 5: a turntable | `3d/turntable` | M | needs S3 |
 | P3 | a character, defined once | `core/character` | S | ready |
 | P4 | M8's brick 4: an avatar that walks | `map/avatar` | M | needs P3 |
@@ -70,11 +70,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L3 | no cycle | `layers/cycles` | S | ready |
 | L2 | flatten | `layers/flatten` | S | needs L1 |
 | L6 | edit in place | `layers/edit` | S | ready |
-| L7 | versions in the vault | — | — | → S6, S7 |
 | L5 | grid takes a window | `layers/grid-takes` | M | ready |
 | U9 | the author's notes on each app | — | — | in part, 2026-11-03: `docs/scene.md` |
-| U10 | the new theme | — | — | → S1: described 2026-11-03 |
-| U11 | the new layout | — | — | → S9: the bench's |
 | P2 | M10's brick 5: a shape swung | `3d/swing` | M | needs P1 |
 | P6 | M10's brick 6: a model from every side | `3d/sides` | S | needs P1, P3 |
 | P7 | a worm's path across the map | `map/paths` | M | needs P4 |
@@ -150,10 +147,10 @@ Each with what happens if nothing is said.
 - **The gabarit, a type** (S8): a format and its guides as an object, made
   for its format (`docs/scene.md`) — its fields to confirm before S8; BEC's
   layers by format, titles under the render and infos over it, one to weigh.
-- **BEC again, M13** (inbox, 2026-11-05; `docs/bec.md`): M13a landed the
-  day of the author's yes. Still theirs: a project as data — BEC's layers,
-  palettes and presets in the vault, no code from outside (M13b, M13d) —
-  and the gabarit's fields (M13c). If nothing is said: M13b as written.
+- **BEC again, M13** (`docs/bec.md`): M13a landed; M13b answered — BEC's
+  assets in a folder `bec_2025`, for BEC 2027's first renders. Still the
+  author's: the gabarit's fields (M13c). And the workshop's (`docs/workshop.md`):
+  a palette's fields — colours and their names — and its place, the panel.
 - **A project made by several** (the roadmap's *Still open*, 3): after
   BEC — PDF layers, the print kept vector, people live on one stack;
   pdf.js and pdf-lib; the app that sets the text; beyond the tailnet.
