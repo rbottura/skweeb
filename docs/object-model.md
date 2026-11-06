@@ -213,7 +213,7 @@ one way, `docs/core-api.md` — makes, run by hand before it existed.
 
 More than one app eats sets: the gamepad as a brush family, grid as a dither
 material, ckt as sprites for its dots, particles as sprites for its
-particles. `recipe.role` says what a set was
+particles, the map a character for its avatar. `recipe.role` says what a set was
 *made as* — `brush-family`, `material` — and it is history. Where it is
 *offered* is a tag, `use:<id>`, one per use, switched in the vault detail;
 `core/uses.js` holds the catalogue of uses and the rule:
@@ -265,6 +265,16 @@ the order they were picked; a name, and a role or none; `origin.app:
 members named again are another set. A material made so has no `ground`:
 its order is the hand's — the first the lightest, the last the darkest —
 not one measured; grid's maker, opening it, measures it again on its own.
+
+**A character** (P3, 2026-11-06, `core/character.js`): a set, `role:
+"character"`, its members loops by direction in RPG Maker's order — down,
+left, right, up — the first frame of each its stance; three members are
+down, right and up, the left the right mirrored. Eight directions later, by
+the same rule: eight, or five, the lefts left out. The count is the rule;
+no field says which member is which, so a character a delete cuts a member
+from is read by its new count — made again, it is right. Offered to the
+map by default (`use:character`, *map character*) for its avatar (P4);
+made by hand in the vault panel as a set is, its members loops.
 
 ## The recipe contract
 

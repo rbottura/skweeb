@@ -46,7 +46,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `theme.css` | the suite's look: tokens, the page shell, controls | **in**, 2026-09-23 |
 | `bus.js`, `panel.js`, `input.js` | namespaced DOM events on `document`; a base panel — show/hide, focus, gamepad and keyboard nav; gamepad and keyboard mapping | not yet: apps dispatch directly; panels are concrete; `gamepad/core/inputManager.js` |
 | `links.js` | the named one-way links between apps | not yet, see below |
-| `uses.js` | what a set can be used as, and where each set is offered | **in**, 2026-09-23 |
+| `uses.js`, `character.js` | what a set can be used as, and where each set is offered; a character's loops by direction (P3) | **in**, 2026-09-23; 2026-11-06 |
 | `easing.js` | the suite's easing curves, and the param that offers one | **in**, 2026-09-24 |
 | `libs/` | p5 1.5.0, for the gamepad and core's replay of its recordings; three.js r186, for the 3D app — `libs/three/README.md`, copied by `scripts/vendor-three.mjs`; MediaPipe's face landmarker, tasks-vision 1.0.1, for the rig's puppet — fetched on each machine by `scripts/vendor-mediapipe.mjs`, 15 MB of WASM and model git never holds, its README kept | **in**; three since 2026-10-06, MediaPipe since 2026-10-21 |
 
@@ -280,7 +280,7 @@ retagFor(object, new Set(['material']))  // the Vault.retag() edit for exactly t
 The consuming side's half of what a link is on the producing side: *the gamepad
 can eat a set as brushes*. A set with no `use:` tag follows its role; once it
 has one, the tags decide. The vault detail draws a switch per row of `USES`.
-Rules in `docs/object-model.md`, *Uses*.
+Rules in `docs/object-model.md`, *Uses*; a character's, `character.js`.
 
 ## easing.js — how a change runs from start to end
 

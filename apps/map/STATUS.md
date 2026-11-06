@@ -149,9 +149,10 @@ is a loop's, and nothing a player does enters a recipe.
 
 ## Next single step
 
-**Brick 4, an avatar that walks — P4 on the board of `docs/plan.md`**, once
-P3 has defined a character (its fields wait on the author's yes). It waits
-on no drawing: until a character set exists the avatar is any loop, facing
+**Brick 4, an avatar that walks — P4 on the board of `docs/plan.md`**, P3
+having defined a character (`core/character.js`, 2026-11-06: `waysOf` a
+loop by direction, a left mirrored; made by hand in the vault panel). It
+waits on no drawing: with no character the avatar is any loop, facing
 every way. ZQSD or WASD by `event.code`, the arrows, a gamepad's stick; E
 uses what it faces; a tap walks to a cell by the shortest way over
 `walkable`; where it stands lives in the player, never in a recipe. Then

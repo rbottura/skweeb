@@ -32,7 +32,8 @@ sorts them.
   of the vault — every draw a seed: R new edges, C new colours, A's pie.
 - **The vault's workshop** (V1–V3, `docs/workshop.md`): a palette made in
   the vault panel, *+ palette*, edited as a new one; its selection into a
-  group or out of one, a group renamed; the pictures selected, a set. And
+  group or out of one, a group renamed; the pictures selected, a set — a
+  character's loops too (P3, `core/character.js`, *map character*). And
   BEC_2025 in it (M13b, `scripts/import-bec.mjs`): its layers by format,
   its other pictures, its three palettes — 31 objects in `bec_2025`.
 
@@ -339,12 +340,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**P3 — a character, defined once** (`docs/plan.md`, *P*): a `set`,
-`role: 'character'`, its members loops by direction in RPG Maker's order —
-down, left, right, up — a row of `core/uses.js`, *map character*, and of
-`docs/object-model.md`, with a test; made by hand in the vault panel as V2
-makes a set, its members sequences. M13c, the gabarit, waits on its
-fields — the author's.
+**P4 — the map's avatar walks** (`apps/map/STATUS.md`, *Next single
+step*): in the player, a character on the spawn — or any loop, facing every
+way — ZQSD or WASD by `event.code`, the arrows; its direction's loop from
+`core/character.js` `waysOf`, a left drawn mirrored. M13c, the gabarit,
+waits on its fields — the author's.
 
 ## Parked decisions
 
