@@ -9,8 +9,11 @@
  * in another window as particles' sprites: one sprite, the model's picture.
  * The sphere taken out in the 3D app and saved again, version 2: particles'
  * sprites follow it there, the loop held still, with no reload — its field
- * says the new version; and following is no step of particles' history. And
- * no page said anything wrong. Needs a 3D backend: WebGPU, or WebGL2.
+ * says the new version; and following is no step of particles' history. The
+ * same smart object a layer of particles' stack (L1): its row keeps it at a
+ * state, a window's layer has none, and the page the stack saves places it
+ * at that state. And no page said anything wrong. Needs a 3D backend:
+ * WebGPU, or WebGL2.
  */
 
 import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
@@ -82,6 +85,30 @@ c.ok('…its field says the new version', /v1/.test(fieldWas) && /v2/.test(field
 c.ok('…and following it is no step of particles\' history — its hand\'s edit the last', stepsWere >= 1 && (await parts.eval(steps)) === stepsWere,
   `${stepsWere} → ${await parts.eval(steps)}`);
 await c.shot('1-followed');
+
+// L1: the same smart object a layer of particles' stack, kept at a state — and the page the stack saves keeps it so.
+const stackButton = label => `[...document.querySelectorAll('.pp-stack-btn')].find(b => b.textContent === ${JSON.stringify(label)})`;
+const layerRow = name => `[...document.querySelectorAll('.pp-stack-layer .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+await parts.click(stackButton('＋ from the vault…'));
+await parts.until(`!!${card}`, { timeout: 20000 }).catch(() => {});
+await parts.click(`${card}?.closest('.vp-cell')?.querySelector('.vp-use')`);
+await parts.until(`document.querySelectorAll('.pp-stack-row').length === 2`, { timeout: 10000 }).catch(() => {});
+const stateRow = layerRow('at its state · 0 follows');
+await parts.click(`[...document.querySelectorAll('.pp-stack-row')].find(r => !/from the vault/.test(r.textContent))`);
+await wait(300);
+const windowHasNone = await parts.eval(`!${stateRow} || ${stateRow}.hidden`);
+await parts.click(`[...document.querySelectorAll('.pp-stack-row')].find(r => /from the vault/.test(r.textContent))`);
+await parts.until(`!!${stateRow} && !${stateRow}.hidden`, { timeout: 5000 }).catch(() => {});
+c.ok('its layer in the stack has a state to be kept at — a window\'s has none', windowHasNone && await parts.eval(`!!${stateRow} && !${stateRow}.hidden`));
+await parts.typeInto(`${layerRow('at its state · 0 follows')}?.querySelector('.pp-num')`, '1');
+await wait(400);
+const said = `(document.querySelector('.pp-stack-said')?.textContent || '')`;
+const before = new Set(((await (await fetch(c.base + '/api/vault')).json()).objects || []).map(o => o.id));
+await parts.click(stackButton('Save the stack as a page'));
+await parts.until(`/^saved |not saved/.test(${said})`, { timeout: 120000 }).catch(() => {});
+const pageMade = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).find(o => !before.has(o.id) && o.type === 'composition');
+const kept = pageMade ? (await (await fetch(c.base + '/api/vault/' + pageMade.id)).json()).recipe.place.find(b => b.ref === skw) : null;
+c.ok('…kept at version 1, the page the stack saves places it at version 1', !!kept && kept.version === 1, kept ? JSON.stringify(kept) : await parts.eval(said));
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));

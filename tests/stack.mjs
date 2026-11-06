@@ -98,6 +98,18 @@ const alone = joinLive({ app: 'rig', layer: () => null, channel: null });
 const own = joinStack(alone, { channel: null });
 own.add({ live: alone.id }, { width: 10, height: 10 });
 ok('with no channel: a stack of one window\'s own', own.get().place.length, 1);
+
+// L1: a smart object's layer kept at a state, or following; the page keeps what the stack kept (stackSave.js).
+const { placed } = await import('../core/stackSave.js');
+own.add({ ref: 'skw_1_a' });
+await wait(10);
+own.set(1, { version: 3 });
+ok('a smart object\'s layer kept at a state', own.get().place[1].version, 3);
+own.set(1, { version: 0 });
+ok('…or following its latest: no version kept', 'version' in own.get().place[1], false);
+const t0 = { x: 0, y: 0, scale: 1, rot: 0 };
+ok('saved as a page: kept at its state, or at its latest; a window always its latest', [placed({ ref: 'skw_1_a', version: 3, transform: t0 }, 'skw_1_a').version,
+  placed({ ref: 'skw_1_a', transform: t0 }, 'skw_1_a').version, placed({ live: 'w1', version: 3, transform: t0 }, 'skw_2_b').version], [3, 'latest', 'latest']);
 own.leave();
 alone.leave();
 

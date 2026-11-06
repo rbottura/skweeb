@@ -17,9 +17,9 @@ import { openFrames }    from './rebuild.js';
 import { toPng }         from './export.js';
 import { thumbFromBlob } from './thumb.js';
 
-/** A block as compose keeps it: by reference, at its latest, simply there, its blend when it has one. */
-const placed = (block, ref) => ({
-  ref, version: 'latest', transform: { ...block.transform }, at: 0, length: null,
+/** A block as compose keeps it: by reference, at its latest — or the state the stack kept it at (L1) — simply there, its blend when it has one. */
+export const placed = (block, ref) => ({
+  ref, version: !block.live && Number.isInteger(block.version) ? block.version : 'latest', transform: { ...block.transform }, at: 0, length: null,
   ...(block.opacity != null && block.opacity < 1 ? { opacity: block.opacity } : {}),
   ...(block.blend && block.blend !== 'normal' ? { blend: block.blend } : {}),
 });

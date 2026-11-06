@@ -38,6 +38,7 @@ function tidy(block) {
   };
   if (block.opacity != null && block.opacity < 1) out.opacity = Math.max(0, block.opacity);
   if (block.blend && block.blend !== 'normal') out.blend = block.blend;
+  if (!block.live && Number.isInteger(block.version) && block.version > 0) out.version = block.version;   // kept at a state (L1)
   return out;
 }
 
@@ -121,6 +122,8 @@ export function joinStack(live, { channel } = {}) {
         if (fields.transform) b.transform = { ...b.transform, ...fields.transform };
         if ('opacity' in fields) b.opacity = fields.opacity;
         if ('blend' in fields) b.blend = fields.blend;
+        // A smart object's layer kept at a state — `version` a number — or following its latest, none (L1).
+        if ('version' in fields) { if (Number.isInteger(fields.version) && fields.version > 0) b.version = fields.version; else delete b.version; }
       });
     },
     /** Hear the stack change. Returns what stops it. */

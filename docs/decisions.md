@@ -253,6 +253,12 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**The live stack follows; a row keeps a state** (L1). Compose places a
+project at its state, as the author asked on 2026-11-03 (S6b); the stack is
+the live composition, so a smart object's layer in it follows its states,
+and the same row as compose's — *at its state · 0 follows* — keeps one.
+The page the stack saves places it as the stack had it.
+
 **A smart object held is followed, and that is no edit** (L11). An object
 field holding one hears its versions and says itself again, `following`
 true: the app loads it again, as if picked again, and its history takes no

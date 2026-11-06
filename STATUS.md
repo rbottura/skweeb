@@ -105,8 +105,8 @@ sorts them.
   version, and every page holding it drawn again (`vault:updated`) — and
   every object field holding it, in any app (L11, 2026-11-06).
 - **The stack saved as a page** (`core/stackSave.js`): every window a smart
-  object, the page compose's, whose placements blend. What M11 left — pins,
-  flatten, no cycle, more takers, overrides — is L in `docs/plan.md`.
+  object, the page compose's, whose placements blend. Pins in compose and
+  the stack (L1); what M11 left — flatten, no cycle, overrides — is L.
 
 ### M10 — 3D (`apps/3d/STATUS.md`, four bricks of six and a turntable)
 
@@ -341,11 +341,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L1 — pins** (`docs/plan.md`, *L*): a placement of a smart object carries
-its `version` — *follows the latest*, or *kept at v3* — shown in compose's
-placed panel and the Stack drawer, with a switch; kept, it draws what was
-kept (`core/smart.js` `innerOf`). M13c, the gabarit, waits on its fields —
-the author's.
+**L3 — no cycle** (`docs/plan.md`, *L*): `Vault.save` walks the refs and
+refuses a page that would come to hold itself, naming the chain; the server
+refuses it too — `tests/smart.mjs` makes A hold B hold A, refused. M13c,
+the gabarit, waits on its fields — the author's.
 
 ## Parked decisions
 

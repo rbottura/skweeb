@@ -56,7 +56,10 @@ JavaScript to someone else's browser.
   no step of its history; one pinned, `skw_…@v3`, follows nothing.
   Particles' and fractals' sprites take a 3D model's picture, followed so.
 - `version: 4` — pinned. An old composition keeps looking as it did. Why
-  `version` and not `at`: `docs/decisions.md`, 2026-09-22.
+  `version` and not `at`: `docs/decisions.md`, 2026-09-22. Compose places a
+  project at its state (S6b), its row *at its state · 0 follows*; the live
+  stack's layer of a smart object follows, and the same row keeps it at a
+  state — its block, and the page the stack saves, carry it (L1).
 - `overrides` — per-placement param values, so two placements of one definition
   can differ. Free, because params are data.
 - `at` — **when**, in frames, measured from the composition's own start.
