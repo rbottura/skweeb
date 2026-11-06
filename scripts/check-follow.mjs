@@ -137,11 +137,11 @@ await compose.until(`!!${plAct('Flatten')} && !${plAct('Flatten')}.disabled`, { 
 c.ok('placed in compose, the smart object can be flattened', await compose.eval(`!!${plAct('Flatten')} && !${plAct('Flatten')}.disabled`));
 
 // Edited in place: Edit in 3d — the 3D app opened on it, bound; the placement, kept at its state, follows now.
-await compose.until(`!!${plAct('Edit in 3d ↗')}`, { timeout: 10000 }).catch(() => {});
+await compose.until(`!!${plAct('Edit in 3d ↗')} && !${plAct('Edit in 3d ↗')}.disabled`, { timeout: 20000 }).catch(() => {});
 // A real press, as a hand's: a window a script's click opens, the browser holds back.
 await compose.pointer(await compose.eval(`(() => { const b = ${plAct('Edit in 3d ↗')}; b.scrollIntoView({ block: 'center' });
   const r = b.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()`));
-const editor = await c.found(url => url.includes('/apps/3d/?open=' + skw), { timeout: 15000 });
+const editor = await c.found(url => url.includes('/apps/3d/?open=' + skw), { timeout: 30000 });
 await editor.until(`/^opened /.test(${say})`, { timeout: 30000 }).catch(() => {});
 c.ok('Edit in 3d: the 3D app opened on it, the placement following now', /^opened /.test(await editor.eval(say))
   && /follows its states now/.test(await compose.eval(say)), `${await editor.eval(say)} · ${await compose.eval(say)}`);

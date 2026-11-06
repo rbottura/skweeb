@@ -172,7 +172,10 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
       row.append(el('span', 'pp-stack-app', name), el('span', 'pp-stack-what', what));
       if (b.live === live.id) row.append(el('span', 'pp-stack-tag', 'this window'));
       // A smart object's layer edited in place (L6): its app opened on it, bound — following it again if it was kept.
-      if (b.ref && b.ref.startsWith('skw_')) row.append(button('✎', 'edit it in its app: its next save drawn here', () => editInPlace(i, b)));
+      if (b.ref && b.ref.startsWith('skw_')) {
+        linkOf(b.ref);
+        row.append(button('✎', 'edit it in its app: its next save drawn here', () => editInPlace(i, b)));
+      }
       row.append(button('▲', 'up the stack', () => stack.move(i, i + 1)),
         button('▼', 'down the stack', () => stack.move(i, i - 1)),
         button('×', 'off the stack', () => stack.remove(i)));
@@ -202,16 +205,20 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
     );
   }
 
+  // A smart layer's link to its app, looked up once when its row is drawn: a press follows it at once —
+  // a window opened after a slow lookup the browser holds back.
+  const editUrls = new Map();
+  const linkOf = ref => {
+    if (!editUrls.has(ref)) editUrls.set(ref, Vault.load(ref).then(({ object }) => reopenUrl(object)).catch(() => null));
+    return editUrls.get(ref);
+  };
+
   /** A smart object's layer, in its app: opened on it, the window bound; kept at a state, it follows from now on. */
   async function editInPlace(i, b) {
-    try {
-      const url = await reopenUrl((await Vault.load(b.ref)).object);
-      if (!url) return;
-      if (Number.isInteger(b.version)) stack.set(i, { version: 0 });
-      follow(url);
-    } catch (err) {
-      console.warn('[stack] could not open it to edit:', err);
-    }
+    const url = await linkOf(b.ref);           // known already, as a rule: its row asked when it was drawn
+    if (!url) return;
+    follow(url);
+    if (Number.isInteger(b.version)) stack.set(i, { version: 0 });
   }
 
   // A vault object's title, from the index: asked once, and only for one it cannot name.

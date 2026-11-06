@@ -14,6 +14,7 @@
 
 import { Vault }      from '../../core/vault.js';
 import { openFrames } from '../../core/rebuild.js';
+import { reopenUrl } from '../../core/reopen.js';
 import { innerOf }    from '../../core/smart.js';
 import { lookOver }   from '../../core/gpu/look.js';
 import { inkSize, placementMatrix, offPage } from './page.js';
@@ -146,6 +147,8 @@ export class Placements {
       Object.assign(p, { title: object.title || object.id, type: object.type, thumb,
                          app: (object.origin && object.origin.app) || null,       // what edits it in place (L6)
                          handle, size: inkSize(handle), refs: object.refs || [] });
+      // Its app's link, known now: a press on Edit follows it at once — a window opened after a slow lookup the browser holds back.
+      p.editUrl = String(p.block.ref || '').startsWith('skw_') ? await reopenUrl(object).catch(() => null) : null;
       const missing = handle.missing || [];
       if (missing.length) this.say(`${p.title} is drawn without ${missing.join(', ')}: not on this machine`);
     } catch (err) {

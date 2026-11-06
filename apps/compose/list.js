@@ -71,7 +71,7 @@ export class PlacedList {
    */
   render(items, chosen) {
     this.flat.disabled = !(chosen && flattens(chosen.block));
-    this.edit.disabled = this.flat.disabled;
+    this.edit.disabled = !(chosen && chosen.editUrl);        // its app's link known: a press follows it at once (placements.js)
     this.edit.textContent = chosen && chosen.app && !this.edit.disabled ? `Edit in ${chosen.app} ↗` : 'Edit ↗';
     this.rows.replaceChildren();
     if (!items.length) this.rows.append(el('div', 'pp-empty', 'Nothing placed yet.'));

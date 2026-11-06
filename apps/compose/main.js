@@ -354,18 +354,15 @@ function wireKeys(mine) {
 async function editChosen() {
   const p = editing && editing.chosen;
   if (!p || !flattens(p.block)) return;
-  try {
-    const url = await reopenUrl((await Vault.load(p.block.ref)).object);
-    if (!url) return bar.announce(`${p.title}: its app cannot open it to edit`);
-    if (Number.isInteger(p.block.version)) {
-      const { version: was, ...block } = p.block;
-      await placements.update(p, block);
-      editing.choose(p);
-      bar.announce(`${p.title} follows its states now: what is saved there is drawn here`);
-    }
-    follow(url);
-  } catch (err) {
-    bar.announce('could not open it to edit: ' + err.message);
+  // Followed first, in the press itself: the link was found when the placement opened (placements.js).
+  const url = p.editUrl || await reopenUrl((await Vault.load(p.block.ref)).object).catch(() => null);
+  if (!url) return bar.announce(`${p.title}: its app cannot open it to edit`);
+  follow(url);
+  if (Number.isInteger(p.block.version)) {
+    const { version: was, ...block } = p.block;
+    await placements.update(p, block);
+    editing.choose(p);
+    bar.announce(`${p.title} follows its states now: what is saved there is drawn here`);
   }
 }
 
