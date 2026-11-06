@@ -16,6 +16,8 @@
  * The page hears which object, and which version (server/events.js): what
  * places it at `latest` draws it again.
  *
+ * A next state whose refs lead back to it — a page holding a page holding it —
+ * is refused, 409, the chain named (L3, 2026-11-06; core/cycles.js).
  * Since S6 (2026-11-03) the versions are a tree, as git's are: each state
  * names its `parent` — the version it was saved from, the one it is at by
  * default, an older one for a branch — and a merge its `parent2`, the
@@ -28,6 +30,32 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+
+/**
+ * The chain by which `id`, holding `refs`, would come to hold itself — or null (L3). The same walk as
+ * core/cycles.js `cycleOf`, written for require: its refs, and theirs, read off their envelopes.
+ */
+function cycleThrough(id, refs, readEnvelope, safeId) {
+  const seen = new Set();
+  const walk = (at, chain) => {
+    const here = String(at).split('@')[0];
+    if (here === id) return [...chain, here];
+    if (seen.has(here)) return null;
+    seen.add(here);
+    const safe = safeId(here);
+    const envelope = safe && readEnvelope(safe);
+    for (const next of (envelope && envelope.refs) || []) {
+      const found = walk(next, [...chain, here]);
+      if (found) return found;
+    }
+    return null;
+  };
+  for (const r of refs) {
+    const found = walk(r, [id]);
+    if (found) return found;
+  }
+  return null;
+}
 
 /** A state's parent: its own, or — kept before S6 — the version before it. */
 const parentOf = (n, v) => (v && Number.isInteger(v.parent) ? v.parent : n > 1 ? n - 1 : null);
@@ -64,6 +92,9 @@ module.exports = function versionRoute({ objectsDir, readEnvelope, safeId, readB
     } catch (err) {
       return sendJson(res, err.code === 413 ? 413 : 400, { error: err.message });
     }
+    // A next state that would come to hold itself — its refs, or theirs, back to it — is refused, the chain named (L3).
+    const chain = cycleThrough(safe, Array.isArray(payload.refs) ? payload.refs.map(String) : envelope.refs || [], readEnvelope, safeId);
+    if (chain) return sendJson(res, 409, { error: 'it would hold itself: ' + chain.join(' → '), chain });
     const render = decodeAsset(payload.render, 'render');
     if (render.error) return sendJson(res, 400, { error: render.error });
     let thumb = null;

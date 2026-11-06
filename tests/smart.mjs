@@ -36,5 +36,16 @@ const latest = await innerOf(skw);
 ok('at its latest, no trip to the vault', [latest.object.recipe.emit.rate, latest.url], [151, null]);
 ok('a bound form with nothing in it is a still of no recipe', [unwrap({ id: 'skw_1_1', type: 'skw', recipe: null }).type, unwrap({ id: 'skw_1_1', type: 'skw' }).recipe], ['still', null]);
 
+// L3: no page that comes to hold itself (core/cycles.js) — A holds B; B saved again holding A is refused.
+const { cycleOf, chainSaid } = await import('../core/cycles.js');
+const holding = { skw_A: ['skw_B'], skw_B: ['skw_C'], skw_C: [] };
+const refsOf = id => holding[id] || [];
+ok('A holding B, B saved again holding A: refused, the chain named', cycleOf('skw_B', ['skw_A'], refsOf), ['skw_B', 'skw_A', 'skw_B']);
+ok('…itself at once, or through a state it names', [cycleOf('skw_A', ['skw_A'], refsOf), cycleOf('skw_C', ['skw_A@v2'], refsOf)],
+  [['skw_A', 'skw_A'], ['skw_C', 'skw_A', 'skw_B', 'skw_C']]);
+ok('a page holding what holds nothing of it: no chain', [cycleOf('skw_A', ['skw_B'], refsOf), cycleOf('skw_A', [], refsOf)], [null, null]);
+ok('the chain in words, by title where it has one', chainSaid(['skw_B', 'skw_A', 'skw_B'], id => ({ skw_A: 'the poster' })[id]),
+  'skw_B → the poster → skw_B');
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);
