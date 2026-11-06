@@ -108,15 +108,15 @@ sorts them.
   object, the page compose's, whose placements blend. Pins in compose and
   the stack (L1), no page holding itself (L3), *Flatten* (L2), *Edit ↗* (L6).
 
-### M10 — 3D (`apps/3d/STATUS.md`, four bricks of six and a turntable)
+### M10 — 3D (`apps/3d/STATUS.md`, five bricks of six)
 
 - **Primitives made from their params**, each a card (`core/Cards.js`, out
   of filter for it); an orbit view; three r186 on core's GPU device, WebGL2
   where there is none; a `model` keeps values, never a vertex — saved,
   replayed, drawn again at scale 2, placed. Picked by a click, moved by
   three's handles; a stack of modifiers per shape; a style — toon bands, an
-  outline, shadows. Brick 5's turntable (P1, 2026-11-06, `motion.js`): a
-  model turned ±1 or ±2 times a loop, played, saved as a `sequence`.
+  outline, shadows. Brick 5 (2026-11-06, `motion.js`): a turntable (P1), a
+  shape swung (P2) — played, saved as a `sequence`.
 
 ### The print, in every app (2026-10-06; `docs/core-export.md`)
 
@@ -342,10 +342,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**P2 — the 3D app's shape swung** (`docs/plan.md`, *P*; `apps/3d/STATUS.md`):
-a shape's place swung on a wave, as the rig swings a bone — a phase a
-shape, a whole number of swings in the turntable's loop so it still
-closes. M13c, the gabarit, waits on its fields — the author's.
+**P6 — the 3D model from every side** (`docs/plan.md`, *P*;
+`apps/3d/STATUS.md`): four or eight yaws, a loop each, kept as a character
+(`core/character.js`) for the map's avatar. M13c, the gabarit, waits on its
+fields — the author's.
 
 ## Parked decisions
 

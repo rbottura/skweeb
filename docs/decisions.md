@@ -253,6 +253,12 @@ selection it has for the trash will make a set and a group (V2, V3,
 `docs/workshop.md`). Both the author's to correct. BEC_2025's assets come
 in as one folder, `bec_2025`: "un groupe ou dossier de ce nom".
 
+**A shape swings one of its place keys** (P2). What swings is named by the
+place key it moves — a turn, a move, its size — so the wave needs no table
+of its own, and an old recipe, which names none, stands still. A shape that
+swings has no handles: dragged at a frame, one would write the wave's moment
+into its place; its rows edit where it rests.
+
 **Two takers, one following** (L5). When grid took windows as filter does,
 filter's following moved to core, each app handing it its two ways to open
 a source — a copy would have drifted. A smart source at a new version is

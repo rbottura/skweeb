@@ -171,7 +171,7 @@ node scripts/check-cluster.mjs          # S9c: the scene — every app mounted i
 node scripts/check-cluster-vault.mjs    # S9g: the scene's vault — still at a switch, the app's own first, a card dragged onto a field
 node scripts/check-puppet.mjs           # the rig's puppet: a fake camera read once a frame, eyes and mouth worn, the body swayed, the guides, the camera switched; sent and followed by a page in OBS; parts found drawn eyes first, and told
 node scripts/vendor-mediapipe.mjs       # once a machine, before the puppet reads a face: MediaPipe into core/libs/mediapipe/, out of git
-node scripts/check-3d-turntable.mjs     # P1: the 3D app's turntable — played, its loop saved as a sequence and replayed, every frame
+node scripts/check-3d-turntable.mjs     # P1: the 3D app's turntable — played, its loop saved as a sequence and replayed, every frame; P2, a shape swung
 node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click and moved by handles, twisted by a stack, drawn in a style; a model saved, drawn again at scale 2, placed; with WebGL2 too
 
 # On a GPU Chrome keeps WebGPU from — the laptop's Intel — a GPU check skips
