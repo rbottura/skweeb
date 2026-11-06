@@ -24,7 +24,8 @@ const el = (tag, cls, text) => {
   return node;
 };
 
-const namedBy = r => [...(r.parents || []), ...(r.refs || [])];
+// A state named — `skw_…@v3`, a flattened placement's parent (L2) — is the object it names.
+const namedBy = r => [...(r.parents || []), ...(r.refs || [])].map(id => String(id).split('@')[0]);
 
 /**
  * Whether this viewer keeps kin together — on unless they turned it off. A

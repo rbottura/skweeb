@@ -46,9 +46,12 @@ const path = require('path');
 const TRASH = 'trash';
 const ID = /"([a-z0-9]{1,8}_[0-9]{9,16}_[a-z0-9]{4,12})"/g;
 
-/** Every id an object names: its lineage, and any id inside its recipe. */
+/** An id without the state it may name: a parent `skw_…@v3` — a flattened placement's (L2) — is `skw_…`. */
+const bare = id => String(id).split('@')[0];
+
+/** Every id an object names: its lineage — a state named, as the object it names — and any id inside its recipe. */
 function namedBy(o) {
-  const out = new Set([...(o.parents || []), ...(o.refs || [])]);
+  const out = new Set([...(o.parents || []), ...(o.refs || [])].map(bare));
   if (o.recipe != null) for (const m of JSON.stringify(o.recipe).matchAll(ID)) out.add(m[1]);
   return out;
 }
@@ -65,8 +68,8 @@ module.exports = function deleteRoute({ objectsDir, allObjects, rebuildIndex, sa
    */
   function cutLoose(o, cut) {
     const entry = { at: new Date().toISOString(), ids: [...cut] };
-    o.parents = (o.parents || []).filter(id => !cut.has(id));
-    o.refs = (o.refs || []).filter(id => !cut.has(id));
+    o.parents = (o.parents || []).filter(id => !cut.has(bare(id)));
+    o.refs = (o.refs || []).filter(id => !cut.has(bare(id)));
 
     const r = o.recipe;
     if (r && typeof r === 'object' && !Array.isArray(r)) {

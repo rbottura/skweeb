@@ -5,6 +5,8 @@
  * two are the candidates, should a third app want one, for a list in core.
  */
 
+import { flattens } from './flatten.js';
+
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
@@ -41,8 +43,9 @@ export class PlacedList {
    * @param {() => void} opts.onAddFrame   the next frame of a flipbook
    * @param {() => void} opts.onRemove
    * @param {(by: number) => void} opts.onMove   +1 forward, -1 backward
+   * @param {() => void} [opts.onFlatten]  the chosen smart placement made ordinary (flatten.js, L2)
    */
-  constructor({ mount, onChoose, onAdd, onAddFrame, onRemove, onMove }) {
+  constructor({ mount, onChoose, onAdd, onAddFrame, onRemove, onMove, onFlatten = () => {} }) {
     this.onChoose = onChoose;
     this.root = el('div', 'pl');
     this.rows = el('div', 'pl-rows');
@@ -52,7 +55,9 @@ export class PlacedList {
     this.remove = button('Remove', onRemove, { title: 'Off the page  Del' });
     this.frame = button('Next frame…', onAddFrame,
       { title: 'After the chosen one, in its place, for as long: a flipbook’s next frame' });
-    actions.append(button('Add…', onAdd, { primary: true }), this.frame, this.up, this.down, this.remove);
+    this.flat = button('Flatten', onFlatten,
+      { title: 'The smart object made ordinary: its state, an object of its own, the placement pointing at it' });
+    actions.append(button('Add…', onAdd, { primary: true }), this.frame, this.up, this.down, this.flat, this.remove);
     this.root.append(this.rows, actions);
     mount.append(this.root);
   }
@@ -62,6 +67,7 @@ export class PlacedList {
    * @param {?object} chosen
    */
   render(items, chosen) {
+    this.flat.disabled = !(chosen && flattens(chosen.block));
     this.rows.replaceChildren();
     if (!items.length) this.rows.append(el('div', 'pp-empty', 'Nothing placed yet.'));
     for (let i = items.length - 1; i >= 0; i--) {

@@ -33,6 +33,7 @@ import { Placements }     from './placements.js';
 import { endOf, showsAt } from './time.js';
 import { Editing }        from './editing.js';
 import { PlacedList }     from './list.js';
+import { flatten, flattens } from './flatten.js';
 import { wirePointer }    from './pointer.js';
 import { APP }          from './save.js';
 import { ways }         from './leaving.js';
@@ -132,7 +133,8 @@ async function boot(mine) {
   list = new PlacedList({ mount: listDrawer.body, onAdd: () => adder.show(), onAddFrame: () => framer.show(),
                           onChoose: p => { editing.choose(p); toFrameOf(p); },
                           onRemove: () => editing.chosen && editing.takeOff(editing.chosen),
-                          onMove: by => editing.chosen && placements.move(editing.chosen, by) });
+                          onMove: by => editing.chosen && placements.move(editing.chosen, by),
+                          onFlatten: () => flattenChosen() });
   adder = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'Place this',
                            onPick: o => editing.putOn(toPlacement({ ref: o.id, ...AT_REST, version: o.type === 'skw' ? (o.version || 1) : 0 })) });   // a project placed at its state of the moment (S6b)
   framer = new VaultPanel({ accepts: PLACEABLE, pickLabel: 'The next frame',
@@ -340,6 +342,23 @@ function wireKeys(mine) {
     if (e.key === ',') { clock.pause(); clock.step(-1); }
     if (e.key === '.') { clock.pause(); clock.step(1); }
   });
+  refreshVault();
+}
+
+/** The chosen smart placement made ordinary, the placement pointing at what it was (flatten.js, L2). */
+async function flattenChosen() {
+  const p = editing && editing.chosen;
+  if (!p || !flattens(p.block)) return;
+  try {
+    bar.say('flattening…');
+    const { object, version } = await flatten(p.block);
+    const { version: kept, ...block } = p.block;
+    await placements.update(p, { ...block, ref: object.id });
+    editing.choose(p);
+    bar.announce(`flattened: ${object.title || object.id}, as it was at version ${version} — ${object.id}`);
+  } catch (err) {
+    bar.announce('could not flatten it: ' + err.message);
+  }
   refreshVault();
 }
 
