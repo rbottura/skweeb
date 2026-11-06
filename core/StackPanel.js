@@ -35,6 +35,10 @@ export const LAYER_PARAMS = {
   y: { type: 'int', min: -20000, max: 20000, default: 0, label: 'y from centre', axis: 'y' },
   scale: { type: 'range', min: 0.01, max: 8, step: 0.01, default: 1, label: 'scale' },
   rot: { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'rotation', unit: '°' },
+  /** The layer's object, carried and never shown — `when` a list none of which holds — for the row under it. */
+  ref: { type: 'text', default: '', label: 'object', when: [] },
+  /** A smart object's layer: kept at a state, or 0, following its latest (L1) — compose's row, the same words (S6b). */
+  version: { type: 'int', min: 0, max: 100000, default: 0, label: 'at its state · 0 follows', when: { ref: { prefix: 'skw_' } } },
 };
 
 const el = (tag, cls, text) => {
@@ -140,7 +144,8 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
     const i = stack.get().place.findIndex(b => keyOf(b) === chosen);
     if (i < 0) return;
     const v = values.values;
-    stack.set(i, { opacity: v.opacity, blend: v.blend, transform: { x: v.x, y: v.y, scale: v.scale, rot: v.rot } });
+    stack.set(i, { opacity: v.opacity, blend: v.blend, transform: { x: v.x, y: v.y, scale: v.scale, rot: v.rot },
+                   ...(v.ref.startsWith('skw_') ? { version: v.version } : {}) });
   });
 
   /** On top — and this window over it, when it is not in the stack yet: a look tried over what it will join. */
@@ -177,7 +182,8 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
     rows.hidden = !block;
     if (block) {
       const t = block.transform;
-      values.restore({ opacity: block.opacity ?? 1, blend: block.blend || 'normal', x: t.x, y: t.y, scale: t.scale, rot: t.rot });
+      values.restore({ opacity: block.opacity ?? 1, blend: block.blend || 'normal', x: t.x, y: t.y, scale: t.scale, rot: t.rot,
+                       ref: block.ref || '', version: Number.isInteger(block.version) ? block.version : 0 });
     }
 
     const here = new Set(place.filter(b => b.live).map(b => b.live));

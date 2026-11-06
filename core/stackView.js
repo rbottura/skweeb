@@ -96,8 +96,10 @@ export function stackView({ live, stack, canvas: find }) {
 
   /** A block's frames: opened once for what it is now, the last kept while the next opens. */
   function framesOf(block) {
-    const key = block.live || 'ref:' + block.ref;
-    let text = block.ref;
+    // A smart object's layer kept at a state is that state: its own key, which no new version names (L1).
+    const kept = !block.live && Number.isInteger(block.version) ? block.version : null;
+    const key = block.live || 'ref:' + block.ref + (kept ? '@v' + kept : '');
+    let text = block.ref + (kept ? '@v' + kept : '');
     if (block.live) {
       const w = live.windows().find(x => x.id === block.live);
       if (!w || !w.layer) return null;
@@ -109,7 +111,7 @@ export function stackView({ live, stack, canvas: find }) {
       entry.pending = text;
       const opening = block.live
         ? openFrames(JSON.parse(text), { draft: true })
-        : Vault.load(block.ref).then(({ object, url }) => { entry.refs = object.refs || []; return openFrames(object, { url, draft: true }); });
+        : Vault.load(block.ref).then(({ object, url }) => { entry.refs = object.refs || []; return openFrames(object, { url, draft: true, ...(kept ? { version: kept } : {}) }); });
       opening.then(handle => {
         if (entry.pending !== text) { if (handle.dispose) handle.dispose(); return; }
         if (entry.handle && entry.handle.dispose) entry.handle.dispose();
