@@ -46,13 +46,18 @@ export const WIDGETS = {
     input.max = along(spec.max ?? 100);
     // The slider's step is five of the box's, a quick way to a round value
     // (the author's, 2026-11-03) — unless that leaves it fewer than eight stops.
-    const lo = spec.min ?? 0, hi = spec.max ?? 100, fine = spec.step ?? 1;
-    const coarse = (hi - lo) / (fine * 5) >= 8 ? fine * 5 : fine;
+    // A count's is one: every whole value its own stop (2026-11-06, "certains
+    // steps sont trop grands"). `step: 'any'` has no grid at all: read as a
+    // number it was NaN, and the param put its default back — a slider that
+    // did not move its value, a fractal's centre the first.
+    const lo = spec.min ?? 0, hi = spec.max ?? 100;
+    const fine = typeof spec.step === 'number' && spec.step > 0 ? spec.step : 0;
+    const coarse = !fine ? 0 : spec.whole || (hi - lo) / (fine * 5) < 8 ? fine : fine * 5;
     input.step = 'any';
     input.value = along(value);
     input.addEventListener('input', () => {
       const x = parseFloat(input.value);
-      set(log ? 10 ** x : Math.min(hi, Math.max(lo, Math.round(x / coarse) * coarse)));
+      set(log ? 10 ** x : Math.min(hi, Math.max(lo, coarse ? lo + Math.round((x - lo) / coarse) * coarse : x)));
     });
     const box = numberBox(spec, value, set, () => panel.value(key));
     readout.replaceChildren(spec.unit ? boxed(box, spec.unit) : box);
@@ -61,7 +66,7 @@ export const WIDGETS = {
 
   // A count. Declaring `int` rather than `range` with step 1 says the value is
   // whole, which a panel shows the same way but a recipe reader can rely on.
-  int: ctx => WIDGETS.range({ ...ctx, spec: { ...ctx.spec, step: 1 } }),   // a log slider's value is rounded by the param
+  int: ctx => WIDGETS.range({ ...ctx, spec: { ...ctx.spec, step: 1, whole: true } }),   // a log slider's value is rounded by the param
 
   bool: ({ value, set }) => {
     const wrap  = el('label', 'pp-switch');

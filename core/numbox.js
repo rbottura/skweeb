@@ -50,13 +50,16 @@ export function paintFill(box, spec, v) {
 /**
  * The box scrubs: dragged sideways it moves the value — Shift ten times
  * faster, Ctrl ten times finer — and a click without a drag still types. A
- * log range scrubs on the logarithm, as its slider runs.
+ * log range scrubs on the logarithm, as its slider runs. Four hundred pixels
+ * cross its range, whatever its step: the param snaps to the step itself, so
+ * a step is never more than the hand moves (2026-11-06 — a pixel was a whole
+ * step, a count of five crossed in five pixels, and `step: 'any'` was NaN).
  */
 function scrubbable(box, spec, set, current) {
   const log = !!spec.log && spec.min > 0;
   const lo = spec.min ?? 0, hi = spec.max ?? lo + 100;
   const span = log ? Math.log10(hi) - Math.log10(lo) : hi - lo;
-  const per = spec.drag ?? (log ? span / 400 : Math.max(spec.step ?? 1, span / 500));
+  const per = spec.drag ?? span / 400;
   let st = null;
   box.addEventListener('pointerdown', e => {
     if (e.button !== 0 || document.activeElement === box) return;      // typing: the caret is the box's

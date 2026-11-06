@@ -83,6 +83,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C4 | two known bugs | `fix/trashed-sets`, `fix/recut-folder` | S | side jobs |
 | C9 | the checks' helpers shared | `clean/check-helpers` | S | side job |
 | C10 | the checks several at a time, picked by what a change reaches | `clean/checks` | S | landed 2026-11-04 |
+| C11 | the sliders and boxes: a slider with no grid moving, a count's by one, a box dragged by the hand | `fix/sliders` | S | landed 2026-11-06 |
 | L4 | the live view blends as a save does | `layers/isolation` | S | side job |
 | P5 | M9's brick 6: the slug from every side | `rig/views` | M | waits: the author's drawings |
 | P0 | the puppet on the author's head | `rig/puppet-defaults` | S | waits: an evening in OBS |
