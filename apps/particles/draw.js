@@ -56,13 +56,22 @@ export function drawOrder(particles, order, focal) {
 }
 
 /**
+ * A particle's size as it is born, in picture pixels: the picture's for all,
+ * or its own between the two, by its `gauge` (model.js). Min above max is the
+ * same range turned over.
+ */
+export function bornSize(picture, p) {
+  return picture.sizeRandom ? picture.sizeMin + (picture.sizeMax - picture.sizeMin) * p.gauge : picture.size;
+}
+
+/**
  * Every particle, stacked by `order` and depth (`drawOrder`): the newest on top — the model gives
  * them oldest first — or, `under`, the newest behind, drawn newest first.
  * Redrawn whole every frame, so the order is simply the loop's; nothing
  * needs a composite operation. Each is a sprite of the set —
  * `images[floor(pick × n)]`
- * — or a dot in the picture's colour. Its size runs from `size` to `size ×
- * grow` over its life and its alpha from 1 to 0 when it fades, each along
+ * — or a dot in the picture's colour. Its size runs from `bornSize` to that ×
+ * `grow` over its life and its alpha from 1 to 0 when it fades, each along
  * its curve (core/easing.js); a sprite is turned by its `rot`.
  *
  * Drawn in canvas pixels: a sprite from the halving of its picture nearest
@@ -97,7 +106,7 @@ export function drawParticles(ctx, particles, picture, scale, sprites = null, in
   const growing = easing(picture.growEase), fading = easing(picture.fadeEase);
   const n = sprites ? sprites.length : 0;
   for (const { p, k } of drawOrder(particles, picture.order, picture.focal)) {
-    const w = picture.size * scale * k * (1 + (grow - 1) * growing(p.t));
+    const w = bornSize(picture, p) * scale * k * (1 + (grow - 1) * growing(p.t));
     const alpha = picture.fade ? 1 - fading(p.t) : 1;
     if (w <= 0 || alpha <= 0) continue;
     const x = ox + p.x * k * scale, y = oy + p.y * k * scale;

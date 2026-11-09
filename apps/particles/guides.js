@@ -22,7 +22,7 @@
  *   the pull                 gravity and wind, one arrow in the corner
  */
 
-import { prepare } from './model.js';
+import { prepare, turned } from './model.js';
 import { toModel } from './params.js';
 import { fieldOf } from './forces.js';
 import { pictureSize } from './draw.js';
@@ -174,14 +174,17 @@ function drawEmitter(ctx, e, p, view, ox, oy, points, chosen) {
   if (list.length) {
     const every = Math.max(1, Math.ceil(list.length / SHOWN));
     ctx.fillStyle = EMITTER;
-    for (let i = 0; i < list.length; i += every) ctx.fillRect(x + list[i][0] * r - 1, y + list[i][1] * r - 1, 2, 2);
+    for (let i = 0; i < list.length; i += every) {
+      const [u, v] = turned(list[i][0], list[i][1], e.objectAngle);
+      ctx.fillRect(x + u * r - 1, y + v * r - 1, 2, 2);
+    }
   }
 
   // The launch: arrows outward round a disc or a ring, or the cone.
   const len = Math.max(36, Math.min(90, (e.speed || 0) * 0.3 * view));
   if (list.length && e.aim === 'outward') {
     for (let i = 0; i < 12; i++) {
-      const [u, v] = list[Math.floor((i / 12) * list.length)];
+      const [u, v] = turned(...list[Math.floor((i / 12) * list.length)], e.objectAngle);
       arrow(ctx, x + u * r, y + v * r, Math.atan2(u, -v), 22, EMITTER);
     }
   } else if ((e.shape === 'disc' || e.shape === 'ring') && e.aim === 'outward') {

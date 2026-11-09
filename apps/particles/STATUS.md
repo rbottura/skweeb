@@ -26,6 +26,15 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **Each particle its own size, and an emitter object turned** (2026-11-09,
+  the author's ask; `draw.js` `bornSize`, `model.js` `turned`). The Look's
+  *random size*: on, *size from, to* in place of *size*, each particle
+  between the two by a draw of its own at the end of its slot (`gauge`), the
+  same all its life; *size at its end* multiplies it as before, and a loop
+  still closes. The emitter's *object angle*, shown for an object: its points
+  turned round its centre, clockwise, −180 to 180; *outward* leaves from
+  where they are now, and the guides draw them turned. 0, as it always was,
+  to the bit.
 - **A picture in front, fitted to the format** (2026-11-09, the author's
   ask, a poster's type over its particles: "une image avec de la
   transparence devant mon rendu, en overlay mais adapter au format pour
@@ -239,7 +248,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 ## Known
 
 - A slot's draws are in a fixed order — jitter, life, speed, angle, pick,
-  turn, twist, spot, spot, lift, dye — and new ones go at the end, or saved
+  turn, twist, spot, spot, lift, dye, gauge — and new ones go at the end, or saved
   recipes redraw differently.
 - A field costs a particle's age in steps, each frame: a long life through
   one is the slow case — 20 s lives are 2400 steps each.

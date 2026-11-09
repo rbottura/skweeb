@@ -120,6 +120,14 @@ c.ok('every particle born on a dot, at the emitter\'s size', ink.length > 0
 c.ok('both dots used, nothing between them', ink.some(x => Math.abs(x - 340) < 3) && ink.some(x => Math.abs(x - 740) < 3)
   && !ink.some(x => Math.abs(x - 540) < 100), JSON.stringify([Math.min(...ink), Math.max(...ink)].map(Math.round)));
 await c.shot('1-two-dots');
+await set('object angle', 90);
+await scrubTo(0);
+const acrossTurned = await inkAlong(540), aboveTurned = await inkAlong(340), belowTurned = await inkAlong(740);
+c.ok('the object turned a quarter: its dots above and below, none across', !acrossTurned.length
+  && aboveTurned.length > 0 && aboveTurned.every(x => Math.abs(x - 540) < 16) && belowTurned.length > 0 && belowTurned.every(x => Math.abs(x - 540) < 16),
+  `${acrossTurned.length} across, ${aboveTurned.length} above, ${belowTurned.length} below`);
+await c.shot('1b-two-dots-turned');
+await set('object angle', 0);
 
 // A dot-set of two glyphs: the second is one dot, at the emitter.
 await choose('emitter object', 'two glyphs');

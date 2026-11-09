@@ -16,7 +16,8 @@
  * zipped, and a sprite sheet with its JSON, cropped to the torch. Emitters,
  * fields and depth, the guides, and a picture from outside are
  * check-particles-fields.mjs's — split from this one on 2026-10-22, at the
- * line cap. And no page said anything wrong.
+ * line cap. Each particle its own size between two (2026-11-09), a loop that
+ * still closes. And no page said anything wrong.
  */
 
 import fs   from 'node:fs';
@@ -302,6 +303,55 @@ if (picked) {
     await c.shot('6-in-compose');
   }
 }
+
+// ── Each particle its own size, between two ─────────────────────────────────
+
+await c.go(c.base + '/apps/particles/');
+await page.until(`${say}.includes('alive')`, { timeout: 20000 });
+await page.eval(`(() => { const b = document.getElementById('guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
+key(' ');                                         // held still
+await wait(300);
+const look = (k, v) => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row('fps')}).params.set(${JSON.stringify(k)}, ${JSON.stringify(v)}))`);
+const emits = (k, v) => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row('seed')}).params.set(${JSON.stringify(k)}, ${JSON.stringify(v)}))`);
+for (const [k, v] of [['mode', 'burst'], ['count', 6], ['shape', 'line'], ['extent', 1000], ['speed', 0], ['speedSpread', 0], ['gravity', 0], ['life', 9], ['lifeSpread', 0], ['y', 0]]) await emits(k, v);
+await look('fade', false);
+await look('grow', 1);
+await wait(400);
+await scrubTo(0);
+/** Along the picture's middle row, 1080 wide: how wide each run of ink is. */
+const runs = () => page.eval(`(() => { const c = document.getElementById('stage'), y = Math.round(c.height / 2), d = c.getContext('2d').getImageData(0, y, c.width, 1).data, out = [];
+  let run = 0; for (let x = 0; x <= c.width; x++) { const i = x * 4, ink = x < c.width && Math.abs(d[i] - 255) + Math.abs(d[i + 1] - 253) + Math.abs(d[i + 2] - 246) > 60;
+    if (ink) run++; else if (run) { out.push(Math.round(run * 1080 / c.width)); run = 0; } } return out; })()`);
+const oneSize = await runs();
+c.ok('by default, one size for all', oneSize.length > 3 && Math.max(...oneSize) - Math.min(...oneSize) <= 6, oneSize.join(' '));
+const hiddenRow = name => page.eval(`${row(name)}.hidden`);
+c.ok('its one size asked, not the two', !(await hiddenRow('size')) && await hiddenRow('size min') && await hiddenRow('size max'));
+for (let i = 0; i < 3; i++) await pixels();       // Chrome moves a canvas read a few times off the GPU, a hair different after
+await scrubTo(1); await scrubTo(0);
+const sameDots = await pixels();
+await look('sizeRandom', true);
+await look('sizeMin', 22);
+await look('sizeMax', 22);
+await wait(400);
+await scrubTo(0);
+c.ok('random, the two asked, the one not', await hiddenRow('size') && !(await hiddenRow('size min')) && !(await hiddenRow('size max')));
+c.ok('between 22 and 22: the picture to the pixel', apart(await pixels(), sameDots) === 0, 'apart by ' + apart(await pixels(), sameDots));
+await look('sizeMin', 6);
+await look('sizeMax', 70);
+await wait(400);
+await scrubTo(0);
+const manySizes = await runs();
+c.ok('between 6 and 70: each its own, within them', manySizes.length > 3 && Math.max(...manySizes) - Math.min(...manySizes) > 20
+  && Math.min(...manySizes) >= 3 && Math.max(...manySizes) <= 74, manySizes.join(' '));
+await c.shot('7-sizes');
+await emits('mode', 'stream');
+await wait(400);
+await scrubTo(0);
+const sizedFirst = await pixels();
+await scrubTo(59);
+key('.'); await wait(300);
+c.ok('at random sizes, the frame after the last is the first', (await page.eval(count)) === '1 / 60' && apart(await pixels(), sizedFirst) === 0,
+  `${await page.eval(count)}, apart by ${apart(await pixels(), sizedFirst)}`);
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
