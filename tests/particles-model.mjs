@@ -8,9 +8,9 @@
  * the closed-form motion against the schoolbook.
  */
 
-const { particlesAt, prepare, motion, slot, duration, MAX_ALIVE } = await import('../apps/particles/model.js');
+const { particlesAt, prepare, motion, slot, duration, turned: turnedBy, MAX_ALIVE } = await import('../apps/particles/model.js');
 const { integrate, fieldOf, STEP, reach } = await import('../apps/particles/forces.js');
-const { drawOrder, overlayBox } = await import('../apps/particles/draw.js');
+const { drawOrder, overlayBox, bornSize } = await import('../apps/particles/draw.js');
 const { inkOf, dyePixels, darkest } = await import('../apps/particles/dye.js');
 const { makeRng, seedFrom } = await import('../core/rng.js');
 
@@ -160,6 +160,16 @@ ok('points given to another emitter are not used', bornFrom(dots, { shape: 'poin
 const burstOut = particlesAt(prepare({ seed: 4, mode: 'burst', count: 60, shape: 'object', aim: 'outward', extent: 200, spread: 0,
   speed: 100, speedSpread: 0, gravity: 0, drag: 0, life: 1, lifeSpread: 0 }, { points: { list: [[0.5, 0], [-0.5, 0], [0, 0.5]], cell: 0 } }), 0.5);
 ok('aimed outward: away from the object\'s centre', burstOut.every(p => Math.abs(Math.hypot(p.x, p.y) - 150) < 1e-6), true);
+const rounded = v => +v.toFixed(6) + 0;
+ok('a point turned a quarter clockwise: right goes down', turnedBy(1, 0, 90).map(rounded), [0, 1]);
+ok('not turned, exactly as it was', turnedBy(0.3, -0.7, 0), [0.3, -0.7]);
+const onRight = { list: [[0.5, 0]], cell: 0 };
+ok('an object turned a quarter: its point below the centre', bornFrom(onRight, { objectAngle: 90 }).every(p => rounded(p.x) === 10 && rounded(p.y) === 80), true);
+ok('turned the other way: above it', bornFrom(onRight, { objectAngle: -90 }).every(p => rounded(p.x) === 10 && rounded(p.y) === -120), true);
+ok('not turned: as before', bornFrom(onRight, { objectAngle: 0 }).every(p => p.x === 110 && p.y === -20), true);
+const turnedOut = particlesAt(prepare({ seed: 4, mode: 'burst', count: 20, shape: 'object', aim: 'outward', extent: 200, spread: 0, objectAngle: 90,
+  speed: 100, speedSpread: 0, gravity: 0, drag: 0, life: 1, lifeSpread: 0 }, { points: onRight }), 0.5);
+ok('and outward leaves away from where it is now', turnedOut.every(p => rounded(p.x) === 0 && rounded(p.y) === 150), true);
 const fromWord = prepare({ ...torch, shape: 'object', extent: 300 }, { points: dots });
 ok('a stream from an object closes its loop', round(particlesAt(fromWord, 2.3)), round(particlesAt(fromWord, 0.3)));
 ok('and draws nothing else differently: the same lives', particlesAt(fromWord, 0.8).map(p => +p.life.toFixed(9)),
@@ -230,7 +240,8 @@ ok('the same all its life, and the loop closes with it', particlesAt(torch, 2.9)
 const heldSlot = prepare(torch);
 const drawsOf = makeRng(seedFrom(`${heldSlot.seed}:3`));
 for (let i = 0; i < 10; i++) drawsOf();
-ok('the slot\'s last draw: what a saved recipe drew is as it was', slot(heldSlot, 3).dye, drawsOf());
+ok('the slot\'s eleventh draw: what a saved recipe drew is as it was', slot(heldSlot, 3).dye, drawsOf());
+ok('its gauge the twelfth, after it', slot(heldSlot, 3).gauge, drawsOf());
 ok('its own draw: a sprite is not tied to a colour', shownNow.some(p => Math.floor(p.pick * 5) !== Math.floor(p.dye * 5)), true);
 const INKS = ['#0073dc', '#e40514', '#00a773', '#ffd400', '#000000'];
 ok('a dye is one of the colours', [inkOf(INKS, 0), inkOf(INKS, 0.2), inkOf(INKS, 0.999)], ['#0073dc', '#e40514', '#000000']);
@@ -248,6 +259,18 @@ ok('flat: every pixel that shows, its alpha left alone', [...dyePixels(px([255, 
    [0, 115, 220, 255, 0, 115, 220, 7]);
 ok('in black, a picture is its greys', [...dyePixels(px([0, 0, 0, 255], [128, 128, 128, 255]), [0, 0, 0], 0)], [0, 0, 0, 255, 128, 128, 128, 255]);
 ok('the darkest tone is of what shows', darkest(px([0, 0, 0, 0], [0, 0, 0, 90], [200, 200, 200, 255])) > 0.7, true);
+
+// -- Each its own size, between two -------------------------------------------
+
+ok('a gauge to choose a size with, in [0, 1)', shownNow.every(p => p.gauge >= 0 && p.gauge < 1), true);
+ok('the same all its life, and the loop closes with it', particlesAt(torch, 2.9).map(p => p.gauge), shownNow.map(p => p.gauge));
+ok('its own draw: a size is not tied to a colour', shownNow.some(p => Math.floor(p.gauge * 5) !== Math.floor(p.dye * 5)), true);
+const between = { size: 22, sizeMin: 10, sizeMax: 40 };
+ok('by default, one size for all', [bornSize(between, { gauge: 0 }), bornSize(between, { gauge: 0.9 })], [22, 22]);
+const atRandom = { ...between, sizeRandom: true };
+ok('at random: min, the middle, nearly max', [0, 0.5, 0.999].map(g => +bornSize(atRandom, { gauge: g }).toFixed(2)), [10, 25, 39.97]);
+ok('every one between the two', shownNow.every(p => bornSize(atRandom, p) >= 10 && bornSize(atRandom, p) < 40), true);
+ok('min above max: the same range', [0, 1].map(g => bornSize({ ...atRandom, sizeMin: 40, sizeMax: 10 }, { gauge: g })), [40, 10]);
 
 // -- An overlay, fitted to the format ------------------------------------------
 

@@ -30,7 +30,7 @@
  * is over when the longest of them is.
  *
  * A slot's draws are made in a fixed order — jitter, life, speed, angle,
- * pick, turn, twist, spot, spot, lift, dye — and a new one is only ever added at the end, so a
+ * pick, turn, twist, spot, spot, lift, dye, gauge — and a new one is only ever added at the end, so a
  * recipe saved today draws the same particles after the model has grown.
  *
  * ── Motion ─────────────────────────────────────────────────────────────────
@@ -70,7 +70,8 @@
  *
  * Or it is an `object` from the vault (2026-09-30, the author's idea): a
  * dot-set's dots, or where a picture has ink (core/points.js), `extent` px
- * along its longer side. The recipe names the object; its points come to
+ * along its longer side, turned `objectAngle` degrees clockwise round its
+ * centre. The recipe names the object; its points come to
  * `prepare()` beside it, never in it. The first spot draw picks a point, the
  * second jitters round it within a picture's sample — dots are exact — and
  * `outward` points away from the object's centre: a word that bursts. Until
@@ -111,6 +112,7 @@ export const DEFAULTS = {
   shape: 'point',       // 'point' | 'line' | 'disc' | 'ring' | 'object'
   extent: 100,          // px: a line's length, a disc's or a ring's radius, an object's longer side
   lineAngle: 0,         // degrees clockwise from level
+  objectAngle: 0,       // degrees clockwise, an object emitter round its centre
   aim: 'fixed',         // 'fixed' | 'outward', on a disc, a ring or an object
   fx: 0, fy: 0,         // the fields' centre, from the picture's centre
   vortex: 0,            // px/s², round the centre, clockwise
@@ -145,6 +147,13 @@ export function prepare(recipe = {}, { points = null, field = null } = {}) {
   return m;
 }
 
+/** A point turned round the origin, degrees clockwise on the picture, y down; by none, exactly as it was. */
+export function turned(x, y, degrees) {
+  if (!degrees) return [x, y];
+  const t = degrees * DEG, c = Math.cos(t), s = Math.sin(t);
+  return [x * c - y * s, x * s + y * c];
+}
+
 /**
  * Where on the emitter a particle leaves from, from its two spot draws `a`
  * and `b`: its offset from the emitter's centre, and — on a disc or a ring
@@ -167,7 +176,7 @@ export function spotOf(m, a, b) {
     const { list, cell } = m.points;
     const [px, py] = list[Math.min(list.length - 1, Math.floor(a * list.length))];
     const jx = cell ? (b - 0.5) * cell : 0, jy = cell ? (((b * 4096) % 1) - 0.5) * cell : 0;
-    const dx = (px + jx) * m.extent, dy = (py + jy) * m.extent;
+    const [dx, dy] = turned((px + jx) * m.extent, (py + jy) * m.extent, m.objectAngle);
     return { dx, dy, out: m.aim === 'outward' ? Math.atan2(dx, -dy) : null };
   }
   return { dx: 0, dy: 0, out: null };
@@ -210,19 +219,20 @@ export function slot(m, k) {
   const spot = spotOf(m, rng(), rng());
   const lift = (m.depthSpread || 0) * (rng() - 0.5) * DEG;
   const dye = rng();
+  const gauge = rng();
   const born = m.burst ? 0 : (k + m.jitter * jitter) * m.spacing;
   return { slot: own, born, life: Math.max(1e-3, life), speed,
-           angle: angle + (spot.out ?? 0), pick, turn, spin, dx: spot.dx, dy: spot.dy, lift, dye };
+           angle: angle + (spot.out ?? 0), pick, turn, spin, dx: spot.dx, dy: spot.dy, lift, dye, gauge };
 }
 
 /**
  * Every particle alive at `t` seconds, oldest first — the order they are
  * drawn in, so the newest are on top. Each is where it is, how fast it goes,
  * how old it is, how it is turned and what it drew:
- * `{ slot, x, y, z, vx, vy, vz, rot, age, life, t, pick, dye }`,
+ * `{ slot, x, y, z, vx, vy, vz, rot, age, life, t, pick, dye, gauge }`,
  * `t` its age over its life, 0 to 1, for what runs over a particle's life;
- * `pick` chooses its sprite and `dye` its colour of a palette, apart, so a
- * sprite is not tied to a colour.
+ * `pick` chooses its sprite, `dye` its colour of a palette and `gauge` its
+ * size between two, each apart, so none is tied to another.
  *
  * @param {object} recipe   see DEFAULTS
  * @param {number} t        seconds: on a stream, any time at all, negative too
@@ -256,7 +266,7 @@ export function particlesAt(recipe, t) {
     at.z = deep.x;
     at.vz = deep.vx;
     const rot = m.align ? Math.atan2(at.vx, -at.vy) : s.turn + s.spin * age;
-    out.push({ slot: s.slot, ...at, rot, age, life: s.life, t: age / s.life, pick: s.pick, dye: s.dye });
+    out.push({ slot: s.slot, ...at, rot, age, life: s.life, t: age / s.life, pick: s.pick, dye: s.dye, gauge: s.gauge });
   }
   return out;
 }

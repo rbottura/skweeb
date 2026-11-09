@@ -75,6 +75,9 @@ export function emitParams() {
                  group: 'emission', when: { shape: { not: 'point' } } },
     lineAngle: { type: 'range', min: -180, max: 180, step: 1, default: D.lineAngle, label: 'line angle', unit: '°',
                  group: 'emission', when: { shape: 'line' } },
+    /** An object emitter turned round its centre, clockwise (model.js `spotOf`). */
+    objectAngle: { type: 'range', min: -180, max: 180, step: 1, default: D.objectAngle, label: 'object angle', unit: '°',
+                   group: 'emission', when: { shape: 'object' } },
     aim:       { type: 'enum', options: ['fixed', 'outward'], default: D.aim, display: 'chips', label: 'launch',
                  labels: { fixed: 'as the angle', outward: 'outward' }, group: 'emission',
                  when: { shape: ['disc', 'ring', 'object'] } },
@@ -164,8 +167,13 @@ export function pictureParams() {
     tint:    { type: 'enum', options: ['tones', 'flat'], default: 'tones', display: 'chips',
                labels: { tones: 'keeps its tones', flat: 'flat' }, label: 'on a sprite', group: 'look',
                when: { palette: { not: null }, sprites: { not: null } } },
+    /** Each particle its own size between two, by a draw of its own (model.js `gauge`) — or all of them `size`. */
+    sizeRandom: { type: 'bool', default: false, label: 'random size', group: 'look' },
     /** A dot's width, or a sprite's: its height follows its own shape. */
-    size:   { type: 'range', min: 0.5, max: 256, step: 0.5, default: 22, label: 'size', unit: 'px', group: 'look', slider: true },
+    size:   { type: 'range', min: 0.5, max: 256, step: 0.5, default: 22, label: 'size', unit: 'px', group: 'look', slider: true, when: { sizeRandom: false } },
+    sizeMin: { type: 'range', min: 0.5, max: 256, step: 0.5, default: 10, label: 'size min', group: 'look',
+               pair: 'sizeMax', pairLabel: 'size from, to', unit: 'px', axis: '↓', when: { sizeRandom: true } },
+    sizeMax: { type: 'range', min: 0.5, max: 256, step: 0.5, default: 40, label: 'size max', group: 'look', axis: '↑', when: { sizeRandom: true } },
     color:  { type: 'color', default: '#d9481c', label: 'dot colour', group: 'look', when: { sprites: null, palette: null } },
     /** Its size at the end of its life, as a share of `size`, reached along `growEase`. */
     grow:     { type: 'range', min: 0, max: 4, step: 0.05, default: 0.2, label: 'size at its end', unit: '×', group: 'look' },
