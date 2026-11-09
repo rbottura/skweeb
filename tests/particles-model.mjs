@@ -10,7 +10,7 @@
 
 const { particlesAt, prepare, motion, slot, duration, MAX_ALIVE } = await import('../apps/particles/model.js');
 const { integrate, fieldOf, STEP, reach } = await import('../apps/particles/forces.js');
-const { drawOrder } = await import('../apps/particles/draw.js');
+const { drawOrder, overlayBox } = await import('../apps/particles/draw.js');
 const { inkOf, dyePixels, darkest } = await import('../apps/particles/dye.js');
 const { makeRng, seedFrom } = await import('../core/rng.js');
 
@@ -248,6 +248,15 @@ ok('flat: every pixel that shows, its alpha left alone', [...dyePixels(px([255, 
    [0, 115, 220, 255, 0, 115, 220, 7]);
 ok('in black, a picture is its greys', [...dyePixels(px([0, 0, 0, 255], [128, 128, 128, 255]), [0, 0, 0], 0)], [0, 0, 0, 255, 128, 128, 128, 255]);
 ok('the darkest tone is of what shows', darkest(px([0, 0, 0, 0], [0, 0, 0, 90], [200, 200, 200, 255])) > 0.7, true);
+
+// -- An overlay, fitted to the format ------------------------------------------
+
+const near = box => Object.values(box).map(v => +v.toFixed(1));
+ok('a sheet of A3 at 300 dpi fills the format A3, to the pixel', near(overlayBox(3508, 4961, { width: 1080, height: 1527 })), [0, 0, 1080, 1527]);
+ok('on a square: whole, centred, nothing cut', near(overlayBox(3508, 4961, { width: 1080, height: 1080 })), [158.2, 0, 763.7, 1080]);
+ok('on a wide format, whole again', near(overlayBox(100, 100, { width: 1920, height: 1080 })), [420, 0, 1080, 1080]);
+ok('smaller than the format, it grows to it', near(overlayBox(10, 20, { width: 100, height: 200 })), [0, 0, 100, 200]);
+ok('on the frame, the bleed outside it', near(overlayBox(100, 100, { width: 1000, height: 1000, bleed: 30 })), [30, 30, 1000, 1000]);
 
 // -- Falloff: a vortex and a pull with a reach ----------------------------------
 

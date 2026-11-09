@@ -55,6 +55,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | V2 | a set by hand: the pictures selected, in their order, a set of a role | `vault/set` | S | landed 2026-11-06 |
 | V3 | groups by hand: the selection into a group, out of it, a group renamed | `vault/groups` | S | landed 2026-11-06 |
 | V1b | a palette on particles: each one a colour of it, a dot filled, a sprite printed in it | `particles/palette` | S | landed 2026-11-09 |
+| — | an overlay in particles: one picture in front, fitted to the format | `particles/overlay` | S | landed 2026-11-09; layers by format are M13c's |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
@@ -86,8 +87,9 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C9 | the checks' helpers shared | `clean/check-helpers` | S | side job |
 | C10 | the checks several at a time, picked by what a change reaches | `clean/checks` | S | landed 2026-11-04 |
 | C11 | the sliders and boxes: a slider with no grid moving, a count's by one, a box dragged by the hand | `fix/sliders` | S | landed 2026-11-06 |
-| C12 | check-frames' stills: it takes the vault's first three, the garden's sparse flowers since M14a — three with ink, whatever the vault | `fix/frames-stills` | S | side job |
+| C12 | check-frames' stills: it takes the vault's first three, and sparse ones fall under its thresholds — three with ink, whatever the vault | `fix/frames-stills` | S | side job |
 | L4 | the live view blends as a save does | `layers/isolation` | S | side job |
+| L12 | the window stack's bugs | — | — | waits: the author's list of them, "pour plus tard" |
 | P5 | M9's brick 6: the slug from every side | `rig/views` | M | waits: the author's drawings |
 | P0 | the puppet on the author's head | `rig/puppet-defaults` | S | waits: an evening in OBS |
 | L8 | overrides | `layers/overrides` | L | waits: the author — now, or later |

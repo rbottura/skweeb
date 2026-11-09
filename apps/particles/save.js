@@ -42,13 +42,14 @@ function titleOf(emit, spritesTitle, points, palette) {
  * @param {?object} [args.points]     an object emitter's points and title (core/points.js)
  * @param {?object} [args.field]      a field from another object (core/fields.js)
  * @param {?object} [args.palette]    a palette's colours and title (core/palettes.js)
+ * @param {?object} [args.overlay]    the picture in front (core/sprites.js)
  * @param {number} args.tick          the frame on screen
  * @param {boolean} [args.still]      one frame, not the loop
  * @returns {Promise<?object>}        the envelope, or null when there is no vault
  */
-export async function saveParticles({ emit, picture, sprites, spritesTitle, points = null, field = null, palette = null, tick, still = false }) {
+export async function saveParticles({ emit, picture, sprites, spritesTitle, points = null, field = null, palette = null, overlay = null, tick, still = false }) {
   const recipe = { emit: emit.values, picture: picture.values, ...(still ? { tick } : {}) };
-  const frames = openParticles(recipe, sprites, { points, field, palette });
+  const frames = openParticles(recipe, sprites, { points, field, palette, overlay });
   const shown = frames.frame(tick);
   const blob = await toPng(shown);
   const loop = frames.length > 1;
@@ -77,9 +78,9 @@ export async function saveParticles({ emit, picture, sprites, spritesTitle, poin
  *
  * @returns {Promise<{frames: number, fps: number, width: number, height: number}>}
  */
-export async function downloadFrames({ emit, picture, sprites, points = null, field = null, palette = null, onStatus = () => {} }) {
+export async function downloadFrames({ emit, picture, sprites, points = null, field = null, palette = null, overlay = null, onStatus = () => {} }) {
   const recipe = { emit: emit.values, picture: picture.values };
-  const frames = openParticles(recipe, sprites, { points, field, palette });
+  const frames = openParticles(recipe, sprites, { points, field, palette, overlay });
   const entries = [];
   await runFrames({
     count: frames.length,
@@ -106,13 +107,14 @@ export async function downloadFrames({ emit, picture, sprites, points = null, fi
  * The loop as a sprite sheet for a game (core/spritesheet.js): every frame on
  * one PNG, cropped to the box the particles reach over the whole loop, and
  * the Aseprite-style JSON beside it — both in one zip, `<name>.png` and
- * `<name>.json`, so the browser asks once. Drawn on no ground, whatever the
- * picture's is: a game puts its own under a sprite.
+ * `<name>.json`, so the browser asks once. Drawn on no ground and with no
+ * overlay, whatever the picture's are: a game puts its own round a sprite,
+ * and an overlay would be the whole frame to crop to.
  *
  * @returns {Promise<{name, frames, width, height, box}>}
  */
 export async function downloadSheet({ emit, picture, sprites, points = null, field = null, palette = null, onStatus = () => {} }) {
-  const recipe = { emit: emit.values, picture: { ...picture.values, ground: 'none' } };
+  const recipe = { emit: emit.values, picture: { ...picture.values, ground: 'none', overlay: null } };
   const frames = openParticles(recipe, sprites, { points, field, palette });
   const name = `particles_${recipe.emit.mode}_${frames.length}f`;
   const { canvas, json, box, layout } = await buildSheet({

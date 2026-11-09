@@ -13,13 +13,16 @@
  * by their handles, and a save made with them on has none in its picture.
  * A picture from outside, dropped on the vault panel, comes in as a shape and
  * is picked as the one sprite; an opaque one is a still, several a set too.
+ * An overlay (2026-11-09): a picture in front of the render, at the format
+ * A3 its whole width, on a square whole and centred, the render through what
+ * is see-through; saved, its parent, replayed to the pixel, printed in tiles.
  * Split from check-particles.mjs on 2026-10-22, at the line cap; the loop,
  * the burst, print scale, a set's sprites and the saves are there.
  */
 
 import fs   from 'node:fs';
 import path from 'node:path';
-import { startCheck } from './check-kit.mjs';
+import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
 const { page } = c;
@@ -260,6 +263,96 @@ c.ok('several come in in their names\' order, numbers as numbers', JSON.stringif
 c.ok('and make a set, a sprite family', imported.setType === 'set' && imported.set.role === 'brush-family'
   && imported.set.members.length === 3, JSON.stringify(imported.set));
 c.ok('the same file twice is one object', imported.again === (star && star.id), imported.again);
+
+// ── An overlay: a picture in front of the render, fitted to the format ──────
+
+await c.go(c.base + '/apps/particles/');
+await page.until(`${say}.includes('alive')`, { timeout: 20000 });
+await page.eval(`(() => { const b = document.getElementById('guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
+key(' ');                                         // the torch held still
+await wait(300);
+const band = await page.eval(`(async () => {
+  const { Vault } = await import('/core/vault.js');
+  const { thumbFromBlob } = await import('/core/thumb.js');
+  const pic = new OffscreenCanvas(297, 420), g = pic.getContext('2d');   // A3's shape: a green band on top, see-through under it
+  g.fillStyle = '#00ff00'; g.fillRect(0, 0, 297, 60);
+  const blob = await pic.convertToBlob({ type: 'image/png' });
+  const o = await Vault.save({ type: 'shape', title: 'a band on top', tags: ['shape'], origin: { app: 'vault', version: '1.0.0' },
+    seed: null, recipe: null, render: { blob, ext: 'png', w: 297, h: 420 }, thumb: await thumbFromBlob(blob) });
+  await Vault.refresh();
+  return o.id; })()`);
+const setPicture = (name, k, v) => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row(name)}).params.set(${JSON.stringify(k)}, ${JSON.stringify(v)}))`);
+/** Between two heights of the picture, 0 to 1: its pixels, those in the band's green, and those neither green nor ground. */
+const between = (from, to) => page.eval(`(() => { const c = document.getElementById('stage'), y = Math.floor(c.height * ${from}), h = Math.floor(c.height * ${to}) - y;
+  const d = c.getContext('2d').getImageData(0, y, c.width, h).data; let green = 0, ink = 0;
+  for (let i = 0; i < d.length; i += 4) { if (d[i] < 8 && d[i + 1] > 247 && d[i + 2] < 8) green++;
+    else if (Math.abs(d[i] - 255) + Math.abs(d[i + 1] - 253) + Math.abs(d[i + 2] - 246) > 30) ink++; }
+  return { all: d.length / 4, green, ink }; })()`);
+const shape = () => page.eval(`document.getElementById('stage').width / document.getElementById('stage').height`);
+await setPicture('format', 'format', 'a3');
+await wait(400);
+c.ok('the format A3: the picture its shape', Math.abs(await shape() - 297 / 420) < 0.005, String(await shape()));
+await set('y from centre', -700);
+await scrubTo(20);
+const nothingInFront = await between(0, 0.12);
+c.ok('the particles at the top, nothing in front yet', nothingInFront.ink > 50 && nothingInFront.green === 0, JSON.stringify(nothingInFront));
+await setPicture('overlay', 'overlay', band);
+await page.until(`${say}.includes('a band on top')`, { timeout: 15000 }).catch(() => {});
+await scrubTo(20);
+const covered = await between(0, 0.12);
+c.ok('in front of them, the whole width of the format', covered.green === covered.all, JSON.stringify(covered));
+await set('y from centre', 260);
+await scrubTo(20);
+const under = await between(0.5, 1);
+c.ok('where it is see-through, the render shows', under.ink > 50 && under.green === 0, JSON.stringify(under));
+await c.shot('10-overlay-a3');
+await setPicture('format', 'format', 'ig-square');
+await setPicture('width', 'width', 1080);
+await setPicture('height', 'height', 1080);
+await wait(400);
+await scrubTo(20);
+const square = await between(0, 0.1);
+c.ok('on a square it is whole, centred: the band narrower than the picture', Math.abs(square.green / square.all - 297 / 420) < 0.02, JSON.stringify(square));
+await setPicture('format', 'format', 'a3');
+await wait(400);
+await scrubTo(0);
+for (let i = 0; i < 3; i++) await pixels();         // Chrome moves a canvas read a few times off the GPU, a hair different after
+await scrubTo(1);
+await scrubTo(0);
+const overFirst = await pixels();
+await scrubTo(59);
+key('.'); await wait(300);
+c.ok('under it, the frame after the last is the first', (await page.eval(count)) === '1 / 60' && apart(await pixels(), overFirst) === 0,
+  `${await page.eval(count)}, apart by ${apart(await pixels(), overFirst)}`);
+await scrubTo(20);
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+key('S');
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+const fronted = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const envelope = fronted ? inner(await (await fetch(c.base + '/api/vault/' + fronted)).json()) : null;
+c.ok('saved: the overlay is its parent', !!envelope && envelope.parents.includes(band), envelope ? JSON.stringify(envelope.parents) : await page.eval(say));
+if (fronted) {
+  const replayed = await page.eval(`(async () => {
+    const { Vault } = await import('/core/vault.js');
+    const { openFrames } = await import('/core/rebuild.js');
+    const { object, url } = await Vault.load(${JSON.stringify(fronted)});
+    const h = await openFrames(object, { url });
+    const img = await createImageBitmap(await (await fetch(url)).blob());
+    const a = new OffscreenCanvas(img.width, img.height).getContext('2d'); a.drawImage(img, 0, 0);
+    const b = new OffscreenCanvas(img.width, img.height).getContext('2d'); b.drawImage(h.frame(20), 0, 0);
+    const da = a.getImageData(0, 0, img.width, img.height).data, db = b.getImageData(0, 0, img.width, img.height).data;
+    let worst = 0; for (let k = 0; k < da.length; k++) worst = Math.max(worst, Math.abs(da[k] - db[k]));
+    const out = { worst, missing: h.missing, w: img.width, h: img.height }; h.dispose(); return out; })()`);
+  c.ok('the vault replays it, the overlay in front: its render, pixel for pixel', replayed.worst === 0 && !replayed.missing.length, JSON.stringify(replayed));
+  const printed = await c.printMatch(fronted, { scale: 2, tick: 20 });
+  c.ok(`printed in ${printed.tiles} tiles, the overlay drawn in each`, printed.enlarged === 1 && printed.off < 0.002 && printed.mean < 0.3, JSON.stringify(printed));
+  await c.go(c.base + '/apps/particles/?open=' + fronted);
+  await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+  await page.eval(`(() => { const b = document.getElementById('guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
+  await scrubTo(20);
+  const back = await between(0, 0.12);
+  c.ok('?open= brings it back, in front', back.green === back.all, JSON.stringify(back));
+}
 
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));

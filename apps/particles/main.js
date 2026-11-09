@@ -10,7 +10,8 @@
  *
  * A set from the vault is the sprites (sprites.js), one each; with none, or
  * no vault at all, the particles are dots and the app plays the same
- * (rule 7). A palette from the vault colours them (dye.js).
+ * (rule 7). A palette from the vault colours them (dye.js), and a picture
+ * from it may stand in front, fitted to the format (draw.js `drawOverlay`).
  * An emitter may be an object from the vault — a dot-set, a
  * shape — and a field may come from one — a fractal: its points, its field,
  * loaded beside the recipe (core/points.js, core/fields.js). S saves the loop (save.js), and the vault plays it back through
@@ -23,7 +24,7 @@
 
 import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROUPS } from './params.js';
 import { prepare, particlesAt } from './model.js';
-import { drawParticles, pictureSize } from './draw.js';
+import { drawParticles, drawOverlay, pictureSize } from './draw.js';
 import { loadSprites }  from '../../core/sprites.js';
 import { loadPalette }  from '../../core/palettes.js';
 import { loadPoints }   from '../../core/points.js';
@@ -94,8 +95,8 @@ async function start(at, mine) {
   loading = false;         // a set is on its way in: nothing saves until it is
   spritesIn = Promise.resolve();   // the set on its way in, for a reopen to wait on
   asked = 0;               // the latest set asked for; an older answer is dropped
-  given = { points: null, field: null, palette: null };   // what the recipe names, loaded beside it
-  asking = { points: 0, field: 0, palette: 0 };           // the latest asked for, as `asked` is
+  given = { points: null, field: null, palette: null, overlay: null };   // what the recipe names, loaded beside it
+  asking = { points: 0, field: 0, palette: 0, overlay: 0 };              // the latest asked for, as `asked` is
   coming = new Set();      // loads on their way in, for a reopen and a save to wait on
   leaving = null;          // the ways out (leaving.js): a save or a download drawing, nothing else starts
   painted = [];            // when the last paints were, while playing
@@ -139,7 +140,7 @@ async function boot(mine) {
     applyFrameEdit(picture, key);
     if (key === 'fps') remake();
     else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'), { following: picture.following });
-    else if (key === 'palette') bring('palette');
+    else if (key === 'palette' || key === 'overlay') bring(key);
     else draw();
   });
   const sized = new ResizeObserver(() => draw());
@@ -248,14 +249,17 @@ const BROUGHT = {
              said: got => `${got.title}: a field to move through`, called: 'the field' },
   palette: { named: (e, p) => p.palette, read: id => loadPalette(id),
              said: got => `${got.title}: ${got.colours.length} colour${got.colours.length === 1 ? '' : 's'}`, called: 'the palette' },
+  overlay: { named: (e, p) => p.overlay, read: id => loadSprites(id),
+             said: got => (got.images.length ? `${got.title}: in front of the picture, fitted to its format` : `${got.title} would not load`), called: 'the overlay' },
 };
 
 /**
  * Load what the recipe names beside it: the object the emitter leaves from
  * (core/points.js), the field it moves through (core/fields.js), the palette
- * it is drawn in (core/palettes.js). Until it is in, and if it will not come,
- * the particles do without — from the emitter's centre, with no such pull, in
- * their own colours; an older answer is dropped for a newer ask.
+ * it is drawn in (core/palettes.js), the picture in front (core/sprites.js).
+ * Until it is in, and if it will not come, the particles do without — from
+ * the emitter's centre, with no such pull, in their own colours, with nothing
+ * in front; an older answer is dropped for a newer ask.
  */
 function bring(what) {
   const ask = ++asking[what];
@@ -342,6 +346,8 @@ function paint() {
 
   shown = particlesAt(model, clock.tick / p.fps);
   drawParticles(ctx, shown, p, view, sprites, given.palette && given.palette.colours);
+  const front = given.overlay && given.overlay.images[0];
+  if (front) drawOverlay(ctx, p, view, front);
   shownView = view;
   if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), { ...given, selected: selected() });
 

@@ -172,9 +172,10 @@ sorts them.
   a ring, or a vault object's points (`ckt → particles: an emitter`) —
   forces in closed form, a vortex, an attractor, curl noise, a fractal's
   field; depth with a camera; a set's sprites, sized, faded and turned on
-  easing curves (`set → particles: sprites`), in a palette's colours since
-  2026-11-09. Guides show what makes them. Saved, replayed, placed; a loop
-  leaves as a sprite sheet with Aseprite's JSON, and Phaser 3 plays it.
+  easing curves (`set → particles: sprites`), in a palette's colours, a
+  picture in front fitted to the format (2026-11-09). Guides show what makes
+  them. Saved, replayed, placed; a loop leaves as a sprite sheet with
+  Aseprite's JSON, and Phaser 3 plays it.
 
 ### M5 — filter, and the GPU kit under it (`apps/filter/STATUS.md`)
 
@@ -279,9 +280,9 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Broken / half-done
 
-- **`check-frames` red on the tower since the garden** (`main` too, 3 of 3,
-  2026-11-09): its three stills are the vault's first, sparse flowers now,
-  and the onion skin shows under its threshold. The check's, not compose's: C12.
+- **`check-frames` depends on which stills come first in the vault**: red
+  with the garden's sparse flowers (2026-11-09, `main` too, 3 of 3), green
+  once other pictures came in. The check's, not compose's: C12.
 - **`check-live` hangs under the gate's load** after its gamepad window —
   twice on 2026-11-05, taken down at 8:00, green alone each time. A flake
   of the load, noted at each merge; worth its own look (C9's helpers).

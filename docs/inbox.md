@@ -30,6 +30,9 @@ day before that became bricks done went with them.
 
 ## Sorted
 
+- **2026-11-09 — the window stack's bugs.** "nous devrions fixer des bugs du
+  mode de stack de fenetre mais ce sera pour plus tard". → L12 on the board,
+  waiting on the author's list of them.
 - **2026-11-06 — iterations of flowers: a garden.** A brief of the author's
   own, `docs/iterations-modifications.md`: "une fleur est une recette
   d'événements, à laquelle on peut appliquer une série ordonnée de

@@ -138,6 +138,12 @@ export function pictureParams() {
   return defineParams('particles-picture', {
     ...frame,
     format: { ...frame.format, options: frame.format.options.filter(o => !DERIVED.includes(o)) },
+    /**
+     * A picture in front of everything, fitted whole to the format (draw.js
+     * `overlayBox`): a poster's type over its particles, to work the
+     * composition. Where it is see-through the render shows.
+     */
+    overlay: { type: 'object', accepts: ['still', 'shape'], label: 'overlay', group: 'format' },
     fps:    { type: 'int', min: 1, max: 60, default: 30, label: 'fps', group: 'player' },
     /**
      * A vault set whose members are the particles' sprites, one each by its

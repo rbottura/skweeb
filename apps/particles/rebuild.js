@@ -12,9 +12,9 @@
  *
  * A sprite set that will not open is said, as `missing`, and the particles
  * are dots; a palette that will not, and they are in their own colours; an
- * emitter object that will not, and they leave from its centre; a field that
- * will not, and they move without it — drawn all the same, as the app draws
- * with no vault.
+ * overlay that will not, and nothing stands in front; an emitter object that
+ * will not, and they leave from its centre; a field that will not, and they
+ * move without it — drawn all the same, as the app draws with no vault.
  */
 
 import { openParticles } from './frames.js';
@@ -72,6 +72,16 @@ export async function openObject(object, opts = {}) {
     }
   }
 
+  let overlay = null;
+  if (recipe.picture.overlay) {
+    try {
+      overlay = await loadSprites(recipe.picture.overlay);
+      if (!overlay.images.length) { missing.push(overlay.title); overlay = null; }
+    } catch {
+      missing.push(recipe.picture.overlay);
+    }
+  }
+
   let points = null;
   const { shape, from, glyph } = recipe.emit;
   if (shape === 'object' && from) {
@@ -90,7 +100,7 @@ export async function openObject(object, opts = {}) {
     }
   }
 
-  const frames = openParticles(recipe, sprites, { scale: opts.scale > 0 ? opts.scale : 1, points, field, palette });
+  const frames = openParticles(recipe, sprites, { scale: opts.scale > 0 ? opts.scale : 1, points, field, palette, overlay });
   const box = { x: 0, y: 0, w: frames.width, h: frames.height };
 
   return {

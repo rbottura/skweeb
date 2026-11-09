@@ -17,7 +17,7 @@
 
 import { prepare, particlesAt } from './model.js';
 import { toModel, framesOf }    from './params.js';
-import { drawParticles, pictureSize } from './draw.js';
+import { drawParticles, drawOverlay, pictureSize } from './draw.js';
 import { surface }              from '../../core/surface.js';
 import { windowed, canvasFor }  from '../../core/windowed.js';
 
@@ -29,19 +29,27 @@ import { windowed, canvasFor }  from '../../core/windowed.js';
  * @param {?object} [opts.points]    an object emitter's points (core/points.js)
  * @param {?object} [opts.field]     a field from another object (core/fields.js)
  * @param {?object} [opts.palette]   a palette's colours (core/palettes.js)
+ * @param {?object} [opts.overlay]   the picture in front (core/sprites.js)
  * @returns {{length, fps, loop, width, height, scale, frame(i): OffscreenCanvas|HTMLCanvasElement}}
  *          `frame` hands out one canvas, drawn again on every call — borrowed
  */
-export function openParticles(recipe, sprites, { scale = 1, points = null, field = null, palette = null } = {}) {
+export function openParticles(recipe, sprites, { scale = 1, points = null, field = null, palette = null, overlay = null } = {}) {
   const { emit, picture } = recipe;
   const model = prepare(toModel(emit, picture), { points, field });
   const inks = palette ? palette.colours : null;
+  const front = overlay ? overlay.images[0] : null;
   const size = pictureSize(picture);
   const own = picture.scale || 1;
   const px = own * scale;
   const W = Math.max(1, Math.round(size.width * px)), H = Math.max(1, Math.round(size.height * px));
   let canvas = null, tile = null;      // the whole frame's when asked for; a print's windows' (core/print.js)
   const still = Number.isInteger(recipe.tick);
+
+  /** One frame onto a context: the particles, and what stands in front of them. */
+  const paint = (ctx, tick) => {
+    drawParticles(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites, inks);
+    if (front) drawOverlay(ctx, picture, px, front);
+  };
 
   return {
     length: still ? 1 : framesOf(emit, picture, model.longest),
@@ -54,7 +62,7 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
     frame(i) {
       const tick = still ? recipe.tick : i;
       canvas = canvas || surface(W, H);
-      drawParticles(canvas.getContext('2d'), particlesAt(model, tick / picture.fps), picture, px, sprites, inks);
+      paint(canvas.getContext('2d'), tick);
       return canvas;
     },
 
@@ -62,8 +70,7 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
     window(i, win) {
       const tick = still ? recipe.tick : i;
       tile = canvasFor(tile, win);
-      const ctx = windowed(tile.getContext('2d'), { x: win.x, y: win.y, width: W, height: H });
-      drawParticles(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites, inks);
+      paint(windowed(tile.getContext('2d'), { x: win.x, y: win.y, width: W, height: H }), tick);
       return tile;
     },
   };

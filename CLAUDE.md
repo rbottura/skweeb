@@ -145,7 +145,7 @@ node scripts/check-look.mjs             # M5's link: a look made in filter, over
 node scripts/check-vault.mjs            # the vault panel: kin together, folders, the lineage switch; the vault app, an object drawn as chosen
 node scripts/check-frames.mjs           # a flipbook in compose: next frames, stepped, picked up, saved
 node scripts/check-particles.mjs        # particles: a loop that closes, a burst, print scale, a set's sprites; saved, replayed, placed, a sprite sheet
-node scripts/check-particles-fields.mjs # …emitters and fields, depth, a burst's sheet; the guides dragged; a picture from outside as the sprite
+node scripts/check-particles-fields.mjs # …emitters and fields, depth, a burst's sheet; the guides dragged; a picture from outside as the sprite; an overlay at A3
 node scripts/check-particles-links.mjs  # particles from other apps' objects: a dot-set or a shape's ink as the emitter; a fractal's field; a palette's colours
 node scripts/check-sheet-engine.mjs     # that sheet loaded and played by Phaser 3, fetched into the page only
 node scripts/check-fractals.mjs         # the GPU's Mandelbrot against doubles, the wheel, the drag; copies of a star; idles of both families saved and placed
