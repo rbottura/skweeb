@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-06_
+_last touched: 2026-11-09_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -170,11 +170,11 @@ sorts them.
 - A particle is a function of its slot and its age, so a loop closes pixel
   for pixel and any frame stands alone. Emitters — a point, a line, a disc,
   a ring, or a vault object's points (`ckt → particles: an emitter`) —
-  forces in closed form, a vortex, an attractor, curl noise, a field from a
-  fractal; depth with a camera; a set's sprites, sized, faded and turned on
-  easing curves (`set → particles: sprites`). Guides show what makes them.
-  Saved, replayed, placed; a loop leaves as a sprite sheet with Aseprite's
-  JSON, and Phaser 3 plays it (`check-sheet-engine`).
+  forces in closed form, a vortex, an attractor, curl noise, a fractal's
+  field; depth with a camera; a set's sprites, sized, faded and turned on
+  easing curves (`set → particles: sprites`), in a palette's colours since
+  2026-11-09. Guides show what makes them. Saved, replayed, placed; a loop
+  leaves as a sprite sheet with Aseprite's JSON, and Phaser 3 plays it.
 
 ### M5 — filter, and the GPU kit under it (`apps/filter/STATUS.md`)
 
@@ -269,12 +269,8 @@ Thirty-eight browser checks, each a command in `CLAUDE.md`, run several at a
 time by `scripts/checks.mjs`: each its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-garden`, the garden
-(M14a); `check-cluster-vault`, the scene's vault beside each app (S9g); `check-cluster`, the scene, and
-`check-mount`, an app unmounted with nothing left (S9); `check-puppet`, the
-puppet on a fake camera, sent and followed by a page in OBS; M11's four —
-`check-live`, `check-send`, `check-smart`, `check-page` — `check-print`
-(20), `check-3d-poster` (8) and `check-3d` (58). On the laptop Chrome keeps
+throws or its console is not quiet. Newest: `check-garden` (M14a),
+`check-cluster-vault` (S9g), `check-cluster` and `check-mount` (S9). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
 (`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
@@ -283,6 +279,9 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Broken / half-done
 
+- **`check-frames` red on the tower since the garden** (`main` too, 3 of 3,
+  2026-11-09): its three stills are the vault's first, sparse flowers now,
+  and the onion skin shows under its threshold. The check's, not compose's: C12.
 - **`check-live` hangs under the gate's load** after its gamepad window —
   twice on 2026-11-05, taken down at 8:00, green alone each time. A flake
   of the load, noted at each merge; worth its own look (C9's helpers).

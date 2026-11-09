@@ -37,7 +37,8 @@ in one; *its colours* from a picture, still to come.
   with it keeps the colours it had.
 - **Used** by every list of colours that can take one, by the object param
   every app has: BEC's grid first — its palette one of its own three, or
-  one of the vault's — then particles' colours, a ground, ckt's dots.
+  one of the vault's — then particles' colours (2026-11-09, a colour of it
+  each, `apps/particles/dye.js`); a ground and ckt's dots to come.
   Dragged onto a palette field from the vault, as any object (S9g).
 
 ## V2 — a set, by hand

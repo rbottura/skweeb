@@ -9,11 +9,13 @@
  * picture's pixels from its centre, so more pixels is a multiplication and
  * never a stretch.
  *
- * A particle is a sprite of a vault set (sprites.js), or a dot.
+ * A particle is a sprite of a vault set (sprites.js), or a dot; with a
+ * palette, in a colour of it (dye.js).
  */
 
 import { mipFor } from '../../core/stamps.js';
 import { easing } from '../../core/easing.js';
+import { dyed, inkOf } from './dye.js';
 
 /** The canvas a picture needs, in its own pixels: the frame, and its bleed on every side. */
 export function pictureSize(picture) {
@@ -74,8 +76,10 @@ export function drawOrder(particles, order, focal) {
  * @param {object} picture                 the picture's values (params.js)
  * @param {number} scale                   canvas pixels per picture pixel
  * @param {?Array} [sprites]               a set's images (sprites.js), or none for dots
+ * @param {?string[]} [inks]                a palette's colours (core/palettes.js), or none:
+ *                                          a dot in the picture's colour, a sprite in its own
  */
-export function drawParticles(ctx, particles, picture, scale, sprites = null) {
+export function drawParticles(ctx, particles, picture, scale, sprites = null, inks = null) {
   const { width, height } = pictureSize(picture);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;
@@ -98,7 +102,9 @@ export function drawParticles(ctx, particles, picture, scale, sprites = null) {
     if (w <= 0 || alpha <= 0) continue;
     const x = ox + p.x * k * scale, y = oy + p.y * k * scale;
     ctx.globalAlpha = Math.min(1, alpha);
+    const ink = inks ? inkOf(inks, p.dye) : null;
     if (!n) {
+      if (ink) ctx.fillStyle = ink;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.beginPath();
       ctx.arc(x, y, w / 2, 0, Math.PI * 2);
@@ -109,7 +115,8 @@ export function drawParticles(ctx, particles, picture, scale, sprites = null) {
     const h = w * (mark.height / mark.width);
     const cos = Math.cos(p.rot || 0), sin = Math.sin(p.rot || 0);
     ctx.setTransform(cos, sin, -sin, cos, x, y);
-    ctx.drawImage(mipFor(mark, w), -w / 2, -h / 2, w, h);
+    const level = mipFor(mark, w);
+    ctx.drawImage(ink ? dyed(mark, level, ink, picture.tint) : level, -w / 2, -h / 2, w, h);
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;

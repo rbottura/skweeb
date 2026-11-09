@@ -30,7 +30,7 @@
  * is over when the longest of them is.
  *
  * A slot's draws are made in a fixed order — jitter, life, speed, angle,
- * pick, turn, twist, spot, spot, lift — and a new one is only ever added at the end, so a
+ * pick, turn, twist, spot, spot, lift, dye — and a new one is only ever added at the end, so a
  * recipe saved today draws the same particles after the model has grown.
  *
  * ── Motion ─────────────────────────────────────────────────────────────────
@@ -209,17 +209,20 @@ export function slot(m, k) {
   const spin = m.spin * (1 + m.spinSpread * (rng() * 2 - 1)) * DEG;
   const spot = spotOf(m, rng(), rng());
   const lift = (m.depthSpread || 0) * (rng() - 0.5) * DEG;
+  const dye = rng();
   const born = m.burst ? 0 : (k + m.jitter * jitter) * m.spacing;
   return { slot: own, born, life: Math.max(1e-3, life), speed,
-           angle: angle + (spot.out ?? 0), pick, turn, spin, dx: spot.dx, dy: spot.dy, lift };
+           angle: angle + (spot.out ?? 0), pick, turn, spin, dx: spot.dx, dy: spot.dy, lift, dye };
 }
 
 /**
  * Every particle alive at `t` seconds, oldest first — the order they are
  * drawn in, so the newest are on top. Each is where it is, how fast it goes,
  * how old it is, how it is turned and what it drew:
- * `{ slot, x, y, z, vx, vy, vz, rot, age, life, t, pick }`,
- * `t` its age over its life, 0 to 1, for what runs over a particle's life.
+ * `{ slot, x, y, z, vx, vy, vz, rot, age, life, t, pick, dye }`,
+ * `t` its age over its life, 0 to 1, for what runs over a particle's life;
+ * `pick` chooses its sprite and `dye` its colour of a palette, apart, so a
+ * sprite is not tied to a colour.
  *
  * @param {object} recipe   see DEFAULTS
  * @param {number} t        seconds: on a stream, any time at all, negative too
@@ -253,7 +256,7 @@ export function particlesAt(recipe, t) {
     at.z = deep.x;
     at.vz = deep.vx;
     const rot = m.align ? Math.atan2(at.vx, -at.vy) : s.turn + s.spin * age;
-    out.push({ slot: s.slot, ...at, rot, age, life: s.life, t: age / s.life, pick: s.pick });
+    out.push({ slot: s.slot, ...at, rot, age, life: s.life, t: age / s.life, pick: s.pick, dye: s.dye });
   }
   return out;
 }

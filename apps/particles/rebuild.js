@@ -4,20 +4,22 @@
  * The other end of core/rebuild.js's dispatch: the vault's player, compose
  * placing a loop, a print export. A particles object's recipe is the two
  * panels' values, `{ emit, picture }`, and `tick` for a still, so replaying
- * it is opening its sprite set, if it has one, the object its emitter
- * leaves from and the field it moves through, if it names them
- * (core/points.js, core/fields.js), and drawing frames with
+ * it is opening its sprite set and its palette, if it has them, the object
+ * its emitter leaves from and the field it moves through, if it names them
+ * (core/palettes.js, core/points.js, core/fields.js), and drawing frames with
  * frames.js — the code its save drew with. No GPU, no random that was not
  * seeded: the replay is the render, on any machine.
  *
  * A sprite set that will not open is said, as `missing`, and the particles
- * are dots; an emitter object that will not, and they leave from its centre;
- * a field that will not, and they move without it — drawn all the same, as
- * the app draws with no vault.
+ * are dots; a palette that will not, and they are in their own colours; an
+ * emitter object that will not, and they leave from its centre; a field that
+ * will not, and they move without it — drawn all the same, as the app draws
+ * with no vault.
  */
 
 import { openParticles } from './frames.js';
 import { loadSprites }   from '../../core/sprites.js';
+import { loadPalette }   from '../../core/palettes.js';
 import { loadPoints }    from '../../core/points.js';
 import { loadField }     from '../../core/fields.js';
 import { drawFrameInto } from '../../core/rebuild.js';
@@ -61,6 +63,15 @@ export async function openObject(object, opts = {}) {
     }
   }
 
+  let palette = null;
+  if (recipe.picture.palette) {
+    try {
+      palette = await loadPalette(recipe.picture.palette);
+    } catch {
+      missing.push(recipe.picture.palette);
+    }
+  }
+
   let points = null;
   const { shape, from, glyph } = recipe.emit;
   if (shape === 'object' && from) {
@@ -79,7 +90,7 @@ export async function openObject(object, opts = {}) {
     }
   }
 
-  const frames = openParticles(recipe, sprites, { scale: opts.scale > 0 ? opts.scale : 1, points, field });
+  const frames = openParticles(recipe, sprites, { scale: opts.scale > 0 ? opts.scale : 1, points, field, palette });
   const box = { x: 0, y: 0, w: frames.width, h: frames.height };
 
   return {

@@ -10,7 +10,8 @@
  *
  * A set from the vault is the sprites (sprites.js), one each; with none, or
  * no vault at all, the particles are dots and the app plays the same
- * (rule 7). An emitter may be an object from the vault — a dot-set, a
+ * (rule 7). A palette from the vault colours them (dye.js).
+ * An emitter may be an object from the vault — a dot-set, a
  * shape — and a field may come from one — a fractal: its points, its field,
  * loaded beside the recipe (core/points.js, core/fields.js). S saves the loop (save.js), and the vault plays it back through
  * rebuild.js; `?open=<id>` brings a saved one back to work on.
@@ -24,6 +25,7 @@ import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROU
 import { prepare, particlesAt } from './model.js';
 import { drawParticles, pictureSize } from './draw.js';
 import { loadSprites }  from '../../core/sprites.js';
+import { loadPalette }  from '../../core/palettes.js';
 import { loadPoints }   from '../../core/points.js';
 import { loadField }    from '../../core/fields.js';
 import { APP } from './save.js';
@@ -92,8 +94,8 @@ async function start(at, mine) {
   loading = false;         // a set is on its way in: nothing saves until it is
   spritesIn = Promise.resolve();   // the set on its way in, for a reopen to wait on
   asked = 0;               // the latest set asked for; an older answer is dropped
-  given = { points: null, field: null };   // what the emitter names, loaded beside the recipe
-  asking = { points: 0, field: 0 };        // the latest asked for, as `asked` is
+  given = { points: null, field: null, palette: null };   // what the recipe names, loaded beside it
+  asking = { points: 0, field: 0, palette: 0 };           // the latest asked for, as `asked` is
   coming = new Set();      // loads on their way in, for a reopen and a save to wait on
   leaving = null;          // the ways out (leaving.js): a save or a download drawing, nothing else starts
   painted = [];            // when the last paints were, while playing
@@ -137,6 +139,7 @@ async function boot(mine) {
     applyFrameEdit(picture, key);
     if (key === 'fps') remake();
     else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'), { following: picture.following });
+    else if (key === 'palette') bring('palette');
     else draw();
   });
   const sized = new ResizeObserver(() => draw());
@@ -234,34 +237,46 @@ async function chooseSprites(id, { following = false } = {}) {
   draw();
 }
 
+const pointsSaid = got => `${got.title}: ${got.list.length.toLocaleString('en')} point${got.list.length === 1 ? '' : 's'} to leave from`
+  + (got.glyphs > 1 ? ` · glyph ${got.glyph + 1} of ${got.glyphs}` : '');
+
+/** What is loaded beside the recipe: which object it names now, how that is read, what the bar says of it, and its name if it will not come. */
+const BROUGHT = {
+  points:  { named: e => (e.shape === 'object' ? e.from : null), read: (id, e) => loadPoints(id, { glyph: e.glyph }),
+             said: pointsSaid, called: "the emitter's object" },
+  field:   { named: e => e.fieldFrom, read: id => loadField(id),
+             said: got => `${got.title}: a field to move through`, called: 'the field' },
+  palette: { named: (e, p) => p.palette, read: id => loadPalette(id),
+             said: got => `${got.title}: ${got.colours.length} colour${got.colours.length === 1 ? '' : 's'}`, called: 'the palette' },
+};
+
 /**
- * Load what the emitter names beside the recipe: the object it leaves from
- * (core/points.js), the field it moves through (core/fields.js). Until it is
- * in, and if it will not come, the particles do without — from the emitter's
- * centre, with no such pull; an older answer is dropped for a newer ask.
+ * Load what the recipe names beside it: the object the emitter leaves from
+ * (core/points.js), the field it moves through (core/fields.js), the palette
+ * it is drawn in (core/palettes.js). Until it is in, and if it will not come,
+ * the particles do without — from the emitter's centre, with no such pull, in
+ * their own colours; an older answer is dropped for a newer ask.
  */
 function bring(what) {
   const ask = ++asking[what];
+  const { named, read, said, called } = BROUGHT[what];
   const e = emit.values;
-  const id = what === 'points' ? (e.shape === 'object' ? e.from : null) : e.fieldFrom;
+  const id = named(e, picture.values);
   given[what] = null;
   remake();
   if (!id) return;
-  const done = (what === 'points' ? loadPoints(id, { glyph: e.glyph }) : loadField(id)).then(got => {
+  const done = read(id, e).then(got => {
     if (ask !== asking[what]) return;
     given[what] = got;
-    bar.announce(what === 'field' ? `${got.title}: a field to move through` : pointsSaid(got));
+    bar.announce(said(got));
   }, err => {
-    if (ask === asking[what]) bar.announce(`could not open ${what === 'field' ? 'the field' : "the emitter's object"}: ${err.message}`);
+    if (ask === asking[what]) bar.announce(`could not open ${called}: ${err.message}`);
   }).finally(() => {
     coming.delete(done);
     if (ask === asking[what] && mounted()) remake();
   });
   coming.add(done);
 }
-
-const pointsSaid = got => `${got.title}: ${got.list.length.toLocaleString('en')} point${got.list.length === 1 ? '' : 's'} to leave from`
-  + (got.glyphs > 1 ? ` · glyph ${got.glyph + 1} of ${got.glyphs}` : '');
 
 // ── Leaving: a loop, a still, the frames ─────────────────────────────────────
 
@@ -326,7 +341,7 @@ function paint() {
   if (canvas.height !== h) canvas.height = h;
 
   shown = particlesAt(model, clock.tick / p.fps);
-  drawParticles(ctx, shown, p, view, sprites);
+  drawParticles(ctx, shown, p, view, sprites, given.palette && given.palette.colours);
   shownView = view;
   if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), { ...given, selected: selected() });
 

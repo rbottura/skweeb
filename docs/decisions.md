@@ -357,3 +357,18 @@ middle, and a mark has no field to turn one over. Later, the author's:
 modifiers from another app's values (M14b) — "le modificateur de particules
 ajouterait des marques dans la recette de la fleur avec un sprite de rendu
 associé"; two flowers crossed (M14c), "pour plus tard".
+
+## Decided since, 2026-11-09
+
+**A palette's colour on a sprite is one ink on paper.** The author:
+"utiliser une palette de couleurs et l'appliquer sur les particules
+générés comme les images ou couleur unis qu'on a aujourd'hui". On a dot it
+is the dot's colour. A sprite is rarely flat — of the gamepad's 64 brushes
+60 have lights and darks and 49 are in colour, a still is often opaque — so
+a silhouette would make most of them a disc or a rectangle, and a multiply
+leaves black ink black and turns cyan under red black. So by default a
+sprite's darkest tone takes the colour whole, pure white stays and what is
+between is between; one of a single tone has no lights to keep and takes
+it whole; *flat*, the silhouette, is one chip away. A particle keeps its
+colour all its life, by a draw of its own after every other, so what a
+recipe drew before is as it was and a colour is not tied to a sprite.

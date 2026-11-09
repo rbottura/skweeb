@@ -12,8 +12,8 @@ import { saveParticles, downloadFrames, downloadSheet } from './save.js';
  * @param {object} opts
  * @param {object} opts.bar               core's Bar
  * @param {object} opts.clock             the picture's Playhead
- * @param {() => object} opts.args        save.js's arguments as things are now: the panels, the sprites, the points and the field
- * @param {() => boolean} opts.loading    whether the sprites, the emitter or the field are still on their way in
+ * @param {() => object} opts.args        save.js's arguments as things are now: the panels, the sprites, the points, the field and the palette
+ * @param {() => boolean} opts.loading    whether the sprites, the palette, the emitter or the field are still on their way in
  * @param {() => void} opts.after         once one is done, however it went: the vault read again, the picture drawn
  * @returns {{ save: (o?: {still?: boolean}) => Promise, sheet: () => Promise, frames: () => Promise,
  *             leave: (action: () => Promise<string>) => Promise, busy: () => boolean }}
@@ -24,7 +24,7 @@ export function ways({ bar, clock, args, loading, after }) {
   /** One way out for all three: the player held still, nothing else started meanwhile. */
   async function leave(action) {
     if (busy) return;
-    if (loading()) return bar.announce('the sprites, the emitter or the field are still loading — a moment');
+    if (loading()) return bar.announce('the sprites, the palette, the emitter or the field are still loading — a moment');
     busy = true;
     clock.pause();
     try {

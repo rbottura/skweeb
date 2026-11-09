@@ -40,6 +40,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `noise.js` | seeded noise in JS on the GPU kit's hash — `pcg` and `randAt` bit for bit WGSL's — gradient noise with its exact slope, and its curl; `noise3` in 3D, JS only (`tests/noise.mjs`) | **in**, 2026-09-27, for particles' fields; `noise3` 2026-10-06, for a displaced shape |
 | `vault-import.js` | pictures from outside into the vault: *+ pictures* in the panel's head, or a drop on it — each a `shape` (see-through) or a `still`, several a `set` too | **in**, 2026-09-27, the author's ask |
 | `sprites.js` | a vault set, shape or still as images to draw with (`loadSprites`) | **in**, 2026-09-28, moved from particles when fractals needed it |
+| `palettes.js` | a vault palette as colours to draw with (`loadPalette`, `coloursIn`); `vault-palette.js` makes them | **in**, 2026-11-09, moved from the 3D app when particles needed it |
 | `points.js` | an object as points to leave from: a dot-set's glyph, a picture's ink, centred, its longer side 1 (`loadPoints`) | **in**, 2026-09-30, for particles' object emitter |
 | `fields.js` | an object as a field, asked of the app that made it — its rebuild.js's `fieldOf` (`loadField`) | **in**, 2026-09-30, M7's link |
 | `view.js` | how large a preview draws: `viewFactor()`, the size the viewer shows, never more than an export makes; `zoom.js`, a picture seen closer — the wheel about the pointer, a drag, a double click to fit (`closer`, the vault app's, S9h) | **in**, 2026-09-27, moved from compose when particles needed it |

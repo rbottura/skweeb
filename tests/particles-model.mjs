@@ -11,6 +11,8 @@
 const { particlesAt, prepare, motion, slot, duration, MAX_ALIVE } = await import('../apps/particles/model.js');
 const { integrate, fieldOf, STEP, reach } = await import('../apps/particles/forces.js');
 const { drawOrder } = await import('../apps/particles/draw.js');
+const { inkOf, dyePixels, darkest } = await import('../apps/particles/dye.js');
+const { makeRng, seedFrom } = await import('../core/rng.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -219,6 +221,33 @@ const deep3 = [{ z: 0, id: 'plane' }, { z: 800, id: 'far' }, { z: -400, id: 'nea
 ok('with depth, far first, near last', drawOrder(deep3, 'over', 800).map(d => d.p.id), ['far', 'plane', 'near']);
 ok('as far again as the focal is half the size, and half as near twice', drawOrder(deep3, 'over', 800).map(d => d.k), [0.5, 1, 2]);
 ok('behind the camera, left out', drawOrder([{ z: -900 }, { z: 0 }], 'over', 800).length, 1);
+
+// -- A palette: a colour of its own for each particle --------------------------
+
+const shownNow = particlesAt(torch, 0.9);
+ok('a dye to choose a colour with, in [0, 1)', shownNow.every(p => p.dye >= 0 && p.dye < 1), true);
+ok('the same all its life, and the loop closes with it', particlesAt(torch, 2.9).map(p => p.dye), shownNow.map(p => p.dye));
+const heldSlot = prepare(torch);
+const drawsOf = makeRng(seedFrom(`${heldSlot.seed}:3`));
+for (let i = 0; i < 10; i++) drawsOf();
+ok('the slot\'s last draw: what a saved recipe drew is as it was', slot(heldSlot, 3).dye, drawsOf());
+ok('its own draw: a sprite is not tied to a colour', shownNow.some(p => Math.floor(p.pick * 5) !== Math.floor(p.dye * 5)), true);
+const INKS = ['#0073dc', '#e40514', '#00a773', '#ffd400', '#000000'];
+ok('a dye is one of the colours', [inkOf(INKS, 0), inkOf(INKS, 0.2), inkOf(INKS, 0.999)], ['#0073dc', '#e40514', '#000000']);
+ok('every colour is used', new Set(shownNow.map(p => inkOf(INKS, p.dye))).size, 5);
+
+const px = (...rows) => Uint8ClampedArray.from(rows.flat());
+const BLUE = [0, 115, 220];
+ok('tones: black takes the colour, white stays, alpha left alone', [...dyePixels(px([0, 0, 0, 200], [255, 255, 255, 40]), BLUE, 0)],
+   [0, 115, 220, 200, 255, 255, 255, 40]);
+ok('tones: half way, half way', [...dyePixels(px([128, 128, 128, 255]), BLUE, 0)].slice(0, 3), [128, 185, 238]);
+ok('tones: a sprite\'s darkest takes the colour whole', [...dyePixels(px([128, 128, 128, 255], [255, 255, 255, 255]), BLUE, darkest(px([128, 128, 128, 255], [255, 255, 255, 255])))],
+   [0, 115, 220, 255, 255, 255, 255, 255]);
+ok('one tone, however pale: taken whole', [...dyePixels(px([250, 250, 250, 255]), BLUE, darkest(px([250, 250, 250, 255])))], [0, 115, 220, 255]);
+ok('flat: every pixel that shows, its alpha left alone', [...dyePixels(px([255, 255, 255, 255], [30, 200, 90, 7]), BLUE, null)],
+   [0, 115, 220, 255, 0, 115, 220, 7]);
+ok('in black, a picture is its greys', [...dyePixels(px([0, 0, 0, 255], [128, 128, 128, 255]), [0, 0, 0], 0)], [0, 0, 0, 255, 128, 128, 128, 255]);
+ok('the darkest tone is of what shows', darkest(px([0, 0, 0, 0], [0, 0, 0, 90], [200, 200, 200, 255])) > 0.7, true);
 
 // -- Falloff: a vortex and a pull with a reach ----------------------------------
 
