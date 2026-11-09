@@ -372,3 +372,11 @@ between is between; one of a single tone has no lights to keep and takes
 it whole; *flat*, the silhouette, is one chip away. A particle keeps its
 colour all its life, by a draw of its own after every other, so what a
 recipe drew before is as it was and a colour is not tied to a sprite.
+
+**An overlay in particles, before the gabarit.** The author wants a poster's
+type over a render now, "au plus simple", the window stack's bugs for later.
+So one object row in the Format drawer, the one place a format is picked,
+and no layer model: M13c's gabarit keeps its fields to be decided. It is
+fitted whole and centred. `core/frame.js` has no `fit` because content is
+placed at its own scale on purpose; an overlay is made for a format, and on
+another one cutting it would lose what it says.

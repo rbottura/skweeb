@@ -26,6 +26,18 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **A picture in front, fitted to the format** (2026-11-09, the author's
+  ask, a poster's type over its particles: "une image avec de la
+  transparence devant mon rendu, en overlay mais adapter au format pour
+  pouvoir gérer la composition"; `draw.js` `overlayBox`, `drawOverlay`). The
+  Format drawer's *overlay*: a still or a shape of the vault, whole, as large
+  as the format allows, centred — a sheet of the format fills it to the
+  pixel, and on another format nothing of it is cut. In front of the
+  particles and under the guides; where it is see-through, the render. In
+  the save, the replay, the frames and the print, from its own pixels there;
+  a parent of what is saved; not on a sprite sheet, as the ground is not.
+  A3 at 300 dpi, 3510 × 4963, draws in 10 ms, and the 3508 × 4961 poster
+  costs the preview nothing (`check-particles-fields`).
 - **A palette of the vault colours the particles** (2026-11-09, the
   author's ask, to try BEC_2025's; `dye.js`, `core/palettes.js`). The
   Look's *palette*, an object row as *sprites* is; BEC's three are in the
@@ -249,6 +261,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   its picture was taken at.
 - A value changed keeps the frame on screen; a loop made shorter than it
   lands on its last.
+- The overlay is one picture, fitted whole: no offset, no opacity, no blend,
+  and not several — the gabarit's layers (M13c, `docs/bec.md`) are.
 - A palette's colour is a particle's for its whole life: colour over life
   is not in yet. With no palette, a set's colours are its own.
 - A sprite's size is its width; its height follows its own shape, so a

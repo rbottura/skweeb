@@ -172,9 +172,10 @@ sorts them.
   a ring, or a vault object's points (`ckt → particles: an emitter`) —
   forces in closed form, a vortex, an attractor, curl noise, a fractal's
   field; depth with a camera; a set's sprites, sized, faded and turned on
-  easing curves (`set → particles: sprites`), in a palette's colours since
-  2026-11-09. Guides show what makes them. Saved, replayed, placed; a loop
-  leaves as a sprite sheet with Aseprite's JSON, and Phaser 3 plays it.
+  easing curves (`set → particles: sprites`), in a palette's colours, a
+  picture in front fitted to the format (2026-11-09). Guides show what makes
+  them. Saved, replayed, placed; a loop leaves as a sprite sheet with
+  Aseprite's JSON, and Phaser 3 plays it.
 
 ### M5 — filter, and the GPU kit under it (`apps/filter/STATUS.md`)
 
