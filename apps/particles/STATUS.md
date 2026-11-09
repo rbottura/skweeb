@@ -1,5 +1,5 @@
 # STATUS — particles
-_last touched: 2026-11-04_
+_last touched: 2026-11-09_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
 and *Done when* are in `docs/roadmap-done.md`, M6 — a torch loop that closes
@@ -26,6 +26,21 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **A palette of the vault colours the particles** (2026-11-09, the
+  author's ask, to try BEC_2025's; `dye.js`, `core/palettes.js`). The
+  Look's *palette*, an object row as *sprites* is; BEC's three are in the
+  picker's folder `bec_2025`. Each particle is one of its colours, the same
+  all its life, by a draw of its own at the end of its slot (`dye`), so
+  nothing drawn before moves and a loop still closes pixel for pixel. A dot
+  is filled with it, and the *dot colour* row goes. A sprite is printed in
+  it, *on a sprite* says how: *keeps its tones* — its darkest tone takes
+  the colour whole, pure white stays, what is between is between, and a
+  sprite of one tone, even white, is taken whole — or *flat*, a silhouette.
+  Dyed once for each halving and colour, within 256 MB: 2000 sprites at
+  1080², 9 ms a frame → 10. The palette is a parent of what is saved, the
+  replay draws in it to the pixel, `?open=` brings it back, the frames, the
+  sheet and the print are in it; cleared, as before, and a recipe from
+  before draws as it did (`check-particles-links`, `tests/particles-model.mjs`).
 - **A module** (S9, 2026-11-04; `main.js` on core's `mount.js` and
   `scope.js`): `mount(host)` builds the app in any host and `unmount()`
   takes it out — its panels, bar, title bar and vault panel gone, its keys
@@ -212,7 +227,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 ## Known
 
 - A slot's draws are in a fixed order — jitter, life, speed, angle, pick,
-  turn, twist, spot, spot, lift — and new ones go at the end, or saved
+  turn, twist, spot, spot, lift, dye — and new ones go at the end, or saved
   recipes redraw differently.
 - A field costs a particle's age in steps, each frame: a long life through
   one is the slow case — 20 s lives are 2400 steps each.
@@ -234,8 +249,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   its picture was taken at.
 - A value changed keeps the frame on screen; a loop made shorter than it
   lands on its last.
-- Sprites have no tint: a set's colours are its own. Colour over life, for
-  dots and a tint for sprites, is not in yet.
+- A palette's colour is a particle's for its whole life: colour over life
+  is not in yet. With no palette, a set's colours are its own.
 - A sprite's size is its width; its height follows its own shape, so a
   tall sprite in a set of round ones stands taller.
 - An object emitter's points are its ink, evenly — a still with no
@@ -257,5 +272,5 @@ and a field taken from other objects. Nothing of particles' own is on the
 board of the cycle begun 2026-10-22 (`docs/plan.md`) — L11 will have its
 sprites follow a smart object; what is left here waits under its *Later*:
 
-- **Colour over life** — for dots, and a tint for sprites: a `color[]`
-  ramp run along a curve.
+- **Colour over life** — a palette run along a particle's life, on a
+  curve, for dots and sprites: `dye.js` paints them in any of its colours.

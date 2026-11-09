@@ -28,12 +28,14 @@ import { windowed, canvasFor }  from '../../core/windowed.js';
  * @param {number} [opts.scale=1]    pixels per pixel of its own size
  * @param {?object} [opts.points]    an object emitter's points (core/points.js)
  * @param {?object} [opts.field]     a field from another object (core/fields.js)
+ * @param {?object} [opts.palette]   a palette's colours (core/palettes.js)
  * @returns {{length, fps, loop, width, height, scale, frame(i): OffscreenCanvas|HTMLCanvasElement}}
  *          `frame` hands out one canvas, drawn again on every call — borrowed
  */
-export function openParticles(recipe, sprites, { scale = 1, points = null, field = null } = {}) {
+export function openParticles(recipe, sprites, { scale = 1, points = null, field = null, palette = null } = {}) {
   const { emit, picture } = recipe;
   const model = prepare(toModel(emit, picture), { points, field });
+  const inks = palette ? palette.colours : null;
   const size = pictureSize(picture);
   const own = picture.scale || 1;
   const px = own * scale;
@@ -52,7 +54,7 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
     frame(i) {
       const tick = still ? recipe.tick : i;
       canvas = canvas || surface(W, H);
-      drawParticles(canvas.getContext('2d'), particlesAt(model, tick / picture.fps), picture, px, sprites);
+      drawParticles(canvas.getContext('2d'), particlesAt(model, tick / picture.fps), picture, px, sprites, inks);
       return canvas;
     },
 
@@ -61,7 +63,7 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
       const tick = still ? recipe.tick : i;
       tile = canvasFor(tile, win);
       const ctx = windowed(tile.getContext('2d'), { x: win.x, y: win.y, width: W, height: H });
-      drawParticles(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites);
+      drawParticles(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites, inks);
       return tile;
     },
   };

@@ -147,9 +147,20 @@ export function pictureParams() {
      * versions (L11). None: dots, in `color`.
      */
     sprites: { type: 'object', accepts: ['set', 'shape', 'still', 'model'], use: 'particles', label: 'sprites', group: 'look' },
+    /**
+     * A palette of the vault (V1, docs/workshop.md): each particle one of its
+     * colours, by a draw of its own, the same all its life (model.js `dye`) —
+     * a dot filled with it, a sprite printed in it (dye.js). None: a dot in
+     * `color`, a sprite in its own colours.
+     */
+    palette: { type: 'object', accepts: ['palette'], label: 'palette', group: 'look' },
+    /** A sprite in a palette's colour: its darks take it and its lights stay — or flat, a silhouette. */
+    tint:    { type: 'enum', options: ['tones', 'flat'], default: 'tones', display: 'chips',
+               labels: { tones: 'keeps its tones', flat: 'flat' }, label: 'on a sprite', group: 'look',
+               when: { palette: { not: null }, sprites: { not: null } } },
     /** A dot's width, or a sprite's: its height follows its own shape. */
     size:   { type: 'range', min: 0.5, max: 256, step: 0.5, default: 22, label: 'size', unit: 'px', group: 'look', slider: true },
-    color:  { type: 'color', default: '#d9481c', label: 'dot colour', group: 'look', when: { sprites: null } },
+    color:  { type: 'color', default: '#d9481c', label: 'dot colour', group: 'look', when: { sprites: null, palette: null } },
     /** Its size at the end of its life, as a share of `size`, reached along `growEase`. */
     grow:     { type: 'range', min: 0, max: 4, step: 0.05, default: 0.2, label: 'size at its end', unit: '×', group: 'look' },
     growEase: easeParam({ default: 'linear', label: 'growing', group: 'look', when: { grow: { not: 1 } } }),

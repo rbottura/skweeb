@@ -18,6 +18,13 @@
  * parent and the replay is the render to the pixel; an object whose app
  * makes no field says so. The field is in doubles: no GPU here either.
  *
+ * A palette of the vault (V1, 2026-11-09): picked, each dot is one of its
+ * colours, every colour used, the picture otherwise as it was — a palette of
+ * the dots' own colour is the picture to the pixel — and the loop still
+ * closes; on a sprite its darks take the colour and its lights stay, or flat,
+ * a silhouette. Saved, the palette is a parent, the vault replays it to the
+ * pixel of its render, `?open=` brings it back; cleared, the sprite's own.
+ *
  * On its own because check-particles.mjs is past the 400-line cap. Needs no
  * GPU and brings its own objects: the vault it runs on may be empty.
  */
@@ -240,6 +247,105 @@ if (o) {
   await choose('a field from', now.title);
   const none = await sayWith('makes no field');
   c.ok('an object whose app makes no field says so', none.includes('makes no field'), none);
+}
+
+// ── A palette of the vault: the particles' colours ──────────────────────────
+
+const BEC = ['#0073dc', '#e40514', '#00a773', '#ffd400', '#000000'], OWN = '#d9481c', WHITE = '#ffffff';
+await c.go(c.base + '/apps/particles/');
+await page.until(`${say}.includes('alive')`, { timeout: 20000 });
+await guidesOff();
+await key(' ');                                   // the torch held still
+const dyes = await page.eval(`(async () => {
+  const { Vault } = await import('/core/vault.js');
+  const { savePalette } = await import('/core/vault-palette.js');
+  const { thumbFromBlob } = await import('/core/thumb.js');
+  const five = (await savePalette({ title: 'five inks', colours: ${JSON.stringify(BEC)} })).id;
+  const one = (await savePalette({ title: 'its own colour', colours: [${JSON.stringify(OWN)}] })).id;
+  const pic = new OffscreenCanvas(64, 64), g = pic.getContext('2d');   // lights and darks, nothing see-through
+  g.fillStyle = '#000000'; g.fillRect(0, 0, 32, 64); g.fillStyle = '#ffffff'; g.fillRect(32, 0, 32, 64);
+  const blob = await pic.convertToBlob({ type: 'image/png' });
+  const sprite = (await Vault.save({ type: 'shape', title: 'half and half', tags: ['shape'], origin: { app: 'vault', version: '1.0.0' },
+    seed: null, recipe: null, render: { blob, ext: 'png', w: 64, h: 64 }, thumb: await thumbFromBlob(blob) })).id;
+  await Vault.refresh();
+  return { five, one, sprite }; })()`);
+c.ok('a palette and a sprite in the vault', !!(dyes && dyes.five && dyes.one && dyes.sprite), JSON.stringify(dyes));
+/** How many pixels of the picture are exactly each of these colours. */
+const exactly = hexes => page.eval(`(() => { const c = document.getElementById('stage'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const want = ${JSON.stringify(hexes)}.map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16))), out = want.map(() => 0);
+  for (let i = 0; i < d.length; i += 4) want.forEach((w, k) => { if (d[i] === w[0] && d[i + 1] === w[1] && d[i + 2] === w[2]) out[k]++; });
+  return out; })()`);
+const hidden = name => page.eval(`!${row(name)} || ${row(name)}.hidden || !${row(name)}.offsetParent`);
+
+// Dots, whole to the end of their lives: what shows is the colour itself.
+await page.click(`${row('fade over its life')}.querySelector('input')`);
+await wait(300);
+await scrubTo(20);
+for (let i = 0; i < 3; i++) await grid();         // Chrome moves a canvas read a few times off the GPU, its dots' edges a hair different after
+await scrubTo(21);
+await scrubTo(20);
+const ownDots = await grid(), noPalette = await exactly([OWN, ...BEC]);
+c.ok('with no palette, every dot in the one colour', noPalette[0] > 100 && noPalette.slice(1).every(n => n === 0), JSON.stringify(noPalette));
+c.ok('no palette, and a sprite\'s row does not ask', await hidden('on a sprite'));
+
+await choose('palette', 'its own colour');
+const oneSay = await sayWith('its own colour: 1 colour');
+await scrubTo(20);
+c.ok('a palette of the dots\' own colour: the picture to the pixel', oneSay.includes('1 colour') && apart(await grid(), ownDots) === 0,
+  `${oneSay}, apart by ${apart(await grid(), ownDots)}`);
+
+await choose('palette', 'five inks');
+const fiveSay = await sayWith('five inks: 5 colours');
+c.ok('a palette picked: its colours', fiveSay.includes('five inks: 5 colours'), fiveSay);
+await scrubTo(20);
+const inDots = await exactly([OWN, ...BEC]);
+c.ok('each dot one of its colours, every colour used', inDots[0] === 0 && inDots.slice(1).every(n => n > 20), JSON.stringify(inDots));
+c.ok('the dot colour asks no more', await hidden('dot colour'));
+await c.shot('4-palette-dots');
+await scrubTo(0);
+const dyedFirst = await grid();
+await scrubTo(59);
+await key('.');
+c.ok('in its colours, the frame after the last is the first', (await page.eval(count)) === '1 / 60'
+  && apart(await grid(), dyedFirst) === 0, `${await page.eval(count)}, apart by ${apart(await grid(), dyedFirst)}`);
+
+// A sprite of a black half and a white half, turned by nothing, shrunk by nothing.
+await choose('sprites', 'half and half');
+await sayWith('half and half: 1 sprite');
+c.ok('a palette and a sprite: how it goes on asked', !(await hidden('on a sprite')) && await chipOn('on a sprite', 'keeps its tones'));
+await set('size', 64);
+await set('size at its end', 1);
+await scrubTo(20);
+const toned = await exactly([WHITE, ...BEC]);
+c.ok('its tones kept: its black in the colour, its white white', toned[0] > 300 && toned.slice(1).every(n => n > 20), JSON.stringify(toned));
+await c.shot('5-palette-sprites');
+await chip('on a sprite', 'flat');
+await scrubTo(20);
+const flatSprites = await exactly([WHITE, ...BEC]);
+c.ok('flat: a silhouette, no white left', flatSprites[0] === 0 && flatSprites.slice(1).every(n => n > 20), JSON.stringify(flatSprites));
+await c.shot('6-palette-flat');
+await chip('on a sprite', 'keeps its tones');
+await scrubTo(20);
+
+// Saved, replayed, reopened, cleared.
+const inPalette = await saved();
+c.ok('saved: the palette and the sprite its parents', !!inPalette && inPalette.parents.includes(dyes.five) && inPalette.parents.includes(dyes.sprite),
+  inPalette ? JSON.stringify(inPalette.parents) : await page.eval(say));
+c.ok('titled by what it is drawn in', !!inPalette && inPalette.title.includes('half and half in five inks'), inPalette && inPalette.title);
+if (inPalette) {
+  const replay = await replayOf(inPalette.id, 20);
+  c.ok('the vault replays it in its colours: its render, pixel for pixel', replay.worst === 0 && !replay.missing.length, JSON.stringify(replay));
+  await c.go(c.base + '/apps/particles/?open=' + inPalette.id);
+  await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+  await guidesOff();
+  await scrubTo(20);
+  const back = await exactly([WHITE, ...BEC]);
+  c.ok('?open= brings the palette back, on its sprites', back[0] > 300 && back.slice(1).every(n => n > 20), JSON.stringify(back));
+  await page.click(`[...${row('palette')}.querySelectorAll('button')].find(b => b.textContent === 'Clear')`);
+  await wait(500);
+  await scrubTo(20);
+  const own = await exactly([WHITE, ...BEC]);
+  c.ok('cleared, the sprite in its own colours again', own[0] > 300 && own.slice(1, 5).every(n => n === 0) && own[5] > 300, JSON.stringify(own));
 }
 
 const noise = c.quiet();
