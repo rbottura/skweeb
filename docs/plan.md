@@ -56,6 +56,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | V3 | groups by hand: the selection into a group, out of it, a group renamed | `vault/groups` | S | landed 2026-11-06 |
 | V1b | a palette on particles: each one a colour of it, a dot filled, a sprite printed in it | `particles/palette` | S | landed 2026-11-09 |
 | — | an overlay in particles: one picture in front, fitted to the format | `particles/overlay` | S | landed 2026-11-09; layers by format are M13c's |
+| — | particles at random sizes between two; an emitter object turned | `particles/size-angle` | S | landed 2026-11-09 |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
