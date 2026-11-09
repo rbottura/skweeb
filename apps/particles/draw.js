@@ -121,3 +121,42 @@ export function drawParticles(ctx, particles, picture, scale, sprites = null, in
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;
 }
+
+/**
+ * Where an overlay goes: whole, as large as the format allows, centred, its
+ * proportions kept — so a sheet made for the format fills it, and on another
+ * format nothing of it is cut. On the frame, the bleed outside it. Within a
+ * pixel of filling a side, it fills it: A3 is 1080 × 1527, rounded, and a
+ * sheet of A3 inside it would leave a hairline of what is under.
+ *
+ * @param {number} w          the overlay's own width
+ * @param {number} h          and its height
+ * @param {object} picture    the picture's values (params.js)
+ * @returns {{x: number, y: number, w: number, h: number}}   in picture pixels, from the canvas's corner
+ */
+export function overlayBox(w, h, picture) {
+  const bleed = Math.max(0, Math.round(picture.bleed || 0));
+  const k = Math.min(picture.width / w, picture.height / h);
+  const fw = picture.width - w * k < 1 ? picture.width : w * k;
+  const fh = picture.height - h * k < 1 ? picture.height : h * k;
+  return { x: bleed + (picture.width - fw) / 2, y: bleed + (picture.height - fh) / 2, w: fw, h: fh };
+}
+
+/**
+ * A picture in front of what is drawn, fitted to the format (`overlayBox`):
+ * from the halving of it nearest above the size it shows, as a sprite is, so
+ * at print scale from its own pixels.
+ *
+ * @param {CanvasRenderingContext2D} ctx   the canvas `drawParticles` drew on
+ * @param {object} picture                 the picture's values (params.js)
+ * @param {number} scale                   canvas pixels per picture pixel
+ * @param {ImageBitmap} image
+ */
+export function drawOverlay(ctx, picture, scale, image) {
+  const box = overlayBox(image.width, image.height, picture);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(mipFor(image, box.w * scale), box.x * scale, box.y * scale, box.w * scale, box.h * scale);
+}
