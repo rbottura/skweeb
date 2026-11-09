@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-06_
+_last touched: 2026-11-09_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -170,11 +170,11 @@ sorts them.
 - A particle is a function of its slot and its age, so a loop closes pixel
   for pixel and any frame stands alone. Emitters — a point, a line, a disc,
   a ring, or a vault object's points (`ckt → particles: an emitter`) —
-  forces in closed form, a vortex, an attractor, curl noise, a field from a
-  fractal; depth with a camera; a set's sprites, sized, faded and turned on
-  easing curves (`set → particles: sprites`). Guides show what makes them.
-  Saved, replayed, placed; a loop leaves as a sprite sheet with Aseprite's
-  JSON, and Phaser 3 plays it (`check-sheet-engine`).
+  forces in closed form, a vortex, an attractor, curl noise, a fractal's
+  field; depth with a camera; a set's sprites, sized, faded and turned on
+  easing curves (`set → particles: sprites`), in a palette's colours since
+  2026-11-09. Guides show what makes them. Saved, replayed, placed; a loop
+  leaves as a sprite sheet with Aseprite's JSON, and Phaser 3 plays it.
 
 ### M5 — filter, and the GPU kit under it (`apps/filter/STATUS.md`)
 
