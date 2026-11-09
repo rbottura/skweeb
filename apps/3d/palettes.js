@@ -13,15 +13,9 @@
  */
 
 import { Vault } from '../../core/vault.js';
+import { coloursIn } from '../../core/palettes.js';
 
 const known = new Map();        // a palette's id → its colours; null while they come, or when there are none
-
-/** A palette's colours from its envelope: `#rrggbb` only — none if it has none. */
-const coloursIn = object => {
-  const c = object && object.recipe && Array.isArray(object.recipe.colours) ? object.recipe.colours : [];
-  const kept = c.filter(x => /^#[0-9a-f]{6}$/i.test(String(x)));
-  return kept.length ? kept : null;
-};
 
 /**
  * The colours of the palette `id`, if they have come; asked for the first time, read — `then` called once
