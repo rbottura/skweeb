@@ -87,7 +87,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C9 | the checks' helpers shared | `clean/check-helpers` | S | side job |
 | C10 | the checks several at a time, picked by what a change reaches | `clean/checks` | S | landed 2026-11-04 |
 | C11 | the sliders and boxes: a slider with no grid moving, a count's by one, a box dragged by the hand | `fix/sliders` | S | landed 2026-11-06 |
-| C12 | check-frames' stills: it takes the vault's first three, the garden's sparse flowers since M14a — three with ink, whatever the vault | `fix/frames-stills` | S | side job |
+| C12 | check-frames' stills: it takes the vault's first three, and sparse ones fall under its thresholds — three with ink, whatever the vault | `fix/frames-stills` | S | side job |
 | L4 | the live view blends as a save does | `layers/isolation` | S | side job |
 | L12 | the window stack's bugs | — | — | waits: the author's list of them, "pour plus tard" |
 | P5 | M9's brick 6: the slug from every side | `rig/views` | M | waits: the author's drawings |
