@@ -30,6 +30,11 @@ apps/*/gallery/manifest.json
 core/libs/mediapipe/*
 !core/libs/mediapipe/README.md
 
+# graphify's knowledge graph of the repo (2026-11-11): graph.json alone is 5 MB,
+# and every file in it is made again by `graphify update .` on the machine that
+# keeps it. Its build config (what it leaves out) is in there too.
+graphify-out/
+
 node_modules/
 .DS_Store
 Thumbs.db
