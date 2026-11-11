@@ -16,9 +16,11 @@ sorts them.
   emitter in 3D, its dots placed once — on a vault object's ink, a ball, a
   disc… — each its own size and colour by two seeds, R where and C which
   colour; unlit, a palette's colours to the pixel, or lit in the style's
-  toon bands; an outline round each; saved, replayed, printed. And in
-  particles (2026-11-09): a palette, an overlay fitted to the format,
-  sizes at random between two, an emitter object turned.
+  toon bands; an outline round each; saved, replayed, printed. In time
+  (G2, `forces.js`): a launch, gravity, wind, drag, a vortex, a pull and
+  curl noise move its dots from rest — the state at a time a print takes,
+  the evolution a sequence played once. And in particles (2026-11-09): a
+  palette, an overlay fitted to the format, random sizes, an object turned.
 
 ### 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop, the garden
 
@@ -259,8 +261,8 @@ sorts them.
 
 ## Tests
 
-Sixty-seven files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-11-11). Newest: `3d-cloud` (G1); `garden`,
+Sixty-eight files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-11-11). Newest: `3d-forces` (G2), `3d-cloud` (G1); `garden`,
 the garden's modifiers and growth (M14); `scope` and `reach`; the puppet's four —
 `puppet-eyes` (27), `puppet-mouth` (15), `puppet-sway` (24), `puppet-roles`
 (17): the eyes and the mouth cut and worn, the sway, the parts found;
@@ -342,12 +344,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**G2 — the cloud in time** (`docs/plan.md`, `3d/cloud-forces`): a `forces`
-drawer in the cloud's card and `cloudAt(dots, t, forces)` in a file of its
-own — a vortex, gravity, a pull, drag, noise, each dot integrated from rest —
-tested in Node against gravity's and drag's closed form first
-(`apps/3d/STATUS.md`, *Next*). Waiting on the author: G3's pick, L12's list
-of the stack's bugs; S9i, the players in cluster, is `ready` beside it.
+**S9i — the players in cluster** (`docs/plan.md`, `ready`): the rig's
+puppet and the map's player mounted in the scene as the garden is, each a
+module on `core/mount.js`. Waiting on the author: G3's pick among *G*'s
+list — the graphic system's next parameters — and L12's list of the window
+stack's bugs, window by window.
 
 ## Parked decisions
 

@@ -296,3 +296,17 @@ is every shape's now. Two seeds as the grid's, the colours on their own, so
 C never moves a dot; a dot's draws its own, so more dots move none. A
 stretch moves the dots and leaves each round; the stack works on the dots,
 not on one sphere.
+
+**A cloud in time: a state at a time, its evolution played once; forces
+a cloud each** (G2). Asked how time should go, the author took the first of
+three: a time under the forces, the state then — what a print takes — and
+the evolution from rest to it, a sequence played once; not a loop closed by
+forces made to close it (a vortex of whole turns, a fall that wraps), nor
+there and back. And forces in each cloud's card, as particles' are its
+emitter's, rather than one field for the scene. Each dot is integrated from
+rest in fixed steps, so a frame stands alone, as particles' do from birth;
+states kept on the way make a frame drawn back as quick as one drawn on, and
+exactly the same. Past a thousand instances three hands their matrices on
+once a node frame; the 3D app's renderer had stopped three's loop (S9) and
+moved only its counts on at each draw, so it now moves its node frame on
+too, as that loop would — the comment there said so already.
