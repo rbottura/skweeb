@@ -8,7 +8,7 @@
  * seeded, zero on its lattice, smooth, about −1 to 1, and changing along z.
  */
 
-const { pcg, randAt, noise2, noiseGrad2, curl2, noise3 } = await import('../core/noise.js');
+const { pcg, randAt, noise2, noiseGrad2, curl2, noise3, noiseGrad3, curl3 } = await import('../core/noise.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
