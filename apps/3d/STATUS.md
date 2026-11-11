@@ -1,5 +1,5 @@
 # STATUS — 3d
-_last touched: 2026-11-04_
+_last touched: 2026-11-11_
 
 M10's app (`docs/roadmap.md`, M10): 3D, from primitives up. A model is
 its shapes — each a primitive, its params, a place and a look — with a
@@ -26,6 +26,34 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
    a set by direction, `role: 'character'`; eight later.
 
 ## Works now
+
+- **A cloud of dots** (G1, 2026-11-11, the author's ask for BEC 2027;
+  `cloud.js`, `emitters.js`, `tests/3d-cloud.mjs` 48, `check-3d-cloud` 19).
+  The catalogue's ninth, *cloud of dots*: particles' emitter in 3D, its dots
+  placed once — "on crée une fois les objets dans l'espace". Born on a ball,
+  a sphere's surface, a disc, a ring, a square, a line, or an object of the
+  vault — a dot-set's glyph, where a shape or a still has ink, as particles'
+  object emitter reads it (`core/points.js`), its longer side *its size*,
+  a disc until its points come; a flat emitter faces the eye as the model
+  opens, *depth* deep. Up to 20 000 dots, each by draws of its own: *where
+  they are* (R) its place and its size — between two, *small ones* skewing
+  them — and *colours dealt* (C) its colour alone, so C moves nothing and
+  more dots move none; *scattered* round their place. Its colours BEC's
+  three palettes or one of the vault's, at random or in the palette's order
+  along x, up y, along z or out from the middle, *mixed* across the bands.
+  It starts **unlit** — every shape's *shading* has it now: its colours
+  alone, no light, exactly the palette's to the pixel — circles in space;
+  smooth or flat, the style's toon bands and shadows light its spheres. One
+  InstancedMesh: one dot's sphere, a matrix and a colour each (scene.js
+  `dotsUp`, `placeDots`); a stretch moves the dots apart and leaves each
+  round; the style's outline rings every dot, its hull instanced on their
+  very matrices (look.js); a click picks the cloud, its box hugging its dots
+  (guides.js `boxOfDots`). The shape's stack works on its dots: a twist, a
+  bend, a push by noise along z for a flat one, a mirror and a row — 60 000
+  dots at most — subdivide nothing. The object and a vault palette are read
+  before a save, a replay or a print (`readEmitters`), and are the save's
+  parents; replayed to the pixel, drawn again at scale 2. A's pie: new
+  places, new colours.
 
 - **A model from every side** (P6, 2026-11-06; `sides.js`, `save.js`
   `saveRecipe`, `check-3d-turntable`). Export's own act, *Save it from every
@@ -73,7 +101,7 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   an id, a label, a schema, the geometry its values make. A card's drawers:
   *Form*, the shape's own; *Place*, where it stands, turned about each axis
   in degrees, its size, and a stretch along each of its own axes — a recipe
-  from before them stands as it did; *Look*, its colour, smooth or flat. A
+  from before them stands as it did; *Look*, its colour, smooth, flat or unlit (2026-11-11). A
   shape added from the menu starts beside the last — 0, right, left,
   further right — in the next of eight colours. The cards are core's
   (`core/Cards.js`), the list filter's chain is too: shown or hidden, taken
@@ -214,6 +242,11 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Known
 
+- **A cloud's dots are spheres, at rest**: a circle is an unlit sphere,
+  round from every side; they do not move yet (G2). A dot's segments rise
+  to 32 at most for a print — a dot is small in any picture. One outline for
+  every dot, the style's. An object's points are its ink, evenly: denser
+  where it is darker is not in, as in particles.
 - **A model is a still.** No loop until brick 5; the Format drawer has no
   rate.
 - **A replay asked for a scale draws in one piece**: compose placing a
@@ -239,10 +272,16 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**M10's six bricks are done.** What the roadmap has after them is links,
-each its own: a gamepad stroke turned on a lathe or swept as a tube; type
-extruded from the suite's fonts; a fractal or a dither as a height field;
-OBJ and glTF out and in — none on the board yet, the author's to order.
+**G2 — the cloud in time** (`docs/plan.md`, `3d/cloud-forces`): the dots
+at rest are frame 0; a vortex about an axis, gravity, a pull to a centre,
+drag and curl noise move them, each dot integrated from rest as particles'
+`forces.js` integrates a particle from its birth — every frame its own,
+the model's loop playing it, saved as a `sequence`. First step: a
+`forces` drawer in the cloud's card and `cloudAt(dots, t, forces)` in a
+file of its own, tested in Node against the closed form of gravity and drag.
+
+M10's six bricks are done; its links — a stroke on a lathe, type extruded,
+a height field, OBJ and glTF — wait for the author to order them.
 
 ## Parked
 
