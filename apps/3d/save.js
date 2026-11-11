@@ -14,6 +14,7 @@
  */
 
 import { readPalettes, palettesIn } from './palettes.js';
+import { readEmitters, emittersIn } from './emitters.js';
 import { openModel }     from './frames.js';
 import { loopOf }        from './motion.js';
 import { Vault }         from '../../core/vault.js';
@@ -55,6 +56,7 @@ export async function saveModel({ params, shapes, renderer, tick = 0 }) {
 export async function saveRecipe(recipe, { renderer, tick = 0, parents = [], state = true, title = null, tags = [] }) {
   const shapes = recipe.shapes || [];
   await readPalettes(recipe);                          // drawn in the vault's palettes its shapes name, as they are seen
+  await readEmitters(recipe);                          // its clouds born on the objects they name (emitters.js)
   const frames = openModel(recipe, { renderer });
   try {
     const loop = frames.loop;
@@ -70,7 +72,8 @@ export async function saveRecipe(recipe, { renderer, tick = 0, parents = [], sta
       origin: APP,
       seed: null,
       recipe,
-      parents: [...parents, ...palettesIn(recipe)],   // and the palettes its shapes are drawn in
+      // …and the palettes its shapes are drawn in, the objects its clouds are born on
+      parents: [...new Set([...parents, ...palettesIn(recipe), ...emittersIn(recipe)])],
       render: { blob, ext: 'png', w: shown.width, h: shown.height,
                 ...(loop ? { frames: frames.length, fps: frames.fps, loop: true } : {}) },
       thumb: await thumbFromBlob(blob),
@@ -84,6 +87,7 @@ export async function saveRecipe(recipe, { renderer, tick = 0, parents = [], sta
 export async function downloadPicture({ params, shapes, renderer, tick = 0 }) {
   const recipe = { ...params.values, shapes };
   await readPalettes(recipe);
+  await readEmitters(recipe);
   const frames = openModel(recipe, { renderer });
   try {
     const shown = frames.frame(frames.loop ? tick % frames.length : 0);
@@ -105,6 +109,7 @@ async function entry(name, canvas) {
 export async function downloadFrames({ params, shapes, renderer, onStatus = () => {} }) {
   const recipe = { ...params.values, shapes };
   await readPalettes(recipe);
+  await readEmitters(recipe);
   const frames = openModel(recipe, { renderer });
   try {
     const entries = [];

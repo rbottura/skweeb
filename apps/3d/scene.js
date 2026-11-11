@@ -20,9 +20,10 @@
  */
 
 import {
-  Scene, Mesh, MeshStandardMaterial, DirectionalLight, AmbientLight, Box3, Sphere,
+  Scene, Mesh, InstancedMesh, InstancedBufferAttribute, MeshStandardMaterial, DirectionalLight, AmbientLight, Box3, Sphere,
 } from '../../core/libs/three/three.core.js';
 import { inksOf } from './palettes.js';
+import { pointsOf } from './emitters.js';
 import { SHAPES, shapeSchema, formKeys, finer } from './shapes.js';
 import { MODIFIERS, modify } from './modifiers.js';
 import { dress, bandsOf, outline, outlineOf, inkOf, inkUp, shade, shadowsOf } from './look.js';
@@ -69,8 +70,12 @@ export function unknownIn(recipe) {
   return out;
 }
 
-/** What a shape's geometry is made from — its form's values and its stack: equal, the same mesh kept. */
-const formOf = (id, values, stack) => id + ':' + JSON.stringify([formKeys(id).map(k => values[k]), values.inks || null, stack]);
+/**
+ * What a shape's geometry is made from — its form's values and its stack, and what came from the vault beside
+ * them, a palette's colours and an emitter's points (counted, not written out): equal, the same mesh kept.
+ */
+const formOf = (id, values, stack) => id + ':' + JSON.stringify([formKeys(id).map(k => values[k]), values.inks || null,
+  values.points ? values.points.list.length : 0, stack]);
 
 export class Model {
   constructor() {
@@ -108,30 +113,37 @@ export class Model {
     if (lined && !this.ink) this.ink = inkOf();
     if (this.ink) inkUp(this.ink, recipe);
     shapes.forEach(({ id, values, index, stack }, i) => {
-      // A palette of the vault the shape names, its colours beside its values once read (palettes.js).
+      const shape = SHAPES[id];
+      // A palette of the vault the shape names, its colours beside its values once read (palettes.js); the object
+      // a cloud is born on, its points (emitters.js) — the draw called again when either comes.
       const inks = values.colours ? inksOf(values.colours, this.onInks) : null;
-      const made = { ...finer(id, values, detail), ...(inks ? { inks } : {}) };
+      const points = shape.instanced && values.emitter === 'object' ? pointsOf(values.from, values.glyph, this.onInks) : null;
+      const made = { ...finer(id, values, detail), ...(inks ? { inks } : {}), ...(points ? { points } : {}) };
       const form = formOf(id, made, stack);
       let part = this.parts[i];
+      if (part && part.instanced !== !!shape.instanced) {       // a cloud where a mesh was, or the other way
+        free(this.scene, part);
+        part = null;
+      }
       if (!part) {
-        part = this.parts[i] = { mesh: new Mesh(undefined, new MeshStandardMaterial()), form: '', index };
-        this.scene.add(part.mesh);
+        part = this.parts[i] = { mesh: null, form: '', index, instanced: !!shape.instanced };
+        if (!shape.instanced) this.scene.add(part.mesh = new Mesh(undefined, new MeshStandardMaterial()));
       }
       part.index = index;
       if (part.form !== form) {
-        if (part.mesh.geometry) part.mesh.geometry.dispose();
-        part.mesh.geometry = modify(SHAPES[id].geometry(made), stack);
+        if (shape.instanced) dotsUp(this.scene, part, shape, made, stack);
+        else {
+          if (part.mesh.geometry) part.mesh.geometry.dispose();
+          part.mesh.geometry = modify(shape.geometry(made), stack);
+        }
         part.form = form;
       }
       place(part.mesh, values);
+      if (part.instanced) placeDots(part, values);
       dress(part.mesh, id, values, bands);
       outline(part.mesh, id, lined ? this.ink : null);
     });
-    for (const part of this.parts.splice(shapes.length)) {
-      this.scene.remove(part.mesh);
-      part.mesh.geometry.dispose();
-      part.mesh.material.dispose();
-    }
+    for (const part of this.parts.splice(shapes.length)) free(this.scene, part);
 
     return this.light(recipe || {}, { shadowMap });
   }
@@ -169,10 +181,7 @@ export class Model {
 
   /** Let three free every geometry and material: the GPU's copies go with them. */
   dispose() {
-    for (const part of this.parts) {
-      part.mesh.geometry.dispose();
-      part.mesh.material.dispose();
-    }
+    for (const part of this.parts) free(null, part);
     this.parts = [];
     if (this.ink) this.ink.material.dispose();
     if (this.catcher) {
@@ -187,6 +196,66 @@ function place(mesh, v) {
   mesh.position.set(v.x, v.y, v.z);
   mesh.rotation.set(v.turnX * RAD, v.turnY * RAD, v.turnZ * RAD);
   mesh.scale.set(v.size * v.sx, v.size * v.sy, v.size * v.sz);
+}
+
+/** A part out of the scene, and three told to free what it held — an instanced mesh its matrices and colours too. */
+function free(scene, part) {
+  if (!part.mesh) return;
+  if (scene) scene.remove(part.mesh);
+  part.mesh.geometry.dispose();
+  part.mesh.material.dispose();
+  letGo(part.mesh);
+}
+
+/** A cloud's instances let go of, its outline's with them (look.js `outline`): the matrices they share. */
+function letGo(mesh) {
+  if (!mesh.isInstancedMesh) return;
+  if (mesh.userData.hull) mesh.userData.hull.dispose();
+  mesh.dispose();
+}
+
+/**
+ * A cloud's dots made again (cloud.js): one InstancedMesh, its geometry one dot's, a colour for each — the
+ * material kept from the mesh before it, so the look stays as it was dressed. Its matrices are `placeDots`'.
+ */
+function dotsUp(scene, part, shape, made, stack) {
+  const dots = shape.dots(made, stack);
+  const old = part.mesh, room = Math.max(1, dots.count);
+  const mesh = new InstancedMesh(shape.geometry(made), old ? old.material : new MeshStandardMaterial(), room);
+  mesh.count = dots.count;
+  mesh.visible = dots.count > 0;
+  const colours = new Float32Array(room * 3);
+  colours.set(dots.colours);
+  mesh.instanceColor = new InstancedBufferAttribute(colours, 3);
+  if (old) {
+    scene.remove(old);
+    old.geometry.dispose();
+    letGo(old);
+  }
+  scene.add(mesh);
+  Object.assign(part, { mesh, dots, stretch: '' });
+}
+
+/**
+ * Each dot's matrix: where it is in the cloud, its size — divided by the cloud's stretch, which the mesh's own
+ * scale multiplies back, so a stretch moves the dots apart and a dot stays round (cloud.js). Made again only when
+ * the dots or the stretch change.
+ */
+function placeDots(part, v) {
+  const key = `${v.sx},${v.sy},${v.sz}`;
+  if (part.stretch === key) return;
+  part.stretch = key;
+  const { mesh, dots } = part, a = mesh.instanceMatrix.array;
+  const kx = 1 / (v.sx || 1), ky = 1 / (v.sy || 1), kz = 1 / (v.sz || 1);
+  for (let k = 0; k < dots.count; k++) {
+    const r = dots.radii[k], o = k * 16;
+    a.fill(0, o, o + 16);
+    a[o] = r * kx; a[o + 5] = r * ky; a[o + 10] = r * kz; a[o + 15] = 1;
+    a[o + 12] = dots.centres[k * 3]; a[o + 13] = dots.centres[k * 3 + 1]; a[o + 14] = dots.centres[k * 3 + 2];
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  mesh.boundingBox = null;
+  mesh.boundingSphere = null;
 }
 
 /**
