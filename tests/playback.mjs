@@ -139,6 +139,9 @@ const make = (opts = {}) => {
   advance(1000);
   ok('a one-shot stops on the last frame', shown, [9]);
   ok('and pauses itself', head.playing, false);
+  shown.length = 0;
+  head.play();            // played from its last frame (2026-11-11, a cloud's evolution)
+  ok('played again from there, it starts over from its first', [shown[0], head.playing], [0, true]);
 }
 
 // -- Transport ---------------------------------------------------------------
