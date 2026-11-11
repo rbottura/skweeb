@@ -310,3 +310,14 @@ exactly the same. Past a thousand instances three hands their matrices on
 once a node frame; the 3D app's renderer had stopped three's loop (S9) and
 moved only its counts on at each draw, so it now moves its node frame on
 too, as that loop would — the comment there said so already.
+
+**The overlay composed, and no more for now** (G3). Offered a list, the
+author took one: "overlay composable" — and of the rest, "les changements
+de couleurs et de taille dans le temps n'est pas souhaité pour ce système,
+c'est à peu près tout pour l'instant une fois l'overlay en place". So its
+composition is rows of the Format drawer, beside the overlay, as the
+overlay itself was put there: a place in front or behind, a fit, a size, a
+move, a turn, an opacity, a blend by the stack's names — still one picture,
+the gabarit's layers M13c's. Dragged on the preview by a press anywhere
+in it, since its middle is where the fields' centre starts, and a handle
+alone there would always lose.

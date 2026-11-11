@@ -87,7 +87,9 @@ to draw, never code that arrives with it.
    all in one folder, `bec_2025`, the author's word of 2026-11-06: "un
    groupe ou dossier de ce nom avec tous les éléments concernés". The
    suite is to try BEC 2027's first renders: "tester des rendus graphiques
-   de l'édition bec_2027".
+   de l'édition bec_2027". Its graphic system since: track G of
+   `docs/plan.md` (2026-11-11) — particles in a palette under an overlay
+   composed, and a cloud of dots in the 3D app, at rest or in time.
 3. **M13c — the gabarit, a type** · `ui/gabarit` · M. S8's gabarit — a
    format and its guides — and its layers, under the render and over it,
    BEC's titles and infos; chosen with the format in any app, laid on the
