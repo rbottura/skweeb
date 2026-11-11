@@ -15,9 +15,14 @@
  * magnet — to the picture's edges, its centre, the guides; Ctrl held, not —
  * and the one last pressed is the selection: F puts it at the centre, the
  * emitter until another is pressed.
+ *
+ * And the overlay (G3, 2026-11-11): a press on it, on no handle, drags it
+ * by its middle through the picture panel's `overlayX` and `overlayY`, the
+ * magnet pulling its middle; F places it with its own edge or corner on the
+ * picture's.
  */
 
-import { handlesOf } from './guides.js';
+import { handlesOf, overlayOn, onOverlay } from './guides.js';
 import { pictureSize } from './draw.js';
 import { snapPoint, endSnap, select, placeable } from '../../core/shell/guides.js';
 
@@ -32,8 +37,9 @@ const REACH = 12;
  * @param {object} opts.picture           the picture's Params
  * @param {() => boolean} opts.guides     whether the guides, and so the handles, are shown
  * @param {() => void} [opts.chose]       a handle was pressed: the selection changed, to be drawn
+ * @param {() => ?ImageBitmap} [opts.overlay]   the overlay's picture, once it has come
  */
-export function wirePointer({ canvas, view, emit, picture, guides, chose = () => {} }) {
+export function wirePointer({ canvas, view, emit, picture, guides, chose = () => {}, overlay = () => null }) {
   let drag = null;
 
   /** A pointer's place in picture pixels from the centre, and CSS pixels per picture pixel. */
@@ -55,10 +61,20 @@ export function wirePointer({ canvas, view, emit, picture, guides, chose = () =>
     return best;
   };
 
+  /** The overlay under a point, away from every handle. */
+  const onIt = pt => guides() && onOverlay(overlayOn(overlay(), picture.values), pt.x, pt.y);
+
   canvas.addEventListener('pointerdown', ev => {
     if (ev.button !== 0) return;
     const pt = at(ev);
     const h = under(pt);
+    if (!h && onIt(pt)) {
+      select('overlay');
+      chose();
+      drag = { overlay: true, from: pt, x: picture.get('overlayX'), y: picture.get('overlayY') };
+      canvas.setPointerCapture(ev.pointerId);
+      return;
+    }
     if (!h) return;
     select(h.id === 'emitter' ? 'emitter' : 'field');
     chose();
@@ -69,7 +85,14 @@ export function wirePointer({ canvas, view, emit, picture, guides, chose = () =>
 
   canvas.addEventListener('pointermove', ev => {
     const pt = at(ev);
-    if (!drag) { canvas.classList.toggle('can-move', !!under(pt)); return; }
+    if (!drag) { canvas.classList.toggle('can-move', !!under(pt) || onIt(pt)); return; }
+    if (drag.overlay) {
+      // Its middle, pulled by the magnet — in the picture's pixels from its top left.
+      const { width, height } = pictureSize(picture.values);
+      const [sx, sy] = snapPoint(drag.x + (pt.x - drag.from.x) + width / 2, drag.y + (pt.y - drag.from.y) + height / 2, ev.ctrlKey || ev.metaKey);
+      picture.set({ overlayX: Math.round(sx - width / 2), overlayY: Math.round(sy - height / 2) });
+      return;
+    }
     if (drag.reach) {
       emit.set('falloff', Math.max(1, Math.round(Math.hypot(pt.x - emit.get('fx'), pt.y - emit.get('fy')))));
       return;
@@ -95,5 +118,14 @@ export function wirePointer({ canvas, view, emit, picture, guides, chose = () =>
   placeable([
     { id: 'emitter', label: 'the emitter', put: put('x', 'y', true) },
     { id: 'field', label: "the fields' centre", put: put('fx', 'fy', false) },
+    // The overlay with its own edge or corner on the picture's: its middle where the anchor says, moved back by
+    // as much of its box — so at the top it stands under the top, not half over it.
+    { id: 'overlay', label: 'the overlay', put: (x, y) => {
+      const o = overlayOn(overlay(), picture.values);
+      if (!o) return;
+      const { width, height } = pictureSize(picture.values);
+      const fx = x / width - 0.5, fy = y / height - 0.5;
+      picture.set({ overlayX: Math.round(x - width / 2 - fx * o.w), overlayY: Math.round(y - height / 2 - fy * o.h) });
+    } },
   ]);
 }

@@ -19,8 +19,8 @@ sorts them.
   toon bands; an outline round each; saved, replayed, printed. In time
   (G2, `forces.js`): a launch, gravity, wind, drag, a vortex, a pull and
   curl noise move its dots from rest — the state at a time a print takes,
-  the evolution a sequence played once. And in particles (2026-11-09): a
-  palette, an overlay fitted to the format, random sizes, an object turned.
+  the evolution a sequence played once. In particles: a palette, an overlay
+  composed (G3) — in front or behind, sized, moved, turned, blended, dragged.
 
 ### 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop, the garden
 
@@ -269,11 +269,11 @@ the garden's modifiers and growth (M14); `scope` and `reach`; the puppet's four 
 before them M11's — `live`, `stack`, `place`, `smart` — the print's —
 `windowed`, `stage-still`, `png` — and the 3D app's seven.
 
-Thirty-nine browser checks, each a command in `CLAUDE.md`, run several at a
+Forty browser checks, each a command in `CLAUDE.md`, run several at a
 time by `scripts/checks.mjs`: each its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-3d-cloud` (G1), `check-garden` (M14a),
+throws or its console is not quiet. Newest: `check-particles-overlay` (G3), `check-3d-cloud` (G1, G2),
 `check-cluster-vault` (S9g), `check-cluster` and `check-mount` (S9). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
@@ -346,9 +346,9 @@ compares two pages' canvases measures, never demands the pixel.
 
 **S9i — the players in cluster** (`docs/plan.md`, `ready`): the rig's
 puppet and the map's player mounted in the scene as the garden is, each a
-module on `core/mount.js`. Waiting on the author: G3's pick among *G*'s
-list — the graphic system's next parameters — and L12's list of the window
-stack's bugs, window by window.
+module on `core/mount.js`. Track G is done for now, the author's word;
+waiting on the author: L12's list of the window stack's bugs, window by
+window.
 
 ## Parked decisions
 

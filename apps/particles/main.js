@@ -24,7 +24,7 @@
 
 import { emitParams, pictureParams, toModel, framesOf, EMIT_GROUPS, PICTURE_GROUPS } from './params.js';
 import { prepare, particlesAt } from './model.js';
-import { drawParticles, drawOverlay, pictureSize } from './draw.js';
+import { drawPicture, pictureSize } from './draw.js';
 import { loadSprites }  from '../../core/sprites.js';
 import { loadPalette }  from '../../core/palettes.js';
 import { loadPoints }   from '../../core/points.js';
@@ -146,7 +146,8 @@ async function boot(mine) {
   const sized = new ResizeObserver(() => draw());
   sized.observe(canvas.parentElement);
   mine.hold(() => sized.disconnect());
-  wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn, chose: () => draw() });
+  wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn, chose: () => draw(),
+               overlay: () => given.overlay && given.overlay.images[0] });
   guidesBtn.addEventListener('click', () => showGuides(!guidesOn));
   showGuides(guidesOn);
   // The left hand (core/shell/bindings.js): Z shows the guides — G is the ground's since S5b — and A picks the emitter's shape.
@@ -345,9 +346,7 @@ function paint() {
   if (canvas.height !== h) canvas.height = h;
 
   shown = particlesAt(model, clock.tick / p.fps);
-  drawParticles(ctx, shown, p, view, sprites, given.palette && given.palette.colours);
-  const front = given.overlay && given.overlay.images[0];
-  if (front) drawOverlay(ctx, p, view, front);
+  drawPicture(ctx, shown, p, view, sprites, given.palette && given.palette.colours, given.overlay && given.overlay.images[0]);
   shownView = view;
   if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), { ...given, selected: selected() });
 

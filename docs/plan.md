@@ -59,7 +59,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | — | particles at random sizes between two; an emitter object turned | `particles/size-angle` | S | landed 2026-11-09 |
 | G1 | a cloud of dots in the 3D app: particles' emitter, its dots placed once — where (R) and their colours (C) seeds, a palette, sizes between two, unlit | `3d/cloud` | M | landed 2026-11-11 |
 | G2 | the cloud in time: a vortex, gravity, a pull, drag and noise on its dots from rest, every frame its own, saved as a sequence | `3d/cloud-forces` | M | landed 2026-11-11 |
-| G3 | the graphic system's other parameters: particles' and the cloud's, the author's pick of *G*'s list | — | S | waits: which first, the author's |
+| G3 | the overlay composed: in front or behind, fitted, sized, moved, turned, see-through, blended, dragged | `particles/overlay-compose` | S | landed 2026-11-11 |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
@@ -143,7 +143,6 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
-- **The graphic system's parameters** (G3): which of *G*'s list first.
 - **The window stack's bugs** (L12): "fixer le système de stack
   inter-app" (2026-11-10) — what was seen, window by window.
 - **The motion, case by case** (S9e): its first pass is the proposal as
@@ -285,10 +284,10 @@ sizes the day before (V1b and the two rows after it).
 **G2 — the cloud in time** · `3d/cloud-forces` · landed 2026-11-11 (`apps/3d/forces.js`): the
 author's picks, a state at a time and its evolution played once, forces a cloud each.
 
-**G3 — more parameters** · waits: which first. Particles' colour over life;
-the overlay's place, opacity and blend; an emitter denser where a picture is
-darker; a cloud's dots growing or turning colour as they go, a set's
-sprites, or rings.
+**G3 — the overlay composed** · `particles/overlay-compose` · landed 2026-11-11: the
+author's pick of the list, and "c'est à peu près tout pour l'instant une fois l'overlay
+en place"; colour and size in time not for this system. Left on the list: an
+emitter denser where a picture is darker; a cloud's dots a set's sprites, or rings.
 
 ## L — layers and smart objects
 

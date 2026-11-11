@@ -1,5 +1,5 @@
 # STATUS — particles
-_last touched: 2026-11-09_
+_last touched: 2026-11-11_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
 and *Done when* are in `docs/roadmap-done.md`, M6 — a torch loop that closes
@@ -26,6 +26,20 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **The overlay composed** (G3, 2026-11-11, the author's pick: "overlay
+  composable"; `draw.js` `overlayBox`, `drawOverlay`, `drawPicture`;
+  `guides.js` `overlayOn`; `check-particles-overlay` 16). With an overlay,
+  the Format drawer's rows compose it: *where* — in front of the
+  particles, or behind them, over the ground — *fitted* whole or filling
+  the format, what spills over cut; its *size*, a share of that; *from
+  centre*, x and y in picture pixels; *turned*, clockwise round its middle;
+  its *opacity*; its *blend*, CSS's names as the stack's (`core/blend.js`).
+  At their defaults it stands as it did, to the pixel. With the guides on,
+  its box is drawn dashed and turned, a handle at its middle: a press in it,
+  away from every handle, drags it — its rows the drag's, the magnet on
+  its middle — and F, pressed last, puts it with its own edge or corner on
+  the picture's. One path draws a frame (`drawPicture`): the preview, a
+  save, a replay and a print in tiles, turned and blended in each.
 - **Each particle its own size, and an emitter object turned** (2026-11-09,
   the author's ask; `draw.js` `bornSize`, `model.js` `turned`). The Look's
   *random size*: on, *size from, to* in place of *size*, each particle
@@ -270,8 +284,8 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   its picture was taken at.
 - A value changed keeps the frame on screen; a loop made shorter than it
   lands on its last.
-- The overlay is one picture, fitted whole: no offset, no opacity, no blend,
-  and not several — the gabarit's layers (M13c, `docs/bec.md`) are.
+- The overlay is one picture, composed (G3): not several — the gabarit's
+  layers (M13c, `docs/bec.md`) are. Its drag moves it, never sizes or turns it.
 - A palette's colour is a particle's for its whole life: colour over life
   is not in yet. With no palette, a set's colours are its own.
 - A sprite's size is its width; its height follows its own shape, so a
@@ -297,3 +311,5 @@ sprites follow a smart object; what is left here waits under its *Later*:
 
 - **Colour over life** — a palette run along a particle's life, on a
   curve, for dots and sprites: `dye.js` paints them in any of its colours.
+  Not for BEC 2027's system: "les changements de couleurs et de taille dans
+  le temps n'est pas souhaité pour ce système" (the author, 2026-11-11).

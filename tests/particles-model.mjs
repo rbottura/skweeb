@@ -280,6 +280,17 @@ ok('on a square: whole, centred, nothing cut', near(overlayBox(3508, 4961, { wid
 ok('on a wide format, whole again', near(overlayBox(100, 100, { width: 1920, height: 1080 })), [420, 0, 1080, 1080]);
 ok('smaller than the format, it grows to it', near(overlayBox(10, 20, { width: 100, height: 200 })), [0, 0, 100, 200]);
 ok('on the frame, the bleed outside it', near(overlayBox(100, 100, { width: 1000, height: 1000, bleed: 30 })), [30, 30, 1000, 1000]);
+// Composed (G3, 2026-11-11): filling the format, at a size of that, moved from the centre — turned by drawOverlay.
+const wide = { width: 1920, height: 1080 };
+ok('filling the format: its longer way cut, centred', near(overlayBox(100, 100, { ...wide, overlayFit: 'fill' })), [0, -420, 1920, 1920]);
+ok('at half its size, whole, still centred', near(overlayBox(100, 100, { ...wide, overlayScale: 0.5 })), [690, 270, 540, 540]);
+ok('…moved from the centre, right and up', near(overlayBox(100, 100, { ...wide, overlayScale: 0.5, overlayX: 100, overlayY: -50 })), [790, 220, 540, 540]);
+const { overlayOn, onOverlay } = await import('../apps/particles/guides.js');
+const shown = overlayOn({ width: 200, height: 100 }, { ...wide, overlay: 'x', overlayScale: 400 / 1920, overlayX: 30, overlayAngle: 90 });
+ok('on the preview: its middle from the centre, its box, its turn', [Math.round(shown.x), Math.round(shown.y), Math.round(shown.w), +shown.turn.toFixed(4)],
+   [30, 0, 400, +(Math.PI / 2).toFixed(4)]);
+ok('…a press on it found turned with it: along its short side now, not its long one', [onOverlay(shown, 30, 180), onOverlay(shown, 180, 0)], [true, false]);
+ok('…and none without an overlay', [overlayOn({ width: 1, height: 1 }, { ...wide, overlay: null }), onOverlay(null, 0, 0)], [null, false]);
 
 // -- Falloff: a vortex and a pull with a reach ----------------------------------
 

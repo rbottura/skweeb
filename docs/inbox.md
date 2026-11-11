@@ -44,8 +44,8 @@ day before that became bricks done went with them.
   track G on the board of `docs/plan.md`: G1, the cloud of dots, landed
   2026-11-11 (`apps/3d/STATUS.md`), and G2 its forces in time, the
   same day — the author's picks, a state at a time and its evolution played
-  once, forces a cloud each; G3 more
-  parameters, the author's pick; the stack's bugs still L12, waiting on
+  once, forces a cloud each; G3, the overlay composed, the author's pick —
+  colour and size in time not for this system; the stack's bugs still L12, waiting on
   what was seen; `docs/decisions.md`, 2026-11-11.
 - **2026-11-09 — the window stack's bugs.** "nous devrions fixer des bugs du
   mode de stack de fenetre mais ce sera pour plus tard". → L12 on the board,
