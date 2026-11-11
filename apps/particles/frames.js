@@ -17,7 +17,7 @@
 
 import { prepare, particlesAt } from './model.js';
 import { toModel, framesOf }    from './params.js';
-import { drawParticles, drawOverlay, pictureSize } from './draw.js';
+import { drawPicture, pictureSize } from './draw.js';
 import { surface }              from '../../core/surface.js';
 import { windowed, canvasFor }  from '../../core/windowed.js';
 
@@ -45,11 +45,8 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
   let canvas = null, tile = null;      // the whole frame's when asked for; a print's windows' (core/print.js)
   const still = Number.isInteger(recipe.tick);
 
-  /** One frame onto a context: the particles, and what stands in front of them. */
-  const paint = (ctx, tick) => {
-    drawParticles(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites, inks);
-    if (front) drawOverlay(ctx, picture, px, front);
-  };
+  /** One frame onto a context: the particles, and the overlay in front of them or behind. */
+  const paint = (ctx, tick) => drawPicture(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites, inks, front);
 
   return {
     length: still ? 1 : framesOf(emit, picture, model.longest),

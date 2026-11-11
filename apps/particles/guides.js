@@ -20,21 +20,47 @@
  *                            the centre's handle — there with no field on,
  *                            faint, so it can be placed first
  *   the pull                 gravity and wind, one arrow in the corner
+ *   the overlay              green: its box, dashed, turned as it is, a
+ *                            handle at its middle — pressed anywhere in it,
+ *                            away from another handle, it is dragged (G3)
  */
 
 import { prepare, turned } from './model.js';
 import { toModel } from './params.js';
 import { fieldOf } from './forces.js';
-import { pictureSize } from './draw.js';
+import { pictureSize, overlayBox } from './draw.js';
 
 const DEG = Math.PI / 180;
 const EMITTER = '#1f5fd6';
 const FIELD = '#c81e6a';
 const QUIET = '#6b6b6b';
+const OVERLAY = '#1b998b';
 const HALO = 'rgba(255, 253, 246, 0.9)';
 
 /** Whether any field pulls: then there is a centre worth a handle. */
 export const hasField = e => !!(e.vortex || e.attract || e.noise || (e.fieldFrom && e.fieldPull));
+
+/**
+ * The overlay as the preview has it (draw.js `overlayBox`): its middle, from the picture's centre, its
+ * size, its turn — or null with none, or while its picture comes.
+ *
+ * @param {?{width: number, height: number}} image
+ * @returns {?{x: number, y: number, w: number, h: number, turn: number}}   picture pixels; `turn` radians, clockwise
+ */
+export function overlayOn(image, p) {
+  if (!image || !p.overlay) return null;
+  const { width, height } = pictureSize(p);
+  const b = overlayBox(image.width, image.height, p);
+  return { x: b.x + b.w / 2 - width / 2, y: b.y + b.h / 2 - height / 2, w: b.w, h: b.h, turn: (p.overlayAngle || 0) * DEG };
+}
+
+/** Whether a point, in picture pixels from its centre, is on the overlay: turned back into its own box. */
+export function onOverlay(o, x, y) {
+  if (!o) return false;
+  const c = Math.cos(-o.turn), s = Math.sin(-o.turn), dx = x - o.x, dy = y - o.y;
+  const u = dx * c - dy * s, v = dx * s + dy * c;
+  return Math.abs(u) <= o.w / 2 && Math.abs(v) <= o.h / 2;
+}
 
 /** How far the camera scales something at depth `z` (draw.js `drawOrder`); 0 behind it. */
 const depthScale = (z, focal) => {
@@ -125,10 +151,10 @@ function ring(ctx, x, y, colour) {
  * @param {number} [dpp=1]  canvas pixels per CSS pixel: the guides are sized
  *                          on screen, not on the canvas, so they read the same
  *                          on any display and at any preview size
- * @param {object} [given]  what the emitter names, loaded: `points`, `field`;
+ * @param {object} [given]  what the emitter names, loaded: `points`, `field`; the picture, its `overlay`;
  *                          and `selected`, the handle F places, ringed
  */
-export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = null, selected = null } = {}) {
+export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = null, overlay = null, selected = null } = {}) {
   const { width, height } = pictureSize(p);
   view /= dpp;                                  // from here on, CSS pixels
   const ox = (width / 2) * view, oy = (height / 2) * view;
@@ -142,10 +168,27 @@ export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = nu
   ctx.moveTo(ox, oy - 8); ctx.lineTo(ox, oy + 8);
   stroke(ctx, QUIET, 1);
 
+  drawOverlayBox(ctx, overlayOn(overlay && overlay.images && overlay.images[0], p), view, ox, oy, selected === 'overlay');
   drawField(ctx, e, p, view, ox, oy, width, height, field, selected === 'field');
   drawEmitter(ctx, e, p, view, ox, oy, points, selected === 'emitter');
   drawPull(ctx, e);
   ctx.restore();
+}
+
+/** The overlay's box, dashed and turned as it is, its name at a corner and a handle at its middle. */
+function drawOverlayBox(ctx, o, view, ox, oy, chosen) {
+  if (!o) return;
+  const x = ox + o.x * view, y = oy + o.y * view, hw = (o.w / 2) * view, hh = (o.h / 2) * view;
+  const c = Math.cos(o.turn), s = Math.sin(o.turn);
+  const corner = (u, v) => [x + u * c - v * s, y + u * s + v * c];
+  ctx.beginPath();
+  [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]].forEach(([u, v], i) => (i ? ctx.lineTo(...corner(u, v)) : ctx.moveTo(...corner(u, v))));
+  ctx.closePath();
+  stroke(ctx, OVERLAY, 1.5, [8, 5]);
+  const [lx, ly] = corner(-hw, -hh);
+  label(ctx, 'overlay', lx + 4, ly + 14, OVERLAY);
+  handle(ctx, x, y, OVERLAY, true);
+  if (chosen) ring(ctx, x, y, OVERLAY);
 }
 
 /** At most this many of an object's points are drawn: enough to see its shape. */

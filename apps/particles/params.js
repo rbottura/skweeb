@@ -20,6 +20,7 @@
 import { defineParams } from '../../core/params.js';
 import { frameParams, DERIVED } from '../../core/frame.js';
 import { easeParam } from '../../core/easing.js';
+import { BLENDS, BLEND_LABELS } from '../../core/blend.js';
 import { DEFAULTS } from './model.js';
 
 /** The emitter panel's drawers. */
@@ -43,6 +44,7 @@ export const PICTURE_GROUPS = {
 
 const D = DEFAULTS;
 const STREAM = { mode: 'stream' };
+const OVERLAID = { overlay: { not: null } };
 const BURST = { mode: 'burst' };
 
 /** `slider: true` keeps a slider under its box, as the bench kept these six (S2, 2026-11-03). */
@@ -147,6 +149,26 @@ export function pictureParams() {
      * composition. Where it is see-through the render shows.
      */
     overlay: { type: 'object', accepts: ['still', 'shape'], label: 'overlay', group: 'format' },
+    /**
+     * The overlay composed (G3, 2026-11-11, the author's pick: "overlay composable"; draw.js `overlayBox`,
+     * `drawOverlay`): in front of the particles or behind them, over the ground; whole or filling the format,
+     * at a size of that, moved from the centre, turned, at an opacity and a blend — CSS's names, as the stack's.
+     * At their defaults it stands as it did, to the pixel. Dragged on the preview too (pointer.js).
+     */
+    overlayAt:      { type: 'enum', options: ['front', 'behind'], default: 'front', display: 'chips',
+                      labels: { front: 'in front', behind: 'behind the particles' }, label: 'overlay, where', group: 'format', when: OVERLAID },
+    overlayFit:     { type: 'enum', options: ['whole', 'fill'], default: 'whole', display: 'chips',
+                      labels: { whole: 'whole', fill: 'filling it' }, label: 'overlay, fitted', group: 'format', when: OVERLAID },
+    overlayScale:   { type: 'range', min: 0.05, max: 10, step: 'any', log: true, default: 1, label: 'overlay size', unit: '×',
+                      group: 'format', when: OVERLAID },
+    overlayX:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'overlay x', group: 'format',
+                      pair: 'overlayY', pairLabel: 'overlay, from centre', axis: 'x', when: OVERLAID },
+    overlayY:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'overlay y', group: 'format', axis: 'y', when: OVERLAID },
+    overlayAngle:   { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'overlay turned', unit: '°',
+                      group: 'format', when: OVERLAID },
+    overlayOpacity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1, label: 'overlay opacity', group: 'format', when: OVERLAID },
+    overlayBlend:   { type: 'enum', options: BLENDS, labels: BLEND_LABELS, default: 'normal', label: 'overlay blend',
+                      group: 'format', when: OVERLAID },
     fps:    { type: 'int', min: 1, max: 60, default: 30, label: 'fps', group: 'player' },
     /**
      * A vault set whose members are the particles' sprites, one each by its
