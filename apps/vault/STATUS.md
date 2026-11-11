@@ -45,9 +45,11 @@ app that is open when nothing else is (`docs/scene.md`, *Planned*).
   palette's detail, kept as a new palette, the first its parent. Its origin
   is the vault app, so a palette reopens here (`rebuild.js`) — the panel's
   every link asked an app that had none, a 404 in every console.
-- **It makes nothing**: no recipe, no `rebuild.js`, no S; its title bar has
-  no Save and no Export (`Bar` with `acts: false`). With no vault it opens
-  and says so (rule 7).
+- **It makes nothing of its own**: no recipe of its own and no S; its title
+  bar has no Save and no Export (`Bar` with `acts: false`). What it makes by
+  hand is made of objects — a palette — and its `rebuild.js` answers only
+  for that: a palette reopens here and is never drawn again at a scale, its
+  picture being itself. With no vault it opens and says so (rule 7).
 - **A module** (`core/mount.js`): `mount(host)` and `unmount()`, its page
   mounting it on itself — `check-mount`; the app itself — `check-vault`.
 - **In cluster** (S9c, 2026-11-05): the scene's vault is beside the viewer,

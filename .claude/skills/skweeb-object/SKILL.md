@@ -23,13 +23,20 @@ const object = await Vault.save({          // the envelope — or null: no serve
   parents: params.consumedObjectIds(),     // automatic, from `type: 'object'` params
   render:  { blob, ext: 'png', w, h, frames, fps, loop: true },
   thumb:   await thumbFromBlob(blob),      // core/thumb.js — the server makes none
+  state:   true,                           // the app's S: the next state of the page's smart object (S6b)
 });
 ```
 
 The server writes the folder, checks the bytes, hashes the render, dedups —
 the same bytes and recipe return the old object, as `vault:duplicate` — and
 rewrites `index.json`, which every open page hears as `vault:changed`, from
-any machine on the vault. Four things are easy to get wrong:
+any machine on the vault. Since S6b an app's S is `state: true`: its first
+makes a `skw` bound to the object, every one after is that smart object's
+next state, and the envelope it returns is the `skw` — a check reads the
+object it binds with `inner()` (`scripts/check-kit.mjs`). A frozen act — a
+frame as a still, a look, a side of a model — is `state: false`, an object
+of its own whose `parents` name the state it came from, `skw_…@v3`
+(`core/vault.js`). Four things are easy to get wrong:
 
 - **`seed` is the promise of a replay.** Whatever is random draws from
   `makeRng(seed)` (`core/rng.js`); a save with randomness and no seed cannot
@@ -101,12 +108,17 @@ answer is almost always a new type, a set role, or a key inside `recipe`.
   `published`. The client has no such call yet. When it lands, compress
   before committing — `oxipng -o4 --strip safe` — because the gallery is in
   git forever and its ancestor reached 33 MB for 41 images.
-- **Smart objects.** `skw` — the one mutable type, versioned, the one that
-  carries `refs` — is specified in *Smart objects* and not built: the server
-  writes no versions. Before building anything that places one, read that
-  section whole — placement, pinning, overrides, flattening and cycle
-  refusal are specified there, and none of them should be reinvented. Two
-  things to hold from the start: editing appends a version and never
+- **Smart objects, the rest of them.** `skw` — the one mutable type,
+  versioned, the one that carries `refs` — is built since M11 (2026-10-07;
+  `core/smart.js`, `server/versions.js`): an app's S saves its next state, a
+  tree by their parents (S6b); a placement pins a state, `id@vN` (L1); a
+  placement flattened, no cycle, edit in place, and a smart object followed
+  wherever it is held are in (L2, L3, L6, L11). Specified and not built:
+  per-placement `overrides` (L8 in `docs/plan.md`) and a `standalone` skw,
+  one that carries its own module. Before building anything that places
+  one, read `docs/smart-objects.md` whole — placement, pinning, overrides,
+  flattening and cycle refusal are specified there, and none of them should
+  be reinvented. Two things to hold: editing appends a version and never
   overwrites one, since something may be pinned to it; and `refs` is not
   `parents` — a live dependency put in `parents` fails silently, months
   later, as a render that never updates. A `standalone` skw carries code: it
