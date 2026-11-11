@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-09_
+_last touched: 2026-11-11_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -10,7 +10,17 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop, the garden
+### Newest — 2026-11-09 to -11: BEC 2027's graphic system (track G, `docs/plan.md`)
+
+- **A cloud of dots in the 3D app** (G1, `apps/3d/cloud.js`): particles'
+  emitter in 3D, its dots placed once — on a vault object's ink, a ball, a
+  disc… — each its own size and colour by two seeds, R where and C which
+  colour; unlit, a palette's colours to the pixel, or lit in the style's
+  toon bands; an outline round each; saved, replayed, printed. And in
+  particles (2026-11-09): a palette, an overlay fitted to the format,
+  sizes at random between two, an emitter object turned.
+
+### 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop, the garden
 
 - **The garden** (M14a, `apps/map/garden/`, `apps/map/STATUS.md`, *The
   garden*): a map gardened in, alone or in cluster. The gardener walks it as
@@ -72,26 +82,18 @@ sorts them.
   opened `@v3` saving a branch; compose pins a project placed, 0 to follow;
   Ctrl Z and Ctrl Y over the session's steps; a row's value in every state,
   by Alt click on its mark — `check-states`, `check-steps`, `check-smart`.
-- **The graph** (S7a): H opens the states over the page, see-through, panned
-  and zoomed, v1 at the bottom and a branch in a column of its own; hovered,
-  the page draws a state, clicked it goes back to it, its next save a branch;
-  two Shift clicked are compared and merged — taken where only the arriving
-  one changed, a conflict picked row by row — its save a state with both
-  parents (S7b); A over a state, the apps it reaches, each on that state
-  (S7c; `core/shell/graph.js`, `merge.js`, `check-graph`).
+- **The graph** (S7): H, the states over the page — hovered, a state drawn;
+  clicked, gone back to, its next save a branch; two Shift clicked compared
+  and merged, a conflict picked row by row (S7b); A over a state, the apps
+  it reaches (S7c; `core/shell/graph.js`, `merge.js`, `check-graph`).
 - The bench stays a page apart: https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm.
 
-### 2026-10-21 and -22
+### 2026-10-21 and -22 — and a branch for each work item since (`docs/workflow.md`)
 
 - **The rig's puppet, worn in OBS** (`apps/rig/STATUS.md`, *The puppet*):
-  the author's eyes from the camera at the eyestalks' tips, the mouth on
-  the face, the body swaying with the head, the rig's bones over it as
-  guides; kept as a smart object that a page in OBS follows; and scripts
-  that keep the avatar in sight on the screen OBS records
-  (`docs/guides/obs.md`, read in the page by `core/Guide.js`).
-- **A plan, and a branch for each item** (`docs/plan.md`,
-  `docs/workflow.md`): the cycle's work items on one board, in order, each
-  a branch landed after a gate; the puppet the first, `rig/puppet`.
+  the author's eyes at the eyestalks' tips, the mouth on the face, the body
+  swaying with the head; a smart object a page in OBS follows, kept in sight
+  on the screen OBS records (`docs/guides/obs.md`, read by `core/Guide.js`).
 
 ### M11 — the live stack and smart objects (done 2026-10-07; `docs/smart-objects.md`)
 
@@ -107,9 +109,8 @@ sorts them.
   by its app through its own save, the window bound; saved again, a
   version, and every page holding it drawn again (`vault:updated`) — and
   every object field holding it, in any app (L11, 2026-11-06).
-- **The stack saved as a page** (`core/stackSave.js`): every window a smart
-  object, the page compose's, whose placements blend. Pins in compose and
-  the stack (L1), no page holding itself (L3), *Flatten* (L2), *Edit ↗* (L6).
+- **The stack saved as a page** (`core/stackSave.js`), every window a smart
+  object; pins (L1), no cycle (L3), *Flatten* (L2), *Edit ↗* (L6).
 
 ### M10 — 3D (`apps/3d/STATUS.md`, its six bricks done 2026-11-06)
 
@@ -119,7 +120,8 @@ sorts them.
   replayed, drawn again at scale 2, placed. Picked by a click, moved by
   three's handles; a stack of modifiers per shape; a style — toon bands, an
   outline, shadows. Brick 5 (`motion.js`): a turntable (P1), a shape swung
-  (P2), saved as a `sequence`; brick 6, its sides a character (P6).
+  (P2), saved as a `sequence`; brick 6, its sides a character (P6). Since,
+  a cloud of dots (G1, under *Newest*).
 
 ### The print, in every app (2026-10-06; `docs/core-export.md`)
 
@@ -205,12 +207,11 @@ sorts them.
 
 ### The vault
 
-- **One vault, on the laptop that travels** (the author's setup,
-  2026-09-28): it serves `~/skweeb-vault` behind `tailscale serve`; the
-  pages on the work PC and the home tower save into it over the tailnet,
-  and a save shows on every open panel as it happens (`server/events.js`).
-  Old vaults merge in with `scripts/vault-merge.mjs`, copying, never
-  overwriting. 135 objects in it on 2026-10-02.
+- **The laptop's vault, and the tower's**: the laptop serves `~/skweeb-vault`
+  behind `tailscale serve` to every machine; the tower's `./vault` is in use
+  again since 2026-11-06 (BEC's palettes, the garden). A save shows on every
+  open panel as it happens (`server/events.js`); `scripts/vault-merge.mjs`
+  merges one into another, copying, never overwriting.
 - **A trash, and deleting** (2026-09-26): the trash is a tag; deleting for
   good asks what is made from what goes — delete the chain too, or cut it
   loose (`server/delete.js`).
@@ -258,19 +259,19 @@ sorts them.
 
 ## Tests
 
-Sixty-six files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-11-06). Newest: `garden`, the garden's
-modifiers and growth (M14); `scope` and `reach` (2026-11-04); the puppet's four —
+Sixty-seven files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-11-11). Newest: `3d-cloud` (G1); `garden`,
+the garden's modifiers and growth (M14); `scope` and `reach`; the puppet's four —
 `puppet-eyes` (27), `puppet-mouth` (15), `puppet-sway` (24), `puppet-roles`
 (17): the eyes and the mouth cut and worn, the sway, the parts found;
 before them M11's — `live`, `stack`, `place`, `smart` — the print's —
 `windowed`, `stage-still`, `png` — and the 3D app's seven.
 
-Thirty-eight browser checks, each a command in `CLAUDE.md`, run several at a
+Thirty-nine browser checks, each a command in `CLAUDE.md`, run several at a
 time by `scripts/checks.mjs`: each its own server on a
 copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
 mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-garden` (M14a),
+throws or its console is not quiet. Newest: `check-3d-cloud` (G1), `check-garden` (M14a),
 `check-cluster-vault` (S9g), `check-cluster` and `check-mount` (S9). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
@@ -318,9 +319,9 @@ compares two pages' canvases measures, never demands the pixel.
   (C6).
 - **Files past 400 lines** (rule 4, `node scripts/lines.mjs`): the
   gamepad's `ui/hud.css` (721), `sketch/gamepadSketch.js` (572),
-  `ui/TimelinePanel.js` (547) and `ui/ParamPanel.js` (500) — C6 — and
-  `scripts/check-3d.mjs` (414), kept whole with its reason.
-  `core/VaultPanel.js` stands at 399.
+  `ui/TimelinePanel.js` (547) and `ui/ParamPanel.js` (500) — C6 — and four
+  kept whole with their reasons: `core/VaultPanel.js`, `apps/grid/main.js`,
+  `apps/filter/main.js`, `scripts/check-3d.mjs`.
 - **A 3D model's handles turn about the world's axes only**; nothing in it
   is undone; a shadow's darkness and map are fixed; not yet seen on the
   laptop itself, where it should draw with WebGL2 (`apps/3d/STATUS.md`).
@@ -341,12 +342,12 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9i — the players in cluster** (`docs/plan.md`, the author's yes of
-2026-11-06): the rig's puppet and the map's player mounted in the scene as
-the garden is, each a module on `core/mount.js`. Beside it, L4, a side job.
-The main thread waits on the author otherwise: the garden played, then
-M14b's shape; P7's path, a field of the map's recipe; P8's bundle; M13c's
-fields.
+**G2 — the cloud in time** (`docs/plan.md`, `3d/cloud-forces`): a `forces`
+drawer in the cloud's card and `cloudAt(dots, t, forces)` in a file of its
+own — a vortex, gravity, a pull, drag, noise, each dot integrated from rest —
+tested in Node against gravity's and drag's closed form first
+(`apps/3d/STATUS.md`, *Next*). Waiting on the author: G3's pick, L12's list
+of the stack's bugs; S9i, the players in cluster, is `ready` beside it.
 
 ## Parked decisions
 
@@ -374,10 +375,8 @@ fields.
 - **Newest behind, in the gamepad too** (the author's idea, 2026-09-27, not
   started): `destination-over` inside `_drawEvent`'s push/pop in
   `core/stage/player.js`, from a clip override, and on the live layer.
-- **Next were filters, particles, fractals; 3D parked** (2026-09-26): 2D
-  first, fake 3D where it helps. The GPU kit is WebGPU, nothing cut for a
-  machine without it; a GPU render replays within a small difference on
-  another machine.
+- **The GPU kit is WebGPU** (2026-09-26): nothing cut for a machine without
+  it; a GPU render replays within a small difference on another machine.
 - **Rule 8 settled** (2026-09-26): p5 is not required; the gamepad and core's
   replay of its recordings keep p5 1.5.0 until ported. **Rule 5 covers
   shaders**: LYGIA and unlicensed Shadertoy code stay out.

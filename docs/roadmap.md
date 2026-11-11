@@ -18,7 +18,7 @@ item, is the board in `docs/plan.md`. Here, the milestones still open.
 | M7 | fractals | *Done when* met 2026-09-30; its bricks open, below |
 | M8 | the map editor, and a room first | bricks 1 to 4 of six, below |
 | M9 | the rig: bones, walks, and worms | bricks 1 to 5 of six, and the puppet, below |
-| M10 | 3D: meshes, from primitives up | its six bricks done 2026-11-06; its links open, below |
+| M10 | 3D: meshes, from primitives up | its six bricks done 2026-11-06; a cloud of dots 2026-11-11 (G1, `docs/plan.md`); its links open, below |
 | M11 | the live stack, and smart objects | done 2026-10-07; what it left is L in `docs/plan.md` |
 | M12 | the scene: one canvas, the suite round it | planned 2026-11-03 — `docs/scene.md`; track S in `docs/plan.md` |
 | M13 | BEC again: its grid in the 3D app, its layers by format, the project one page | `docs/bec.md`: M13a, the grid, landed 2026-11-05; b to d next |
@@ -46,9 +46,9 @@ gamepad still to the rig, *Rig this ↗*. M8 `any → map: a thing in the room` 
 **done, 2026-09-30**: any still, loop, shape or page stood on a cell.
 M11 `every app → every app: a live layer` — **done, 2026-10-07**: a
 window's layer in every other's stack, *Send to ▸*, a page of smart
-objects that follows them. Open: `rig → map: a character` and
-`model → map: a character from every side` — P5 and P6 in
-`docs/plan.md`.
+objects that follows them. P6's `model → map: a character from every side`
+— **done, 2026-11-06**; G1's `ckt → 3d: a cloud's emitter` — **done,
+2026-11-11**, where a cloud is born. Open: P5's `rig → map: a character`.
 
 ## The milestones still open
 

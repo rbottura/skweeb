@@ -14,6 +14,7 @@
  */
 
 import { readPalettes } from './palettes.js';
+import { readEmitters } from './emitters.js';
 import { openModel } from './frames.js';
 import { openRenderer } from './renderer.js';
 import { unknownIn } from './scene.js';
@@ -43,6 +44,7 @@ export async function openObject(object, opts = {}) {
   }
 
   await readPalettes(object.recipe);                  // a palette of the vault a shape names, its colours from the first frame
+  await readEmitters(object.recipe);                  // the objects its clouds are born on, their points from the first frame
   const frames = openModel(object.recipe, { renderer, scale: opts.scale > 0 ? opts.scale : 1 });
   const box = { x: 0, y: 0, w: frames.width, h: frames.height };
   return {

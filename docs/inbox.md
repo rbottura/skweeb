@@ -30,6 +30,21 @@ day before that became bricks done went with them.
 
 ## Sorted
 
+- **2026-11-10 — BEC 2027's graphic system; bridges between the apps; the
+  stack.** "aujourd'hui je veux créer plus de pont entre les apps et fixer le
+  système de stack inter-app. d'abord dans le context du travail que nous
+  nommerons BEC_2027, qui utilise la palette de couleurs de BEC_2025 …
+  avant je voudrais avoir le plus de paramètre possible pour le système
+  graphique … utiliser cette forme émettrice également dans le context 3d
+  … des cercles ou des sphères à l'apparence 2d mais dans un espace 3D …
+  l'émetteur n'émet pas en permanence, on crée une fois les objets dans
+  l'espace puis on fera intervenir des forces de vortex et de gravité …
+  tout en gardant le paramètre de seed". Started on Fable that afternoon,
+  its week's usage spent before a word was written; taken up 2026-11-11. →
+  track G on the board of `docs/plan.md`: G1, the cloud of dots, landed
+  2026-11-11 (`apps/3d/STATUS.md`); G2 its forces in time; G3 more
+  parameters, the author's pick; the stack's bugs still L12, waiting on
+  what was seen; `docs/decisions.md`, 2026-11-11.
 - **2026-11-09 — the window stack's bugs.** "nous devrions fixer des bugs du
   mode de stack de fenetre mais ce sera pour plus tard". → L12 on the board,
   waiting on the author's list of them.

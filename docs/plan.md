@@ -57,6 +57,9 @@ In the order the main thread takes them; side jobs and waits at the end.
 | V1b | a palette on particles: each one a colour of it, a dot filled, a sprite printed in it | `particles/palette` | S | landed 2026-11-09 |
 | — | an overlay in particles: one picture in front, fitted to the format | `particles/overlay` | S | landed 2026-11-09; layers by format are M13c's |
 | — | particles at random sizes between two; an emitter object turned | `particles/size-angle` | S | landed 2026-11-09 |
+| G1 | a cloud of dots in the 3D app: particles' emitter, its dots placed once — where (R) and their colours (C) seeds, a palette, sizes between two, unlit | `3d/cloud` | M | landed 2026-11-11 |
+| G2 | the cloud in time: a vortex, gravity, a pull, drag and noise on its dots from rest, every frame its own, saved as a sequence | `3d/cloud-forces` | M | ready |
+| G3 | the graphic system's other parameters: particles' and the cloud's, the author's pick of *G*'s list | — | S | waits: which first, the author's |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
@@ -90,7 +93,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C11 | the sliders and boxes: a slider with no grid moving, a count's by one, a box dragged by the hand | `fix/sliders` | S | landed 2026-11-06 |
 | C12 | check-frames' stills: it takes the vault's first three, and sparse ones fall under its thresholds — three with ink, whatever the vault | `fix/frames-stills` | S | side job |
 | L4 | the live view blends as a save does | `layers/isolation` | S | side job |
-| L12 | the window stack's bugs | — | — | waits: the author's list of them, "pour plus tard" |
+| L12 | the window stack's bugs | — | — | waits: the author's list of them — "fixer le système de stack inter-app", 2026-11-10 |
 | P5 | M9's brick 6: the slug from every side | `rig/views` | M | waits: the author's drawings |
 | P0 | the puppet on the author's head | `rig/puppet-defaults` | S | waits: an evening in OBS |
 | L8 | overrides | `layers/overrides` | L | waits: the author — now, or later |
@@ -140,6 +143,10 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
+- **The graphic system's parameters** (G3): which of *G*'s list first —
+  and G2's, whether the cloud in time loops back to rest or runs on.
+- **The window stack's bugs** (L12): "fixer le système de stack
+  inter-app" (2026-11-10) — what was seen, window by window.
 - **The motion, case by case** (S9e): its first pass is the proposal as
   written (`docs/scene.md`); what the author sees in it, case by case — "on
   va travailler ça ensemble" — is its next pass.
@@ -263,6 +270,29 @@ What the bench settled, the bricks and their order are `docs/scene.md`; the
 bench itself is https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm, its
 source its published files. **S1 — the dark theme** · landed 2026-11-03.
 
+## G — the graphic system, for BEC 2027
+
+The author, 2026-11-10: "dans le context du travail que nous nommerons
+BEC_2027, qui utilise la palette de couleurs de BEC_2025 … je voudrais avoir
+le plus de paramètre possible pour le système graphique que nous mettons en
+place. J'aimerais utiliser cette forme émettrice également dans le context
+3d … on crée une fois les objets dans l'espace puis on fera intervenir des
+forces de vortex et de gravité sur ces éléments … tout en gardant le
+paramètre de seed". Particles had their palette, an overlay and random
+sizes the day before (V1b and the two rows after it).
+
+**G1 — a cloud of dots** · `3d/cloud` · landed 2026-11-11 (`apps/3d/cloud.js`).
+
+**G2 — the cloud in time** · `3d/cloud-forces` · M. Its dots at rest are
+frame 0; a vortex about an axis, gravity, a pull to a centre, drag and curl
+noise move them, each dot integrated from rest as a particle is from its
+birth, so every frame stands alone; the model's loop plays it, saved as a
+`sequence`, the seeds kept.
+
+**G3 — more parameters** · waits: which first. Particles' colour over life;
+the overlay's place, opacity and blend; an emitter denser where a picture is
+darker; the cloud's dots a set's sprites, or rings.
+
 ## L — layers and smart objects
 
 What M11 left after its *Done when* (`docs/smart-objects.md`; decisions,
@@ -275,34 +305,14 @@ wherever it is used.
 
 **L10 — saved three ways: S, then 1 2 3** · → S3 and S6, landed 2026-11-03: S the next state of a smart object, E's menu the rest.
 
-**L11 — a smart object followed wherever it is picked** · `layers/follow` ·
-landed 2026-11-06: an object field holding one hears its versions, the app
-loading it again (`params.following`); a model's picture a sprite.
-
-**L1 — pins** · `layers/pins` · landed 2026-11-06: compose's since S6b, a
-project placed at its state; the live stack's too, a smart object's layer
-kept at a state by its row, in its block and in the page it saves.
-
-**L3 — no cycle** · `layers/cycles` · landed 2026-11-06: a smart object's
-next state that would come to hold itself refused, the chain named, by
-`Vault.save` and the server alike (`core/cycles.js`).
-
-**L2 — flatten** · `layers/flatten` · landed 2026-11-06: compose's *Flatten*,
-a smart placement saved as an object of its own at its state, `parents:
-["skw_…@vN"]`, no refs; the kin and the delete read `@vN`.
-
-**L6 — edit in place** · `layers/edit` · landed 2026-11-06: compose's
-*Edit in <app> ↗* and the stack row's ✎ — its app opened on it, bound; a
-placement kept at a state follows from then on.
+**L11, L1, L3, L2, L6** · landed 2026-11-06: a smart object followed wherever it is picked; pins; no cycle; flatten; edit in place.
 
 **L7 — versions in the vault** · `layers/versions` · S. A smart object's
 detail lists its versions, each with the picture it had (`versions/vN.*`,
 numbered, never scanned — rule 3), and takes one back as the newest
 version, so nothing kept is lost.
 
-**L5 — grid takes a window** · `layers/grid-takes` · landed 2026-11-06:
-*Send to ▸ grid*, a window as grid's source, live; saved, the window first,
-a smart object — the following moved to `core/following.js`.
+**L5 — grid takes a window** · `layers/grid-takes` · landed 2026-11-06.
 
 **L4 — the live view blends as a save does** · `layers/isolation` · S, a
 side job. The stage is a group already (`isolation: isolate`,

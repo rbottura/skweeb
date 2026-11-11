@@ -123,7 +123,7 @@ async function start(host, mine) {
 
 async function boot(mine) {
   bar = new Bar({ app: '3d', mount: root,
-                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · space play · , . frame · S save · V vault · R C a BEC grid anew' });
+                  keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · space play · , . frame · S save · V vault · R C a grid or a cloud anew' });
   params = modelParams();
   const panel = new ParamPanel(params, { title: '3d', mount: root.querySelector('#side'), groups: GROUPS });
 
@@ -131,7 +131,8 @@ async function boot(mine) {
   // A card changed: the loop fitted again — a shape set swinging makes the model one, and plays it (P2).
   cards = new Cards({ ...SHAPE_CARDS, mount: shapesDrawer.body, onChange: () => { const was = clock.length > 1; fitClock();
     if (!was && clock.length > 1 && !clock.playing) clock.play(); draw(); }, onChoose: draw });
-  model.onInks = () => draw();             // a palette of the vault a shape names, come: drawn again in it (palettes.js)
+  model.onInks = () => draw();             // a palette of the vault a shape names, or the object a cloud is born on, come:
+                                           // drawn again in it (palettes.js, emitters.js)
   chosen = wireChosen({ cards, model, onChange: draw, root });
   const handles = chosen.handles;
   mine.hold(() => handles.dispose());
@@ -311,17 +312,24 @@ function wireKeys(mine) {
   const MODES = ['move', 'turn', 'size'], modeOf = m => root.querySelector('#handle-' + m);
   const now = () => MODES.find(m => modeOf(m)?.getAttribute('aria-pressed') === 'true') || 'move';
   // BEC's grid chosen (grid.js, M13a): its draws again, as BEC's keys had them — new edges (R, core's),
-  // new colours (C), so many faces filled (q s d: four, six, eight).
-  const grid = () => (cards.chosen && cards.chosen.item.id === 'grid' ? cards.chosen.params : null);
+  // new colours (C), so many faces filled (q s d: four, six, eight). A cloud chosen (cloud.js): new places (R),
+  // new colours (C).
+  const chosenOf = id => (cards.chosen && cards.chosen.item.id === id ? cards.chosen.params : null);
+  const grid = () => chosenOf('grid'), cloud = () => chosenOf('cloud'), hued = () => grid() || cloud();
   const again = (p, key) => p.set(key, p.get(key) + 1);
   const becActs = p => [
     { label: 'new edges', run: () => again(p, 'seed') },
     { label: 'new colours', run: () => again(p, 'hues') },
     ...[4, 6, 8].map(n => ({ label: `${n} faces filled`, on: p.get('faces') === n, run: () => { p.set('faces', n); again(p, 'fill'); } })),
   ];
+  const cloudActs = p => [
+    { label: 'new places', run: () => again(p, 'seed') },
+    { label: 'new colours', run: () => again(p, 'hues') },
+  ];
   setAppPie({
     title: 'handles',
-    items: () => [...MODES.map(m => ({ label: m, on: now() === m, run: () => modeOf(m)?.click() })), ...(grid() ? becActs(grid()) : [])],
+    items: () => [...MODES.map(m => ({ label: m, on: now() === m, run: () => modeOf(m)?.click() })),
+      ...(grid() ? becActs(grid()) : cloud() ? cloudActs(cloud()) : [])],
     tap: () => modeOf(MODES[(MODES.indexOf(now()) + 1) % MODES.length])?.click(),
   });
   let vault = null;
@@ -341,7 +349,7 @@ function wireKeys(mine) {
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') leaving.save();
     if (e.key === 'f' || e.key === 'F') frameAll();
-    if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey && grid()) again(grid(), 'hues');   // BEC's c
+    if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey && hued()) again(hued(), 'hues');   // BEC's c
     if (e.key === 'Escape' && !vault.isOpen) cards.choose(null);
   });
   vault = new VaultPanel();

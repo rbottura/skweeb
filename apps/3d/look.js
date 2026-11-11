@@ -28,8 +28,8 @@
  */
 
 import {
-  Mesh, MeshStandardMaterial, MeshToonMaterial, ShadowMaterial, DataTexture, RGBAFormat, NearestFilter,
-  DoubleSide, FrontSide, BackSide, Color, Float32BufferAttribute, PlaneGeometry, Box3, Sphere,
+  Mesh, InstancedMesh, MeshStandardMaterial, MeshToonMaterial, MeshBasicMaterial, ShadowMaterial, DataTexture, RGBAFormat,
+  NearestFilter, DoubleSide, FrontSide, BackSide, Color, Float32BufferAttribute, PlaneGeometry, Box3, Sphere,
 } from '../../core/libs/three/three.core.js';
 import { NodeMaterial, TSL } from '../../core/libs/three/three.webgpu.js';
 import { copiesOf } from './deform.js';
@@ -66,28 +66,35 @@ export function rampOf(n) {
   return ramps.get(n);
 }
 
+/** Which of the three a material is: lit by three's physical shading, in toon bands, or unlit. */
+const kindOf = m => (m.isMeshBasicMaterial ? 'unlit' : m.isMeshToonMaterial ? 'toon' : 'lit');
+
 /**
- * A shape's mesh dressed as its values and the style say: a toon for bands,
- * three's standard otherwise — the old material freed when the kind changes.
- * Its colour, flat or smooth; a plane seen from both sides.
+ * A shape's mesh dressed as its values and the style say: unlit, its colour
+ * alone, when its shading says so; else a toon for bands, three's standard
+ * otherwise — the old material freed when the kind changes. Its colour, flat
+ * or smooth; a plane seen from both sides. An unlit shape casts a shadow and
+ * takes none: no light falls on it.
  */
 export function dress(mesh, id, values, bands) {
-  const toon = bands > 0;
-  if (!!mesh.material.isMeshToonMaterial !== toon) {
+  const kind = values.shading === 'unlit' ? 'unlit' : bands > 0 ? 'toon' : 'lit';
+  const toon = kind === 'toon';
+  if (kindOf(mesh.material) !== kind) {
     mesh.material.dispose();
-    mesh.material = toon ? new MeshToonMaterial() : new MeshStandardMaterial();
+    mesh.material = kind === 'unlit' ? new MeshBasicMaterial() : toon ? new MeshToonMaterial() : new MeshStandardMaterial();
   }
   const m = mesh.material;
-  // A shape whose colours are its own — BEC's grid, a colour at each vertex (grid.js) — is drawn in them, untinted.
+  // A shape whose colours are its own — BEC's grid, a colour at each vertex (grid.js); a cloud's dots, one each
+  // (cloud.js) — is drawn in them, untinted.
   const own = !!(mesh.geometry && mesh.geometry.getAttribute('color'));
   if (m.vertexColors !== own) { m.vertexColors = own; m.needsUpdate = true; }
-  m.color.set(own ? '#ffffff' : values.colour);
+  m.color.set(own || mesh.instanceColor ? '#ffffff' : values.colour);
   if (toon) {
     if (m.gradientMap !== rampOf(bands)) {
       m.gradientMap = rampOf(bands);
       m.needsUpdate = true;
     }
-  } else {
+  } else if (kind === 'lit') {
     m.roughness = 0.75;
     m.metalness = 0;
   }
@@ -152,7 +159,9 @@ export function hullNormals(geometry) {
 /**
  * A shape's hull — shown with an outline, hidden without, none for a plane —
  * a child of its mesh, so it stands where the shape does, sharing its
- * geometry, which gets its smoothed normals the first time.
+ * geometry, which gets its smoothed normals the first time. A cloud's is
+ * instanced as its dots are, on their very matrices (scene.js `placeDots`):
+ * each dot ringed in ink, as wide on the picture as any shape's outline.
  */
 export function outline(mesh, id, ink) {
   let hull = mesh.userData.hull;
@@ -163,11 +172,16 @@ export function outline(mesh, id, ink) {
   const g = mesh.geometry;
   if (!g.attributes.hull) g.setAttribute('hull', hullNormals(g));
   if (!hull) {
-    hull = mesh.userData.hull = new Mesh(g, ink.material);
+    hull = mesh.userData.hull = mesh.isInstancedMesh ? new InstancedMesh(g, ink.material, 1) : new Mesh(g, ink.material);
     mesh.add(hull);
   }
   hull.geometry = g;
   hull.material = ink.material;
+  if (mesh.isInstancedMesh) {
+    hull.instanceMatrix = mesh.instanceMatrix;
+    hull.count = mesh.count;
+    hull.frustumCulled = false;           // its dots' bounds are the cloud's, which culls them
+  }
   hull.visible = true;
 }
 

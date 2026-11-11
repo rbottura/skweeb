@@ -26,6 +26,7 @@ import {
   TorusGeometry, PlaneGeometry, CapsuleGeometry,
 } from '../../core/libs/three/three.core.js';
 import { gridGeometry, PALETTES } from './grid.js';
+import { CLOUD_PARAMS, dotGeometry, dotsOf } from './cloud.js';
 
 /** A card's drawers: what the shape is, where it stands, how it looks. */
 export const SHAPE_GROUPS = {
@@ -120,6 +121,19 @@ export const SHAPES = {
     },
     geometry: v => gridGeometry(v),
   },
+  /**
+   * A cloud of dots, placed once on an emitter (cloud.js, 2026-11-11): particles' object emitter in 3D, each dot
+   * a sphere of its own size and colour — `geometry` one dot's, `dots` where they all are. Unlit as it starts, its
+   * palette's colours exactly: circles in space. R a new `seed`, C new `hues`, as the grid's.
+   */
+  cloud: {
+    id: 'cloud', label: 'cloud of dots', ownColours: true, instanced: true,
+    defaults: { shading: 'unlit' },
+    finest: 32,                            // a dot is small: more segments for a print than this, and nothing shows
+    params: CLOUD_PARAMS,
+    geometry: v => dotGeometry(v.segments),
+    dots: (v, stack) => dotsOf(v, stack),
+  },
 };
 
 const place = 'place';
@@ -139,8 +153,11 @@ export const PLACE = {
   size: times('size'),
   sx: times('stretched along x'), sy: times('stretched along y'), sz: times('stretched along z'),
   colour: { type: 'color', default: '#ffd60a', label: 'colour', group: 'look' },
-  /** Smooth reads as round; flat shows the facets the segments make. */
-  shading: { type: 'enum', options: ['smooth', 'flat'], default: 'smooth', display: 'chips', label: 'shading', group: 'look' },
+  /**
+   * Smooth reads as round; flat shows the facets the segments make; unlit is its colour alone, no light on it —
+   * a silhouette in exactly its colours, for a print (2026-11-11, the cloud's circles).
+   */
+  shading: { type: 'enum', options: ['smooth', 'flat', 'unlit'], default: 'smooth', display: 'chips', label: 'shading', group: 'look' },
   /** Its place on a wave, as the rig swings a bone (P2): whole cycles in the model's loop, so it closes. */
   swingBy:     { type: 'enum', options: SWINGS, labels: SWING_LABELS, default: 'none', label: 'what swings', group: 'swing' },
   swingTurn:   { type: 'range', min: 0, max: 180, step: 0.5, default: 20, label: 'as far, either way', unit: '°', group: 'swing',
@@ -153,12 +170,17 @@ export const PLACE = {
   swingPhase:  { type: 'range', min: -180, max: 180, step: 1, default: 0, label: 'phase', unit: '°', group: 'swing', when: swinging },
 };
 
-/** A shape's whole schema: its form, then its place and look — no colour for one whose colours are its own. */
+/**
+ * A shape's whole schema: its form, then its place and look — no colour for one whose colours are its own, and
+ * a place row starting where its shape says (`defaults`: a cloud unlit).
+ */
 export function shapeSchema(id) {
   const shape = SHAPES[id];
   if (!shape) throw new Error(`3d: no shape "${id}"`);
   const { colour, ...rest } = PLACE;
-  return { ...shape.params, ...(shape.ownColours ? rest : PLACE) };
+  const schema = { ...shape.params, ...(shape.ownColours ? rest : PLACE) };
+  for (const [key, d] of Object.entries(shape.defaults || {})) schema[key] = { ...schema[key], default: d };
+  return schema;
 }
 
 /** The keys that make a shape's geometry: change one and the mesh is made again. */
@@ -171,12 +193,15 @@ const ROUNDNESS = ['segments', 'sides'];
  * A shape's values made rounder for a print: its segments raised to at least
  * `n`, so a silhouette many times the preview's size stays round — π√R
  * segments keep a circle R pixels across within half a pixel of true. A flat
- * shape keeps its facets: they are its look, not a want of pixels.
+ * shape keeps its facets: they are its look, not a want of pixels. A shape
+ * small in any picture — a cloud's dot — is raised no further than its
+ * `finest`.
  */
 export function finer(id, values, n) {
   if (!(n > 0) || values.shading === 'flat') return values;
   const out = { ...values };
-  for (const key of ROUNDNESS) if (key in SHAPES[id].params) out[key] = Math.max(values[key], Math.ceil(n));
+  const most = SHAPES[id].finest || Infinity;
+  for (const key of ROUNDNESS) if (key in SHAPES[id].params) out[key] = Math.max(values[key], Math.min(most, Math.ceil(n)));
   return out;
 }
 
