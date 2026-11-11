@@ -61,7 +61,7 @@ export function openModel(recipe, { renderer, scale = 1 }) {
   // placed again (P2), their forms kept, so no geometry is made again.
   const at = i => {
     const v = seenAt(recipe, i);
-    if (motion.swings) model.update(v, fine);
+    if (motion.swings || motion.evolves) model.update(v, fine);   // its clouds under their forces too (forces.js)
     else if (motion.loop && v.turning !== 'the eye') model.light(v, fine);
     return v;
   };
@@ -72,7 +72,7 @@ export function openModel(recipe, { renderer, scale = 1 }) {
   return {
     length: motion.length,
     fps: motion.fps,
-    loop: motion.loop,
+    loop: motion.closes,                         // an evolution plays once: more frames than one, and no loop
     width: Math.max(1, Math.round(recipe.width * own)),
     height: Math.max(1, Math.round(recipe.height * own)),
     scale,

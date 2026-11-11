@@ -27,10 +27,12 @@ import {
 } from '../../core/libs/three/three.core.js';
 import { gridGeometry, PALETTES } from './grid.js';
 import { CLOUD_PARAMS, dotGeometry, dotsOf } from './cloud.js';
+import { FORCE_PARAMS } from './forces.js';
 
 /** A card's drawers: what the shape is, where it stands, how it looks. */
 export const SHAPE_GROUPS = {
   form:  { label: 'Form', open: true },
+  forces: { label: 'Forces', open: false },          // a cloud's (forces.js): what moves its dots in time
   place: { label: 'Place', open: false },
   swing: { label: 'Swing', open: false },
   look:  { label: 'Look', open: true },
@@ -124,13 +126,16 @@ export const SHAPES = {
   /**
    * A cloud of dots, placed once on an emitter (cloud.js, 2026-11-11): particles' object emitter in 3D, each dot
    * a sphere of its own size and colour — `geometry` one dot's, `dots` where they all are. Unlit as it starts, its
-   * palette's colours exactly: circles in space. R a new `seed`, C new `hues`, as the grid's.
+   * palette's colours exactly: circles in space. R a new `seed`, C new `hues`, as the grid's. And its forces in
+   * time (forces.js, G2): not of its form — `form` says which are — so a pull changed moves the dots, never
+   * makes them again.
    */
   cloud: {
     id: 'cloud', label: 'cloud of dots', ownColours: true, instanced: true,
     defaults: { shading: 'unlit' },
     finest: 32,                            // a dot is small: more segments for a print than this, and nothing shows
-    params: CLOUD_PARAMS,
+    params: { ...CLOUD_PARAMS, ...FORCE_PARAMS },
+    form: Object.keys(CLOUD_PARAMS),
     geometry: v => dotGeometry(v.segments),
     dots: (v, stack) => dotsOf(v, stack),
   },
@@ -183,8 +188,8 @@ export function shapeSchema(id) {
   return schema;
 }
 
-/** The keys that make a shape's geometry: change one and the mesh is made again. */
-export const formKeys = id => Object.keys(SHAPES[id].params);
+/** The keys that make a shape's geometry: change one and the mesh is made again — all its own, unless it says. */
+export const formKeys = id => SHAPES[id].form || Object.keys(SHAPES[id].params);
 
 /** The keys that say how round a round shape is: its segments, and a torus's round its tube. */
 const ROUNDNESS = ['segments', 'sides'];

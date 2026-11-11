@@ -24,7 +24,15 @@
  * either way as it says, a whole number of cycles in the loop and at its
  * phase, so frame `length` is frame 0 here too. A shape that swings makes
  * the model a loop, turning or not.
+ *
+ * And a cloud under its forces (forces.js, G2, 2026-11-11): `time` is how
+ * long they have acted, the state a still and a print show; a model with a
+ * cloud that moves is then its evolution — frame 0 at rest, the last at
+ * `time` — a sequence played once, which does not close: the author's pick.
+ * What turns or swings turns and swings along it.
  */
+
+import { forcesOn } from './forces.js';
 
 const motion = 'motion';
 const TURNING = { turns: { not: 0 } };
@@ -36,23 +44,40 @@ export const MOTION_PARAMS = {
   turning: { type: 'enum', options: ['the model', 'the eye'], default: 'the model', display: 'chips', label: 'what turns', group: motion, when: TURNING },
   length:  { type: 'int', min: 2, max: 600, default: 72, label: 'loop, frames', group: motion },
   fps:     { type: 'int', min: 1, max: 60, default: 24, label: 'fps', group: motion },
+  /** How long a cloud's forces have acted (forces.js): 0, at rest; more, its evolution from rest to then. */
+  time:    { type: 'range', min: 0, max: 60, step: 0.05, default: 0, label: 'time under the forces', unit: 's', group: motion },
 };
+
+/** Whether a model's clouds move: one shown, with a force on, and time for it. */
+export const evolves = v => !!v && Number(v.time) > 0 && Array.isArray(v.shapes)
+  && v.shapes.some(s => !!s && s.on !== false && s.id === 'cloud' && forcesOn(s.params));
 
 /** Whether a shape swings: on, and its `swingBy` a place key, not `none` (shapes.js). */
 export const swings = shape => !!shape && shape.on !== false && !!shape.params
   && typeof shape.params.swingBy === 'string' && shape.params.swingBy !== 'none';
 
 /**
- * The loop the values make: its frames and their rate — a still's one frame when nothing turns or
- * swings, and in a recipe saved before the turntable, which has no `turns`.
+ * The frames the values make and their rate — a still's one frame when nothing turns, swings or evolves, and in a
+ * recipe saved before the turntable, which has no `turns`. `loop`: more frames than one; `closes`: the frame
+ * after the last is the first — not for an evolution, which plays once.
  *
- * @returns {{length: number, fps: number, loop: boolean, turns: number, swings: boolean}}
+ * @returns {{length: number, fps: number, loop: boolean, closes: boolean, turns: number, swings: boolean, evolves: boolean}}
  */
 export function loopOf(v) {
   const turns = Math.round(Number(v && v.turns) || 0);
   const swung = !!v && Array.isArray(v.shapes) && v.shapes.some(swings);
-  if (!turns && !swung) return { length: 1, fps: 0, loop: false, turns: 0, swings: false };
-  return { length: Math.max(2, Math.round(Number(v.length) || 72)), fps: Math.max(1, Number(v.fps) || 24), loop: true, turns, swings: swung };
+  const evolving = evolves(v);
+  if (!turns && !swung && !evolving) return { length: 1, fps: 0, loop: false, closes: false, turns: 0, swings: false, evolves: false };
+  return { length: Math.max(2, Math.round(Number(v.length) || 72)), fps: Math.max(1, Number(v.fps) || 24), loop: true,
+           closes: !evolving, turns, swings: swung, evolves: evolving };
+}
+
+/** How long the forces have acted at frame `i` of an evolution: 0 at the first, `time` at the last. */
+export function elapsedAt(v, i) {
+  const { length, evolves: evolving } = loopOf(v);
+  if (!evolving) return 0;
+  const k = Math.max(0, Math.min(length - 1, Math.round(Number(i) || 0)));
+  return (Number(v.time) * k) / (length - 1);
 }
 
 /**
@@ -80,11 +105,15 @@ export function turnedAt(v, i) {
   return (360 * turns * k) / length;
 }
 
-/** The values frame `i` is seen with: the yaw turned on, the sun with it when the model turns, its shapes swung. */
+/**
+ * The values frame `i` is seen with: the yaw turned on, the sun with it when the model turns, its shapes swung —
+ * and `elapsed`, how long its clouds' forces have acted, in an evolution (scene.js).
+ */
 export function seenAt(v, i) {
-  const { length, swings: swung } = loopOf(v);
+  const { length, swings: swung, evolves: evolving } = loopOf(v);
   const by = turnedAt(v, i);
   let out = by ? { ...v, yaw: v.yaw + by, ...(v.turning === 'the eye' ? {} : { sunYaw: v.sunYaw + by }) } : v;
   if (swung) out = { ...out, shapes: v.shapes.map(s => swungAt(s, i, length)) };
+  if (evolving) out = { ...out, elapsed: elapsedAt(v, i) };
   return out;
 }

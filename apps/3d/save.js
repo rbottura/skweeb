@@ -59,7 +59,7 @@ export async function saveRecipe(recipe, { renderer, tick = 0, parents = [], sta
   await readEmitters(recipe);                          // its clouds born on the objects they name (emitters.js)
   const frames = openModel(recipe, { renderer });
   try {
-    const loop = frames.loop;
+    const loop = frames.length > 1;           // it moves: a sequence — closing, or an evolution played once
     const shown = frames.frame(loop ? tick % frames.length : 0);
     const blob = await toPng(shown);
     const kinds = [...new Set(shapes.filter(s => s.on !== false && SHAPES[s.id]).map(s => s.id))];
@@ -67,15 +67,16 @@ export async function saveRecipe(recipe, { renderer, tick = 0, parents = [], sta
     return await Vault.save({
       type: loop ? 'sequence' : 'model',
       state,                              // S: the project's next state, its smart object's (S6b, core/vault.js)
-      title: title || titleOf(shapes) + (loop ? ` · ${how.turns ? 'turning' : 'swinging'} ×${frames.length}` : ''),
-      tags: ['3d', ...kinds, ...(loop ? ['loop', ...(how.turns ? ['turntable'] : []), ...(how.swings ? ['swing'] : [])] : []), ...tags],
+      title: title || titleOf(shapes) + (loop ? ` · ${how.evolves ? 'evolving' : how.turns ? 'turning' : 'swinging'} ×${frames.length}` : ''),
+      tags: ['3d', ...kinds, ...(loop ? [...(frames.loop ? ['loop'] : []), ...(how.turns ? ['turntable'] : []), ...(how.swings ? ['swing'] : []),
+        ...(how.evolves ? ['evolving'] : [])] : []), ...tags],
       origin: APP,
       seed: null,
       recipe,
       // …and the palettes its shapes are drawn in, the objects its clouds are born on
       parents: [...new Set([...parents, ...palettesIn(recipe), ...emittersIn(recipe)])],
       render: { blob, ext: 'png', w: shown.width, h: shown.height,
-                ...(loop ? { frames: frames.length, fps: frames.fps, loop: true } : {}) },
+                ...(loop ? { frames: frames.length, fps: frames.fps, loop: frames.loop } : {}) },
       thumb: await thumbFromBlob(blob),
     });
   } finally {
@@ -90,7 +91,7 @@ export async function downloadPicture({ params, shapes, renderer, tick = 0 }) {
   await readEmitters(recipe);
   const frames = openModel(recipe, { renderer });
   try {
-    const shown = frames.frame(frames.loop ? tick % frames.length : 0);
+    const shown = frames.frame(frames.length > 1 ? tick % frames.length : 0);
     download(await toPng(shown), `model_${shown.width}x${shown.height}.png`);
     return { width: shown.width, height: shown.height };
   } finally {
