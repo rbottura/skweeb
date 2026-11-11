@@ -22,6 +22,8 @@
  * turns, a loop's frames and its rate. Core's clock plays it in the view —
  * space, and , . a frame — its handles hidden while it plays; S saves its
  * loop, a `sequence`, its picture the frame on screen; E's menu every frame.
+ * A cloud under its forces (forces.js, G2) makes it an evolution: the Motion
+ * drawer's time, its last frame shown as it is set, played once from rest.
  *
  * Opens with no vault (rule 7), on a box, a sphere and a torus. With no
  * WebGPU three draws with WebGL2, and the bar says so; with neither, the
@@ -97,7 +99,7 @@ const mounted = () => !!app.scope;
 // One app mounted at a time: its state, made again by each mount (`start`).
 let root, canvas, ctx, model;
 let params, bar, cards, shapesDrawer, chosen, renderer, failing, pending, leaving;
-let clock, transport, player, framesButton, clockAt;   // the turntable's (motion.js)
+let clock, transport, player, framesButton, clockAt, evolving;   // the turntable's, an evolution's (motion.js)
 
 async function start(host, mine) {
   root = host;
@@ -112,6 +114,7 @@ async function start(host, mine) {
   leaving = null;          // the ways out (leaving.js): a save or a download drawing, nothing else starts
   transport = player = framesButton = null;
   clockAt = '';            // the loop the clock was fitted to
+  evolving = false;        // a cloud moving under its forces, as last fitted
   // The clock plays a turntable's frames at its rate; a model that does not turn is one frame. Stopped at the unmount.
   clock = new Playhead({
     onShow: tick => { if (transport) transport.show(tick); draw(); },
@@ -151,6 +154,8 @@ async function boot(mine) {
     fitClock();
     // Turns given where there were none: the turntable plays at once. A recipe arriving keeps its clock still.
     if (key === 'turns' && !params.restoring && loopOf(params.values).loop && !clock.playing) clock.play();
+    // An evolution's time set: its last frame shown, the state then — what a print takes.
+    if (key === 'time' && !params.restoring && evolving && !clock.playing) clock.show(clock.length - 1);
     draw();
   });
   const sized = new ResizeObserver(() => draw());
@@ -174,22 +179,27 @@ async function boot(mine) {
   draw();
 }
 
-/** The clock fitted to the turntable the values make (motion.js): its frames at its rate, or one still frame. */
+/**
+ * The clock fitted to what the values make (motion.js): a turntable's or a swing's loop, an evolution played
+ * once — its last frame shown when it starts, the state at its time — or one still frame.
+ */
 function fitClock() {
   if (!params || !transport) return;
-  const { length, fps, loop } = loopOf({ ...params.values, shapes: cards ? cards.recipe() : [] });
-  const key = `${length}@${fps}`;
+  const { length, fps, loop, closes, evolves } = loopOf({ ...params.values, shapes: cards ? cards.recipe() : [] });
+  const key = `${length}@${fps}@${closes}`;
   if (key !== clockAt) {
     const was = clock.playing && loop;
-    clock.configure({ length, fps: fps || 24, loop: true });
+    clock.configure({ length, fps: fps || 24, loop: closes });
     transport.configure();
     clockAt = key;
     if (was) clock.play();
     else clock.pause();
   }
+  if (evolves && !evolving && !clock.playing) clock.show(length - 1);
+  evolving = evolves;
   player.hidden = !loop;
   if (framesButton) framesButton.hidden = !loop;
-  player.note(loop ? `${length} frames · ${(length / fps).toFixed(2)} s, a loop` : '');
+  player.note(loop ? `${length} frames · ${(length / fps).toFixed(2)} s, ${closes ? 'a loop' : `once, from rest to ${+params.values.time.toFixed(2)} s under the forces`}` : '');
 }
 
 /** The values the frame on screen is seen with, its shapes with them: the turntable's and their swings', at the clock's tick (motion.js). */
@@ -271,7 +281,8 @@ function describe(v, shapes) {
   const lens = v.lens === 'orthographic' ? 'orthographic' : `${v.fov}° lens`;
   const yaw = (((Math.round(v.yaw) + 180) % 360) + 360) % 360 - 180;
   return `${titleOf(shapes)} · turned ${yaw}°, raised ${Math.round(v.pitch)}°, `
-    + `${+v.distance.toPrecision(3)} away · ${lens}` + (renderer.backend === 'WebGPU' ? '' : ` · ${renderer.backend}`);
+    + `${+v.distance.toPrecision(3)} away · ${lens}` + (v.elapsed !== undefined ? ` · ${v.elapsed.toFixed(2)} s under the forces` : '')
+    + (renderer.backend === 'WebGPU' ? '' : ` · ${renderer.backend}`);
 }
 
 /**
@@ -340,7 +351,7 @@ function wireKeys(mine) {
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (!vault.isOpen && chosen.key(e)) return;
     // A turntable's clock (motion.js): space plays it or holds it, , and . a frame back and on.
-    if (loopOf(params.values).loop && [' ', ',', '.'].includes(e.key)) {
+    if (loopOf({ ...params.values, shapes: cards.recipe() }).loop && [' ', ',', '.'].includes(e.key)) {
       e.preventDefault();
       if (e.key === ' ') clock.toggle();
       else { clock.pause(); clock.step(e.key === ',' ? -1 : 1); }

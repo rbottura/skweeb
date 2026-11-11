@@ -42,7 +42,9 @@ day before that became bricks done went with them.
   tout en gardant le paramètre de seed". Started on Fable that afternoon,
   its week's usage spent before a word was written; taken up 2026-11-11. →
   track G on the board of `docs/plan.md`: G1, the cloud of dots, landed
-  2026-11-11 (`apps/3d/STATUS.md`); G2 its forces in time; G3 more
+  2026-11-11 (`apps/3d/STATUS.md`), and G2 its forces in time, the
+  same day — the author's picks, a state at a time and its evolution played
+  once, forces a cloud each; G3 more
   parameters, the author's pick; the stack's bugs still L12, waiting on
   what was seen; `docs/decisions.md`, 2026-11-11.
 - **2026-11-09 — the window stack's bugs.** "nous devrions fixer des bugs du

@@ -14,8 +14,12 @@
  * the style's outline rings every dot. Saved: a `model`, the L and the palette
  * its parents; drawn again by its app it is its render, at scale 2 twice the
  * pixels, the same picture; `?open=` brings the cloud back, born on the L.
- * With WebGPU taken away, three draws it with WebGL2, in its colours. And no
- * page said anything wrong.
+ * In time (G2, apps/3d/forces.js), more dots than three's thousand: a force
+ * with no time moves nothing; the time set, its last frame shown, the dots
+ * fallen as far as gravity takes them; drawn back to rest and on again, the
+ * same frame; played from its end, from rest again; saved, an evolution that
+ * plays once, replayed to its render. With WebGPU taken away, three draws it
+ * with WebGL2, in its colours. And no page said anything wrong.
  */
 
 import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
@@ -191,6 +195,69 @@ if (o) {
     && (await cardValue('emitter')) === 'object' && Number(await cardValue('dots')) === 4000
     && (await exactly(['#ff00ff', '#00ffff'])).every(n => n > 200), await page.eval(say));
 }
+
+// ── In time, under its forces (G2): an evolution, played once ────────────────
+
+const strip = `document.querySelector('.viewer-player')`;
+const scrubTo = async i => { await page.eval(`(s => { s.value = ${i}; s.dispatchEvent(new Event('input', { bubbles: true })); return true; })(document.querySelector('.tp-scrub'))`); await wait(500); };
+const scrubbed = () => page.eval(`Number(document.querySelector('.tp-scrub')?.value)`);
+await c.go(c.base + '/apps/3d/');
+await page.until(`/box, sphere, torus|nothing draws/.test(${say})`, { timeout: 30000 });
+for (const i of [0, 1, 2]) await page.click(`[...${cards}[${i}].querySelectorAll('.pp-head .pp-btn')].find(b => b.textContent === 'shown')`);
+await addCloud();
+// More dots than a thousand: three hands their matrices on by another buffer, once a frame (renderer.js).
+await setCloud({ x: 0, emitter: 'disc', extent: 1.2, depth: 0, count: 1500, drag: 0 });
+await setView({ yaw: 0, pitch: 0, distance: 7, tx: 0, ty: 0, tz: 0 });
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
+await wait(500);
+const rest = await inkOf('rest');
+await setCloud({ gravity: 0.5 });
+c.ok('a force with no time: the dots at rest, no player', (await inkOf('forced', 'rest')).where < 0.0005 && (await page.eval(`!${strip} || ${strip}.hidden`)));
+await setView({ time: 2, length: 25, fps: 24 });
+await page.until(`${say}.includes('2.00 s under the forces')`, { timeout: 15000 }).catch(() => {});
+const fallen = await inkOf('fallen', 'rest');
+// Half of 0.5 by 2 s squared: a unit down, a fifth of a picture seven away through 40°.
+const down = fallen.box && rest.box ? (fallen.box[1] + fallen.box[3]) / 2 - (rest.box[1] + rest.box[3]) / 2 : 0;
+c.ok('time under the forces: its last frame shown, the dots a unit down', await scrubbed() === 24 && !(await page.eval(`${strip}.hidden`))
+  && Math.abs(down - 0.196) < 0.02, `frame ${await scrubbed()}, down ${down.toFixed(3)} of the picture`);
+await scrubTo(0);
+const back = await inkOf('back');            // the player under the viewer now: another canvas, its box compared
+await scrubTo(24);
+const again = await inkOf('again', 'fallen');
+const near = (a, b) => !!a && !!b && a.every((x, i) => Math.abs(x - b[i]) < 0.006);
+c.ok('…drawn back to rest, and on again: the same frame', near(back.box, rest.box) && again.where < 0.0005 && again.hue < 0.0005,
+  JSON.stringify([back.box, rest.box, again.where]));
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))`);
+await wait(250);
+const replaying = [await scrubbed(), await page.eval(`!!document.querySelector('.tp-play.tp-playing')`)];
+await page.until(`!document.querySelector('.tp-play.tp-playing')`, { timeout: 10000 }).catch(() => {});
+c.ok('…played from its end, from rest again — and it stops at its end', replaying[0] < 24 && replaying[1] && (await scrubbed()) === 24, JSON.stringify(replaying));
+await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
+await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
+const eid = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
+const e = eid ? inner(await (await fetch(c.base + '/api/vault/' + eid)).json()) : null;
+c.ok('saved: an evolution, 25 frames that play once', !!e && e.type === 'sequence' && e.render.frames === 25 && e.render.loop === false
+  && e.title === 'cloud of dots · evolving ×25' && e.tags.includes('evolving') && !e.tags.includes('loop'), e ? `${e.type} "${e.title}" ${JSON.stringify(e.render)}` : await page.eval(say));
+if (e) {
+  const replay = await page.eval(`(async () => {
+    const { Vault } = await import('/core/vault.js');
+    const app = await import('/apps/3d/rebuild.js');
+    const { object, url } = await Vault.load(${JSON.stringify(e.id)});
+    const img = await createImageBitmap(await (await fetch(url)).blob());
+    const read = src => { const x = new OffscreenCanvas(img.width, img.height).getContext('2d'); x.drawImage(src, 0, 0, img.width, img.height); return x.getImageData(0, 0, img.width, img.height).data; };
+    const render = read(img);
+    const it = object.type === 'skw' ? (await import('/core/smart.js')).unwrap(object) : object;
+    const own = await app.openObject(it, { url });
+    const first = read(own.frame(0)), last = read(own.frame(24));
+    let off = 0, moved = 0;
+    for (let i = 0; i < render.length; i++) { if (Math.abs(render[i] - last[i]) > 8) off++; if (Math.abs(first[i] - last[i]) > 8) moved++; }
+    const out = { off: off / render.length, moved: moved / render.length, length: own.length, loop: own.loop };
+    own.dispose(); return out; })()`);
+  c.ok('…replayed: its last frame its render, its first at rest, no loop', replay.off < 0.001 && replay.moved > 0.01 && replay.length === 25 && replay.loop === false,
+    JSON.stringify(replay));
+}
+await c.shot('3-in-time');
 
 // ── With no WebGPU: three falls back to WebGL2, as on the laptop's Intel ────
 

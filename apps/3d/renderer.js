@@ -67,7 +67,8 @@ async function create() {
   // frame would — its nodes' frame, its `info` reset by `draw` below — so it
   // is stopped, as three stops it itself for a WebXR session. Found by
   // check-mount (S9): the 3D app unmounted, frames were still asked for.
-  // `_animation` is three's own, pinned at r186 (core/libs/three/README.md).
+  // `_animation` and `_nodes` are three's own, pinned at r186
+  // (core/libs/three/README.md).
   renderer._animation.stop();
   renderer.info.autoReset = false;
   renderer.setClearColor(0x000000, 0);
@@ -89,6 +90,10 @@ async function create() {
         h = height;
       }
       renderer.info.reset();             // a frame's counts, as three's own loop reset them each frame
+      // …and its nodes' frame, as that loop moved it on: what a node does once a frame is done again — a cloud's
+      // dots past a thousand, their matrices handed on to the GPU only so (G2, 2026-11-11).
+      renderer._nodes.nodeFrame.update();
+      renderer.info.frame = renderer._nodes.nodeFrame.frameId;
       renderer.render(scene, camera);
       return canvas.transferToImageBitmap();
     },

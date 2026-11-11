@@ -90,6 +90,8 @@ export class Playhead {
 
   play() {
     if (this._playing || this._length < 2) return;
+    // A sequence that plays once, played from its last tick, plays again from its first (2026-11-11).
+    if (!this._loop && this._tick >= this._length - 1) this.show(0);
     this._playing = true;
     this._last = performance.now();
     this._carry = 0;

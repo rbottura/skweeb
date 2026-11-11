@@ -24,6 +24,7 @@ import {
 } from '../../core/libs/three/three.core.js';
 import { inksOf } from './palettes.js';
 import { pointsOf } from './emitters.js';
+import { Evolution, forcesOn, forceKey } from './forces.js';
 import { SHAPES, shapeSchema, formKeys, finer } from './shapes.js';
 import { MODIFIERS, modify } from './modifiers.js';
 import { dress, bandsOf, outline, outlineOf, inkOf, inkUp, shade, shadowsOf } from './look.js';
@@ -100,7 +101,8 @@ export class Model {
 
   /**
    * Bring the scene into step with a recipe.
-   * @param {object} recipe   the app's values and `shapes: [{ id, params, on, modifiers }]`
+   * @param {object} recipe   the app's values and `shapes: [{ id, params, on, modifiers }]` — and `elapsed`, a
+   *                          frame's time under its clouds' forces (motion.js `seenAt`)
    * @param {object} [print]  drawn above its own size (frames.js `sharper`): `detail`, the fewest segments a
    *                          smooth round shape is made with (shapes.js `finer`), and
    *                          `shadowMap`, the side of the sun's shadow map
@@ -110,6 +112,7 @@ export class Model {
     const shapes = shapesOf(recipe);
     const bands = bandsOf(recipe);
     const lined = outlineOf(recipe) > 0;
+    const elapsed = Math.max(0, Number(recipe && recipe.elapsed) || 0);
     if (lined && !this.ink) this.ink = inkOf();
     if (this.ink) inkUp(this.ink, recipe);
     shapes.forEach(({ id, values, index, stack }, i) => {
@@ -139,7 +142,7 @@ export class Model {
         part.form = form;
       }
       place(part.mesh, values);
-      if (part.instanced) placeDots(part, values);
+      if (part.instanced) placeDots(part, values, elapsed);
       dress(part.mesh, id, values, bands);
       outline(part.mesh, id, lined ? this.ink : null);
     });
@@ -233,29 +236,39 @@ function dotsUp(scene, part, shape, made, stack) {
     letGo(old);
   }
   scene.add(mesh);
-  Object.assign(part, { mesh, dots, stretch: '' });
+  Object.assign(part, { mesh, dots, stretch: '', evolution: null });
 }
 
 /**
- * Each dot's matrix: where it is in the cloud, its size — divided by the cloud's stretch, which the mesh's own
- * scale multiplies back, so a stretch moves the dots apart and a dot stays round (cloud.js). Made again only when
- * the dots or the stretch change.
+ * Each dot's matrix: where it is in the cloud — at rest, or `elapsed` seconds under its forces (forces.js) — its
+ * size divided by the cloud's stretch, which the mesh's own scale multiplies back, so a stretch moves the dots
+ * apart and a dot stays round (cloud.js). Made again only when the dots, the stretch or the time change.
  */
-function placeDots(part, v) {
-  const key = `${v.sx},${v.sy},${v.sz}`;
+function placeDots(part, v, elapsed = 0) {
+  const moving = elapsed > 0 && forcesOn(v);
+  const evolution = moving ? evolutionOf(part, v) : null;
+  const key = `${v.sx},${v.sy},${v.sz}|${moving ? `${elapsed}|${evolution.key}` : ''}`;
   if (part.stretch === key) return;
   part.stretch = key;
   const { mesh, dots } = part, a = mesh.instanceMatrix.array;
+  const centres = moving ? evolution.at(elapsed) : dots.centres;
   const kx = 1 / (v.sx || 1), ky = 1 / (v.sy || 1), kz = 1 / (v.sz || 1);
   for (let k = 0; k < dots.count; k++) {
     const r = dots.radii[k], o = k * 16;
     a.fill(0, o, o + 16);
     a[o] = r * kx; a[o + 5] = r * ky; a[o + 10] = r * kz; a[o + 15] = 1;
-    a[o + 12] = dots.centres[k * 3]; a[o + 13] = dots.centres[k * 3 + 1]; a[o + 14] = dots.centres[k * 3 + 2];
+    a[o + 12] = centres[k * 3]; a[o + 13] = centres[k * 3 + 1]; a[o + 14] = centres[k * 3 + 2];
   }
   mesh.instanceMatrix.needsUpdate = true;
   mesh.boundingBox = null;
   mesh.boundingSphere = null;
+}
+
+/** A cloud's evolution from rest, kept while its dots and forces are: a frame on goes on from the one before. */
+function evolutionOf(part, v) {
+  const key = forceKey(v);
+  if (!part.evolution || part.evolution.key !== key) part.evolution = new Evolution(part.dots, v);
+  return part.evolution;
 }
 
 /**

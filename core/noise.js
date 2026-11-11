@@ -115,3 +115,46 @@ export function noise3(x, y, z, seed) {
   const x01 = lerp(dot(0, 0, 1), dot(1, 0, 1), u), x11 = lerp(dot(0, 1, 1), dot(1, 1, 1), u);
   return lerp(lerp(x00, x10, v), lerp(x01, x11, v), w);
 }
+
+/**
+ * Gradient noise at (x, y, z) and its slope — `[n, ∂n/∂x, ∂n/∂y, ∂n/∂z]`,
+ * exact, from the same eight corners in one pass: `noise3`'s field, its value
+ * the same within a rounding (summed in another order), so `noise3` stays as
+ * it was for what it displaced. What a 3D curl is made of.
+ *
+ * @returns {[number, number, number, number]}
+ */
+export function noiseGrad3(x, y, z, seed) {
+  const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+  const fx = x - ix, fy = y - iy, fz = z - iz;
+  const u = fade(fx), v = fade(fy), w = fade(fz), du = fade1(fx), dv = fade1(fy), dw = fade1(fz);
+  let n = 0, nx = 0, ny = 0, nz = 0;
+  for (let c = 0; c < 8; c++) {
+    const i = c & 1, j = (c >> 1) & 1, k = (c >> 2) & 1;
+    const g = grad3(ix + i, iy + j, iz + k, seed);
+    const d = g[0] * (fx - i) + g[1] * (fy - j) + g[2] * (fz - k);
+    const a = i ? u : 1 - u, b = j ? v : 1 - v, e = k ? w : 1 - w;
+    const weight = a * b * e;
+    n += weight * d;
+    nx += weight * g[0] + (i ? du : -du) * b * e * d;
+    ny += weight * g[1] + a * (j ? dv : -dv) * e * d;
+    nz += weight * g[2] + a * b * (k ? dw : -dw) * d;
+  }
+  return [n, nx, ny, nz];
+}
+
+/** The three potentials of a 3D curl, each its own field of the one seed. */
+const POTENTIALS = [0, 0x2545f491, 0x6b43a9b5];
+
+/**
+ * The curl of three noise fields at (x, y, z) — the 3D flow particles' `curl2`
+ * is in the plane: it swirls and never gathers, a curl having no divergence.
+ * Roughly unit-sized; the caller scales it. A cloud's dots move through it
+ * (apps/3d/forces.js).
+ *
+ * @returns {[number, number, number]}
+ */
+export function curl3(x, y, z, seed) {
+  const [p, q, r] = POTENTIALS.map(salt => noiseGrad3(x, y, z, salt ? pcg((seed ^ salt) >>> 0) : seed));
+  return [r[2] - q[3], p[3] - r[1], q[1] - p[2]];
+}

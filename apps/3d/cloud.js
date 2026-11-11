@@ -132,8 +132,9 @@ const paletteOf = v => (Array.isArray(v.inks) && v.inks.length ? v.inks : PALETT
  * @param {object} v        its values (CLOUD_PARAMS), `inks` the colours of a vault palette once read
  *                          (palettes.js), `points` an object emitter's once loaded (emitters.js)
  * @param {Array<{id: string, values: object}>} [stack]   its modifiers, on and known (scene.js `shapesOf`)
- * @returns {{count: number, centres: Float32Array, radii: Float32Array, colours: Float32Array}}
- *          `colours` linear RGB, three to a dot, as three's colours are
+ * @returns {{count: number, centres: Float32Array, radii: Float32Array, colours: Float32Array, faces: Float32Array}}
+ *          `colours` linear RGB, three to a dot, as three's colours are; `faces` the way each faces, its stack's
+ *          turns carried — what a launch `the way it faces` follows (forces.js)
  */
 export function dotsOf(v, stack = []) {
   const n = Math.max(0, Math.min(CLOUD_PARAMS.count.max, Math.round(v.count) || 0));
@@ -148,8 +149,8 @@ export function dotsOf(v, stack = []) {
     centres.set([p[0] + sx * s, p[1] + sy * s, p[2] + sz * s], k * 3);
     faces.set(way, k * 3);
   }
-  const moved = stack.length ? onDots({ centres, faces, radii }, stack) : { centres, radii };
-  return { count: moved.radii.length, centres: moved.centres, radii: moved.radii, colours: dealt(v, moved.centres) };
+  const moved = stack.length ? onDots({ centres, faces, radii }, stack) : { centres, faces, radii };
+  return { count: moved.radii.length, centres: moved.centres, radii: moved.radii, colours: dealt(v, moved.centres), faces: moved.faces };
 }
 
 /**
@@ -193,7 +194,8 @@ function onDots({ centres, faces, radii }, stack) {
     else if (id === 'mirror') g = swap(g, mirror(g, m.axis, m.offset, MAX_DOTS));
     else if (id === 'array') g = swap(g, array(g, m.count, [m.dx, m.dy, m.dz], MAX_DOTS));
   }
-  const out = { centres: Float32Array.from(g.attributes.position.array), radii: Float32Array.from(g.attributes.radius.array) };
+  const out = { centres: Float32Array.from(g.attributes.position.array), faces: Float32Array.from(g.attributes.normal.array),
+                radii: Float32Array.from(g.attributes.radius.array) };
   g.dispose();
   return out;
 }

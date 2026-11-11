@@ -27,6 +27,24 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **A cloud in time** (G2, 2026-11-11, the author's picks; `forces.js`,
+  `tests/3d-forces.mjs` 29, `check-3d-cloud` 25). A cloud's card's *Forces*,
+  its own: a launch — out from the centre, the way a dot faces, every way, a
+  spread — gravity down its y, wind along its x and z, drag, a vortex round
+  an axis through the centre (the right hand's way), a pull to it or away,
+  their reach, and curl noise in 3D (`core/noise.js` `curl3`). The Motion
+  drawer's *time under the forces*: the state after so long — shown as it is
+  set, the frame a print or a picture takes — and the model then an
+  evolution: frame 0 at rest, the last at that time, played once and from
+  rest again when played at its end (`core/playback.js`), saved as a
+  `sequence` that does not loop, titled *evolving*; a turntable turns along
+  it. Each dot integrated from rest, sixty steps a second, by the midpoint
+  rule, so a frame stands alone — drawn fresh, back or on, the same to the
+  bit; played forward it goes on from the frame before, drawn back from the
+  state kept every two seconds. A pull changed moves the dots and makes none
+  again. Past a thousand dots three hands their matrices on once a node
+  frame, which the app's renderer now moves on at each draw (`renderer.js`).
+
 - **A cloud of dots** (G1, 2026-11-11, the author's ask for BEC 2027;
   `cloud.js`, `emitters.js`, `tests/3d-cloud.mjs` 48, `check-3d-cloud` 19).
   The catalogue's ninth, *cloud of dots*: particles' emitter in 3D, its dots
@@ -242,6 +260,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Known
 
+- **A cloud in time is in its own space**, as its stack is: turned, its
+  gravity turns with it. Its dots never meet, nor change size or colour as
+  they go (G3). Curl noise is the slow case: from rest, 3000 dots cost about
+  0.16 s a second of forces — a time set late, with noise, takes a moment.
 - **A cloud's dots are spheres, at rest**: a circle is an unlit sphere,
   round from every side; they do not move yet (G2). A dot's segments rise
   to 32 at most for a print — a dot is small in any picture. One outline for
@@ -272,13 +294,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**G2 — the cloud in time** (`docs/plan.md`, `3d/cloud-forces`): the dots
-at rest are frame 0; a vortex about an axis, gravity, a pull to a centre,
-drag and curl noise move them, each dot integrated from rest as particles'
-`forces.js` integrates a particle from its birth — every frame its own,
-the model's loop playing it, saved as a `sequence`. First step: a
-`forces` drawer in the cloud's card and `cloudAt(dots, t, forces)` in a
-file of its own, tested in Node against the closed form of gravity and drag.
+**G3 — more parameters**, the author's pick (`docs/plan.md`): its list —
+particles' colour over life, the overlay's place and blend, an emitter
+denser where a picture is darker; a cloud's dots growing or turning colour
+as they go, a set's sprites, rings.
 
 M10's six bricks are done; its links — a stroke on a lathe, type extruded,
 a height field, OBJ and glTF — wait for the author to order them.
