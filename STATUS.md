@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-11_
+_last touched: 2026-11-12_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -63,17 +63,21 @@ sorts them.
   listeners, windows in the stack, keys and pies, steps; each app stops its
   own clock — `check-mount`, which counts what an app unmounted leaves.
 
-### 2026-11-03: the bench's UI, in every app (track S, `docs/scene.md`)
+### 2026-11-03, and -12: the bench's UI, in every app (track S, `docs/scene.md`)
 
 - **The look and the rows**: the dark theme (S1); a value on one line — its
   box dragged, its fill, its slider only where wanted, its mark a dot when
   changed, counted by its drawer (S2); its unit in its box, two numbers on
   one line, the rows seldom touched under "n more" (S2b); the format a list
-  (S4) — `check-rows`.
+  (S4), in the viewer's head since 2026-11-12, the picture's size a chip
+  opening the rest (S14b) — `check-rows`, `check-viewtools`.
 - **The shell**, its first Lit components (S12): a title bar — the search,
   Save, Export ▾ — the player under the viewer, as After Effects' (S3), the
   Export box in order (S3), the status bar's hints; in every viewer rulers,
-  guides and the magnet, F placing in particles (S8) — `check-guides`.
+  guides and the magnet, F placing in particles (S8) — `check-guides`; and
+  since 2026-11-12 the viewer's tools as the bench has them (S14a): the zoom
+  — a menu, Ctrl and the wheel, Space or the middle button and a drag — the
+  states, the app's guides, the ground; not in the gamepad, its own page.
 - **The left hand**: ² or Ctrl K, every control and act by name (S5); keys
   by their place, tapped or held for a pie — Q D frames, A the app's own, Z
   the view, E export, R again, F place, G the ground, X a reset (S5b) —
@@ -299,13 +303,9 @@ compares two pages' canvases measures, never demands the pixel.
   fit a 120×176 sheet at 300 dpi, a tall one is enlarged a little, and the
   print says by how much. A shape, or a picture from outside, has only its
   pixels. The gamepad's print box is not on the pad.
-- **Two checks are intermittent under the load of checks run together**,
-  green alone, which the runner tries before saying red: check-compose's
-  "a typed transform lands where page.js says", and check-rig's "a swing,
-  and the loop plays by itself" — 0 values moved, twice on 2026-11-06;
-  check-puppet and check-live hung once each that day, taken down at 8:00.
-  check-map's press, which found the vault panel still fading out over the
-  map, waits for the map to be under the pointer since 2026-11-06.
+- **Checks intermittent under the gate's load**, green alone, which the
+  runner tries before saying red: check-compose's typed transform, check-rig's
+  swing (2026-11-06); check-puppet and check-live hung once that day.
 - **A blur's taps stop at 512 a side**; past that it wants a smaller picture.
 - **Compose's PNG export still draws its page on one canvas**, tried up to
   2480 × 3508 — its print beside it draws any sheet in tiles.
@@ -346,9 +346,9 @@ compares two pages' canvases measures, never demands the pixel.
 
 **S9i — the players in cluster** (`docs/plan.md`, `ready`): the rig's
 puppet and the map's player mounted in the scene as the garden is, each a
-module on `core/mount.js`. Track G is done for now, the author's word;
-waiting on the author: L12's list of the window stack's bugs, window by
-window.
+module on `core/mount.js` — and with them, the viewer's tools (S14). Track
+G is done for now; waiting on the author: S14's look in use, L12's list of
+the window stack's bugs, window by window.
 
 ## Parked decisions
 

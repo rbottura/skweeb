@@ -91,9 +91,9 @@ const search = async words => {
   return found;
 };
 const handOn = key => page.eval(`({ shown: getComputedStyle(${row(key)}).display !== 'none' && !!${row(key)}.getClientRects().length,
-  focus: document.activeElement === ${row(key)}.querySelector('.pp-num') })`);
-const foundFold = await search('prewarm'), handFold = await handOn('prewarm');
-c.ok('the search reaches a folded row, and opens its fold', /› prewarm/.test(foundFold[0]) && handFold.shown && handFold.focus,
+  focus: ${row(key)}.contains(document.activeElement) })`);
+const foundFold = await search('first frame'), handFold = await handOn('prewarm');
+c.ok('the search reaches a folded row, and opens its fold', /› full from the first frame/.test(foundFold[0]) && handFold.shown && handFold.focus,
   JSON.stringify({ found: foundFold.slice(0, 2), hand: handFold }));
 const found = await search('bleed'), hand = await handOn('bleed');
 c.ok('…and a row of the format, behind its chip, the chip opened', found[0] === 'Format › bleed px' && hand.shown && hand.focus,
