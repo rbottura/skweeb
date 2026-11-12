@@ -16,6 +16,7 @@ import { cut, entriesOf, makeDataset, plotDots, plotThumb } from './dots.js';
 import { loadFace }    from './fonts.js';
 import { saveDataset } from './save.js';
 import { Vault }       from '../../core/vault.js';
+import { viewAsIs }    from '../../core/view.js';
 
 const wrap = (i, n) => ((i % n) + n) % n;
 
@@ -133,6 +134,7 @@ export class DotsStage {
 
     if (this.canvas.width !== found.canvas.width) this.canvas.width = found.canvas.width;
     if (this.canvas.height !== found.canvas.height) this.canvas.height = found.canvas.height;
+    viewAsIs(this.canvas, found.canvas);                 // the viewer's zoom (S14a): drawn in its own pixels, sized by CSS
     const ctx = this.canvas.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;

@@ -113,7 +113,7 @@ async function start(host, mine) {
 }
 
 async function boot(mine) {
-  bar = new Bar({ app: 'rig', mount: root,
+  bar = new Bar({ app: 'rig', mount: root, redraw: () => draw(),
                   keys: 'drag a joint · B bones · R rest · space play · S save · V vault' });
   own('KeyR');                        // R is the rig's rest, not core's seed (core/keys.js)
   params = rigParams();

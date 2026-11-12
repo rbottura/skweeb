@@ -125,7 +125,7 @@ async function start(host, mine) {
 }
 
 async function boot(mine) {
-  bar = new Bar({ app: '3d', mount: root,
+  bar = new Bar({ app: '3d', mount: root, redraw: () => draw(),
                   keys: 'click choose · drag turn · shift-drag slide · wheel zoom · A handles · F frame · space play · , . frame · S save · V vault · R C a grid or a cloud anew' });
   params = modelParams();
   const panel = new ParamPanel(params, { title: '3d', mount: root.querySelector('#side'), groups: GROUPS });

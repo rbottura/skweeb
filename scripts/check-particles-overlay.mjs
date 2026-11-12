@@ -36,7 +36,7 @@ const scrubTo = async tick => {
   await page.eval(`(() => { const s = document.querySelector('.tp-scrub'); s.value = ${tick}; s.dispatchEvent(new Event('input', { bubbles: true })); })()`);
   await wait(300);
 };
-const guides = on => page.eval(`(() => { const b = document.getElementById('guides'); if ((b.getAttribute('aria-pressed') === 'true') !== ${on}) b.click(); })()`);
+const guides = on => page.eval(`(() => { const b = document.querySelector('skw-viewtools .vt-guides'); if ((b.getAttribute('aria-pressed') === 'true') !== ${on}) b.click(); })()`);
 /**
  * The band's green on the picture: how many pixels are it, exactly, and the box they make, as shares of the
  * picture — and, in a strip of it, 0 to 1 from the top, the pixels there and those that are particles.

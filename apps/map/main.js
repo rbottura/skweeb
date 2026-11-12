@@ -58,8 +58,6 @@ const MARKUP = `
                 title="A press picks up the thing under it, a drag moves it [2]">things</button>
         <button class="nb-btn" id="tool-walls" type="button" aria-pressed="false"
                 title="A press marks a cell that cannot be walked, a drag a line of them; the right button clears [3]">walls</button>
-        <button class="nb-btn" id="guides" type="button" aria-pressed="true"
-                title="The grid, and the chosen thing's box — never in anything saved [Z]">guides</button>
       </div>
       <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
     </section>
@@ -75,7 +73,7 @@ export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;
 
 // One app mounted at a time: its state, made again by each mount (`start`).
-let root, canvas, ctx, guidesBtn, toolBtns, clock, pending;
+let root, canvas, ctx, toolBtns, clock, pending;
 let map, bar, palette, editing;
 let guidesOn, tool, cells, walls, shape, tiles, tilesTitle, asked, clockFps, busy, savedId, playBtn;
 
@@ -83,7 +81,6 @@ async function start(at, mine) {
   root = at;
   canvas = root.querySelector('#stage');
   ctx = canvas.getContext('2d');
-  guidesBtn = root.querySelector('#guides');
   toolBtns = { tiles: root.querySelector('#tool-tiles'), walls: root.querySelector('#tool-walls'),
                things: root.querySelector('#tool-things') };
   map = bar = palette = editing = null;
@@ -112,7 +109,7 @@ async function start(at, mine) {
 }
 
 async function boot(mine) {
-  bar = new Bar({ app: 'map', mount: root,
+  bar = new Bar({ app: 'map', mount: root, redraw: () => draw(),
                   keys: '1 tiles · 2 things · 3 walls · A tool · Z guides · space play · Del remove · S save · V vault' });
   map = mapParams();
   const panel = new ParamPanel(map, { title: 'map', mount: root.querySelector('#map-side'), groups: MAP_GROUPS });
@@ -144,7 +141,6 @@ async function boot(mine) {
   const sized = new ResizeObserver(() => draw());
   sized.observe(canvas.parentElement);
   mine.hold(() => sized.disconnect());
-  guidesBtn.addEventListener('click', () => showGuides(!guidesOn));
   for (const [name, b] of Object.entries(toolBtns)) b.addEventListener('click', () => useTool(name));
   showGuides(guidesOn);
   useTool('tiles');
@@ -302,7 +298,6 @@ function useTool(name) {
  */
 function showGuides(on) {
   guidesOn = on;
-  guidesBtn.setAttribute('aria-pressed', String(on));
   try { localStorage.setItem('skweeb.map.guides', on ? '1' : '0'); } catch { /* private mode: forgotten */ }
   draw();
 }

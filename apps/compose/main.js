@@ -116,7 +116,7 @@ async function start(at, mine) {
 }
 
 async function boot(mine) {
-  bar = new Bar({ app: 'compose', mount: root,
+  bar = new Bar({ app: 'compose', mount: root, redraw: () => draw(),
                   keys: 'drag or ← ↑ → ↓ move · [ ] order · Del remove · space play · , . frame · S save · V vault' });
   rate = new PaintRate(bar);
   page = pageParams();

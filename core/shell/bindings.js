@@ -35,6 +35,7 @@ const press = node => { if (node && !node.disabled) { node.click(); return true;
 let appPie = null;            // { title, items() → [{ label, run, on? }], tap() }
 let overlay = null;           // { label, on() → bool, toggle() }
 let unPie = () => {}, unOverlay = () => {};   // their holds in the app's scope: one each, the latest
+const overlayEars = new Set();                 // told when the overlay comes or goes: the viewer's tools
 
 /** The app's own pie, on A: its choices, and what a tap does. Gone with its app (core/scope.js). */
 export function setAppPie(spec) {
@@ -47,8 +48,23 @@ export function setAppPie(spec) {
 export function setOverlay(spec) {
   unOverlay();
   overlay = spec;
-  unOverlay = held(() => { if (overlay === spec) overlay = null; });
+  unOverlay = held(() => { if (overlay === spec) { overlay = null; for (const fn of overlayEars) fn(); } });
+  for (const fn of overlayEars) fn();
 }
+
+/** The app's guides over its picture, as the view's tap shows and hides them — or null (core/shell/viewtools.js). */
+export const viewOverlay = () => overlay;
+
+/** The overlay on or off, by Z, its pie or the viewer's tools — and they told. */
+function toggleOverlay() {
+  if (!overlay) return;
+  overlay.toggle();
+  for (const fn of overlayEars) fn();
+}
+export { toggleOverlay };
+
+/** Told when an app's overlay comes or goes; gives back its own undoing. */
+export function onOverlay(fn) { overlayEars.add(fn); return () => overlayEars.delete(fn); }
 
 /**
  * A pie of an enum's options, the one picked lit; a tap the next. For an
@@ -72,12 +88,23 @@ function step(dir, ten) {
   for (let i = 0; i < (ten ? 10 : 1); i++) if (!press(button)) return;
 }
 
-/** The ground of the page's picture — not a print's paper, a card's, a stack layer's. */
+/** The ground's row of the page's picture — not a print's paper, a card's, a stack layer's. */
+function groundRow() {
+  return [...document.querySelectorAll('.pp-row')]
+    .find(r => r.querySelector('.pp-ground') && !r.closest('.pp-print, .pp-card, .pp-stack-layer, [hidden]')) || null;
+}
 function groundChip() {
-  const row = [...document.querySelectorAll('.pp-row')]
-    .find(r => r.querySelector('.pp-ground') && !r.closest('.pp-print, .pp-card, .pp-stack-layer, [hidden]'));
+  const row = groundRow();
   return row ? row.querySelector('.pp-ground .pp-chip') : null;
 }
+
+/** Whether the page's picture has a ground, whether it is one now — not none — and it, or none, as G gives it. */
+export const hasGround = () => !!groundChip();
+export function groundOn() {
+  const o = rowParams(groundRow());
+  return !!o && o.params.get(o.key) !== 'none';
+}
+export const toggleGround = () => press(groundChip());
 
 const hovered = sel => [...document.querySelectorAll(`${sel}:hover`)].pop() || null;
 
@@ -113,11 +140,11 @@ export function installBindings() {
 
   bind('KeyW', {
     short: 'view', label: 'the view',
-    tap: () => (overlay ? overlay.toggle() : Guides.toggle('rulers')),
+    tap: () => (overlay ? toggleOverlay() : Guides.toggle('rulers')),
     pie: () => {
       const st = Guides.state(), n = Guides.guides().length;
       return { title: 'view', items: [
-        ...(overlay ? [{ label: overlay.label, on: overlay.on(), run: () => overlay.toggle() }] : []),
+        ...(overlay ? [{ label: overlay.label, on: overlay.on(), run: () => toggleOverlay() }] : []),
         { label: 'rulers and guides', on: st.rulers, run: () => Guides.toggle('rulers') },
         { label: 'magnetism', on: st.magnet, run: () => Guides.toggle('magnet') },
         ...(n ? [{ label: `clear ${n} guide${n > 1 ? 's' : ''}`, run: () => Guides.clear() }] : []),

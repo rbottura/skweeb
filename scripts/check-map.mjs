@@ -61,7 +61,7 @@ c.ok('the grid is drawn between cells', !ground(await pixel(128, 96, 768)), JSON
 await set('columns', 20);
 c.ok('a map made wider is drawn wider', (await page.eval(say)).includes('20 × 10')
   && await page.eval(`Math.abs(document.getElementById('stage').width / document.getElementById('stage').height - 1280 / 640) < 0.01`), await page.eval(say));
-await page.click(`document.getElementById('guides')`);
+await page.click(`document.querySelector('skw-viewtools .vt-guides')`);
 await wait(300);
 c.ok('the guides\' switch takes the grid away', ground(await pixel(128, 96, 1280)), JSON.stringify(await pixel(128, 96, 1280)));
 await c.shot('1-grid');
@@ -215,7 +215,7 @@ await page.click(`document.getElementById('tool-things')`);
 await wait(300);
 c.ok('with another tool and the guides off, the walls are not drawn', ground(await pixel(cellMid(9), cellMid(1), 768)),
   JSON.stringify(await pixel(cellMid(9), cellMid(1), 768)));
-await page.click(`document.getElementById('guides')`);
+await page.click(`document.querySelector('skw-viewtools .vt-guides')`);
 await wait(300);
 c.ok('with the guides on, they are, whatever the tool', await wallAt(9, 1), JSON.stringify(await pixel(cellMid(9), cellMid(1), 768)));
 

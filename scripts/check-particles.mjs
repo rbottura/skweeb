@@ -308,7 +308,7 @@ if (picked) {
 
 await c.go(c.base + '/apps/particles/');
 await page.until(`${say}.includes('alive')`, { timeout: 20000 });
-await page.eval(`(() => { const b = document.getElementById('guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
+await page.eval(`(() => { const b = document.querySelector('skw-viewtools .vt-guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
 key(' ');                                         // held still
 await wait(300);
 const look = (k, v) => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row('fps')}).params.set(${JSON.stringify(k)}, ${JSON.stringify(v)}))`);

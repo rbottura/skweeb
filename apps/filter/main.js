@@ -28,6 +28,7 @@ import { ParamPanel }           from '../../core/ParamPanel.js';
 import { VaultPanel }           from '../../core/VaultPanel.js';
 import { Transport }            from '../../core/Transport.js';
 import { Bar }                  from '../../core/Bar.js';
+import { viewAsIs }             from '../../core/view.js';
 import { Playhead }             from '../../core/playback.js';
 import { Vault }                from '../../core/vault.js';
 import { createRunner, reachOf } from '../../core/gpu/runner.js';
@@ -362,6 +363,7 @@ function paint() {
   // The picture's own size: the source's, or more where the chain grew it.
   if (canvas.width !== picture.width) canvas.width = picture.width;
   if (canvas.height !== picture.height) canvas.height = picture.height;
+  viewAsIs(canvas, picture);                       // the viewer's zoom (S14a): drawn in its own pixels, sized by CSS
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(picture, 0, 0);
 

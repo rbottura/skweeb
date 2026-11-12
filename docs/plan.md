@@ -60,6 +60,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | G1 | a cloud of dots in the 3D app: particles' emitter, its dots placed once — where (R) and their colours (C) seeds, a palette, sizes between two, unlit | `3d/cloud` | M | landed 2026-11-11 |
 | G2 | the cloud in time: a vortex, gravity, a pull, drag and noise on its dots from rest, every frame its own, saved as a sequence | `3d/cloud-forces` | M | landed 2026-11-11 |
 | G3 | the overlay composed: in front or behind, fitted, sized, moved, turned, see-through, blended, dragged | `particles/overlay-compose` | S | landed 2026-11-11 |
+| S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
+| S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | next |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
@@ -267,6 +269,10 @@ tabs (U7).
 What the bench settled, the bricks and their order are `docs/scene.md`; the
 bench itself is https://claude.ai/artifact/JsZT1PpgNTBYpuMAaWmaZm, its
 source its published files. **S1 — the dark theme** · landed 2026-11-03.
+
+**S14 — the viewer's tools, the format among them** · the author's ask of 2026-11-12 from
+the bench, and two picks (`docs/decisions.md`): S14a the zoom, the states, the guides
+and the ground in every viewer (`core/shell/viewtools.js`, `core/viewzoom.js`); S14b the format.
 
 ## G — the graphic system, for BEC 2027
 

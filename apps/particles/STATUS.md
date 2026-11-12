@@ -228,9 +228,9 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 - **The guides are a switch over the viewer** (2026-09-27, the author's
   ask): on, everything shows, always — the fields' centre too with no
   field on, faint, *field · off*, so it can be placed first; off, nothing.
-  G too. How the viewer looks, not what the particles are, so it is not a
-  param and never in a recipe: remembered in this browser, as a drawer's
-  open state is.
+  Z too, and the viewer's tools since S14a. How the viewer looks, not what
+  the particles are, so it is not a param and never in a recipe: remembered
+  in this browser, as a drawer's open state is.
 - **One sprite, or a set** (2026-09-27, the author's ask). The Look's
   `sprites` takes a shape or a still too — one sprite for every particle.
   And a picture from outside the suite comes in through the vault panel's

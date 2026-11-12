@@ -151,15 +151,15 @@ const guided = await pixels();
 tapKey('KeyW'); await wait(300);                 // Z: the guides are the view's since S5b, G the ground's
 const bare = await pixels();
 c.ok('Z takes the guides away, and the particles stay', apart(guided, bare) > 1
-  && (await page.eval(`document.getElementById('guides').getAttribute('aria-pressed')`)) === 'false');
+  && (await page.eval(`document.querySelector('skw-viewtools .vt-guides').getAttribute('aria-pressed')`)) === 'false');
 tapKey('KeyW'); await wait(300);
 // Within a level, not to the pixel: Chrome moves a canvas read back often off
 // the GPU and draws it a hair differently after (check-frames.mjs says the same).
 c.ok('and Z brings them back', apart(await pixels(), guided) <= 1, 'apart by ' + apart(await pixels(), guided).toFixed(2));
-await page.click(`document.getElementById('guides')`); await wait(300);
+await page.click(`document.querySelector('skw-viewtools .vt-guides')`); await wait(300);
 c.ok('the switch over the viewer turns them off too', apart(await pixels(), bare) <= 1
-  && (await page.eval(`document.getElementById('guides').getAttribute('aria-pressed')`)) === 'false');
-await page.click(`document.getElementById('guides')`); await wait(300);
+  && (await page.eval(`document.querySelector('skw-viewtools .vt-guides').getAttribute('aria-pressed')`)) === 'false');
+await page.click(`document.querySelector('skw-viewtools .vt-guides')`); await wait(300);
 
 /** Where a point of the picture, from its centre, is on screen. */
 const onScreen = (x, y) => page.eval(`(() => { const r = document.getElementById('stage').getBoundingClientRect();
@@ -268,7 +268,7 @@ c.ok('the same file twice is one object', imported.again === (star && star.id), 
 
 await c.go(c.base + '/apps/particles/');
 await page.until(`${say}.includes('alive')`, { timeout: 20000 });
-await page.eval(`(() => { const b = document.getElementById('guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
+await page.eval(`(() => { const b = document.querySelector('skw-viewtools .vt-guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
 key(' ');                                         // the torch held still
 await wait(300);
 const band = await page.eval(`(async () => {
@@ -348,7 +348,7 @@ if (fronted) {
   c.ok(`printed in ${printed.tiles} tiles, the overlay drawn in each`, printed.enlarged === 1 && printed.off < 0.002 && printed.mean < 0.3, JSON.stringify(printed));
   await c.go(c.base + '/apps/particles/?open=' + fronted);
   await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
-  await page.eval(`(() => { const b = document.getElementById('guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
+  await page.eval(`(() => { const b = document.querySelector('skw-viewtools .vt-guides'); if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`);
   await scrubTo(20);
   const back = await between(0, 0.12);
   c.ok('?open= brings it back, in front', back.green === back.all, JSON.stringify(back));

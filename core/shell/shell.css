@@ -85,7 +85,22 @@ skw-viewtools .vt-btn { height: 24px; min-width: 24px; display: inline-flex; ali
   border: 0; border-radius: var(--radius); background: none; color: var(--fg-3); font: 400 12px var(--font-ui); cursor: pointer; }
 skw-viewtools .vt-btn:hover { background: var(--hover); color: var(--fg); }
 skw-viewtools .vt-btn[aria-pressed="true"] { color: var(--accent); }
+skw-viewtools .vt-btn:disabled { opacity: .4; cursor: default; background: none; }
 skw-viewtools .vt-ic { width: 16px; height: 16px; }
+
+/* Its zoom (S14a, core/viewzoom.js): how near, its menu under it; the stage moved by a drag while Space is held. */
+skw-viewtools .vt-zoom { position: relative; }
+skw-viewtools .vt-zoom-btn { font: 500 11.5px var(--font-num); color: var(--fg-2); }
+skw-viewtools .vt-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; min-width: 168px; display: flex; flex-direction: column; padding: 4px;
+  border-radius: var(--radius-lg); border: 1px solid var(--line-2); background: var(--raised); box-shadow: 0 14px 36px var(--shadow); }
+skw-viewtools .vt-mi { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border: 0; border-radius: var(--radius);
+  background: none; color: var(--fg); font: 400 12px var(--font-ui); text-align: left; cursor: pointer; }
+skw-viewtools .vt-mi:hover { background: var(--accent); color: var(--accent-ink); }
+skw-viewtools .vt-mi[aria-checked="true"]::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+skw-viewtools .vt-note { margin: 4px 8px 2px; color: var(--fg-3); font-size: 11px; line-height: 1.35; }
+.viewer-stage.vz { overflow: hidden; }
+.viewer-stage.vz-grab { cursor: grab; }
+.viewer-stage.vz-held { cursor: grabbing; }
 
 /* ── Pies (S5b; core/shell/pie.js): held by a key, at the pointer ────────── */
 

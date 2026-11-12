@@ -12,8 +12,8 @@
  *                    the ruler it crosses, and gone dragged back into the one
  *                    it came out of. The magnet's lines while it pulls. On a size its guides were not laid on,
  *                    the offer to lay them here, in % or in px.
- *   <skw-viewtools>  at the end of `.viewer-head`: the rulers and the magnet,
- *                    on or off, and this size's guides cleared.
+ * Their buttons — the rulers and the magnet on or off, this size's guides
+ * cleared — are the viewer's tools' since S14a (core/shell/viewtools.js).
  *
  * Lit components in the page's DOM, with no canvas of their own: whatever
  * finds the app's canvas in the stage (core/StackPanel.js) never finds
@@ -26,12 +26,6 @@ import * as G from './guides.js';
 const RULER = 18;          // the stage's padding (theme.css): the rulers are that wide
 const STEPS = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
 const NUMBERED = 56;       // screen pixels between two numbered ticks, at least
-
-const icon = body => html`<svg class="vt-ic" viewBox="0 0 16 16" aria-hidden="true">${body}</svg>`;
-const ICONS = {
-  rulers: icon(svg`<g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"><path d="M2.5 10.5 10.5 2.5l3 3-8 8z"/><path d="M5 8l1.2 1.2M7 6l1.2 1.2M9 4l1.2 1.2"/></g>`),
-  magnet: icon(svg`<g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4 2.5v5.5a4 4 0 0 0 8 0V2.5"/><path d="M4 5h2.5M9.5 5H12"/><path d="M6.5 2.5V8a1.5 1.5 0 0 0 3 0V2.5"/></g>`),
-};
 
 class SkwRulers extends LitElement {
   createRenderRoot() { return this; }
@@ -198,35 +192,5 @@ class SkwRulers extends LitElement {
   }
 }
 
-class SkwViewtools extends LitElement {
-  createRenderRoot() { return this; }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this._off = G.on('change', () => this.requestUpdate());
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._off();
-  }
-
-  render() {
-    const st = G.state(), n = G.guides().length;
-    return html`
-      ${n ? html`<button class="vt-btn vt-clear" type="button" data-pal="Clear the guides"
-          title=${`Clear the ${n} guide${n > 1 ? 's' : ''} of ${st.doc.w} × ${st.doc.h}`}
-          @click=${() => G.clear()}>${n} guide${n > 1 ? 's' : ''} ✕</button>` : nothing}
-      <button class="vt-btn vt-rulers" type="button" aria-pressed=${st.rulers ? 'true' : 'false'} aria-label="Rulers"
-              data-pal="Rulers and guides, on or off" title="Rulers and guides — drag a guide out of a ruler"
-              @click=${() => G.toggle('rulers')}>${ICONS.rulers}</button>
-      <button class="vt-btn vt-magnet" type="button" aria-pressed=${st.magnet ? 'true' : 'false'} aria-label="Magnetism"
-              data-pal="Magnetism, on or off" title="Magnetism: to the edges, the centre and the guides — Ctrl held, none"
-              @click=${() => G.toggle('magnet')}>${ICONS.magnet}</button>`;
-  }
-}
-
 if (!customElements.get('skw-rulers')) customElements.define('skw-rulers', SkwRulers);
-if (!customElements.get('skw-viewtools')) customElements.define('skw-viewtools', SkwViewtools);
-
-export { SkwRulers, SkwViewtools };
+export { SkwRulers };

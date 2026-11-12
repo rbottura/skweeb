@@ -104,7 +104,7 @@ function gather() {
     if (!text) continue;
     out.push({ label: text, detail: titleOf(drawer), act: true, run: () => { opened(drawer); b.click(); } });
   }
-  // The viewer's tools and offers (core/shell/rulers.js), by the words they carry; a scene's apps (apps/cluster/).
+  // The viewer's tools and offers (core/shell/viewtools.js, core/shell/rulers.js), by the words they carry; a scene's apps (apps/cluster/).
   for (const b of document.querySelectorAll('[data-pal]')) {
     if (b.disabled || b.closest('[hidden]') || b.closest('.pal')) continue;
     out.push({ label: b.dataset.pal, detail: b.dataset.palWhere || 'Viewer', act: true, run: () => b.click() });

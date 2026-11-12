@@ -363,6 +363,7 @@ at once, so every browser check runs at each gate.
 | S11 | the space viewer's own bench: its parameters, its small tests | — | before S10, a side bench |
 | S12 | the bench's shell in every app, ahead of S8: title bar, the player under the viewer, hints | `ui/shell` | — |
 | S13 | the player's lanes: a composition's sequences a lane each, one opened there to be seen or changed | `compose/lanes` | compose's timeline |
+| S14 | the viewer's tools as the bench has them: the zoom, the states, the guides, the ground (S14a); the format in the viewer (S14b) | `ui/vtools`, `ui/format-viewer` | the bench's `.vtools` |
 
 S12 came forward on the author's word of 2026-11-03 — the bench's
 interface is what every app should have first — and with it the

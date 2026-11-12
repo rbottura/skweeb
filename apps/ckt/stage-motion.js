@@ -26,6 +26,7 @@ import { applyFrameEdit } from '../../core/frame.js';
 import { PrintPanel }   from '../../core/PrintPanel.js';
 import { exportBox }      from '../../core/boxes/export.js';
 import { stackDrawer }  from '../../core/StackPanel.js';
+import { viewFactor }   from '../../core/view.js';
 
 const DATA   = new Set(['dataset', 'made']);
 const ANCHOR = new Set(['dataset', 'made', 'glyph', 'width', 'height']);
@@ -206,17 +207,12 @@ export class MotionStage {
     if (this.active) this.showOutput();
   }
 
-  /** How much of the output the viewer can show, in device pixels — in steps, so a resize does not churn. */
+  /**
+   * How much of the output the viewer can show, in device pixels — in steps, so a resize does not churn; never
+   * more than the output. Core's, so the viewer's zoom lays it too (core/view.js, S14a).
+   */
   viewFactor(full) {
-    const box = this.canvas.parentElement;
-    if (!box || typeof getComputedStyle === 'undefined') return 1;
-    const cs = getComputedStyle(box);
-    const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    const h = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-    if (!(w > 0) || !(h > 0)) return 1;
-    const dpr = window.devicePixelRatio || 1;
-    const fit = Math.min(1, (w * dpr) / full.width, (h * dpr) / full.height);
-    return Math.min(1, Math.ceil(fit * 20) / 20);
+    return viewFactor(this.canvas, full, 1);
   }
 
   /** The bar's size readout: what a save makes, not the preview. */

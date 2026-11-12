@@ -30,6 +30,7 @@ import { installKeys, bound, letterOf } from './keys.js';
 import { installBindings } from './shell/bindings.js';
 import { onStep } from './steps.js';
 import { bag, held } from './scope.js';
+import { zoomable } from './viewzoom.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -47,8 +48,10 @@ export class Bar {
    * @param {HTMLElement} opts.mount   the page grid (`.app`)
    * @param {string} [opts.keys]       the few shortcuts worth showing
    * @param {boolean} [opts.acts]      false: an app that makes nothing — no Save, no Export above it
+   * @param {() => void} [opts.redraw] the app's picture drawn again: what its viewer's zoom asks (core/viewzoom.js)
    */
-  constructor({ app, mount, keys = '', acts = true }) {
+  constructor({ app, mount, keys = '', acts = true, redraw = null }) {
+    this._redraw = redraw;
     this.root = el('footer', 'bar');
     this._say = el('span', 'bar-say', 'loading…');
     this._fps = el('span', 'bar-dim');
@@ -118,7 +121,9 @@ export class Bar {
     let head = viewer.querySelector(':scope > .viewer-head');
     if (!head) { head = el('div', 'viewer-head'); viewer.prepend(head); }
     if (!head.querySelector('skw-viewtools')) head.append(document.createElement('skw-viewtools'));
+    zoomable(stage, this._redraw);
     import('./shell/rulers.js').catch(err => console.warn('the rulers did not load:', err.message));
+    import('./shell/viewtools.js').catch(err => console.warn("the viewer's tools did not load:", err.message));
   }
 
   /** What the thing under the cursor answers to, in place of the app's keys while it is there. */
@@ -132,7 +137,7 @@ export class Bar {
       : at('skw-titlebar') ? '² or Ctrl K: every control and act, by name'
       : at('skw-rulers .rl') ? 'drag out: a guide · back into a ruler: gone · Ctrl held: no magnet'
       : at('skw-rulers .gd-grip') ? 'drag: move the guide · back into the ruler it came from: gone · Ctrl held: no magnet'
-      : at('skw-viewtools') ? 'the rulers and guides · the magnet'
+      : at('skw-viewtools') ? 'the zoom: Ctrl wheel, Space or the middle button and drag · the states · the rulers · the magnet · the guides · the ground'
       : at('.viewer') ? `${this._leftHand()} · held: its pie`
       : null;
     this._keys.textContent = h || this._keysText;

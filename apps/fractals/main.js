@@ -95,7 +95,7 @@ async function start(host, mine) {
 }
 
 async function boot(mine) {
-  bar = new Bar({ app: 'fractals', mount: root,
+  bar = new Bar({ app: 'fractals', mount: root, redraw: () => draw(),
                   keys: 'drag pan · wheel zoom · space play · , . frame · S save · V vault' });
   params = fractalParams();
   const panel = new ParamPanel(params, { title: 'fractal', mount: root.querySelector('#side'), groups: GROUPS });

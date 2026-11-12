@@ -53,7 +53,7 @@ const inkAlong = py => page.eval(`(() => { const c = document.getElementById('st
     if (Math.abs(d[i] - 255) + Math.abs(d[i + 1] - 253) + Math.abs(d[i + 2] - 246) > 30) out.push(x * 1080 / c.width); }
   return out; })()`);
 /** The guides off, whatever this browser remembered: only particles on the picture. */
-const guidesOff = async () => { await page.eval(`(() => { const b = document.getElementById('guides');
+const guidesOff = async () => { await page.eval(`(() => { const b = document.querySelector('skw-viewtools .vt-guides');
   if (b.getAttribute('aria-pressed') === 'true') b.click(); })()`); await wait(200); };
 /** Pick an object by its title in the picker a row's Choose… opens. */
 const choose = async (rowName, title) => {

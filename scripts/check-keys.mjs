@@ -60,7 +60,7 @@ c.ok('A held: its pie, the shape it has lit; a digit takes one', pie.length === 
 await page.click(`[...${row('shape')}.querySelectorAll('.pp-chip')].find(b => b.textContent === 'point')`);
 
 // Z: tapped the guides, off and on; held the view's pie, aimed, let go.
-const pressed = () => page.eval(`document.getElementById('guides').getAttribute('aria-pressed')`);
+const pressed = () => page.eval(`document.querySelector('skw-viewtools .vt-guides').getAttribute('aria-pressed')`);
 await tap('KeyW');
 const off = await pressed();
 await tap('KeyW');

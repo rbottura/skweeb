@@ -92,7 +92,7 @@ async function start(at, mine) {
 }
 
 async function boot(mine) {
-  bar = new Bar({ app: 'ckt', mount: root, keys: KEYS });
+  bar = new Bar({ app: 'ckt', mount: root, keys: KEYS, redraw: () => { if (motion && motion.active) { motion.reframe(); motion.draw(); } } });
 
   const [fonts, datasets, fams] = await Promise.all([fontManifest(), datasetManifest(), families()]);
   if (mine.closed) return;

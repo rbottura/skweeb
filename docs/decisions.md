@@ -321,3 +321,26 @@ move, a turn, an opacity, a blend by the stack's names — still one picture,
 the gabarit's layers M13c's. Dragged on the preview by a press anywhere
 in it, since its middle is where the fields' centre starts, and a handle
 alone there would always lose.
+
+## Decided since, 2026-11-12
+
+**The viewer's tools as the bench has them, the format among them** (S14).
+The author, from the bench: "il manque dans le vtools du viewer le bouton
+fmtQuick, le bouton de zoom, de graph, de guides et de background, ça veut
+dire déplacer la section de format dans le viewer, pour toutes les apps
+dans le clusters et les apps en stand alone aussi". Asked how far, two
+picks. The format all in the viewer: its list there, and the size beside it
+a chip opening the rest — width and height, the link, bleed, scale — the
+Format section out of the properties, particles' overlay a section of its
+own (S14b). The zoom a menu — Fit, 25 % to 200 % — with Ctrl and the wheel
+about the pointer, the middle button or Space held and a drag to move: no
+app loses its wheel or its drag, the 3D app's camera and fractals' plane
+keeping the wheel alone (S14a). The zoom is the viewer's, never the
+recipe's — each stage its own, at Fit when it mounts — and read where an
+app already sized its preview (`viewFactor`), so a picture zoomed is drawn
+in as many pixels as it shows and no more than its scale, as pixels past
+that; a pan is CSS alone. Space over a viewer is held for a drag and, let
+go without one, is the app's Space as before — its play, a tap later than
+it was; elsewhere Space is unchanged. The guides button is the app's
+overlay, Z's (particles', the map's), which left their own buttons; the
+ground's is G's; the states' H's, there once the object has one.

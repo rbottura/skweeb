@@ -35,6 +35,7 @@ import { ParamPanel }              from '../../core/ParamPanel.js';
 import { VaultPanel }              from '../../core/VaultPanel.js';
 import { Transport }               from '../../core/Transport.js';
 import { Bar }                     from '../../core/Bar.js';
+import { viewAsIs }                from '../../core/view.js';
 import { Playhead }                from '../../core/playback.js';
 import { Vault }                   from '../../core/vault.js';
 import { resolveFrame, applyFrameEdit } from '../../core/frame.js';
@@ -351,6 +352,8 @@ function paint() {
 
   if (canvas.width !== last.canvas.width) canvas.width = last.canvas.width;
   if (canvas.height !== last.canvas.height) canvas.height = last.canvas.height;
+  // The viewer's zoom (S14a): drawn in its own pixels, sized by CSS.
+  viewAsIs(canvas, { width: canvas.width / last.scale, height: canvas.height / last.scale }, last.scale);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(last.canvas, 0, 0);
 

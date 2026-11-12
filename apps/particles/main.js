@@ -58,10 +58,7 @@ const MARKUP = `
   <main class="app-main">
     <div class="app-side" id="emit-side"></div>
     <section class="viewer" aria-label="particles">
-      <div class="viewer-head">
-        <button class="nb-btn" id="guides" type="button" aria-pressed="true"
-                title="The emitter, the fields and the pull over the preview, with handles to drag — never saved [Z]">guides</button>
-      </div>
+      <div class="viewer-head"></div>
       <div class="viewer-stage"><canvas id="stage" width="480" height="300"></canvas></div>
     </section>
     <div class="app-side" id="picture-side"></div>
@@ -76,7 +73,7 @@ export const unmount = () => app.unmount();
 const mounted = () => !!app.scope;
 
 // One app mounted at a time: its state, made again by each mount (`start`).
-let root, canvas, ctx, guidesBtn, clock, emit, picture, bar, transport, player;
+let root, canvas, ctx, clock, emit, picture, bar, transport, player;
 let clockFps, shownView, guidesOn, model, shown, sprites, spritesTitle, loading, spritesIn, asked;
 let given, asking, coming, leaving, painted, pending;
 
@@ -84,7 +81,6 @@ async function start(at, mine) {
   root = at;
   canvas = root.querySelector('#stage');
   ctx = canvas.getContext('2d');
-  guidesBtn = root.querySelector('#guides');
   clockFps = 0;
   shownView = 1;           // canvas pixels per picture pixel, as last painted
   guidesOn = remembered(); // the guides over the preview: the viewer's, not the recipe's
@@ -117,7 +113,7 @@ async function start(at, mine) {
 }
 
 async function boot(mine) {
-  bar = new Bar({ app: 'particles', mount: root,
+  bar = new Bar({ app: 'particles', mount: root, redraw: () => draw(),
                   keys: 'drag the handles · Z guides · A emitter · F place · space play · , . frame · S save · V vault' });
   emit = emitParams();
   picture = pictureParams();
@@ -148,9 +144,9 @@ async function boot(mine) {
   mine.hold(() => sized.disconnect());
   wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn, chose: () => draw(),
                overlay: () => given.overlay && given.overlay.images[0] });
-  guidesBtn.addEventListener('click', () => showGuides(!guidesOn));
   showGuides(guidesOn);
-  // The left hand (core/shell/bindings.js): Z shows the guides — G is the ground's since S5b — and A picks the emitter's shape.
+  // The left hand (core/shell/bindings.js): Z shows the guides — G is the ground's since S5b — and A picks the emitter's
+  // shape. The viewer's tools show them too, their button pressed as they are (core/shell/viewtools.js, S14a).
   setOverlay({ label: 'guides', on: () => guidesOn, toggle: () => showGuides(!guidesOn) });
   setAppPie(enumPie(emit, 'shape', 'emitter'));
   wireKeys(mine);
@@ -317,7 +313,6 @@ function buildExport(side) {
  */
 function showGuides(on) {
   guidesOn = on;
-  guidesBtn.setAttribute('aria-pressed', String(on));
   try { localStorage.setItem('skweeb.particles.guides', on ? '1' : '0'); } catch { /* private mode: forgotten */ }
   if (!on) canvas.classList.remove('can-move');
   draw();

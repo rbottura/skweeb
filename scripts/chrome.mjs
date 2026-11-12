@@ -226,7 +226,7 @@ async function attach(wsUrl, { page: isPage = true } = {}) {
      * `{ button: 'right' }` presses the other button.
      */
     async pointer(from, to = from, steps = 6, { button = 'left' } = {}) {
-      const held = button === 'right' ? 2 : 1;
+      const held = button === 'right' ? 2 : button === 'middle' ? 4 : 1;
       const at = ([x, y], type, buttons) => send('Input.dispatchMouseEvent',
         { type, x, y, button, buttons, clickCount: 1 });
       await at(from, 'mouseMoved', 0);
