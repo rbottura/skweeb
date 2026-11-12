@@ -17,6 +17,12 @@
  * tiles as it is drawn whole; `?open=` brings its composition back. And no
  * page said anything wrong. What came before — fitted whole, in front, at A3
  * and on a square — is check-particles-fields'.
+ *
+ * Since L13b (2026-11-12) the overlay is the picture's first layer, in its
+ * Stack section (core/layers.js): G3's rows by their old names are its rows
+ * here, and every assertion stands as it was. With them: the Stack has the
+ * layers and no Overlay section is left; a save from before L13, its overlay
+ * one of G3's rows, replayed as its picture was.
  */
 
 import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
@@ -28,9 +34,17 @@ const key = k => page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', 
 const tapKey = code => page.eval(`(() => { for (const t of ['keydown', 'keyup']) document.dispatchEvent(new KeyboardEvent(t, { code: '${code}', key: '', bubbles: true })); })()`);
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const row = name => `[...document.querySelectorAll('.pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
-/** Values set on the picture's panel, as its rows would. */
-const setPicture = async values => { await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row('format')}).params.set(${JSON.stringify(values)}))`); await wait(400); };
-const getPicture = keys => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { const p = rowParams(${row('format')}).params; return ${JSON.stringify(keys)}.map(k => p.get(k)); })`);
+/** G3's rows by their names, the picture's first layer's since L13b — `overlay` its object. */
+const OLD = { overlay: 'ref', overlayAt: 'at', overlayFit: 'fit', overlayScale: 'scale', overlayX: 'x', overlayY: 'y', overlayAngle: 'rot',
+  overlayOpacity: 'opacity', overlayBlend: 'blend' };
+/** Values set on the picture's panel, as its rows would — an old row of the overlay its first layer's. */
+const setPicture = async values => { await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { const p = rowParams(${row('format')}).params;
+  const OLD = ${JSON.stringify(OLD)}, rest = {}, part = {};
+  for (const [k, v] of Object.entries(${JSON.stringify(values)})) { if (OLD[k]) part[OLD[k]] = v; else rest[k] = v; }
+  if (Object.keys(rest).length) p.set(rest);
+  if (Object.keys(part).length) { const ls = p.get('layers'); p.set('layers', [{ ...(ls[0] || {}), ...part }, ...ls.slice(1)]); } })`); await wait(400); };
+const getPicture = keys => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { const p = rowParams(${row('format')}).params, first = p.get('layers')[0] || {};
+  const OLD = ${JSON.stringify(OLD)}; return ${JSON.stringify(keys)}.map(k => (OLD[k] ? first[OLD[k]] : p.get(k))); })`);
 const setEmit = async values => { await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row('seed')}).params.set(${JSON.stringify(values)}))`); await wait(400); };
 const scrubTo = async tick => {
   await page.eval(`(() => { const s = document.querySelector('.tp-scrub'); s.value = ${tick}; s.dispatchEvent(new Event('input', { bubbles: true })); })()`);
@@ -73,6 +87,11 @@ await setEmit({ y: -700 });                            // the particles at the t
 await setPicture({ overlay: band });
 await page.until(`${say}.includes('a band on top')`, { timeout: 15000 }).catch(() => {});
 await scrubTo(20);
+// Its layers the Stack's, in the picture's panel — no Overlay section left (L13b).
+const sections = await page.eval(`[...document.querySelectorAll('.dr-head')].map(h => h.textContent.trim())`);
+const stacked = await page.eval(`(() => { const r = document.querySelector('#picture-side .pp-row[data-key="layers"]'); return !!r && /^Stack/.test(r.closest('.dr').querySelector('.dr-head').textContent.trim())
+  && document.querySelectorAll('#picture-side .pp-layer-row').length === 1; })()`);
+c.ok('its overlay a layer, in the Stack: no Overlay section left', stacked && !sections.some(t => /^Overlay/i.test(t)), JSON.stringify(sections));
 
 // ── At its defaults, as it was; then behind ─────────────────────────────────
 
@@ -154,8 +173,10 @@ await key('S');
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });
 const id = ((await page.eval(say)).match(/^saved (\S+)/) || [])[1];
 const o = id ? inner(await (await fetch(c.base + '/api/vault/' + id)).json()) : null;
-c.ok('saved composed: the overlay its parent, its composition in the recipe', !!o && o.parents.includes(band) && o.recipe.picture.overlayAt === 'behind'
-  && o.recipe.picture.overlayBlend === 'multiply' && o.recipe.picture.overlayAngle === 12, o ? JSON.stringify(o.parents) : await page.eval(say));
+const kept = o && o.recipe.picture.layers && o.recipe.picture.layers[0];
+c.ok('saved composed: the overlay its parent, its composition in the recipe — its first layer', !!o && o.parents.includes(band) && !!kept
+  && kept.ref === band && kept.at === 'behind' && kept.blend === 'multiply' && kept.rot === 12 && !('overlay' in o.recipe.picture),
+  o ? JSON.stringify({ parents: o.parents, kept }) : await page.eval(say));
 if (id) {
   const replayed = await page.eval(`(async () => {
     const { Vault } = await import('/core/vault.js');
@@ -177,6 +198,39 @@ if (id) {
   c.ok('?open= brings its composition back', JSON.stringify(back) === JSON.stringify(['behind', 12, 0.8, -60, 90, 0.7, 'multiply']), JSON.stringify(back));
 }
 await c.shot('1-composed');
+
+// ── A save from before L13: its overlay one of G3's rows, replayed as its picture was ──
+const index = (await (await fetch(c.base + '/api/vault')).json()).objects || [];
+let before = null;
+for (const r of index.filter(r => r.type === 'skw' || (r.origin && r.origin.app === 'particles'))) {
+  if (before) break;
+  const full = inner(await (await fetch(c.base + '/api/vault/' + r.id)).json());
+  if (full.origin && full.origin.app === 'particles' && full.recipe && full.recipe.picture && typeof full.recipe.picture.overlay === 'string') before = full;
+}
+if (before) {
+  // Its picture is a frame of it — a still's its tick, a loop's the one on screen when it was saved: the frame of the
+  // replay nearest it, found small, then held to it whole.
+  const old = await page.eval(`(async () => {
+    const { Vault } = await import('/core/vault.js');
+    const { openFrames } = await import('/core/rebuild.js');
+    const { object, url } = await Vault.load(${JSON.stringify(before.id)});
+    const h = await openFrames(object, { url });
+    const img = await createImageBitmap(await (await fetch(url, { cache: 'no-store' })).blob());
+    const read = (src, w, hh) => { const x = new OffscreenCanvas(w, hh).getContext('2d'); x.drawImage(src, 0, 0, w, hh); return x.getImageData(0, 0, w, hh).data; };
+    const apart = (p, q) => { let sum = 0; for (let k = 0; k < p.length; k++) sum += Math.abs(p[k] - q[k]); return sum / p.length; };
+    const sw = Math.max(1, img.width >> 3), sh = Math.max(1, img.height >> 3), small = read(img, sw, sh);
+    let best = 0, near = Infinity;
+    for (let i = 0; i < h.length; i++) { const d = apart(read(h.frame(i), sw, sh), small); if (d < near) { near = d; best = i; } }
+    const f = h.frame(best), da = read(img, img.width, img.height), db = read(f, img.width, img.height);
+    let sum = 0, off = 0; for (let k = 0; k < da.length; k++) { const d = Math.abs(da[k] - db[k]); sum += d; if (d > 24) off++; }
+    const out = { frame: best, of: h.length, size: [img.width, img.height, f.width, f.height], mean: +(sum / da.length).toFixed(3),
+      off: +(off / da.length).toFixed(5), missing: h.missing };
+    h.dispose(); return out; })()`);
+  c.ok("a save from before L13, its overlay G3's row: replayed as its picture was", old.size[0] === old.size[2] && old.mean < 0.5 && old.off < 0.002
+    && !old.missing.length, JSON.stringify({ id: before.id, ...old }));
+} else {
+  console.log('     no particles save with an overlay from before L13 in this vault: the old replay goes unchecked');
+}
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));

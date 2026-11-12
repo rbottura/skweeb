@@ -1,5 +1,5 @@
 # STATUS — particles
-_last touched: 2026-11-11_
+_last touched: 2026-11-12_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
 and *Done when* are in `docs/roadmap-done.md`, M6 — a torch loop that closes
@@ -26,9 +26,21 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **Its overlay, its layers** (L13b, 2026-11-12, the author's: "on peut la
+  mettre dans la section stack comme une section à part entière dédiée au
+  système de 'calque'"; core/layers.js, `params.js` `overlayAsLayer`). The
+  Overlay section is the Stack's layers now, as every app's: "+ overlay…",
+  a list, each layer composed as the overlay was — and particles draws them
+  itself (`drawPicture`), the ones behind between its ground and its
+  particles (`layered`: core lays none round its picture again). On the
+  preview the topmost layer under a press is dragged by its middle, F puts
+  the one pressed last on the picture's edge or corner. A recipe from before
+  — G3's nine rows — has its overlay as its first layer wherever it comes
+  in: opened, gone back to in the graph, replayed, printed, as it was drawn
+  (`tests/particles-model.mjs`, `check-particles-overlay`).
 - **The overlay composed** (G3, 2026-11-11, the author's pick: "overlay
-  composable"; `draw.js` `overlayBox`, `drawOverlay`, `drawPicture`;
-  `guides.js` `overlayOn`; `check-particles-overlay` 16). With an overlay,
+  composable"; since L13b its rows are its layer's, and its box core's
+  `layerBox`; `check-particles-overlay` 16). With an overlay,
   the Overlay section's rows compose it (S14b): *where* — in front of the
   particles, or behind them, over the ground — *fitted* whole or filling
   the format, what spills over cut; its *size*, a share of that; *from

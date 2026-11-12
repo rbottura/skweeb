@@ -296,7 +296,7 @@ await set('y from centre', -700);
 await scrubTo(20);
 const nothingInFront = await between(0, 0.12);
 c.ok('the particles at the top, nothing in front yet', nothingInFront.ink > 50 && nothingInFront.green === 0, JSON.stringify(nothingInFront));
-await setPicture('overlay', 'overlay', band);
+await setPicture('format', 'layers', [{ ref: band }]);     // its overlay, a layer since L13b
 await page.until(`${say}.includes('a band on top')`, { timeout: 15000 }).catch(() => {});
 await scrubTo(20);
 const covered = await between(0, 0.12);
