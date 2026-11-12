@@ -24,8 +24,10 @@ export class Chain extends Cards {
       mount, onChange,
       catalogue: FILTERS,
       app: 'filter',
+      key: 'chain',           // the recipe's: a state gone back to puts the chain back with the source (core/steps.js, L12b)
       order: true,
       words: {
+        label: 'the chain',
         add: 'add a filter…',
         empty: 'No filters yet. Add one — they run top to bottom.',
         toggle: 'Switch this filter off or on',

@@ -12,7 +12,8 @@
  * filter's own layer, the page its size; particles' drawer shows the same
  * stack. An opacity and a blend set in filter are particles' too; a layer
  * moved down in particles is down in filter; something from the vault goes
- * on top in both, and off in both. The gamepad, which has no drawer, is a
+ * on top in both, and off in both — every row within its panel, its buttons
+ * in reach, its title the whole of it (L12a). The gamepad, which has no drawer, is a
  * window the others can stack; a tab closed takes its layer off every
  * stack. Served as plain files with no vault, an app's drawer says it is
  * alone (rule 7). And no page said anything wrong.
@@ -101,6 +102,19 @@ await page.click(`document.querySelector('.vp--visible .vp-use')`);
 await filter.until(`(${order}).length === 3`, { timeout: 5000 }).catch(() => {});
 c.ok('something from the vault goes on top, in both', (await filter.eval(order))[0].startsWith('vault') && (await page.eval(order))[0].startsWith('vault'),
   `${JSON.stringify(await filter.eval(order))} · ${await filter.eval(`${rowOf('vault')}?.querySelector('.pp-stack-app')?.textContent`)}`);
+// Every row within its panel and its buttons in reach, however long what it says (L12a, 2026-11-12): a
+// window's size and frames, or a title, once pushed ▲ ▼ × past the panel's edge. What is cut, its title says.
+const fits = `(() => { const side = document.querySelector('.pp-stack').closest('.pp').getBoundingClientRect();
+  return [...document.querySelectorAll('.pp-stack-row')].map(r => { const b = r.getBoundingClientRect();
+    const out = [...r.querySelectorAll('button')].filter(x => { const q = x.getBoundingClientRect();
+      return !(q.width > 0 && q.left >= b.left - 0.5 && q.right <= b.right + 0.5); }).length;
+    return { app: r.dataset.app, w: Math.round(b.width), side: Math.round(side.width), past: Math.round(b.right - side.right), out }; }); })()`;
+for (const [name, tab] of [['particles', page], ['filter', filter]]) {
+  const rows = await tab.eval(fits);
+  c.ok(`in ${name}, every row within the panel, its buttons in reach`, rows.length === 3 && rows.every(r => r.past <= 0 && !r.out), JSON.stringify(rows));
+}
+c.ok('…and a row says the whole of it in its title', /^particles — sequence · \d+ × \d+ · \d+ frames$/.test(await filter.eval(`${rowOf('particles')}?.title`)),
+  await filter.eval(`${rowOf('particles')}?.title`));
 await filter.click(`${rowOf('vault')}?.querySelector('[title="off the stack"]')`);
 await page.until(`(${order}).length === 2`, { timeout: 5000 }).catch(() => {});
 c.ok('…and off, in both', (await page.eval(order)).length === 2 && (await filter.eval(order)).length === 2, JSON.stringify(await page.eval(order)));

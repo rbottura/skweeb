@@ -129,5 +129,45 @@ Steps.forTests();
   off();
 }
 
+// A list the recipe holds beyond its params (L12b): held as a params is, laid back with them in one step.
+Steps.forTests();
+{
+  const p = fresh('model');
+  let shapes = [{ id: 'cloud', params: { count: 600 } }];
+  let put = 0;
+  const release = Steps.holdList('shapes', { get: () => shapes, put: list => { shapes = list; put++; }, label: 'the shapes' });
+  const [list] = Steps.heldLists();
+  ok('a list held: its values under its key, a copy', [list.key, list.values], ['shapes', { shapes: [{ id: 'cloud', params: { count: 600 } }] }]);
+  list.values.shapes[0].params.count = 1;
+  ok('…which changes nothing of it', shapes[0].params.count, 600);
+  p.set('rate', 120); later();
+  Steps.settle();
+  const v1 = [{ id: 'cloud', params: { count: 500 } }, { id: 'cloud', params: { count: 300 } }];
+  Steps.aroundAll([p, list], () => { p.restore({ rate: 400, seed: 3 }); list.restore({ shapes: v1 }); }, 'back to v1');
+  ok('a state gone back to, its params and its list: one step', [Steps.counts().back, both(p), shapes.length], [2, [400, 3], 2]);
+  ok('…named as it was given', Steps.list().map(s => s.label)[1], 'back to v1');
+  Steps.undo();
+  ok('…a Ctrl Z the page before it, whole', [both(p), shapes.map(s => s.params.count)], [[120, 1], [600]]);
+  Steps.redo();
+  ok('…and a Ctrl Y the state again', [both(p), shapes.map(s => s.params.count)], [[400, 3], [500, 300]]);
+  Steps.aroundAll([p, list], () => {}, 'nothing');
+  ok('nothing changed at once: no step', Steps.counts().back, 2);
+  ok('a list is never watched', Steps.watched().includes(list), false);
+  release();
+  ok('let go of: no list held, and its share of a step gone with it', [Steps.heldLists().length, Steps.counts().back], [0, 2]);
+  Steps.undo();
+  ok('…the step left the params\'', [both(p), shapes.length, put], [[120, 1], 2, 3]);
+}
+
+// Where a card's values are in a recipe: as it says, when told (L12b); undefined otherwise, to be searched for.
+Steps.forTests();
+{
+  const p = fresh('card');
+  ok('nothing told: undefined', Steps.findPart(p, { rate: 1 }), undefined);
+  Steps.partIn(p, recipe => (recipe.shapes || [])[1]?.params ?? null);
+  ok('told: its entry\'s values', Steps.findPart(p, { shapes: [{ params: { rate: 1 } }, { params: { rate: 2 } }] }), { rate: 2 });
+  ok('…or null where a state has none', Steps.findPart(p, { shapes: [] }), null);
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

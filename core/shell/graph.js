@@ -8,12 +8,15 @@
  *
  *   hovered   the page draws that state, where all of the app's recipe is its
  *             params (core/steps.js `watched`, core/param-history.js
- *             `partOf`) — particles, fractals, the 3D app's view; held Shift,
- *             it does not. Anywhere else the node's picture says it.
- *   clicked   the page goes back to that state: in place, the same way, a
- *             step Ctrl Z takes back — or, for an app whose recipe is more
- *             than its params, reopened at it (`?open=…@v3`). The page then
- *             holds it, so its next save is a branch from there.
+ *             `partOf`) and the lists it holds (`heldLists`: the 3D app's
+ *             shapes, filter's chain — since L12b, 2026-11-12, where once
+ *             only the 3D app's view came, its shapes left as they were) —
+ *             particles, fractals, the 3D app, filter; held Shift, it does
+ *             not. Anywhere else the node's picture says it.
+ *   clicked   the page goes back to that state: in place, the same way, one
+ *             step Ctrl Z takes back whole — or, for an app whose recipe is
+ *             more than its params and lists, reopened at it (`?open=…@v3`).
+ *             The page then holds it, so its next save is a branch from there.
  *   Shift clicked, two of them   compared, value by value: one receives, one
  *             arrives, swapped by a button; merged (core/shell/merge.js), the
  *             page has the values as a step and its next save is a state with
@@ -29,7 +32,7 @@
 
 import { LitElement, html, svg, nothing } from '../libs/lit/lit-all.min.js';
 import { Vault } from '../vault.js';
-import { watched, settle, around, tell } from '../steps.js';
+import { watched, heldLists, findPart, settle, aroundAll, tell } from '../steps.js';
 import { mergeBase, plan, merged } from './merge.js';
 import { innerOf } from '../smart.js';
 import { reopenUrl, placeUrl, rigUrl, follow } from '../reopen.js';
@@ -37,14 +40,36 @@ import { partOf } from '../param-history.js';
 
 import { layout, W, H } from './layout.js';
 
-/** A recipe the page's params hold all of: each part of it some watched params'. */
+/**
+ * A recipe the page holds all of: each part of it some watched params', each
+ * list one the page holds — or null. Key by key: a params whose part is the
+ * recipe itself holds its own keys and no more, so the 3D app's view no longer
+ * stands for its shapes (L12b), which its list holds.
+ *
+ * @returns {?Array<[object, object]>}   each params or list, and the part of the recipe it lays back
+ */
 function laid(recipe) {
   if (!recipe || typeof recipe !== 'object') return null;
-  const parts = watched().map(p => [p, partOf(recipe, p.keys)]).filter(([, part]) => part);
-  const covered = new Set(parts.map(([, part]) => part));
-  const all = covered.has(recipe) || Object.entries(recipe).every(([k, v]) => k === 'tick' || covered.has(v));
+  const parts = [], own = new Set(), inner = new Set();
+  for (const p of watched()) {
+    if (findPart(p, recipe) !== undefined) continue;   // a card's: its list lays it, whole — never a search that finds a format's width
+    const part = partOf(recipe, p.keys);
+    if (!part) continue;
+    parts.push([p, part]);
+    if (part === recipe) for (const k of p.keys) own.add(k);
+    else inner.add(part);
+  }
+  for (const list of heldLists()) {
+    if (!(list.key in recipe)) continue;
+    parts.push([list, recipe]);                // its restore reads its own key of it
+    own.add(list.key);
+  }
+  const all = Object.entries(recipe).every(([k, v]) => k === 'tick' || own.has(k) || inner.has(v));
   return all && parts.length ? parts : null;
 }
+
+/** The part of a recipe a params lays — a list's, the recipe that holds its key — or null. */
+const partIn = (recipe, p) => (p.list ? (recipe && p.key in recipe ? recipe : null) : partOf(recipe, p.keys));
 
 class SkwGraph extends LitElement {
   static properties = { states: { state: true }, hot: { state: true }, note: { state: true }, picked: { state: true }, cmp: { state: true }, gates: { state: true } };
@@ -112,7 +137,7 @@ class SkwGraph extends LitElement {
     if (e && e.shiftKey) return;
     const parts = laid(await this._recipe(n));
     if (!parts || this.hot !== n) return;
-    if (!this._kept) this._kept = watched().map(p => [p, p.values]);
+    if (!this._kept) this._kept = parts.map(([p]) => [p, p.values]);   // what it lays, as it is: a card's own values go with its list
     for (const [p, part] of parts) p.restore(part);
   }
 
@@ -176,7 +201,7 @@ class SkwGraph extends LitElement {
     const base = mergeBase(this.states, recv, inc);
     const [R, I, B] = await Promise.all([recv, inc, base].map(n => (n ? this._recipe(n) : null)));
     if (!laid(R) || !laid(I)) { this.cmp = { recv, inc, rows: [], note: 'compared by their pictures: this app keeps more than its params' }; return; }
-    const parts = watched().map((p, id) => ({ id, params: p, keys: p.keys, recv: partOf(R, p.keys), inc: partOf(I, p.keys), base: B && partOf(B, p.keys) }))
+    const parts = laid(R).map(([p], id) => ({ id, params: p, keys: p.keys, recv: partIn(R, p), inc: partIn(I, p), base: B && partIn(B, p) }))
       .filter(x => x.recv && x.inc);
     this.cmp = { recv, inc, base, parts, rows: plan(parts) };
   }
@@ -187,7 +212,8 @@ class SkwGraph extends LitElement {
   _merge() {
     const { recv, inc, parts, rows } = this.cmp, bound = Vault.bound;
     this._unpreview();
-    for (const part of parts) around(part.params, () => part.params.restore(merged(part.recv, rows, part.id)));
+    aroundAll(parts.map(part => part.params), () => { for (const part of parts) part.params.restore(merged(part.recv, rows, part.id)); },
+      `v${inc} merged into v${recv}`);
     Vault.bind({ id: bound.id, type: bound.type, version: recv, strict: bound.strict });
     Vault.merging(inc);
     tell(`v${inc} merged into v${recv} — S saves it, a state with both`);
@@ -198,7 +224,8 @@ class SkwGraph extends LitElement {
     const c = this.cmp;
     if (!c) return this.picked.length === 1 ? html`<div class="gr-cmp gr-cmp--wait">v${this.picked[0]} picked — Shift click another to compare</div>` : nothing;
     const label = row => { const p = c.parts && c.parts.find(x => x.id === row.id); return (p && p.params.spec(row.key) && p.params.spec(row.key).label) || row.key; };
-    const val = v => (typeof v === 'number' ? String(Math.round(v * 1000) / 1000) : v == null ? '—' : typeof v === 'object' ? '…' : String(v));
+    const val = v => (typeof v === 'number' ? String(Math.round(v * 1000) / 1000) : v == null ? '—'
+      : Array.isArray(v) ? `${v.length} in it` : typeof v === 'object' ? '…' : String(v));
     return html`<div class="gr-cmp">
       <div class="gr-cmp-head"><b>v${c.recv}</b> receives · <b>v${c.inc}</b> arrives
         <button class="gr-cmp-swap" type="button" title="The other way round" @click=${() => this._compare(c.recv, c.inc, true)}>⇄</button></div>
@@ -302,7 +329,8 @@ export async function backTo(n, recipe) {
   if (!bound || !bound.id) return false;
   const parts = laid(recipe === undefined ? await recipeAt(bound.id, n) : recipe);
   if (!parts) { location.search = `?open=${encodeURIComponent(bound.id)}@v${n}`; return true; }
-  for (const [p, part] of parts) around(p, () => p.restore(part));
+  // Its params and its lists together, one step: a Ctrl Z after it is the page before it, whole.
+  aroundAll(parts.map(([p]) => p), () => { for (const [p, part] of parts) p.restore(part); }, `back to v${n}`);
   Vault.bind({ id: bound.id, type: bound.type, version: n, strict: bound.strict });
   return true;
 }

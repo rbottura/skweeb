@@ -156,7 +156,7 @@ node scripts/check-garden.mjs           # M14: the garden — a flower grown fro
 node scripts/check-rig.mjs              # M9's rig: bones from strokes, a pose and a loop saved, presets by part, a crawl round a path
 node scripts/check-3d-poster.mjs        # the 120×176 poster at 300 dpi, once: 77 tiles into one streamed PNG, checked whole
 node scripts/check-print.mjs            # every app's print in tiles against its object drawn whole; a gamepad still from its marks; the gamepad's print box; the 3D app's print panel
-node scripts/check-live.mjs             # M11: windows of one browser sharing a stack, each drawing it round its own canvas
+node scripts/check-live.mjs             # M11: windows of one browser sharing a stack, each drawing it round its own canvas; L12a, its rows within the panel
 node scripts/check-send.mjs             # M11: Send to ▸ filter — a window opened, following particles; saved, particles first; ▸ grid too (L5)
 node scripts/check-smart.mjs            # M11: smart objects — saved, versioned, drawn again wherever they are held
 node scripts/check-follow.mjs           # L11: a model saved again in the 3D app, particles' sprites drawn again in another window; L1, a stack's layer kept at a state; L2, flattened in compose; L6, edited in place
@@ -166,7 +166,7 @@ node scripts/check-guides.mjs           # S8: rulers, guides out of them and bac
 node scripts/check-rows.mjs             # S2, S2b: a value on one line — its unit in its box, dragged, marked; pairs; the fold
 node scripts/check-keys.mjs             # S5b: the left hand — keys by place, tapped or held for a pie; an app's own keys kept
 node scripts/check-steps.mjs            # S6c: the session's steps — Ctrl Z, Ctrl Y; a drag one step, a Reset one
-node scripts/check-graph.mjs            # S7: H, the states as a graph over the page — hovered drawn, clicked gone back to, a branch; two compared and merged; A, where a state goes
+node scripts/check-graph.mjs            # S7: H, the states as a graph over the page — hovered drawn, clicked gone back to, a branch; two compared and merged; A, where a state goes; L12b, the 3D app's shapes with them
 node scripts/check-states.mjs           # S6b, S6d: S the next state of a smart object; a still named from it; a row's value in each state; pinned in compose
 node scripts/check-mount.mjs            # S9: an app a module — mounted, unmounted with nothing left, mounted again elsewhere
 node scripts/check-cluster.mjs          # S9c: the scene — every app mounted in turn from the strip, twice round, nothing held more; the address

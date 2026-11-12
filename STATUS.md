@@ -10,17 +10,18 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-09 to -11: BEC 2027's graphic system (track G, `docs/plan.md`)
+### Newest — 2026-11-09 to -12: BEC 2027's graphic system (track G, `docs/plan.md`)
+
+- **The stack's bugs, the author's list** (L12, 2026-11-12): a layer's row
+  within its panel, its ▲ ▼ × in reach; a state gone back to whole — the 3D
+  app's shapes with its view, filter's chain with its source — one Ctrl Z.
 
 - **A cloud of dots in the 3D app** (G1, `apps/3d/cloud.js`): particles'
-  emitter in 3D, its dots placed once — on a vault object's ink, a ball, a
-  disc… — each its own size and colour by two seeds, R where and C which
-  colour; unlit, a palette's colours to the pixel, or lit in the style's
-  toon bands; an outline round each; saved, replayed, printed. In time
-  (G2, `forces.js`): a launch, gravity, wind, drag, a vortex, a pull and
-  curl noise move its dots from rest — the state at a time a print takes,
-  the evolution a sequence played once. In particles: a palette, an overlay
-  composed (G3) — in front or behind, sized, moved, turned, blended, dragged.
+  emitter in 3D, its dots placed once on a vault object's ink, a ball, a disc…,
+  each its size and colour by two seeds, R and C; unlit in a palette, or toon;
+  saved, replayed, printed. In time (G2, `forces.js`): gravity, wind, drag, a
+  vortex, a pull and curl noise from rest — a state at a time, its evolution
+  played once. In particles: a palette, an overlay composed (G3).
 
 ### 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop, the garden
 
@@ -266,7 +267,7 @@ sorts them.
 ## Tests
 
 Sixty-eight files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-11-11). Newest: `3d-forces` (G2), `3d-cloud` (G1); `garden`,
+all of them, and all pass (2026-11-12). Newest: `3d-forces` (G2), `3d-cloud` (G1); `garden`,
 the garden's modifiers and growth (M14); `scope` and `reach`; the puppet's four —
 `puppet-eyes` (27), `puppet-mouth` (15), `puppet-sway` (24), `puppet-roles`
 (17): the eyes and the mouth cut and worn, the sway, the parts found;
@@ -344,11 +345,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9i — the players in cluster** (`docs/plan.md`, `ready`): the rig's
-puppet and the map's player mounted in the scene as the garden is, each a
-module on `core/mount.js` — and with them, the viewer's tools (S14). Track
-G is done for now; waiting on the author: S14's look in use, L12's list of
-the window stack's bugs, window by window.
+**L13a — an object's layers** (`docs/plan.md`, the author's picks of
+2026-11-12): the param `layers` and its rows in the Stack, "+ overlay…",
+drawn by core round the canvas and in all that leaves, every app; then L13b,
+particles' overlay fused in; S9i after.
 
 ## Parked decisions
 

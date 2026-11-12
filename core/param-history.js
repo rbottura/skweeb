@@ -9,13 +9,14 @@
  * Alt click on a row's mark (core/param-rows.js): the states of the smart
  * object the page is bound to (core/vault.js `bound`, `states`), each with
  * the value that row had in it — read off the state's recipe, in the part
- * of it that is this row's params — the one the page has now marked. A pick
+ * of it that is this row's params: a card's, its entry in its list, since
+ * L12b (core/steps.js `partIn`) — the one the page has now marked. A pick
  * sets it: a step of its own, Ctrl Z takes it back (core/steps.js). Nothing bound yet,
  * it says S makes the first state. DOM only; param-rows.css draws `.pp-hist`.
  */
 
 import { Vault } from './vault.js';
-import { settle } from './steps.js';
+import { settle, findPart } from './steps.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -93,7 +94,8 @@ export async function showValues(row, { params, key }) {
   for (const st of states.slice().reverse()) {
     const recipe = await recipeAt(bound.id, st.version, now).catch(() => null);
     if (!open || open.root !== root) return;
-    const part = partOf(recipe, keys);
+    const found = findPart(params, recipe);            // a card's entry in its list; otherwise searched for
+    const part = found !== undefined ? found : partOf(recipe, keys);
     if (!part || !(key in part)) continue;
     const value = part[key];
     const item = el('button', 'pp-hist-item' + (JSON.stringify(value) === JSON.stringify(params.get(key)) ? ' pp-hist-item--now' : ''));

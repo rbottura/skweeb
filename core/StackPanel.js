@@ -169,16 +169,24 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
         + (keyOf(b) === chosen ? ' pp-stack-row--chosen' : ''));
       row.dataset.key = keyOf(b);
       row.dataset.app = b.live ? name : 'vault';
-      row.append(el('span', 'pp-stack-app', name), el('span', 'pp-stack-what', what));
-      if (b.live === live.id) row.append(el('span', 'pp-stack-tag', 'this window'));
+      row.title = what ? `${name} — ${what}` : name;      // the whole of it, where its lines cut it short
+      // Its words on two lines that give way, its buttons beside them that never do (L12a): a long title
+      // or a window's size once pushed ▲ ▼ × out of the panel, out of reach.
+      const head = el('span', 'pp-stack-name');
+      head.append(el('span', 'pp-stack-app', name));
+      if (b.live === live.id) head.append(el('span', 'pp-stack-tag', 'this window'));
+      const text = el('span', 'pp-stack-text');
+      text.append(head, el('span', 'pp-stack-what', what));
+      const acts = el('span', 'pp-stack-acts');
       // A smart object's layer edited in place (L6): its app opened on it, bound — following it again if it was kept.
       if (b.ref && b.ref.startsWith('skw_')) {
         linkOf(b.ref);
-        row.append(button('✎', 'edit it in its app: its next save drawn here', () => editInPlace(i, b)));
+        acts.append(button('✎', 'edit it in its app: its next save drawn here', () => editInPlace(i, b)));
       }
-      row.append(button('▲', 'up the stack', () => stack.move(i, i + 1)),
+      acts.append(button('▲', 'up the stack', () => stack.move(i, i + 1)),
         button('▼', 'down the stack', () => stack.move(i, i - 1)),
         button('×', 'off the stack', () => stack.remove(i)));
+      row.append(text, acts);
       row.addEventListener('click', () => { chosen = keyOf(b); paint(); });
       return row;
     }));
