@@ -6,20 +6,27 @@
    after it, after cards.css, as it came after them inside it.
    ────────────────────────────────────────────────────────────────────────────── */
 
-.pp-stack-note { margin: 4px 0 8px; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); }
-.pp-stack { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
-.pp-stack-row { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 8px; cursor: pointer;
-  border: 1px solid var(--line-2); background: var(--panel); }
+.pp-stack-note { margin: 4px 0 8px; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); overflow-wrap: anywhere; }
+
+/* A layer's row (L12a, 2026-11-12): its words in a column that gives way — the name over what it has, each
+   cut short with an ellipsis, the whole in the row's title — and its buttons in one that never does. As a
+   flex line of nowrap words it took the width of its longest, past the panel, and its ▲ ▼ × with it. */
+.pp-stack { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.pp-stack-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0;
+  padding: 4px 4px 4px 8px; cursor: pointer; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--panel); }
 .pp-stack-row--mine { background: var(--accent); color: var(--accent-ink); }
-.pp-stack-row--chosen { box-shadow: none; }
-.pp-stack-app { font-weight: 700; white-space: nowrap; }
-.pp-stack-what { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.pp-stack-row--chosen { border-color: var(--fg-2); }
+.pp-stack-text { display: grid; min-width: 0; }
+.pp-stack-name { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.pp-stack-app { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.pp-stack-tag { flex: none; font-size: 11px; white-space: nowrap; }
+.pp-stack-what { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font: 400 12px/1.4 var(--font-num); color: var(--fg-2); }
-.pp-stack-row--mine .pp-stack-what { color: var(--fg); }
-.pp-stack-tag { font-size: 11px; white-space: nowrap; }
-.pp-stack-btn { min-width: 26px; padding: 2px 6px; }
+.pp-stack-row--mine .pp-stack-what { color: inherit; opacity: 0.8; }
+.pp-stack-acts { display: flex; gap: 2px; }
+.pp-stack-btn { min-width: 24px; padding: 0 6px; }
 .pp-stack-adds { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .pp-stack-sends { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .pp-stack-sends:empty { display: none; }
-.pp-stack-said { margin: 6px 0 0; min-height: 1.4em; font: 400 12px/1.4 var(--font-num); color: var(--fg-2); }
+.pp-stack-said { margin: 6px 0 0; min-height: 1.4em; font: 400 12px/1.4 var(--font-num); color: var(--fg-2); overflow-wrap: anywhere; }
 .pp-stack-open { color: var(--fg); }
