@@ -269,8 +269,8 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   to 32 at most for a print — a dot is small in any picture. One outline for
   every dot, the style's. An object's points are its ink, evenly: denser
   where it is darker is not in, as in particles.
-- **A model is a still.** No loop until brick 5; the Format drawer has no
-  rate.
+- **A model is a still.** No loop until brick 5; the format (in the viewer
+  since S14b) has no rate.
 - **A replay asked for a scale draws in one piece**: compose placing a
   model and exporting its page as one PNG at scale 4 asks rebuild.js for the
   whole frame, which throws past the GPU's side — 16384 here, 8192 under

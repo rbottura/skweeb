@@ -55,8 +55,9 @@ const pair = await page.eval(`(() => { const p = ${row('x')}.closest('.pp-pair')
 c.ok('x and y from the centre on one line, a row each still', pair && pair.name === 'from centre' && pair.line
   && pair.halves.join() === 'x x from centre,y y from centre', JSON.stringify(pair));
 
-// The frame's size: linked, the other side follows; unlinked, not; swapped, the format is custom.
-await page.click(`${row('width')}.closest('.dr').querySelector(':scope > .dr-head')`);
+// The frame's size: linked, the other side follows; unlinked, not; swapped, the format is custom — behind the
+// size's chip in the viewer since S14b (core/viewformat.js).
+await page.click(`document.querySelector('.viewer-head > .vf .vf-size')`);
 await page.typeInto(`${row('width')}.querySelector('.pp-num')`, '540');
 c.ok('linked, the height follows the width', (await num('height')) === 540, `${await num('width')} × ${await num('height')}`);
 await page.click(`document.querySelector('.pp-pair-link')`);
@@ -79,14 +80,24 @@ await page.typeInto(`${row('jitter')}.querySelector('.pp-num')`, '0.5');
 c.ok('a row changed from its default stays out of the fold', (await shown('jitter')) && (await page.eval(`${fold}.textContent`)) === '1 more',
   await page.eval(`${fold}.textContent`));
 
-// The search reaches a folded row: its drawer and its fold opened, its box in hand.
-await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Backquote', key: '²', bubbles: true }))`);
-await page.eval(`(() => { const i = document.querySelector('.pal-input'); i.value = 'bleed'; i.dispatchEvent(new Event('input')); })()`);
-const found = await page.eval(`[...document.querySelectorAll('.pal-list li .pal-name')].map(n => n.textContent)`);
-await page.eval(`document.querySelector('.pal-input').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))`);
-await wait(400);
-const hand = await page.eval(`({ shown: getComputedStyle(${row('bleed')}).display !== 'none', focus: document.activeElement === ${row('bleed')}.querySelector('.pp-num') })`);
-c.ok('the search reaches a folded row, and opens its fold', found[0] === 'Format › bleed px' && hand.shown && hand.focus, JSON.stringify({ found: found.slice(0, 2), hand }));
+// The search reaches a folded row: its drawer and its fold opened, its box in hand — and a row of the format behind
+// the size's chip, the chip opened (S14b).
+const search = async words => {
+  await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Backquote', key: '²', bubbles: true }))`);
+  await page.eval(`(() => { const i = document.querySelector('.pal-input'); i.value = ${JSON.stringify(words)}; i.dispatchEvent(new Event('input')); })()`);
+  const found = await page.eval(`[...document.querySelectorAll('.pal-list li .pal-name')].map(n => n.textContent)`);
+  await page.eval(`document.querySelector('.pal-input').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))`);
+  await wait(400);
+  return found;
+};
+const handOn = key => page.eval(`({ shown: getComputedStyle(${row(key)}).display !== 'none' && !!${row(key)}.getClientRects().length,
+  focus: ${row(key)}.contains(document.activeElement) })`);
+const foundFold = await search('first frame'), handFold = await handOn('prewarm');
+c.ok('the search reaches a folded row, and opens its fold', /› full from the first frame/.test(foundFold[0]) && handFold.shown && handFold.focus,
+  JSON.stringify({ found: foundFold.slice(0, 2), hand: handFold }));
+const found = await search('bleed'), hand = await handOn('bleed');
+c.ok('…and a row of the format, behind its chip, the chip opened', found[0] === 'Format › bleed px' && hand.shown && hand.focus,
+  JSON.stringify({ found: found.slice(0, 2), hand }));
 
 // ── The sliders and boxes the author found stuck in fractals (2026-11-06) ────
 // A slider with `step: 'any'` read its step as NaN, and the param put its default back; a count's slider went by

@@ -37,7 +37,7 @@ const c = await startCheck();
 const { page } = c;
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const panelRow = name => `[...document.querySelectorAll('#side > .pp > .pp-body .pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const panelRow = name => `[...document.querySelectorAll('#side > .pp > .pp-body .pp-row:not(.pp-stack-layer .pp-row), .viewer-head > .vf .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const value = name => page.eval(`Number(${panelRow(name)}?.querySelector('.pp-num')?.value)`);
 /** The shapes' cards — not the modifiers' inside them. */
 const cards = `[...document.querySelectorAll('.pp-card')].filter(c => !c.parentElement.closest('.pp-card'))`;

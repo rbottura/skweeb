@@ -15,7 +15,7 @@ placed, titled and worded its own way.
 
 | box | how it is made today | where |
 |---|---|---|
-| **Format** | a schema group, core's `frameParams()` (`core/frame.js`), less what an app has no use for, drawn by `ParamPanel` as a drawer | grid whole; ckt's motion side; compose, particles less `zoom`; fractals, 3d less `zoom` and `bleed`. None in map (its size is its grid), filter (its source's), the rig (its drawing's), the puppet |
+| **Format** | a schema group, core's `frameParams()` (`core/frame.js`), less what an app has no use for, drawn by `ParamPanel` in the viewer's head since S14b — its list, the size a chip opening the rest (`core/viewformat.js`) | grid whole; ckt's motion side; compose, particles less `zoom`; fractals, 3d less `zoom` and `bleed`. None in map (its size is its grid), filter (its source's), the rig (its drawing's), the puppet |
 | **Ground** | one `type: 'ground'` row, in whatever group the app put it | its own drawer in grid, ckt, compose (*paper*); fractals' *copies*, particles' *look*, map's *map*, 3d's light, the puppet's *For OBS* |
 | **Player** | core's `Transport` on core's `Playhead`, mounted by the app | a drawer added for it in grid, filter, fractals; a holder in the *player* group's drawer in ckt, compose, particles. The rig's loop in its Motion drawer, the map's clock: no transport. A drawer for it in 3d since its turntable (P1) |
 | **Export** | a drawer the app adds, *Export*, filled with its own buttons, core's `PrintPanel` inside | every app, placed before *format*, *ground*, or last |
@@ -129,6 +129,8 @@ drawer left to the layout.
 drawn from the schema as ever, so a layout can put the Format by the
 canvas and keep the rest in a column. Ground is one group, `ground`, in
 every app that has one, where it lives in five different drawers now.
+The Format went first, to the viewer (S14b, 2026-11-12): ParamPanel lays
+the group there, and a drawer added `before: 'format'` sits where it was.
 
 ## The steps
 
@@ -140,7 +142,8 @@ every app that has one, where it lives in five different drawers now.
    drawer is the layout for now, so `columnLayout` waits for S9's scene; the
    gamepad's export waits for C6.
 2. **U8b** — `playerBox` and `stackBox`, every app.
-3. **U8c** — groups mounted anywhere; Ground one group.
+3. **U8c** — groups mounted anywhere; Ground one group. The Format in the
+   viewer, S14b.
 
 Each lands alone; none moves a box on screen. What an app keeps its own —
 its Emission, its Shapes, its Bones — stays its drawers until U11.

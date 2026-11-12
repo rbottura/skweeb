@@ -28,7 +28,6 @@ export const GROUPS = {
   light:  { label: 'Light', open: true },
   style:  { label: 'Style', open: true },
   motion: { label: 'Motion', open: false },
-  format: { label: 'Format', open: false },
 };
 
 export function modelParams() {

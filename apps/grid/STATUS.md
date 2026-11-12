@@ -135,7 +135,7 @@ luminance picking a member of an ordered ramp of tiles. Ported from
 - **The dither follows the motion.** A loop source is rebuilt and dithered
   frame by frame; a save is a `sequence` with the source as its parent — M2's
   link, `grid → vault: dithered sequence`. A still source saves a `still`.
-- **Zoom and scale mean one thing each**, from the shared Format drawer:
+- **Zoom and scale mean one thing each**, from the shared format (S14b):
   `zoom` scales the source inside the canvas and never changes the canvas;
   `scale`, 0.25–4, multiplies the canvas — the same dither in more pixels.
   The bar reads the output size and, on a paper format, its dpi.

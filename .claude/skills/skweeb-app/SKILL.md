@@ -49,7 +49,7 @@ import { easeParam }    from '../../core/easing.js';
 export const GROUPS = { look: { label: 'Look', open: true }, format: { label: 'Format', open: false } };
 
 export function appParams() {
-  const { zoom, ...frame } = frameParams({ format: 'ig-square' });   // core's Format drawer, less what has no use here
+  const { zoom, ...frame } = frameParams({ format: 'ig-square' });   // core's format — in the viewer since S14b — less what has no use here
   return defineParams('<name>', {
     sprites: { type: 'object', accepts: ['set', 'shape', 'still'], use: '<name>', label: 'sprites', group: 'look' },
     size:    { type: 'range', min: 0.1, max: 20, step: 'any', log: true, default: 1, label: 'size ×', group: 'look' },

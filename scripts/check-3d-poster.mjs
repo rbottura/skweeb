@@ -25,7 +25,7 @@ const c = await startCheck();
 const { page } = c;
 const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const panelRow = name => `[...document.querySelectorAll('#side .pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const panelRow = name => `[...document.querySelectorAll('#side .pp-row:not(.pp-stack-layer .pp-row), .viewer-head > .vf .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const W = 14173, H = 20787;
 
 await c.go(c.base + '/apps/3d/');

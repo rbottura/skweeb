@@ -34,7 +34,8 @@ const DL = path.join(kit.dir, 'downloads');
 
 const said = () => page.eval(`document.querySelector('.bar-say').textContent`);
 const set = async (side, label, value) => {
-  await page.typeInto(`[...document.querySelectorAll('#${side} .pp-row')]
+  // The page's format is the viewer's since S14b.
+  await page.typeInto(`[...document.querySelectorAll('${side === 'page-side' ? '#page-side .pp-row, .viewer-head > .vf .pp-row' : `#${side} .pp-row`}')]
     .find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(label)})?.querySelector('.pp-num')`, value);
   await new Promise(r => setTimeout(r, 250));
 };

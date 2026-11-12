@@ -14,9 +14,8 @@ import { defineParams } from '../../core/params.js';
 import { frameParams, DERIVED, MAX_SIDE } from '../../core/frame.js';
 import { BLENDS, BLEND_LABELS } from '../../core/blend.js';
 
-/** The page panel's drawers. Format is the page, so it starts open. */
+/** The page panel's drawers — its Format the viewer's since S14b (core/viewformat.js). */
 export const PAGE_GROUPS = {
-  format: { label: 'Format', open: true },
   player: { label: 'Sequence player', open: true },
   ground: { label: 'Ground', open: false },
 };
