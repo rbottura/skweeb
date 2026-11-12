@@ -16,6 +16,7 @@ import { defineParams } from '../../core/params.js';
 import { frameParams }  from '../../core/frame.js';
 import { PATH_IDS, PATH_LABELS } from './attractor.js';
 import { ROTATE_IDS }   from './motion.js';
+import { LAYERS } from '../../core/layers.js';
 
 /** The motion panel's drawers, top to bottom. `format` is core's own. */
 export const GROUPS = {
@@ -184,5 +185,6 @@ export function motionParams(datasetManifest, families) {
     ...frame,
     width:  { ...frame.width, default: 1920 },
     height: { ...frame.height, default: 1080 },
+    layers: LAYERS,      // its layers, in the Stack section: an overlay in front, a picture behind (core/layers.js, L13)
   });
 }

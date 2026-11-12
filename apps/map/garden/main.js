@@ -47,6 +47,7 @@ import { Bar }          from '../../../core/Bar.js';
 import { Vault }        from '../../../core/vault.js';
 import { own }          from '../../../core/keys.js';
 import { appModule }    from '../../../core/mount.js';
+import { layersView } from '../../../core/layers-view.js';
 
 /** The garden's panel and the map's on the left, the garden between, the treatment on the right. */
 const MARKUP = `
@@ -99,6 +100,7 @@ async function start(at, mine) {
   const side = root.querySelector('#gd-side');
   const panel = new ParamPanel(garden, { title: 'garden', mount: side, groups: GARDEN_GROUPS });
   new ParamPanel(map, { title: 'map', mount: side, groups: MAP_GROUPS });
+  layersView({ params: map, key: 'layers', canvas: () => canvas, clock, own: async () => mapSize(map.values) });   // its layers round it, as the map's (L13)
   buildExport(panel);
   const right = new ParamPanel(defineParams('garden-treatment', {}), { title: 'treatment', mount: root.querySelector('#gd-treat') });
   const faced = right.addDrawer({ id: 'faced', title: 'The flower faced' });

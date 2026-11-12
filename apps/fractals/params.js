@@ -22,6 +22,7 @@ import { frameParams, DERIVED } from '../../core/frame.js';
 import { FRACTAL_PARAMS } from './fractal.js';
 import { SHAPES } from './copies.js';
 import { MOTION_PARAMS } from './motion.js';
+import { LAYERS } from '../../core/layers.js';
 
 /** The drawers. The family first: it says which of the others there are. */
 export const GROUPS = {
@@ -73,5 +74,6 @@ export function fractalParams() {
     ...MOTION_PARAMS,
     ...frame,
     format: { ...frame.format, options: frame.format.options.filter(o => !DERIVED.includes(o)) },
+    layers: LAYERS,      // its layers, in the Stack section: an overlay in front, a picture behind (core/layers.js, L13)
   });
 }

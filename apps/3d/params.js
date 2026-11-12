@@ -21,6 +21,7 @@ import { STYLE_PARAMS } from './look.js';
 import { MOTION_PARAMS } from './motion.js';
 import { SHAPES, SHAPE_GROUPS, shapeSchema, startOf } from './shapes.js';
 import { MODIFIERS } from './modifiers.js';
+import { LAYERS } from '../../core/layers.js';
 
 /** The drawers, top to bottom. `shapes` holds the cards, and no params. */
 export const GROUPS = {
@@ -39,6 +40,7 @@ export function modelParams() {
     ...MOTION_PARAMS,
     ...frame,
     format: { ...frame.format, options: frame.format.options.filter(o => !DERIVED.includes(o)) },
+    layers: LAYERS,      // its layers, in the Stack section: an overlay in front, a picture behind (core/layers.js, L13)
   });
 }
 
