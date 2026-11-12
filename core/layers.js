@@ -54,6 +54,8 @@ export const LAYER_PARAMS = {
 export const LAYERS = {
   type: 'layers', of: LAYER_PARAMS, default: [], label: 'layers', group: 'stack',
   accepts: ['still', 'shape', 'sequence', 'composition'],
+  /** What behind means, said on a layer's line: an app that draws them between its ground and its picture says its own. */
+  behind: "seen where the picture's ground is none",
 };
 
 /** A new layer on `ref`, as "+ overlay…" makes one: in front, whole, as it is. */

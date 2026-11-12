@@ -95,7 +95,7 @@ export async function showValues(row, { params, key }) {
     const recipe = await recipeAt(bound.id, st.version, now).catch(() => null);
     if (!open || open.root !== root) return;
     const found = findPart(params, recipe);            // a card's entry in its list; otherwise searched for
-    const part = found !== undefined ? found : partOf(recipe, keys);
+    const part = params.upgraded(found !== undefined ? found : partOf(recipe, keys));   // an older state's, as the page has it now
     if (!part || !(key in part)) continue;
     const value = part[key];
     const item = el('button', 'pp-hist-item' + (JSON.stringify(value) === JSON.stringify(params.get(key)) ? ' pp-hist-item--now' : ''));

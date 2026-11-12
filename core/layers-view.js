@@ -15,12 +15,10 @@
  * never has one of these (core/StackPanel.js `layered`).
  */
 
-import { openLayers, closeLayers, drawLayer } from './layers-draw.js';
+import { openedLayers, drawLayer, laidOn } from './layers-draw.js';
 import { layersOf, formatOf, across } from './layers.js';
 import { onZoom }  from './viewzoom.js';
 import { held }    from './scope.js';
-
-const sameRefs = (a, b) => a.length === b.length && a.every((l, i) => l.ref === b[i].ref);
 
 /**
  * @param {object} opts
@@ -34,7 +32,8 @@ const sameRefs = (a, b) => a.length === b.length && a.every((l, i) => l.ref === 
  * @returns {{redraw: () => void, dispose: () => void}}
  */
 export function layersView({ params, key, canvas: find, clock = null, own = async () => null, frame = () => null }) {
-  let opened = [], refs = [], asked = 0, raf = 0, ticked = -1, size = null;
+  let raf = 0, ticked = -1, size = null;
+  const opened = openedLayers({ draft: true, onOpened: () => schedule() });
   let stage = null, mine = null, was = null;
   const shown = [];                 // [{ canvas, o }]: one a layer, in the stage
 
@@ -73,18 +72,6 @@ export function layersView({ params, key, canvas: find, clock = null, own = asyn
     stage = mine = was = null;
   }
 
-  /** The layers named now, opened — again only when which objects they are changes. */
-  async function open(list) {
-    if (sameRefs(list, refs)) return;
-    refs = list.map(l => ({ ref: l.ref }));
-    const ask = ++asked;
-    const next = await openLayers(list, { draft: true });
-    if (ask !== asked) return closeLayers(next);
-    closeLayers(opened);
-    opened = next;
-    schedule();
-  }
-
   /**
    * A canvas for each layer, in the stage beside the app's, one z-index with
    * it so their order is the page's: the ones behind bottom first before it,
@@ -114,14 +101,10 @@ export function layersView({ params, key, canvas: find, clock = null, own = asyn
 
   function draw() {
     raf = 0;
-    const now = params.values[key] || [];
-    const list = opened.filter(o => now.some(l => l.ref === o.layer.ref));
-    // Its rows as they are now, on the frames opened for its object: a drag moves it with no reopening.
-    const layers = now.filter(l => l.on !== false && opened.some(o => o.layer.ref === l.ref))
-      .map(l => ({ ...opened.find(o => o.layer.ref === l.ref), layer: l }));
+    const layers = laidOn(params.values[key], opened.list);           // its rows as they are now: a change moves it, reopening nothing
     // Nothing to lay them on — no picture yet, filter with no source, the rig with no drawing: none shown.
     const fmt = formatOf(params.values, size);
-    if (!list.length || !layers.length || !fmt || !mount()) return unmount();
+    if (!layers.length || !fmt || !mount()) return unmount();
     const r = mine.getBoundingClientRect(), s = stage.getBoundingClientRect();
     if (!(r.width > 0 && r.height > 0)) return unmount();
     // The picture's box on the screen: the canvas's, or the part of it the app says it saves.
@@ -170,11 +153,11 @@ export function layersView({ params, key, canvas: find, clock = null, own = asyn
   }
 
   const sized = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => schedule()) : null;
-  const heard = () => { open(layersOf({ [key]: params.values[key] })); schedule(); };
+  const heard = () => { opened.want(layersOf({ [key]: params.values[key] })); schedule(); };
   const offParams = params.on(k => { if (k === key || k === 'width' || k === 'height' || k === 'bleed' || k === 'scale' || k === 'format') heard(); });
   const offZoom = onZoom(() => schedule());
   // A smart object held as a layer took a version: opened again, at its latest (core/smart.js).
-  const stale = ({ detail }) => { if (refs.some(r => r.ref === detail.id)) { refs = []; heard(); } };
+  const stale = ({ detail }) => { if (opened.list.some(o => o.layer.ref === detail.id)) { opened.stale(); heard(); } };
   document.addEventListener('vault:updated', stale);
   heard();
 
@@ -186,10 +169,8 @@ export function layersView({ params, key, canvas: find, clock = null, own = asyn
       offZoom();
       document.removeEventListener('vault:updated', stale);
       cancelAnimationFrame(raf);
-      asked++;
       unmount();
-      closeLayers(opened);
-      opened = [];
+      opened.close();
     },
   };
   let unheld = () => {};
