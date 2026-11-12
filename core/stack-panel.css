@@ -1,6 +1,7 @@
 /* ──────────────────────────────────────────────────────────────────────────────
-   stack-panel.css — the Stack drawer (core/StackPanel.js): this browser's live
-   stack, top first, and what can go on it.
+   stack-panel.css — the Stack drawer (core/StackPanel.js): the object's layers
+   (core/layers-row.js, L13), then this browser's live stack, top first, and
+   what can go on either.
 
    Moved out of param-panel.css on 2026-10-22, at its cap, and imported right
    after it, after cards.css, as it came after them inside it.
@@ -12,10 +13,11 @@
    cut short with an ellipsis, the whole in the row's title — and its buttons in one that never does. As a
    flex line of nowrap words it took the width of its longest, past the panel, and its ▲ ▼ × with it. */
 .pp-stack { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
-.pp-stack-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0;
+.pp-stack-row, .pp-layer-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0;
   padding: 4px 4px 4px 8px; cursor: pointer; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--panel); }
 .pp-stack-row--mine { background: var(--accent); color: var(--accent-ink); }
-.pp-stack-row--chosen { border-color: var(--fg-2); }
+.pp-stack-row--chosen, .pp-layer-row--chosen { border-color: var(--fg-2); }
+.pp-layer-row--off .pp-stack-text { opacity: 0.5; }
 .pp-stack-text { display: grid; min-width: 0; }
 .pp-stack-name { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
 .pp-stack-app { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
@@ -30,3 +32,11 @@
 .pp-stack-sends:empty { display: none; }
 .pp-stack-said { margin: 6px 0 0; min-height: 1.4em; font: 400 12px/1.4 var(--font-num); color: var(--fg-2); overflow-wrap: anywhere; }
 .pp-stack-open { color: var(--fg); }
+
+/* The object's layers, over the windows' stack: their list in the param's row, full width; the windows' heading. */
+.pp-layers { display: grid; gap: 0; min-width: 0; }
+.pp-layers .pp-stack { margin-top: 6px; }
+.pp-layers-none { margin: 4px 0 0; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); }
+.pp-layers-none[hidden], .pp-layers .pp-stack:empty { display: none; }
+.pp-stack-part { margin: 14px 0 2px; padding-top: 10px; border-top: 1px solid var(--line-2);
+  font: 600 11px/1.2 var(--font-ui); letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-2); }

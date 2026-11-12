@@ -22,6 +22,7 @@ import * as Registry from './registry.js';
 import { Vault }     from './vault.js';
 import { dropOn }    from './vault-drag.js';
 import { numberBox, boxed, paintFill } from './numbox.js';
+import { layersWidget } from './layers-row.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -277,6 +278,9 @@ export const WIDGETS = {
       values(all) { if (all[spec.family] !== family) build(all[spec.family]); },
     };
   },
+
+  /** An object's layers, in its Stack section: their list, the chosen one's rows, "+ overlay…" (core/layers-row.js, L13). */
+  layers: ctx => layersWidget(ctx),
 };
 
 // ── The two faces of an enum ─────────────────────────────────────────────────

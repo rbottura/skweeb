@@ -13,6 +13,11 @@
  * draws, a loop as a loop by its clock — and the stack, puts the drawer in
  * its panel, and draws the stack round its canvas (core/stackView.js). DOM and params;
  * core/stack-panel.css draws `.pp-stack`.
+ *
+ * Since L13 (2026-11-12) the section is the object's layers first: the
+ * panel's `layers` param (core/layers.js), its rows the Stack group's, drawn
+ * round the canvas here (core/layers-view.js) unless the app draws them
+ * itself (`layered`, particles) — and the windows' stack after them.
  */
 
 import { joinLive, loopOf, savedBy } from './live.js';
@@ -26,6 +31,7 @@ import { ParamPanel }   from './ParamPanel.js';
 import { VaultPanel }   from './VaultPanel.js';
 import { Vault }        from './vault.js';
 import { follow, reopenUrl } from './reopen.js';
+import { layersView }   from './layers-view.js';
 
 /** A layer's rows: how it meets what is under it, and where it sits on the page. */
 export const LAYER_PARAMS = {
@@ -83,14 +89,22 @@ const sizeOf = thing => {
  * @param {() => ?HTMLCanvasElement} [opts.canvas]  its own canvas: by default, its viewer's
  * @param {() => *} [opts.save]          its own save: what another window asks of it before it holds this one
  * @param {(windowId: string) => void} [opts.take]   take another window as its source (core/send.js)
- * @returns {{live: object, stack: object, view: object}}
+ * @param {boolean} [opts.layered]      its picture has its layers drawn in it already — particles': none drawn round it
+ * @param {() => ?{x, y, w, h}} [opts.frame]   where on its canvas the picture it saves is, in the canvas's pixels (the rig's)
+ * @returns {{live: object, stack: object, view: object, layers: ?object}}
  */
-export function stackDrawer(panel, { app, layer, clock = null, save = null, take = null,
-  canvas = () => document.querySelector('.viewer-stage canvas:not(.stack-layer)') }) {
+export function stackDrawer(panel, { app, layer, clock = null, save = null, take = null, layered = false, frame = undefined,
+  canvas = () => document.querySelector('.viewer-stage canvas:not(.stack-layer):not(.obj-layer)') }) {
   const live = joinLive({ app, layer: async () => loopOf(await layer(), clock) });
   const stack = joinStack(live);
   const view = stackView({ live, stack, canvas });
-  const drawer = panel.addDrawer({ id: 'stack', title: 'Stack' });
+  // The object's layers, when its panel has them: the Stack group's drawer, theirs first — moved last, as it was.
+  const params = panel.params;
+  const key = params && params.keys.find(k => params.spec(k).type === 'layers');
+  const drawer = panel.drawer('stack') || panel.addDrawer({ id: 'stack', title: 'Stack' });
+  drawer.root.parentElement.append(drawer.root);
+  const own = async () => { const l = await layer(); const r = l && typeof l === 'object' && l.render; return r && r.w > 0 ? { width: r.w, height: r.h } : null; };
+  const layers = key && !layered ? layersView({ params, key, canvas, clock, own, frame }) : null;
   const note = el('p', 'pp-stack-note');
   const list = el('ul', 'pp-stack');
   const rows = el('div', 'pp-stack-layer');
@@ -117,7 +131,7 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
       say('the stack was not saved: ' + err.message);
     }
   }));
-  drawer.body.append(note, list, rows, adds, sends, said);
+  drawer.body.append(...(key ? [el('p', 'pp-stack-part', 'the windows')] : []), note, list, rows, adds, sends, said);
   // Asked to save for something that will hold it: as a smart object, made once and then versioned.
   if (save) live.answer('save', ({ smart }) => { if (smart && !Vault.bound) Vault.bind({}); return savedBy(save); });
   if (take) takeWhenAsked(live, take);
@@ -238,5 +252,5 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
   live.on(paint);
   stack.on(() => { titled(); paint(); });
   paint();
-  return { live, stack, view };
+  return { live, stack, view, layers };
 }

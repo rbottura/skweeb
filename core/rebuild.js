@@ -44,6 +44,7 @@
 import * as Registry     from './registry.js';
 import { createClip }    from './stage/clip.js';
 import { SequencePlayer } from './stage/player.js';
+import { layersOf }      from './layers.js';
 
 const P5_URL = new URL('./libs/p5.min.js', import.meta.url).href;
 
@@ -319,7 +320,11 @@ async function openViaApp(object, opts) {
     throw new Error(`rebuild: /apps/${app}/rebuild.js does not export openObject()`);
   }
 
-  return module.openObject(object, { ...opts, depth: (opts.depth || 0) + 1 });
+  const depth = (opts.depth || 0) + 1;
+  const handle = await module.openObject(object, { ...opts, depth });
+  // Its layers laid round its frames, in front and behind (core/layers-draw.js, L13) — unless its app drew them.
+  if (!layersOf(object.recipe).length || handle.layered) return handle;
+  return (await import('./layers-draw.js')).withLayers(handle, object.recipe, { draft: !!opts.draft, depth });
 }
 
 /** A recording of marks, replayed through the stage. */

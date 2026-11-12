@@ -26,6 +26,10 @@
  * A page may be bound into a smart object (`bind`, core/smart.js): its saves
  * of the kind it binds are that object, saved again — its next version.
  *
+ * A save's picture goes through what the page was given to finish it with
+ * (`finishWith`): an object's layers laid round it (core/layers-draw.js,
+ * L13), so its picture is what its replay draws. This file draws nothing.
+ *
  * The trash is a tag (docs/object-model.md, *Trash*): what carries it is
  * still on disk and still loads — a composition placing it still draws it —
  * but list() leaves it out, and so does anything offering objects to choose.
@@ -44,6 +48,7 @@ let _index = [];
 let _events = null;
 let _bound = null;     // the smart object this page's saves bind into: { id, type, version } — the state it holds
 let _heard = '';       // the last new version said, so one is said once
+let _finish = null;    // what a save's picture goes through before it is written (`finishWith`)
 
 /** A smart object's new version, said once on the page however it is heard. */
 function updated(detail) {
@@ -106,6 +111,13 @@ export const Vault = {
       (!filter.tag  || (row.tags || []).includes(filter.tag)));
   },
 
+  /**
+   * What every save goes through before it is written: `fn(spec)`, the spec
+   * as it should be saved — an object's layers laid round its picture
+   * (core/layers-draw.js `finished`). One per page; the last given.
+   */
+  finishWith(fn) { _finish = typeof fn === 'function' ? fn : null; },
+
   /** The smart object this page edits, if any: `{ id, type }` — id null until its first save. */
   get bound() { return _bound; },
 
@@ -160,6 +172,7 @@ export const Vault = {
    * @returns {Promise<object|null>} the envelope, or null when offline
    */
   async save(spec) {
+    if (_finish) spec = await _finish(spec);
     // A project's own save — the app's S, `state: true` — is the next state of its smart object, its first
     // S making it (S6b, the author's 2026-11-03). Bound, a save of its kind is that object saved again
     // (core/smart.js); `state: false` — a frame as a still, a look — never is.
