@@ -16,8 +16,8 @@ sorts them.
   its Stack section first — "+ overlay…", a vault picture in front or behind,
   fitted to the format, composed as particles' overlay — kept state by state,
   drawn round the canvas and in all that leaves: a save, a replay, compose,
-  the print, E's picture. The stack's bugs (L12): rows within the panel, a
-  state gone back to whole — the 3D app's shapes with its view — one Ctrl Z.
+  the print, E's picture; particles' overlay its first layer (L13b). The
+  stack's bugs (L12): rows within the panel, a state gone back to whole.
 
 - **A cloud of dots in the 3D app** (G1, `apps/3d/cloud.js`): particles'
   emitter in 3D, its dots placed once on a vault object's ink, a ball, a disc…,
@@ -283,9 +283,9 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Broken / half-done
 
-- **An object's layers** (L13a): a frames zip leaves without them, and the
-  map's player shows none; a window's block in the stack gives its opacity
-  and blend to its picture, not its layers' canvases; dragged, not yet.
+- **An object's layers** (L13): a frames zip leaves without them, but in
+  particles, and the map's player shows none; a window's block in the stack
+  gives its opacity and blend to its picture, not its layers; dragged in particles alone.
 
 - **`check-frames` depends on which stills come first in the vault**: red
   with the garden's sparse flowers (2026-11-09, `main` too, 3 of 3), green
@@ -344,10 +344,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L13b — particles' overlay fused into its layers** (`docs/plan.md`):
-its Overlay section the first layer, its saves drawn as they were, behind
-still between its ground and its particles, its drag and F on the chosen
-layer; then S9i.
+**S9i — the players in cluster** (`docs/plan.md`, `ready`): the rig's
+puppet and the map's player mounted in the scene as the garden is. Waiting
+on the author: the layers in use — what a frames zip, a drag, a live
+window as a layer should do next.
 
 ## Parked decisions
 
