@@ -228,6 +228,7 @@ const every = defineParams('every', {
   h: { type: 'object', accepts: ['still'] },
   i: { type: 'sprite', family: 'fam', default: 8 },
   j: { type: 'ground', default: '#ffffff' },
+  k: { type: 'layers', of: { opacity: { type: 'range', min: 0, max: 1, default: 1 } } },
 });
 ok('a schema using every type defines cleanly', every.keys.length, PARAM_TYPES.length);
 

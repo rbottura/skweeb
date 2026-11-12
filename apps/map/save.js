@@ -14,6 +14,7 @@ import { openMap }       from './frames.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { toPng, download } from '../../core/export.js';
+import { layeredPng }    from '../../core/layers-draw.js';
 
 export const APP = { app: 'map', version: '1.0.0' };
 
@@ -71,7 +72,7 @@ export async function downloadPicture({ map, cells, walls, place, tick = 0 }) {
   const frames = await openMap(recipe);
   try {
     const shown = frames.frame(frames.length > 1 ? tick % frames.length : 0);
-    download(await toPng(shown), `map_${(recipe.map.name || 'map').replace(/\W+/g, '-')}_${shown.width}x${shown.height}.png`);
+    download(await layeredPng(await toPng(shown), recipe), `map_${(recipe.map.name || 'map').replace(/\W+/g, '-')}_${shown.width}x${shown.height}.png`);   // its layers round it (L13)
     return { width: shown.width, height: shown.height };
   } finally {
     frames.dispose();

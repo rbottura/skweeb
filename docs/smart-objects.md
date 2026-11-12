@@ -217,3 +217,12 @@ blend; its picture is compose's replay. A filter following another window
 saves that window first, so a page of a filter of particles is a smart
 object of a smart object: change the particles and save, and the page,
 opened anywhere, is drawn again.
+
+**An object's own layers** (L13, 2026-11-12) are not the stack: the stack
+is the browser's, shared by its windows and saved only as a page; an
+object's layers are its recipe's — one param, `layers` (`core/layers.js`) —
+so its S keeps them state by state, and they go wherever it goes, drawn by
+core round its frames. Both are the Stack section, the object's layers
+first. A live window as a layer of the object, saved first as a smart
+object as the stack's page saves it, is the next step (the author's pick,
+"plus tard").

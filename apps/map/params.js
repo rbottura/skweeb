@@ -17,6 +17,7 @@
 
 import { defineParams } from '../../core/params.js';
 import { FACES }        from './walk.js';
+import { LAYERS } from '../../core/layers.js';
 
 /** The drawers. */
 export const MAP_GROUPS = {
@@ -41,6 +42,7 @@ export function mapParams() {
      * core/uses.js as a map tileset. The cells name them by their place.
      */
     tileset: { type: 'object', accepts: ['set'], use: 'tileset', label: 'tileset', group: 'tiles' },
+    layers: LAYERS,      // its layers, in the Stack section: an overlay in front, a picture behind (core/layers.js, L13)
   });
 }
 

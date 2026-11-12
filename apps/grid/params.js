@@ -15,6 +15,7 @@
 import { defineParams } from '../../core/params.js';
 import { frameParams }  from '../../core/frame.js';
 import { easeParam }    from '../../core/easing.js';
+import { LAYERS } from '../../core/layers.js';
 
 /** How the drawers read, top to bottom. `format` is core's own. */
 export const GROUPS = {
@@ -151,5 +152,6 @@ export function gridParams(manifest) {
     },
 
     ...frameParams({ format: 'content' }),
+    layers: LAYERS,      // its layers, in the Stack section: an overlay in front, a picture behind (core/layers.js, L13)
   });
 }

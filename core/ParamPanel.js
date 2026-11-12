@@ -63,9 +63,13 @@ import { formatIn }   from './viewformat.js';
 
 export { WIDGET_TYPES };
 
-/** Groups every app shares, so a Format section is the same section everywhere — in the viewer, where there is one. */
+/**
+ * Groups every app shares, so a Format section is the same section everywhere — in the viewer, where there is
+ * one — and the Stack too: an object's layers (core/layers.js), the windows' stack after them (core/StackPanel.js).
+ */
 const CORE_GROUPS = {
   format: { label: 'Format', open: false, viewer: true },
+  stack: { label: 'Stack', open: true },
 };
 
 const el = (tag, cls, text) => {
@@ -94,6 +98,8 @@ export class ParamPanel {
    * @param {string} [opts.title]       defaults to the app name
    * @param {HTMLElement} [opts.mount]  dock into this element instead of floating
    * @param {Object<string,{label:string, open?:boolean}>} [opts.groups]
+   * @param {boolean} [opts.steps=true]  its changes steps of the session — not where they reach a param that is
+   *                                     one already: a chosen layer's rows (core/layers-row.js)
    */
   constructor(params, opts = {}) {
     this._params  = params;
@@ -111,6 +117,7 @@ export class ParamPanel {
     this._hover   = null;            // the drawer under the pointer, for Alt's peek
     this._alt     = false;
     this._viewer  = undefined;       // the Format group's place in the viewer, once asked: null where there is none
+    this._steps   = opts.steps !== false;
     this._at      = new Map();       // group id → where its drawer would be, for a group the viewer holds
 
     this._build();
@@ -118,7 +125,7 @@ export class ParamPanel {
     this._wirePeek();
     installPalette();                // ² or Ctrl K: every control and act of the page, by name
     panels.set(params, (panels.get(params) || 0) + 1);
-    watch(params);                   // every change a step: Ctrl Z, Ctrl Y (core/steps.js, S6c)
+    if (this._steps) watch(params);  // every change a step: Ctrl Z, Ctrl Y (core/steps.js, S6c)
     if (this._mount) this.show();
 
     // An external change — a restore, a key, a drag on the canvas — has to
@@ -146,6 +153,9 @@ export class ParamPanel {
   /** A drawer by group id or by the id it was added under. */
   drawer(id) { return this._drawers.get(id) || null; }
 
+  /** The params it shows: what a widget of a whole list reads its app's name off (core/layers-row.js). */
+  get params() { return this._params; }
+
   /** The title bar, for an app's buttons beside Reset — a filter's in a chain. */
   get head() { return this._head; }
 
@@ -163,7 +173,7 @@ export class ParamPanel {
     if (this._viewer) this._viewer.remove();
     const left = panels.get(this._params) - 1;
     panels.set(this._params, left);
-    if (!left) unwatch(this._params);      // its steps go with the last panel showing it
+    if (!left && this._steps) unwatch(this._params);      // its steps go with the last panel showing it
     for (const picker of (this._pickers || new Map()).values()) picker.remove();
   }
 
@@ -203,7 +213,8 @@ export class ParamPanel {
     head.append(el('span', 'pp-title', this._title), el('span', 'pp-spacer'));
     const reset = el('button', 'pp-btn', 'Reset');
     reset.title = 'Every parameter back to its default';
-    reset.addEventListener('click', () => around(this._params, () => this._params.reset()));   // one step, gone back over by Ctrl Z
+    // One step, gone back over by Ctrl Z — or, where its changes reach a param that is a step already, that one's.
+    reset.addEventListener('click', () => (this._steps ? around(this._params, () => this._params.reset()) : this._params.reset()));
     head.append(reset);
     if (!this._mount) {
       const close = el('button', 'pp-btn', '✕');

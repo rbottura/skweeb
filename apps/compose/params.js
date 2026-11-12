@@ -13,6 +13,7 @@
 import { defineParams } from '../../core/params.js';
 import { frameParams, DERIVED, MAX_SIDE } from '../../core/frame.js';
 import { BLENDS, BLEND_LABELS } from '../../core/blend.js';
+import { LAYERS } from '../../core/layers.js';
 
 /** The page panel's drawers — its Format the viewer's since S14b (core/viewformat.js). */
 export const PAGE_GROUPS = {
@@ -62,6 +63,7 @@ export function pageParams() {
     fps:    { type: 'int', min: 1, max: 60, default: 60, label: 'fps', group: 'player' },
     onion:  { type: 'bool', default: true, label: 'onion skin, paused', group: 'player' },
     ground: { type: 'ground', default: '#ffffff', label: 'paper', group: 'ground' },
+    layers: LAYERS,      // its layers, in the Stack section: an overlay in front, a picture behind (core/layers.js, L13)
   });
 }
 

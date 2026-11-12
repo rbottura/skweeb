@@ -299,6 +299,16 @@ from the recipe alone, found by core through `origin.app` (`docs/core-api.md`,
 *Writing an app against core*). The plan had a `registerApp(name, { serialize,
 restore, render })`; none was needed.
 
+**An object's layers are one param of its recipe** (L13, 2026-11-12): `layers`,
+at the recipe's top or in one of its parts — particles' `picture`, compose's
+`page` — beside the app's format, bottom first, each `{ ref, on, at, fit,
+scale, x, y, rot, opacity, blend }` (`core/layers.js`). The one key of a
+recipe core reads besides `tick`: it lays them round the app's frames —
+what the app's `rebuild.js` hands back, unless it says `layered` — and
+round a save's picture, so an object's picture, its replay and its print
+agree. A layer that is on is a parent of what is saved; a smart object's, a
+ref, followed at its latest. A recipe from before has none.
+
 `load(id)` inside `render` resolves a parent or a ref, so a grid dither can be
 rebuilt at print size *from its source* rather than from a scaled-up copy of
 what it looked like on screen. It is also how a placed `.skw` draws itself.

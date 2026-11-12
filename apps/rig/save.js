@@ -16,6 +16,7 @@ import { crawls }        from './crawl.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { toPng, download } from '../../core/export.js';
+import { layeredPng }    from '../../core/layers-draw.js';
 
 export const APP = { app: 'rig', version: '1.0.0' };
 
@@ -62,8 +63,9 @@ export async function saveRig(args) {
 
 /** The frame on screen as a PNG, at its own pixels. */
 export async function downloadRig(args) {
-  const frames = await openRig(recipeOf(args));
+  const recipe = recipeOf(args);
+  const frames = await openRig(recipe);
   const shown = frames.frame(frames.loop ? (args.tick || 0) % frames.length : 0);
-  download(await toPng(shown), `rig_${(args.title || 'pose').replace(/\W+/g, '-')}_${shown.width}x${shown.height}.png`);
+  download(await layeredPng(await toPng(shown), recipe), `rig_${(args.title || 'pose').replace(/\W+/g, '-')}_${shown.width}x${shown.height}.png`);   // its layers round it (L13)
   return { width: shown.width, height: shown.height };
 }

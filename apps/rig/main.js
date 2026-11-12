@@ -124,7 +124,9 @@ async function boot(mine) {
   kept = () => out.keep() || { type: 'still', recipe: { rig: params.values, bones: [], turns: [], waves: [] } };   // no drawing: its values
   const exp = buildDrawers(panel, { rest: toRest, preset: applyPreset, still: toStill, save, download: out.download });
   new PrintPanel({ mount: exp.body, app: 'rig', object: () => out.envelope(), leave: out.leave, say: text => bar.say(text), tick: () => clock.tick });
-  stackDrawer(panel, { app: 'rig', layer: () => out.envelope(), clock, save: out.save });     // a window of the stack (core/live.js)
+  // A window of the stack (core/live.js); its layers on the box a save fills, in the room the canvas shows round it (L13).
+  stackDrawer(panel, { app: 'rig', layer: () => out.envelope(), clock, save: out.save,
+    frame: () => { const b = stage && out.envelope()?.recipe?.box; return b && { x: (b.x - stage.x) * view, y: (b.y - stage.y) * view, w: b.w * view, h: b.h * view }; } });
   chosenPanel = new ChosenBone({ mount: root.querySelector('#bone-side'), onWave });
 
   params.on(key => {

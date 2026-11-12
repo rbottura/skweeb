@@ -47,6 +47,7 @@ import { surface }        from '../../core/surface.js';
 import { createRunner }   from '../../core/gpu/runner.js';
 import { whyNoGpu }       from '../../core/gpu/device.js';
 import { appModule }      from '../../core/mount.js';
+import { layeredPng } from '../../core/layers-draw.js';
 
 /** Past this zoom a 32-bit float cannot tell neighbouring pixels apart (fractal.js, *The plane*). */
 const DEEPEST = 5e4;
@@ -337,7 +338,7 @@ function downloadPicture() {
     const out = surface(w, h);
     if (v.family === 'copies') drawCopies(out.getContext('2d'), v, sprites, v.scale, mipFor);
     else out.getContext('2d').drawImage(render(v, w, h), 0, 0);
-    download(await toPng(out), `fractal_${v.family === 'copies' ? v.shape : v.kind}_${w}x${h}.png`);
+    download(await layeredPng(await toPng(out), params.values), `fractal_${v.family === 'copies' ? v.shape : v.kind}_${w}x${h}.png`);   // its layers round it (L13)
     return `downloaded ${w} × ${h} px`;
   });
 }

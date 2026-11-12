@@ -19,6 +19,7 @@
 import { defineParams } from '../../core/params.js';
 import { CRAWLS, PATHS } from './crawl.js';
 import { PARTS } from './parts.js';
+import { LAYERS } from '../../core/layers.js';
 
 /** The drawers. */
 export const GROUPS = {
@@ -66,6 +67,7 @@ export function rigParams() {
     /** Waves laid on the path, fixed to the ground: the body slithers through them. */
     wiggle:     { type: 'range', min: 0, max: 200, step: 1, default: 14, label: 'wiggle', unit: 'px', group: 'crawl', when: ON_PATH },
     wiggles:    { type: 'int', min: 0, max: 60, default: 8, label: 'wiggles round it', group: 'crawl', when: { ...ON_PATH, wiggle: { not: 0 } } },
+    layers: LAYERS,      // its layers, in the Stack section: an overlay in front, a picture behind (core/layers.js, L13)
   });
 }
 

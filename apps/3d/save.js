@@ -21,6 +21,7 @@ import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { toPng, download, runFrames, zipStore, frameName, crc32 } from '../../core/export.js';
 import { SHAPES }        from './shapes.js';
+import { layeredPng } from '../../core/layers-draw.js';
 
 export const APP = { app: '3d', version: '1.0.0' };
 
@@ -92,7 +93,7 @@ export async function downloadPicture({ params, shapes, renderer, tick = 0 }) {
   const frames = openModel(recipe, { renderer });
   try {
     const shown = frames.frame(frames.length > 1 ? tick % frames.length : 0);
-    download(await toPng(shown), `model_${shown.width}x${shown.height}.png`);
+    download(await layeredPng(await toPng(shown), recipe), `model_${shown.width}x${shown.height}.png`);   // its layers round it (L13)
     return { width: shown.width, height: shown.height };
   } finally {
     frames.dispose();

@@ -63,7 +63,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |
 | L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
-| L13 | an object's layers, in its Stack, kept state by state: L13a in core and every app, "+ overlay…"; L13b particles' overlay fused in | `layers/object-layers`, `layers/particles` | M | ready: the author's three picks, 2026-11-12 |
+| L13 | an object's layers, in its Stack, kept state by state: L13a in core and every app, "+ overlay…"; L13b particles' overlay fused in | `layers/object-layers`, `layers/particles` | M | L13a landed 2026-11-12; L13b ready |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
@@ -302,7 +302,8 @@ wherever it is used.
 **L13 — an object's layers** · `layers/object-layers`, then `layers/particles` · M. The author's, 2026-11-12:
 the overlay "sur toutes les apps facilement … dans la section stack … faisant partie des paramètres d'objets
 sauvegardables par état", a button "pour ajouter un simple overlay". Picks (`docs/decisions.md`): layers of the
-object, a param `layers` in its recipe; particles' overlay fused in; a live window as a layer later.
+object, a param `layers` in its recipe; particles' overlay fused in; a live window as a layer later. L13a
+landed 2026-11-12 (`core/layers*.js`, `check-layers`); L13b, particles', next; then a frames zip with them, a drag.
 
 **L7 — versions in the vault** · `layers/versions` · S. A smart object's
 detail lists its versions, each with the picture it had (`versions/vN.*`,

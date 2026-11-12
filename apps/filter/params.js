@@ -9,6 +9,7 @@
  */
 
 import { defineParams } from '../../core/params.js';
+import { LAYERS } from '../../core/layers.js';
 
 /** How the drawers read, top to bottom. The chain's cards join `filters`. */
 export const GROUPS = {
@@ -54,5 +55,6 @@ export function filterParams() {
      * seed when its chain draws at random.
      */
     seed: { type: 'int', min: 0, max: 999999, default: 1, label: 'seed', group: 'filters' },
+    layers: LAYERS,      // its layers, in the Stack section: an overlay in front, a picture behind (core/layers.js, L13)
   });
 }

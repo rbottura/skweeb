@@ -114,6 +114,15 @@ const TYPES = {
       return typeof value === 'string' && value.trim() ? value.trim() : this.default(spec);
     },
   },
+
+  /** An object's layers (core/layers.js, L13): bottom first, each a vault object by `ref`, `on` or not, its rows
+   *  coerced by their declarations in `spec.of`, a missing one its default; one naming nothing dropped. */
+  layers: {
+    default: () => [],
+    coerce: (value, spec) => (Array.isArray(value) ? value : []).filter(v => v && typeof v === 'object' && typeof v.ref === 'string' && v.ref)
+      .map(v => Object.fromEntries([['ref', v.ref], ['on', v.on !== false],
+        ...Object.entries(spec.of || {}).map(([k, s]) => [k, k in v ? TYPES[s.type].coerce(v[k], s) : TYPES[s.type].default(s)])])),
+  },
 };
 
 /**
@@ -339,9 +348,11 @@ export function defineParams(app, schema) {
     consumedObjectIds() {
       const ids = [];
       for (const key of keys) {
-        if (schema[key].type !== 'object' || !applies(schema[key], values)) continue;
-        const id = values[key];
-        if (id && !ids.includes(id)) ids.push(id);
+        const type = schema[key].type;
+        if ((type !== 'object' && type !== 'layers') || !applies(schema[key], values)) continue;
+        // A layer that is on is what the object was made from too, as particles' overlay was (L13).
+        const named = type === 'layers' ? values[key].filter(l => l.on).map(l => l.ref) : [values[key]];
+        for (const id of named) if (id && !ids.includes(id)) ids.push(id);
       }
       return ids;
     },

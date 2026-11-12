@@ -16,6 +16,7 @@
 import { renderComposition, openComposition, surface } from './render.js';
 import { toPng, runFrames, zipStore, frameName, download, crc32 } from '../../core/export.js';
 import { labelOf } from '../../core/frame.js';
+import { layeredPng } from '../../core/layers-draw.js';
 
 /** A file's name for a page: what it is and how many pixels, `compose_A4_2480x3508`. */
 const fileName = (recipe, w, h) =>
@@ -31,7 +32,7 @@ const fileName = (recipe, w, h) =>
  */
 export async function exportPng(recipe, { tick = 0 } = {}) {
   const out = await renderComposition(recipe, { tick });
-  const blob = await toPng(out.canvas);
+  const blob = await layeredPng(await toPng(out.canvas), recipe);     // the page's layers round it (L13)
   const { width, height } = out.canvas;
   download(blob, fileName(recipe, width, height) + '.png');
   return { width, height, bytes: blob.size, stretched: out.stretched };
