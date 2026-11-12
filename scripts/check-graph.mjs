@@ -13,7 +13,9 @@
  * Two Shift clicked are compared, the held one receiving (S7b): a conflict
  * and a value only the held one changed; merged with the conflict taken the
  * arriving way, saved, a state with both parents. A over a state: the apps it
- * reaches, each link on that state (S7c).
+ * reaches, each link on that state (S7c). In the 3D app (L12b): a state is
+ * its view and its shapes — hovered and gone back to whole, one Ctrl Z the
+ * page before it, a cloud's row's value in each state that has it.
  * No page said anything wrong.
  */
 

@@ -30,6 +30,17 @@ day before that became bricks done went with them.
 
 ## Sorted
 
+- **2026-11-12 — the stack fixed, an overlay in every app.** "je souhaiterais
+  corriger le système de stack et pouvoir bénéficier de l'option d'overlay sur
+  toutes les apps facilement … dans la section stack comme une section à part
+  entière dédiée au système de 'calque' avec connexion inter-app et faisant
+  partie des paramètres d'objets sauvegardables par état … un bouton pour
+  ajouter un simple overlay"; "les stacks row sont trop longues et dépassent
+  largement du format du panel"; "les saves d'état dans l'app 3d et des cloud
+  of dots … les paramètres n'ont pas été bien sauvegardés". → L12, its list,
+  landed the same day (the rows; a state gone back to whole); L13 on the board,
+  an object's layers, the author's three picks (`docs/decisions.md`).
+
 - **2026-11-10 — BEC 2027's graphic system; bridges between the apps; the
   stack.** "aujourd'hui je veux créer plus de pont entre les apps et fixer le
   système de stack inter-app. d'abord dans le context du travail que nous

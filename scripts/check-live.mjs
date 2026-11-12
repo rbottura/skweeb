@@ -12,7 +12,8 @@
  * filter's own layer, the page its size; particles' drawer shows the same
  * stack. An opacity and a blend set in filter are particles' too; a layer
  * moved down in particles is down in filter; something from the vault goes
- * on top in both, and off in both. The gamepad, which has no drawer, is a
+ * on top in both, and off in both — every row within its panel, its buttons
+ * in reach, its title the whole of it (L12a). The gamepad, which has no drawer, is a
  * window the others can stack; a tab closed takes its layer off every
  * stack. Served as plain files with no vault, an app's drawer says it is
  * alone (rule 7). And no page said anything wrong.

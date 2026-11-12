@@ -62,6 +62,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | G3 | the overlay composed: in front or behind, fitted, sized, moved, turned, see-through, blended, dragged | `particles/overlay-compose` | S | landed 2026-11-11 |
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |
+| L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
+| L13 | an object's layers, in its Stack, kept state by state: L13a in core and every app, "+ overlay…"; L13b particles' overlay fused in | `layers/object-layers`, `layers/particles` | M | ready: the author's three picks, 2026-11-12 |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
@@ -95,7 +97,6 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C11 | the sliders and boxes: a slider with no grid moving, a count's by one, a box dragged by the hand | `fix/sliders` | S | landed 2026-11-06 |
 | C12 | check-frames' stills: it takes the vault's first three, and sparse ones fall under its thresholds — three with ink, whatever the vault | `fix/frames-stills` | S | side job |
 | L4 | the live view blends as a save does | `layers/isolation` | S | side job |
-| L12 | the window stack's bugs | — | — | waits: the author's list of them — "fixer le système de stack inter-app", 2026-11-10 |
 | P5 | M9's brick 6: the slug from every side | `rig/views` | M | waits: the author's drawings |
 | P0 | the puppet on the author's head | `rig/puppet-defaults` | S | waits: an evening in OBS |
 | L8 | overrides | `layers/overrides` | L | waits: the author — now, or later |
@@ -145,8 +146,6 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
-- **The window stack's bugs** (L12): "fixer le système de stack
-  inter-app" (2026-11-10) — what was seen, window by window.
 - **The motion, case by case** (S9e): its first pass is the proposal as
   written (`docs/scene.md`); what the author sees in it, case by case — "on
   va travailler ça ensemble" — is its next pass.
@@ -193,9 +192,7 @@ Each with what happens if nothing is said.
 
 ## C — the suite tidied
 
-**C1 — the docs true again** · landed 2026-10-22, `docs/status`.
-
-**C2 — under the line cap** · landed 2026-10-22, `clean/line-cap`.
+**C1, C2, C7, C8** · landed 2026-10-22: the docs true again, under the line cap, check-print green, rule 4 eased.
 
 **C3 — fonts licensed in their files** · `clean/font-licences` · S, a side
 job. Rule 5: `assets/fonts/` lacks its `OFL.txt` files, and Destra's
@@ -213,10 +210,6 @@ it lands. Nothing to install; the browser checks stay on the machines.
 **C6 — the gamepad on core's kit.** The last app on panels and params of
 its own, four files past the cap, its recordings never reopened, no clock
 in the stack. A milestone's size: listed so it is chosen, not forgotten.
-
-**C7 — check-print green again** · landed 2026-10-22, `fix/print-still`.
-
-**C8 — rule 4 eased** · landed 2026-10-22, `docs/rule-4`.
 
 **C9 — the checks' helpers shared** · `clean/check-helpers` · S, a side job.
 Every check defines its own `say`, `wait`, `row`, `set`, `scrubTo`,
@@ -285,14 +278,9 @@ forces de vortex et de gravité sur ces éléments … tout en gardant le
 paramètre de seed". Particles had their palette, an overlay and random
 sizes the day before (V1b and the two rows after it).
 
-**G1 — a cloud of dots** · `3d/cloud` · landed 2026-11-11 (`apps/3d/cloud.js`).
-
-**G2 — the cloud in time** · `3d/cloud-forces` · landed 2026-11-11 (`apps/3d/forces.js`): the
-author's picks, a state at a time and its evolution played once, forces a cloud each.
-
-**G3 — the overlay composed** · `particles/overlay-compose` · landed 2026-11-11: the
-author's pick of the list, and "c'est à peu près tout pour l'instant une fois l'overlay
-en place"; colour and size in time not for this system. Left on the list: an
+**G1, G2, G3** · landed 2026-11-11: a cloud of dots (`apps/3d/cloud.js`); in time, a state at a time and its
+evolution played once, forces a cloud each (`forces.js`); the overlay composed — "c'est à peu près tout pour
+l'instant une fois l'overlay en place", colour and size in time not for this system. Left on the list: an
 emitter denser where a picture is darker; a cloud's dots a set's sprites, or rings.
 
 ## L — layers and smart objects
@@ -308,6 +296,13 @@ wherever it is used.
 **L10 — saved three ways: S, then 1 2 3** · → S3 and S6, landed 2026-11-03: S the next state of a smart object, E's menu the rest.
 
 **L11, L1, L3, L2, L6** · landed 2026-11-06: a smart object followed wherever it is picked; pins; no cycle; flatten; edit in place.
+
+**L12 — the window stack's bugs** · landed 2026-11-12, `fix/stack-states`: the author's list, and with it L13.
+
+**L13 — an object's layers** · `layers/object-layers`, then `layers/particles` · M. The author's, 2026-11-12:
+the overlay "sur toutes les apps facilement … dans la section stack … faisant partie des paramètres d'objets
+sauvegardables par état", a button "pour ajouter un simple overlay". Picks (`docs/decisions.md`): layers of the
+object, a param `layers` in its recipe; particles' overlay fused in; a live window as a layer later.
 
 **L7 — versions in the vault** · `layers/versions` · S. A smart object's
 detail lists its versions, each with the picture it had (`versions/vN.*`,

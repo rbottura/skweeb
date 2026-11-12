@@ -344,3 +344,24 @@ go without one, is the app's Space as before — its play, a tap later than
 it was; elsewhere Space is unchanged. The guides button is the app's
 overlay, Z's (particles', the map's), which left their own buttons; the
 ground's is G's; the states' H's, there once the object has one.
+
+**The window stack's bugs, and an object's layers** (L12, L13). The author's
+list, 2026-11-12: the overlay "sur toutes les apps facilement" — particles'
+Overlay section put "dans la section stack comme une section à part entière
+dédiée au système de 'calque' avec connexion inter-app et faisant partie
+des paramètres d'objets sauvegardables par état", a button "pour ajouter un
+simple overlay plutôt qu'une fenêtre de l'app compose"; the stack's rows
+"trop longues … les boutons deviennent inaccessibles"; and the 3D app's
+states, "les paramètres n'ont pas été bien sauvegardés". The last was not
+the save: every state of the cloud held its clouds, but going back to one
+laid back the view alone — a params whose part was the recipe itself was
+taken for all of it — so a list beside the params is now held as they are
+(L12b). Asked the layers' shape, the author took the three first: layers of
+the object, kept in its recipe as one param, `layers` — each a vault
+object, a smart object of another app following its latest, in front or
+behind, composed as particles' overlay is — drawn by core wherever the
+object is drawn, the windows' live stack below them in the same section;
+particles' overlay fused into them, its saves drawn as they were and its
+"behind" still between its ground and its particles, where elsewhere behind
+is under the picture, seen where its ground is none; and a live window as a
+layer of the object later, once vault objects are.
