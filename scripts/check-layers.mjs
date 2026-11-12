@@ -89,11 +89,11 @@ c.ok('a band on top, in the vault', !!band, String(band));
 const section = await page.eval(`(() => { const row = ${layersRow}, dr = row && row.closest('.dr');
   return { head: dr && dr.querySelector('.dr-head')?.textContent.trim(), last: !!dr && dr === dr.parentElement.lastElementChild,
     order: dr ? [...dr.querySelectorAll('.pp-row[data-key="layers"], .pp-stack-part, .pp-stack-note')].map(n => n.dataset.key || n.className) : [],
-    add: [...(row?.querySelectorAll('.pp-stack-adds button') || [])].map(b => b.textContent) }; })()`);
+    add: [...(row?.querySelectorAll('.pp-layers-adds button') || [])].map(b => b.textContent) }; })()`);
 c.ok('the Stack is the last section: the object\'s layers, then the windows', /^Stack/.test(section.head) && section.last
   && JSON.stringify(section.order) === '["layers","pp-stack-part","pp-stack-note"]' && JSON.stringify(section.add) === '["＋ overlay…"]', JSON.stringify(section));
 const v1 = await save();                                // v1: no layer
-await page.click(`[...${layersRow}.querySelectorAll('.pp-stack-adds button')].find(b => b.textContent === '＋ overlay…')`);
+await page.click(`[...${layersRow}.querySelectorAll('.pp-layers-adds button')].find(b => b.textContent === '＋ overlay…')`);
 await page.until(`!!document.querySelector('.vp--visible [data-id="${band}"]')`, { timeout: 15000 }).catch(() => {});
 await page.click(`[...document.querySelectorAll('.vp--visible .vp-cell')].find(x => x.querySelector('[data-id="${band}"]'))?.querySelector('.vp-use')`);
 await page.until(`document.querySelectorAll('.pp-layer-row').length === 1`, { timeout: 10000 }).catch(() => {});

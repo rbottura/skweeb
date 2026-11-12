@@ -12,7 +12,7 @@
 /* A layer's row (L12a, 2026-11-12): its words in a column that gives way — the name over what it has, each
    cut short with an ellipsis, the whole in the row's title — and its buttons in one that never does. As a
    flex line of nowrap words it took the width of its longest, past the panel, and its ▲ ▼ × with it. */
-.pp-stack { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.pp-stack, .pp-layers-list { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .pp-stack-row, .pp-layer-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0;
   padding: 4px 4px 4px 8px; cursor: pointer; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--panel); }
 .pp-stack-row--mine { background: var(--accent); color: var(--accent-ink); }
@@ -26,8 +26,8 @@
   font: 400 12px/1.4 var(--font-num); color: var(--fg-2); }
 .pp-stack-row--mine .pp-stack-what { color: inherit; opacity: 0.8; }
 .pp-stack-acts { display: flex; gap: 2px; }
-.pp-stack-btn { min-width: 24px; padding: 0 6px; }
-.pp-stack-adds { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pp-stack-btn, .pp-layer-btn { min-width: 24px; padding: 0 6px; }
+.pp-stack-adds, .pp-layers-adds { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .pp-stack-sends { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .pp-stack-sends:empty { display: none; }
 .pp-stack-said { margin: 6px 0 0; min-height: 1.4em; font: 400 12px/1.4 var(--font-num); color: var(--fg-2); overflow-wrap: anywhere; }
@@ -35,8 +35,8 @@
 
 /* The object's layers, over the windows' stack: their list in the param's row, full width; the windows' heading. */
 .pp-layers { display: grid; gap: 0; min-width: 0; }
-.pp-layers .pp-stack { margin-top: 6px; }
+.pp-layers .pp-layers-list { margin-top: 6px; }
 .pp-layers-none { margin: 4px 0 0; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); }
-.pp-layers-none[hidden], .pp-layers .pp-stack:empty { display: none; }
+.pp-layers-none[hidden], .pp-layers-list:empty { display: none; }
 .pp-stack-part { margin: 14px 0 2px; padding-top: 10px; border-top: 1px solid var(--line-2);
   font: 600 11px/1.2 var(--font-ui); letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-2); }

@@ -26,7 +26,7 @@ const el = (tag, cls, text) => {
 };
 
 const button = (label, title, onClick) => {
-  const b = el('button', 'nb-btn pp-stack-btn', label);
+  const b = el('button', 'nb-btn pp-layer-btn', label);
   b.type = 'button';
   b.title = title;
   b.addEventListener('click', e => { e.stopPropagation(); onClick(); });
@@ -54,9 +54,9 @@ function nameOf(ref, then) {
  */
 export function layersWidget({ key, spec, value, set, panel }) {
   const wrap = el('div', 'pp-layers');
-  const list = el('ul', 'pp-stack pp-layers-list');
-  const rows = el('div', 'pp-stack-layer pp-layers-rows');
-  const adds = el('div', 'pp-stack-adds');
+  const list = el('ul', 'pp-layers-list');
+  const rows = el('div', 'pp-layers-rows');
+  const adds = el('div', 'pp-layers-adds');
   const none = el('p', 'pp-layers-none', 'No layer yet: a picture in front of this one, or behind it.');
   wrap.append(none, list, rows, adds);
   // Or dragged here from the vault: on top, in front.

@@ -29,18 +29,21 @@
 import { BLENDS, BLEND_LABELS } from './blend.js';
 import { DERIVED } from './frame.js';
 
-/** One layer's rows — the chosen one's, in the Stack section — as particles' overlay had them (G3). */
+/**
+ * One layer's rows — the chosen one's, in the Stack section — as particles' overlay had them (G3), named
+ * as its were, "overlay size" then: a layer's own, never taken for an app's size or the stack's opacity.
+ */
 export const LAYER_PARAMS = {
   at:      { type: 'enum', options: ['front', 'behind'], default: 'front', display: 'chips',
-             labels: { front: 'in front', behind: 'behind' }, label: 'where' },
+             labels: { front: 'in front', behind: 'behind' }, label: 'layer, where' },
   fit:     { type: 'enum', options: ['whole', 'fill'], default: 'whole', display: 'chips',
-             labels: { whole: 'whole', fill: 'filling it' }, label: 'fitted' },
-  scale:   { type: 'range', min: 0.05, max: 10, step: 'any', log: true, default: 1, label: 'size', unit: '×' },
-  x:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'x', pair: 'y', pairLabel: 'from centre', axis: 'x' },
-  y:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'y', axis: 'y' },
-  rot:     { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'turned', unit: '°' },
-  opacity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1, label: 'opacity' },
-  blend:   { type: 'enum', options: BLENDS, labels: BLEND_LABELS, default: 'normal', label: 'blend' },
+             labels: { whole: 'whole', fill: 'filling it' }, label: 'layer, fitted' },
+  scale:   { type: 'range', min: 0.05, max: 10, step: 'any', log: true, default: 1, label: 'layer size', unit: '×' },
+  x:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'layer x', pair: 'y', pairLabel: 'layer, from centre', axis: 'x' },
+  y:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'layer y', axis: 'y' },
+  rot:     { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'layer turned', unit: '°' },
+  opacity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1, label: 'layer opacity' },
+  blend:   { type: 'enum', options: BLENDS, labels: BLEND_LABELS, default: 'normal', label: 'layer blend' },
 };
 
 /**
