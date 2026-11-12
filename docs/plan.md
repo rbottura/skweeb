@@ -63,7 +63,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |
 | L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
-| L13 | an object's layers, in its Stack, kept state by state: L13a in core and every app, "+ overlay…"; L13b particles' overlay fused in | `layers/object-layers`, `layers/particles` | M | landed 2026-11-12, both |
+| L13 | an object's layers, in its Stack, kept state by state: L13a in core and every app, "+ overlay…"; L13b particles' overlay fused in | `layers/object-layers`, `layers/particles`, `fix/layer-rows` | M | landed 2026-11-12, both; its rows kept within the section the same day |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |

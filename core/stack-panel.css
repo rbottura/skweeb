@@ -33,8 +33,11 @@
 .pp-stack-said { margin: 6px 0 0; min-height: 1.4em; font: 400 12px/1.4 var(--font-num); color: var(--fg-2); overflow-wrap: anywhere; }
 .pp-stack-open { color: var(--fg); }
 
-/* The object's layers, over the windows' stack: their list in the param's row, full width; the windows' heading. */
-.pp-layers { display: grid; gap: 0; min-width: 0; }
+/* The object's layers, over the windows' stack: their list in the param's row, full width; the windows' heading.
+   Its one track is the row's width and never its words': an `auto` track took the max-content of a long title, the
+   list past the row and out of the window, the chosen layer's rows with it (2026-11-12, the author's). */
+.pp-layers { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; min-width: 0; }
+.pp-layers-list, .pp-layers-rows { min-width: 0; }
 .pp-layers .pp-layers-list { margin-top: 6px; }
 .pp-layers-none { margin: 4px 0 0; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); }
 .pp-layers-none[hidden], .pp-layers-list:empty { display: none; }

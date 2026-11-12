@@ -39,7 +39,7 @@ export const LAYER_PARAMS = {
   fit:     { type: 'enum', options: ['whole', 'fill'], default: 'whole', display: 'chips',
              labels: { whole: 'whole', fill: 'filling it' }, label: 'layer, fitted' },
   scale:   { type: 'range', min: 0.05, max: 10, step: 'any', log: true, default: 1, label: 'layer size', unit: '×' },
-  x:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'layer x', pair: 'y', pairLabel: 'layer, from centre', axis: 'x' },
+  x:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'layer x', pair: 'y', pairLabel: 'layer x, y', axis: 'x' },
   y:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'layer y', axis: 'y' },
   rot:     { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'layer turned', unit: '°' },
   opacity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1, label: 'layer opacity' },

@@ -40,6 +40,9 @@ day before that became bricks done went with them.
   of dots … les paramètres n'ont pas été bien sauvegardés". → L12, its list,
   landed the same day (the rows; a state gone back to whole); L13 on the board,
   an object's layers, the author's three picks (`docs/decisions.md`).
+  Then, the same day: "les pp-layer-row dépassent et élargissent l'ensemble
+  de la section et font sortir certains éléments de la fenêtre" → landed
+  (`fix/layer-rows`): the layers' list sized by its row, never its words.
 
 - **2026-11-10 — BEC 2027's graphic system; bridges between the apps; the
   stack.** "aujourd'hui je veux créer plus de pont entre les apps et fixer le

@@ -18,7 +18,11 @@
  * compose, filter, fractals, grid, the map, the rig, the garden — shows the
  * band on its picture's box, fitted whole to its format, whatever its shape:
  * grid's its source's; the rig's the box a save fills, inside the room its
- * canvas shows round the drawing. And no page said anything wrong.
+ * canvas shows round the drawing. With a title too long for its line, in
+ * the 3D app and in cluster: every layer's row, its rows and "+ overlay…"
+ * within the layers' row and the window (the author's, 2026-11-12: the
+ * rows had widened the section past the window). And no page said anything
+ * wrong.
  */
 
 import fs   from 'node:fs';
@@ -179,6 +183,42 @@ for (const [app, canvasSel, values, query = ''] of APPS) {
     JSON.stringify({ there, want }));
 }
 await c.shot('02-garden-band');
+
+// ── A title too long for its line: within the row, within the window ────────
+const long = await page.eval(`(async () => {
+  const { Vault } = await import('/core/vault.js');
+  const { thumbFromBlob } = await import('/core/thumb.js');
+  const pic = new OffscreenCanvas(300, 300); pic.getContext('2d').fillRect(0, 0, 300, 60);
+  const blob = await pic.convertToBlob({ type: 'image/png' });
+  const o = await Vault.save({ type: 'shape', title: 'BEC 2025 · poster · titles and infos for the biennale, RL-04, the long version with every line',
+    tags: ['shape'], origin: { app: 'vault', version: '1.0.0' }, seed: null, recipe: null, render: { blob, ext: 'png', w: 300, h: 300 }, thumb: await thumbFromBlob(blob) });
+  await Vault.refresh(); return o.id; })()`);
+/** How far past the layers' row, and past the window, its rows, its chosen layer's rows and its button go — 0 within. */
+const within = () => page.eval(`(() => { const row = ${layersRow}, R = row.getBoundingClientRect();
+  const parts = [...row.querySelectorAll('.pp-layer-row, .pp-layers-rows .pp-row:not([hidden]), .pp-layers-adds button')].filter(n => n.getBoundingClientRect().width > 0);
+  return { parts: parts.length, pastRow: Math.round(Math.max(0, ...parts.map(n => n.getBoundingClientRect().right - R.right))),
+    pastWindow: Math.round(Math.max(0, document.documentElement.scrollWidth - innerWidth, ...parts.map(n => n.getBoundingClientRect().right - innerWidth))) }; })()`);
+for (const [where, url] of [['the 3D app', '/apps/3d/'], ['cluster', '/apps/cluster/#3d']]) {
+  await c.go(c.base + url);
+  await page.until(`!!${layersRow}`, { timeout: 30000 }).catch(() => {});
+  await setLayers([{ ref: long }, { ref: band, at: 'behind' }]);
+  await page.until(`document.querySelectorAll('.pp-layer-row').length === 2`, { timeout: 15000 }).catch(() => {});
+  await wait(500);
+  const fit = await within();
+  c.ok(`${where}: a long title — its rows, the chosen one's rows, its button within the row and the window`, fit.parts >= 10 && fit.pastRow === 0
+    && fit.pastWindow === 0, JSON.stringify(fit));
+  // Whatever is wide inside it — a pair of numbers once, "layer, from centre" — widens nothing: the layers' rows and
+  // their button stay within the row, the window too. Something wide set among the chosen one's rows, taken out after.
+  const wide = await page.eval(`(() => { const row = ${layersRow}, R = row.getBoundingClientRect();
+    const w = document.createElement('div'); w.style.cssText = 'white-space: nowrap'; w.textContent = 'a pair too wide for its line '.repeat(8);
+    row.querySelector('.pp-layers-rows').append(w);
+    const parts = [...row.querySelectorAll('.pp-layer-row, .pp-layers-adds button')];
+    const out = { parts: parts.length, pastRow: Math.round(Math.max(0, ...parts.map(n => n.getBoundingClientRect().right - R.right))),
+      pastWindow: Math.round(Math.max(0, document.documentElement.scrollWidth - innerWidth, ...parts.map(n => n.getBoundingClientRect().right - innerWidth))) };
+    w.remove(); return out; })()`);
+  c.ok(`${where}: …and something wide among them widens nothing`, wide.parts === 3 && wide.pastRow === 0 && wide.pastWindow === 0, JSON.stringify(wide));
+}
+await c.shot('03-cluster-long');
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));
