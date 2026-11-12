@@ -18,7 +18,7 @@
  * vault app's stage zooms itself, and has no zoom of these.
  *
  * S14b, the format in the viewer: its list in the head and the picture's size
- * beside it, no Format section left in the properties, particles' overlay a
+ * beside it, no Format section left in the properties, particles' overlay a layer of its Stack (L13b), once a
  * section of its own; a format picked, the picture that shape; the chip
  * opening the size, its link, bleed and scale, a width typed there followed
  * by the height; closed by Escape or a press elsewhere; in cluster too, and
@@ -175,8 +175,8 @@ const sections = () => page.eval(`[...document.querySelectorAll('.dr-head')].map
 const popOpen = () => page.eval(`!${vf}.querySelector('.vf-pop').hidden`);
 c.ok("the format in the viewer's head: its list, and the picture's size", (await page.eval(`${vf}?.querySelector('.vf-list select')?.value`)) === 'ig-square'
   && (await chip()) === '1080 × 1080', await chip());
-c.ok('…no Format section in the properties, the overlay one of its own', !(await sections()).some(t => /^Format/i.test(t))
-  && (await sections()).some(t => /^Overlay/i.test(t)), JSON.stringify(await sections()));
+c.ok('…no Format section in the properties; its overlay a layer, in the Stack (L13b)', !(await sections()).some(t => /^Format/i.test(t))
+  && (await sections()).some(t => /^Stack/i.test(t)) && !(await sections()).some(t => /^Overlay/i.test(t)), JSON.stringify(await sections()));
 await page.typeInto(`${vf}.querySelector('.vf-list select')`, 'a3');
 await page.until(`${vf}.querySelector('.vf-size').textContent !== '1080 × 1080'`, { timeout: 5000 }).catch(() => {});
 await wait(400);

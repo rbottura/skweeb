@@ -16,7 +16,8 @@
  */
 
 import { prepare, particlesAt } from './model.js';
-import { toModel, framesOf }    from './params.js';
+import { toModel, framesOf, overlayAsLayer } from './params.js';
+import { laidOn }               from '../../core/layers-draw.js';
 import { drawPicture, pictureSize } from './draw.js';
 import { surface }              from '../../core/surface.js';
 import { windowed, canvasFor }  from '../../core/windowed.js';
@@ -29,15 +30,16 @@ import { windowed, canvasFor }  from '../../core/windowed.js';
  * @param {?object} [opts.points]    an object emitter's points (core/points.js)
  * @param {?object} [opts.field]     a field from another object (core/fields.js)
  * @param {?object} [opts.palette]   a palette's colours (core/palettes.js)
- * @param {?object} [opts.overlay]   the picture in front (core/sprites.js)
+ * @param {object[]} [opts.layers]   its layers' objects, opened (core/layers-draw.js `openLayers`)
  * @returns {{length, fps, loop, width, height, scale, frame(i): OffscreenCanvas|HTMLCanvasElement}}
  *          `frame` hands out one canvas, drawn again on every call — borrowed
  */
-export function openParticles(recipe, sprites, { scale = 1, points = null, field = null, palette = null, overlay = null } = {}) {
+export function openParticles(recipe, sprites, { scale = 1, points = null, field = null, palette = null, layers = [] } = {}) {
+  recipe = { ...recipe, picture: overlayAsLayer(recipe.picture) };     // one from before L13: its overlay its first layer
   const { emit, picture } = recipe;
   const model = prepare(toModel(emit, picture), { points, field });
   const inks = palette ? palette.colours : null;
-  const front = overlay ? overlay.images[0] : null;
+  const laid = laidOn(picture.layers, layers);
   const size = pictureSize(picture);
   const own = picture.scale || 1;
   const px = own * scale;
@@ -45,8 +47,8 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
   let canvas = null, tile = null;      // the whole frame's when asked for; a print's windows' (core/print.js)
   const still = Number.isInteger(recipe.tick);
 
-  /** One frame onto a context: the particles, and the overlay in front of them or behind. */
-  const paint = (ctx, tick) => drawPicture(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites, inks, front);
+  /** One frame onto a context: the particles, and its layers in front of them or behind. */
+  const paint = (ctx, tick) => drawPicture(ctx, particlesAt(model, tick / picture.fps), picture, px, sprites, inks, laid, tick);
 
   return {
     length: still ? 1 : framesOf(emit, picture, model.longest),

@@ -11,8 +11,8 @@
  * seeded: the replay is the render, on any machine.
  *
  * A sprite set that will not open is said, as `missing`, and the particles
- * are dots; a palette that will not, and they are in their own colours; an
- * overlay that will not, and nothing stands in front; an emitter object that
+ * are dots; a palette that will not, and they are in their own colours; a
+ * layer that will not, and it is not there; an emitter object that
  * will not, and they leave from its centre; a field that will not, and they
  * move without it — drawn all the same, as the app draws with no vault.
  */
@@ -23,6 +23,9 @@ import { loadPalette }   from '../../core/palettes.js';
 import { loadPoints }    from '../../core/points.js';
 import { loadField }     from '../../core/fields.js';
 import { drawFrameInto } from '../../core/rebuild.js';
+import { layersOf }      from '../../core/layers.js';
+import { openLayers, closeLayers } from '../../core/layers-draw.js';
+import { overlayAsLayer } from './params.js';
 
 const isParticles = object => !!(object && object.recipe && object.recipe.emit && object.recipe.picture);
 
@@ -72,15 +75,11 @@ export async function openObject(object, opts = {}) {
     }
   }
 
-  let overlay = null;
-  if (recipe.picture.overlay) {
-    try {
-      overlay = await loadSprites(recipe.picture.overlay);
-      if (!overlay.images.length) { missing.push(overlay.title); overlay = null; }
-    } catch {
-      missing.push(recipe.picture.overlay);
-    }
-  }
+  // Its layers — its overlay, from before L13 — opened beside it, drawn by its frames between the ground and the
+  // particles or over them: so core lays none round it again (`layered`).
+  const list = layersOf({ picture: overlayAsLayer(recipe.picture) });
+  const layers = list.length ? await openLayers(list, { draft: !!opts.draft, depth: opts.depth || 0 }) : [];
+  for (const l of list) if (!layers.some(o => o.layer.ref === l.ref)) missing.push(l.ref);
 
   let points = null;
   const { shape, from, glyph } = recipe.emit;
@@ -100,7 +99,7 @@ export async function openObject(object, opts = {}) {
     }
   }
 
-  const frames = openParticles(recipe, sprites, { scale: opts.scale > 0 ? opts.scale : 1, points, field, palette, overlay });
+  const frames = openParticles(recipe, sprites, { scale: opts.scale > 0 ? opts.scale : 1, points, field, palette, layers });
   const box = { x: 0, y: 0, w: frames.width, h: frames.height };
 
   return {
@@ -123,6 +122,8 @@ export async function openObject(object, opts = {}) {
 
     drawInto(ctx, i, w, h) { drawFrameInto(ctx, frames.frame(i), box, this, w, h); },
 
-    dispose() {},
+    /** Its layers drawn in its frames already. */
+    layered: true,
+    dispose() { closeLayers(layers); },
   };
 }

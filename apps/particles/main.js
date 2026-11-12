@@ -10,8 +10,9 @@
  *
  * A set from the vault is the sprites (sprites.js), one each; with none, or
  * no vault at all, the particles are dots and the app plays the same
- * (rule 7). A palette from the vault colours them (dye.js), and a picture
- * from it may stand in front, fitted to the format (draw.js `drawOverlay`).
+ * (rule 7). A palette from the vault colours them (dye.js), and pictures
+ * from it — its layers, the Stack section's (core/layers.js, L13b) — stand
+ * in front or behind them, fitted to the format.
  * An emitter may be an object from the vault — a dot-set, a
  * shape — and a field may come from one — a fractal: its points, its field,
  * loaded beside the recipe (core/points.js, core/fields.js). S saves the loop (save.js), and the vault plays it back through
@@ -48,6 +49,8 @@ import { selected }       from '../../core/shell/guides.js';
 import { setAppPie, setOverlay, enumPie } from '../../core/shell/bindings.js';
 import { wirePointer }    from './pointer.js';
 import { appModule }      from '../../core/mount.js';
+import { layersOf }       from '../../core/layers.js';
+import { openedLayers, laidOn } from '../../core/layers-draw.js';
 
 /**
  * Three columns, as compose has: what the particles do on the left, the
@@ -75,7 +78,7 @@ const mounted = () => !!app.scope;
 // One app mounted at a time: its state, made again by each mount (`start`).
 let root, canvas, ctx, clock, emit, picture, bar, transport, player;
 let clockFps, shownView, guidesOn, model, shown, sprites, spritesTitle, loading, spritesIn, asked;
-let given, asking, coming, leaving, painted, pending;
+let given, asking, coming, leaving, painted, pending, layers, pointer;
 
 async function start(at, mine) {
   root = at;
@@ -91,8 +94,12 @@ async function start(at, mine) {
   loading = false;         // a set is on its way in: nothing saves until it is
   spritesIn = Promise.resolve();   // the set on its way in, for a reopen to wait on
   asked = 0;               // the latest set asked for; an older answer is dropped
-  given = { points: null, field: null, palette: null, overlay: null };   // what the recipe names, loaded beside it
-  asking = { points: 0, field: 0, palette: 0, overlay: 0 };              // the latest asked for, as `asked` is
+  given = { points: null, field: null, palette: null };   // what the recipe names, loaded beside it
+  asking = { points: 0, field: 0, palette: 0 };            // the latest asked for, as `asked` is
+  // Its layers' objects, opened beside it as its palette is, again only when which they are changes (L13b).
+  layers = openedLayers({ onOpened: (opened, list) => bar.announce(opened.length < list.length ? `${list.length - opened.length} of its layers would not open`
+    : opened.length ? `${opened.map(o => o.title).join(', ')}: ${opened.length > 1 ? 'its layers' : 'a layer'}, fitted to the format` : 'no layer') });
+  mine.hold(() => layers.close());
   coming = new Set();      // loads on their way in, for a reopen and a save to wait on
   leaving = null;          // the ways out (leaving.js): a save or a download drawing, nothing else starts
   painted = [];            // when the last paints were, while playing
@@ -136,14 +143,18 @@ async function boot(mine) {
     applyFrameEdit(picture, key);
     if (key === 'fps') remake();
     else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'), { following: picture.following });
-    else if (key === 'palette' || key === 'overlay') bring(key);
+    else if (key === 'palette') bring(key);
+    else if (key === 'layers') {
+      const done = layers.want(layersOf({ picture: picture.values }));
+      if (done) { coming.add(done); done.finally(() => { coming.delete(done); draw(); }); } else draw();
+    }
     else draw();
   });
   const sized = new ResizeObserver(() => draw());
   sized.observe(canvas.parentElement);
   mine.hold(() => sized.disconnect());
-  wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn, chose: () => draw(),
-               overlay: () => given.overlay && given.overlay.images[0] });
+  pointer = wirePointer({ canvas, view: () => shownView, emit, picture, guides: () => guidesOn, chose: () => draw(),
+                         layers: () => laidOn(picture.values.layers, layers.list) });
   showGuides(guidesOn);
   // The left hand (core/shell/bindings.js): Z shows the guides — G is the ground's since S5b — and A picks the emitter's
   // shape. The viewer's tools show them too, their button pressed as they are (core/shell/viewtools.js, S14a).
@@ -246,8 +257,6 @@ const BROUGHT = {
              said: got => `${got.title}: a field to move through`, called: 'the field' },
   palette: { named: (e, p) => p.palette, read: id => loadPalette(id),
              said: got => `${got.title}: ${got.colours.length} colour${got.colours.length === 1 ? '' : 's'}`, called: 'the palette' },
-  overlay: { named: (e, p) => p.overlay, read: id => loadSprites(id),
-             said: got => (got.images.length ? `${got.title}: in front of the picture, fitted to its format` : `${got.title} would not load`), called: 'the overlay' },
 };
 
 /**
@@ -283,7 +292,7 @@ function bring(what) {
 
 /** The Export drawer, under the picture's settings, and the ways out it offers (leaving.js). */
 function buildExport(side) {
-  leaving = ways({ bar, clock, args: () => ({ emit, picture, sprites, spritesTitle, ...given }),
+  leaving = ways({ bar, clock, args: () => ({ emit, picture, sprites, spritesTitle, ...given, layers: layers.list }),
                    loading: () => loading || coming.size > 0, after: () => { refreshVault(); draw(); } });
   const { save, leave } = leaving;
   const exp = exportBox(side, {
@@ -300,8 +309,9 @@ function buildExport(side) {
     },
   });
   picture.on(key => { if (key === 'format') printing.follow(picture.get('format')); });
-  // A window of the stack (core/live.js): what is on screen, as its print has it.
-  stackDrawer(side, { app: 'particles', layer: () => printing.object(), clock, save: () => save() });
+  // A window of the stack (core/live.js): what is on screen, as its print has it — its layers its own to draw,
+  // between its ground and its particles (L13b).
+  stackDrawer(side, { app: 'particles', layer: () => printing.object(), clock, save: () => save(), layered: true });
 }
 
 // ── The guides' switch ───────────────────────────────────────────────────────
@@ -341,9 +351,11 @@ function paint() {
   if (canvas.height !== h) canvas.height = h;
 
   shown = particlesAt(model, clock.tick / p.fps);
-  drawPicture(ctx, shown, p, view, sprites, given.palette && given.palette.colours, given.overlay && given.overlay.images[0]);
+  const laid = laidOn(p.layers, layers.list);
+  drawPicture(ctx, shown, p, view, sprites, given.palette && given.palette.colours, laid, clock.tick);
   shownView = view;
-  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width), { ...given, selected: selected() });
+  if (guidesOn) drawGuides(ctx, emit.values, p, view, canvas.width / Math.max(1, canvas.getBoundingClientRect().width),
+    { points: given.points, field: given.field, layers: laid, selected: selected(), layer: pointer ? laid.findIndex(o => o.index === pointer.layer()) : -1 });
 
   bar.output({ width: Math.round(size.width * p.scale), height: Math.round(size.height * p.scale),
                scale: p.scale, format: p.format });

@@ -20,15 +20,17 @@
  *                            the centre's handle — there with no field on,
  *                            faint, so it can be placed first
  *   the pull                 gravity and wind, one arrow in the corner
- *   the overlay              green: its box, dashed, turned as it is, a
- *                            handle at its middle — pressed anywhere in it,
- *                            away from another handle, it is dragged (G3)
+ *   its layers               green: each one's box, dashed, turned as it is,
+ *                            a handle at its middle — pressed anywhere in it,
+ *                            away from another handle, it is dragged (G3, L13b)
  */
 
 import { prepare, turned } from './model.js';
 import { toModel } from './params.js';
 import { fieldOf } from './forces.js';
-import { pictureSize, overlayBox } from './draw.js';
+import { pictureSize } from './draw.js';
+import { layerBox, formatOf } from '../../core/layers.js';
+import { inkSize } from '../../core/rebuild.js';
 
 const DEG = Math.PI / 180;
 const EMITTER = '#1f5fd6';
@@ -41,20 +43,21 @@ const HALO = 'rgba(255, 253, 246, 0.9)';
 export const hasField = e => !!(e.vortex || e.attract || e.noise || (e.fieldFrom && e.fieldPull));
 
 /**
- * The overlay as the preview has it (draw.js `overlayBox`): its middle, from the picture's centre, its
- * size, its turn — or null with none, or while its picture comes.
+ * A layer as the preview has it (core/layers.js `layerBox`): its middle, from the picture's centre, its
+ * size, its turn — or null while its picture comes.
  *
- * @param {?{width: number, height: number}} image
+ * @param {?{layer: object, handle: object}} o   a layer opened and laid (core/layers-draw.js `laidOn`)
  * @returns {?{x: number, y: number, w: number, h: number, turn: number}}   picture pixels; `turn` radians, clockwise
  */
-export function overlayOn(image, p) {
-  if (!image || !p.overlay) return null;
+export function layerOnPicture(o, p) {
+  if (!o || !o.handle) return null;
   const { width, height } = pictureSize(p);
-  const b = overlayBox(image.width, image.height, p);
-  return { x: b.x + b.w / 2 - width / 2, y: b.y + b.h / 2 - height / 2, w: b.w, h: b.h, turn: (p.overlayAngle || 0) * DEG };
+  const ink = inkSize(o.handle);
+  const b = layerBox(ink.width, ink.height, o.layer, formatOf(p));
+  return { x: b.x + b.w / 2 - width / 2, y: b.y + b.h / 2 - height / 2, w: b.w, h: b.h, turn: (o.layer.rot || 0) * DEG };
 }
 
-/** Whether a point, in picture pixels from its centre, is on the overlay: turned back into its own box. */
+/** Whether a point, in picture pixels from its centre, is on a layer: turned back into its own box. */
 export function onOverlay(o, x, y) {
   if (!o) return false;
   const c = Math.cos(-o.turn), s = Math.sin(-o.turn), dx = x - o.x, dy = y - o.y;
@@ -151,10 +154,10 @@ function ring(ctx, x, y, colour) {
  * @param {number} [dpp=1]  canvas pixels per CSS pixel: the guides are sized
  *                          on screen, not on the canvas, so they read the same
  *                          on any display and at any preview size
- * @param {object} [given]  what the emitter names, loaded: `points`, `field`; the picture, its `overlay`;
- *                          and `selected`, the handle F places, ringed
+ * @param {object} [given]  what the emitter names, loaded: `points`, `field`; the picture's `layers`, laid;
+ *                          `selected`, the handle F places, ringed — `layer` which one, for its layers
  */
-export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = null, overlay = null, selected = null } = {}) {
+export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = null, layers = [], selected = null, layer = -1 } = {}) {
   const { width, height } = pictureSize(p);
   view /= dpp;                                  // from here on, CSS pixels
   const ox = (width / 2) * view, oy = (height / 2) * view;
@@ -168,14 +171,14 @@ export function drawGuides(ctx, e, p, view, dpp = 1, { points = null, field = nu
   ctx.moveTo(ox, oy - 8); ctx.lineTo(ox, oy + 8);
   stroke(ctx, QUIET, 1);
 
-  drawOverlayBox(ctx, overlayOn(overlay && overlay.images && overlay.images[0], p), view, ox, oy, selected === 'overlay');
+  layers.forEach((o, i) => drawOverlayBox(ctx, layerOnPicture(o, p), view, ox, oy, selected === 'overlay' && i === layer));
   drawField(ctx, e, p, view, ox, oy, width, height, field, selected === 'field');
   drawEmitter(ctx, e, p, view, ox, oy, points, selected === 'emitter');
   drawPull(ctx, e);
   ctx.restore();
 }
 
-/** The overlay's box, dashed and turned as it is, its name at a corner and a handle at its middle. */
+/** A layer's box, dashed and turned as it is, its name at a corner and a handle at its middle. */
 function drawOverlayBox(ctx, o, view, ox, oy, chosen) {
   if (!o) return;
   const x = ox + o.x * view, y = oy + o.y * view, hw = (o.w / 2) * view, hh = (o.h / 2) * view;

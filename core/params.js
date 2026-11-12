@@ -226,7 +226,9 @@ export function valuesFor(schema, incoming = {}) {
  * @param {Object<string, object>} schema  key -> { type, ...spec }
  * @returns {Params}
  */
-export function defineParams(app, schema) {
+/** `upgrade`: an older recipe's values as this schema has them, the app's migration (docs/object-model.md, *App
+ *  versioning*) — particles' overlay its first layer (L13b). */
+export function defineParams(app, schema, { upgrade = null } = {}) {
   const keys = Object.keys(schema);
 
   for (const key of keys) {
@@ -268,6 +270,8 @@ export function defineParams(app, schema) {
     /** The declaration for one key, for a panel or a gallery filter. */
     spec(key) { return schema[key]; },
 
+    upgraded(v) { return upgrade && v && typeof v === 'object' ? upgrade(v) : v; },     // an older recipe's, as `upgrade` has it
+
     /** A key's default, as a reset gives it: a panel marks what differs from it. */
     defaultOf(key) { return TYPES[schema[key].type].default(schema[key]); },
 
@@ -281,7 +285,7 @@ export function defineParams(app, schema) {
     set(keyOrValues, maybeValue) {
       const incoming = typeof keyOrValues === 'string'
         ? { [keyOrValues]: maybeValue }
-        : (keyOrValues || {});
+        : params.upgraded(keyOrValues || {});
 
       const changed = [];
       for (const key of Object.keys(incoming)) {
@@ -311,7 +315,7 @@ export function defineParams(app, schema) {
     restore(recipe) {
       const was = JSON.parse(JSON.stringify(values));
       Object.assign(values, defaults());
-      const incoming = recipe || {};
+      const incoming = params.upgraded(recipe || {});
       for (const key of Object.keys(incoming)) {
         if (!Object.prototype.hasOwnProperty.call(schema, key)) continue;
         values[key] = TYPES[schema[key].type].coerce(incoming[key], schema[key]);

@@ -10,7 +10,11 @@
 
 const { particlesAt, prepare, motion, slot, duration, turned: turnedBy, MAX_ALIVE } = await import('../apps/particles/model.js');
 const { integrate, fieldOf, STEP, reach } = await import('../apps/particles/forces.js');
-const { drawOrder, overlayBox, bornSize } = await import('../apps/particles/draw.js');
+const { drawOrder, bornSize } = await import('../apps/particles/draw.js');
+const { overlayAsLayer } = await import('../apps/particles/params.js');
+const { layerBox, formatOf } = await import('../core/layers.js');
+/** G3's overlayBox, as a picture's values from before L13 have it now: their overlay their first layer, fitted by core (L13b). */
+const overlayBox = (w, h, p) => layerBox(w, h, overlayAsLayer({ overlay: 'x', ...p }).layers[0], formatOf(p));
 const { inkOf, dyePixels, darkest } = await import('../apps/particles/dye.js');
 const { makeRng, seedFrom } = await import('../core/rng.js');
 
@@ -272,7 +276,7 @@ ok('at random: min, the middle, nearly max', [0, 0.5, 0.999].map(g => +bornSize(
 ok('every one between the two', shownNow.every(p => bornSize(atRandom, p) >= 10 && bornSize(atRandom, p) < 40), true);
 ok('min above max: the same range', [0, 1].map(g => bornSize({ ...atRandom, sizeMin: 40, sizeMax: 10 }, { gauge: g })), [40, 10]);
 
-// -- An overlay, fitted to the format ------------------------------------------
+// -- An overlay, fitted to the format — since L13b, its first layer -------------
 
 const near = box => Object.values(box).map(v => +v.toFixed(1));
 ok('a sheet of A3 at 300 dpi fills the format A3, to the pixel', near(overlayBox(3508, 4961, { width: 1080, height: 1527 })), [0, 0, 1080, 1527]);
@@ -285,12 +289,19 @@ const wide = { width: 1920, height: 1080 };
 ok('filling the format: its longer way cut, centred', near(overlayBox(100, 100, { ...wide, overlayFit: 'fill' })), [0, -420, 1920, 1920]);
 ok('at half its size, whole, still centred', near(overlayBox(100, 100, { ...wide, overlayScale: 0.5 })), [690, 270, 540, 540]);
 ok('…moved from the centre, right and up', near(overlayBox(100, 100, { ...wide, overlayScale: 0.5, overlayX: 100, overlayY: -50 })), [790, 220, 540, 540]);
-const { overlayOn, onOverlay } = await import('../apps/particles/guides.js');
-const shown = overlayOn({ width: 200, height: 100 }, { ...wide, overlay: 'x', overlayScale: 400 / 1920, overlayX: 30, overlayAngle: 90 });
+const { layerOnPicture, onOverlay } = await import('../apps/particles/guides.js');
+const old = overlayAsLayer({ ...wide, overlay: 'x', overlayScale: 400 / 1920, overlayX: 30, overlayAngle: 90 });
+const shown = layerOnPicture({ layer: old.layers[0], handle: { width: 200, height: 100 } }, old);
 ok('on the preview: its middle from the centre, its box, its turn', [Math.round(shown.x), Math.round(shown.y), Math.round(shown.w), +shown.turn.toFixed(4)],
    [30, 0, 400, +(Math.PI / 2).toFixed(4)]);
 ok('…a press on it found turned with it: along its short side now, not its long one', [onOverlay(shown, 30, 180), onOverlay(shown, 180, 0)], [true, false]);
-ok('…and none without an overlay', [overlayOn({ width: 1, height: 1 }, { ...wide, overlay: null }), onOverlay(null, 0, 0)], [null, false]);
+ok('…and none while its picture comes', [layerOnPicture({ layer: old.layers[0] }, old), onOverlay(null, 0, 0)], [null, false]);
+// A picture's values from before L13: its overlay, G3's nine rows, its first layer, word for word.
+ok('an old overlay its first layer, every row of it', overlayAsLayer({ width: 9, overlay: 'imp_a', overlayAt: 'behind', overlayFit: 'fill', overlayScale: 2,
+  overlayX: 3, overlayY: -4, overlayAngle: 30, overlayOpacity: 0.5, overlayBlend: 'multiply' }),
+  { width: 9, layers: [{ ref: 'imp_a', on: true, at: 'behind', fit: 'fill', scale: 2, x: 3, y: -4, rot: 30, opacity: 0.5, blend: 'multiply' }] });
+ok('…none set: its rows gone, no layer', overlayAsLayer({ width: 9, overlay: null, overlayAt: 'front' }), { width: 9 });
+ok('…a picture of now, untouched', overlayAsLayer({ width: 9, layers: [] }), { width: 9, layers: [] });
 
 // -- Falloff: a vortex and a pull with a reach ----------------------------------
 

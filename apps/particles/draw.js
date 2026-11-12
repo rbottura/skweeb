@@ -10,13 +10,16 @@
  * never a stretch.
  *
  * A particle is a sprite of a vault set (sprites.js), or a dot; with a
- * palette, in a colour of it (dye.js).
+ * palette, in a colour of it (dye.js). Its picture's layers (core/layers.js,
+ * L13b — its overlay of G3 made a list) are laid by core's drawing, the ones
+ * behind between the ground and the particles, the rest in front.
  */
 
 import { mipFor } from '../../core/stamps.js';
 import { easing } from '../../core/easing.js';
 import { dyed, inkOf } from './dye.js';
-import { compositeOf } from '../../core/blend.js';
+import { drawSide } from '../../core/layers-draw.js';
+import { formatOf } from '../../core/layers.js';
 
 /** The canvas a picture needs, in its own pixels: the frame, and its bleed on every side. */
 export function pictureSize(picture) {
@@ -88,7 +91,7 @@ export function bornSize(picture, p) {
  * @param {?Array} [sprites]               a set's images (sprites.js), or none for dots
  * @param {?string[]} [inks]                a palette's colours (core/palettes.js), or none:
  *                                          a dot in the picture's colour, a sprite in its own
- * @param {?(ctx) => void} [behind]         what stands behind the particles, over the ground: an overlay set behind
+ * @param {?(ctx) => void} [behind]         what stands behind the particles, over the ground: its layers set behind
  */
 export function drawParticles(ctx, particles, picture, scale, sprites = null, inks = null, behind = null) {
   const { width, height } = pictureSize(picture);
@@ -135,68 +138,18 @@ export function drawParticles(ctx, particles, picture, scale, sprites = null, in
 }
 
 /**
- * Where an overlay goes: whole, as large as the format allows, centred, its
- * proportions kept — so a sheet made for the format fills it, and on another
- * format nothing of it is cut. On the frame, the bleed outside it. Within a
- * pixel of filling a side, it fills it: A3 is 1080 × 1527, rounded, and a
- * sheet of A3 inside it would leave a hairline of what is under.
+ * A frame whole: the ground, the particles, and its layers where each is set
+ * — behind the particles over the ground, or in front of them — fitted to
+ * the format (core/layers.js `layerBox`: G3's `overlayBox`, so its overlay
+ * draws as it did, to the pixel). The one path the preview, a save, a replay
+ * and a print draw through.
  *
- * Composed (G3, 2026-11-11): `fill` covers the format instead, what spills
- * over cut; `overlayScale` times that size; its middle `overlayX`,
- * `overlayY` from the format's, in picture pixels — at their defaults, as
- * before, to the pixel. Its turn is `drawOverlay`'s, round the box's middle.
- *
- * @param {number} w          the overlay's own width
- * @param {number} h          and its height
- * @param {object} picture    the picture's values (params.js)
- * @returns {{x: number, y: number, w: number, h: number}}   in picture pixels, from the canvas's corner, unturned
+ * @param {object[]} [layers]   its layers, opened and laid (core/layers-draw.js `laidOn`)
+ * @param {number} [tick]       the frame on screen: a loop's own frame of it
  */
-export function overlayBox(w, h, picture) {
-  const bleed = Math.max(0, Math.round(picture.bleed || 0));
-  const size = picture.overlayScale > 0 ? picture.overlayScale : 1;
-  const k = (picture.overlayFit === 'fill' ? Math.max : Math.min)(picture.width / w, picture.height / h) * size;
-  const fw = Math.abs(picture.width - w * k) < 1 ? picture.width : w * k;
-  const fh = Math.abs(picture.height - h * k) < 1 ? picture.height : h * k;
-  return { x: bleed + (picture.width - fw) / 2 + (picture.overlayX || 0), y: bleed + (picture.height - fh) / 2 + (picture.overlayY || 0),
-           w: fw, h: fh };
-}
-
-/**
- * A picture over what is drawn, fitted to the format (`overlayBox`): from the
- * halving of it nearest above the size it shows, as a sprite is, so at print
- * scale from its own pixels — turned round its middle by `overlayAngle`,
- * clockwise, at `overlayOpacity`, meeting what is under it by `overlayBlend`
- * (core/blend.js), and everything set back after.
- *
- * @param {CanvasRenderingContext2D} ctx   the canvas `drawParticles` drew on, or draws on
- * @param {object} picture                 the picture's values (params.js)
- * @param {number} scale                   canvas pixels per picture pixel
- * @param {ImageBitmap} image
- */
-export function drawOverlay(ctx, picture, scale, image) {
-  const box = overlayBox(image.width, image.height, picture);
-  const turn = ((picture.overlayAngle || 0) * Math.PI) / 180, cos = Math.cos(turn), sin = Math.sin(turn);
-  const w = box.w * scale, h = box.h * scale;
-  ctx.globalAlpha = Math.max(0, Math.min(1, picture.overlayOpacity ?? 1));
-  ctx.globalCompositeOperation = compositeOf(picture.overlayBlend);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.setTransform(cos, sin, -sin, cos, (box.x + box.w / 2) * scale, (box.y + box.h / 2) * scale);
-  ctx.drawImage(mipFor(image, w), -w / 2, -h / 2, w, h);
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = 'source-over';
-}
-
-/**
- * A frame whole: the ground, the particles, and the overlay where it is set —
- * in front of them, or behind them over the ground. The one path the preview,
- * a save, a replay and a print draw through.
- *
- * @param {?ImageBitmap} [front]   the overlay's picture, or none
- */
-export function drawPicture(ctx, particles, picture, scale, sprites = null, inks = null, front = null) {
-  const behind = !!front && picture.overlayAt === 'behind';
-  drawParticles(ctx, particles, picture, scale, sprites, inks, behind ? c => drawOverlay(c, picture, scale, front) : null);
-  if (front && !behind) drawOverlay(ctx, picture, scale, front);
+export function drawPicture(ctx, particles, picture, scale, sprites = null, inks = null, layers = [], tick = 0) {
+  const fmt = formatOf(picture);
+  const behind = layers.some(o => o.layer.at === 'behind'), front = layers.some(o => o.layer.at !== 'behind');
+  drawParticles(ctx, particles, picture, scale, sprites, inks, behind ? c => drawSide(c, layers, 'behind', fmt, scale, tick) : null);
+  if (front) drawSide(ctx, layers, 'front', fmt, scale, tick);
 }

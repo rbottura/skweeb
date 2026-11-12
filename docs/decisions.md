@@ -377,3 +377,12 @@ are. The format they fit is the app's, read beside them in the recipe, or,
 where its source sets it — grid's `content`, filter, the map, the rig — the
 picture's own size; the rig says where on its canvas its saved box is. An
 app that draws them itself says `layered`: particles, from L13b.
+
+**Particles' overlay, its first layer** (L13b). Its nine rows went, and a
+recipe from before has its overlay as the first of its layers wherever it
+comes in — `defineParams`'s `upgrade`, the app's own migration, as
+*App versioning* has it, so an object opened, a state gone back to, a
+replay and a print all read it the same. Particles draws its layers itself,
+in its one drawing path, the ones behind between its ground and its
+particles as the overlay was, and says `layered`; core's layer box is the
+overlay's own, word for word, so an old save draws as its picture did.

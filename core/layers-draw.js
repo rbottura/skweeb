@@ -46,12 +46,53 @@ export async function openLayers(list, { draft = false, depth = 0 } = {}) {
     try {
       const { object, url } = await Vault.load(layer.ref);
       const handle = await openFrames(object, { url, draft, depth: depth + 1 });
-      out.push({ layer, handle, still: handle.length > 1 ? null : kept(handle.frame(0)) });
+      out.push({ layer, handle, still: handle.length > 1 ? null : kept(handle.frame(0)), title: object.title || layer.ref });
     } catch (err) {
       console.warn(`[layers] ${layer.ref} would not open: ${err.message}`);
     }
   }
   return out;
+}
+
+/**
+ * The layers named now, each on the frames opened for its object — its rows as they are, so a drag moves it
+ * with nothing opened again; one that is off, or not opened yet, left out. What a preview draws.
+ *
+ * @param {object[]} list     the param's value, as it is now
+ * @param {object[]} opened   `openLayers`'s
+ */
+export function laidOn(list, opened) {
+  return (list || []).map((l, index) => ({ o: l && l.on !== false && (opened || []).find(x => x.layer.ref === l.ref), layer: l, index }))
+    .filter(x => x.o).map(({ o, layer, index }) => ({ ...o, layer, index }));     // `index` its place in the list
+}
+
+/**
+ * Layers kept opened for what is named now: `want(list)` opens them again only when which objects they are
+ * changes — a drag or a turn reopens nothing — an older opening dropped for a newer, the last let go of; back,
+ * the promise of the opening, or null when there is none to make. What core's preview and particles hold.
+ *
+ * @param {object} [opts]   `draft`, as `openLayers` takes it; `onOpened(opened, list)`, told of each opening kept
+ */
+export function openedLayers({ draft = false, onOpened = () => {} } = {}) {
+  let refs = null, asked = 0, opened = [];
+  return {
+    get list() { return opened; },
+    want(list) {
+      const now = (list || []).map(l => l.ref).join();
+      if (now === refs) return null;
+      refs = now;
+      const ask = ++asked;
+      return openLayers(list, { draft }).then(next => {
+        if (ask !== asked) return closeLayers(next);
+        closeLayers(opened);
+        opened = next;
+        onOpened(next, list);
+      });
+    },
+    /** Opened again at the next `want`, whatever it names: a smart object among them took a version. */
+    stale() { refs = null; },
+    close() { asked++; closeLayers(opened); opened = []; refs = null; },
+  };
 }
 
 /** Let the layers' frames go. */

@@ -20,7 +20,7 @@
 import { defineParams } from '../../core/params.js';
 import { frameParams, DERIVED } from '../../core/frame.js';
 import { easeParam } from '../../core/easing.js';
-import { BLENDS, BLEND_LABELS } from '../../core/blend.js';
+import { LAYERS } from '../../core/layers.js';
 import { DEFAULTS } from './model.js';
 
 /** The emitter panel's drawers. */
@@ -34,9 +34,8 @@ export const EMIT_GROUPS = {
   depth:    { label: 'Depth', open: false },
 };
 
-/** The picture panel's drawers — the Format in the viewer since S14b, the overlay a section of its own. */
+/** The picture panel's drawers — the Format in the viewer since S14b, its layers the Stack's since L13b. */
 export const PICTURE_GROUPS = {
-  overlay: { label: 'Overlay', open: true },
   player: { label: 'Sequence player', open: true },
   look:   { label: 'Look', open: true },
   camera: { label: 'Camera', open: false },
@@ -44,7 +43,6 @@ export const PICTURE_GROUPS = {
 
 const D = DEFAULTS;
 const STREAM = { mode: 'stream' };
-const OVERLAID = { overlay: { not: null } };
 const BURST = { mode: 'burst' };
 
 /** `slider: true` keeps a slider under its box, as the bench kept these six (S2, 2026-11-03). */
@@ -138,37 +136,26 @@ export function emitParams() {
   });
 }
 
+/**
+ * A picture's values from before L13 (2026-11-12), its overlay — G3's nine rows — its first layer, word for
+ * word: in front or behind the particles, fitted, sized, moved, turned, see-through, blended, as it was drawn.
+ * Anything else as it is; what has no overlay row, untouched.
+ */
+export function overlayAsLayer(p) {
+  if (!p || typeof p !== 'object' || !('overlay' in p)) return p;
+  const { overlay, overlayAt, overlayFit, overlayScale, overlayX, overlayY, overlayAngle, overlayOpacity, overlayBlend, ...rest } = p;
+  if (typeof overlay !== 'string' || !overlay) return rest;
+  const layer = { ref: overlay, on: true, at: overlayAt === 'behind' ? 'behind' : 'front', fit: overlayFit === 'fill' ? 'fill' : 'whole',
+    scale: overlayScale > 0 ? overlayScale : 1, x: overlayX || 0, y: overlayY || 0, rot: overlayAngle || 0,
+    opacity: overlayOpacity ?? 1, blend: overlayBlend || 'normal' };
+  return { ...rest, layers: [layer, ...(Array.isArray(rest.layers) ? rest.layers : [])] };
+}
+
 export function pictureParams() {
   const { zoom, ...frame } = frameParams({ format: 'ig-square' });
   return defineParams('particles-picture', {
     ...frame,
     format: { ...frame.format, options: frame.format.options.filter(o => !DERIVED.includes(o)) },
-    /**
-     * A picture in front of everything, fitted whole to the format (draw.js
-     * `overlayBox`): a poster's type over its particles, to work the
-     * composition. Where it is see-through the render shows.
-     */
-    overlay: { type: 'object', accepts: ['still', 'shape'], label: 'overlay', group: 'overlay' },
-    /**
-     * The overlay composed (G3, 2026-11-11, the author's pick: "overlay composable"; draw.js `overlayBox`,
-     * `drawOverlay`): in front of the particles or behind them, over the ground; whole or filling the format,
-     * at a size of that, moved from the centre, turned, at an opacity and a blend — CSS's names, as the stack's.
-     * At their defaults it stands as it did, to the pixel. Dragged on the preview too (pointer.js).
-     */
-    overlayAt:      { type: 'enum', options: ['front', 'behind'], default: 'front', display: 'chips',
-                      labels: { front: 'in front', behind: 'behind the particles' }, label: 'overlay, where', group: 'overlay', when: OVERLAID },
-    overlayFit:     { type: 'enum', options: ['whole', 'fill'], default: 'whole', display: 'chips',
-                      labels: { whole: 'whole', fill: 'filling it' }, label: 'overlay, fitted', group: 'overlay', when: OVERLAID },
-    overlayScale:   { type: 'range', min: 0.05, max: 10, step: 'any', log: true, default: 1, label: 'overlay size', unit: '×',
-                      group: 'overlay', when: OVERLAID },
-    overlayX:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'overlay x', group: 'overlay',
-                      pair: 'overlayY', pairLabel: 'overlay, from centre', axis: 'x', when: OVERLAID },
-    overlayY:       { type: 'int', min: -8000, max: 8000, default: 0, label: 'overlay y', group: 'overlay', axis: 'y', when: OVERLAID },
-    overlayAngle:   { type: 'range', min: -180, max: 180, step: 0.5, default: 0, label: 'overlay turned', unit: '°',
-                      group: 'overlay', when: OVERLAID },
-    overlayOpacity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1, label: 'overlay opacity', group: 'overlay', when: OVERLAID },
-    overlayBlend:   { type: 'enum', options: BLENDS, labels: BLEND_LABELS, default: 'normal', label: 'overlay blend',
-                      group: 'overlay', when: OVERLAID },
     fps:    { type: 'int', min: 1, max: 60, default: 30, label: 'fps', group: 'player' },
     /**
      * A vault set whose members are the particles' sprites, one each by its
@@ -216,7 +203,13 @@ export function pictureParams() {
      * depth shows more. Nothing changes while every particle is at depth 0.
      */
     focal:  { type: 'range', min: 100, max: 5000, step: 10, default: 800, label: 'focal', unit: 'px', group: 'camera' },
-  });
+    /**
+     * Its layers, the Stack section's (core/layers.js, L13b): the overlay of G3 made a list — a poster's type
+     * over its particles, to work the composition. Particles draws them itself (draw.js), behind ones between
+     * its ground and its particles, as its overlay was.
+     */
+    layers: { ...LAYERS, behind: 'behind the particles, over the ground' },
+  }, { upgrade: overlayAsLayer });     // a recipe from before: its overlay its first layer
 }
 
 /**

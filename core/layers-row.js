@@ -99,7 +99,7 @@ export function layersWidget({ key, spec, value, set, panel }) {
       const row = el('li', 'pp-layer-row' + (i === chosen ? ' pp-layer-row--chosen' : '') + (l.on ? '' : ' pp-layer-row--off'));
       row.dataset.ref = l.ref;
       const where = l.at === 'behind' ? 'behind' : 'in front';
-      row.title = `${title} — ${where} · ${what}` + (l.at === 'behind' ? " — seen where the picture's ground is none" : '');
+      row.title = `${title} — ${where} · ${what}` + (l.at === 'behind' ? ` — ${spec.behind || "seen where the picture's ground is none"}` : '');
       const text = el('span', 'pp-stack-text');
       const head = el('span', 'pp-stack-name');
       head.append(el('span', 'pp-stack-app', title));
