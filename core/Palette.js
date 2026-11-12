@@ -68,10 +68,17 @@ function opened(drawer) {
   if (drawer && !drawer.classList.contains('dr--open')) drawer.querySelector(':scope > .dr-head').click();
 }
 
+/** A row of the format in the viewer (core/viewformat.js): behind the size's chip, opened. */
+function unhidden(row) {
+  const pop = row.closest('.vf-pop');
+  if (pop && pop.hidden) pop.parentElement.querySelector(':scope > .vf-size')?.click();
+}
+
 /** The hand on a row: its drawer open, the row in view, its control taken. */
 function reach(row) {
   const drawer = row.closest('.dr');
   opened(drawer);
+  unhidden(row);
   // A row seldom touched, folded away (core/param-rows.js): its fold opened first.
   if (row.classList.contains('pp-row--more') && drawer && !drawer.classList.contains('pp-more-open')) {
     drawer.querySelector(':scope > .dr-body > .pp-more')?.click();
@@ -93,7 +100,7 @@ function gather() {
     if (row.hidden || (drawer && drawer.hidden) || row.closest('.pal')) continue;
     const name = row.querySelector('.pp-name');
     if (!name || !name.textContent.trim()) continue;
-    const where = titleOf(drawer) || (row.closest('.pp')?.querySelector('.pp-title')?.textContent || '');
+    const where = titleOf(drawer) || (row.closest('.vf') ? 'Format' : row.closest('.pp')?.querySelector('.pp-title')?.textContent || '');
     const unit = row.querySelector('.pp-unit');
     out.push({ label: `${where ? where + ' › ' : ''}${name.textContent.trim()}${unit ? ' ' + unit.textContent : ''}`, detail: valueOf(row), run: () => reach(row) });
   }

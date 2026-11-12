@@ -87,10 +87,10 @@ done** (2026-09-24).
   Checked by `scripts/check-look.mjs`.
 - **Three columns**, as ckt has: `placed` on the left — what is on the page,
   and the chosen one's object and transform — the page between, `page` on
-  the right: core's Format drawer, open, the player and the ground. Both
+  the right: the player and the ground — the format the viewer's (S14b). Both
   panels are core's, drawn from the two schemas in `params.js`; compose draws
   no control of its own but its list.
-- **The page is the Format drawer** (`pageParams`), less what a page has no
+- **The page is core's format** (`pageParams`), less what a page has no
   use for: no `ink` or `canvas` format — a page has no one source to take its
   size from — and no `zoom`, since each placement has its own scale. It opens
   as A4 at 150 dpi, 1240 × 1754, that shape to the pixel. `bleed` grows the

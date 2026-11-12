@@ -98,6 +98,21 @@ skw-viewtools .vt-mi { display: flex; align-items: center; justify-content: spac
 skw-viewtools .vt-mi:hover { background: var(--accent); color: var(--accent-ink); }
 skw-viewtools .vt-mi[aria-checked="true"]::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 skw-viewtools .vt-note { margin: 4px 8px 2px; color: var(--fg-3); font-size: 11px; line-height: 1.35; }
+/* The format in the viewer (S14b, core/viewformat.js): its list, and the picture's size a chip opening the rest. */
+.viewer-head > .vf { position: relative; display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.viewer-head > .vf[hidden] { display: none; }
+.viewer-head > .vf + skw-viewtools { margin-left: 4px; }
+.vf .vf-list > .pp-row { padding: 0; }
+.vf .vf-list > .pp-row:hover { background: none; }
+.vf .vf-list > .pp-row > .pp-mark, .vf .vf-list > .pp-row > .pp-label { display: none; }
+.vf .vf-list .pp-select { width: auto; max-width: 172px; min-height: 0; height: 24px; padding: 0 6px; font-size: 12px; }
+.vf .vf-size { height: 24px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--field); color: var(--fg-2);
+  font: 500 11.5px var(--font-num); white-space: nowrap; cursor: pointer; }
+.vf .vf-size:hover, .vf.vf--open .vf-size { color: var(--fg); border-color: var(--fg-3); }
+.vf .vf-pop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 41; width: 296px; padding: 6px 10px 8px 0;
+  border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--raised); box-shadow: 0 14px 36px var(--shadow); }
+.vf .vf-pop[hidden] { display: none; }
+.vf .vf-head { padding: 2px 0 6px 14px; font: 600 10.5px var(--font-ui); letter-spacing: .07em; text-transform: uppercase; color: var(--fg-3); }
 .viewer-stage.vz { overflow: hidden; }
 .viewer-stage.vz-grab { cursor: grab; }
 .viewer-stage.vz-held { cursor: grabbing; }

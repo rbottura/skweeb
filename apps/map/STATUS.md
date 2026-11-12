@@ -189,7 +189,7 @@ size, the gamepad's by the gamepad.
 
 ## Known
 
-- No Format drawer: a map's size is its grid. What it is drawn at for the
+- No format: a map's size is its grid. What it is drawn at for the
   web is the bake's, brick 5.
 - Tiles are drawn square, stretched to the cell: a tileset's members are
   expected square. One layer: no tiles over the avatar yet — a tree's top,

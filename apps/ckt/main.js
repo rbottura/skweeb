@@ -189,6 +189,8 @@ function show(which) {
   motion.active = which === 'motion';
   root.querySelector('#view-dots').setAttribute('aria-pressed', String(which === 'dots'));
   root.querySelector('#view-motion').setAttribute('aria-pressed', String(which === 'motion'));
+  const format = root.querySelector('.viewer-head > .vf');      // the motion's format, in the viewer (S14b): not the dots'
+  if (format) format.hidden = which === 'dots';
 
   if (which === 'dots') dots.draw();
   else {

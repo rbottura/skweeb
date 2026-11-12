@@ -15,8 +15,14 @@
  * The guides and the ground on and off; the states once the object has one,
  * the graph opened by them. In the 3D app no guides, and at 200 % the picture
  * shown as pixels past its own; in cluster, the app's tools in its head; the
- * vault app's stage zooms itself, and has no zoom of these. And no page said
- * anything wrong.
+ * vault app's stage zooms itself, and has no zoom of these.
+ *
+ * S14b, the format in the viewer: its list in the head and the picture's size
+ * beside it, no Format section left in the properties, particles' overlay a
+ * section of its own; a format picked, the picture that shape; the chip
+ * opening the size, its link, bleed and scale, a width typed there followed
+ * by the height; closed by Escape or a press elsewhere; in cluster too, and
+ * in ckt hidden over the dots. And no page said anything wrong.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -157,6 +163,54 @@ c.ok('…at 100 %, its preview in its own pixels, a CSS pixel each', (await labe
 await c.go(c.base + '/apps/vault/');
 await page.until(`!!document.querySelector('skw-viewtools .vt-rulers')`, { timeout: 30000 }).catch(() => {});
 c.ok('the vault app zooms its own stage: no zoom of these', !/zoom-btn/.test(await tools()) && /rulers/.test(await tools()), await tools());
+
+// ── S14b: the format in the viewer ──────────────────────────────────────────
+
+await c.go(c.base + '/apps/particles/');
+await page.until(`${say}.includes('alive')`, { timeout: 30000 });
+await wait(500);
+const vf = `document.querySelector('.viewer-head > .vf')`;
+const chip = () => page.eval(`${vf}.querySelector('.vf-size').textContent`);
+const sections = () => page.eval(`[...document.querySelectorAll('.dr-head')].map(h => h.textContent.trim())`);
+const popOpen = () => page.eval(`!${vf}.querySelector('.vf-pop').hidden`);
+c.ok("the format in the viewer's head: its list, and the picture's size", (await page.eval(`${vf}?.querySelector('.vf-list select')?.value`)) === 'ig-square'
+  && (await chip()) === '1080 × 1080', await chip());
+c.ok('…no Format section in the properties, the overlay one of its own', !(await sections()).some(t => /^Format/i.test(t))
+  && (await sections()).some(t => /^Overlay/i.test(t)), JSON.stringify(await sections()));
+await page.typeInto(`${vf}.querySelector('.vf-list select')`, 'a3');
+await page.until(`${vf}.querySelector('.vf-size').textContent !== '1080 × 1080'`, { timeout: 5000 }).catch(() => {});
+await wait(400);
+const sheet = await canvasAt(), sheetH = await page.eval(`document.getElementById('stage').height`);
+c.ok('a format from the list: the picture that shape, the chip its size', (await chip()) === '1080 × 1527'
+  && Math.abs(sheetH / sheet.w - 420 / 297) < 0.01, `${await chip()}; canvas ${sheet.w} × ${sheetH}`);
+await page.click(`${vf}.querySelector('.vf-size')`);
+await wait(300);
+const popRows = await page.eval(`[...${vf}.querySelectorAll('.vf-pop .pp-row:not([hidden]) .pp-name')].map(n => n.textContent)`);
+c.ok('the chip opens the rest: the size and its link, bleed, the scale', (await popOpen()) && ['width', 'height', 'bleed', 'scale'].every(k => popRows.includes(k))
+  && (await page.eval(`!!${vf}.querySelector('.vf-pop .pp-pair-link')`)), JSON.stringify(popRows));
+await page.typeInto(`${vf}.querySelector('.vf-pop .pp-row[data-key="width"] .pp-num')`, '540');
+await wait(500);
+c.ok('…a width typed there: the height follows, linked, the sheet still itself', (await chip()) === '540 × 764'
+  && (await page.eval(`${vf}.querySelector('.vf-list select').value`)) === 'a3', `${await chip()}`);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+await wait(200);
+c.ok('…and Escape closes it', !(await popOpen()));
+await page.click(`${vf}.querySelector('.vf-size')`);
+await wait(200);
+await page.pointer([30, 860], [32, 860], 1);
+await wait(200);
+c.ok('…as a press anywhere else does', !(await popOpen()));
+await c.go(c.base + '/apps/cluster/?s14b#compose');
+await page.until(`!!document.querySelector('.viewer-head > .vf .vf-list select')`, { timeout: 30000 }).catch(() => {});
+c.ok("in cluster, the app's format in its viewer", (await page.eval(`${vf}?.querySelector('.vf-list select')?.value`)) === 'a4', await page.eval(`${vf}?.textContent`));
+await c.go(c.base + '/apps/ckt/');
+await page.until(`!!document.querySelector('.viewer-head > .vf')`, { timeout: 30000 }).catch(() => {});
+await page.click(`document.getElementById('view-dots')`);
+await wait(500);
+const overDots = await page.eval(`${vf}.hidden`);
+await page.click(`document.getElementById('view-motion')`);
+await wait(500);
+c.ok('ckt: the format the motion\'s, not shown over the dots', overDots && !(await page.eval(`${vf}.hidden`)));
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));

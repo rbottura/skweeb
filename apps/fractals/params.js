@@ -30,7 +30,6 @@ export const GROUPS = {
   colour:  { label: 'Colour', open: true },
   copies:  { label: 'Copies', open: true },
   motion:  { label: 'Motion', open: true },
-  format:  { label: 'Format', open: false },
 };
 
 const ESCAPE = { family: 'escape' };

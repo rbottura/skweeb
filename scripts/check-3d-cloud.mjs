@@ -31,7 +31,7 @@ const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const cards = `[...document.querySelectorAll('.pp-card')].filter(c => !c.parentElement.closest('.pp-card'))`;
 const cardRow = (i, name) => `[...${cards}[${i}].querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
-const panelRow = name => `[...document.querySelectorAll('#side > .pp > .pp-body .pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const panelRow = name => `[...document.querySelectorAll('#side > .pp > .pp-body .pp-row:not(.pp-stack-layer .pp-row), .viewer-head > .vf .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 /** Values set on a row's panel, as a hand would: the cloud's card, or the app's. */
 const setOn = (row, values) => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { rowParams(${row}).params.set(${JSON.stringify(values)}); return true; })`);
 const CLOUD = 3;                                      // the opening's box, sphere and torus, then the cloud

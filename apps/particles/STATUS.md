@@ -29,7 +29,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 - **The overlay composed** (G3, 2026-11-11, the author's pick: "overlay
   composable"; `draw.js` `overlayBox`, `drawOverlay`, `drawPicture`;
   `guides.js` `overlayOn`; `check-particles-overlay` 16). With an overlay,
-  the Format drawer's rows compose it: *where* — in front of the
+  the Overlay section's rows compose it (S14b): *where* — in front of the
   particles, or behind them, over the ground — *fitted* whole or filling
   the format, what spills over cut; its *size*, a share of that; *from
   centre*, x and y in picture pixels; *turned*, clockwise round its middle;
@@ -53,7 +53,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   ask, a poster's type over its particles: "une image avec de la
   transparence devant mon rendu, en overlay mais adapter au format pour
   pouvoir gérer la composition"; `draw.js` `overlayBox`, `drawOverlay`). The
-  Format drawer's *overlay*: a still or a shape of the vault, whole, as large
+  Overlay section's *overlay*: a still or a shape of the vault, whole, as large
   as the format allows, centred — a sheet of the format fills it to the
   pixel, and on another format nothing of it is cut. In front of the
   particles and under the guides; where it is see-through, the render. In
@@ -142,7 +142,7 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   `node scripts/check-particles.mjs`, 41 checks since its split). Three columns, as
   compose: *particles* on the left — Emission, Launch, Life, Forces, the
   model's recipe key for key — the picture between, *picture* on the right —
-  core's Format drawer less `ink`, `canvas` and `zoom`, the player and its
+  the overlay, the player and its
   `fps`, the Look: dot size, colour, a fade over life, the ground. Every
   frame is `particlesAt(recipe, tick / fps)`. A stream's loop is set in
   frames, so its period is whole frames and it closes on one: the frame

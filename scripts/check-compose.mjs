@@ -54,7 +54,9 @@ const look = () => page.eval(`(() => {
     dpi: dim[1] || '', vault: dim[2] || '' };
 })()`);
 
-const row = (side, label) => `[...document.querySelectorAll('#${side} .pp-row')]
+/** A row of a side; the page's format is the viewer's since S14b. */
+const rowsOf = side => side === 'page-side' ? '#page-side .pp-row, .viewer-head > .vf .pp-row' : `#${side} .pp-row`;
+const row = (side, label) => `[...document.querySelectorAll('${rowsOf(side)}')]
   .find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(label)})`;
 const type = async (side, label, value) => {
   await page.typeInto(row(side, label) + '?.querySelector(".pp-num")', value);
@@ -145,7 +147,7 @@ try {
     await new Promise(r => setTimeout(r, 200));
     s = await look();
     ok('a ground of none is transparent', s.clear > 0, s.clear + ' clear pixels');
-    await page.typeInto(`[...document.querySelectorAll('#page-side .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === 'format')?.querySelector('select')`, 'a3');
+    await page.typeInto(`${row('page-side', 'format')}?.querySelector('select')`, 'a3');
     await new Promise(r => setTimeout(r, 200));
     s = await look();
     ok('A3 is A4\'s shape: the box stays, the dpi moves', s.out === '1240 × 1754 px' && s.dpi.includes('106 dpi on A3'), s.dpi);

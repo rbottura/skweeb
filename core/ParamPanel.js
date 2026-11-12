@@ -42,6 +42,13 @@
  * Since S2b the rows are core/param-rows.js's: a unit inside its box, two
  * numbers on one line (`pair`), the rows seldom touched folded under "n
  * more" (`more`).
+ *
+ * ── The format in the viewer (S14b, 2026-11-12) ─────────────────────────────
+ *
+ * The Format group is not a drawer where the panel's app has a viewer: its
+ * rows sit in the viewer's head (core/viewformat.js) — the format's list
+ * there, the rest behind the size's chip — laid as a drawer would lay them.
+ * A drawer added `before: 'format'` goes where its drawer would have been.
  */
 
 import { VaultPanel } from './VaultPanel.js';
@@ -52,12 +59,13 @@ import { buildRow, buildPair, pairedKeys, addFold, loadFolds } from './param-row
 import { installPalette } from './Palette.js';
 import { watch, unwatch, around } from './steps.js';
 import { held }       from './scope.js';
+import { formatIn }   from './viewformat.js';
 
 export { WIDGET_TYPES };
 
-/** Groups every app shares, so a Format section is the same section everywhere. */
+/** Groups every app shares, so a Format section is the same section everywhere — in the viewer, where there is one. */
 const CORE_GROUPS = {
-  format: { label: 'Format', open: false },
+  format: { label: 'Format', open: false, viewer: true },
 };
 
 const el = (tag, cls, text) => {
@@ -102,6 +110,8 @@ export class ParamPanel {
     this._pairs   = [];              // [{ node, keys }]: two numbers on one line
     this._hover   = null;            // the drawer under the pointer, for Alt's peek
     this._alt     = false;
+    this._viewer  = undefined;       // the Format group's place in the viewer, once asked: null where there is none
+    this._at      = new Map();       // group id → where its drawer would be, for a group the viewer holds
 
     this._build();
     this._paint();
@@ -150,6 +160,7 @@ export class ParamPanel {
     this._root.remove();
     if (this._unpeek) this._unpeek();
     if (this._off) this._off();
+    if (this._viewer) this._viewer.remove();
     const left = panels.get(this._params) - 1;
     panels.set(this._params, left);
     if (!left) unwatch(this._params);      // its steps go with the last panel showing it
@@ -165,8 +176,8 @@ export class ParamPanel {
    */
   addDrawer({ id, title, open = true, note = '', before = null }) {
     const drawer = new Drawer({ title, open, note, id: `${this._params.app}:${id}` });
-    const next = before && this._drawers.get(before);
-    if (next) this._body.insertBefore(drawer.root, next.root);
+    const next = before && (this._drawers.has(before) ? this._drawers.get(before).root : this._at.get(before));
+    if (next) this._body.insertBefore(drawer.root, next);
     else this._body.append(drawer.root);
     this._drawers.set(id, drawer);
     this._extra.add(id);
@@ -229,7 +240,7 @@ export class ParamPanel {
       const spec = this._params.spec(key);
       if (!WIDGETS[spec.type]) continue;          // params.js refuses these first
       const group = spec.group || null;
-      const into = group ? this._drawerFor(group).body : this._loose;
+      const into = this._into(group, key);
       if (spec.pair) {
         const pair = buildPair(this, this._params, key);
         into.append(pair.node);
@@ -245,6 +256,27 @@ export class ParamPanel {
       const fold = addFold(this._params.app, id, drawer, this._folds);
       if (fold) this._foldOf.set(id, fold);
     }
+  }
+
+  /**
+   * Where a row goes: its group's drawer, or the loose rows above them — or, for the group the viewer holds,
+   * the viewer's head: the format's list there, the rest behind the size's chip (core/viewformat.js, S14b).
+   */
+  _into(group, key) {
+    if (!group) return this._loose;
+    if (CORE_GROUPS[group] && CORE_GROUPS[group].viewer) {
+      if (this._viewer === undefined) {
+        this._viewer = this._mount ? formatIn(this._mount, this._params) : null;
+        if (this._viewer) {
+          const at = el('div', 'pp-at');
+          at.hidden = true;
+          this._body.append(at);
+          this._at.set(group, at);
+        }
+      }
+      if (this._viewer) return key === 'format' ? this._viewer.list : this._viewer.rows;
+    }
+    return this._drawerFor(group).body;
   }
 
   /** Rows that apply, drawers that have anything to show, widgets that read others, what changed. */
@@ -263,6 +295,7 @@ export class ParamPanel {
       if (spec.more && on && !mod && group) folded.set(group, (folded.get(group) || 0) + 1);
     }
     for (const { node, keys } of this._pairs) node.hidden = keys.every(k => this._rows.get(k).row.hidden);
+    if (this._viewer) this._viewer.paint();
     for (const [id, drawer] of this._drawers) {
       if (this._extra.has(id)) continue;
       drawer.hidden = !shown.get(id);

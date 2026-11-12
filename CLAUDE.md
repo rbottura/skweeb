@@ -171,7 +171,7 @@ node scripts/check-states.mjs           # S6b, S6d: S the next state of a smart 
 node scripts/check-mount.mjs            # S9: an app a module — mounted, unmounted with nothing left, mounted again elsewhere
 node scripts/check-cluster.mjs          # S9c: the scene — every app mounted in turn from the strip, twice round, nothing held more; the address
 node scripts/check-cluster-vault.mjs    # S9g: the scene's vault — still at a switch, the app's own first, a card dragged onto a field
-node scripts/check-viewtools.mjs        # S14a: the viewer's tools — the zoom by its menu, Ctrl wheel, Space, the middle button; a handle dragged zoomed; the states, the guides, the ground
+node scripts/check-viewtools.mjs        # S14a: the viewer's tools — the zoom by its menu, Ctrl wheel, Space, the middle button; a handle dragged zoomed; the states, the guides, the ground; S14b, the format in the viewer
 node scripts/check-puppet.mjs           # the rig's puppet: a fake camera read once a frame, eyes and mouth worn, the body swayed, the guides, the camera switched; sent and followed by a page in OBS; parts found drawn eyes first, and told
 node scripts/vendor-mediapipe.mjs       # once a machine, before the puppet reads a face: MediaPipe into core/libs/mediapipe/, out of git
 node scripts/check-3d-cloud.mjs          # G1: a cloud of dots — unlit in its palette to the pixel, C and R, born on a shape's ink; saved, replayed, opened; G2, in time under its forces, played once; WebGL2

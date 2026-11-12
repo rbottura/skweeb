@@ -228,7 +228,7 @@ c.ok('printed: a PNG the sheet\'s size, saying its 50 dpi, the drawing on it', !
 await c.go(c.base + '/apps/3d/');
 await page.until(`/box, sphere, torus|nothing draws/.test(${say})`, { timeout: 30000 });
 await page.downloadsTo(DL);
-const panelRow = name => `[...document.querySelectorAll('#side > .pp > .pp-body .pp-row:not(.pp-stack-layer .pp-row)')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const panelRow = name => `[...document.querySelectorAll('#side > .pp > .pp-body .pp-row:not(.pp-stack-layer .pp-row), .viewer-head > .vf .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 
 const tiling = await page.eval(`(async () => {
   const { printObject } = await import('/core/print.js');

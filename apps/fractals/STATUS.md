@@ -124,7 +124,7 @@ field`.
   the pointer; the wheel zooms about the pointer, keeping its point. Held
   to the escape count in doubles at 158 points away from the set's edge,
   every one agreeing. Opens with no vault; with no WebGPU it says why.
-- **The format** is core's Format drawer less `ink`, `canvas`, `zoom` and
+- **The format** is core's, in the viewer, less `ink`, `canvas`, `zoom` and
   `bleed`: a fractal fills whatever it is given.
 - **`step: 'any'`** for a range (core/params.js): no grid to snap to, so the
   centre and the zoom keep every digit a wheel gives them.
