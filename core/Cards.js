@@ -24,11 +24,21 @@
  * drawer of the card, its changes the outer list's, kept in the entry's
  * recipe under its key: `[{ id, params, on, modifiers: [{ id, params, on }] }]`.
  *
+ * A list the app's recipe holds under a `key` — the 3D app's `shapes`,
+ * filter's `chain` — is held as the app's params are (core/steps.js
+ * `holdList`, L12b, 2026-11-12): a state gone back to, hovered in the graph
+ * or merged puts the list back with the params, where once only the params
+ * came back and the cards stayed as they were; and each card, its inner
+ * cards too, finds its values in a state's recipe — the entry at its place
+ * in the list, of its kind (`partIn`) — for its rows' value in each state.
+ *
  * DOM and params only; core/cards.css draws `.pp-cards` and `.pp-card`.
  */
 
 import { defineParams } from './params.js';
 import { ParamPanel }   from './ParamPanel.js';
+import { holdList, partIn } from './steps.js';
+import { held }         from './scope.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -72,11 +82,13 @@ export class Cards {
    * @param {boolean} [opts.fold=false]        only the chosen card open, the others one line each
    * @param {object} [opts.inner]              a list inside each card: `{ key, title, before }` and the
    *                                           options of its own Cards; its recipe under `key`
+   * @param {string} [opts.key]                the key the app's recipe holds the list under — `shapes`, `chain`:
+   *                                           a state gone back to puts it back (core/steps.js `holdList`)
    * @param {() => void} [opts.onChange]       an entry came or went, moved, or changed a value
    * @param {(index: number) => void} [opts.onChoose]   another entry chosen — its index, or -1 for none
    */
   constructor({ mount, catalogue, app, schemaOf = null, groups = null, order = false, start = null, words = {},
-                fold = false, inner = null, onChange = () => {}, onChoose = () => {} }) {
+                fold = false, inner = null, key = null, onChange = () => {}, onChoose = () => {} }) {
     this.catalogue = catalogue;
     this.app = app;
     this.schemaOf = schemaOf || (id => catalogue[id].params || {});
@@ -90,6 +102,9 @@ export class Cards {
     this.onChoose = onChoose;
     this.entries = [];
     this.chosen = null;
+    /** The list in a recipe: under its key — or, for an inner list, its entry's (`innerOf`); none known, null. */
+    this.listIn = key ? recipe => (recipe && typeof recipe === 'object' ? recipe[key] : null) : null;
+    if (key) held(holdList(key, { app, label: this.words.label || key, get: () => this.recipe(), put: list => this.restore(list, { keep: true }) }));
 
     this.cards = el('div', 'pp-cards');
     this.empty = el('p', 'pp-cards-empty', this.words.empty);
@@ -164,7 +179,7 @@ export class Cards {
     const panel = new ParamPanel(params, { title: item.label, mount: card, ...(this.groups ? { groups: this.groups } : {}) });
     const entry = { item, params, on, card, panel, title: panel.head.querySelector('.pp-title') };
     if (this.fold) foldable(entry, () => this.choose(this.chosen === entry ? null : entry));
-    if (this.inner) entry.inner = this.innerOf(panel);
+    if (this.inner) entry.inner = this.innerOf(panel, entry);
 
     const toggle = headButton(on ? this.words.on : this.words.off, this.words.toggle, () => {
       entry.on = !entry.on;
@@ -181,6 +196,8 @@ export class Cards {
     }
     panel.head.append(headButton('✕', this.words.out, () => this.remove(entry)));
     params.on(() => this.onChange());
+    // Its values in a state's recipe: the entry at its place, of its kind — for its rows' value in each state.
+    if (this.listIn) partIn(params, recipe => { const e = this.entryIn(recipe, entry); return e ? e.params : null; });
 
     const next = this.entries[at];
     this.entries.splice(at, 0, entry);
@@ -202,7 +219,7 @@ export class Cards {
   }
 
   /** The list inside a card: a drawer of its own, its count beside its title, its changes the outer list's. */
-  innerOf(panel) {
+  innerOf(panel, entry) {
     const { key, title, before = null, ...opts } = this.inner;
     const drawer = panel.addDrawer({ id: key, title, before });
     const inner = new Cards({ ...opts, mount: drawer.body, onChange: () => {
@@ -210,7 +227,16 @@ export class Cards {
       drawer.note(all ? (on === all ? `${all}` : `${on} of ${all} on`) : '');
       this.onChange();
     } });
+    // Its list in a recipe is its card's entry's, under its key: a modifier's values in each state too.
+    if (this.listIn) inner.listIn = recipe => { const e = this.entryIn(recipe, entry); return e ? e[key] : null; };
     return inner;
+  }
+
+  /** An entry's place in a recipe's list: the one at its index, if it is of its kind — or null. */
+  entryIn(recipe, entry) {
+    const list = this.listIn ? this.listIn(recipe) : null;
+    const e = Array.isArray(list) ? list[this.entries.indexOf(entry)] : null;
+    return e && typeof e === 'object' && e.id === entry.item.id ? e : null;
   }
 
   move(entry, by) {
@@ -236,9 +262,12 @@ export class Cards {
 
   /**
    * Put a whole list back, as a recipe has it, inner lists too, nothing
-   * chosen. What a catalogue lacks is named, not thrown — the inner lists' too.
+   * chosen — or, `keep`, the one at the place chosen still chosen when it is
+   * of the same kind: a state gone back to. What a catalogue lacks is named,
+   * not thrown — the inner lists' too.
    */
-  restore(list = []) {
+  restore(list = [], { keep = false } = {}) {
+    const was = keep && this.chosen ? { at: this.chosenIndex, id: this.chosen.item.id } : null;
     for (const e of this.entries) drop(e);
     this.entries = [];
     this.choose(null);
@@ -250,6 +279,7 @@ export class Cards {
     }
     this.paint();
     this.onChange();
+    if (was && this.entries[was.at] && this.entries[was.at].item.id === was.id) this.choose(was.at);
     return unknown;
   }
 

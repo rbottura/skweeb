@@ -20,6 +20,12 @@
  * ParamPanel watches every panel's params; core/Bar.js says each step. A
  * page that lists them — cluster's History (S9f) — reads `list()`, hears
  * `onSteps`, and goes to one with `go`.
+ *
+ * What a page's recipe holds beyond its params — a list of cards, the 3D
+ * app's shapes, filter's chain — the list holds under its key (`holdList`,
+ * L12b, 2026-11-12): a state gone back to puts it back with the params, and
+ * a card's row finds its value in each state (`partIn`). Several changed at
+ * once — a state gone back to, a merge — are one step (`aroundAll`).
  * No DOM at import.
  */
 
@@ -44,6 +50,38 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const say = text => { for (const fn of ears) fn(text); };
 const changed = () => { for (const fn of lists) fn(); };
 
+const holds = new Map();       // key → a list the page's recipe holds beyond its params, as a params is held
+const finders = new WeakMap(); // params → where its values are in a recipe, when no search of it finds them: a card's
+
+/**
+ * A list the page's recipe holds under `key` — the 3D app's shapes, filter's
+ * chain (core/Cards.js) — held as a params is, its values `{ [key]: list }`:
+ * a state gone back to, previewed or merged lays it back with the params
+ * (core/shell/graph.js). Back, what lets go of it.
+ *
+ * @param {string} key
+ * @param {{get: () => Array, put: (list: Array) => void, app?: string, label?: string}} opts
+ */
+export function holdList(key, { get, put, app = '', label = key }) {
+  const list = {
+    list: true, key, app, keys: [key],
+    get values() { return { [key]: JSON.parse(JSON.stringify(get() ?? [])) }; },
+    restore(values) { put((values && values[key]) || []); },
+    spec: k => (k === key ? { label } : null),
+  };
+  holds.set(key, list);
+  return () => { if (holds.get(key) === list) holds.delete(key); drop(list); };
+}
+
+/** The lists the page holds beyond its params, as `holdList` made them. */
+export const heldLists = () => [...holds.values()];
+
+/** Where `params`' values are in a recipe its page saves: `find(recipe)`, the part or null — a card's, in its list. */
+export function partIn(params, find) { finders.set(params, find); }
+
+/** …asked: the part `partIn` was told of, or undefined when it was told nothing — a search of the recipe then. */
+export const findPart = (params, recipe) => (finders.has(params) ? finders.get(params)(recipe) : undefined);
+
 /** Hear each step taken back or on, in words for the status bar. */
 export function onStep(fn) { ears.add(fn); return () => ears.delete(fn); }
 
@@ -64,12 +102,23 @@ export function watch(params) {
  */
 export function unwatch(params) {
   if (!cur.has(params)) return;
-  if (open && open.params === params) open = null;
   offs.get(params)();
   offs.delete(params);
   cur.delete(params);
+  drop(params);
+}
+
+/** Every step of `params` forgotten — its share of one made of several too, that one gone when nothing of it is left. */
+function drop(params) {
+  if (open && open.params === params) open = null;
   for (const list of [back, ahead]) {
-    for (let i = list.length - 1; i >= 0; i--) if (list[i].params === params) list.splice(i, 1);
+    for (let i = list.length - 1; i >= 0; i--) {
+      const st = list[i];
+      if (st.group) {
+        st.group = st.group.filter(s => s.params !== params);
+        if (!st.group.length) list.splice(i, 1);
+      } else if (st.params === params) list.splice(i, 1);
+    }
   }
 }
 
@@ -116,18 +165,44 @@ export function around(params, fn) {
   changed();
 }
 
+/**
+ * Several changed at once, as one step — a state gone back to, a merge: its
+ * params and the lists it holds (`holdList`), a step Ctrl Z takes back whole,
+ * its line `label` where one is given.
+ */
+export function aroundAll(targets, fn, label = '') {
+  settle();
+  const before = targets.map(snap);
+  replaying = true;
+  try { fn(); } finally { replaying = false; }
+  const group = [];
+  targets.forEach((params, i) => {
+    const after = snap(params);
+    if (cur.has(params)) cur.set(params, after);
+    if (!same(after, before[i])) group.push({ params, before: before[i], after });
+  });
+  if (!group.length) return;
+  back.push({ ...(group.length === 1 ? group[0] : { group }), ...(label ? { label } : {}) });
+  if (back.length > KEEP) back.shift();
+  ahead.length = 0;
+  changed();
+}
+
 function replay(params, values) {
   replaying = true;
   try { params.restore(values); } finally { replaying = false; }
-  cur.set(params, snap(params));
+  if (cur.has(params)) cur.set(params, snap(params));   // a list is held, never watched (`holdList`)
 }
+
+/** A step's every part laid back to one side of it: `before` or `after`. */
+const replayed = (st, side) => { for (const s of st.group || [st]) replay(s.params, s[side]); };
 
 /** A step back: true if there was one. */
 export function undo() {
   settle();
   const st = back.pop();
   if (!st) { say('nothing to go back to'); return false; }
-  replay(st.params, st.before);
+  replayed(st, 'before');
   ahead.push(st);
   say(`a step back${back.length ? ` · ${back.length} more` : ''}`);
   changed();
@@ -139,7 +214,7 @@ export function redo() {
   settle();
   const st = ahead.pop();
   if (!st) { say('nothing to go on to'); return false; }
-  replay(st.params, st.after);
+  replayed(st, 'after');
   back.push(st);
   say(`a step on${ahead.length ? ` · ${ahead.length} more` : ''}`);
   changed();
@@ -152,7 +227,9 @@ const shortly = v => typeof v === 'number' ? String(Math.round(v * 1000) / 1000)
   : typeof v === 'boolean' ? (v ? 'on' : 'off') : v == null ? '—' : '…';
 
 /** What a step changed, in a line: the value and where it went, or how many. */
-function described({ params, before = {}, after = {} }) {
+function described({ params, before = {}, after = {}, group = null, label = '' }) {
+  if (label) return label;
+  if (group) return `${group.length} parts at once`;
   const keys = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter(k => !same(before[k], after[k]));
   if (keys.length !== 1) return `${keys.length} values${params.app ? ' · ' + params.app : ''}`;
   const spec = typeof params.spec === 'function' ? params.spec(keys[0]) : null;
@@ -188,7 +265,7 @@ export const counts = () => ({ back: back.length + (open ? 1 : 0), ahead: ahead.
 export function forTests({ now = null } = {}) {
   if (now) clock = now;
   for (const off of offs.values()) off();
-  back.length = 0; ahead.length = 0; cur.clear(); offs.clear(); open = null;
+  back.length = 0; ahead.length = 0; cur.clear(); offs.clear(); holds.clear(); open = null;
 }
 
 /** Ctrl Z, Ctrl Y and Ctrl Shift Z — by their letter, as every program has them. */

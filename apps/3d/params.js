@@ -51,6 +51,7 @@ export function modelParams() {
 export const SHAPE_CARDS = {
   catalogue: SHAPES,
   app: '3d',
+  key: 'shapes',            // the recipe's: a state gone back to puts the shapes back with the view (core/steps.js, L12b)
   schemaOf: shapeSchema,
   groups: SHAPE_GROUPS,
   fold: true,
@@ -60,6 +61,7 @@ export const SHAPE_CARDS = {
     return at;
   },
   words: {
+    label: 'the shapes',
     add: 'add a shape…',
     empty: 'No shapes yet. Add one.',
     on: 'shown', off: 'hidden',

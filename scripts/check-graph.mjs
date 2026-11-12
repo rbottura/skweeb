@@ -121,6 +121,62 @@ const pie = await page.eval(`!!document.querySelector('skw-pie')`);
 c.ok("…the graph's, not the app's pie", !pie);
 await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
 
+// ── L12b: the 3D app's states are its view and its shapes, gone back to whole ──────────────────
+// Its shapes are cards, held as a list (core/steps.js `holdList`): once, a state gone back to brought the view
+// back and left the shapes as they were — the next S a state of one's view and another's clouds (2026-11-12).
+await c.go(c.base + '/apps/3d/');
+await page.until(`document.querySelectorAll('.pp-card').length === 3`, { timeout: 30000 });
+await page.until(`!/three is still starting/.test(${say}) && !!document.querySelector('#stage')?.width`, { timeout: 30000 }).catch(() => {});
+const model = `import('/core/steps.js').then(m => { const s = m.heldLists().find(l => l.key === 'shapes').values.shapes;
+  const v = m.watched().find(p => p.app === '3d').values;
+  return { shapes: s.map(x => x.id + (x.id === 'cloud' ? ':' + x.params.count : '')).join(), turned: Math.round(v.yaw) }; })`;
+await save();
+await page.click(`[...document.querySelectorAll('.pp-card')].find(c => c.querySelector('.pp-title')?.textContent === 'torus').querySelector('[title="Take it out of the model"]')`);
+// The shapes' own menu — each card has one of its own, for its modifiers, before it.
+await page.eval(`(() => { const m = [...document.querySelectorAll('.pp-cards-add')].find(m => [...m.options].some(o => o.value === 'cloud'));
+  m.value = 'cloud'; m.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+await page.until(`document.querySelectorAll('.pp-card').length === 3`, { timeout: 10000 }).catch(() => {});
+const cloudRow = key => `[...document.querySelectorAll('.pp-card')].find(c => c.querySelector('.pp-title')?.textContent === 'cloud of dots')?.querySelector('.pp-row[data-key="${key}"]')`;
+await page.typeInto(`${cloudRow('count')}.querySelector('.pp-num')`, '250');
+await page.typeInto(`${row('yaw')}.querySelector('.pp-num')`, '60');
+await wait(600);
+await save();
+const v2 = await page.eval(model);
+await tapH();
+await page.until(`document.querySelectorAll('skw-graph .gr-node').length === 2`, { timeout: 15000 }).catch(() => {});
+await page.eval(`${node(1)}.dispatchEvent(new PointerEvent('pointerenter'))`);
+await page.until(`(${model})().then(m => m.shapes === 'box,sphere,torus')`, { timeout: 10000 }).catch(() => {});
+const hover3d = await page.eval(model);
+await page.eval(`${node(1)}.dispatchEvent(new PointerEvent('pointerleave'))`);
+await wait(400);
+const left3d = await page.eval(model);
+c.ok('3D, hovered: v1 drawn, its shapes too; left, the page itself again', v2.shapes === 'box,sphere,cloud:250' && v2.turned === 60
+  && hover3d.shapes === 'box,sphere,torus' && hover3d.turned === 30 && JSON.stringify(left3d) === JSON.stringify(v2),
+  JSON.stringify({ v2, hover3d, left3d }));
+await page.click(node(1));
+await wait(600);
+const back3d = await page.eval(model);
+const held3d = await page.eval(`import('/core/vault.js').then(m => m.Vault.bound.version)`);
+c.ok('…clicked: back to v1, its view and its shapes, held', back3d.shapes === 'box,sphere,torus' && back3d.turned === 30 && held3d === 1,
+  JSON.stringify({ back3d, held3d }));
+const ctrl = k => page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: '${k}', ctrlKey: true, bubbles: true }))`);
+await ctrl('z');
+await wait(500);
+const undone = await page.eval(model);
+await ctrl('y');
+await wait(500);
+const redone = await page.eval(model);
+c.ok('…one Ctrl Z the page before it, whole; Ctrl Y v1 again', JSON.stringify(undone) === JSON.stringify(v2)
+  && JSON.stringify(redone) === JSON.stringify(back3d), JSON.stringify({ undone, redone }));
+// A card's row, its value in each state: the cloud's dots in v2, and nowhere in v1, which had none (S6d).
+await ctrl('z');
+await page.until(`!!${cloudRow('count')}`, { timeout: 10000 }).catch(() => {});
+await page.eval(`${cloudRow('count')}.querySelector(':scope > .pp-mark').dispatchEvent(new MouseEvent('click', { altKey: true, bubbles: true }))`);
+await page.until(`document.querySelectorAll('.pp-hist-item, .pp-hist-none').length >= 1`, { timeout: 15000 }).catch(() => {});
+const cardValues = await page.eval(`[...document.querySelectorAll('.pp-hist-item')].map(i => i.querySelector('.pp-hist-v').textContent + ' = ' + i.querySelector('.pp-hist-val').textContent)`);
+c.ok("…a card's row, its value in each state that has it", JSON.stringify(cardValues) === '["v2 = 250"]', JSON.stringify(cardValues));
+await page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();
