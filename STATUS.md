@@ -12,9 +12,12 @@ sorts them.
 
 ### Newest — 2026-11-09 to -12: BEC 2027's graphic system (track G, `docs/plan.md`)
 
-- **The stack's bugs, the author's list** (L12, 2026-11-12): a layer's row
-  within its panel, its ▲ ▼ × in reach; a state gone back to whole — the 3D
-  app's shapes with its view, filter's chain with its source — one Ctrl Z.
+- **An object's layers, in every app** (L13a, 2026-11-12, `core/layers.js`):
+  its Stack section first — "+ overlay…", a vault picture in front or behind,
+  fitted to the format, composed as particles' overlay — kept state by state,
+  drawn round the canvas and in all that leaves: a save, a replay, compose,
+  the print, E's picture. The stack's bugs (L12): rows within the panel, a
+  state gone back to whole — the 3D app's shapes with its view — one Ctrl Z.
 
 - **A cloud of dots in the 3D app** (G1, `apps/3d/cloud.js`): particles'
   emitter in 3D, its dots placed once on a vault object's ink, a ball, a disc…,
@@ -153,17 +156,12 @@ sorts them.
 
 ### M8 — the map editor (`apps/map/STATUS.md`, four bricks of six; the player)
 
-- **A map on a grid of large tiles** (2026-09-30): a tileset — any set,
-  offered as a *map tileset* (`core/uses.js`) — painted into cells with no
-  gaps; things from the vault on cells, feet at the bottom middle, back to
-  front by row, dragged, their loops playing by the map's clock. A new type,
-  `map`, saves, replays to the pixel, draws again at scale 2, reopens, and
-  compose places and plays it: `any → map: a thing in the room`.
-- **Walls, and things that answer** (2026-10-02): a wall a flag a cell; a
-  sign, a warp to a map by its name, the spawn, RPG Maker's way. **The
-  player** (`play/`): a saved map, point and click — what answers outlined,
-  a sign shown, a warp followed and back. Its avatar (P4, 2026-11-06): on
-  the spawn, wearing a character; ZQSD, the arrows, a pad; E; a tap walks.
+- **A map on a grid of large tiles** (2026-09-30): a tileset painted into
+  cells; things from the vault on cells, back to front by row, their loops by
+  the map's clock; a `map` saved, replayed, reopened, placed in compose.
+- **Walls, and things that answer** (2026-10-02): a sign, a warp, the spawn,
+  RPG Maker's way. **The player** (`play/`): point and click, a warp followed
+  and back; its avatar (P4) on the spawn — ZQSD, the arrows, a pad, E, a tap.
 
 ### M7 — fractals (`apps/fractals/STATUS.md`, done 2026-09-30)
 
@@ -266,20 +264,17 @@ sorts them.
 
 ## Tests
 
-Sixty-eight files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-11-12). Newest: `3d-forces` (G2), `3d-cloud` (G1); `garden`,
-the garden's modifiers and growth (M14); `scope` and `reach`; the puppet's four —
-`puppet-eyes` (27), `puppet-mouth` (15), `puppet-sway` (24), `puppet-roles`
-(17): the eyes and the mouth cut and worn, the sway, the parts found;
-before them M11's — `live`, `stack`, `place`, `smart` — the print's —
-`windowed`, `stage-still`, `png` — and the 3D app's seven.
+Sixty-nine files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-11-12). Newest: `layers` (L13), `steps` grown
+for a list held (L12b); `3d-forces` (G2), `3d-cloud` (G1); `garden` (M14);
+`scope` and `reach`; the puppet's four; M11's, the print's, the 3D app's seven.
 
-Forty browser checks, each a command in `CLAUDE.md`, run several at a
-time by `scripts/checks.mjs`: each its own server on a
-copy of the vault, headless Chrome through `scripts/chrome.mjs` — a real
-mouse included — and `scripts/check-kit.mjs` under it. Each fails when a page
-throws or its console is not quiet. Newest: `check-particles-overlay` (G3), `check-3d-cloud` (G1, G2),
-`check-cluster-vault` (S9g), `check-cluster` and `check-mount` (S9). On the laptop Chrome keeps
+Forty-two browser checks, each a command in `CLAUDE.md`, run several at a
+time by `scripts/checks.mjs`: each its own server on a copy of the vault,
+headless Chrome through `scripts/chrome.mjs` — a real mouse included — and
+`scripts/check-kit.mjs` under it; each fails when a page throws or its
+console is not quiet. Newest: `check-layers` (L13), `check-particles-overlay`
+(G3), `check-3d-cloud` (G1, G2). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
 (`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
@@ -287,6 +282,10 @@ drawn by Chrome in software afterwards, a little differently: a check that
 compares two pages' canvases measures, never demands the pixel.
 
 ## Broken / half-done
+
+- **An object's layers** (L13a): a frames zip leaves without them, and the
+  map's player shows none; a window's block in the stack gives its opacity
+  and blend to its picture, not its layers' canvases; dragged, not yet.
 
 - **`check-frames` depends on which stills come first in the vault**: red
   with the garden's sparse flowers (2026-11-09, `main` too, 3 of 3), green
@@ -345,10 +344,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**L13a — an object's layers** (`docs/plan.md`, the author's picks of
-2026-11-12): the param `layers` and its rows in the Stack, "+ overlay…",
-drawn by core round the canvas and in all that leaves, every app; then L13b,
-particles' overlay fused in; S9i after.
+**L13b — particles' overlay fused into its layers** (`docs/plan.md`):
+its Overlay section the first layer, its saves drawn as they were, behind
+still between its ground and its particles, its drag and F on the chosen
+layer; then S9i.
 
 ## Parked decisions
 

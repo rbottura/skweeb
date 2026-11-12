@@ -74,6 +74,10 @@ scale) for **a window**:
 handle.window(i, { x, y, w, h })   // a canvas at least w × h: that part of frame i, at the handle's scale
 ```
 
+An object with layers (L13, `core/layers-draw.js`) is laid round in each
+window as in its frame: the ones behind under the app's window, those in
+front over it, through `windowed.js` — each layer from its own pixels.
+
 That is the one addition to the handle a print needs, and every app's
 rebuild.js has it. The ways it is met:
 

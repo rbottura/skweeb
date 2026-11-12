@@ -365,3 +365,15 @@ particles' overlay fused into them, its saves drawn as they were and its
 "behind" still between its ground and its particles, where elsewhere behind
 is under the picture, seen where its ground is none; and a live window as a
 layer of the object later, once vault objects are.
+
+**An object's layers drawn by core, not by each app** (L13a). Nine apps draw
+their pictures nine ways, so the layers are laid round what they draw, in
+the three places everything passes: a save's picture, before the vault
+writes it (`Vault.finishWith`, its thumb made again); every replay, round
+the frames an app's `rebuild.js` hands back — so compose, the vault, the
+windows' stack and the print in tiles have them; and the preview, a canvas
+each on the picture's box, its opacity and blend the page's, as the stack's
+are. The format they fit is the app's, read beside them in the recipe, or,
+where its source sets it — grid's `content`, filter, the map, the rig — the
+picture's own size; the rig says where on its canvas its saved box is. An
+app that draws them itself says `layered`: particles, from L13b.

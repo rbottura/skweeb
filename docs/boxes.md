@@ -123,6 +123,11 @@ and the map's clock take one when their apps' layouts come to it.
 `stackBox(…)`: what `stackDrawer` draws, in a box: the same options, the
 drawer left to the layout.
 
+Since L13 (2026-11-12) the Stack section is the object's layers first —
+the `layers` param, one line of each app's schema (`LAYERS`), its group
+`stack` one of ParamPanel's own, like `format` — then the windows' live
+stack, under a heading of its own; the section stays the panel's last.
+
 ## Format and Ground — U8c
 
 `ParamPanel` mounts a group of the schema in an element it is given,
