@@ -136,7 +136,9 @@ below.
 What each brick reads first, found while planning:
 
 - **b, c** — the `skweeb-app` skill; fractals, the one app that already
-  draws over a blank picture through the kit (`{ filter, params }`).
+  draws over a blank picture through the kit (`{ filter, params }`). A
+  blank picture is a canvas whose 2D context has been got: the GPU's queue
+  refuses one that has none — found drawing M15a's first sheet.
 - **e** — particles take a *set* as sprites (`core/uses.js`); whether a
   loop is offered as it is or as a set of its frames is
   `docs/object-model.md`'s, *Uses*. Particles stay Canvas 2D.
