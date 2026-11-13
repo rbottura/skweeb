@@ -1,5 +1,5 @@
 # STATUS — filter
-_last touched: 2026-11-04_
+_last touched: 2026-11-13_
 
 M5's app: any picture or loop through a chain of GPU filters, on the kit in
 `core/gpu/` (`docs/core-api.md`, *gpu/*). The plan and *Done when* are in
@@ -85,8 +85,13 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
   needs no seed; an *ordered dither* — Bayer's 2×2, 4×4 or 8×8, in levels,
   in colour or grey, chunky if asked. Held to exact values in
   `check-filters`: a half grey dithers exactly half white.
-- **Twenty-nine filters**, in the menu by group — tone and colour; blur and
-  detail; shape and edges; stylise; for game assets. Written here: brightness,
+- **Generators** (M15a, 2026-11-13; `docs/vfx.md`): `noise`, `gradient`,
+  `shape` — filters that make their picture, each a grey meeting what is
+  under it by its blend (`core/gpu/filters/meet.js`). A run is told its
+  loop's length now (`frames`), so a noise scrolled over a loop comes
+  round with it; over a still it holds still. `check-filters` holds them.
+- **Thirty-two filters**, in the menu by group — tone and colour; blur and
+  detail; shape and edges; stylise; for game assets; the generators. Written here: brightness,
   contrast, gaussian blur, pixelate, outline, drop shadow, palette lock. From p5.FIP (MIT, its whole licence in
   `core/gpu/filters/LICENSE-p5.FIP.txt`): saturation, invert, sepia, duotone,
   threshold, posterize — each file names its source, licence and copyright

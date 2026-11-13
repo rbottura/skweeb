@@ -40,8 +40,11 @@ const R = Math.SQRT1_2;
 const GX = [1, -1, 0, 0, R, -R, R, -R];
 const GY = [0, 0, 1, -1, R, R, -R, -R];
 
+/** What the hash of a lattice point is mixed with last: another salt, another noise of the same seed. */
+export const GRAD_SALT = 0x9e3779b9;
+
 /** The gradient index of a lattice point: WGSL's randAt hash, its low three bits. */
-const gradAt = (ix, iy, seed) => pcg((pcg((pcg(((ix | 0) ^ seed) >>> 0) ^ (iy | 0)) >>> 0) ^ 0x9e3779b9) >>> 0) & 7;
+const gradAt = (ix, iy, seed, salt = GRAD_SALT) => pcg((pcg((pcg(((ix | 0) ^ seed) >>> 0) ^ (iy | 0)) >>> 0) ^ salt) >>> 0) & 7;
 
 /**
  * Gradient noise at (x, y), in lattice units, and its slope — `[n, ∂n/∂x,
@@ -75,6 +78,36 @@ export function noiseGrad2(x, y, seed) {
 /** Gradient noise at (x, y): `noiseGrad2`'s value alone. */
 export function noise2(x, y, seed) {
   return noiseGrad2(x, y, seed)[0];
+}
+
+/**
+ * Gradient noise that comes round: `noise2` on a lattice wrapped every `px`
+ * points across and `py` down, so a tile of px by py meets itself at its
+ * edges, and scrolled by a whole tile it ends where it began. `salt` is
+ * another noise of the same seed — an octave's, a second row's. With no wrap
+ * in reach and no salt given it is `noise2`, to the bit. Its twin in WGSL is
+ * `tileNoise` (core/gpu/filters/noise.js): the same hash, the same fade.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @param {number} seed   a u32
+ * @param {number} px     lattice points across before it repeats, a whole number
+ * @param {number} py     …and down
+ * @param {number} [salt]
+ */
+export function noiseTile2(x, y, seed, px, py, salt = GRAD_SALT) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix, fy = y - iy;
+  const x0 = ((ix % px) + px) % px, x1 = (x0 + 1) % px;
+  const y0 = ((iy % py) + py) % py, y1 = (y0 + 1) % py;
+  const ga = gradAt(x0, y0, seed, salt), gb = gradAt(x1, y0, seed, salt);
+  const gc = gradAt(x0, y1, seed, salt), gd = gradAt(x1, y1, seed, salt);
+  const a = GX[ga] * fx + GY[ga] * fy;
+  const b = GX[gb] * (fx - 1) + GY[gb] * fy;
+  const c = GX[gc] * fx + GY[gc] * (fy - 1);
+  const d = GX[gd] * (fx - 1) + GY[gd] * (fy - 1);
+  const u = fade(fx), v = fade(fy);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
 }
 
 /**

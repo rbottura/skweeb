@@ -66,5 +66,14 @@ ok('…within −1.1 and 1.1, and reaching past ±0.5', [n3.every(v => Math.abs(
 ok('…smooth: a step of a thousandth moves it little', samples.slice(0, 200).every(([x, y, z]) => Math.abs(noise3(x + 1e-3, y, z, 9) - noise3(x, y, z, 9)) < 0.01), true);
 ok('…and it changes along z, as 2D noise cannot', samples.slice(0, 200).filter(([x, y, z]) => Math.abs(noise3(x, y, z + 0.5, 9) - noise3(x, y, z, 9)) > 0.05).length > 100, true);
 
+// ── A noise that comes round: what a tile is made of (core/gpu/filters/noise.js) ──
+const { noiseTile2 } = await import('../core/noise.js');
+const inside = samples.slice(0, 300).map(([x, y]) => [Math.abs(x) % 6, Math.abs(y) % 6]);
+ok('noiseTile2: where no wrap is in reach, noise2 to the bit', inside.every(([x, y]) => noiseTile2(x, y, 9, 8, 8) === noise2(x, y, 9)), true);
+ok('…a period across and a period down, the same number', inside.every(([x, y]) =>
+  Math.abs(noiseTile2(x + 8, y, 9, 8, 5) - noiseTile2(x, y, 9, 8, 5)) < 1e-12 && Math.abs(noiseTile2(x, y - 5, 9, 8, 5) - noiseTile2(x, y, 9, 8, 5)) < 1e-12), true);
+ok('…smooth across its seam', [0.3, 1.7, 2.2, 4.9].every(y => Math.abs(noiseTile2(7.999, y, 9, 8, 5) - noiseTile2(8.001, y, 9, 8, 5)) < 0.01), true);
+ok('…another salt, another noise of the same seed', inside.filter(([x, y]) => Math.abs(noiseTile2(x, y, 9, 8, 8, 12345) - noiseTile2(x, y, 9, 8, 8)) > 0.02).length > 200, true);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

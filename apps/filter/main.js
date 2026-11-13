@@ -309,7 +309,7 @@ async function look() {
   busy = true;
   try {
     const shown = runner.run(source.frame(clock.tick), list,
-      { time: source.fps ? clock.tick / source.fps : 0, grow: growing(), seed: params.get('seed'), tick: clock.tick });
+      { time: source.fps ? clock.tick / source.fps : 0, grow: growing(), seed: params.get('seed'), tick: clock.tick, frames: source.frames });
     const object = await saveLook({ chain: list, edges: params.get('edges'), seed: params.get('seed'), picture: shown });
     bar.announce(object ? `saved the look ${object.id} — ${object.title}` : 'no vault — downloaded instead');
   } catch (err) {
@@ -354,7 +354,7 @@ function paint() {
   if (runner && on && !failing) {
     try {
       picture = runner.run(frame, list, { time: source.fps ? clock.tick / source.fps : 0, grow: growing(),
-        seed: params.get('seed'), tick: clock.tick });
+        seed: params.get('seed'), tick: clock.tick, frames: source.frames });
     } catch (err) {
       trouble = err.message;
     }

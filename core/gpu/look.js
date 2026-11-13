@@ -69,7 +69,7 @@ export async function withLook(handle, look) {
       // sizes follow, so a blur keeps its look at print scale.
       const density = picture.width / box.w;
       return runner.run(picture, look.chain, { scale: density, time: i / fps, grow: look.grow,
-        seed: look.seed ?? 1, tick: i });
+        seed: look.seed ?? 1, tick: i, frames: handle.frames });
     },
 
     drawInto(ctx, i, w, h) {
@@ -81,7 +81,7 @@ export async function withLook(handle, look) {
       window(i, win) {
         const density = handle.scale || 1;
         return chainWindow({
-          runner, chain: look.chain, grow: look.grow, scale: density, time: i / fps, seed: look.seed ?? 1, tick: i,
+          runner, chain: look.chain, grow: look.grow, scale: density, time: i / fps, seed: look.seed ?? 1, tick: i, frames: handle.frames,
           width: Math.max(1, Math.round(box.w * density)), height: Math.max(1, Math.round(box.h * density)),
           piece: part => handle.window(i, part),
         }, win, kept);
