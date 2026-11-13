@@ -61,9 +61,11 @@ export const THING_GROUPS = {
  * A *sign* is used and something shows — its words, and a picture: another
  * object, or the thing itself. A *warp* is stepped on and leads to the map
  * of that name, its latest. The *spawn* is where the avatar appears, facing
- * one way: one a map, so a thing made the spawn takes it from another.
+ * one way: one a map, so a thing made the spawn takes it from another. An
+ * *effect* is used and something plays over its cell, once, then is gone
+ * (M15g, docs/vfx.md): a life, particles wearing one, a page of several.
  */
-export const EVENTS = ['none', 'sign', 'warp', 'spawn'];
+export const EVENTS = ['none', 'sign', 'warp', 'spawn', 'effect'];
 
 /**
  * One thing standing on the map — a block of `place` — as its panel edits
@@ -86,5 +88,9 @@ export function thingParams() {
     /** A map's name: the warp leads to the latest map so called. */
     to:    { type: 'text', default: '', label: 'to the map', group: 'event', when: { event: 'warp' } },
     face:  { type: 'enum', options: FACES, default: FACES[0], label: 'facing', group: 'event', when: { event: 'spawn' } },
+    /** What plays when it is used: an object's frames, once, centred on its cell (play/effects.js). */
+    plays: { type: 'object', accepts: PLACEABLE, label: 'plays', group: 'event', when: { event: 'effect' } },
+    /** How wide it plays, in tiles — a blast is wider than its barrel; its height is its own shape's. */
+    over:  { type: 'range', min: 0.25, max: 16, step: 0.25, default: 3, label: 'played, tiles wide', group: 'event', when: { event: 'effect' } },
   });
 }

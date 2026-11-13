@@ -78,6 +78,8 @@ const signed = { map, walls, place: [{ ref: 'p', col: 2, row: 0, event: 'sign', 
                                      { ref: 'w', col: 2, row: 2, width: 3, event: 'sign' }] };
 ok('what answers on a cell: a sign there, a warp there, a wide sign across its width', [answeringAt(signed, 2, 0)?.says,
   answeringAt(signed, 0, 2)?.to, answeringAt(signed, 3, 2)?.ref, answeringAt(signed, 0, 0)], ['hi', 'out', 'w', null]);
+ok('an effect answers on its cell too, faced and used (M15g)',
+   answeringAt({ map, walls, place: [{ col: 1, row: 1, event: 'effect', plays: 'burst' }] }, 1, 1)?.plays, 'burst');
 ok('the warp a step onto a cell goes through — not a sign', [warpAt(signed, 0, 2)?.to, warpAt(signed, 2, 0)], ['out', null]);
 ok('the shortest way round a wall, the same way every time', pathTo(recipe, { col: 0, row: 0 }, { col: 2, row: 0 }),
    [{ col: 0, row: 1 }, { col: 1, row: 1 }, { col: 2, row: 1 }, { col: 2, row: 0 }]);

@@ -21,11 +21,11 @@ export const APP = { app: 'map', version: '1.0.0' };
 /** A map's recipe from the editor: the panel's values, the cells, the walls, the blocks. */
 export const recipeOf = (map, cells, walls, place) => ({ map: map.values, cells: cells.slice(), walls: walls.slice(), place });
 
-/** What a map is made of besides its panel's tileset: each thing's object, and what a sign shows. */
+/** What a map is made of besides its panel's tileset: each thing's object, what a sign shows, what an effect plays. */
 export function partsOf(place) {
   const ids = [];
   for (const b of place) {
-    for (const id of [b.ref, b.event === 'sign' ? b.shows : null]) if (id && !ids.includes(id)) ids.push(id);
+    for (const id of [b.ref, b.event === 'sign' ? b.shows : null, b.event === 'effect' ? b.plays : null]) if (id && !ids.includes(id)) ids.push(id);
   }
   return ids;
 }
