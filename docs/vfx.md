@@ -125,7 +125,7 @@ The link it leaves: **`shader → particles: a surface over a life`**.
 | M15b | **the app opens**: the chain, every row its picture, the loop played; the starters; the guide's first pages | `shader/app` | M | **landed 2026-11-13** — `apps/shader/STATUS.md`; `check-shader`: fire from its starter, each row's picture the chain cut there |
 | M15c | **it saves**: a still, a loop; replayed, reopened, printed, placed in compose | `shader/save` | S | **landed 2026-11-13** — `check-shader-save`: saved and replayed to the pixel, `?open=`, a print in tiles against the whole |
 | M15d | **a life, and the moves that want one**: `dissolve` (a threshold over the life, a soft edge, a hot rim), `warp` (what is under, read through a noise), `polar` (rings, vortices), `glow` (the bright spread and added) | `shader/life` | M | **landed 2026-11-13** — `check-filters`: each against what it does; a dissolve whole at birth, gone at death; `check-shader`: a life played once |
-| M15e | **the link**: a life offered to particles as sprites; a particle shows the frame of its age | `particles/life-frames` | S | `check-particles`: at half its life, the middle frame; saved, replayed, on its sheet |
+| M15e | **the link**: a life offered to particles as sprites; a particle shows the frame of its age | `particles/life-frames` | S | **landed 2026-11-13** — below; `check-particles-life`: at half its life, the middle frame; saved, replayed, on its sheet |
 | M15f | **an effect out to a game**: its layers — each its sheet, its blend, its start — and one manifest | `export/effect` | M | Phaser 3 plays it, its fire added, as `check-sheet-engine` plays a sheet |
 | M15g | **an effect in the suite's game**: a thing's event plays one at its cell | `map/effects` | S | `check-map-play`: a click, the effect once, then gone |
 
@@ -173,6 +173,28 @@ the loop's length, and the loop still closes.
 - **Left for later**: a noise that boils in place (a third axis, looped), a
   gradient's own colours, a shape drawn in the gamepad as the mask — a
   picture from the vault in a chain needs a third texture, which no pass has.
+
+## The link — M15e, landed 2026-11-13
+
+`shader → particles: a surface over a life`. In particles' Look, *sprites*
+takes a loop now, and *a particle wears* says how: *one each*, as a set's
+members always were, or *the frame of its age* — `images[floor(age × n)]`,
+at half its life the middle frame. A loop chosen turns it to its age.
+
+- **A loop as it is, not a set of its frames** — the question *What each
+  brick reads first* left open. A set would be a still a frame and one more
+  object, at every state of the life; a `sequence` stays one object and one
+  parent, and the shader's S — a smart object's next state — is followed by
+  the particles wearing it, as a picture's is (L11). So no `use:` tag and no
+  row in `core/uses.js`: a loop is taken as a picture is.
+- **Any loop** — the shader's, particles' own, a turntable, a recording:
+  `core/sprites.js` replays it once by what made it (`core/rebuild.js`) and
+  keeps each frame, at most 64 of them, none over 512 pixels a side.
+- **Either way round**: a set worn by age is a flipbook drawn by hand, a
+  loop worn one each is a puff different on every particle.
+- **Left for later**: a frame drawn again at a print's size, past 512; the
+  frames blended one into the next; a life's own blend — fire *added* — which
+  is the effect's page (M15g) and particles' layer blend today.
 
 ## Not now
 

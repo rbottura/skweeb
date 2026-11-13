@@ -107,7 +107,28 @@ Why the threshold matters: it *is* the age. Drawn once at every age, the
 frames are a flipbook — and a particle that shows the frame of its own age
 dissolves on its own clock, each one a little out of step with the others.
 
+## 7. Particles wearing a life
+
+One burst is one sprite. An explosion is thirty of them, each born at its
+own moment, each dying on its own clock — and that is particles' work. Save
+the life (**S**), open **particles**, and in *Look* choose it as the
+*sprites*: its frames come in, and *a particle wears* turns to *the frame of
+its age*. A particle just born shows the life's first frame; at half its
+life, the middle one; dying, the last — so every particle dissolves by
+itself, a little out of step with its neighbours.
+
+- **A burst** of a few, *life spread* above zero: the same life, never twice
+  in time.
+- **Size at its end** above 1 and the fire swells as it is eaten; *fade*
+  can stay off — the dissolve is the fade.
+- *One each* instead holds one frame on each particle for all its life: a
+  loop of smoke becomes puffs each a little different.
+- Save the shader's life again and the particles wearing it follow.
+
+Particles' *Download a sprite sheet* is then the effect as a game loads it:
+every frame of the whole burst on one picture, and its JSON.
+
 ## Next
 
-Particles wearing a life, each showing the frame of its age; then an effect
-of several layers, played in the suite's own game on a click.
+An effect of several layers — a flash, the fire, its smoke, a ring — played
+in the suite's own game on a click.

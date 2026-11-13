@@ -1,5 +1,5 @@
 # STATUS — particles
-_last touched: 2026-11-12_
+_last touched: 2026-11-13_
 
 M6's app, begun: particles as a function of time, not a simulation. The plan
 and *Done when* are in `docs/roadmap-done.md`, M6 — a torch loop that closes
@@ -25,6 +25,17 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
    (`core/spritesheet.js`).
 
 ## Works now
+
+- **A loop's frames as sprites, worn by age** (M15e, 2026-11-13; the link
+  `shader → particles: a surface over a life`, `docs/vfx.md`). *sprites*
+  takes a `sequence` — the shader's life, or any loop — as it is:
+  `core/sprites.js` replays it once (`core/rebuild.js`), each frame kept, at
+  most 64, none over 512 px. *a particle wears* (`wears`): *one each*, by
+  its `pick`, or *the frame of its age* — `draw.js` `spriteAt`: at half its
+  life, the middle frame. A loop chosen by hand turns it to its age,
+  anything else back; a recipe arriving leaves it. A smart object's next
+  state is followed (L11). `check-particles-life`, 17 checks, no GPU asked;
+  the shader's own loop as sprites, `check-shader-save`.
 
 - **Its overlay, its layers** (L13b, 2026-11-12, the author's: "on peut la
   mettre dans la section stack comme une section à part entière dédiée au
@@ -272,6 +283,13 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
   defaults, not the model's, which stay a plain fountain.
 
 ## Known
+
+- **A flipbook's frames are 512 px at most**: worn larger — a print — they
+  are stretched, as a set's pictures are; drawn again at the size is not
+  done. Nor are two frames blended: a short life steps.
+- **A loop chosen is two steps to undo**: the sprites, then what a particle
+  wears. And an object chosen as its own sprites, or its own layer, would
+  replay itself: nothing stops it.
 
 - A slot's draws are in a fixed order — jitter, life, speed, angle, pick,
   turn, twist, spot, spot, lift, dye, gauge — and new ones go at the end, or saved

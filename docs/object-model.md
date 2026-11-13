@@ -223,6 +223,10 @@ particles, the map a character for its avatar. `recipe.role` says what a set was
 - a set with **any `use:` tag** is offered to exactly those, and `use:none`
   means nowhere.
 
+A loop is not a set: particles take a `sequence` as it is, as they take a
+picture — its frames a flipbook, each particle the frame of its age
+(`core/sprites.js`, M15e) — with no `use:` tag and no set of its frames.
+
 A set's index row carries its `role`, copied out of the recipe, so a picker can
 apply the default without opening every set — and its `members`, so the vault
 panel files a set with the folder holding exactly them (since 2026-11-05: the

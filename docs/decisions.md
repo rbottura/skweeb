@@ -396,4 +396,5 @@ composant de jeux et de jeu intégralement. les recommandations sont bonnes,
 on peut suivre le plan." So the game is the suite's own — the map's player —
 and no engine's language is owed; the app is `apps/shader/`, a chain and no
 graph, a particle wears the frames of a life, an effect is a page.
-*Generator*, not *source*: filter's input is one already.
+*Generator*, not *source*: filter's input is one already. A loop goes to
+particles as it is, not as a set of its frames (M15e): one object, followed.

@@ -1,7 +1,8 @@
 /**
  * sprites.js — a vault object as sprites to draw with: a set's members in
- * its order, or one picture — a shape, a still, a 3D model — or a smart
- * object binding one, followed at its versions (L11).
+ * its order, or one picture — a shape, a still, a 3D model — or a loop's
+ * frames in time, a flipbook (M15e) — or a smart object binding one,
+ * followed at its versions (L11).
  *
  * A set is an ordered list of objects (docs/object-model.md, *Sets*); each
  * member's render is one sprite, as core/registry.js reads a set as a
@@ -9,6 +10,12 @@
  * `images[floor(pick × n)]` for each particle — M6's link, `set → particles:
  * sprites` — and fractals a member for each level of copies. Moved here from
  * particles when fractals needed it too.
+ *
+ * A `sequence` is taken as it is, not as a set of its frames (M15e,
+ * docs/vfx.md): replayed once by what made it (core/rebuild.js), each frame
+ * kept as a picture — so it stays one object, one parent, and a smart
+ * object's next state is followed as a picture's is. Particles then show
+ * `images[floor(age × n)]`: `shader → particles: a surface over a life`.
  *
  * No vault, or an object that will not open, is the caller's to meet: both
  * apps draw dots or nothing instead, and go on (rule 7).
@@ -43,24 +50,76 @@ function image(url, key = url) {
 /** What gives one sprite, its render: a picture — and a 3D model's, the author's sprite of 2026-10-22 (L11). */
 const PICTURES = new Set(['shape', 'still', 'model']);
 
+/** A flipbook's bounds: at most so many frames of a loop, none wider or higher than so many pixels. */
+export const FLIP_FRAMES = 64, FLIP_SIDE = 512;
+
+const _flips = new Map();          // id and version → Promise<ImageBitmap[]>
+
+/**
+ * The frames kept of a loop `length` long: every one, or `most` of them
+ * evenly through it — its first and its last always among them, a life's
+ * birth and its death.
+ *
+ * @returns {number[]}
+ */
+export function flipFrames(length, most = FLIP_FRAMES) {
+  const n = Math.max(1, Math.min(Math.floor(length) || 1, most));
+  return Array.from({ length: n }, (_, i) => (n === 1 ? 0 : Math.round(i * (length - 1) / (n - 1))));
+}
+
+/**
+ * A loop's frames as pictures, in time: replayed by what made it
+ * (core/rebuild.js) at a size a sprite wants, each frame drawn once and kept.
+ * `held` is the object as the vault has it — a smart object, or `object` itself.
+ */
+function flipbook(held, object, url) {
+  const key = `${held.id}#v${object.version || 0}`;
+  if (!_flips.has(key)) {
+    _flips.set(key, (async () => {
+      const { openFrames } = await import('./rebuild.js');
+      const side = Math.max((object.render && object.render.w) || 0, (object.render && object.render.h) || 0);
+      const handle = await openFrames(held, { url, scale: side > FLIP_SIDE ? FLIP_SIDE / side : 1 });
+      try {
+        const images = [];
+        for (const i of flipFrames(handle.length)) {
+          const frame = await handle.frame(i);
+          const over = Math.max(frame.width, frame.height) / FLIP_SIDE;      // an app that drew it no smaller
+          images.push(await createImageBitmap(frame, over > 1
+            ? { resizeWidth: Math.round(frame.width / over), resizeHeight: Math.round(frame.height / over), resizeQuality: 'high' } : {}));
+        }
+        return images;
+      } finally {
+        if (handle.dispose) handle.dispose();
+      }
+    })().catch(err => { _flips.delete(key); throw err; }));
+  }
+  return _flips.get(key);
+}
+
 /**
  * The sprites an object gives: a set's members as images, in its order — or
  * one picture, a shape, a still or a model, its render, the sprite of every
- * particle. A smart object is the object it binds, its render its latest
- * state's, read again at each new version (L11). Members that would not load
- * are left out, and said.
+ * particle — or a sequence's frames, in time (`frames`: a flipbook). A smart
+ * object is the object it binds, its render its latest state's, read again
+ * at each new version (L11). Members that would not load are left out, and
+ * said.
  *
- * @param {string} id   a set, a picture, or a smart object binding one, in the vault
- * @returns {Promise<{title: string, images: ImageBitmap[], missing: number}>}
+ * @param {string} id   a set, a picture, a loop, or a smart object binding one, in the vault
+ * @returns {Promise<{title: string, images: ImageBitmap[], missing: number, frames?: boolean}>}
  */
 export async function loadSprites(id) {
   let { object, url } = await Vault.load(id);
+  const held = object;
   if (object.type === 'skw') object = (await import('./smart.js')).unwrap(object);
+  if (object.type === 'sequence') {
+    const images = await flipbook(held, object, url);
+    return { title: object.title || id, images, missing: images.length ? 0 : 1, frames: true };
+  }
   if (PICTURES.has(object.type)) {
     const one = await image(url, object.version ? `${url}#v${object.version}` : url);
     return { title: object.title || id, images: one ? [one] : [], missing: one ? 0 : 1 };
   }
-  if (object.type !== 'set') throw new Error(`${id} is a ${object.type}, not a set or a picture`);
+  if (object.type !== 'set') throw new Error(`${id} is a ${object.type}, not a set, a picture or a loop`);
   const family = familyFromSet(object, Vault.index || []);
   if (!family) throw new Error(`${object.title || id} has no members`);
   const loaded = await Promise.all(family.urls.map(image));

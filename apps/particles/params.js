@@ -161,10 +161,20 @@ export function pictureParams() {
      * A vault set whose members are the particles' sprites, one each by its
      * `pick` (model.js) — M6's link, `set → particles: sprites`, offered
      * through core/uses.js — or one sprite, a shape, a still or a 3D model,
-     * for every particle; a smart object binding one followed at its
-     * versions (L11). None: dots, in `color`.
+     * for every particle; or a loop's frames in time, a flipbook (M15e); a
+     * smart object binding one followed at its versions (L11). None: dots,
+     * in `color`.
      */
-    sprites: { type: 'object', accepts: ['set', 'shape', 'still', 'model'], use: 'particles', label: 'sprites', group: 'look' },
+    sprites: { type: 'object', accepts: ['set', 'shape', 'still', 'model', 'sequence'], use: 'particles', label: 'sprites', group: 'look' },
+    /**
+     * Which of them a particle wears: one, all its life, by a draw of its own
+     * (`pick`) — or each in turn, the frame of its age (M15e): a surface
+     * dissolving over a life, every particle on its own clock. A loop chosen
+     * turns it to its age, anything else back (main.js).
+     */
+    wears:   { type: 'enum', options: ['pick', 'age'], default: 'pick', display: 'chips',
+               labels: { pick: 'one each', age: 'the frame of its age' }, label: 'a particle wears', group: 'look',
+               when: { sprites: { not: null } } },
     /**
      * A palette of the vault (V1, docs/workshop.md): each particle one of its
      * colours, by a draw of its own, the same all its life (model.js `dye`) —
