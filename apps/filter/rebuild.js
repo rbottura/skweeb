@@ -99,14 +99,14 @@ export async function openObject(object, opts = {}) {
 
     /** Borrowed, as every frame is: the runner's picture, until the next call. */
     frame(i) {
-      return runner.run(parent.frame(i), chain, { scale: k, time: i / fps, grow, seed, tick: i });
+      return runner.run(parent.frame(i), chain, { scale: k, time: i / fps, grow, seed, tick: i, frames: parent.frames });
     },
 
     /** A window of frame i at this scale, for a print past any canvas: the chain over its part (core/gpu/window.js). */
     ...(windows(chain) ? {
       window(i, win) {
         return chainWindow({
-          runner, chain, grow, scale: k, time: i / fps, seed, tick: i,
+          runner, chain, grow, scale: k, time: i / fps, seed, tick: i, frames: parent.frames,
           width: parent.pixels.w, height: parent.pixels.h,
           piece: part => parent.window(i, part),
         }, win, kept);

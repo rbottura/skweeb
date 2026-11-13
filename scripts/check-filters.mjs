@@ -27,7 +27,7 @@ async function inPage() {
   const runner = await createRunner();
   if (!runner) return { gpu: false };
   await runner.prepare(['halftone', 'dots', 'crt', 'vignette', 'grain', 'glitch',
-    'gradientmap', 'motionblur', 'zoomblur', 'dither'].map(id => ({ id })));
+    'gradientmap', 'motionblur', 'zoomblur', 'dither', 'noise', 'gradient', 'shape'].map(id => ({ id })));
 
   const canvas = (w, h, draw) => {
     const el = Object.assign(document.createElement('canvas'), { width: w, height: h });
@@ -119,6 +119,65 @@ async function inPage() {
   };
   out.dither = { half: dithered(128), quarter: dithered(64) };
 
+  // The generators (M15a): what makes a picture — over nothing, 64 by 64.
+  {
+    const { noiseAt } = await import('/core/gpu/filters/noise.js');
+    const blank = canvas(64, 64, () => {});
+    const red = flat('#ff0000');
+    const px = (d, x, y) => at(d, 64, x, y);
+    const nv = { cells: 4, octaves: 3, rough: 0.5, contrast: 1.5, variant: 0, scrollX: 1, scrollY: 0, blend: 'replace', amount: 1 };
+    const noise = (opts, v = nv) => read(runner.run(blank, [{ id: 'noise', params: v }], opts));
+    const n0 = noise({ seed: 7, tick: 0, frames: 16 });
+    const n8 = noise({ seed: 7, tick: 8, frames: 16 });
+    // A window of a bigger noise: the bottom right quarter of 128 by 128, against the whole.
+    const whole = read(runner.run(canvas(128, 128, () => {}), [{ id: 'noise', params: nv }], { seed: 7 }));
+    const part = read(runner.run(blank, [{ id: 'noise', params: nv }], { seed: 7, window: { x: 64, y: 64, width: 128, height: 128 } }));
+    let worst = 0, lo = 255, hi = 0, shifted = 0, apart = 0;
+    for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) {
+      const g = n0[(y * 64 + x) * 4];
+      worst = Math.max(worst, Math.abs(g - Math.round(noiseAt((x + 0.5) / 64, (y + 0.5) / 64, 64, 64, nv, 7) * 255)));
+      lo = Math.min(lo, g);
+      hi = Math.max(hi, g);
+      shifted = Math.max(shifted, Math.abs(n8[(y * 64 + x) * 4] - n0[(y * 64 + (x + 32) % 64) * 4]));
+      apart = Math.max(apart, Math.abs(part[(y * 64 + x) * 4] - whole[((y + 64) * 128 + x + 64) * 4]));
+    }
+    out.genNoise = { worst, lo, hi, shifted, apart, alpha: n0[3],
+      closes: same(noise({ seed: 7, tick: 16, frames: 16 }), n0), still: same(noise({ seed: 7, tick: 5 }), n0),
+      moves: differing(noise({ seed: 7, tick: 1, frames: 16 }), n0),
+      seed: differing(noise({ seed: 8 }), n0), variant: differing(noise({ seed: 7 }, { ...nv, variant: 1 }), n0) };
+
+    const grad = (params, opts) => read(runner.run(blank, [{ id: 'gradient', params }], opts));
+    const g0 = grad({ kind: 'along', angle: 0 }), g90 = grad({ kind: 'along', angle: 90 });
+    const round = grad({ kind: 'round' }), ridge = grad({ kind: 'along', mirror: true }), fan = grad({ kind: 'about' });
+    const rings = { kind: 'round', repeats: 4, scroll: 1 };
+    const r0 = grad(rings, { tick: 0, frames: 8 });
+    out.genGradient = {
+      along: [px(g0, 0, 32)[0], px(g0, 32, 32)[0], px(g0, 63, 32)[0], px(g0, 32, 0)[0]],
+      down: [px(g90, 32, 0)[0], px(g90, 32, 63)[0]],
+      round: [px(round, 32, 32)[0], px(round, 48, 32)[0], px(round, 0, 0)[0]],
+      flipped: px(grad({ kind: 'round', flip: true }), 32, 32)[0],
+      ridge: [px(ridge, 0, 32)[0], px(ridge, 32, 32)[0], px(ridge, 63, 32)[0]],
+      about: [px(fan, 48, 33)[0], px(fan, 32, 48)[0], px(fan, 16, 33)[0], px(fan, 32, 16)[0]],
+      closes: same(grad(rings, { tick: 8, frames: 8 }), r0), moves: differing(grad(rings, { tick: 1, frames: 8 }), r0),
+    };
+
+    const shape = (params, on = blank) => read(runner.run(on, [{ id: 'shape', params }]));
+    const disc = { kind: 'disc', size: 0.5, soft: 0 };
+    const d = shape(disc), ring = shape({ kind: 'ring', size: 0.8, width: 0.25, soft: 0 });
+    const star = shape({ kind: 'star', size: 0.8, points: 5, inner: 0.4, soft: 0 }), glow = shape({ kind: 'disc', size: 1, soft: 1 });
+    const met = (blend, on) => { const m = shape({ ...disc, blend }, on); return [px(m, 32, 32).join(), px(m, 0, 0).join()]; };
+    out.genShape = {
+      disc: [px(d, 32, 32)[0], px(d, 44, 32)[0], px(d, 52, 32)[0], px(d, 0, 0).join()],
+      ring: [px(ring, 32, 32)[0], px(ring, 54, 32)[0], px(ring, 44, 32)[0]],
+      star: [px(star, 32, 32)[0], px(star, 32, 16)[0], px(star, 42, 17)[0]],
+      glow: [px(glow, 32, 32)[0], px(glow, 48, 32)[0], px(glow, 63, 32)[0]],
+      multiply: met('multiply', red), mask: met('mask', red), add: met('add', blank),
+      screen: met('screen', flat('rgb(128,128,128)')),
+      half: px(shape({ ...disc, amount: 0.5 }, red), 32, 32),
+      none: same(shape({ ...disc, amount: 0 }, red), read(red)),
+    };
+  }
+
   runner.dispose();
   return out;
 }
@@ -165,6 +224,40 @@ if (r.gpu) {
   c.ok('ordered dither: half grey half white, a quarter a quarter, nothing between',
     d.half.white === 0.5 && d.quarter.white === 0.25 && !d.half.between && !d.quarter.between,
     `${d.half.white} and ${d.quarter.white} white`);
+
+  // The generators (M15a, docs/vfx.md).
+  const close = (a, b, by = 2) => Math.abs(a - b) <= by;
+  const nz = r.genNoise;
+  c.ok('noise: the grey core/noise.js gives, at every pixel', nz.worst <= 2 && nz.alpha === 255, `worst ${nz.worst} of 255`);
+  c.ok('…dark and light both', nz.lo < 64 && nz.hi > 192, `${nz.lo} to ${nz.hi}`);
+  c.ok('…a tile: scrolled half a loop, it is itself half a picture across', nz.shifted <= 1, `worst ${nz.shifted}`);
+  c.ok('…the loop over, its first frame again; told no length, it holds still', nz.closes && nz.still);
+  c.ok('…a frame on it has moved; another seed, another variant, another noise',
+    nz.moves > 0.5 && nz.seed > 0.5 && nz.variant > 0.5, `${nz.moves} · ${nz.seed} · ${nz.variant} of its pixels`);
+  c.ok('…and a window of a bigger one is its part of the whole', nz.apart <= 1, `worst ${nz.apart}`);
+  const gd = r.genGradient;
+  c.ok('gradient: along, dark at one edge and light at the other, every row the same',
+    close(gd.along[0], 2) && close(gd.along[1], 129) && close(gd.along[2], 253) && gd.along[3] === gd.along[1], String(gd.along));
+  c.ok('…turned a quarter, top to bottom', close(gd.down[0], 2) && close(gd.down[1], 253), String(gd.down));
+  c.ok('…round: dark at its centre, grey half way, light past the picture\'s half; flipped, light at its centre',
+    close(gd.round[0], 6) && close(gd.round[1], 132) && gd.round[2] === 255 && close(gd.flipped, 249), `${gd.round} · ${gd.flipped}`);
+  c.ok('…there and back: a ridge', gd.ridge[0] < 8 && gd.ridge[1] > 247 && gd.ridge[2] < 8, String(gd.ridge));
+  c.ok('…about: lighter clockwise round its centre',
+    gd.about[0] < gd.about[1] && gd.about[1] < gd.about[2] && gd.about[2] < gd.about[3], String(gd.about));
+  c.ok('…rings scrolled: a frame on they have moved, the loop over they are back', gd.moves > 0.5 && gd.closes, String(gd.moves));
+  const sh = r.genShape;
+  c.ok('shape: a disc light inside and dark out, opaque when it replaces',
+    sh.disc.join() === '255,255,0,0,0,0,255', String(sh.disc));
+  c.ok('…a ring: its band light, its middle and the inside of it dark', sh.ring.join() === '0,255,0', String(sh.ring));
+  c.ok('…a star: its middle and a tip, up, light; the notch beside it dark', sh.star.join() === '255,255,0', String(sh.star));
+  c.ok('…all soft, a glow: light at its centre, grey half way, nothing at its edge',
+    sh.glow[0] >= 253 && close(sh.glow[1], 121, 4) && sh.glow[2] <= 1, String(sh.glow));
+  c.ok('meeting what is under: multiplied, red inside and black out; masked, nothing out',
+    sh.multiply.join(' ') === '255,0,0,255 0,0,0,255' && sh.mask.join(' ') === '255,0,0,255 0,0,0,0', `${sh.multiply} · ${sh.mask}`);
+  c.ok('…added over nothing, its light alone; screened over grey, white inside and the grey out',
+    sh.add.join(' ') === '255,255,255,255 0,0,0,0' && sh.screen.join(' ') === '255,255,255,255 128,128,128,255', `${sh.add} · ${sh.screen}`);
+  c.ok('…half of it, half way to white; none of it, the picture as it was',
+    sh.half[0] === 255 && close(sh.half[1], 128) && close(sh.half[2], 128) && sh.half[3] === 255 && sh.none, String(sh.half));
 }
 
 const noise = c.quiet();

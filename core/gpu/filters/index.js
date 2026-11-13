@@ -16,6 +16,9 @@
  *   params      a param schema, as an app's (core/params.js)
  *   random?     true when it draws at random — from the recipe's seed and
  *               the frame's tick, never the clock (rule 2)
+ *   generates?  true when it makes its picture rather than changing one — a
+ *               noise, a gradient, a shape — and meets what is under it by
+ *               its `blend` (meet.js, docs/vfx.md)
  *   reach?      (values) → how far past its picture it can spread, in the
  *               source's pixels: a blur's taps, an outline's width. Absent is
  *               0 — a colour change reaches nowhere (runner.js, *Past the edge*)
@@ -61,10 +64,14 @@ import dither from './dither.js';
 import outline from './outline.js';
 import shadow from './shadow.js';
 import palette from './palette.js';
+// The generators, the suite's own (M15a): what makes a picture.
+import noise from './noise.js';
+import gradient from './gradient.js';
+import shape from './shape.js';
 
 /**
  * In the order the add menu lists them: tone and colour; blur and detail;
- * shape and edges; stylise; then for game assets.
+ * shape and edges; stylise; for game assets; then the generators.
  */
 export const FILTERS = Object.freeze(Object.fromEntries([
   brightness, contrast, saturation, invert, sepia, duotone, gradientmap, threshold, posterize,
@@ -72,4 +79,5 @@ export const FILTERS = Object.freeze(Object.fromEntries([
   emboss, edges, dilate, erode,
   halftone, dots, dither, crt, vignette, grain, glitch,
   outline, shadow, palette,
+  noise, gradient, shape,
 ].map(f => [f.id, f])));

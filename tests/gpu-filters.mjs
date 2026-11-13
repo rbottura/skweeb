@@ -141,9 +141,9 @@ ok('a gradient of three fills three of sixteen stops',
 ok('a 4×4 matrix is two bits a side', FILTERS.dither.passes[0].uniforms({ levels: 2, matrix: '4', size: 1, grey: false }, { scale: 1 })[1], 2);
 
 // ── What draws at random ─────────────────────────────────────────────────────
-ok('grain and glitch draw at random', ['grain', 'glitch'].every(id => FILTERS[id].random === true), true);
+ok('grain and glitch draw at random, and noise', ['grain', 'glitch', 'noise'].every(id => FILTERS[id].random === true), true);
 ok('and nothing else in the catalogue does',
-  Object.values(FILTERS).filter(f => f.random).map(f => f.id).sort(), ['glitch', 'grain']);
+  Object.values(FILTERS).filter(f => f.random).map(f => f.id).sort(), ['glitch', 'grain', 'noise']);
 ok('a chain with one draws at random', drawsAtRandom([{ id: 'blur' }, { id: 'grain' }]), true);
 ok('switched off, it does not', drawsAtRandom([{ id: 'blur' }, { id: 'grain', on: false }]), false);
 ok('a chain without one does not', drawsAtRandom([{ id: 'blur' }, { id: 'halftone' }]), false);
@@ -152,6 +152,36 @@ ok('unsharp mask blurs with the blur\'s own two passes, then one of its own',
 ok('a filter this catalogue lacks is left out, not thrown', reachOf([{ id: 'nope' }, { id: 'blur', params: { radius: 1 } }]), 3);
 ok('the room at 2x is twice the pixels', marginOf([{ id: 'blur', params: { radius: 4 } }], 2), 24);
 ok('and whole pixels at any scale', marginOf([{ id: 'blur', params: { radius: 1.5 } }], 1.5), 8);
+
+// ── The generators: what makes a picture (M15a, docs/vfx.md) ─────────────────
+const { BLENDS, phaseOf } = await import('../core/gpu/filters/meet.js');
+const { noiseAt } = await import('../core/gpu/filters/noise.js');
+const makers = Object.values(FILTERS).filter(f => f.generates);
+ok('noise, gradient and shape make their picture', makers.map(f => f.id).sort(), ['gradient', 'noise', 'shape']);
+ok('each ends its Params with how it meets what is under it', makers.every(f =>
+  /blend: f32, amount: f32 \}/.test(f.passes[0].code) && f.params.blend.options === BLENDS && f.params.amount.default === 1), true);
+ok('…its blend the place of its name', makers.map(f => f.passes[0].uniforms({ ...valuesFor(f.params, {}), blend: 'mask' }, info).slice(-2)),
+  [[2, 1], [2, 1], [2, 1]]);
+ok('none reaches past its picture, none in pixels', makers.map(f => reachOf([{ id: f.id }]) + readsOf([{ id: f.id }])), [0, 0, 0]);
+ok('a still is at phase 0; frame 12 of 48 a quarter in; the loop\'s length where it began',
+  [phaseOf({ tick: 12 }), phaseOf({ tick: 12, frames: 48 }), phaseOf({ tick: 48, frames: 48 }), phaseOf(undefined)], [0, 0.25, 0, 0]);
+ok('the phase is a number of the pass', FILTERS.noise.passes[0].uniforms(valuesFor(FILTERS.noise.params, {}), { tick: 12, frames: 48 })[7], 0.25);
+
+const nv = valuesFor(FILTERS.noise.params, { scrollX: 1, scrollY: -2 });
+const spots = Array.from({ length: 300 }, (_, i) => [(i * 0.6180339887) % 1, (i * 0.7548776662) % 1]);
+const near = (a, b) => Math.abs(a - b) < 1e-9;
+const greys = spots.map(([u, v]) => noiseAt(u, v, 64, 64, nv, 7));
+ok('noise: a grey from 0 to 1, dark and light both', [greys.every(g => g >= 0 && g <= 1), Math.min(...greys) < 0.25, Math.max(...greys) > 0.75], [true, true, true]);
+ok('…a tile: a whole picture across or down, the same grey', spots.every(([u, v], i) =>
+  near(noiseAt(u + 1, v, 64, 64, nv, 7), greys[i]) && near(noiseAt(u, v - 1, 64, 64, nv, 7), greys[i])), true);
+ok('…on a format twice as wide too, its cells still whole', spots.every(([u, v]) =>
+  near(noiseAt(u + 1, v, 128, 64, nv, 7), noiseAt(u, v, 128, 64, nv, 7)) && near(noiseAt(u, v + 1, 128, 64, nv, 7), noiseAt(u, v, 128, 64, nv, 7))), true);
+ok('…scrolled, it moves', spots.filter(([u, v], i) => Math.abs(noiseAt(u, v, 64, 64, nv, 7, 0.25) - greys[i]) > 0.02).length > 200, true);
+ok('…a quarter of a loop is a quarter of a tile across, half a tile up', spots.every(([u, v], i) =>
+  near(noiseAt(u + 0.25, v - 0.5, 64, 64, nv, 7, 0.25), greys[i])), true);
+ok('…and the loop over, where it began', spots.every(([u, v], i) => near(noiseAt(u, v, 64, 64, nv, 7, 1), greys[i])), true);
+ok('…another seed another noise, another variant another', [8, 7].map((seed, k) =>
+  spots.filter(([u, v], i) => Math.abs(noiseAt(u, v, 64, 64, { ...nv, variant: k }, seed) - greys[i]) > 0.02).length > 200), [true, true]);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

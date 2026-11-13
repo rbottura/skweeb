@@ -63,7 +63,7 @@ export async function save({ params, chain, source, runner, tick = 0, keepFrames
     const fps = exact.fps || 0;
     const grow = params.get('edges') !== 'keep';
     const seed = params.get('seed');
-    const at = i => runner.run(exact.frame(i), chain, { time: fps ? i / fps : 0, grow, seed, tick: i });
+    const at = i => runner.run(exact.frame(i), chain, { time: fps ? i / fps : 0, grow, seed, tick: i, frames: exact.frames });
 
     const shown = keep(at(loop ? tick : 0));
     const blob = await toPng(shown);

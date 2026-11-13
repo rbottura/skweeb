@@ -38,11 +38,12 @@ const sized = (canvas, w, h) => (canvas && canvas.width >= w && canvas.height >=
  * @param {number} [run.time]
  * @param {number} [run.seed]
  * @param {number} [run.tick]
+ * @param {number} [run.frames]     the loop's length, as a whole run's
  * @param {{x, y, w, h}} win         in the chain's picture's pixels, its room counted
  * @param {object} keep              canvases kept from one window to the next
  * @returns {OffscreenCanvas}        the window at its corner — borrowed
  */
-export function chainWindow({ runner, chain, width, height, piece, grow = false, scale = 1, time = 0, seed = 0, tick = 0 }, win, keep) {
+export function chainWindow({ runner, chain, width, height, piece, grow = false, scale = 1, time = 0, seed = 0, tick = 0, frames = 0 }, win, keep) {
   const m = grow ? marginOf(chain, scale) : 0;
   const W = width + 2 * m, H = height + 2 * m;
   const r = Math.ceil(readsOf(chain) * scale) + 4;
@@ -61,7 +62,7 @@ export function chainWindow({ runner, chain, width, height, piece, grow = false,
     const w = sx1 - sx0, h = sy1 - sy0;
     a.drawImage(piece({ x: sx0, y: sy0, w, h }), 0, 0, w, h, sx0 + m - x0, sy0 + m - y0, w, h);
   }
-  const ran = runner.run(part, chain, { scale, time, seed, tick, window: { x: x0, y: y0, width: W, height: H } });
+  const ran = runner.run(part, chain, { scale, time, seed, tick, frames, window: { x: x0, y: y0, width: W, height: H } });
   keep.tile = sized(keep.tile, win.w, win.h);
   const t = keep.tile.getContext('2d');
   t.setTransform(1, 0, 0, 1, 0, 0);

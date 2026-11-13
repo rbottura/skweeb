@@ -214,17 +214,18 @@ class Runner {
    *
    * @param {CanvasImageSource} source   a canvas, an OffscreenCanvas, an ImageBitmap, an image
    * @param {object[]} [chain]
-   * @param {{scale?: number, time?: number, seed?: number, tick?: number, grow?: boolean, window?: {x: number, y: number, width: number, height: number}}} [opts]
+   * @param {{scale?: number, time?: number, seed?: number, tick?: number, frames?: number, grow?: boolean, window?: {x: number, y: number, width: number, height: number}}} [opts]
    *        `window`: the source is a part of a bigger picture — its corner there, the whole's size — and is
    *        drawn as that part of it, its room its own (wgsl.js, frame); `grow` then adds none
    *   scale multiplies every size a filter has — its sizes are in the
    *   source's pixels at 1, so a picture drawn again at 2x keeps its look;
    *   grow gives the chain room past the edge, and the picture comes back
    *   `marginOf(chain, scale)` bigger on every side; seed and tick are what a
-   *   filter drawing at random draws from — the recipe's seed, the loop's frame
+   *   filter drawing at random draws from — the recipe's seed, the loop's frame;
+   *   frames is the loop's length, which what scrolls comes round in (filters/meet.js)
    * @returns {ImageBitmap} the runner's, good until its next run()
    */
-  run(source, chain = [], { scale = 1, time = 0, seed = 0, tick = 0, grow = false, window = null } = {}) {
+  run(source, chain = [], { scale = 1, time = 0, seed = 0, tick = 0, frames = 0, grow = false, window = null } = {}) {
     const sw = source.naturalWidth || source.width;
     const sh = source.naturalHeight || source.height;
     // A window of a bigger picture brings its own room, its corner where it lies in it (wgsl.js, frame).
@@ -253,7 +254,7 @@ class Runner {
     device.queue.writeBuffer(this.frameBuffer, 0, frame);
 
     const encoder = device.createCommandEncoder({ label: 'chain' });
-    const info = { width: w, height: h, scale, time, seed, tick };
+    const info = { width: w, height: h, scale, time, seed, tick, frames };
     let input = this.src;
     let own = input;                 // the filter's own input: its passes' `orig`
     let free = [];                   // the two textures it writes into, in turns
