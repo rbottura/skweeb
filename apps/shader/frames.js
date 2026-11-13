@@ -16,9 +16,14 @@
  * picture, a print's scale — the runner is told `px` as its scale: what a
  * generator counts is counted across the picture, and what a filter
  * measures in pixels follows. So any size is the same surface, drawn again.
+ *
+ * A print past any canvas asks for windows (core/print.js): the chain over
+ * a blank part, run as that part of the whole (core/gpu/window.js) — a
+ * chain that reads from anywhere has none, and is drawn whole.
  */
 
 import { surface } from '../../core/surface.js';
+import { chainWindow, windows } from '../../core/gpu/window.js';
 
 /** The chain down to a row and no further: `at` its index; past the end, or null, the whole. */
 export const cut = (chain, at = null) => (at == null || at < 0 ? chain : chain.slice(0, at + 1));
@@ -55,7 +60,7 @@ export function blankOf(w, h) {
  * @param {object} opts
  * @param {object} opts.runner      core/gpu's, the chain prepared
  * @param {number} [opts.scale=1]   pixels per pixel of its own size
- * @returns {{length, fps, loop, width, height, scale, frame(i)}}
+ * @returns {{length, fps, loop, width, height, scale, frame(i), window?(i, win)}}
  *          `frame` hands out one canvas, drawn again on every call — borrowed
  */
 export function openSurface(recipe, { runner, scale = 1 } = {}) {
@@ -64,6 +69,8 @@ export function openSurface(recipe, { runner, scale = 1 } = {}) {
   const px = own * scale;
   const w = Math.max(1, Math.round(recipe.width * px)), h = Math.max(1, Math.round(recipe.height * px));
   const length = loopOf(recipe);
+  const chain = recipe.chain || [];
+  const empty = blankOf(1, 1), kept = {};     // a window's source is nothing; its canvases, kept
   let canvas = null, ctx = null, blank = null;
   return {
     length,
@@ -82,5 +89,12 @@ export function openSurface(recipe, { runner, scale = 1 } = {}) {
       ctx.drawImage(drawSurface(runner, blank, recipe, i, px), 0, 0);
       return canvas;
     },
+    /** A window of frame i at this scale, for a print past any canvas. */
+    ...(windows(chain) ? {
+      window(i, win) {
+        return chainWindow({ runner, chain, width: w, height: h, piece: () => empty, scale: px, seed: recipe.seed,
+          tick: i, frames: length, time: recipe.fps ? i / recipe.fps : 0 }, win, kept);
+      },
+    } : {}),
   };
 }
