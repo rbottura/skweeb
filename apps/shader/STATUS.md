@@ -11,7 +11,9 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 - **M15b — the app opens**: done 2026-11-13, this folder.
 - **M15c — it saves**: done 2026-11-13.
 - **M15d — a life, and the moves that want one**: done 2026-11-13.
-- **M15e — the link to particles**: next. Then M15g, then f.
+- **M15e — the link to particles**: done 2026-11-13, in particles
+  (`core/sprites.js`, `apps/particles/STATUS.md`).
+- **M15g — an effect in the suite's game**: next. Then f.
 
 ## Works now
 
@@ -55,7 +57,7 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 ## Known
 
 - **Nothing leaves to disk yet**: no PNG, no frames zip, no sprite sheet —
-  the sheet is M15e's, where particles want it.
+  a life's sheet is particles', wearing it (M15e).
 - **No layers** (L13, `core/layers.js`), so not in `check-layers`' list.
 - **Not in cluster's strip**, nor in `check-mount`'s or `check-print`'s
   lists — a side job: one row in each, and `apps/cluster/main.js`.
@@ -72,13 +74,12 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 
 ## Next single step
 
-**M15e — a life offered to particles** (`particles/life-frames`). Read
-first `docs/object-model.md`, *Uses*, and `core/uses.js`: decide whether
-particles take the shader's `sequence` as it is or a `set` of its frames
-(`docs/vfx.md`, *What each brick reads first*). Then the smallest step: in
-particles' draw, with a life chosen as sprites, a particle shows
-`frames[floor(age × n)]` instead of `images[floor(pick × n)]` — held in
-`check-particles`: at half its life, the middle frame.
+**M15g — an effect in the suite's game** (`map/effects`). Read first
+`apps/map/STATUS.md` and how a thing's event is answered in the player
+(`apps/map/play/`); `docs/vfx.md`, *Settled* 4: an effect is a compose page
+played once. Then the smallest step: a thing's event names an object — a
+life, or particles wearing one — and a click plays it once at the thing's
+cell, then it is gone; held in `check-map-play`.
 
 ## Parked
 
