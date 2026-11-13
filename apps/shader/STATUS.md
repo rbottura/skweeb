@@ -9,8 +9,9 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 
 - **M15a — generators in the kit**: landed 2026-11-13 (`core/gpu/filters/`).
 - **M15b — the app opens**: done 2026-11-13, this folder.
-- **M15c — it saves**: next.
-- M15d a life and its moves; M15e the link to particles; M15g, then f.
+- **M15c — it saves**: done 2026-11-13.
+- **M15d — a life, and the moves that want one**: next.
+- M15e the link to particles; M15g, then f.
 
 ## Works now
 
@@ -28,18 +29,30 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 - **Starters** (`starters.js`): fire, smoke, energy — each a row of data,
   opened in place of the chain and played. `tests/shader.mjs` holds each to
   the catalogue: every row a filter of it, every value one its schema keeps.
-- **The guide** (`docs/guides/vfx.md`, four sections), read in the app.
+- **It saves, and it replays** (`save.js`, `rebuild.js`; `check-shader-save`,
+  12 checks): S saves a loop as a `sequence`, one frame as a `still` — the
+  recipe `{ …values, chain }`, the seed the object's when a row draws at
+  random, no parents; a smart object, so S again is its next state (S6b).
+  Replayed by `openSurface`, the code the save drew with: fire's frame to
+  the pixel, the same twice, the loop closed, twice the pixels at scale 2.
+  `?open=` brings the values and the chain back; compose places it.
+- **It prints** (core's print panel in Export): the chain over a blank
+  window, run as that part of the whole (`core/gpu/window.js`) — fire at
+  2160² in 81 tiles, no difference from the whole. A chain with a zoom
+  blur reads from anywhere, and is printed whole.
+- **A window of the stack** (`stackDrawer`): Send to ▸, as every app.
+- **The guide** (`docs/guides/vfx.md`, five sections), read in the app.
 - **No WebGPU**: the page opens, says why, the chain can be built.
 - **A module** (`core/mount.js`): `mount(host)`, `unmount()`.
-- `node scripts/check-shader.mjs`, 16 checks.
+- `node scripts/check-shader.mjs`, 16 checks; `tests/shader.mjs`.
 
 ## Known
 
-- **It does not save.** The bar's Save and Export are core's and find
-  nothing to do here; no `rebuild.js`, no `?open=`, no Stack drawer, no
-  layers (L13) — all M15c's.
-- **Not in cluster's strip**, nor in `check-mount`'s list: once it saves,
-  with what a scene asks of an app.
+- **Nothing leaves to disk yet**: no PNG, no frames zip, no sprite sheet —
+  the sheet is M15e's, where particles want it.
+- **No layers** (L13, `core/layers.js`), so not in `check-layers`' list.
+- **Not in cluster's strip**, nor in `check-mount`'s or `check-print`'s
+  lists — a side job: one row in each, and `apps/cluster/main.js`.
 - **A guide opened leaves its Escape listener on the document** at an
   unmount — `core/Guide.js` has no way out yet; the puppet's does the same.
 - **Every row is run on every frame.** Fine at six rows; a long chain at a
@@ -49,11 +62,13 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 
 ## Next single step
 
-**M15c — it saves** (`shader/save`): `save.js` on `openSurface` — a still,
-or a loop as a `sequence`, its recipe `{ …values, chain }`, its seed the
-object's; then `rebuild.js` (`openObject`, `reopens`, `redraws`) on the same
-`openSurface`, and `?open=` restoring the params and `chain.restore`.
-Start with the save and `check-shader-save`: saved and replayed to the pixel.
+**M15d's first move — `dissolve`** (`shader/life`), in
+`core/gpu/filters/dissolve.js`: what is under kept where its brightness is
+over a threshold, the threshold run `from` → `to` over the loop on
+`phaseOf(info)` and `core/easing.js`, a soft edge, a hot rim of a colour.
+Held in `check-filters`: whole at the first frame, gone at the last. Then
+the *life* — a `time` enum in `params.js`, loop or life, the player's
+`loop: false` — and `warp`, `polar`, `glow`.
 
 ## Parked
 

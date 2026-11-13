@@ -9,11 +9,13 @@
  * its length. Starters are chains to open (starters.js); the guide is
  * `docs/guides/vfx.md`, read here.
  *
- * It does not save yet — M15c's. The preview is drawn at the size the
- * viewer shows (core/view.js), the same function of the same recipe a save
- * will draw at the format's.
+ * The preview is drawn at the size the viewer shows (core/view.js). What
+ * leaves (save.js) is drawn again by frames.js at the format's size times
+ * its scale — the same function of the same recipe, so exact: a still or a
+ * loop into the vault, S; a print. rebuild.js replays them for the vault
+ * and compose; `?open=` brings one back, its chain row for row.
  *
- * Opens with no vault (rule 7): it uses none. With no WebGPU the page opens
+ * Opens with no vault (rule 7): it needs none. With no WebGPU the page opens
  * all the same, says why, and the chain can be built — nothing is drawn.
  *
  * A module (core/mount.js): `mount(host)` and `unmount()` — its runner's GPU
@@ -24,6 +26,13 @@ import { shaderParams, GROUPS } from './params.js';
 import { Rows, ROW_SIDE }       from './rows.js';
 import { drawSurface, blankOf, loopOf } from './frames.js';
 import { STARTERS, FIRST }      from './starters.js';
+import { saveSurface, APP }     from './save.js';
+import { PrintPanel }           from '../../core/PrintPanel.js';
+import { exportBox }            from '../../core/boxes/export.js';
+import { stackDrawer }          from '../../core/StackPanel.js';
+import { VaultPanel }           from '../../core/VaultPanel.js';
+import { Vault }                from '../../core/vault.js';
+import { requested, openedLine } from '../../core/reopen.js';
 import { ParamPanel }           from '../../core/ParamPanel.js';
 import { Transport }            from '../../core/Transport.js';
 import { Playhead }             from '../../core/playback.js';
@@ -54,7 +63,7 @@ const mounted = () => !!app.scope;
 
 // One app mounted at a time: its state, made again by each mount (`start`).
 let root, canvas, ctx, clock, pending, painted;
-let params, panel, bar, transport, player, chain, runner, failing, blanks, guide, clockAt;
+let params, panel, bar, transport, player, chain, runner, failing, blanks, guide, clockAt, busy;
 
 async function start(host, mine) {
   root = host;
@@ -62,7 +71,7 @@ async function start(host, mine) {
   ctx = canvas.getContext('2d');
   params = panel = bar = transport = player = chain = runner = guide = null;
   failing = '';            // why the chain does not compile, until it does
-  pending = false;         // a paint asked for, not made
+  pending = busy = false;  // a paint asked for, not made; a save or a print drawing, nothing else starts
   painted = [];            // when the last paints were, while the loop plays
   blanks = new Map();      // the blank pictures the chain is run over, by size: the viewer's, a row's
   clockAt = '';            // the loop the clock was fitted to
@@ -77,7 +86,7 @@ async function start(host, mine) {
 
 async function boot(mine) {
   bar = new Bar({ app: 'shader', mount: root, redraw: () => draw(),
-                  keys: 'space play · , . frame · a row\'s picture: seen large' });
+                  keys: 'space play · , . frame · S save · V vault · a row\'s picture: seen large' });
   params = shaderParams();
   panel = new ParamPanel(params, { title: 'shader', mount: root.querySelector('#side'), groups: GROUPS });
   buildDrawers();
@@ -98,6 +107,22 @@ async function boot(mine) {
   mine.hold(() => { if (made) made.dispose(); });   // its GPU memory, not the device: that is the page's
   if (!runner) bar.announce(`no surface here — ${whyNoGpu()}; the chain can still be built`);
   chain.restore(FIRST);
+  await openRequested();
+}
+
+/** `?open=<id>`: a saved surface back to work on (core/reopen.js) — its values, and its chain row for row. */
+async function openRequested() {
+  try {
+    const opened = await requested('shader');
+    if (!opened || !mounted()) return;
+    const { chain: list, ...values } = opened.object.recipe;
+    params.restore(values);
+    const unknown = chain.restore(list);
+    fitClock();
+    bar.announce(openedLine(opened) + (unknown.length ? ` · ${unknown.length} of its rows are not in this catalogue` : ''));
+  } catch (err) {
+    bar.announce('could not open it: ' + err.message);
+  }
 }
 
 /** What it is doing, for a scene to give back (core/mount.js): its values and its chain. */
@@ -121,7 +146,50 @@ function buildDrawers() {
   chain = new Rows({ mount: panel.drawer('surface').body, onChange: onChainChange, onChoose: () => draw() });
 
   player = panel.addDrawer({ id: 'player', title: 'Sequence player', before: 'format' });
-  transport = new Transport({ clock, mount: player.body });
+  transport = new Transport({ clock, mount: player.body, busy: () => busy });
+
+  const exp = exportBox(panel, { before: 'format', vault: { save } }).drawer;
+  // A print of the frame on screen, drawn again at the sheet's size a window at a time (core/PrintPanel.js).
+  const printing = new PrintPanel({
+    mount: exp.body, app: 'shader', leave, say: text => bar.say(text), format: params.get('format'), tick: () => clock.tick,
+    object: () => {
+      const recipe = recipeNow(), own = recipe.scale || 1;
+      return { type: 'still', origin: APP, recipe, render: { w: Math.round(recipe.width * own), h: Math.round(recipe.height * own) } };
+    },
+  });
+  params.on(key => { if (key === 'format') printing.follow(params.get('format')); });
+  // A window of the stack (core/live.js): what is on screen, as its print has it.
+  stackDrawer(panel, { app: 'shader', layer: () => printing.object(), clock, save: () => save() });
+}
+
+/** One way out: the player held still, nothing else started, what happened said. */
+async function leave(action) {
+  if (busy) return;
+  if (!runner) return bar.announce(`no WebGPU here — ${whyNoGpu()}`);
+  if (failing || !runner.ready(chain.recipe())) return bar.announce('the chain is not ready — ' + (failing || 'still compiling'));
+  busy = true;
+  clock.pause();
+  try {
+    bar.announce(await action());
+  } catch (err) {
+    console.error('[shader] failed:', err);
+    bar.announce('failed: ' + err.message);
+  } finally {
+    busy = false;
+    refreshVault();
+    draw();
+  }
+}
+
+/** A still, or a loop with the frame on screen as its picture, into the vault (save.js). */
+function save() {
+  return leave(async () => {
+    bar.say('saving…');
+    const object = await saveSurface({ params, chain: chain.recipe(), runner, tick: clock.tick });
+    if (!object) return 'no vault — downloaded instead';
+    return object.render.frames ? `saved ${object.id} — ${object.render.frames} frames at ${object.render.fps} fps`
+      : `saved ${object.id} — ${object.title}`;
+  });
 }
 
 function button(label, onClick, title = '') {
@@ -253,12 +321,20 @@ function rate() {
 // ── Keys ─────────────────────────────────────────────────────────────────────
 
 function wireKeys(mine) {
+  const vault = new VaultPanel();
   mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
-    if (clock.length < 2) return;
+    if (e.key === 'v' || e.key === 'V') vault.toggle();
+    if (e.key === 's' || e.key === 'S') save();
+    if (busy || clock.length < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }
     if (e.key === ',') { clock.pause(); clock.step(-1); }
     if (e.key === '.') { clock.pause(); clock.step(1); }
   });
+  refreshVault();
+}
+
+function refreshVault() {
+  Vault.refresh().then(ok => { if (bar) bar.vault(ok ? `${Vault.index.length} in vault` : 'no vault'); });
 }
