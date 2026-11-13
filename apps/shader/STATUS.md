@@ -13,7 +13,9 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 - **M15d — a life, and the moves that want one**: done 2026-11-13.
 - **M15e — the link to particles**: done 2026-11-13, in particles
   (`core/sprites.js`, `apps/particles/STATUS.md`).
-- **M15g — an effect in the suite's game**: next. Then f.
+- **M15g — an effect in the suite's game**: done 2026-11-13, in the map's
+  player (`apps/map/play/effects.js`, `apps/map/STATUS.md`).
+- **M15f — an effect out to a game made elsewhere**: waits for that game.
 
 ## Works now
 
@@ -49,7 +51,7 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
   2160² in 81 tiles, no difference from the whole. A chain with a zoom
   blur reads from anywhere, and is printed whole.
 - **A window of the stack** (`stackDrawer`): Send to ▸, as every app.
-- **The guide** (`docs/guides/vfx.md`, six sections), read in the app.
+- **The guide** (`docs/guides/vfx.md`, eight sections), read in the app.
 - **No WebGPU**: the page opens, says why, the chain can be built.
 - **A module** (`core/mount.js`): `mount(host)`, `unmount()`.
 - `node scripts/check-shader.mjs`, 19 checks; `tests/shader.mjs`.
@@ -74,12 +76,17 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 
 ## Next single step
 
-**M15g — an effect in the suite's game** (`map/effects`). Read first
-`apps/map/STATUS.md` and how a thing's event is answered in the player
-(`apps/map/play/`); `docs/vfx.md`, *Settled* 4: an effect is a compose page
-played once. Then the smallest step: a thing's event names an object — a
-life, or particles wearing one — and a click plays it once at the thing's
-cell, then it is gone; held in `check-map-play`.
+M15's bricks are in but f, which waits for a game made elsewhere
+(`docs/vfx.md`, *Settled* 6). What M15's *Done when* still asks is the
+explosion itself, the author's to make: a flash, a fire dissolving, smoke
+and a ring, each a life saved here, worn by particles, placed on a compose
+page and played by a thing's event in the map's player (`docs/guides/vfx.md`,
+7 and 8). The smallest step of this app's own: **the glow's grey cast**,
+seen on the burst where its light is faint over a clear picture, and not
+understood yet — its last pass (`core/gpu/filters/glow.js`) writes the
+light's brightest channel as its alpha, which reads right for a
+premultiplied picture. So first a case in `check-filters`: a glow over a
+clear picture, read back, to see at which pass the grey comes in.
 
 ## Parked
 

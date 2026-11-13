@@ -127,7 +127,7 @@ The link it leaves: **`shader → particles: a surface over a life`**.
 | M15d | **a life, and the moves that want one**: `dissolve` (a threshold over the life, a soft edge, a hot rim), `warp` (what is under, read through a noise), `polar` (rings, vortices), `glow` (the bright spread and added) | `shader/life` | M | **landed 2026-11-13** — `check-filters`: each against what it does; a dissolve whole at birth, gone at death; `check-shader`: a life played once |
 | M15e | **the link**: a life offered to particles as sprites; a particle shows the frame of its age | `particles/life-frames` | S | **landed 2026-11-13** — below; `check-particles-life`: at half its life, the middle frame; saved, replayed, on its sheet |
 | M15f | **an effect out to a game**: its layers — each its sheet, its blend, its start — and one manifest | `export/effect` | M | Phaser 3 plays it, its fire added, as `check-sheet-engine` plays a sheet |
-| M15g | **an effect in the suite's game**: a thing's event plays one at its cell | `map/effects` | S | `check-map-play`: a click, the effect once, then gone |
+| M15g | **an effect in the suite's game**: a thing's event plays one at its cell | `map/effects` | S | **landed 2026-11-13** — below; `check-map-play`: a click, the effect once, then gone |
 
 a to c are the shader app, and a alone already gives a game its tiles of
 noise. d and e are where it becomes effects. f and g wait on the choices
@@ -195,6 +195,28 @@ at half its life the middle frame. A loop chosen turns it to its age.
 - **Left for later**: a frame drawn again at a print's size, past 512; the
   frames blended one into the next; a life's own blend — fire *added* — which
   is the effect's page (M15g) and particles' layer blend today.
+
+## An effect in the suite's game — M15g, landed 2026-11-13
+
+A thing's event may be an **effect** (`apps/map/params.js`, `EVENTS`):
+*plays* names an object, *played, tiles wide* its size. In the player
+(`apps/map/play/effects.js`) a click on it, or E facing it, plays that
+object's frames **once**, centred on the thing's cell, over the things —
+and the frame after its last is the map alone. A loop is played once round;
+a still is held half a second, a flash.
+
+- **Any object** (`core/rebuild.js` `openFrames`): a life from the shader,
+  particles wearing one, a compose page of several layers in time — *Settled*
+  4, an effect is a page played once; nothing new in the object model but
+  two fields of a thing's block, `plays` and `over`.
+- **By the wall clock**, at the object's own rate, each use on its own
+  clock: used again while it plays, a second one plays over the first.
+- **Opened as the map is**, so the first click plays at once; what it plays
+  is a parent of the map (`save.js`).
+- **Left for later**: an effect begun by something else than a use — a step
+  onto a cell, a timer, another event's end; a sound; its blend over the
+  map — fire *added* — which a page's placements carry inside it today; the
+  thing itself hidden or changed when it has played (a barrel gone).
 
 ## Not now
 

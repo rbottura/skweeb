@@ -1,5 +1,5 @@
 # STATUS — map
-_last touched: 2026-11-06_
+_last touched: 2026-11-13_
 
 M8's app: the map editor, and a room first (`docs/roadmap.md`, M8). A map
 is the field's word for a level; the playable map is its export, as video
@@ -22,6 +22,18 @@ is a loop's, and nothing a player does enters a recipe.
 6. **Toys** — pushed, then rolled.
 
 ## Works now
+
+- **An effect, played once** (M15g, 2026-11-13; `docs/vfx.md`). A thing's
+  event may be an *effect* (`params.js` `EVENTS`): *plays*, an object, and
+  *played, tiles wide*. In the player a click on it, or E facing it
+  (`walk.js` `answeringAt`), plays that object's frames once, centred on
+  its cell, over the things, by the wall clock at the object's own rate —
+  `play/effects.js`; `play/maps.js` `effectFrame` says which frame and when
+  it is over, `effectBox` where. Any object `openFrames` opens: a shader's
+  life, particles wearing one, a compose page. Opened as the map is; a
+  parent of the map. The editor tags its cell *effect* (`guides.js`).
+  `tests/map-play.mjs`, `tests/map-walk.mjs`; `check-map-play`: a click,
+  played over its cell, then the map alone, and again.
 
 - **The player's avatar** (P4, 2026-11-06; `play/avatar.js`, `walk.js`,
   `tests/map-walk.mjs`, `check-map-play`). On the spawn — through a warp,
@@ -188,6 +200,11 @@ its save; a flower's picture in the vault is drawn by the garden at its own
 size, the gamepad's by the gamepad.
 
 ## Known
+
+- **An effect is begun by a use only** — a click, or E: not by a step onto
+  its cell, a timer or another event. It has no sound, is not seen in the
+  editor but for its tag, and its thing stays as it was once it has played.
+  A map's saved frames never hold one, as they hold no event.
 
 - No format: a map's size is its grid. What it is drawn at for the
   web is the bake's, brick 5.
