@@ -1,0 +1,25 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   style.css — shader
+
+   Everything that looks like the suite comes from core. The shader app says
+   its layout — the viewer, then one column of drawers — and a row's picture
+   over its card (rows.js).
+   ────────────────────────────────────────────────────────────────────────────── */
+
+@import '../../core/theme.css';
+@import '../../core/param-panel.css';
+@import '../../core/cards.css';
+@import '../../core/stack-panel.css';
+@import '../../core/vault-panel.css';
+@import '../../core/sequence-viewer.css';
+
+.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+
+/* A row's picture: the chain cut there, on the checker where it is clear. */
+.sh-row {
+  display: block; padding: 0; margin: 0 0 4px; border: 1px solid var(--line-2); cursor: zoom-in; line-height: 0;
+  background: repeating-conic-gradient(var(--nb-check-a) 0% 25%, var(--nb-check-b) 0% 50%) 0 0 / 12px 12px;
+}
+.sh-row canvas { display: block; height: 72px; width: auto; }
+.pp-card--chosen > .sh-row { outline: 2px solid var(--accent); cursor: zoom-out; }
+.sh-about { margin: 6px 0 0; color: var(--nb-muted); }

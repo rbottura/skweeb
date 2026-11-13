@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="shader — a surface from nothing: a chain begun by a generator, every row its picture.">
+  <title>shader — skweeb</title>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!--
+    The app is a module (main.js, S9): it builds itself in a host and takes
+    itself out again, so a scene can mount it too. Here, alone, its host is
+    this page.
+  -->
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
+</body>
+</html>
