@@ -10,21 +10,23 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-09 to -12: BEC 2027's graphic system (track G, `docs/plan.md`)
+### Newest — 2026-11-09 to -13: BEC 2027's graphic system (track G), a game's effects (M15)
 
+- **The shader app** (M15, `apps/shader/STATUS.md`, `docs/vfx.md`): a surface
+  from nothing — filter's chain begun by a generator, every row its picture,
+  a loop or a life played once, dissolved; saved, replayed, printed. Worn by
+  particles, a loop's frames by a particle's age (M15e); played once at a
+  thing's cell in the map's player, an event (M15g).
 - **An object's layers, in every app** (L13a, 2026-11-12, `core/layers.js`):
   its Stack section first — "+ overlay…", a vault picture in front or behind,
   fitted to the format, composed as particles' overlay — kept state by state,
   drawn round the canvas and in all that leaves: a save, a replay, compose,
-  the print, E's picture; particles' overlay its first layer (L13b). The
-  stack's bugs (L12): rows within the panel, a state gone back to whole.
-
+  the print, E's picture; particles' overlay its first layer (L13b).
 - **A cloud of dots in the 3D app** (G1, `apps/3d/cloud.js`): particles'
   emitter in 3D, its dots placed once on a vault object's ink, a ball, a disc…,
   each its size and colour by two seeds, R and C; unlit in a palette, or toon;
   saved, replayed, printed. In time (G2, `forces.js`): gravity, wind, drag, a
-  vortex, a pull and curl noise from rest — a state at a time, its evolution
-  played once. In particles: a palette, an overlay composed (G3).
+  vortex, a pull and curl noise — played once. In particles: a palette (G3).
 
 ### 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop, the garden
 
@@ -32,9 +34,8 @@ sorts them.
   garden*): a map gardened in, alone or in cluster. The gardener walks it as
   the player's avatar does; facing a flower — a drawing that keeps its
   marks — E plants its next generation beside it: its marks through a chain
-  of modifiers, each on parts of the drawing's order, saved as a still, its
-  source its parent; on bare earth, a flower of the set in hand. Every
-  flower grows as its marks come; Ctrl S keeps the garden, a map's state.
+  of modifiers, saved as a still, its source its parent; on bare earth, a
+  flower of the set in hand. Ctrl S keeps the garden, a map's state.
 - **cluster** (`apps/cluster/STATUS.md`): the apps in one page one at a
   time, through their modules, laid as the bench is — a strip, the side,
   the viewer in one place, the properties one panel, the app's panels a tab
@@ -160,7 +161,7 @@ sorts them.
   cells; things from the vault on cells, back to front by row, their loops by
   the map's clock; a `map` saved, replayed, reopened, placed in compose.
 - **Walls, and things that answer** (2026-10-02): a sign, a warp, the spawn,
-  RPG Maker's way. **The player** (`play/`): point and click, a warp followed
+  RPG Maker's way — an effect played once too (M15g). **The player** (`play/`): point and click, a warp followed
   and back; its avatar (P4) on the spawn — ZQSD, the arrows, a pad, E, a tap.
 
 ### M7 — fractals (`apps/fractals/STATUS.md`, done 2026-09-30)
@@ -194,7 +195,7 @@ sorts them.
   machine the author uses — the laptop's Intel once Chrome's flags are on.
 - **filter** filters any vault still, loop or page live, a chain of cards
   drawn from their schemas; saves stills and loops that replay and draw
-  again at print scale. Twenty-nine filters, eighteen from p5.FIP under
+  again at print scale. Thirty-six filters, eighteen from p5.FIP under
   MIT, the suite's own for game assets — outline, drop shadow, palette lock.
 - **A look** (`filter → compose: a look`): a chain saved alone, put over a
   placement in compose, saved in the page's block and among its parents.
@@ -264,17 +265,17 @@ sorts them.
 
 ## Tests
 
-Sixty-nine files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-11-12). Newest: `layers` (L13), `steps` grown
-for a list held (L12b); `3d-forces` (G2), `3d-cloud` (G1); `garden` (M14);
+Seventy files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-11-13). Newest: `shader` (M15), `layers` (L13),
+`steps` for a list held (L12b); `3d-forces` (G2), `3d-cloud` (G1); `garden` (M14);
 `scope` and `reach`; the puppet's four; M11's, the print's, the 3D app's seven.
 
-Forty-two browser checks, each a command in `CLAUDE.md`, run several at a
+Forty-five browser checks, each a command in `CLAUDE.md`, run several at a
 time by `scripts/checks.mjs`: each its own server on a copy of the vault,
 headless Chrome through `scripts/chrome.mjs` — a real mouse included — and
 `scripts/check-kit.mjs` under it; each fails when a page throws or its
-console is not quiet. Newest: `check-layers` (L13), `check-particles-overlay`
-(G3), `check-3d-cloud` (G1, G2). On the laptop Chrome keeps
+console is not quiet. Newest: `check-shader`, `check-shader-save`,
+`check-particles-life` (M15), `check-layers` (L13). On the laptop Chrome keeps
 WebGPU from its Intel: a GPU check there skips its GPU half unless given
 `CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
 (`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
@@ -344,11 +345,10 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**M15b — the shader app opens** (`docs/vfx.md`, `shader/app`): its folder
-by the `skweeb-app` skill, one `noise` row drawn over a blank picture as
-fractals draws — on M15a's generators, landed 2026-11-13. Then S9i, the
-players in cluster, `ready`. Waiting on the author: the layers in use —
-what a frames zip, a drag, a live window as a layer should do next.
+**S9i — the players in cluster** (`scene/players`, `ready`): the rig's
+puppet and the map's player as modules on `core/mount.js`, as the garden is.
+M15 is in but f, waiting for a game made elsewhere (`apps/shader/STATUS.md`).
+Waiting on the author: the layers in use — a frames zip, a drag, a live window.
 
 ## Parked decisions
 

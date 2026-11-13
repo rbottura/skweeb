@@ -27,6 +27,7 @@ export function eventLabel(block) {
   if (block.event === 'sign') return 'a sign';
   if (block.event === 'warp') return block.to ? `a warp to ${block.to}` : 'a warp, to no map yet';
   if (block.event === 'spawn') return `the spawn, facing ${block.face || 'down'}`;
+  if (block.event === 'effect') return block.plays ? 'an effect' : 'an effect, playing nothing yet';
   return '';
 }
 

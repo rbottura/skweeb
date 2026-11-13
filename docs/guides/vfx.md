@@ -128,7 +128,21 @@ itself, a little out of step with its neighbours.
 Particles' *Download a sprite sheet* is then the effect as a game loads it:
 every frame of the whole burst on one picture, and its JSON.
 
+## 8. An effect in the game
+
+The suite's game is the map's player, and an effect there is an **event**.
+In the map editor, choose a thing — a barrel, or a cell with nothing on it —
+and in its *Event* drawer pick **effect**: *plays* takes the object, *played,
+tiles wide* how large. Save the map and open it in the player: the thing
+answers under the pointer, and a click — or **E**, facing it — plays the
+object once, centred on its cell. Then it is gone.
+
+What to play: the life itself, straight from the shader; better, the
+particles wearing it, saved as a burst; best, a compose page — the flash, the
+fire, its smoke and a ring, each placed and begun at its moment — which is
+what an explosion is: several small effects, a few frames apart.
+
 ## Next
 
-An effect of several layers — a flash, the fire, its smoke, a ring — played
-in the suite's own game on a click.
+An effect out to a game made elsewhere: every layer its sheet, its blend and
+its start, and one manifest to load them by.

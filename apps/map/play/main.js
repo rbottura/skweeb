@@ -26,6 +26,7 @@ import { mapSize }   from '../grid.js';
 import { thingAt, boxOf } from '../things.js';
 import { answers, signOf, latestMap } from './maps.js';
 import { Sign }      from './sign.js';
+import { Effects }   from './effects.js';
 import { Avatar }    from './avatar.js';
 import { Steering, stride } from '../steering.js';
 import { spawnOf, arrival, pathTo, ahead, warpAt, answeringAt as answeringOn } from '../walk.js';
@@ -36,6 +37,7 @@ const canvas = document.getElementById('room');
 const ctx = canvas.getContext('2d');
 const note = document.getElementById('note');
 const sign = new Sign(document.getElementById('sign'));
+const effects = new Effects();
 const MARGIN = 20;        // CSS pixels kept clear round the map, its frame and shadow
 const LONGEST = 4096;     // the most canvas pixels along the map's longer side
 
@@ -80,6 +82,8 @@ async function open(id, from) {
     if (room) dispose(room.things);
     room = { id, m: recipe.map, recipe, tiles: parts.tiles, things: parts.things, from };
     hover = null;
+    effects.stop();
+    effects.ready(recipe);
     // Through a warp, on the warp back; else on the spawn — wearing what stands there, or what it wore (avatar.js).
     avatar.place(arrival(recipe, from));
     const spawn = spawnOf(recipe);
@@ -125,9 +129,16 @@ function answeringAt(pt) {
   return thingAt(items, pt.x, pt.y, room.m.tile);
 }
 
-function use(p) {
-  if (p.block.event === 'sign') return sign.show(signOf(p.block));
-  if (p.block.event === 'warp') return go(p.block.to);
+function use(p) { return useBlock(p.block); }
+
+/** A block used, by a press or by E: a sign shown, a warp gone through, an effect played once at its cell (effects.js). */
+function useBlock(b) {
+  if (b.event === 'sign') return sign.show(signOf(b));
+  if (b.event === 'warp') return go(b.to);
+  if (b.event === 'effect') {
+    if (!b.plays) return say('This effect plays nothing yet.');
+    return effects.play(b).then(() => draw(), err => say('What this plays would not open: ' + err.message));
+  }
 }
 
 canvas.addEventListener('pointermove', e => {
@@ -173,13 +184,12 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keyup', e => steer.release(e));
 window.addEventListener('blur', () => { steer.held.length = 0; });
 
-/** E: what the avatar faces, used — a sign read, a warp gone through. */
+/** E: what the avatar faces, used — a sign read, a warp gone through, an effect played. */
 function useAhead() {
   if (!room || avatar.walking) return;
   const at = ahead(avatar.at, avatar.face);
   const b = answeringOn(room.recipe, at.col, at.row);
-  if (b && b.event === 'sign') sign.show(signOf(b));
-  else if (b && b.event === 'warp') go(b.to);
+  if (b) useBlock(b);
 }
 
 /** Every frame: the step under way moved on, a warp stepped onto gone through, the next step taken (../steering.js). */
@@ -197,7 +207,7 @@ function walk(now) {
     go(warp.to);
     return true;
   });
-  if (step.moved && !step.stopped) paint();
+  if ((step.moved && !step.stopped) || effects.active) paint();
 }
 requestAnimationFrame(walk);
 window.addEventListener('popstate', e => openFromUrl((e.state && e.state.from) || null));
@@ -228,6 +238,7 @@ function paint() {
   const me = avatar.layer(room.m, performance.now());
   const after = layers.findIndex(l => l.row > me.row);
   layers.splice(after < 0 ? layers.length : after, 0, me);
+  layers.push(...effects.layers(performance.now(), room.m));     // over them all, while they last
   drawMap(ctx, room.m, view, { cells: room.recipe.cells || [], tiles: room.tiles, layers });
   if (hover) outline(hover);
 }

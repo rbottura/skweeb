@@ -60,7 +60,15 @@ const made = await page.eval(`(async () => {
       parents: [], render: { blob, ext: 'png', w: m.cols * m.tile, h: m.rows * m.tile }, thumb: await thumbFromBlob(blob) })).id; };
   const poster = await shape('a poster', '#2a9d4b', false), big = await shape('the poster, large', '#7b2cbf', false, 96, 128);
   const dot = await shape('a dot', '#f28c28');
+  // An effect (M15g): a burst of dots from particles, a little over a second, played once — its recipe replayed, no GPU asked.
+  const { emitParams, pictureParams } = await import('/apps/particles/params.js');
+  const flash = await picture(64, 64, '#d8342a', true);
+  const burst = (await Vault.save({ type: 'sequence', title: 'a burst', tags: ['particles'], origin: { app: 'particles', version: '1.0.0' }, seed: 1,
+    recipe: { emit: { ...emitParams().values, mode: 'burst', count: 30, life: 1.2, lifeSpread: 0, x: 0, y: 0, speed: 40, gravity: 0 },
+              picture: { ...pictureParams().values, ground: 'none', size: 256, grow: 1, fade: false, color: '#d8342a' } },
+    parents: [], render: { blob: flash, ext: 'png', w: 1080, h: 1080, frames: 36, fps: 30, loop: false }, thumb: await thumbFromBlob(flash) })).id;
   const room = await map({ name: 'a room', cols: 6, rows: 5, tile: 64, ground: '#fffdf6' }, [
+    { ref: null, col: 5, row: 0, width: 1, event: 'effect', plays: burst, over: 1 },
     { ref: poster, col: 1, row: 1, width: 1, event: 'sign', says: 'hello from the room', shows: big, solid: true },
     { ref: dot, col: 3, row: 2, width: 1 },
     { ref: null, col: 4, row: 4, width: 1, event: 'warp', to: 'the hall' },
@@ -80,7 +88,7 @@ const made = await page.eval(`(async () => {
   const yard = await map({ name: 'the yard', cols: 3, rows: 3, tile: 64, ground: '#fffdf6' }, [
     { ref: walker, col: 1, row: 1, width: 1, event: 'spawn', face: 'down' }]);
   await Vault.refresh();
-  return { poster, big, dot, room, hall, yard }; })()`);
+  return { poster, big, dot, room, hall, yard, burst }; })()`);
 c.ok('a room and a hall in the vault, joined by warps', !!(made.room && made.hall), JSON.stringify(made));
 
 // ── Played ──────────────────────────────────────────────────────────────────
@@ -130,6 +138,26 @@ await c.shot('1-sign');
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
 await wait(200);
 c.ok('Escape puts it away', await page.eval(`document.getElementById('sign').hidden`));
+
+// ── An effect (M15g, play/effects.js): a click, played once at its cell, then gone ──
+
+/** Whether the burst's red is at the middle of the effect's cell. */
+const red = `(() => { const c = document.getElementById('room'), k = c.width / 384;
+  const d = c.getContext('2d').getImageData(Math.round(${mid(5)} * k), Math.round(${mid(0)} * k), 1, 1).data;
+  return Math.abs(d[0] - 216) + Math.abs(d[1] - 52) + Math.abs(d[2] - 42) < 40; })()`;
+const seen = (what, ms) => page.until(what, { timeout: ms }).then(() => true, () => false);
+c.ok('an effect waits unseen: its cell is the ground', colour(await pixel(mid(5), mid(0), 384), [255, 253, 246]), JSON.stringify(await pixel(mid(5), mid(0), 384)));
+await hoverAt(await onScreen(mid(5), mid(0), 384));
+c.ok('…and answers under the pointer', await answersNow());
+await page.pointer(await onScreen(mid(5), mid(0), 384));
+c.ok('clicked, it plays over its cell', await seen(red, 4000));
+await c.shot('1b-effect');
+c.ok('once: after its last frame, the map alone', await seen(`!${red}`, 5000) && colour(await pixel(mid(5), mid(0), 384), [255, 253, 246]),
+  JSON.stringify(await pixel(mid(5), mid(0), 384)));
+await wait(1500);
+c.ok('…and it stays gone: a loop is not begun again', !(await page.eval(red)));
+await page.pointer(await onScreen(mid(5), mid(0), 384));
+c.ok('clicked again, it plays again — and ends', await seen(red, 4000) && await seen(`!${red}`, 5000));
 
 // ── Its avatar (P4, play/avatar.js) ─────────────────────────────────────────
 

@@ -141,7 +141,7 @@ export function drawEvents(ctx, m, view, dpp, place, spawn, spawnWalkable) {
       ctx.strokeRect(x + 2 * dpp, y + 2 * dpp, side - 4 * dpp, side - 4 * dpp);
       ctx.setLineDash([]);
     }
-    const tag = b.event === 'sign' ? 'sign' : b.event === 'warp' ? `→ ${b.to || '?'}` : '';
+    const tag = b.event === 'sign' ? 'sign' : b.event === 'warp' ? `→ ${b.to || '?'}` : b.event === 'effect' ? 'effect' : '';
     if (!tag) continue;
     const pad = 3 * dpp, tw = ctx.measureText(tag).width;
     ctx.fillStyle = EVENT;

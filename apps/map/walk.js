@@ -130,9 +130,9 @@ export function faceTo(from, to) {
 /** Whether a block stands on a cell: its feet there, its width covering it as a solid thing's would. */
 const covers = (block, col, row) => blockedBy({ ...block, solid: true }).some(c => c.col === col && c.row === row);
 
-/** What answers on a cell — a sign or a warp standing on it — or null: what E uses, faced. */
+/** What answers on a cell — a sign, a warp or an effect standing on it — or null: what E uses, faced. */
 export function answeringAt(recipe, col, row) {
-  return (recipe.place || []).find(b => b && (b.event === 'sign' || b.event === 'warp') && covers(b, col, row)) || null;
+  return (recipe.place || []).find(b => b && (b.event === 'sign' || b.event === 'warp' || b.event === 'effect') && covers(b, col, row)) || null;
 }
 
 /** The warp on a cell — what a step onto it goes through — or null. */
