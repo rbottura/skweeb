@@ -31,6 +31,9 @@ export const cut = (chain, at = null) => (at == null || at < 0 ? chain : chain.s
 /** The loop a recipe plays: its frames, at least one. */
 export const loopOf = recipe => Math.max(1, Math.floor(recipe.frames) || 1);
 
+/** Whether a recipe's frames are a life, played once, rather than a loop. */
+export const isLife = recipe => recipe.time === 'life';
+
 /**
  * One frame of a recipe on the GPU.
  *
@@ -45,7 +48,7 @@ export const loopOf = recipe => Math.max(1, Math.floor(recipe.frames) || 1);
 export function drawSurface(runner, blank, recipe, tick, px, at = null) {
   const frames = loopOf(recipe);
   return runner.run(blank, cut(recipe.chain || [], at),
-    { scale: px, seed: recipe.seed, tick, frames, time: recipe.fps ? tick / recipe.fps : 0 });
+    { scale: px, seed: recipe.seed, tick, frames, life: isLife(recipe), time: recipe.fps ? tick / recipe.fps : 0 });
 }
 
 /** A blank picture the GPU will copy from: a canvas whose 2D context has been got. */
@@ -75,7 +78,7 @@ export function openSurface(recipe, { runner, scale = 1 } = {}) {
   return {
     length,
     fps: length > 1 ? recipe.fps : 0,
-    loop: length > 1,
+    loop: length > 1 && !isLife(recipe),
     width: Math.max(1, Math.round(recipe.width * own)),
     height: Math.max(1, Math.round(recipe.height * own)),
     scale,
@@ -93,7 +96,7 @@ export function openSurface(recipe, { runner, scale = 1 } = {}) {
     ...(windows(chain) ? {
       window(i, win) {
         return chainWindow({ runner, chain, width: w, height: h, piece: () => empty, scale: px, seed: recipe.seed,
-          tick: i, frames: length, time: recipe.fps ? i / recipe.fps : 0 }, win, kept);
+          tick: i, frames: length, life: isLife(recipe), time: recipe.fps ? i / recipe.fps : 0 }, win, kept);
       },
     } : {}),
   };

@@ -24,7 +24,7 @@
 
 import { shaderParams, GROUPS } from './params.js';
 import { Rows, ROW_SIDE }       from './rows.js';
-import { drawSurface, blankOf, loopOf } from './frames.js';
+import { drawSurface, blankOf, loopOf, isLife } from './frames.js';
 import { STARTERS, FIRST }      from './starters.js';
 import { saveSurface, APP }     from './save.js';
 import { PrintPanel }           from '../../core/PrintPanel.js';
@@ -227,16 +227,16 @@ function onChainChange() {
 function fitClock() {
   const v = params.values;
   const n = loopOf(v);
-  const key = `${n}@${v.fps}`;
+  const key = `${n}@${v.fps}${isLife(v) ? ', once' : ''}`;
   if (key !== clockAt) {
     const was = clock.playing && n > 1;
-    clock.configure({ length: n, fps: v.fps || 24, loop: true });
+    clock.configure({ length: n, fps: v.fps || 24, loop: !isLife(v) });
     transport.configure();
     clockAt = key;
     if (was) clock.play();
   }
   player.hidden = n < 2;
-  player.note(n > 1 ? `${n} frames · ${(n / v.fps).toFixed(2)} s, a loop` : '');
+  player.note(n > 1 ? `${n} frames · ${(n / v.fps).toFixed(2)} s, ${isLife(v) ? 'a life' : 'a loop'}` : '');
 }
 
 // ── Drawing ──────────────────────────────────────────────────────────────────

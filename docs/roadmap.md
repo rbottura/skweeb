@@ -23,7 +23,7 @@ item, is the board in `docs/plan.md`. Here, the milestones still open.
 | M12 | the scene: one canvas, the suite round it | planned 2026-11-03 — `docs/scene.md`; track S in `docs/plan.md` |
 | M13 | BEC again: its grid in the 3D app, its layers by format, the project one page | `docs/bec.md`: M13a, the grid, landed 2026-11-05; b to d next |
 | M14 | the garden: flowers drawn, changed by a chain of modifiers, planted generation after generation | M14a, the garden, landed 2026-11-06 — below |
-| M15 | a game's effects: a shader app — surfaces from nothing — worn by particles over their life, out to a game | taken up 2026-11-13 — `docs/vfx.md`: M15a, the generators, M15b and c, the app opened and saving (`apps/shader/`), landed that day; d to g next |
+| M15 | a game's effects: a shader app — surfaces from nothing — worn by particles over their life, out to a game | taken up 2026-11-13 — `docs/vfx.md`: M15a, the generators, M15b to d, the app opened, saving, a life and its moves (`apps/shader/`), landed that day; e to g next |
 
 ## The links
 

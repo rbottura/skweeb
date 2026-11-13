@@ -44,14 +44,14 @@ export async function saveSurface({ params, chain, runner, tick = 0 }) {
     type: loop ? 'sequence' : 'still',
     state: true,                        // the project's next state, its smart object's (S6b, core/vault.js)
     title: titleOf(chain) + (loop ? ` ×${frames.length}` : ''),
-    tags: ['shader', 'surface', ...(loop ? ['loop'] : [])],
+    tags: ['shader', 'surface', ...(loop ? [frames.loop ? 'loop' : 'life'] : [])],
     origin: APP,
     seed: drawsAtRandom(chain) ? recipe.seed : null,
     recipe,
     parents: params.consumedObjectIds(),
     render: {
       blob, ext: 'png', w: shown.width, h: shown.height,
-      ...(loop ? { frames: frames.length, fps: frames.fps, loop: true } : {}),
+      ...(loop ? { frames: frames.length, fps: frames.fps, loop: frames.loop } : {}),
     },
     thumb: await thumbFromBlob(blob),
   });

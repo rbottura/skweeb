@@ -93,12 +93,12 @@ await c.go(APP + '?open=' + loopId);
 await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
 await page.until(`${cards}.length === 6`);
 const back = await page.eval(`({ titles: ${cards}.map(k => k.querySelector('.pp-title').textContent).join(), seed: +${num('seed')}.value,
-  frames: +${num('frames, a loop')}.value, second: ${cards}[1].querySelector('select')?.value })`);
+  frames: +${num('frames')}.value, second: ${cards}[1].querySelector('select')?.value })`);
 c.ok('?open= brings it back: its six rows, its seed, its loop, a row\'s blend',
   back.titles === 'noise,noise,brightness,gradient,shape,gradient map' && back.seed === 7 && back.frames === 48 && back.second === 'multiply', JSON.stringify(back));
 
 // ── 3. One frame is a still — the same smart object's next state (S6b) — and printed
-await page.typeInto(num('frames, a loop'), '1');
+await page.typeInto(num('frames'), '1');
 await page.until(`!${say}.includes('frame ')`);
 const stillId = await saved();
 const still = await api(stillId);

@@ -27,7 +27,7 @@ async function inPage() {
   const runner = await createRunner();
   if (!runner) return { gpu: false };
   await runner.prepare(['halftone', 'dots', 'crt', 'vignette', 'grain', 'glitch',
-    'gradientmap', 'motionblur', 'zoomblur', 'dither', 'noise', 'gradient', 'shape'].map(id => ({ id })));
+    'gradientmap', 'motionblur', 'zoomblur', 'dither', 'noise', 'gradient', 'shape', 'dissolve', 'warp', 'polar', 'glow'].map(id => ({ id })));
 
   const canvas = (w, h, draw) => {
     const el = Object.assign(document.createElement('canvas'), { width: w, height: h });
@@ -178,6 +178,48 @@ async function inPage() {
     };
   }
 
+  // An effect's moves (M15d): a dissolve over a life, a warp, a polar, a glow — 64 by 64.
+  {
+    const px = (d, x, y) => at(d, 64, x, y);
+    const ramp = canvas(64, 64, x => { const g = x.createLinearGradient(0, 0, 64, 0); g.addColorStop(0, '#000'); g.addColorStop(1, '#fff');
+      x.fillStyle = g; x.fillRect(0, 0, 64, 64); });
+    const whole = read(ramp);
+    const hard = { soft: 0, rim: 0 };
+    const dis = (params, opts) => read(runner.run(ramp, [{ id: 'dissolve', params }], opts));
+    const alphas = d => { let lo = 255, hi = 0; for (let i = 3; i < d.length; i += 4) { lo = Math.min(lo, d[i]); hi = Math.max(hi, d[i]); } return [lo, hi]; };
+    const life = tick => ({ life: true, tick, frames: 9 });
+    const mid = dis(hard, life(4)), rim = dis({ soft: 0, rim: 0.2, colour: '#ff0000' }, life(4));
+    out.dissolve = {
+      born: same(dis({}, life(0)), whole), dead: alphas(dis({}, life(8))),
+      half: [px(mid, 8, 32)[3], px(mid, 56, 32)[3], px(mid, 56, 32)[0] === px(whole, 56, 32)[0]],
+      rim: [px(rim, 30, 32), px(rim, 60, 32)],
+      loop: alphas(dis(hard, { tick: 8, frames: 9 }))[1], still: same(dis({}, {}), whole),
+    };
+
+    const warp = (params, opts) => read(runner.run(ramp, [{ id: 'warp', params }], opts));
+    const flow = { amount: 0.1, cells: 4, scrollX: 1 };
+    const w0 = warp(flow, { seed: 7, tick: 0, frames: 8 });
+    out.warp = {
+      none: same(warp({ amount: 0 }, { seed: 7 }), whole), moved: differing(w0, whole),
+      again: same(warp(flow, { seed: 7, tick: 0, frames: 8 }), w0), seed: differing(warp(flow, { seed: 8, tick: 0, frames: 8 }), w0),
+      flows: differing(warp(flow, { seed: 7, tick: 1, frames: 8 }), w0), closes: same(warp(flow, { seed: 7, tick: 8, frames: 8 }), w0),
+    };
+
+    // Top white and bottom black: a white disc in a black one. Left red and right blue: half the round each.
+    const bands = canvas(64, 64, x => { x.fillStyle = '#000'; x.fillRect(0, 0, 64, 64); x.fillStyle = '#fff'; x.fillRect(0, 0, 64, 32); });
+    const sides = canvas(64, 64, x => { x.fillStyle = '#f00'; x.fillRect(0, 0, 32, 64); x.fillStyle = '#00f'; x.fillRect(32, 0, 32, 64); });
+    const disc = read(runner.run(bands, [{ id: 'polar' }])), fan = read(runner.run(sides, [{ id: 'polar' }]));
+    const turned = read(runner.run(sides, [{ id: 'polar', params: { turn: 180 } }]));
+    out.polar = { centre: px(disc, 32, 34).join(), out: px(disc, 58, 32).join(), corner: px(disc, 1, 1)[3],
+      below: px(fan, 48, 42).join(), above: px(fan, 48, 22).join(), turned: px(turned, 48, 42).join() };
+
+    const spot = colour => canvas(64, 64, x => { x.fillStyle = colour; x.fillRect(28, 28, 8, 8); });
+    const lit = spot('#fff'), dim = spot('rgb(60,60,60)');
+    const glow = read(runner.run(lit, [{ id: 'glow', params: { threshold: 0.5, radius: 4, strength: 1 } }]));
+    out.glow = { inside: px(glow, 32, 32).join(), near: px(glow, 39, 32), far: px(glow, 60, 32)[3],
+      before: px(read(lit), 39, 32)[3], dark: same(read(runner.run(dim, [{ id: 'glow', params: { threshold: 0.5, radius: 4 } }])), read(dim)) };
+  }
+
   runner.dispose();
   return out;
 }
@@ -258,6 +300,29 @@ if (r.gpu) {
     sh.add.join(' ') === '255,255,255,255 0,0,0,0' && sh.screen.join(' ') === '255,255,255,255 128,128,128,255', `${sh.add} · ${sh.screen}`);
   c.ok('…half of it, half way to white; none of it, the picture as it was',
     sh.half[0] === 255 && close(sh.half[1], 128) && close(sh.half[2], 128) && sh.half[3] === 255 && sh.none, String(sh.half));
+}
+
+if (r.gpu) {
+  // An effect's moves (M15d, docs/vfx.md).
+  const ds = r.dissolve;
+  c.ok('dissolve: whole at its birth, gone at its death', ds.born && ds.dead.join() === '0,0', String(ds.dead));
+  c.ok('…half way, the dark half eaten and the light half as it was', ds.half.join() === '0,255,true', String(ds.half));
+  c.ok('…a hot rim inside its edge, and none further in', ds.rim[0][0] > ds.rim[0][1] + 40 && ds.rim[0][3] === 255 && ds.rim[1][0] === ds.rim[1][1],
+    ds.rim.join(' · '));
+  c.ok('…a loop never ends it; a still holds at its birth', ds.loop === 255 && ds.still);
+  const wp = r.warp;
+  c.ok('warp: none of it, the picture as it was; some, most pixels from elsewhere', wp.none && wp.moved > 0.5, String(wp.moved));
+  c.ok('…from the seed: the same twice, another seed another', wp.again && wp.seed > 0.3, String(wp.seed));
+  c.ok('…scrolled, it flows, and the loop over it is its first frame', wp.flows > 0.3 && wp.closes, String(wp.flows));
+  const po = r.polar;
+  c.ok('polar: the top at the centre, the bottom at the rim, nothing past it',
+    po.centre === '255,255,255,255' && po.out === '0,0,0,255' && po.corner === 0, `${po.centre} · ${po.out} · ${po.corner}`);
+  c.ok('…left to right once round; turned half a turn, the other half',
+    po.below === '255,0,0,255' && po.above === '0,0,255,255' && po.turned === '0,0,255,255', `${po.below} · ${po.above} · ${po.turned}`);
+  const gl = r.glow;
+  c.ok('glow: the bright spread past its edge, fading to nothing; the picture under as it was',
+    gl.inside === '255,255,255,255' && gl.before === 0 && gl.near[3] > 20 && gl.near[0] > 20 && gl.far === 0, `${gl.near} · far ${gl.far}`);
+  c.ok('…what is under its threshold glows not at all', gl.dark);
 }
 
 const noise = c.quiet();

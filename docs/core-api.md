@@ -240,7 +240,7 @@ over. A filter that draws at random says so (`random: true`) and draws from
 `frame.seed` and `frame.tick` — the recipe's seed and the loop's frame, which
 `run()` is handed — so the same seed gives the same noise and a loop's
 noise comes round with it. `wgsl.js` is what a pass is written against. `node tests/gpu-filters.mjs` holds the catalogue to all of
-this without a GPU; `node scripts/check-gpu.mjs` runs it on one. A **generator** (`generates: true`) makes its picture — `noise`, `gradient`, `shape` — and meets what is under it by its `blend` (`filters/meet.js`); what scrolls in one comes round in a loop whose length a run is told, `run(…, { tick, frames })` — `docs/vfx.md`, *The generators*.
+this without a GPU; `node scripts/check-gpu.mjs` runs it on one. A **generator** (`generates: true`) makes its picture — `noise`, `gradient`, `shape` — and meets what is under it by its `blend` (`filters/meet.js`); what scrolls in one comes round in a loop whose length a run is told, `run(…, { tick, frames })` — `docs/vfx.md`, *The generators*. Told `life: true`, those frames are played once: `ageOf(info)` is 0 at the first and 1 at the last, what `dissolve` runs its threshold over (M15d).
 
 **Past the edge.** A filter may say how far it reaches past its picture —
 `reach(values)`, in the source's pixels: a blur its three deviations. A run

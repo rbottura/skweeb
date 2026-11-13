@@ -222,10 +222,11 @@ class Runner {
    *   grow gives the chain room past the edge, and the picture comes back
    *   `marginOf(chain, scale)` bigger on every side; seed and tick are what a
    *   filter drawing at random draws from — the recipe's seed, the loop's frame;
-   *   frames is the loop's length, which what scrolls comes round in (filters/meet.js)
+   *   frames is the loop's length, which what scrolls comes round in (filters/meet.js);
+   *   life says those frames are played once, the last its end — what a dissolve runs over
    * @returns {ImageBitmap} the runner's, good until its next run()
    */
-  run(source, chain = [], { scale = 1, time = 0, seed = 0, tick = 0, frames = 0, grow = false, window = null } = {}) {
+  run(source, chain = [], { scale = 1, time = 0, seed = 0, tick = 0, frames = 0, life = false, grow = false, window = null } = {}) {
     const sw = source.naturalWidth || source.width;
     const sh = source.naturalHeight || source.height;
     // A window of a bigger picture brings its own room, its corner where it lies in it (wgsl.js, frame).
@@ -254,7 +255,7 @@ class Runner {
     device.queue.writeBuffer(this.frameBuffer, 0, frame);
 
     const encoder = device.createCommandEncoder({ label: 'chain' });
-    const info = { width: w, height: h, scale, time, seed, tick, frames };
+    const info = { width: w, height: h, scale, time, seed, tick, frames, life };
     let input = this.src;
     let own = input;                 // the filter's own input: its passes' `orig`
     let free = [];                   // the two textures it writes into, in turns

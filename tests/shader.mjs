@@ -8,7 +8,7 @@
  * laid over nothing. What they draw is check-shader's.
  */
 
-const { cut, loopOf } = await import('../apps/shader/frames.js');
+const { cut, loopOf, isLife } = await import('../apps/shader/frames.js');
 const { STARTERS, FIRST } = await import('../apps/shader/starters.js');
 const { FILTERS } = await import('../core/gpu/filters/index.js');
 const { defineParams } = await import('../core/params.js');
@@ -45,12 +45,14 @@ function wrong(list) {
 }
 
 ok('what the app opens on: one generator', [FIRST.length, !!FILTERS[FIRST[0].id].generates, wrong(FIRST)], [1, true, []]);
-ok('three starters, each its own', STARTERS.map(s => s.id), ['fire', 'smoke', 'energy']);
+ok('four starters, each its own; the last a life', [STARTERS.map(s => s.id), STARTERS.map(s => s.values.time)],
+  [['fire', 'smoke', 'energy', 'burst'], ['loop', 'loop', 'loop', 'life']]);
+ok('a life is played once: its frames no loop', [isLife({ time: 'life' }), isLife({ time: 'loop' }), isLife({})], [true, false, false]);
 for (const s of STARTERS) {
   ok(`${s.id}: every row the catalogue's, every value its schema's`, wrong(s.chain), []);
   const first = s.chain[0];
   ok(`${s.id}: begun by a generator, over nothing`, [!!FILTERS[first.id].generates, first.params.blend || 'replace'], [true, 'replace']);
-  ok(`${s.id}: a loop, said in a line`, [s.values.frames > 1, s.values.fps > 0, s.about.length > 20], [true, true, true]);
+  ok(`${s.id}: frames to play, said in a line`, [s.values.frames > 1, s.values.fps > 0, s.about.length > 20], [true, true, true]);
   // What scrolls is a whole number of tiles a loop: the schema's ints, so the loop closes (tests/gpu-filters.mjs).
   const scrolls = s.chain.flatMap(r => ['scroll', 'scrollX', 'scrollY'].filter(k => k in r.params).map(k => r.params[k]));
   ok(`${s.id}: it moves, by whole tiles`, [scrolls.length > 0, scrolls.every(Number.isInteger)], [true, true]);
