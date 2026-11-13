@@ -30,6 +30,11 @@ day before that became bricks done went with them.
 
 ## Sorted
 
+- **2026-11-13 — the suite, a game's editor and the game.** "un objectif
+  serai de composé des avatars, des maps, des objets et maintenant des vfx
+  grace a la suite, une forme d'éditeur graphique et de composant de jeux et
+  de jeu intégralement". → `docs/decisions.md`, 2026-11-13: the game's
+  engine is the suite's own; M15's choices settled by it (`docs/vfx.md`).
 - **2026-11-13 — a zone for a game's VFX, a shader app.** "une zone de
   créations … qui permettrai de comprendre et créer des vfx de jeux … il
   manque une app de shader à la suite". → M15, proposed: `docs/vfx.md`, its

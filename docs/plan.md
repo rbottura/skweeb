@@ -67,11 +67,12 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
+| M15a | generators in the GPU kit: `noise`, `gradient`, `shape`, each meeting what is under it; a run told its loop's length | `gpu/generators` | M | landed 2026-11-13 (`docs/vfx.md`) |
+| M15b | the shader app opens — filter's chain begun by a generator, every row its picture, a loop played; then c to g, `docs/vfx.md` | `shader/app` | M | ready: the author's "on peut suivre le plan", 2026-11-13 |
 | S9i | the players in cluster: the rig's puppet, the map's player — modules on `core/mount.js`, as the garden is | `scene/players` | S | ready: "devrait y être", the author, 2026-11-06 |
 | M14b | modifiers from another app's values: particles adding marks with a sprite of their own, filter's look | — | M | waits: its shape, worked out with the author |
 | M14c | two flowers crossed: a generation of two parents, RimWorld's genes | — | M | later, the author's word |
 | — | a game's effects planned: M15, `docs/vfx.md` | `docs/vfx` | — | landed 2026-11-13 |
-| M15 | effects: sources in the GPU kit, the shader app, a surface over a particle's life, an effect out to a game — seven bricks, a to g, in `docs/vfx.md` | `gpu/sources` first | L | waits: the author's read of the plan, and its place in the order |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
 | S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | first pass landed 2026-11-05, the proposal as written; the rest with the author's eye (`docs/scene.md`) |
 | S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | landed 2026-11-05 |
@@ -148,8 +149,6 @@ placed panel are L's. The side jobs touch neither and run any time.
 
 Each with what happens if nothing is said.
 
-- **M15, a game's effects** (`docs/vfx.md`, proposed 2026-11-13): its six
-  choices at its end, each with what is recommended; unread, it waits.
 - **The motion, case by case** (S9e): its first pass is the proposal as
   written (`docs/scene.md`); what the author sees in it, case by case — "on
   va travailler ça ensemble" — is its next pass.

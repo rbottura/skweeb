@@ -38,7 +38,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
 | `docs/workshop.md` | V, the vault's workshop: what is made of objects for every app — a palette, a set by hand, groups | before touching palettes, hand-made sets or groups |
 | `docs/bec.md` | M13, proposed: BEC_2025's scenarios in skweeb — its grid in the 3D app, its layers by format, the project one page | before any brick of M13 |
-| `docs/vfx.md` | M15, proposed: a game's effects — how one is made, the shader app (`apps/shader/`), a surface over a particle's life, an effect out to a game | before any brick of M15 |
+| `docs/vfx.md` | M15: a game's effects — how one is made, the generators in the GPU kit (M15a), the shader app (`apps/shader/`), a surface over a particle's life, an effect in the suite's game | before any brick of M15 |
 | `docs/inbox.md` | the author's ideas between bricks, not yet sorted | when the author has one, and at the end of a session |
 
 ## The one idea
@@ -139,7 +139,7 @@ node scripts/reach.mjs --since main     # what each change reaches, and why
 node scripts/check-compose.mjs
 node scripts/check-compose-export.mjs   # print scale: the PNG, the frames, the save
 node scripts/check-gpu.mjs              # the GPU kit, on this machine's GPU
-node scripts/check-filters.mjs          # filters from the stylise batch on, each against what it does
+node scripts/check-filters.mjs          # filters from the stylise batch on, each against what it does; the generators (M15a)
 node scripts/check-filter.mjs           # the filter app: a chain built, a loop played, no WebGPU
 node scripts/check-filter-save.mjs      # …and what it saves: replayed, reopened, placed in compose
 node scripts/check-look.mjs             # M5's link: a look made in filter, over a placement in compose

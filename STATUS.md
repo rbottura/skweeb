@@ -344,11 +344,11 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9i — the players in cluster** (`docs/plan.md`, `ready`): the rig's
-puppet and the map's player mounted in the scene as the garden is. Waiting
-on the author: the layers in use — what a frames zip, a drag, a live
-window as a layer should do next; and M15, a game's effects, proposed
-2026-11-13 (`docs/vfx.md`) — its read, then `gpu/sources`, its first brick.
+**M15b — the shader app opens** (`docs/vfx.md`, `shader/app`): its folder
+by the `skweeb-app` skill, one `noise` row drawn over a blank picture as
+fractals draws — on M15a's generators, landed 2026-11-13. Then S9i, the
+players in cluster, `ready`. Waiting on the author: the layers in use —
+what a frames zip, a drag, a live window as a layer should do next.
 
 ## Parked decisions
 

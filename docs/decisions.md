@@ -386,3 +386,14 @@ replay and a print all read it the same. Particles draws its layers itself,
 in its one drawing path, the ones behind between its ground and its
 particles as the overlay was, and says `layered`; core's layer box is the
 overlay's own, word for word, so an old save draws as its picture did.
+
+## Decided since, 2026-11-13
+
+**M15, a game's effects, taken up the day it was proposed** (`docs/vfx.md`).
+The author: "un objectif serai de composé des avatars, des maps, des objets
+et maintenant des vfx grace a la suite, une forme d'éditeur graphique et de
+composant de jeux et de jeu intégralement. les recommandations sont bonnes,
+on peut suivre le plan." So the game is the suite's own — the map's player —
+and no engine's language is owed; the app is `apps/shader/`, a chain and no
+graph, a particle wears the frames of a life, an effect is a page.
+*Generator*, not *source*: filter's input is one already.

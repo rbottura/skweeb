@@ -1,4 +1,4 @@
-# Effects — a game's VFX, made in skweeb (M15, proposed 2026-11-13)
+# Effects — a game's VFX, made in skweeb (M15, taken up 2026-11-13)
 
 The author, 2026-11-13: "une zone de créations qui s'intégrerai dans la
 suite skweeb qui permettrai de comprendre et créer des vfx de jeux ? je
@@ -7,7 +7,16 @@ encore bien comment créer des shaders, comment ils s'empilent ensuite pour
 être utilisé en jeu, est-ce qu'il se lie aussi avec des objets du jeu
 comme des particules etc, utilisent aussi ce qu'on a déjà en place".
 
-Proposed, nothing built. It is a plan and a lesson at once: each brick is
+And the plan read, the same day: "la suite contient déjà des apps comme rig,
+map, garden qui sont des morceaux encore à approfondir mais qui on des
+bases de comportement pour un jeu en ligne, issu des objets créer dans la
+suite. donc un objectif serai de composé des avatars, des maps, des objets
+et maintenant des vfx grace a la suite, une forme d'éditeur graphique et de
+composant de jeux et de jeu intégralement. les recommandations sont bonnes,
+on peut suivre le plan." So the game is the suite's own, and M15 was taken
+up the day it was proposed; M15a landed that day.
+
+It is a plan and a lesson at once: each brick is
 one idea of how a game's effect is made, in the order they are learnt, and
 leaves something a game can use that day. The roadmap's aim since
 2026-09-26 — "the suite is to make the assets of a small game" — is where
@@ -60,7 +69,7 @@ An engine's words for all this, to search by: *material*; *billboard*;
 
 | a game's effect | in skweeb today | missing |
 |---|---|---|
-| a surface | a pass of the GPU kit, `fx(uv)` in WGSL (`core/gpu/wgsl.js`): filter's twenty-nine, fractals' escape time | **sources** — every pass changes a picture, none but fractals' makes one |
+| a surface | a pass of the GPU kit, `fx(uv)` in WGSL (`core/gpu/wgsl.js`): filter's twenty-nine, fractals' escape time | **generators** — a pass that makes a picture: there since M15a |
 | its moves | `gradientmap` and `palette` colour; `threshold`; `erode` is a shape's, not a dissolve | noise, scroll, multiply, mask, warp, dissolve |
 | a carrier | particles, a function of slot and age; the 3D app's cloud and models | — |
 | carrier → surface | a particle keeps one sprite all its life (`images[floor(pick × n)]`) | **the frame of its age** |
@@ -75,10 +84,10 @@ is a look. What it has never had is a picture made from nothing, in time.
 
 ## The app — `apps/shader/`
 
-A surface from nothing: filter's chain, begun by a source.
+A surface from nothing: filter's chain, begun by a generator.
 
-- **A source is a filter that makes its picture** and says how it meets what
-  is under it — `blend`: replace, multiply, add, screen, mask. So a chain
+- **A generator is a filter that makes its picture** and says how it meets
+  what is under it — `blend`: replace, multiply, add, screen, mask. So a chain
   stays what the kit runs today, `[{ id, params }]` in order, and "two
   noises multiplied, masked by a disc, dissolved, coloured" is five rows —
   no graph of nodes. In the catalogue, a group of their own: filter's menu
@@ -86,7 +95,7 @@ A surface from nothing: filter's chain, begun by a source.
 - **Every row shows the picture as it stands there** — the chain cut at
   that row. That is the lesson: the grey noise, the noise moving, masked,
   eroded, in colour. A row clicked is seen large.
-- **In time, two ways**, the player's: a *loop*, which closes — a source
+- **In time, two ways**, the player's: a *loop*, which closes — a generator
   scrolls a whole number of its tiles in it, and its noise has a period; or
   a *life*, played once, frame 0 its birth and the last its death — what a
   particle wears. A `dissolve` runs its threshold between two values over
@@ -99,7 +108,7 @@ A surface from nothing: filter's chain, begun by a source.
   few chains to open — fire, smoke, energy, a dissolve — each a row of data.
 - **WebGPU only**, as filter and fractals: elsewhere its objects show as
   their saved renders (rule 7); the laptop's Intel wants Chrome's flags.
-- **Rule 5**: every source and filter written here from the technique,
+- **Rule 5**: every generator and filter written here from the technique,
   never from code — `source: 'skweeb'`, MIT. LYGIA and Shadertoy's
   unlicensed code stay out. Noise is `core/noise.js`'s, its twin in WGSL.
 
@@ -112,7 +121,7 @@ The link it leaves: **`shader → particles: a surface over a life`**.
 
 | | brick | branch | size | done when |
 |---|---|---|---|---|
-| M15a | **sources in the kit**: `noise` (seeded, with a period, octaves), `gradient` (along, round, about), `shape` (a disc, a ring, a star — a distance), each scrolled and blended | `gpu/sources` | M | `check-gpu`: a noise tile meets itself at its edges; scrolled, the loop's last frame leads to its first; a seed, a tile. Seen in filter that day |
+| M15a | **generators in the kit**: `noise` (seeded, with a period, octaves), `gradient` (along, round, about), `shape` (a disc, a ring, a star — a distance), each blended, the first two scrolled | `gpu/generators` | M | **landed 2026-11-13** — below |
 | M15b | **the app opens**: the chain, every row its picture, the loop played; the starters; the guide's first pages | `shader/app` | M | `check-shader`: fire from its starter, each row's picture the chain cut there |
 | M15c | **it saves**: a still, a loop; replayed, reopened, printed, placed in compose | `shader/save` | S | saved and replayed to the pixel, `?open=`, a print in tiles against the whole |
 | M15d | **a life, and the moves that want one**: `dissolve` (a threshold over the life, a soft edge, a hot rim), `warp` (what is under, read through a noise), `polar` (rings, vortices), `glow` (the bright spread and added) | `shader/life` | M | `check-filters`: each against what it does; a dissolve whole at birth, gone at death |
@@ -126,10 +135,6 @@ below.
 
 What each brick reads first, found while planning:
 
-- **a** — `Frame` has `tick` and `time`, not the loop's length: a source
-  that must come round needs its phase. Where it comes from — a field of
-  `Frame`, or `info` in `uniforms(values, info)` — is a's first question.
-  `core/noise.js` has no period; its WGSL twin needs one.
 - **b, c** — the `skweeb-app` skill; fractals, the one app that already
   draws over a blank picture through the kit (`{ filter, params }`).
 - **e** — particles take a *set* as sprites (`core/uses.js`); whether a
@@ -137,6 +142,35 @@ What each brick reads first, found while planning:
   `docs/object-model.md`'s, *Uses*. Particles stay Canvas 2D.
 - **f** — compose places in time already (a flipbook); a layer's start in
   an effect is S13's lanes, which wait on the author.
+
+## The generators — M15a, landed 2026-11-13
+
+`noise`, `gradient` and `shape`, in the catalogue (`core/gpu/filters/`,
+`generates: true`), so filter's add menu has them today: any picture as the
+source, *+ noise*, and it is replaced by a tile of noise; a second noise,
+its `variant` 1 and its blend *multiply*; a `shape`, its blend *mask*; a
+`gradientmap` to colour it. Over a loop, a scroll of 1 is one tile across in
+the loop's length, and the loop still closes.
+
+- **A grey at every pixel, and a blend** — `filters/meet.js`: replace,
+  multiply, mask, add, screen, and `amount`. *Generator* and not *source*,
+  this plan's first word: filter's source is the picture a chain runs over,
+  and a filter's `source` where its code came from.
+- **Nothing in pixels**: cells, repeats and sizes are counted across the
+  picture, in units of its shorter side — a print scale changes nothing,
+  and a window of a picture is its part of the whole (`check-filters`).
+- **A run is told its loop's length** — `run(…, { tick, frames })`, handed
+  on by filter, a look and a print's windows; `phaseOf(info)` is the tick
+  over it. What scrolls moves by whole tiles, or whole repeats, and comes
+  round; told no length, it holds still.
+- **Noise is `core/noise.js`'s `noiseTile2`** — Perlin's improved noise on
+  a lattice that wraps — and `tileNoise` its twin in WGSL; `noiseAt` is the
+  whole pass in JS. `tests/gpu-filters.mjs` holds the tile and the loop
+  without a GPU; `check-filters` the GPU's grey to the JS one, within 1 of
+  255 at every pixel. `TILE_NOISE` is exported for M15d's `warp`.
+- **Left for later**: a noise that boils in place (a third axis, looped), a
+  gradient's own colours, a shape drawn in the gamepad as the mask — a
+  picture from the vault in a chain needs a third texture, which no pass has.
 
 ## Not now
 
@@ -151,16 +185,17 @@ What each brick reads first, found while planning:
 - **What is behind, bent** — refraction, a shockwave: a pass that reads the
   layers under it, which no pass does today.
 
-## The author's to say
+## Settled, 2026-11-13
 
-Each with what is recommended, taken if nothing is said.
+The six choices this plan ended on, each as recommended — "les
+recommandations sont bonnes" (`docs/decisions.md`).
 
-1. **Its name** — `shader`, the author's word; or `surface`, what it makes.
-   *`apps/shader/`.*
-2. **A chain, not nodes.** *The chain.*
-3. **Frames of a life, not a shader per particle.** *Frames.*
-4. **What an effect is in the vault** — a compose page played once, nothing
-   new in the object model; or a type of its own. *A page.*
-5. **Where M15 sits on the board** — before M13c and d, after S9i?
-6. **The game's engine**, if there is one: it decides whether code ever
-   leaves — GLSL for Phaser 3, WGSL as it is for a WebGPU engine.
+1. **Its name**: `apps/shader/`, the author's word.
+2. **A chain, not nodes.**
+3. **Frames of a life, not a shader per particle.**
+4. **An effect is a compose page played once**: nothing new in the object
+   model.
+5. **M15 now**: a brick after the other, before S9i on the board.
+6. **The game's engine is the suite**: the map's player, a page that can
+   run the kit itself. So g comes before f, f waits for a game made
+   elsewhere, and no engine's language is owed.
