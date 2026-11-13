@@ -21,6 +21,10 @@
  * runner.js). What moves by a whole number of its periods in a loop ends
  * where it began. A still, or a run told no length, is at 0.
  *
+ * And its age, for what happens once: `ageOf(info)`, in [0, 1] — a *life*,
+ * which a run is told it is (`life`), is 0 at its first frame and 1 at its
+ * last, where a loop never reaches 1; told no life, the age is the phase.
+ *
  * Written for skweeb; the blends are every editor's.
  */
 
@@ -39,6 +43,13 @@ export const meetUniforms = v => [Math.max(0, BLENDS.indexOf(v.blend)), v.amount
 export function phaseOf(info) {
   const n = info && info.frames > 1 ? Math.floor(info.frames) : 0;
   return n ? ((((info.tick | 0) % n) + n) % n) / n : 0;
+}
+
+/** How old a run is, in [0, 1]: a life's first frame 0 and its last 1; a loop's phase otherwise. */
+export function ageOf(info) {
+  if (!info || !info.life) return phaseOf(info);
+  const n = info.frames > 1 ? Math.floor(info.frames) : 0;
+  return n ? Math.min(1, Math.max(0, (info.tick | 0) / (n - 1))) : 0;
 }
 
 /** WGSL: `meet(under, v, blend, amount)` — the picture under, the grey, how, how much. */

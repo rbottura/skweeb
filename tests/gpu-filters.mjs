@@ -141,9 +141,9 @@ ok('a gradient of three fills three of sixteen stops',
 ok('a 4×4 matrix is two bits a side', FILTERS.dither.passes[0].uniforms({ levels: 2, matrix: '4', size: 1, grey: false }, { scale: 1 })[1], 2);
 
 // ── What draws at random ─────────────────────────────────────────────────────
-ok('grain and glitch draw at random, and noise', ['grain', 'glitch', 'noise'].every(id => FILTERS[id].random === true), true);
+ok('grain and glitch draw at random, and noise, and a warp through one', ['grain', 'glitch', 'noise', 'warp'].every(id => FILTERS[id].random === true), true);
 ok('and nothing else in the catalogue does',
-  Object.values(FILTERS).filter(f => f.random).map(f => f.id).sort(), ['glitch', 'grain', 'noise']);
+  Object.values(FILTERS).filter(f => f.random).map(f => f.id).sort(), ['glitch', 'grain', 'noise', 'warp']);
 ok('a chain with one draws at random', drawsAtRandom([{ id: 'blur' }, { id: 'grain' }]), true);
 ok('switched off, it does not', drawsAtRandom([{ id: 'blur' }, { id: 'grain', on: false }]), false);
 ok('a chain without one does not', drawsAtRandom([{ id: 'blur' }, { id: 'halftone' }]), false);
@@ -182,6 +182,24 @@ ok('…a quarter of a loop is a quarter of a tile across, half a tile up', spots
 ok('…and the loop over, where it began', spots.every(([u, v], i) => near(noiseAt(u, v, 64, 64, nv, 7, 1), greys[i])), true);
 ok('…another seed another noise, another variant another', [8, 7].map((seed, k) =>
   spots.filter(([u, v], i) => Math.abs(noiseAt(u, v, 64, 64, { ...nv, variant: k }, seed) - greys[i]) > 0.02).length > 200), [true, true]);
+
+// ── An effect's moves: a life, and what runs over one (M15d, docs/vfx.md) ────
+const { ageOf } = await import('../core/gpu/filters/meet.js');
+const { thresholdOf } = await import('../core/gpu/filters/dissolve.js');
+const { windows } = await import('../core/gpu/window.js');
+ok('a life is 0 at its first frame and 1 at its last; half way, a half',
+  [ageOf({ life: true, tick: 0, frames: 9 }), ageOf({ life: true, tick: 8, frames: 9 }), ageOf({ life: true, tick: 4, frames: 9 })], [0, 1, 0.5]);
+ok('a loop\'s age is its phase, never 1; a still is at 0, life or not',
+  [ageOf({ tick: 8, frames: 9 }) < 1, ageOf({ tick: 9, frames: 9 }), ageOf({ life: true, tick: 3 }), ageOf(undefined)], [true, 0, 0, 0]);
+const dv = valuesFor(FILTERS.dissolve.params, { from: 0.2, to: 0.8 });
+ok('a dissolve\'s threshold runs from its birth to its death',
+  [0, 4, 8].map(tick => +thresholdOf(dv, { life: true, tick, frames: 9 }).toFixed(3)), [0.2, 0.5, 0.8]);
+ok('…eased: outCubic is past half way at half its life', thresholdOf({ ...dv, ease: 'outCubic' }, { life: true, tick: 4, frames: 9 }) > 0.5, true);
+ok('…a still holds at its birth; and it is the first number of the pass',
+  [thresholdOf(dv, { tick: 5 }), FILTERS.dissolve.passes[0].uniforms(dv, { life: true, tick: 8, frames: 9 })[0]], [0.2, 0.8]);
+ok('a warp and a polar read from anywhere: a print draws them whole', ['warp', 'polar'].map(id => windows([{ id }])), [false, false]);
+ok('a dissolve reads its own pixel; a glow spreads as its blur, three deviations',
+  [readsOf([{ id: 'dissolve' }]), reachOf([{ id: 'glow', params: { radius: 4 } }]), FILTERS.glow.passes[1].code === FILTERS.blur.passes[0].code], [0, 12, true]);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

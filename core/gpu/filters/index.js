@@ -68,10 +68,16 @@ import palette from './palette.js';
 import noise from './noise.js';
 import gradient from './gradient.js';
 import shape from './shape.js';
+// An effect's moves, the suite's own (M15d): what a surface is made of after its noise.
+import dissolve from './dissolve.js';
+import warp from './warp.js';
+import polar from './polar.js';
+import glow from './glow.js';
 
 /**
  * In the order the add menu lists them: tone and colour; blur and detail;
- * shape and edges; stylise; for game assets; then the generators.
+ * shape and edges; stylise; for game assets; the generators; then an
+ * effect's moves.
  */
 export const FILTERS = Object.freeze(Object.fromEntries([
   brightness, contrast, saturation, invert, sepia, duotone, gradientmap, threshold, posterize,
@@ -80,4 +86,5 @@ export const FILTERS = Object.freeze(Object.fromEntries([
   halftone, dots, dither, crt, vignette, grain, glitch,
   outline, shadow, palette,
   noise, gradient, shape,
+  dissolve, warp, polar, glow,
 ].map(f => [f.id, f])));
