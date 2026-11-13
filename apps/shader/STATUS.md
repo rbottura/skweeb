@@ -10,8 +10,8 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 - **M15a — generators in the kit**: landed 2026-11-13 (`core/gpu/filters/`).
 - **M15b — the app opens**: done 2026-11-13, this folder.
 - **M15c — it saves**: done 2026-11-13.
-- **M15d — a life, and the moves that want one**: next.
-- M15e the link to particles; M15g, then f.
+- **M15d — a life, and the moves that want one**: done 2026-11-13.
+- **M15e — the link to particles**: next. Then M15g, then f.
 
 ## Works now
 
@@ -26,7 +26,13 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 - **A loop played** (`params.js`: `frames`, `fps`, `seed`, core's format):
   a run is told its tick and the loop's length, so what scrolls comes round.
   Fire's six rows at 1080² play at the loop's 24 a second on the machine it was made on.
-- **Starters** (`starters.js`): fire, smoke, energy — each a row of data,
+- **A life** (`params.js`, `time`: a loop, or a life played once): the
+  player stops at the last frame, a run is told `life`, and a `dissolve`
+  runs birth to death over it — whole at frame 1, gone at the last. Saved,
+  its render says `loop: false`. The four moves are the kit's
+  (`core/gpu/filters/`: dissolve, warp, polar, glow; `check-filters`).
+- **Starters** (`starters.js`): fire, smoke, energy, and a burst
+  dissolving — a life, eight rows — each a row of data,
   opened in place of the chain and played. `tests/shader.mjs` holds each to
   the catalogue: every row a filter of it, every value one its schema keeps.
 - **It saves, and it replays** (`save.js`, `rebuild.js`; `check-shader-save`,
@@ -41,10 +47,10 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
   2160² in 81 tiles, no difference from the whole. A chain with a zoom
   blur reads from anywhere, and is printed whole.
 - **A window of the stack** (`stackDrawer`): Send to ▸, as every app.
-- **The guide** (`docs/guides/vfx.md`, five sections), read in the app.
+- **The guide** (`docs/guides/vfx.md`, six sections), read in the app.
 - **No WebGPU**: the page opens, says why, the chain can be built.
 - **A module** (`core/mount.js`): `mount(host)`, `unmount()`.
-- `node scripts/check-shader.mjs`, 16 checks; `tests/shader.mjs`.
+- `node scripts/check-shader.mjs`, 19 checks; `tests/shader.mjs`.
 
 ## Known
 
@@ -58,17 +64,21 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 - **Every row is run on every frame.** Fine at six rows; a long chain at a
   big format may want the rows drawn only when paused.
 - **Fire's dark is opaque black under its mask**, right for a layer that is
-  *added*; a clear edge by brightness is M15d's `dissolve`.
+  *added*; a `dissolve` held still (`at birth` = `at death`) clears it.
+- **A chain with a warp or a polar prints whole**, not in tiles: they read
+  from anywhere. Past a canvas's size such a print cannot be made.
+- **A glow over nothing** leaves a grey cast where its light is faint and
+  the picture clear — seen on the burst; its alpha wants another look.
 
 ## Next single step
 
-**M15d's first move — `dissolve`** (`shader/life`), in
-`core/gpu/filters/dissolve.js`: what is under kept where its brightness is
-over a threshold, the threshold run `from` → `to` over the loop on
-`phaseOf(info)` and `core/easing.js`, a soft edge, a hot rim of a colour.
-Held in `check-filters`: whole at the first frame, gone at the last. Then
-the *life* — a `time` enum in `params.js`, loop or life, the player's
-`loop: false` — and `warp`, `polar`, `glow`.
+**M15e — a life offered to particles** (`particles/life-frames`). Read
+first `docs/object-model.md`, *Uses*, and `core/uses.js`: decide whether
+particles take the shader's `sequence` as it is or a `set` of its frames
+(`docs/vfx.md`, *What each brick reads first*). Then the smallest step: in
+particles' draw, with a life chosen as sprites, a particle shows
+`frames[floor(age × n)]` instead of `images[floor(pick × n)]` — held in
+`check-particles`: at half its life, the middle frame.
 
 ## Parked
 

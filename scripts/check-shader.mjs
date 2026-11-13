@@ -8,7 +8,8 @@
  * starter is six rows, played; each row's picture is the chain cut there —
  * held against the viewer showing that row large — and every row changes
  * it; the last row's is the whole; a frame stepped to and back is the same
- * picture; a value typed into a row changes its picture; and with WebGPU
+ * picture; a value typed into a row changes its picture; a life is played
+ * once, its dissolve whole to gone; and with WebGPU
  * taken away the page still opens, says why, and the chain can be built.
  *
  * Needs a GPU, as check-gpu.mjs does. Not in the tests loop.
@@ -111,6 +112,23 @@ await page.typeInto(`${cards}[0].querySelector('.pp-num')`, '12');
 await page.until(`window.__diff(window.__row(0), window.__before) > 1`);
 c.ok('a value typed into a row changes its picture, and those under it', true,
   (await page.eval(`window.__diff(window.__row(0), window.__before)`)).toFixed(1));
+
+// ── 5b. A life: played once, a dissolve from birth to death (M15d) ──────────
+await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'a burst, dissolving')`);
+await page.until(`${cards}.length === 8 && ${say}.includes('frame 32 of 32')`, { timeout: 20000 });
+await wait(400);
+await settle();
+const ink = `(c => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0;
+  for (let i = 3; i < d.length; i += 4) if (d[i] > 8) n++; return n / (d.length / 4); })`;
+const end = await page.eval(`({ stage: ${ink}(window.__stage()), before: ${ink}(window.__row(5)), after: ${ink}(window.__row(6)),
+  playing: !!document.querySelector('.bar-fps')?.textContent, said: ${say} })`);
+c.ok('a life is played once and stops at its last frame', end.said.includes('frame 32 of 32'), end.said);
+c.ok('…where the dissolve has eaten it all — the row above it still whole', end.stage === 0 && end.after === 0 && end.before > 0.2, JSON.stringify(end));
+for (let i = 0; i < 5; i++) await key(',');
+await settle();
+const midway = await page.eval(`({ before: ${ink}(window.__row(5)), after: ${ink}(window.__row(6)), said: ${say} })`);
+c.ok('…part of the way, part eaten', midway.after > 0 && midway.after < midway.before, JSON.stringify(midway));
+await c.shot('3-a-life');
 
 // ── 6. No WebGPU: it opens, says why, the chain can be built ────────────────
 const stub = await page.beforeLoad(`Object.defineProperty(navigator, 'gpu', { value: undefined, configurable: true });`);
