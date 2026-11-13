@@ -69,11 +69,17 @@ export function bornSize(picture, p) {
 }
 
 /**
+ * Which of `n` sprites a particle wears: one all its life, by its `pick` —
+ * or, `wears` its age, each in turn: at half its life, the middle one (M15e).
+ */
+export const spriteAt = (n, p, wears) => Math.max(0, Math.min(n - 1, Math.floor((wears === 'age' ? p.t : p.pick) * n)));
+
+/**
  * Every particle, stacked by `order` and depth (`drawOrder`): the newest on top — the model gives
  * them oldest first — or, `under`, the newest behind, drawn newest first.
  * Redrawn whole every frame, so the order is simply the loop's; nothing
  * needs a composite operation. Each is a sprite of the set —
- * `images[floor(pick × n)]`
+ * `images[floor(pick × n)]`, or a loop's frame of its age (`spriteAt`)
  * — or a dot in the picture's colour. Its size runs from `bornSize` to that ×
  * `grow` over its life and its alpha from 1 to 0 when it fades, each along
  * its curve (core/easing.js); a sprite is turned by its `rot`.
@@ -88,7 +94,7 @@ export function bornSize(picture, p) {
  * @param {object[]} particles             from model.js `particlesAt`, oldest first
  * @param {object} picture                 the picture's values (params.js)
  * @param {number} scale                   canvas pixels per picture pixel
- * @param {?Array} [sprites]               a set's images (sprites.js), or none for dots
+ * @param {?Array} [sprites]               a set's images, or a loop's frames (sprites.js), or none for dots
  * @param {?string[]} [inks]                a palette's colours (core/palettes.js), or none:
  *                                          a dot in the picture's colour, a sprite in its own
  * @param {?(ctx) => void} [behind]         what stands behind the particles, over the ground: its layers set behind
@@ -126,7 +132,7 @@ export function drawParticles(ctx, particles, picture, scale, sprites = null, in
       ctx.fill();
       continue;
     }
-    const mark = sprites[Math.min(n - 1, Math.floor(p.pick * n))];
+    const mark = sprites[spriteAt(n, p, picture.wears)];
     const h = w * (mark.height / mark.width);
     const cos = Math.cos(p.rot || 0), sin = Math.sin(p.rot || 0);
     ctx.setTransform(cos, sin, -sin, cos, x, y);

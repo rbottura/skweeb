@@ -10,7 +10,8 @@
 
 const { particlesAt, prepare, motion, slot, duration, turned: turnedBy, MAX_ALIVE } = await import('../apps/particles/model.js');
 const { integrate, fieldOf, STEP, reach } = await import('../apps/particles/forces.js');
-const { drawOrder, bornSize } = await import('../apps/particles/draw.js');
+const { drawOrder, bornSize, spriteAt } = await import('../apps/particles/draw.js');
+const { flipFrames, FLIP_FRAMES } = await import('../core/sprites.js');
 const { overlayAsLayer } = await import('../apps/particles/params.js');
 const { layerBox, formatOf } = await import('../core/layers.js');
 /** G3's overlayBox, as a picture's values from before L13 have it now: their overlay their first layer, fitted by core (L13b). */
@@ -235,6 +236,21 @@ const deep3 = [{ z: 0, id: 'plane' }, { z: 800, id: 'far' }, { z: -400, id: 'nea
 ok('with depth, far first, near last', drawOrder(deep3, 'over', 800).map(d => d.p.id), ['far', 'plane', 'near']);
 ok('as far again as the focal is half the size, and half as near twice', drawOrder(deep3, 'over', 800).map(d => d.k), [0.5, 1, 2]);
 ok('behind the camera, left out', drawOrder([{ z: -900 }, { z: 0 }], 'over', 800).length, 1);
+
+// -- A loop's frames as sprites: the frame of its age (M15e) -------------------
+
+const worn = { t: 0.5, pick: 0.1 };
+ok('one each: its pick, whatever its age', [spriteAt(32, worn, 'pick'), spriteAt(32, { ...worn, t: 0.9 }, 'pick'), spriteAt(32, worn)], [3, 3, 3]);
+ok('by its age: at half its life, the middle frame', spriteAt(32, worn, 'age'), 16);
+ok('born on the first, dying on the last', [spriteAt(32, { t: 0 }, 'age'), spriteAt(32, { t: 0.999 }, 'age'), spriteAt(32, { t: 1 }, 'age')], [0, 31, 31]);
+ok('every frame worn as long as another', Array.from({ length: 8 }, (_, i) => spriteAt(4, { t: i / 8 }, 'age')), [0, 0, 1, 1, 2, 2, 3, 3]);
+const life = particlesAt({ seed: 3, mode: 'burst', count: 5, lifeSpread: 0, life: 2 }, 1);
+ok('a burst of one life, half through it: all on the middle frame', life.map(p => spriteAt(12, p, 'age')), [6, 6, 6, 6, 6]);
+ok('a short loop keeps every frame', flipFrames(32), Array.from({ length: 32 }, (_, i) => i));
+const kept = flipFrames(600);
+ok('a long one, so many evenly — its first and its last among them', [kept.length, kept[0], kept.at(-1)], [FLIP_FRAMES, 0, 599]);
+ok('…never one twice', new Set(kept).size, FLIP_FRAMES);
+ok('one frame, or none told: the first', [flipFrames(1), flipFrames(0)], [[0], [0]]);
 
 // -- A palette: a colour of its own for each particle --------------------------
 

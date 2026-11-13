@@ -142,7 +142,7 @@ async function boot(mine) {
   picture.on(key => {
     applyFrameEdit(picture, key);
     if (key === 'fps') remake();
-    else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'), { following: picture.following });
+    else if (key === 'sprites') spritesIn = chooseSprites(picture.get('sprites'), { following: picture.following, chosen: !picture.restoring });
     else if (key === 'palette') bring(key);
     else if (key === 'layers') {
       const done = layers.want(layersOf({ picture: picture.values }));
@@ -221,8 +221,9 @@ function remake() {
 /**
  * A set chosen as the sprites (sprites.js): dots until it is in, and dots if it will not come. A smart object
  * held, at its new version (L11): the sprites on screen kept until the new ones are in — no dots between.
+ * Chosen by hand, a loop is worn by age — its frames a flipbook (M15e) — and anything else one each.
  */
-async function chooseSprites(id, { following = false } = {}) {
+async function chooseSprites(id, { following = false, chosen = false } = {}) {
   const ask = ++asked;
   if (!following) {
     sprites = null;
@@ -236,7 +237,8 @@ async function chooseSprites(id, { following = false } = {}) {
     if (ask !== asked) return;
     sprites = set.images.length ? set.images : null;
     spritesTitle = set.title;
-    bar.announce(`${set.title}: ${set.images.length} sprite${set.images.length === 1 ? '' : 's'}`
+    if (chosen && !following) picture.set('wears', set.frames ? 'age' : 'pick');
+    bar.announce(`${set.title}: ${set.images.length} ${set.frames ? 'frame' : 'sprite'}${set.images.length === 1 ? '' : 's'}`
       + (set.missing ? ` — ${set.missing} would not load` : '') + (sprites ? '' : ' — drawing dots'));
   } catch (err) {
     if (ask !== asked) return;

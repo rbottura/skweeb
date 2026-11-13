@@ -84,6 +84,14 @@ c.ok(`replayed, frame ${at + 1} is the saved picture to the pixel, the same twic
 c.ok('the loop closes: the frame after the last is the first', again.closes && again.length === 48 && again.fps === 24);
 c.ok('at scale 2 it is drawn again, twice the pixels', again.redraws && again.twice.join() === '2160,2160', again.twice.join(' × '));
 
+// M15e's link, shader → particles: its frames as sprites, in time (core/sprites.js; worn, check-particles-life).
+const worn = await page.eval(`import('/core/sprites.js').then(async ({ loadSprites }) => {
+  const s = await loadSprites(${JSON.stringify(loopId)});
+  const px = i => { const x = new OffscreenCanvas(64, 64).getContext('2d'); x.drawImage(s.images[i], 0, 0, 64, 64); return x.getImageData(0, 0, 64, 64).data; };
+  const a = px(0), b = px(24); let apart = 0; for (let i = 0; i < a.length; i++) apart = Math.max(apart, Math.abs(a[i] - b[i]));
+  return { n: s.images.length, frames: !!s.frames, side: s.images[0].width, apart }; })`);
+c.ok('its frames as particles\' sprites: all 48, in time, at a sprite\'s size', worn.n === 48 && worn.frames && worn.side === 512 && worn.apart > 0, JSON.stringify(worn));
+
 // ── 2. Placed, reopened ─────────────────────────────────────────────────────
 await c.go(c.base + '/apps/compose/?place=' + loopId);
 await page.until(`${say}.includes(' on the page') || ${say}.includes('could not')`, { timeout: 60000 });
