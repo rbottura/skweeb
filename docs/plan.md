@@ -68,7 +68,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
 | M15a | generators in the GPU kit: `noise`, `gradient`, `shape`, each meeting what is under it; a run told its loop's length | `gpu/generators` | M | landed 2026-11-13 (`docs/vfx.md`) |
-| M15b | the shader app opens — filter's chain begun by a generator, every row its picture, a loop played; then c to g, `docs/vfx.md` | `shader/app` | M | ready: the author's "on peut suivre le plan", 2026-11-13 |
+| M15b | the shader app opens — filter's chain begun by a generator, every row its picture, a loop played; starters, the guide's first pages | `shader/app` | M | landed 2026-11-13 (`apps/shader/STATUS.md`) |
+| M15c | the shader app saves — a still, a loop; replayed, reopened, printed, placed in compose; then d to g, `docs/vfx.md` | `shader/save` | S | ready: the author's "on peut suivre le plan", 2026-11-13 |
 | S9i | the players in cluster: the rig's puppet, the map's player — modules on `core/mount.js`, as the garden is | `scene/players` | S | ready: "devrait y être", the author, 2026-11-06 |
 | M14b | modifiers from another app's values: particles adding marks with a sprite of their own, filter's look | — | M | waits: its shape, worked out with the author |
 | M14c | two flowers crossed: a generation of two parents, RimWorld's genes | — | M | later, the author's word |
