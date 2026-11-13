@@ -90,8 +90,14 @@ M5's app: any picture or loop through a chain of GPU filters, on the kit in
   under it by its blend (`core/gpu/filters/meet.js`). A run is told its
   loop's length now (`frames`), so a noise scrolled over a loop comes
   round with it; over a still it holds still. `check-filters` holds them.
-- **Thirty-two filters**, in the menu by group — tone and colour; blur and
-  detail; shape and edges; stylise; for game assets; the generators. Written here: brightness,
+- **An effect's moves** (M15d, 2026-11-13; `docs/vfx.md`): `dissolve` — a
+  threshold over a run's age, a soft edge, a hot rim; `warp` — what is
+  under read through a noise; `polar` — wound round a point; `glow` — the
+  bright spread and added. A run may be told it is a *life* (`life`).
+  Warp and polar read from anywhere, so a chain with one prints whole.
+- **Thirty-six filters**, in the menu by group — tone and colour; blur and
+  detail; shape and edges; stylise; for game assets; the generators; an
+  effect's moves. Written here: brightness,
   contrast, gaussian blur, pixelate, outline, drop shadow, palette lock. From p5.FIP (MIT, its whole licence in
   `core/gpu/filters/LICENSE-p5.FIP.txt`): saturation, invert, sepia, duotone,
   threshold, posterize — each file names its source, licence and copyright

@@ -79,7 +79,35 @@ at any size rather than stretched, and printed at a sheet's size from the
 vault it opens back here, row for row; compose places it on a page, where
 its blend is chosen — *add* for a fire.
 
+## 6. A life, and the four moves that make an effect
+
+A loop is for what lasts — a torch, a river. An explosion happens **once**:
+in the *Time* drawer, *a life, once* plays the frames from a birth to a
+death and stops. Four more rows are made for it:
+
+- **dissolve** — the picture eaten away from its dark parts up. A pixel
+  stays while it is brighter than a threshold, and the threshold climbs
+  from *at birth* to *at death* over the life: holes open in the noise and
+  grow until nothing is left. *Hot rim* colours the edge being eaten — a
+  burning edge. This one row is most of what makes fire look like fire.
+- **warp** — the picture read through a noise, every pixel taking its
+  colour from a little way off. Scrolled, what is under seems to flow: the
+  difference between a noise sliding and a flame licking.
+- **polar** — the picture wound round a point: its width becomes the way
+  round and its height the way out. A noise scrolling down becomes rings
+  leaving a centre; *twist* makes it a vortex. Shockwaves, portals, spells.
+- **glow** — what is bright, spread and added back as light: a core that
+  burns the eye.
+
+Open *a burst, dissolving* and step through it with **,** and **.** — then
+look at the dissolve row's picture against the row above it: the same
+surface, before and after the age has eaten it.
+
+Why the threshold matters: it *is* the age. Drawn once at every age, the
+frames are a flipbook — and a particle that shows the frame of its own age
+dissolves on its own clock, each one a little out of step with the others.
+
 ## Next
 
-A *life*, played once, with the dissolve that erodes a flame as it ages;
-then particles wearing it, each showing the frame of its age.
+Particles wearing a life, each showing the frame of its age; then an effect
+of several layers, played in the suite's own game on a click.
