@@ -70,8 +70,16 @@ wants: a loop of 48 frames it can play for ever.
 A noise is drawn from the **seed**: the same seed, the same surface, on any
 machine and at any size. Another seed is another fire.
 
+## 5. Keeping it
+
+**S** saves what is on screen into the vault: a loop as a loop, one frame
+as a still — with its recipe, the chain and the seed, so it is drawn again
+at any size rather than stretched, and printed at a sheet's size from the
+*Export* drawer. Saved again, it is the same object's next state. From the
+vault it opens back here, row for row; compose places it on a page, where
+its blend is chosen — *add* for a fire.
+
 ## Next
 
-Saving a surface — a still, a loop, a sheet a game loads — comes with the
-next brick; then a *life*, played once, with the dissolve that erodes a
-flame as it ages; then particles wearing it.
+A *life*, played once, with the dissolve that erodes a flame as it ages;
+then particles wearing it, each showing the frame of its age.
