@@ -30,6 +30,10 @@ day before that became bricks done went with them.
 
 ## Sorted
 
+- **2026-11-13 — a zone for a game's VFX, a shader app.** "une zone de
+  créations … qui permettrai de comprendre et créer des vfx de jeux … il
+  manque une app de shader à la suite". → M15, proposed: `docs/vfx.md`, its
+  row on the board, waiting on the author's read.
 - **2026-11-12 — the stack fixed, an overlay in every app.** "je souhaiterais
   corriger le système de stack et pouvoir bénéficier de l'option d'overlay sur
   toutes les apps facilement … dans la section stack comme une section à part

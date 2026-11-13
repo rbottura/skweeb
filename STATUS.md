@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-12_
+_last touched: 2026-11-13_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -347,7 +347,8 @@ compares two pages' canvases measures, never demands the pixel.
 **S9i — the players in cluster** (`docs/plan.md`, `ready`): the rig's
 puppet and the map's player mounted in the scene as the garden is. Waiting
 on the author: the layers in use — what a frames zip, a drag, a live
-window as a layer should do next.
+window as a layer should do next; and M15, a game's effects, proposed
+2026-11-13 (`docs/vfx.md`) — its read, then `gpu/sources`, its first brick.
 
 ## Parked decisions
 

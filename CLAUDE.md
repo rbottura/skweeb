@@ -38,6 +38,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `docs/migration.md` | what the ancestors measured, and what a port must know | before porting |
 | `docs/workshop.md` | V, the vault's workshop: what is made of objects for every app — a palette, a set by hand, groups | before touching palettes, hand-made sets or groups |
 | `docs/bec.md` | M13, proposed: BEC_2025's scenarios in skweeb — its grid in the 3D app, its layers by format, the project one page | before any brick of M13 |
+| `docs/vfx.md` | M15, proposed: a game's effects — how one is made, the shader app (`apps/shader/`), a surface over a particle's life, an effect out to a game | before any brick of M15 |
 | `docs/inbox.md` | the author's ideas between bricks, not yet sorted | when the author has one, and at the end of a session |
 
 ## The one idea
