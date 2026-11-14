@@ -3,7 +3,9 @@ _last touched: 2026-11-14_
 
 M15's app: a surface from nothing — filter's chain, begun by a generator, on
 the kit in `core/gpu/`. The plan, the bricks and what was settled are in
-`docs/vfx.md`; the guide read in the app is `docs/guides/vfx.md`.
+`docs/vfx.md`; the guide read in the app is `docs/guides/vfx.md`; how a
+filter or a generator is written, and where a feature goes, is
+`docs/shader-code.md` (2026-11-14, the author's ask).
 
 ## The bricks
 

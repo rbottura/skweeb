@@ -73,7 +73,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S9i | the players in cluster: the rig's puppet, the map's player — modules on `core/mount.js`, as the garden is | `scene/players` | S | ready: "devrait y être", the author, 2026-11-06 |
 | M14b | modifiers from another app's values: particles adding marks with a sprite of their own, filter's look | — | M | waits: its shape, worked out with the author |
 | M14c | two flowers crossed: a generation of two parents, RimWorld's genes | — | M | later, the author's word |
-| — | a game's effects planned: M15, `docs/vfx.md` | `docs/vfx` | — | landed 2026-11-13 |
+| — | a game's effects planned: M15, `docs/vfx.md`; writing a shader, the code side: `docs/shader-code.md` | `docs/vfx`, `docs/shader-code` | — | landed 2026-11-13; 2026-11-14 |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
 | S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | first pass landed 2026-11-05, the proposal as written; the rest with the author's eye (`docs/scene.md`) |
 | S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | landed 2026-11-05 |
