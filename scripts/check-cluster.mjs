@@ -33,7 +33,7 @@ import { startCheck, countHeld } from './check-kit.mjs';
 
 /** The strip's apps, in its order, and what shows each has booted — as check-mount has them. */
 const APPS = [
-  ['vault', 'footer.bar'], ['grid', '.pp-row'], ['ckt', '.pp-row'], ['compose', '.pp-row'], ['filter', '.pp-row'],
+  ['vault', 'footer.bar'], ['grid', '.pp-row'], ['ckt', '.pp-row'], ['compose', '.pp-row'], ['filter', '.pp-row'], ['shader', '.pp-row'],
   ['fractals', '.pp-row'], ['particles', '.pp-row'], ['map', '.pp-row'], ['garden', '.pp-row'], ['rig', '.pp-row'], ['3d', '.pp-row'],
 ];
 const BOOTED = Object.fromEntries(APPS);

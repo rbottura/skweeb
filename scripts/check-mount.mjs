@@ -79,6 +79,8 @@ const APPS = [
   { name: 'map', own: ['KeyQ'], plays: false, saves: true },
   { name: 'filter', own: [], plays: false, saves: true, prepare: A_STILL,
     ready: `/filters on|no filters yet/.test(document.querySelector('.bar-say')?.textContent || '')` },
+  { name: 'shader', own: [], plays: false, saves: true,
+    ready: `/of [0-9]+ rows on/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: 'fractals', own: [], plays: false, saves: true,
     ready: `/iterations/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: '3d', own: ['KeyQ'], plays: false, saves: true,

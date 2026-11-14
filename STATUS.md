@@ -16,7 +16,7 @@ sorts them.
   from nothing — filter's chain begun by a generator, every row its picture,
   a loop or a life played once, dissolved; saved, replayed, printed. Worn by
   particles, a loop's frames by a particle's age (M15e); played once at a
-  thing's cell in the map's player, an event (M15g).
+  thing's cell in the map's player, an event (M15g). In cluster's strip.
 - **An object's layers, in every app** (L13a, 2026-11-12, `core/layers.js`):
   its Stack section first — "+ overlay…", a vault picture in front or behind,
   fitted to the format, composed as particles' overlay — kept state by state,
