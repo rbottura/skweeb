@@ -1,5 +1,5 @@
 # STATUS — shader
-_last touched: 2026-11-13_
+_last touched: 2026-11-14_
 
 M15's app: a surface from nothing — filter's chain, begun by a generator, on
 the kit in `core/gpu/`. The plan, the bricks and what was settled are in
@@ -56,15 +56,20 @@ the kit in `core/gpu/`. The plan, the bricks and what was settled are in
 - **A module** (`core/mount.js`): `mount(host)`, `unmount()`.
 - `node scripts/check-shader.mjs`, 19 checks; `tests/shader.mjs`.
 
+- **In cluster** (2026-11-14, the author's ask: "tu peux rendre shader
+  accessible dans le cluster ?"): a row in the scene's apps
+  (`apps/cluster/main.js`), in the strip between filter and fractals;
+  mounted, taken out with nothing left and mounted again in `check-mount`
+  (20 checks), twice round in `check-cluster`. Its guide goes with it:
+  `core/Guide.js` `dispose()`, its sheet and its ear for Escape.
+
 ## Known
 
 - **Nothing leaves to disk yet**: no PNG, no frames zip, no sprite sheet —
   a life's sheet is particles', wearing it (M15e).
 - **No layers** (L13, `core/layers.js`), so not in `check-layers`' list.
-- **Not in cluster's strip**, nor in `check-mount`'s or `check-print`'s
-  lists — a side job: one row in each, and `apps/cluster/main.js`.
-- **A guide opened leaves its Escape listener on the document** at an
-  unmount — `core/Guide.js` has no way out yet; the puppet's does the same.
+- **Not in `check-print`'s list**: its print in tiles is
+  `check-shader-save`'s own.
 - **Every row is run on every frame.** Fine at six rows; a long chain at a
   big format may want the rows drawn only when paused.
 - **Fire's dark is opaque black under its mask**, right for a layer that is

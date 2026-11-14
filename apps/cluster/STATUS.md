@@ -1,5 +1,5 @@
 # STATUS — cluster, the scene
-_last touched: 2026-11-05_
+_last touched: 2026-11-14_
 
 S9c on the board of `docs/plan.md`: M12's scene (`docs/scene.md`), the
 apps round one canvas. The name is the author's, "pour l'instant"
@@ -77,8 +77,8 @@ app still opens alone on its own page; the scene is one more host.
   stays; the tab's underline one, sliding; a panel shown by its tab
   fading in; the player's strip always there.
 - **One app at a time, each through its module** (`main.js`): a strip on
-  the left names the suite's apps — the vault, grid, ckt, compose, filter,
-  fractals, particles, map, the rig, the 3D app — and a click on one takes
+  the left names the suite's apps — the vault, grid, ckt, compose, filter, shader
+  (2026-11-14), fractals, particles, map, the garden, the rig, the 3D app — and a click on one takes
   the app there out, with everything it held, and mounts that one in its
   place (`mount(host)`, `unmount()`, `core/mount.js`). The vault first: the
   app open when nothing else is. The gamepad is a link to its own page: it
