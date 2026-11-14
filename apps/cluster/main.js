@@ -66,6 +66,7 @@ const APPS = {
   ckt:       () => import('../ckt/main.js'),
   compose:   () => import('../compose/main.js'),
   filter:    () => import('../filter/main.js'),
+  shader:    () => import('../shader/main.js'),
   fractals:  () => import('../fractals/main.js'),
   particles: () => import('../particles/main.js'),
   map:       () => import('../map/main.js'),

@@ -96,7 +96,14 @@ export class Guide {
     this.root.append(card);
     document.body.append(this.root);
     this.root.addEventListener('click', e => { if (e.target === this.root) this.hide(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && this.isOpen) this.hide(); });
+    this._onKey = e => { if (e.key === 'Escape' && this.isOpen) this.hide(); };
+    document.addEventListener('keydown', this._onKey);
+  }
+
+  /** Taken away with its app (core/mount.js): its sheet out of the page, its ear for Escape let go of. */
+  dispose() {
+    document.removeEventListener('keydown', this._onKey);
+    this.root.remove();
   }
 
   get isOpen() { return !this.root.hidden; }

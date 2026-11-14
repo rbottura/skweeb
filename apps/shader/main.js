@@ -80,7 +80,7 @@ async function start(host, mine) {
     onState: () => { if (transport) transport.state(); if (!clock.playing && bar) bar.rate(null); },
   });
   mine.hold(() => clock.dispose());
-  mine.hold(() => { if (guide) guide.root.remove(); });
+  mine.hold(() => { if (guide) guide.dispose(); });
   try { await boot(mine); } catch (err) { if (bar) bar.announce('failed to boot: ' + err.message); throw err; }
 }
 
