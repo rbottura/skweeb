@@ -305,5 +305,13 @@ version('skw_1_a');
 ok('a recipe arriving holding one hears it too', said.map(s => s[2]), [false, false, true]);
 delete globalThis.document;
 
+// ── A number as its box shows it (core/numbox.js, 2026-11-15) ──────────────
+// Short to read: to its step's decimals, or four digits that count with no step; the value itself untouched.
+const { short } = await import('../core/numbox.js');
+ok('to its step\'s decimals', [short(0.35, { step: 0.05 }), short(12.5, { step: 0.5 }), short(7, { step: 1 })], ['0.35', '12.5', '7']);
+ok('no step: four digits that count', [short(-0.743643887037151, { step: 'any' }), short(12.3456), short(1234.5678), short(98765.4321)],
+  ['-0.7436', '12.35', '1235', '98765']);
+ok('…float noise gone, a tiny one still not 0', [short(0.30000000000000004), short(1.23456e-7), short(0)], ['0.3', '1.235e-7', '0']);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

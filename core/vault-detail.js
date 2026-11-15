@@ -96,7 +96,8 @@ export function paintDetail(body, o, urls, hooks) {
 
   body.append(el('div', 'vp-section', o.recipe ? 'Recipe' : 'No recipe'));
   if (o.recipe) {
-    body.append(el('pre', 'vp-json', JSON.stringify(o.recipe, null, 1)));
+    // Read, not kept: a float's last digits are noise here, so six that count (2026-11-15). The file keeps them all.
+    body.append(el('pre', 'vp-json', JSON.stringify(o.recipe, (k, v) => (typeof v === 'number' && !Number.isInteger(v) ? Number(v.toPrecision(6)) : v), 1)));
   } else if (cuts.some(c => c.recipe)) {
     body.append(el('div', 'vp-sub vp-leaf',
       'Its recipe named an object that was deleted, so it is its picture now. '

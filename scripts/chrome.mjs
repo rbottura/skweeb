@@ -238,6 +238,12 @@ async function attach(wsUrl, { page: isPage = true } = {}) {
       await sleep(250);                 // a repaint waits for the next frame
     },
 
+    /** The wheel turned over a point, as a person scrolls: `dy` CSS pixels, down when positive. */
+    async wheel([x, y], dy = 100) {
+      await send('Input.dispatchMouseEvent', { type: 'mouseWheel', x, y, deltaX: 0, deltaY: dy });
+      await sleep(250);
+    },
+
     /** Type into a field as a person would: set it, then fire what its widget listens for. */
     typeInto(element, value, event = 'change') {
       return page.eval(`(() => { const el = ${element}; if (!el) return false;

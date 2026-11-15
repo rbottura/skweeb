@@ -6,6 +6,8 @@
  * ParamPanel's.
  */
 
+import { places } from './params.js';
+
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
@@ -19,6 +21,11 @@ const el = (tag, cls, text) => {
  * A number the param refuses or clamps to what it already was changes
  * nothing, so nothing syncs the box — it puts the real value back itself, or
  * it would go on showing -50 against a width of 1.
+ *
+ * The wheel scrolls the panel, never the value under it: Chrome steps a
+ * focused number box by the wheel, so a box clicked once and then scrolled
+ * over moved (the author, 2026-11-15). The wheel takes the focus away first —
+ * what was typed is kept, as a click elsewhere keeps it — and scrolls on.
  */
 export function numberBox(spec, value, set, current) {
   const box = el('input', 'pp-num');
@@ -26,14 +33,28 @@ export function numberBox(spec, value, set, current) {
   if (spec.min != null) box.min = spec.min;
   if (spec.max != null) box.max = spec.max;
   box.step = spec.step ?? 1;
-  box.value = value;
+  box.value = short(value, spec);
   box.addEventListener('change', () => {
     const v = parseFloat(box.value);
-    if (!Number.isFinite(v) || !set(v)) box.value = current();
+    if (!Number.isFinite(v) || !set(v)) box.value = short(current(), spec);
   });
+  box.addEventListener('wheel', () => { if (document.activeElement === box) box.blur(); }, { passive: true });
   scrubbable(box, spec, set, current);
   paintFill(box, spec, value);
   return box;
+}
+
+/**
+ * A number as its box shows it, short (the author, 2026-11-15: "des valeurs
+ * avec des floats … qui devraient être trunc plus court"): to its step's
+ * decimals — a step of 0.05, two — or, with no step, four digits that count
+ * and never fewer than its whole part: 0.7436, 12.35, 1235; a tiny one in
+ * four digits, 1.234e-7. The value kept is every digit: only the box is short.
+ */
+export function short(v, spec = {}) {
+  if (typeof v !== 'number' || !Number.isFinite(v) || Number.isInteger(v)) return String(v);
+  const d = typeof spec.step === 'number' && spec.step > 0 ? places(spec.step) : 3 - Math.floor(Math.log10(Math.abs(v)));
+  return String(d > 6 ? Number(v.toPrecision(4)) : Number(v.toFixed(Math.max(0, d))));
 }
 
 /** Where a value sits in its range, a fill behind its box: from the left, or from zero when the range holds it. */
