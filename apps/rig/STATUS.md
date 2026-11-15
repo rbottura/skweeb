@@ -1,5 +1,5 @@
 # STATUS — rig
-_last touched: 2026-11-04_
+_last touched: 2026-11-15_
 
 M9's app (`docs/roadmap.md`, M9): a drawing made of marks, rigged at its
 marks. Its strokes are its bones; each stamp rides its own stroke's and
@@ -14,7 +14,12 @@ The author's ask, from the inbox: a VTuber avatar — a slug's bust drawn in
 the gamepad, its body a tube of stamps, two eyestalks — wearing the
 author's own eyes from the camera, moved a little by the head, shown in
 OBS. M9's *later*, "the gamepad as a puppeteer", with the face as one.
-`/apps/rig/puppet/?drawing=<id>`; `&obs`, the avatar alone. Its bricks:
+`/apps/rig/puppet/?drawing=<id>`; `&obs`, the avatar alone. A module since
+S9i (2026-11-15, `check-cluster`): in cluster's strip as `puppet`, the
+camera asked for only by "camera" — at the viewer's head or in its drawer,
+MediaPipe with it — never by passing through the strip (the author's pick);
+taken out, the camera, MediaPipe, the vault's news and its guide let go of;
+the address for OBS its own page's, in a scene too. Its bricks:
 **(1)** the eyes — done 2026-10-21; **(2)** in OBS — done 2026-10-21;
 **(3)** moved by the head, the eyes trembling less — done 2026-10-22;
 **(4)** the mouth on the face, and the rig's guides over the puppet —

@@ -71,7 +71,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M15a | generators in the GPU kit: `noise`, `gradient`, `shape`, each meeting what is under it; a run told its loop's length | `gpu/generators` | M | landed 2026-11-13 (`docs/vfx.md`) |
 | M15b to e, g | the shader app — filter's chain begun by a generator, every row its picture, a loop played; starters, the guide (b); saved as a still or a loop, replayed, reopened, printed, placed in compose (c); a life played once, and `dissolve`, `warp`, `polar`, `glow` in the kit (d); the link, `shader → particles: a surface over a life` — a loop's frames as sprites, a particle showing the frame of its age (e); an effect in the suite's game — a thing's event plays an object once at its cell (g) | `shader/app`, `shader/save`, `shader/life`, `particles/life-frames`, `map/effects` | M | landed 2026-11-13, all five (`apps/shader/STATUS.md`); in cluster's strip, 2026-11-14 (`scene/shader`) |
 | M15f | an effect out to a game made elsewhere: its layers — each its sheet, its blend, its start — and one manifest, Phaser 3 playing it, `docs/vfx.md` | `export/effect` | M | waits: a game made elsewhere to ask for it (`docs/vfx.md`, *Settled* 6) |
-| S9i | the players in cluster: the rig's puppet, the map's player — modules on `core/mount.js`, as the garden is | `scene/players` | S | ready: "devrait y être", the author, 2026-11-06 |
+| S9i | the players in cluster: the rig's puppet, the map's player — modules on `core/mount.js`, as the garden is | `scene/players` | S | landed 2026-11-15; the puppet's camera at a click there, the author's pick |
 | M14b | modifiers from another app's values: particles adding marks with a sprite of their own, filter's look | — | M | waits: its shape, worked out with the author |
 | M14c | two flowers crossed: a generation of two parents, RimWorld's genes | — | M | later, the author's word |
 | — | a game's effects planned: M15, `docs/vfx.md`; writing a shader, the code side: `docs/shader-code.md` | `docs/vfx`, `docs/shader-code` | — | landed 2026-11-13; 2026-11-14 |
@@ -159,10 +159,8 @@ Each with what happens if nothing is said.
   Effects' timeline, as the gamepad's clips. Its shape worked out with the
   author before it is a branch.
 
-- **The players in cluster** (S9a): answered 2026-11-06 — the puppet "pas
-  encore présent dans le cluster mais devrait y être" — S9i, `ready`. Its
-  care: mounted, the puppet turns the camera on in the scene, and its
-  address, rewritten every change, is the scene's.
+- **The players in cluster** (S9a): "devrait y être", 2026-11-06; landed as S9i
+  on 2026-11-15, the puppet's camera at a click there — the author's pick.
 - **Modifiers from another app** (M14b): "il faudra qu'on réfléchisse à
   comment on peut créer un objet qui serait un modificateur de recette en
   captant un lot de paramètres d'une de ces apps comme filter ou particules
