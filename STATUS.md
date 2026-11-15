@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-13_
+_last touched: 2026-11-15_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -10,8 +10,9 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-09 to -13: BEC 2027's graphic system (track G), a game's effects (M15)
+### Newest — 2026-11-09 to -15: BEC 2027's graphic system (track G), a game's effects (M15)
 
+- **Numbers short in their boxes**, the wheel stepping none (C13, 2026-11-15).
 - **The shader app** (M15, `apps/shader/STATUS.md`, `docs/vfx.md`): a surface
   from nothing — filter's chain begun by a generator, every row its picture,
   a loop or a life played once, dissolved; saved, replayed, printed. Worn by
@@ -37,13 +38,14 @@ sorts them.
   of modifiers, saved as a still, its source its parent; on bare earth, a
   flower of the set in hand. Ctrl S keeps the garden, a map's state.
 - **cluster** (`apps/cluster/STATUS.md`): the apps in one page one at a
-  time, through their modules, laid as the bench is — a strip, the side,
-  the viewer in one place, the properties one panel, the app's panels a tab
-  each (S9d); at a switch its boxes still, what is in them going and coming
-  (S9e's first pass). The side's views: the vault — the app's own first, a
-  card dragged onto an object field (`core/vault-drag.js`), a set in its
-  folder (S9g) — the keys, the history (S9f). The app in the address; back
-  as it was left (`core/mount.js` `keep`); links mounted in place.
+  time, through their modules — the map's player and the rig's puppet too
+  since S9i, its camera at a click — laid as the bench is: a strip, the
+  side, the viewer in one place, the properties one panel, the app's panels
+  a tab each; at a switch its boxes still (S9e's first pass). The side's
+  views: the vault — the app's own first, a card dragged onto a field, its
+  wall with the viewer moved by hand, its pictures sized with it (C13) — the
+  keys, the history. The app in the address; back as it was left
+  (`core/mount.js` `keep`); links mounted in place.
 - **The vault app's viewer** (S9h): an object at its ink's size, never
   stretched; its player's controls; seen closer — wheel, drag, double click
   (`core/zoom.js`); every viewer's picture fitted with an even margin.
@@ -345,10 +347,8 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-**S9i — the players in cluster** (`scene/players`, `ready`): the rig's
-puppet and the map's player as modules on `core/mount.js`, as the garden is.
-M15 is in but f, waiting for a game made elsewhere (`apps/shader/STATUS.md`).
-Waiting on the author: the layers in use — a frames zip, a drag, a live window.
+No row of the board is `ready`: a side job — C12, check-frames' stills, the
+smallest — or one the author unblocks: the gabarit's fields (M13c), S9e's cases.
 
 ## Parked decisions
 

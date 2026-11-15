@@ -34,7 +34,8 @@ import { startCheck, countHeld } from './check-kit.mjs';
 /** The strip's apps, in its order, and what shows each has booted — as check-mount has them. */
 const APPS = [
   ['vault', 'footer.bar'], ['grid', '.pp-row'], ['ckt', '.pp-row'], ['compose', '.pp-row'], ['filter', '.pp-row'], ['shader', '.pp-row'],
-  ['fractals', '.pp-row'], ['particles', '.pp-row'], ['map', '.pp-row'], ['garden', '.pp-row'], ['rig', '.pp-row'], ['3d', '.pp-row'],
+  ['fractals', '.pp-row'], ['particles', '.pp-row'], ['map', '.pp-row'], ['play', 'footer.bar'], ['garden', '.pp-row'], ['rig', '.pp-row'],
+  ['puppet', '.pp-row'], ['3d', '.pp-row'],
 ];
 const BOOTED = Object.fromEntries(APPS);
 
@@ -230,7 +231,8 @@ const numberNow = key => page.eval(`import('/core/param-rows.js').then(({ rowPar
   return row ? rowParams(row).params.get('${key}') : null;
 })`);
 const lost = [];
-for (const [name] of APPS.slice(1)) {
+for (const [name, shows] of APPS.slice(1)) {
+  if (shows === 'footer.bar') continue;      // no panel, no number: the map's player keeps the map it played (below)
   await open(name);
   const moved = await moveANumber(name);
   if (!moved) { lost.push(`${name}: no number to move`); continue; }
@@ -241,6 +243,42 @@ for (const [name] of APPS.slice(1)) {
   if (back !== moved.value) lost.push(`${name}: ${moved.key} ${moved.was} → ${moved.value}, back as ${back}`);
 }
 c.ok('every app mounted again comes back as it was left: a value moved in it still where it was put', !lost.length, lost.join('; ').slice(0, 400));
+
+// ── The players in the scene (S9i, 2026-11-15) ───────────────────────────────
+// The puppet: no camera asked for as it is mounted — the strip passed through never turns it on — and "camera" asks
+// for it, the author's pick. The map's player: a map the scene's vault opens, played; mounted again, that map still.
+await page.eval(`(() => { window.__asked = 0; const md = navigator.mediaDevices;
+  if (md && md.getUserMedia) { const was = md.getUserMedia.bind(md); md.getUserMedia = c => { window.__asked++; return was(c); }; } })()`);
+await open('puppet');
+await wait(600);
+const quiet = await page.eval(`({ asked: window.__asked, pressed: document.querySelector('#camera-on')?.getAttribute('aria-pressed') })`);
+await page.click(`document.querySelector('#camera-on')`);
+await page.until(`window.__asked > 0`, { timeout: 5000 }).catch(() => {});
+const askedFor = await page.eval(`window.__asked`);
+c.ok('the puppet in the scene: no camera asked for as it is mounted; "camera" asks for it', quiet.asked === 0
+  && quiet.pressed === 'false' && askedFor === 1, JSON.stringify({ quiet, askedFor }));
+const maps = ((await (await fetch(c.base + '/api/vault')).json()).objects || []).filter(r => r.type === 'map' && !(r.tags || []).includes('trash'));
+await open('play');
+if (maps.length) {
+  const room = () => page.eval(`(() => { const r = document.getElementById('room'); return { w: r.width, h: r.height,
+    note: document.getElementById('note').hidden ? '' : document.getElementById('note').textContent }; })()`);
+  await page.eval(`import('/apps/map/play/main.js').then(m => import('/core/vault.js').then(({ Vault }) => Vault.load('${maps[0].id}')
+    .then(({ object }) => m.chosen(object))))`);
+  await page.until(`document.getElementById('note').hidden`, { timeout: 15000 }).catch(() => {});
+  await wait(400);
+  const played = await room();
+  await open('vault');
+  await open('play');
+  await page.until(`document.getElementById('note').hidden`, { timeout: 15000 }).catch(() => {});
+  await wait(400);
+  const again = await room();
+  c.ok('the map\'s player in the scene: a map the vault opens, played; mounted again, that map still', !played.note && played.w > 1
+    && JSON.stringify(again) === JSON.stringify(played), JSON.stringify({ map: maps[0].id, played, again }));
+} else {
+  c.ok('the map\'s player in the scene: asks for a map, there being none in this vault',
+    /Choose one in the vault/.test(await page.eval(`document.getElementById('note').textContent`)));
+}
+await open('vault');
 
 // A smart object made by S stays the one S saves into: its next state, across a switch.
 await open('particles');
@@ -354,7 +392,8 @@ c.ok('…and takes it: map mounted', same(await marked(), ['map']));
 c.ok('the gamepad, its own page: a link out, mounted nowhere', await page.eval(`(() => {
   const a = document.querySelector('a.cl-page'); return !!a && a.pathname === '/apps/gamepad/' && a.target === '_blank'; })()`));
 
-const noise = c.quiet();
+// MediaPipe, started by the puppet's "camera", says what it runs on through console.error: its, not ours (check-puppet).
+const noise = c.quiet().filter(e => !/XNNPACK|TensorFlow Lite|gl_context|landmark_projection|W0000|I0000/.test(e.text || ''));
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 
 // ── No vault at all (rule 7) ─────────────────────────────────────────────────

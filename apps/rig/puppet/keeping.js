@@ -19,6 +19,7 @@ import { Vault }         from '../../../core/vault.js';
 import { requested }     from '../../../core/reopen.js';
 import { thumbFromBlob } from '../../../core/thumb.js';
 import { toQuery }       from './address.js';
+import { listen }        from '../../../core/scope.js';
 
 const APP = 'rig/puppet';
 const toBlob = c => (c.convertToBlob ? c.convertToBlob({ type: 'image/png' }) : new Promise(r => c.toBlob(r, 'image/png')));
@@ -31,7 +32,7 @@ const toBlob = c => (c.convertToBlob ? c.convertToBlob({ type: 'image/png' }) : 
 export function makeKeeping({ params, follow }) {
   let id = null, version = 0, unsent = 0, sending = false;
 
-  document.addEventListener('vault:updated', async e => {
+  listen(document, 'vault:updated', async e => {      // held by the app's scope: let go of as it is taken out (S9i)
     const said = e.detail || {};
     if (sending || !id || said.id !== id || !(said.version > version)) return;
     version = said.version;

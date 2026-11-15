@@ -1,5 +1,5 @@
 # STATUS — map
-_last touched: 2026-11-13_
+_last touched: 2026-11-15_
 
 M8's app: the map editor, and a room first (`docs/roadmap.md`, M8). A map
 is the field's word for a level; the playable map is its export, as video
@@ -35,6 +35,13 @@ is a loop's, and nothing a player does enters a recipe.
   `tests/map-play.mjs`, `tests/map-walk.mjs`; `check-map-play`: a click,
   played over its cell, then the map alone, and again.
 
+- **The player a module, in cluster** (S9i, 2026-11-15; `play/main.js`,
+  `check-cluster`): its page mounts it on itself, bare as ever; cluster's
+  strip mounts it as `play` — the shell's viewer, its title and status
+  bars, the walking keys taken from the left hand while it is there; a map
+  the scene's vault opens is played (`chosen`), and given back after a
+  switch. A warp's address keeps the scene's app; its stylesheet is
+  `style.css`, as every app's.
 - **The player's avatar** (P4, 2026-11-06; `play/avatar.js`, `walk.js`,
   `tests/map-walk.mjs`, `check-map-play`). On the spawn — through a warp,
   on the warp back — wearing what stands there: a character

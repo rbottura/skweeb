@@ -79,4 +79,11 @@ export class Effects {
 
   /** Nothing playing any more — another map — its frames kept for the way back. */
   stop() { this.playing = []; }
+
+  /** Every object opened let go of: the player taken out (S9i). */
+  dispose() {
+    for (const p of this.opened.values()) p.then(h => h && h.dispose && h.dispose(), () => {});
+    this.opened.clear();
+    this.playing = [];
+  }
 }

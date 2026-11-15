@@ -23,6 +23,15 @@
  * camera sees (guides.js); H shows the avatar alone; C takes straight
  * again; G opens the guide to OBS (docs/guides/obs.md). With no vault, no
  * camera or no MediaPipe it opens and says which (rule 7).
+ *
+ * A module (core/mount.js; S9i, 2026-11-15): `mount(host)` and `unmount()`,
+ * its page mounting it on itself. In a scene (cluster's), the camera is not
+ * asked for as it is mounted — passing through the strip never turns it on —
+ * but by "camera", at the viewer's head or in its drawer, MediaPipe with it
+ * (the author's pick of two, 2026-11-15); its address is the scene's, the
+ * app named in it still; the address for OBS the puppet's own page. Taken
+ * out, it lets go of the camera, MediaPipe and the vault's news, and is
+ * given back its values. Nothing happens at import.
  */
 
 import { puppetParams, GROUPS } from './params.js';
@@ -48,17 +57,42 @@ import { Vault }                from '../../../core/vault.js';
 import { viewFactor }           from '../../../core/view.js';
 import { surface }              from '../../../core/surface.js';
 import { own }                  from '../../../core/keys.js';
+import { appModule, leftBehind } from '../../../core/mount.js';
 
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
-const video = document.getElementById('camera');
-const trouble = document.getElementById('trouble');
-const seenView = document.getElementById('seen');
-const guidesBtn = document.getElementById('guides');
+/** The viewer and its head, the drawers beside it; the camera's video and what troubles it, in the stage. */
+const MARKUP = `
+  <main class="app-main">
+    <section class="viewer" aria-label="the puppet">
+      <div class="viewer-head">
+        <button class="nb-btn" id="guides" type="button" aria-pressed="false"
+                title="The bones, where the eyes and the mouth go, and what the camera sees — never in anything saved [B]">guides</button>
+        <button class="nb-btn" id="camera-on" type="button" aria-pressed="false"
+                title="The camera, asked for or let go of — for OBS to take">camera</button>
+      </div>
+      <div class="viewer-stage">
+        <canvas id="stage" width="480" height="300"></canvas>
+        <canvas id="seen" class="pz-seen" width="240" height="135" aria-label="what the camera sees"></canvas>
+        <video id="camera" class="pz-camera" muted playsinline></video>
+        <p class="pz-trouble" id="trouble" hidden></p>
+      </div>
+    </section>
+    <div class="app-side" id="side"></div>
+  </main>`;
+
+const app = appModule('puppet', { markup: MARKUP, style: new URL('./style.css', import.meta.url).href, start,
+  keep: () => (params ? { values: params.values } : null) });     // its values, given back as it was left
+
+/** The puppet in `host`, wearing what its address names (core/mount.js). */
+export const mount = (host, given) => app.mount(host, given);
+/** The puppet out of its host: the camera, MediaPipe and all it held let go of. */
+export const unmount = () => app.unmount();
+
+// One puppet mounted at a time: its elements and state, found and made again by each mount (`start`).
+let canvas, ctx, video, trouble, seenView, guidesBtn, cameraBtn, scene = false;
 const MOST = 3;                 // canvas pixels per drawing pixel at most: drawn from its marks, sharp at any
 
-let params, bar = null, drawers = null, guide = null, seeing = null, keeping = null;
-let obs = new URLSearchParams(location.search).has('obs');
+let params = null, bar = null, drawers = null, guide = null, seeing = null, keeping = null;
+let obs = false;
 let worn = null;                // what is worn (wear.js), its room beside it
 let springs = null;             // sway.js, a spring a bone of what is worn
 let cuts = [], mouthCut = null; // an eye's cut each, and the mouth's, cut again every frame (crop.js)
@@ -69,14 +103,34 @@ let view = 1;
 let guides = false;             // the guides over the puppet (B)
 
 /** What the page says: one line a concern, the troubles in OBS too. */
-const state = { wear: { text: '' }, camera: { text: 'asking for the camera…' }, face: { text: 'starting MediaPipe…' } };
+let state;
 
 /** The loop a saved rig plays, if it moves. */
-const clock = new Playhead({ onShow: () => {} });
+let clock;
 
-async function boot() {
+const OFF = 'the camera off — "camera" asks for it';
+
+async function start(root, mine, given = {}) {
+  scene = !!given.vault;
+  canvas = root.querySelector('#stage');
+  ctx = canvas.getContext('2d');
+  video = root.querySelector('#camera');
+  trouble = root.querySelector('#trouble');
+  seenView = root.querySelector('#seen');
+  guidesBtn = root.querySelector('#guides');
+  cameraBtn = root.querySelector('#camera-on');
+  obs = !scene && new URLSearchParams(location.search).has('obs');
+  worn = springs = last = null;
+  cuts = [];
+  mouthCut = null;
+  lastPaint = 0;
+  guides = false;
+  state = { wear: { text: '' }, camera: { text: scene ? OFF : 'asking for the camera…' }, face: { text: scene ? '' : 'starting MediaPipe…' } };
+  clock = new Playhead({ onShow: () => {} });
+  mine.hold(() => clock.dispose());
+  mine.hold(() => document.documentElement.classList.remove('guides', 'obs'));
   params = puppetParams();
-  bar = new Bar({ app: 'puppet', mount: document.querySelector('.app'), keys: 'S send to OBS · B guides · H alone · C straight · G guide · V vault' });
+  bar = new Bar({ app: 'puppet', mount: root, keys: 'S send to OBS · B guides · H alone · C straight · G guide · V vault' });
   own('KeyG', 'KeyH');                // G the puppet's guide, H alone — not core's ground and states (core/keys.js)
   keeping = makeKeeping({ params, follow: values => {
     params.restore(values);
@@ -85,13 +139,19 @@ async function boot() {
   } });
   let kept = null;
   try { kept = await keeping.open(); } catch (err) { bar.announce('could not open it: ' + err.message); }
-  params.restore(kept || fromQuery(params, location.search));
-  seeing = makeSeeing({ video, params, tell, listed: (list, current) => drawers.cameras(list, current), switched: on => drawers.switched(on) });
+  if (app.scope !== mine) return;
+  // What the address asks — or, asked nothing, the values it had when it was last taken out (core/mount.js).
+  const left = !kept && !location.search && leftBehind('puppet');
+  params.restore(kept || (left ? left.state.values : fromQuery(params, location.search)));
+  seeing = makeSeeing({ video, params, tell, listed: (list, current) => drawers.cameras(list, current),
+    switched: on => { drawers.switched(on); cameraBtn.setAttribute('aria-pressed', String(on)); } });
+  mine.hold(() => seeing.stop());
   guide = new Guide({ url: new URL('../../../docs/guides/obs.md', import.meta.url).href, title: 'the puppet in OBS' });
+  mine.hold(() => guide.dispose());           // its sheet and its ear for Escape, out with the puppet
   const panel = new ParamPanel(params, { title: 'puppet', mount: document.getElementById('side'), groups: GROUPS });
   drawers = buildDrawers(panel, {
-    camera: id => seeing.start(id), switch: on => seeing.setWanted(on), send,
-    address: () => location.origin + location.pathname + keeping.address(true),
+    camera: id => seeing.start(id), switch: switchCamera, send,
+    address: () => new URL('./', import.meta.url).href + keeping.address(true),     // the puppet's own page, in a scene too
     say: text => bar.announce(text), guide: () => guide.show(), straight: straightNow, tell: tellStroke,
   });
   drawers.sent(!!keeping.id, 0);
@@ -106,17 +166,36 @@ async function boot() {
     if (['eyeSize', 'sway', 'nod', 'mouth', 'mouthSize', 'mouthLower'].includes(key) && worn) fitRoom();
   });
   guidesBtn.addEventListener('click', () => showGuides(!guides));
-  window.addEventListener('pagehide', () => seeing.stop());
-  wireKeys();
+  cameraBtn.addEventListener('click', () => switchCamera(cameraBtn.getAttribute('aria-pressed') !== 'true'));
+  mine.listen(window, 'pagehide', () => seeing.stop());
+  wireKeys(mine, !given.vault);
   showAlone(obs);
   load();
-  seeing.start();
-  seeing.startFace();
-  requestAnimationFrame(frame);
+  // Alone, the camera at once, as ever; in a scene, when "camera" asks for it (the author, 2026-11-15).
+  if (scene) {
+    seeing.setWanted(false);
+    tell('camera', OFF);
+  } else switchCamera(true);
+  const loop = now => {
+    if (app.scope !== mine) return;          // taken out: its loop ends with it
+    requestAnimationFrame(loop);
+    frame(now);
+  };
+  requestAnimationFrame(loop);
 }
 
+/** The camera asked for, MediaPipe with it the first time — or let go of, for OBS to take. */
+function switchCamera(on) {
+  if (!on) return seeing.setWanted(false);
+  seeing.startFace();
+  if (!seeing.wanted) return seeing.setWanted(true);
+  cameraBtn.setAttribute('aria-pressed', 'true');
+  return seeing.start();
+}
+
+/** Its values in the address — the scene's, in a scene, the app it names kept. */
 function writeAddress() {
-  history.replaceState(null, '', location.pathname + keeping.address(obs));
+  history.replaceState(null, '', location.pathname + keeping.address(obs) + location.hash);
 }
 
 // ── What is worn ────────────────────────────────────────────────────────────
@@ -198,7 +277,6 @@ async function send() {
 // ── Drawing ─────────────────────────────────────────────────────────────────
 
 function frame(now) {
-  requestAnimationFrame(frame);
   seeing.tick(now);
   const dt = lastPaint ? (now - lastPaint) / 1000 : 0;
   lastPaint = now;
@@ -286,9 +364,10 @@ function showAlone(on) {
   writeAddress();
 }
 
-function wireKeys() {
-  const vault = new VaultPanel();
-  document.addEventListener('keydown', e => {
+/** Its keys, held by its scope; V its own vault alone — in a scene, the scene's is beside it. */
+function wireKeys(mine, ownVault) {
+  const vault = ownVault ? new VaultPanel() : null;
+  mine.listen(document, 'keydown', e => {
     const t = e.target;
     if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
     if (e.key === 's' || e.key === 'S') send();
@@ -296,11 +375,7 @@ function wireKeys() {
     if (e.key === 'h' || e.key === 'H') showAlone(!obs);
     if (e.key === 'c' || e.key === 'C') straightNow();
     if (e.key === 'g' || e.key === 'G') guide.toggle();
-    if (e.key === 'v' || e.key === 'V') vault.toggle();
+    if ((e.key === 'v' || e.key === 'V') && vault) vault.toggle();
   });
 }
 
-boot().catch(err => {
-  console.error('[puppet] failed to boot:', err);
-  if (bar) bar.announce('failed to boot: ' + err.message);
-});

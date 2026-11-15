@@ -24,9 +24,8 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing, 2026-11-06: the day's ideas went onto the plan and landed — C11,
-the workshop V1 to V3, BEC_2025's folder (M13b) — and the entries of the
-day before that became bricks done went with them.
+Nothing, 2026-11-15: the author's list of the day went onto the plan as C13
+and landed, as the ideas of 2026-11-06 had — C11, V1 to V3, M13b.
 
 ## Sorted
 

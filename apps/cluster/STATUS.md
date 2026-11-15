@@ -68,6 +68,11 @@ app still opens alone on its own page; the scene is one more host.
   changed, a click going back or on to one (`core/steps.js` `list`, `go`);
   the object's states, newest first, the one held marked, a click going
   back to one as the graph's does (`core/shell/graph.js` `backTo`); H.
+- **The players in the strip** (`scene/players`, S9i, 2026-11-15): the
+  map's player, `play`, and the rig's puppet, `puppet` — modules on
+  `core/mount.js` as the garden is, `NESTED` taking their links in place.
+  The puppet asks for no camera as it is mounted: "camera" asks for it,
+  the author's pick of two; a map the vault opens, the player plays.
 - **The wall between the side and the viewer** (`fix/side-wall`, C13,
   2026-11-15; `wall.js`): dragged, the side wider or narrower — 200 px at
   the least, the viewer keeping 360 — and the vault's pictures with it,
