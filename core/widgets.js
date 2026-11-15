@@ -21,7 +21,7 @@
 import * as Registry from './registry.js';
 import { Vault }     from './vault.js';
 import { dropOn }    from './vault-drag.js';
-import { numberBox, boxed, paintFill } from './numbox.js';
+import { numberBox, boxed, paintFill, short } from './numbox.js';
 import { layersWidget } from './layers-row.js';
 
 const el = (tag, cls, text) => {
@@ -62,7 +62,7 @@ export const WIDGETS = {
     });
     const box = numberBox(spec, value, set, () => panel.value(key));
     readout.replaceChildren(spec.unit ? boxed(box, spec.unit) : box);
-    return { node: input, sync(v) { input.value = along(v); box.value = v; paintFill(box, spec, v); } };
+    return { node: input, sync(v) { input.value = along(v); box.value = short(v, spec); paintFill(box, spec, v); } };
   },
 
   // A count. Declaring `int` rather than `range` with step 1 says the value is

@@ -167,6 +167,36 @@ c.ok('…S: the state it saved listed, marked as the one the page holds', await 
 await c.shot('4-history');
 await side('vault');
 
+// ── Its chips in its frame, and the wall moved (the author, 2026-11-15) ──────
+// Every chip of its head inside the side, the types onto the next line; the wall between it and the viewer
+// dragged: the side wider, the viewer after it, its pictures larger, four columns still; as wide as the window
+// lets it, past 150 px a picture, more columns; a double click puts it back; this browser remembers the width.
+const chips = await page.eval(`(() => { const s = document.querySelector('.cl-side').getBoundingClientRect();
+  const all = [...document.querySelectorAll('.cl-side .vp-head .vp-chip')].filter(b => b.getClientRects().length);
+  return { n: all.length, out: all.filter(b => { const r = b.getBoundingClientRect(); return r.left < s.left - 0.5 || r.right > s.right + 0.5; })
+    .map(b => b.textContent) }; })()`);
+c.ok('every chip of the side\'s head inside its frame, the types onto the next line', chips.n > 3 && !chips.out.length, JSON.stringify(chips));
+const laid = () => page.eval(`(() => { const s = document.querySelector('.cl-side'), w = document.querySelector('.cl-wall').getBoundingClientRect();
+  const grid = s.querySelector('.vp-grid'), card = grid.querySelector('.vp-card[data-id]:not([data-type="set"])');
+  return { side: Math.round(s.getBoundingClientRect().width), viewer: Math.round(document.querySelector('.cl-host .viewer').getBoundingClientRect().left),
+    cols: getComputedStyle(grid).gridTemplateColumns.split(' ').length, card: Math.round(card.getBoundingClientRect().width),
+    at: [Math.round(w.left + w.width / 2), Math.round(w.top + w.height / 2)], kept: localStorage.getItem('skweeb.cluster.side') }; })()`);
+const was = await laid();
+await page.pointer(was.at, [was.at[0] + 200, was.at[1]], 8);
+const wider = await laid();
+c.ok('the wall dragged: the side 200 px wider, the viewer after it, its pictures larger — four columns still',
+  wider.side === was.side + 200 && wider.viewer === was.viewer + 200 && wider.card > was.card + 40 && was.cols === 4 && wider.cols === 4
+  && wider.kept === String(wider.side), JSON.stringify({ was, wider }));
+await page.pointer(wider.at, [wider.at[0] + 600, wider.at[1]], 8);
+const widest = await laid();
+c.ok('…as wide as the window lets it, its pictures 150 px and more columns; the viewer keeps its room',
+  widest.cols > 4 && widest.card >= 150 && widest.side < wider.side + 600 && widest.viewer < 1600 - 300 - 360, JSON.stringify(widest));
+await page.eval(`document.querySelector('.cl-wall').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))`);
+await wait(200);
+const back = await laid();
+c.ok('…a double click puts it back', back.side === was.side && back.cols === 4 && back.card === was.card, JSON.stringify(back));
+await c.shot('5-wall');
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();

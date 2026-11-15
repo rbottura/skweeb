@@ -52,6 +52,7 @@ import { holdFrames }     from './held.js';
 import { propsTabs }      from './tabs.js';
 import { stillFrames }    from './frames.js';
 import { sideViews }      from './sides.js';
+import { wall }           from './wall.js';
 import { keysView }       from './keys-view.js';
 import { historyView }    from './history-view.js';
 
@@ -143,6 +144,7 @@ export function start(page = document.body) {
   boxes = stillFrames();                     // under everything an app lays in the grid: its boxes, still (S9e)
   scene.append(strip, ...boxes.nodes, sideBar, side, keys, story, tabs, detail, none, host);
   page.append(scene);
+  scene.append(wall(scene));                 // between the side and the viewer, moved by hand: the side wider, its pictures larger
 
   installPalette();                          // ² from the start: the vault has no panel to install it
   props = propsTabs({ bar: tabs, detail, none });

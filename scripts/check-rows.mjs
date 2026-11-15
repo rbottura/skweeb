@@ -119,6 +119,26 @@ c.ok('a count\'s slider stops at every whole value, not at fives', (await slide(
 c.ok('a stepped range\'s slider, five of its steps from its least — a turn of 0.5°, 2.5° a stop', (await slide('twist', 10.3)) === 10
   && (await slide('twist', 11.4)) === 12.5);
 
+// ── Short, and still under the wheel (the author, 2026-11-15) ─────────────────
+// A value with no grid shown in four digits that count, every digit kept; a box clicked, then the wheel over it:
+// Chrome stepped a focused number box, its param taking the step as the box was left — now the box lets go of the
+// focus first, and neither moves.
+const deep = await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { const p = rowParams(${row('cx')}).params;
+  p.set('cx', -0.743643887037151); return { kept: p.get('cx'), shown: ${row('cx')}.querySelector('.pp-num').value }; })`);
+c.ok('a value with no grid shown short, every digit kept', deep.shown === '-0.7436' && deep.kept === -0.743643887037151, JSON.stringify(deep));
+const tb = await rectOf(`${row('twist')}.querySelector('.pp-num')`), tAt = [tb[0] + tb[2] / 2, tb[1] + tb[3] / 2];
+const twist = () => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${row('twist')}).params.get('twist'))`);
+const tBox = `${row('twist')}.querySelector('.pp-num')`;
+await page.pointer(tAt);
+const focused = await page.eval(`document.activeElement === ${tBox}`), t0 = await twist(), b0 = await page.eval(`${tBox}.value`);
+await page.wheel(tAt, -100);
+await page.wheel(tAt, -100);
+const b1 = await page.eval(`${tBox}.value`), still = await page.eval(`document.activeElement !== ${tBox}`);
+await page.eval(`${tBox}.blur()`);
+const t1 = await twist();
+c.ok('a box clicked, then the wheel over it: the box and its value stay, the focus let go of', focused && b1 === b0 && t1 === t0 && still,
+  JSON.stringify({ focused, box: [b0, b1], value: [t0, t1] }));
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();

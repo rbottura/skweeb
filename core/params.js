@@ -193,7 +193,7 @@ const snap = (n, spec) => {
 };
 
 /** How many decimals a declared number needs: 0.005 is 3, 1e-7 is 7, 4 is 0. */
-const places = x => {
+export const places = x => {
   let p = 0;
   while (p < 15 && Math.round(x * 10 ** p) / 10 ** p !== x) p++;
   return p;

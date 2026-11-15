@@ -123,8 +123,11 @@
    it is shown — and its objects a grid of pictures, four columns: the name
    and the type in a card's title, the rest in its detail. */
 
+/* Its pictures as large as the side is wide (wall.js): four columns until each is 150 px, then more — its
+   border, padding, a scrollbar and three gaps taken off the side. A length, so vault-kin.js reads it in px. */
+@property --vp-card { syntax: '<length>'; inherits: true; initial-value: 150px; }
 .cl-side { grid-column: 2; grid-row: 3; min-height: 0; margin-bottom: var(--gap); display: flex; flex-direction: column;
-  --vp-card: 50px; --vp-gap: 6px; --vp-pad: 8px; }
+  --vp-card: clamp(50px, (var(--vault-w) - 52px) / 4, 150px); --vp-gap: 6px; --vp-pad: 8px; }
 .cl-side[hidden] { display: none; }
 /* Its tab says what it is (sides.css): the panel's own title not again, its box joined to the tab bar. */
 .cl-side .vp--docked { border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--panel); }
@@ -133,8 +136,10 @@
 .cl-side .vp-count { margin-right: auto; font: 400 11px var(--font-num); color: var(--fg-3); }
 .cl-side .vp-spacer { flex: 0 0 100%; height: 0; order: 1; }
 .cl-side .vp-head > .vp-chip { order: 2; }
-.cl-side .vp-filters { order: 3; flex: 1 1 0; min-width: 0; flex-wrap: nowrap; gap: 2px; overflow-x: auto; scrollbar-width: none; }
-.cl-side .vp-filters::-webkit-scrollbar { display: none; }
+/* The types in the run of lineage and trash, onto the next line when the side is narrow: none out of its frame
+   — on one line that scrolled, with no bar to say so, they went past its edge (the author, 2026-11-15). */
+.cl-side .vp-filters { display: contents; }
+.cl-side .vp-filters > .vp-chip { order: 3; }
 .cl-side .vp-btn, .cl-side .vp-chip { flex: none; min-height: 22px; padding: 0 6px; border: 0; border-radius: var(--radius); background: none;
   box-shadow: none; color: var(--fg-3); font: 400 11.5px var(--font-ui); transition: background 90ms, color 90ms; }
 .cl-side .vp-btn:hover, .cl-side .vp-chip:hover { background: var(--hover); color: var(--fg); }
@@ -166,6 +171,16 @@
 .cl-side .vp-fcard .vp-name { font-size: 11px; }
 .cl-side .vp-fcard .vp-sub { font-size: 10px; }
 .cl-side .vp-fstrip > .vp-grid { padding: 6px; }
+
+/* ── The wall between the side and the viewer, moved by hand (wall.js) ─────────
+   Over the gap between them, a line lit as it is hovered, held or in hand. */
+
+.cl-wall { grid-column: 2; grid-row: 2 / 4; justify-self: end; position: relative; z-index: 4; width: 10px;
+  margin: var(--gap) -8px var(--gap) 0; cursor: col-resize; touch-action: none; outline: none; }
+.cl-wall::after { content: ""; position: absolute; inset: 0 auto 0 4px; width: 2px; border-radius: 1px; background: var(--accent);
+  opacity: 0; transition: opacity 120ms; }
+.cl-wall:hover::after, .cl-wall:focus-visible::after, .cl-wall--held::after { opacity: 1; }
+body.cl-walling { cursor: col-resize; user-select: none; }
 
 /* ── The properties: one panel, as the bench's ─────────────────────────────────
    Its tabs are its head; under them, in the same place, the app's panel

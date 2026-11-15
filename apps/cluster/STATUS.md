@@ -1,5 +1,5 @@
 # STATUS — cluster, the scene
-_last touched: 2026-11-14_
+_last touched: 2026-11-15_
 
 S9c on the board of `docs/plan.md`: M12's scene (`docs/scene.md`), the
 apps round one canvas. The name is the author's, "pour l'instant"
@@ -68,6 +68,14 @@ app still opens alone on its own page; the scene is one more host.
   changed, a click going back or on to one (`core/steps.js` `list`, `go`);
   the object's states, newest first, the one held marked, a click going
   back to one as the graph's does (`core/shell/graph.js` `backTo`); H.
+- **The wall between the side and the viewer** (`fix/side-wall`, C13,
+  2026-11-15; `wall.js`): dragged, the side wider or narrower — 200 px at
+  the least, the viewer keeping 360 — and the vault's pictures with it,
+  four columns until each is 150 px, then more (`--vp-card` from
+  `--vault-w`, a registered length, so `vault-kin.js` reads it in px); the
+  arrows by 16 px, a double click back to 256; this browser remembers it.
+  The head's chips in the run of lineage and trash, onto the next line when
+  narrow — on one line that scrolled with no bar, they went past its edge.
 - **What holds still at a switch** (`scene/motion`, S9e's first pass,
   2026-11-05): the scene's frames under the app's boxes, the same as them
   (`frames.js`) — title bar, viewer with its head, rulers' bands and
