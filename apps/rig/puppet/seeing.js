@@ -53,6 +53,7 @@ export function makeSeeing({ video, params, tell, listed, switched }) {
                  pose: steadyPose(), straight: straight() };
   const out = { eyes: null, mouth: null, seen: [], pose: null, camera: null, wanted: true };
   let face = null, found = null, again = null, watching = false, called = -Infinity, lastFrames = -1, device = null;
+  let facing = false, stopped = false;     // MediaPipe asked for once; the page or the scene let go of it all
 
   async function start(deviceId = device) {
     device = deviceId;
@@ -62,7 +63,7 @@ export function makeSeeing({ video, params, tell, listed, switched }) {
     if (!out.wanted) return;
     try {
       out.camera = await openCamera(video, { deviceId });
-      if (!out.wanted) { out.camera.stop(); out.camera = null; return; }
+      if (!out.wanted || stopped) { out.camera.stop(); out.camera = null; return; }
       tell('camera', out.camera.label);
       listed(await cameras(), out.camera.deviceId);
       watch();
@@ -90,9 +91,14 @@ export function makeSeeing({ video, params, tell, listed, switched }) {
     tell('camera', 'camera off — let go, for OBS to take');
   }
 
+  /** MediaPipe, once: asked again, nothing; let go of while it came, closed as it comes. */
   async function startFace() {
+    if (facing) return;
+    facing = true;
     try {
-      face = await openFace();
+      const opened = await openFace();
+      if (stopped) return opened.close();
+      face = opened;
       tell('face', `MediaPipe on the ${face.on}`);
     } catch (err) {
       tell('face', err instanceof NoTracker ? err.message : 'MediaPipe would not start: ' + err.message, true);
@@ -141,7 +147,14 @@ export function makeSeeing({ video, params, tell, listed, switched }) {
     tune(steadiness) { kept.boxes.tune(steadiness); kept.mouth.tune(steadiness); },
     /** Forget the eyes' boxes, the mouth's, or both — after a change in how they are cut. */
     forget(which) { if (which !== 'mouth') kept.boxes.reset(); if (which !== 'eyes') kept.mouth.reset(); },
-    /** Let go of the camera, as the page goes. */
-    stop() { clearTimeout(again); if (out.camera) out.camera.stop(); },
+    /** Let go of the camera and MediaPipe, as the page goes — or the puppet, out of a scene (S9i). */
+    stop() {
+      stopped = true;
+      clearTimeout(again);
+      if (out.camera) out.camera.stop();
+      out.camera = null;
+      if (face) face.close();
+      face = null;
+    },
   });
 }

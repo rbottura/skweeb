@@ -71,8 +71,10 @@ const APPS = {
   fractals:  () => import('../fractals/main.js'),
   particles: () => import('../particles/main.js'),
   map:       () => import('../map/main.js'),
+  play:      () => import('../map/play/main.js'),       // the map's player (S9i)
   garden:    () => import('../map/garden/main.js'),
   rig:       () => import('../rig/main.js'),
+  puppet:    () => import('../rig/puppet/main.js'),     // the rig's puppet — its camera when asked for (S9i)
   '3d':      () => import('../3d/main.js'),
 };
 const FIRST = 'vault';
@@ -183,9 +185,9 @@ function named() {
 }
 
 /** An app that is another's page, by its path: the garden, the map editor's (M14). */
-const NESTED = { 'map/garden': 'garden' };
+const NESTED = { 'map/garden': 'garden', 'map/play': 'play', 'rig/puppet': 'puppet' };
 
-/** The app a link names — `/apps/particles/`, `/apps/map/garden/`, or its index.html — when the scene has it. */
+/** The app a link names — `/apps/particles/`, `/apps/map/garden/`, `/apps/map/play/`, or its index.html — when the scene has it. */
 function appOf(url) {
   const m = /^\/apps\/([^/]+(?:\/[^/]+)?)\/(?:index\.html)?$/.exec(url.pathname);
   const name = m && (NESTED[m[1]] || m[1]);

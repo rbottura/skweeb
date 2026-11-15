@@ -37,7 +37,8 @@ const EVERY_SESSION = new Set(['CLAUDE.md', 'STATUS.md', 'docs/plan.md']);
 /** Past 400 and kept whole, each with why: one line, the seam it does not have. */
 const KEPT = new Map([
   ['scripts/check-3d.mjs', 'one model followed from the opening to its save: split, the save would build the model again'],
-  ['docs/shader-code.md', 'one guide read in order, a first filter to its landing, each section on the one before: split, the second half would begin mid-shader'],
+  ['scripts/check-cluster.mjs', 'one visit of the scene, every app mounted in turn, twice, then back as it was left: split, each part would boot the scene and its apps again'],
+  ['docs/shader-code.md','one guide read in order, a first filter to its landing, each section on the one before: split, the second half would begin mid-shader'],
   ['apps/grid/main.js', 'one job, the params, their assets and one canvas kept in step (its head): every part reads the source, the tiles and the clock — split, the halves would share them'],
   ['apps/filter/main.js', "a source, a chain, one canvas kept in step (its head): the save, the look and the paint each read the runner, the source and the clock — split, the halves would share them"],
   ['core/VaultPanel.js', "one panel's state read by all it does — the chips, the grid, the detail; its parts are out already (vault-*.js): what is left would share `this`"],

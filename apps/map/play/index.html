@@ -6,27 +6,20 @@
   <meta name="description" content="A map from the suite, played: walk it, point at what answers, and use it.">
   <title>a map — skweeb</title>
 
-  <link rel="stylesheet" href="./play.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
   <!--
     The player: the map and nothing else — no panels, no bar. What answers
     is outlined under the pointer; a sign shows over the map, a warp leads to
-    another. M8's third brick; its fourth, the avatar that walks it.
+    another. M8's third brick; its fourth, the avatar that walks it. A module
+    (main.js, S9i): it builds itself in a host and takes itself out again, so
+    a scene — cluster — can mount it too. Here, alone, its host is this page.
   -->
-  <main class="play">
-    <canvas id="room" width="480" height="300"
-            aria-label="the map — ZQSD, WASD or the arrows walk, E uses what is faced, a tap walks there"></canvas>
-    <p class="play-note" id="note" hidden></p>
-    <div class="play-sign" id="sign" hidden>
-      <figure class="play-sign-card">
-        <canvas class="play-sign-picture" width="1" height="1"></canvas>
-        <figcaption class="play-sign-says"></figcaption>
-      </figure>
-    </div>
-  </main>
-
-  <script type="module" src="./main.js"></script>
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
 </body>
 </html>

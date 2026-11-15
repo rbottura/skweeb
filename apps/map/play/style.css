@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────────────────────────────────────────
-   play.css — the player
+   style.css — the player
 
    The map and what it shows, nothing else: the suite's faces and colours from
    core's theme, the map centred on the page, a sign as a card over it.
@@ -13,6 +13,14 @@
   display: grid;
   place-items: center;
 }
+
+/* Alone, its view and its stage the window; in a scene they are the shell's viewer and stage (main.js). */
+.play-view, .play-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+
+/* In a scene (cluster, S9i): the note and a sign over the stage, not over the window — the rulers under them. */
+.viewer-stage > .play-note, .viewer-stage > .play-sign { position: absolute; }
+.viewer-stage > .play-note { max-width: calc(100% - 32px); z-index: 31; }
+.viewer-stage > .play-sign { z-index: 32; }
 
 /* Sized by main.js to fit the window, in the screen's own pixels. Framed by
    an outline, not a border, so its box is the map's and nothing else. */

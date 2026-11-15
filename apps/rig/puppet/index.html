@@ -6,35 +6,22 @@
   <meta name="description" content="The rig's puppet: a drawing rigged at its marks, worn — your own eyes, from the camera, at the tips of its eyestalks.">
   <title>puppet — skweeb</title>
 
-  <link rel="stylesheet" href="./puppet.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
   <!--
     The puppet: the viewer, its drawers on the right, the bar below — or,
     with ?obs or H, the avatar alone on nothing, for OBS's Browser source.
-    The camera plays into the video, which is never shown: the eyes and the
+    The camera plays into a video that is never shown: the eyes and the
     mouth are cut from it every frame. With the guides on (B), what the
-    camera sees is shown small in the viewer's corner.
+    camera sees is shown small in the viewer's corner. A module (main.js,
+    S9i): it builds itself in a host and takes itself out again, so a scene
+    — cluster — can mount it too. Here, alone, its host is this page.
   -->
-  <div class="app">
-    <main class="app-main">
-      <section class="viewer" aria-label="the puppet">
-        <div class="viewer-head">
-          <button class="nb-btn" id="guides" type="button" aria-pressed="false"
-                  title="The bones, where the eyes and the mouth go, and what the camera sees — never in anything saved [B]">guides</button>
-        </div>
-        <div class="viewer-stage">
-          <canvas id="stage" width="480" height="300"></canvas>
-          <canvas id="seen" class="pz-seen" width="240" height="135" aria-label="what the camera sees"></canvas>
-        </div>
-      </section>
-      <div class="app-side" id="side"></div>
-    </main>
-  </div>
-  <video id="camera" class="pz-camera" muted playsinline></video>
-  <p class="pz-trouble" id="trouble" hidden></p>
-
-  <script type="module" src="./main.js"></script>
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
 </body>
 </html>
