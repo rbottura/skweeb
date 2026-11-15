@@ -35,7 +35,8 @@ const row = name => `[...document.querySelectorAll('.pp-row:not(.pp-stack-layer 
 const set = async (name, value) => { await page.typeInto(`${row(name)}?.querySelector('.pp-num')`, value); await wait(300); };
 /** The bar's line once it says `text`: an announcement holds the bar a few seconds first. */
 const sayWith = text => page.until(`${say}.includes(${JSON.stringify(text)})`, { timeout: 10000 }).then(() => page.eval(say), () => page.eval(say));
-const value = name => page.eval(`Number(${row(name)}?.querySelector('.pp-num')?.value)`);
+// The value itself, every digit — its box shows it short (core/numbox.js `short`).
+const value = name => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { const r = ${row(name)}; return r ? Number(rowParams(r).params.get(r.dataset.key)) : NaN; })`);
 const view = async () => ({ kind: 'mandelbrot', cx: await value('centre x'), cy: await value('centre y'),
                             zoom: await value('zoom'), iterations: await value('iterations') });
 /** A pixel of the preview, at a place in the picture's own pixels (1080 square). */
