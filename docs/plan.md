@@ -70,7 +70,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S15c | many shapes: their list a section, the chosen's params a section of their own | `3d/shape-list` | S | landed 2026-11-16 |
 | S15d | params copied from a shape onto another of a kind that has them: one, a section, or every one it uses | `ui/params-copy` | M | ready — "utilisés", as read: the rows it shows now |
 | S15e | the sections told apart at a glance | `ui/sections` | S | ready |
-| S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | waits: the author's read of the proposal |
+| S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | proposal landed 2026-11-16 (`docs/layouts.md`); waits: the author's read |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
