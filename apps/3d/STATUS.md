@@ -1,5 +1,5 @@
 # STATUS — 3d
-_last touched: 2026-11-11_
+_last touched: 2026-11-16_
 
 M10's app (`docs/roadmap.md`, M10): 3D, from primitives up. A model is
 its shapes — each a primitive, its params, a place and a look — with a
@@ -26,6 +26,13 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
    a set by direction, `role: 'character'`; eight later.
 
 ## Works now
+
+- **The properties for a long use** (S15, 2026-11-16, the author's ask). The
+  shapes a list, a line each — its colour, its name, shown or hidden, out —
+  and the chosen one's params a section of their own under it, *Shape*: a
+  click on a line or in the view chooses (S15c, `core/cards-list.js`). The
+  Export section off the panel, the print floating by Export (S15a); the
+  layers a dock at the panel's foot (S15b) — core's, every app.
 
 - **A cloud in time** (G2, 2026-11-11, the author's picks; `forces.js`,
   `tests/3d-forces.mjs` 29, `check-3d-cloud` 25). A cloud's card's *Forces*,

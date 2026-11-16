@@ -39,6 +39,7 @@ import { defineParams } from './params.js';
 import { ParamPanel }   from './ParamPanel.js';
 import { holdList, partIn } from './steps.js';
 import { held }         from './scope.js';
+import { cardsList }    from './cards-list.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -86,9 +87,11 @@ export class Cards {
    *                                           a state gone back to puts it back (core/steps.js `holdList`)
    * @param {() => void} [opts.onChange]       an entry came or went, moved, or changed a value
    * @param {(index: number) => void} [opts.onChoose]   another entry chosen — its index, or -1 for none
+   * @param {HTMLElement} [opts.list]          the entries as a list of lines here, the menu under them, and in `mount`
+   *                                           the chosen one's card alone (core/cards-list.js, S15c); with `fold`
    */
   constructor({ mount, catalogue, app, schemaOf = null, groups = null, order = false, start = null, words = {},
-                fold = false, inner = null, key = null, onChange = () => {}, onChoose = () => {} }) {
+                fold = false, inner = null, key = null, onChange = () => {}, onChoose = () => {}, list = null }) {
     this.catalogue = catalogue;
     this.app = app;
     this.schemaOf = schemaOf || (id => catalogue[id].params || {});
@@ -120,7 +123,14 @@ export class Cards {
       if (this.fold) this.choose(entry);
       else reveal(entry);
     });
-    mount.append(this.cards, this.empty, this.menu);
+    if (list) {
+      // A list of lines, its menu under it; the chosen card alone in `mount`, a hint while none is (S15c).
+      this.cards.classList.add('pp-cards--split');
+      this.lines = cardsList(this, list);
+      this.hint = el('p', 'pp-cards-empty', this.words.none || 'None chosen: one in the list, or in the view.');
+      list.append(this.empty, this.menu);
+      mount.append(this.cards, this.hint);
+    } else mount.append(this.cards, this.empty, this.menu);
   }
 
   /** The list as a recipe holds it, each entry's inner list under its key. */
@@ -150,6 +160,7 @@ export class Cards {
     this.chosen = entry;
     for (const e of this.entries) this.mark(e);
     if (entry) reveal(entry);
+    if (this.lines) this.paint();
     if (changed) this.onChoose(this.chosenIndex);
   }
 
@@ -185,8 +196,10 @@ export class Cards {
       entry.on = !entry.on;
       toggle.textContent = entry.on ? this.words.on : this.words.off;
       card.classList.toggle('pp-card--off', !entry.on);
+      if (this.lines) this.lines.paint();
       this.onChange();
     });
+    entry.toggle = toggle;
     card.classList.toggle('pp-card--off', !on);
     panel.head.append(toggle);
     if (this.order) {
@@ -195,7 +208,7 @@ export class Cards {
       panel.head.append(entry.up, entry.down);
     }
     panel.head.append(headButton('✕', this.words.out, () => this.remove(entry)));
-    params.on(() => this.onChange());
+    params.on(() => { if (this.lines) this.lines.paint(); this.onChange(); });      // a line's colour, in a list
     // Its values in a state's recipe: the entry at its place, of its kind — for its rows' value in each state.
     if (this.listIn) partIn(params, recipe => { const e = this.entryIn(recipe, entry); return e ? e.params : null; });
 
@@ -286,6 +299,7 @@ export class Cards {
   /** The first card cannot go up, the last cannot go down; an empty list says so. */
   paint() {
     this.empty.hidden = this.entries.length > 0;
+    if (this.lines) { this.lines.paint(); this.hint.hidden = !!this.chosen || !this.entries.length; }
     if (!this.order) return;
     this.entries.forEach((e, i) => {
       e.up.disabled = i === 0;

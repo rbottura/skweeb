@@ -103,7 +103,9 @@ c.ok('lit from above: the top of the sphere brighter than its foot', lit[2] > sh
 c.ok('three cards, the shapes drawer says 3', (await page.eval(`${cards}.length`)) === 3
   && (await page.eval(`document.querySelector('.dr-note')?.textContent`)) === '3');
 const tallest = await page.eval(`Math.max(...${cards}.map(c => c.getBoundingClientRect().height))`);
-c.ok('the cards fold: none chosen, a line each', (await choice()) === 'folded folded folded' && tallest < 48, `${await choice()}, ${tallest} px`);
+const lines = () => page.eval(`[...document.querySelectorAll('.pp-cards-line')].map(l => l.querySelector('.pp-cards-line-name').textContent + (l.classList.contains('pp-cards-line--chosen') ? '*' : ''))`);
+c.ok('the shapes a list, a line each, its colour; none chosen, no card shown (S15c)', (await choice()) === 'folded folded folded' && tallest === 0
+  && JSON.stringify(await lines()) === '["box","sphere","torus"]', `${await choice()}, ${tallest} px, ${JSON.stringify(await lines())}`);
 await c.shot('1-opening');
 
 // ── Chosen by a click ───────────────────────────────────────────────────────
@@ -112,6 +114,9 @@ await keep();
 await press(0.5, 0.5);
 c.ok('a click on the sphere chooses its card: marked, the one open', (await choice()) === 'folded chosen folded'
   && (await page.eval(`${cards}[1].querySelector('.pp-body').getBoundingClientRect().height`)) > 100, await choice());
+c.ok('…its line marked, its card alone in the Shape section, under the list', JSON.stringify(await lines()) === '["box","sphere*","torus"]'
+  && (await page.eval(`(() => { const c = ${cards}[1], dr = c.closest('.dr'); return /^Shape/.test(dr.querySelector('.dr-head').textContent) && ${cards}.filter(x => x.offsetParent).length === 1
+    && dr.getBoundingClientRect().top > document.querySelector('.pp-cards-list').getBoundingClientRect().bottom; })()`)), JSON.stringify(await lines()));
 const marked = await changed();
 const [mx0, my0, mx1, my1] = (marked && marked.box) || [0, 0, 0, 0];
 c.ok('…and the view draws its box round it, an outline', !!marked && marked.share > 0 && marked.share < 0.03
@@ -121,10 +126,10 @@ await c.shot('1b-chosen');
 await press(0.03, 0.03);
 c.ok('a click on nothing chooses nothing: folded, no box', (await choice()) === 'folded folded folded'
   && (await changed()).share === 0, `${await choice()}, ${JSON.stringify(await changed())}`);
-await page.click(`${cards}[2].querySelector('.pp-title')`);
+await page.click(`document.querySelectorAll('.pp-cards-line')[2]`);
 await wait(300);
 const torusBox = (await changed()).box || [0, 0, 0, 0];
-c.ok('a click on a card\'s name chooses it, and its shape is marked', (await choice()) === 'folded folded chosen'
+c.ok('a click on a line of the list chooses it, and its shape is marked', (await choice()) === 'folded folded chosen'
   && (torusBox[0] + torusBox[2]) / 2 > 0.6, `${await choice()}, ${JSON.stringify(torusBox)}`);
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
 await wait(300);

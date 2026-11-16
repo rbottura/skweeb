@@ -45,3 +45,22 @@
 .pp-cards-empty { margin: 2px 0 10px; color: var(--fg-2); font-style: italic; }
 .pp-cards-empty[hidden] { display: none; }
 .pp-cards-add { width: 100%; margin-top: 12px; }
+
+/* A list, and the chosen one's card apart (Cards' `list`, S15c; core/cards-list.js): a line an entry — its
+   colour, its name, its buttons — the chosen one marked; under the list's section, that card alone. */
+.pp-cards--split > .pp-card:not(.pp-card--chosen) { display: none; }
+.pp-cards--split > .pp-card > .pp > .pp-head > .pp-title::before { content: none; }
+.pp-cards-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.pp-cards-line { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto auto; align-items: center; gap: 4px;
+  min-height: 28px; padding: 2px 3px 2px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); cursor: pointer; }
+.pp-cards-line:hover { border-color: var(--line-2); }
+.pp-cards-line:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+.pp-cards-line--chosen { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.pp-cards-line--off .pp-cards-line-name { text-decoration: line-through; opacity: 0.6; }
+.pp-cards-swatch { width: 10px; height: 10px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35); }
+.pp-cards-swatch--none { background: repeating-linear-gradient(45deg, var(--line-2) 0 2px, transparent 2px 4px); }
+.pp-cards-line-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 12.5px var(--font-ui); }
+.pp-cards-line-btn { min-height: 22px; padding: 0 6px; font-size: 11px; }
+.pp-cards-line--chosen .pp-cards-line-btn { border-color: var(--line-2); }
+.pp-cards-list:empty { display: none; }
+.pp-cards-list + .pp-cards-empty { margin-top: 0; }

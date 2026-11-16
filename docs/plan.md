@@ -67,7 +67,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | C13 | the author's list of 2026-11-15: the side vault's chips in its frame; numbers short in their boxes; the wheel steps no value; the wall between the side and the viewer, the pictures sized with it | `fix/side-wall` | S | landed 2026-11-15 |
 | S15a | the Export section off the panel, the title bar's Export its way; the print a box floating by that button — every app | `ui/export-print` | S | landed 2026-11-16 |
 | S15b | the object's layers a dock at the panel's foot, always there: one line, "+" when there are none, the chosen's rows folded | `ui/layers-dock` | S | landed 2026-11-16 |
-| S15c | many shapes: their list a section, the chosen's params a section of their own | `3d/shape-list` | S | ready |
+| S15c | many shapes: their list a section, the chosen's params a section of their own | `3d/shape-list` | S | landed 2026-11-16 |
 | S15d | params copied from a shape onto another of a kind that has them: one, a section, or every one it uses | `ui/params-copy` | M | ready — "utilisés", as read: the rows it shows now |
 | S15e | the sections told apart at a glance | `ui/sections` | S | ready |
 | S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | waits: the author's read of the proposal |
