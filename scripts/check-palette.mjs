@@ -72,6 +72,19 @@ await wait(200);
 const menu = await page.eval(`[...document.querySelectorAll('skw-titlebar .tb-menu-item')].map(b => b.textContent.trim())`);
 c.ok("its Export lists the box's acts, and the print", menu.some(t => t.startsWith('Save to the vault')) && menu.some(t => t.startsWith('Print')), JSON.stringify(menu));
 
+// S15a: the Export section off the panel, its acts the menu's; the print a box floating under the Export button.
+c.ok('no Export section in the properties, its acts still in the page', await page.eval(`(() => {
+  const dr = document.querySelector('.dr .pp-actions')?.closest('.dr');
+  return !!dr && !dr.offsetParent && !dr.hidden; })()`));
+await page.click(`[...document.querySelectorAll('skw-titlebar .tb-menu-item')].find(b => /^Print/.test(b.textContent))`);
+await wait(200);
+const box = await page.eval(`(() => { const b = document.querySelector('.pp-printbox'), e = document.querySelector('skw-titlebar .tb-export');
+  if (!b || b.hidden) return null; const r = b.getBoundingClientRect(), s = e.getBoundingClientRect();
+  return { under: r.top >= s.bottom && r.top - s.bottom < 20 && Math.abs(r.right - s.right) < 2, print: !!b.querySelector('.pp-print'), rows: b.querySelectorAll('.pp-row').length }; })()`);
+c.ok("Export's Print… floats the print under the button, its rows and its act", box && box.under && box.print && box.rows >= 2, JSON.stringify(box));
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+c.ok('…and Escape closes it', await page.eval(`document.querySelector('.pp-printbox').hidden`));
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();

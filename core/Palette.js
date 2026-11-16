@@ -17,6 +17,8 @@
  * `.pal`.
  */
 
+import { showPrintBox } from './boxes/print-box.js';
+
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
@@ -72,6 +74,7 @@ function opened(drawer) {
 function unhidden(row) {
   const pop = row.closest('.vf-pop');
   if (pop && pop.hidden) pop.parentElement.querySelector(':scope > .vf-size')?.click();
+  if (row.closest('.pp-printbox[hidden]')) showPrintBox();      // a row of the print, floating by Export (S15a)
 }
 
 /** The hand on a row: its drawer open, the row in view, its control taken. */

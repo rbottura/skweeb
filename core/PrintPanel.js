@@ -19,6 +19,7 @@ import { ParamPanel }   from './ParamPanel.js';
 import { FORMATS, pixelsAtDpi } from './formats.js';
 import { printObject, tilesOf } from './print.js';
 import { download }     from './export.js';
+import { printHostOf } from './boxes/print-box.js';
 
 const SHEETS = FORMATS.filter(f => f.mm);
 
@@ -50,6 +51,7 @@ export class PrintPanel {
    * @param {() => number} [opts.tick]      the frame on screen
    */
   constructor({ mount, app, object, leave, say, format = null, tick = () => 0 }) {
+    mount = printHostOf(mount);      // an Export section's body: its print floats by the Export button (S15a)
     this.app = app;
     this.object = object;
     this.leave = leave;

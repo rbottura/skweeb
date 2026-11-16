@@ -28,6 +28,19 @@ skw-titlebar kbd { display: inline-flex; align-items: center; height: 16px; padd
 .viewer-player .tp { padding: 2px 0 0; }
 .dr--emptied { display: none !important; }
 
+/* The Export section off the panel, the title bar's Export its way; its print floating by that button (S15a;
+   core/boxes/print-box.js). Out of sight, never `hidden`: its buttons are what the menu presses. */
+.dr--offstage { display: none !important; }
+.pp-printbox { position: fixed; z-index: 1300; width: 300px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--panel); color: var(--fg); box-shadow: 0 14px 36px var(--shadow); }
+.pp-printbox[hidden] { display: none; }
+.pp-printbox-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 6px 6px 12px; border-bottom: 1px solid var(--line); background: var(--raised); font: 600 10.5px var(--font-ui); letter-spacing: 0.07em; text-transform: uppercase; color: var(--fg-2); }
+.pp-printbox-x { width: 22px; height: 22px; border: 0; border-radius: var(--radius); background: none; color: var(--fg-2); font: 400 16px/1 var(--font-ui); cursor: pointer; }
+.pp-printbox-x:hover { background: var(--hover); color: var(--fg); }
+.pp-printbox-body { min-height: 0; overflow: auto; padding: 4px 10px 10px; }
+.pp-printbox-body > .pp { position: static; width: auto; border: 0; background: none; }
+.pp-printbox-body > .pp .pp-head { min-height: 0; padding: 2px 0 4px; border: 0; background: none; }
+.pp-printbox-body > .pp .pp-head .pp-title { display: none; }      /* the box's head says Print */
+
 /* ── Rulers and guides (S8; core/shell/rulers.js) ────────────────────────────
    Over the stage's padding, never the picture: the stage keeps the rulers'
    18 px and a margin on their sides (theme.css .viewer-stage). */

@@ -65,6 +65,12 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
 | L13 | an object's layers, in its Stack, kept state by state: L13a in core and every app, "+ overlay…"; L13b particles' overlay fused in | `layers/object-layers`, `layers/particles`, `fix/layer-rows` | M | landed 2026-11-12, both; its rows kept within the section the same day |
 | C13 | the author's list of 2026-11-15: the side vault's chips in its frame; numbers short in their boxes; the wheel steps no value; the wall between the side and the viewer, the pictures sized with it | `fix/side-wall` | S | landed 2026-11-15 |
+| S15a | the Export section off the panel, the title bar's Export its way; the print a box floating by that button — every app | `ui/export-print` | S | landed 2026-11-16 |
+| S15b | the object's layers a dock at the panel's foot, always there: one line, "+" when there are none, the chosen's rows folded | `ui/layers-dock` | S | ready |
+| S15c | many shapes: their list a section, the chosen's params a section of their own | `3d/shape-list` | S | ready |
+| S15d | params copied from a shape onto another of a kind that has them: one, a section, or every one it uses | `ui/params-copy` | M | ready — "utilisés", as read: the rows it shows now |
+| S15e | the sections told apart at a glance | `ui/sections` | S | ready |
+| S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | waits: the author's read of the proposal |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
@@ -236,20 +242,8 @@ data (`docs/decisions.md`): a column ran 2.14 screens as it opened; the
 shared drawers closed, 1.54; a row on one line, 1.32; the shared boxes
 out of the column, 1.23.
 
-**U8a — the shared boxes: one contract, Export first** · → S3, landed 2026-11-03.
-
-**U8b — the player and the Stack, as boxes** · → S3, landed 2026-11-03.
-
-**U8c — Format and Ground, mounted anywhere** · `ui/boxes-format` · S.
-`ParamPanel` learns to mount a group of the schema outside its column,
-still drawn from it (rule 1); Ground one group in every app, where today
-it lives in five different drawers.
-
-**U9 — the author's notes on each app.** Not a branch: the author opens
-each app and writes what is in the way and what is wanted where — the
-brief of U11.
-
-**U10 — the new theme** · → S1, landed 2026-11-03, from the author's description.
+**U8a, U8b** → S3, U8c → S4 and S14b, U10 → S1, all landed. **U9** — the
+author's notes on each app, the brief of U11; S15 is the 3D app's.
 
 **U11 — the new layout** · `ui/layout` · L. From U9's notes, in U10's
 theme, on U8's boxes: where the clock, the frame, the output, the layers
@@ -269,6 +263,13 @@ source its published files. **S1 — the dark theme** · landed 2026-11-03.
 **S14 — the viewer's tools, the format among them** · the author's ask of 2026-11-12 from
 the bench, and two picks (`docs/decisions.md`): S14a the zoom, the states, the guides
 and the ground in every viewer (`core/shell/viewtools.js`, `core/viewzoom.js`); S14b the format.
+
+**S15 — the properties for a long use** · the author, 2026-11-16, using the 3D app a lot:
+"il me faut une meilleure lisibilité et navigation dans le panel droit". Export is the
+title bar's, the print floats by it (a); the layers a dock at the foot (b); a list of
+shapes and the chosen's params apart (c); params copied between shapes (d); sections
+told apart (e) — core's where it can be, so every app has it; and a gallery of
+layouts by use, U11's question again, proposed before it is built (f).
 
 ## G — the graphic system, for BEC 2027
 

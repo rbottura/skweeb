@@ -68,6 +68,14 @@ column (U8c): `groupBox(panel, 'format')`.
 
 ## The Export box — U8a
 
+**Since S15a (2026-11-16) it is off the panel.** The title bar's Export
+lists its acts, so the section said them twice in a long column — the
+author: "la section d'export est redondante". The section stays in the
+page, `.dr--offstage`, never `hidden`: its buttons are what the menu, E's
+pie and the search press. A print mounted in its body floats in a box
+under the Export button instead (`core/boxes/print-box.js`), opened by
+Export's *Print…*, closed by ×, Escape or *Print…* again; no app changed.
+
 The one box whose inside differs most, and the one L10's save sheet stands
 on. An app declares its acts; core draws them, in one order, with one set
 of words, and the print under them:

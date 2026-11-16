@@ -8,6 +8,11 @@
  * vault, to disk, the app's own. Its body keeps the print (core/PrintPanel.js),
  * mounted after them by the app as before.
  *
+ * Since S15a the section is off the panel — the title bar's Export lists its
+ * acts, so it said them twice — and still in the page, its buttons what the
+ * menu, E's pie and the search press; the print mounted in its body floats by
+ * the Export button instead (core/boxes/print-box.js).
+ *
  *   const box = exportBox(panel, {
  *     before: 'format',
  *     vault: { save, still, loop, loopFrames },    // each a function, or left out
@@ -24,6 +29,7 @@
  */
 
 import { Vault } from '../vault.js';
+import { printBox, showPrintBox } from './print-box.js';
 
 /** One set of words for every app — docs/boxes.md, *The words*. */
 export const EXPORT_WORDS = {
@@ -55,6 +61,8 @@ const el = (tag, cls, text) => {
  */
 export function exportBox(panel, { before = null, vault = {}, disk = {}, acts = [] } = {}) {
   const drawer = panel.addDrawer({ id: 'export', title: 'Export', before });
+  drawer.root.classList.add('dr--offstage');         // the title bar's Export is its way (S15a); never `hidden`, which takes its acts off the menu
+  printBox(drawer.body);
   const buttons = {};
   const section = (title, entries) => {
     const given = entries.filter(e => typeof e.run === 'function');
@@ -107,8 +115,9 @@ export function actsOnPage() {
   })).filter(s => s.acts.length);
 }
 
-/** The print under the box: its drawer opened and brought into view. */
+/** The print, floating by the Export button (S15a); a page with no box, its drawer opened and brought into view. */
 export function showPrint() {
+  if (showPrintBox()) return;
   const list = document.querySelector('.dr .pp-actions');
   const dr = list && list.closest('.dr');
   if (!dr) return;
