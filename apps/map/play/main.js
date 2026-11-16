@@ -40,7 +40,7 @@ import { spawnOf, arrival, pathTo, ahead, warpAt, answeringAt as answeringOn } f
 import { Vault }     from '../../../core/vault.js';
 import { Playhead }  from '../../../core/playback.js';
 import { Bar }       from '../../../core/Bar.js';
-import { own }       from '../../../core/keys.js';
+import { own, bare } from '../../../core/keys.js';
 import { appModule, leftBehind } from '../../../core/mount.js';
 
 /** The map, its note and its sign over it — a viewer and its stage once in a scene (`start`). */
@@ -143,8 +143,7 @@ function start(root, mine, given = {}) {
     if (way) { avatar.path = way; steer.queued = null; }
   });
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (sign.isOpen) {
       if (e.key === 'Escape' || USE.has(e.code)) { e.preventDefault(); sign.close(); }
       return;

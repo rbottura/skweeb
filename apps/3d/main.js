@@ -60,6 +60,7 @@ import { viewFactor }     from '../../core/view.js';
 import { whyNoGpu }       from '../../core/gpu/device.js';
 import { setAppPie }      from '../../core/shell/bindings.js';
 import { appModule }      from '../../core/mount.js';
+import { bare }         from '../../core/keys.js';
 
 /**
  * The viewer, one column of drawers, the bar below; the model drawn by
@@ -350,8 +351,7 @@ function wireKeys(mine) {
   // Heard before the vault panel's own keys, so an Escape that closes the
   // panel is seen as that, and lets go of no shape.
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (!vault.isOpen && chosen.key(e)) return;
     // A turntable's clock (motion.js): space plays it or holds it, , and . a frame back and on.
     if (loopOf({ ...params.values, shapes: cards.recipe() }).loop && [' ', ',', '.'].includes(e.key)) {

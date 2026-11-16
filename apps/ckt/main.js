@@ -35,6 +35,7 @@ import { Bar }          from '../../core/Bar.js';
 import { Vault }        from '../../core/vault.js';
 import { requested, openedLine } from '../../core/reopen.js';
 import { appModule }    from '../../core/mount.js';
+import { bare }         from '../../core/keys.js';
 
 const KEYS = '1 2 view · ← → set · ↑ ↓ glyph · space play · , . frame · S save · V vault';
 
@@ -252,8 +253,7 @@ function wire(mine) {
   canvas.addEventListener('pointermove', drag);
 
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === '1') show('dots');
     if (e.key === '2') show('motion');

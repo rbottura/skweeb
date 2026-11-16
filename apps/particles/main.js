@@ -51,6 +51,7 @@ import { wirePointer }    from './pointer.js';
 import { appModule }      from '../../core/mount.js';
 import { layersOf }       from '../../core/layers.js';
 import { openedLayers, laidOn } from '../../core/layers-draw.js';
+import { bare }         from '../../core/keys.js';
 
 /**
  * Three columns, as compose has: what the particles do on the left, the
@@ -380,8 +381,7 @@ function rate() {
 function wireKeys(mine) {
   const vault = new VaultPanel();
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') leaving.save();
     if (leaving.busy() || clock.length < 2) return;

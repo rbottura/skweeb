@@ -231,7 +231,7 @@ function install() {
       if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); const go = floating.paste; close(); if (go) go(); return; }
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); return; }
     }
-    if (floating && e.key === 'Escape') { close(); return; }
+    if (floating && e.key === 'Escape') { e.stopPropagation(); close(); return; }     // the menu's Escape, not the app's
     if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey || typing(e.target)) return;
     const k = (e.key || '').toLowerCase();
     if (k === 'c') {
@@ -239,11 +239,13 @@ function install() {
       const at = hover && levelsAt(hover);
       if (!at) return;
       e.preventDefault();
+      e.stopPropagation();          // Ctrl C is never C: no app's own key hears it (core/keys.js `bare`)
       copy(at, finest(hover, at));
     } else if (k === 'v' && held) {
       const at = target();
       if (!at) return;
       e.preventDefault();
+      e.stopPropagation();          // nor V's vault
       ask(at);
     }
   }, true);

@@ -128,7 +128,21 @@ const reseed = d => { const o = seedRow(); if (o) o.params.set(o.key, o.params.g
 
 const ANCHORS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];       // round the pie as round the picture
 
+let saving = false;            // Ctrl S heard, once a page
+
 export function installBindings() {
+  // Ctrl S keeps its letter (docs/scene.md): the app's S — its Export box's save — never the browser's page
+  // saved. After the app's own keys, which may take it first (the garden's, where S walks).
+  if (!saving && typeof window !== 'undefined') {
+    saving = true;
+    window.addEventListener('keydown', e => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey || e.code !== 'KeyS' || e.defaultPrevented || e.repeat) return;
+      const save = document.querySelector('.pp-actions .nb-btn[data-act="save"]');
+      if (!save || save.disabled) return;
+      e.preventDefault();
+      save.click();
+    });
+  }
   bind('KeyA', { short: 'frame', label: 'the frame before · Shift ten', tap: e => step(-1, e.shiftKey) });
   bind('KeyD', { short: 'frame', label: 'the frame after · Shift ten', tap: e => step(1, e.shiftKey) });
 

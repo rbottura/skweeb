@@ -8,6 +8,11 @@
  * a default too, the torus's rows flashing; Ctrl Z takes the paste back as one
  * step. A row copied by Ctrl C over it and pasted by the sphere's menu; every
  * value of the box onto the sphere, only what the sphere has.
+ *
+ * And the keys in their contexts (S15i), pressed on the page as a hand does —
+ * through the document, where every app hears its own: Ctrl V is not V, the
+ * vault stays shut; Ctrl S is the app's save, once, and never the browser's;
+ * V alone still opens the vault.
  */
 
 import { startCheck } from './check-kit.mjs';
@@ -15,8 +20,12 @@ import { startCheck } from './check-kit.mjs';
 const c = await startCheck();
 const { page } = c;
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const ctrl = k => page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: '${k}', ctrlKey: true, bubbles: true }))`);
-const key = k => page.eval(`window.dispatchEvent(new KeyboardEvent('keydown', { key: '${k}', bubbles: true }))`);
+// Down through the document, as a key a hand presses: the app's own keys hear it there.
+const press = (k, ctrlKey = false) => page.eval(`document.body.dispatchEvent(new KeyboardEvent('keydown', { key: '${k}',
+  code: '${/^[a-z]$/.test(k) ? 'Key' + k.toUpperCase() : k}', ctrlKey: ${ctrlKey}, bubbles: true, cancelable: true }))`);
+const ctrl = k => press(k, true);
+const key = k => press(k);
+const vaultOpen = () => page.eval(`!!document.querySelector('.vp--visible')`);
 const card = name => `[...document.querySelectorAll('.pp-card')].find(c => !c.parentElement.closest('.pp-card') && c.querySelector('.pp-title').textContent === '${name}')`;
 const values = name => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${card(name)}.querySelector('.pp-row[data-key]')).params.values)`);
 const choose = i => page.click(`document.querySelectorAll('.pp-cards-line')[${i}]`);
@@ -28,6 +37,12 @@ const pick = words => page.click(`[...document.querySelectorAll('.pc-menu-item')
 await c.go(c.base + '/apps/3d/');
 await page.until(`document.querySelectorAll('.pp-cards-line').length === 3`, { timeout: 30000 });
 await wait(800);
+
+// ── Ctrl V with nothing copied: not V — no vault (S15i) ─────────────────────
+await ctrl('v');
+await wait(250);
+c.ok('Ctrl V with nothing copied: no vault, no question — Ctrl V is not V', !(await vaultOpen())
+  && await page.eval(`!document.querySelector('.pc-prompt')`));
 
 // ── A section, by its menu; pasted by Ctrl V, asked, Enter ───────────────────
 await choose(0);
@@ -46,7 +61,8 @@ await ctrl('v');
 await wait(150);
 await c.shot('asked');
 const asked = await page.eval(`document.querySelector('.pc-prompt')?.textContent || ''`);
-c.ok('Ctrl V asks first, over the chosen card: what, from where, onto what', /^Paste Place of box onto torus — \d+ values/.test(asked) && /Enter$/.test(asked), asked);
+c.ok('Ctrl V asks first, over the chosen card: what, from where, onto what — and no vault', /^Paste Place of box onto torus — \d+ values/.test(asked)
+  && /Enter$/.test(asked) && !(await vaultOpen()), asked);
 const still = await values('torus');
 await key('Enter');
 await wait(100);
@@ -93,6 +109,17 @@ await pick('Paste every value');
 await wait(100);
 const sphere = await values('sphere');
 c.ok('…pasted: its place the box\'s, no width given it', sphere.x === box.x && !('width' in sphere), JSON.stringify(sphere));
+
+// ── Ctrl S keeps its letter: the app's save, once, never the browser's (S15i) ──
+const saves = await page.eval(`(async () => { let n = 0; document.addEventListener('vault:saved', () => n++);
+  const kept = document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 's', code: 'KeyS', ctrlKey: true, bubbles: true, cancelable: true }));
+  for (let i = 0; i < 150 && !n; i++) await new Promise(r => setTimeout(r, 100));
+  await new Promise(r => setTimeout(r, 1500));
+  return { n, prevented: !kept }; })()`);
+c.ok("Ctrl S: the app's save, once — the browser's page never saved", saves.n === 1 && saves.prevented, JSON.stringify(saves));
+await key('v');
+await wait(400);
+c.ok('V alone opens the vault, as ever', await vaultOpen());
 
 await c.shot('params-copy');
 const noise = c.quiet();

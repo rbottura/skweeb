@@ -48,6 +48,7 @@ import { createRunner }   from '../../core/gpu/runner.js';
 import { whyNoGpu }       from '../../core/gpu/device.js';
 import { appModule }      from '../../core/mount.js';
 import { layeredPng } from '../../core/layers-draw.js';
+import { bare }         from '../../core/keys.js';
 
 /** Past this zoom a 32-bit float cannot tell neighbouring pixels apart (fractal.js, *The plane*). */
 const DEEPEST = 5e4;
@@ -348,8 +349,7 @@ function downloadPicture() {
 function wireKeys(mine) {
   const vault = new VaultPanel();
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (busy || clock.length < 2) return;

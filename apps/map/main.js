@@ -45,6 +45,7 @@ import { setAppPie, setOverlay } from '../../core/shell/bindings.js';
 import { Vault }        from '../../core/vault.js';
 import { viewFactor }   from '../../core/view.js';
 import { appModule }    from '../../core/mount.js';
+import { bare }         from '../../core/keys.js';
 
 /** The map's panel on the left, the map between, the things on it on the right; the bar under all three is core's. No p5: Canvas 2D. */
 const MARKUP = `
@@ -348,8 +349,7 @@ function paint() {
 function wireKeys(mine) {
   const vault = new VaultPanel();
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (e.key === '1') useTool('tiles');

@@ -56,7 +56,7 @@ import { Bar }                  from '../../../core/Bar.js';
 import { Vault }                from '../../../core/vault.js';
 import { viewFactor }           from '../../../core/view.js';
 import { surface }              from '../../../core/surface.js';
-import { own }                  from '../../../core/keys.js';
+import { own, bare }            from '../../../core/keys.js';
 import { appModule, leftBehind } from '../../../core/mount.js';
 
 /** The viewer and its head, the drawers beside it; the camera's video and what troubles it, in the stage. */
@@ -368,8 +368,7 @@ function showAlone(on) {
 function wireKeys(mine, ownVault) {
   const vault = ownVault ? new VaultPanel() : null;
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 's' || e.key === 'S') send();
     if (e.key === 'b' || e.key === 'B') showGuides(!guides);
     if (e.key === 'h' || e.key === 'H') showAlone(!obs);

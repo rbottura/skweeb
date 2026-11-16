@@ -72,6 +72,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S15e | the sections told apart at a glance | `ui/sections` | S | ready |
 | S15g | Alt click on a slider: its range's ends set by hand, kept for the app in this browser — or a preset | `ui/slider-range` | S | ready |
 | S15h | a rail of icons, a section each, beside the panel: a click brings that section beside the cursor | `ui/section-rail` | S | landed 2026-11-16 |
+| S15i | keys in their contexts: an app's letters bare only — Ctrl V is not V's vault, Ctrl S the app's save, never the browser's | `fix/keys-context` | S | landed 2026-11-16 |
+| S15j | the panel wider, its edge dragged as the scene's vault's wall is, its width kept | `ui/panel-wall` | S | ready |
+| S15k | Shapes a dock at the panel's top, as the layers are at its foot; the chosen card's head the object's name, no arrow | `3d/shapes-dock` | S | ready |
+| S15l | the rail into a card's own sections — Form, Place, Look… of the chosen shape | `ui/rail-card` | S | ready |
 | S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | proposal landed 2026-11-16 (`docs/layouts.md`); waits: the author's read |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
@@ -210,9 +214,7 @@ job. Rule 5: `assets/fonts/` lacks its `OFL.txt` files, and Destra's
 licence is to be named in its own (`docs/fonts.md`; the roadmap's *Still
 open*, 1). *Done when* every face has its licence beside it.
 
-**C4 — two known bugs** · `fix/trashed-sets`, `fix/recut-folder` · landed
-2026-11-06: a set in the trash offered no more in the gamepad and ckt; the
-same dots cut again filed with this visit's session.
+**C4, C10** · landed 2026-11-06 and 2026-11-04: two known bugs; the checks several at a time (`docs/workflow.md`).
 
 **C5 — the unit loop on GitHub** · `clean/ci` · S. A workflow that runs
 every `tests/*.mjs` on Node 22 at each push — a red mark on a branch before
@@ -229,20 +231,10 @@ different in each. A module of them beside `check-kit.mjs`, each check
 taking what it uses: what rule 4's eased cap leaves to split is then
 seams, never copies. *Done when* no check defines a helper another has.
 
-**C10 — the checks several at a time, picked by what a change reaches** ·
-landed 2026-11-04, `clean/checks`: `docs/workflow.md`, *The gate*.
-
 ## U — the UI redesigned: boxes, layout, theme
 
-The author, 2026-10-22, after the measures: measuring the columns is not
-needed (U0, dropped); what is wanted is a layout better than a column that
-scrolls, found from notes the author takes app by app (U9); the boxes every
-app shares gathered first, as components present in every app (U8); and
-the theme rethought with it — the neo-brutalism of 2026-09-23 likely left
-for what the author will describe (U10). The measures of that day stay as
-data (`docs/decisions.md`): a column ran 2.14 screens as it opened; the
-shared drawers closed, 1.54; a row on one line, 1.32; the shared boxes
-out of the column, 1.23.
+The author, 2026-10-22: a layout better than a column that scrolls, from the author's notes app by app (U9),
+the shared boxes first (U8), the theme with it (U10). The measures of that day: `docs/decisions.md`.
 
 **U8a, U8b** → S3, U8c → S4 and S14b, U10 → S1, all landed. **U9** — the
 author's notes on each app, the brief of U11; S15 is the 3D app's.

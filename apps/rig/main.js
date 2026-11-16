@@ -49,7 +49,7 @@ import { VaultPanel }   from '../../core/VaultPanel.js';
 import { Playhead }     from '../../core/playback.js';
 import { Bar }          from '../../core/Bar.js';
 import { Vault }        from '../../core/vault.js';
-import { own }          from '../../core/keys.js';
+import { own, bare }    from '../../core/keys.js';
 import { viewFactor }   from '../../core/view.js';
 import { appModule }    from '../../core/mount.js';
 
@@ -388,8 +388,7 @@ function paint() {
 function wireKeys(mine) {
   const vault = new VaultPanel();
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 'b' || e.key === 'B') toggleBones();
     if (e.key === 'r' || e.key === 'R') toRest();

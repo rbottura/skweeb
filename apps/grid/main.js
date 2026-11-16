@@ -41,6 +41,7 @@ import { Vault }                   from '../../core/vault.js';
 import { resolveFrame, applyFrameEdit } from '../../core/frame.js';
 import { requested, openedLine }   from '../../core/reopen.js';
 import { appModule }               from '../../core/mount.js';
+import { bare }         from '../../core/keys.js';
 
 /**
  * The shell from core/theme.css: the viewer, one column of drawers, and the
@@ -434,8 +435,7 @@ function wireKeys(mine) {
   const vault = new VaultPanel();
 
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (busy || !source || source.frames < 2) return;

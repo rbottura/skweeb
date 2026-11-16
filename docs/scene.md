@@ -55,7 +55,9 @@ The author's, 2026-11-03, each tried before it was kept.
   reset), place. Q D frames, S save, Space play or pan, Tab the panels, X
   reset what is under the cursor, G ground, H the states, ² the search —
   every control and act by name — Ctrl K too. Ctrl Z, Ctrl S keep their
-  letters.
+  letters. Since S15i a letter with Ctrl, Alt or ⌘ is never the letter: an
+  app's own keys are bare (`core/keys.js` `bare`); Ctrl C and Ctrl V copy and
+  paste a card's values (S15d), Ctrl S is the app's save, Ctrl Z, Y steps.
 - **The player** as After Effects' preview: first, back, play, on, last,
   loop; a timecode; the fps a list; the loop's length; a ruler to scrub.
 - **Saving, in the author's order** — the project: S, the next state of

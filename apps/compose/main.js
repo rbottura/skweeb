@@ -49,6 +49,7 @@ import { Vault }          from '../../core/vault.js';
 import { applyFrameEdit } from '../../core/frame.js';
 import { requested, openedLine, reopenUrl, follow } from '../../core/reopen.js';
 import { appModule }      from '../../core/mount.js';
+import { bare }         from '../../core/keys.js';
 
 const AT_REST = { x: 0, y: 0, scale: 1, rot: 0 };
 
@@ -323,8 +324,7 @@ function describe() {
 function wireKeys(mine) {
   const vault = new VaultPanel();
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') leaving.save();
     if (leaving.busy()) return;

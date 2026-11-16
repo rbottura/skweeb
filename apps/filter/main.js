@@ -34,6 +34,7 @@ import { Vault }                from '../../core/vault.js';
 import { createRunner, reachOf } from '../../core/gpu/runner.js';
 import { whyNoGpu }             from '../../core/gpu/device.js';
 import { appModule }            from '../../core/mount.js';
+import { bare }         from '../../core/keys.js';
 
 /** The viewer, one column of drawers, the bar below. No p5: the filters run on the GPU, the page is Canvas 2D round them. */
 const MARKUP = `
@@ -389,8 +390,7 @@ function wireKeys(mine) {
   const vault = new VaultPanel();
 
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (busy || !source || source.frames < 2) return;

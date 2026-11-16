@@ -31,6 +31,19 @@ let installed = false;
 let held = null;              // { code, b, timer, pie } while a bound key is down
 let pointer = null;           // where the pointer last was: a pie opens there
 
+/**
+ * A key an app's own letters may take (S15i, 2026-11-16): no Ctrl, no Alt, no Meta key — Ctrl V, Ctrl C and
+ * Ctrl S are other keys, core's (core/params-copy.js, core/shell/bindings.js) or the browser's, never V's, C's
+ * or S's — and not typed into a field. The author: "Ctrl V déclenche l'apparition du vault, il faut faire
+ * attention au multi-fonction qu'un raccourci clavier peut avoir selon les contextes". Every app's own
+ * keydown asks it first.
+ */
+export function bare(e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) return false;
+  const t = e.target;
+  return !(t instanceof Element && (/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable));
+}
+
 /** What a key does: a tap, and a pie to hold — `when` false, the key is not core's this moment. */
 export function bind(code, spec) { bindings.set(code, spec); }
 

@@ -29,6 +29,7 @@ import { Vault }      from '../../core/vault.js';
 import { openFrames, inkSize } from '../../core/rebuild.js';
 import { closer }     from '../../core/zoom.js';
 import { appModule, leftBehind } from '../../core/mount.js';
+import { bare }         from '../../core/keys.js';
 
 /** The vault on the left, as wide as it needs; the object chosen in the viewer, its player under it. */
 const MARKUP = `
@@ -89,8 +90,7 @@ function start(host, mine, given = {}) {
   sized.observe(canvas.parentElement);
   mine.hold(() => sized.disconnect());
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (!handle || handle.length < 2) return;
     if (e.key === ' ') { e.preventDefault(); clock.toggle(); }
     if (e.key === ',') { clock.pause(); clock.step(-1); }

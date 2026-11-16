@@ -43,6 +43,7 @@ import { viewFactor }           from '../../core/view.js';
 import { createRunner }         from '../../core/gpu/runner.js';
 import { whyNoGpu }             from '../../core/gpu/device.js';
 import { appModule }            from '../../core/mount.js';
+import { bare }         from '../../core/keys.js';
 
 /** The viewer, one column of drawers, the bar below; drawn on the GPU, shown on a Canvas 2D; no p5. */
 const MARKUP = `
@@ -323,8 +324,7 @@ function rate() {
 function wireKeys(mine) {
   const vault = new VaultPanel();
   mine.listen(document, 'keydown', e => {
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (!bare(e)) return;          // no field, no Ctrl, Alt or Meta: Ctrl V is not V (core/keys.js, S15i)
     if (e.key === 'v' || e.key === 'V') vault.toggle();
     if (e.key === 's' || e.key === 'S') save();
     if (busy || clock.length < 2) return;
