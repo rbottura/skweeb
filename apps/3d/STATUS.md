@@ -40,6 +40,8 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   beside the hand (S15h, `core/section-rail.js`). The panel 360 px, its
   edge toward the viewer dragged wider or narrower, kept in this browser
   (S15j, `core/side-wall.js`). Ctrl V is not V, Ctrl S the save (S15i).
+  The shapes' list a dock at the panel's head, never scrolled away, its
+  chosen card's head the object's name — its colour, "box 2" — no fold (S15k).
 
 - **A cloud in time** (G2, 2026-11-11, the author's picks; `forces.js`,
   `tests/3d-forces.mjs` 29, `check-3d-cloud` 25). A cloud's card's *Forces*,

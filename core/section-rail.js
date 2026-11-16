@@ -57,14 +57,14 @@ export function sectionRail(root, body) {
   root.append(rail);
 
   /** The sections shown now: the column's, then the dock's. */
-  const sections = () => [...root.querySelectorAll(':scope > .pp-body > .dr, :scope > .pp-foot > .dr')]
+  const sections = () => [...root.querySelectorAll(':scope > .pp-top > .dr, :scope > .pp-body > .dr, :scope > .pp-foot > .dr')]
     .filter(d => !d.hidden && d.offsetParent !== null);
 
   function mark() {
     const R = body.getBoundingClientRect();
     for (const b of rail.children) {
       const r = b._dr.getBoundingClientRect();
-      b.classList.toggle('pp-rail-btn--seen', b._dr.closest('.pp-foot') ? true : r.bottom > R.top + 8 && r.top < R.bottom - 8);
+      b.classList.toggle('pp-rail-btn--seen', b._dr.closest('.pp-foot, .pp-top') ? true : r.bottom > R.top + 8 && r.top < R.bottom - 8);
     }
   }
 
@@ -107,7 +107,7 @@ export function sectionRail(root, body) {
   let asked = false;
   const again = () => { if (asked) return; asked = true; requestAnimationFrame(() => { asked = false; paint(); }); };
   // Only what changes the sections: a child of the column or the dock, a section's hidden or its classes — never a row's.
-  const counts = r => (r.type === 'childList' ? r.target === root || r.target.matches('.pp-body, .pp-foot') : r.target.classList.contains('dr') && r.target.parentElement !== null && !rail.contains(r.target));
+  const counts = r => (r.type === 'childList' ? r.target === root || r.target.matches('.pp-top, .pp-body, .pp-foot') : r.target.classList.contains('dr') && r.target.parentElement !== null && !rail.contains(r.target));
   const watch = new MutationObserver(records => { if (records.some(counts)) again(); });
   watch.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'class'] });
   held(() => watch.disconnect());

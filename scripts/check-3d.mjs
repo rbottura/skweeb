@@ -208,7 +208,7 @@ c.ok('Delete takes it out: three again, nothing chosen', (await page.eval(`${car
 
 // ── A stack of modifiers ────────────────────────────────────────────────────
 
-await page.click(`${cards}[0].querySelector('.pp-title')`);
+await page.click(`document.querySelectorAll('.pp-cards-line')[0]`);
 await wait(300);
 await keep();
 const modMenu = `${cards}[0].querySelector('.pp-cards-add')`;

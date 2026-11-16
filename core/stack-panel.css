@@ -47,6 +47,10 @@
    Past a third of the panel it scrolls on its own. */
 .pp-foot { flex: none; max-height: 38%; overflow: auto; padding: 8px 7px 2px 0; border-top: 1px solid var(--line-2); }
 .pp-foot .dr { margin: 0; }
+/* Its twin at the head (S15k; ParamPanel's `addDrawer({ dock: 'top' })`): the 3D app's shapes, never scrolled
+   away; as tall as what is in it — its list scrolls past twelve lines, the dock never. */
+.pp-top { flex: none; padding: 0 7px 8px 0; margin-bottom: 8px; border-bottom: 1px solid var(--line-2); }
+.pp-top .dr { margin: 0; }
 .pp-foot .dr-body { padding-top: 2px; }
 .pp-foot .pp-row[data-key="layers"] > .pp-label, .pp-foot .pp-row[data-key="layers"] > .pp-mark { display: none; }
 .pp-foot .pp-row[data-key="layers"] { padding-left: 0; }

@@ -50,6 +50,13 @@ export function cardsList(cards, mount) {
 
   function paint() {
     const w = cards.words, all = names();
+    // Each card's head the object's name as its line says it: its colour, its number from the second of a kind.
+    cards.entries.forEach((e, i) => {
+      const colour = e.params.values.colour;
+      if (e.swatch) e.swatch.style.background = typeof colour === 'string' && colour.startsWith('#') ? colour : '';
+      if (e.swatch) e.swatch.classList.toggle('pp-cards-swatch--none', !(typeof colour === 'string' && colour.startsWith('#')));
+      e.title.dataset.n = all[i] === e.item.label ? '' : all[i].slice(e.item.label.length + 1);
+    });
     node.replaceChildren(...cards.entries.map((e, i) => {
       const line = el('li', 'pp-cards-line' + (e === cards.chosen ? ' pp-cards-line--chosen' : '') + (e.on ? '' : ' pp-cards-line--off'));
       line.tabIndex = 0;

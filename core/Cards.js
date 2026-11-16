@@ -193,8 +193,10 @@ export class Cards {
     const card = el('div', 'pp-card');
     const panel = new ParamPanel(params, { title: item.label, mount: card, ...(this.groups ? { groups: this.groups } : {}) });
     const entry = { item, params, on, card, panel, title: panel.head.querySelector('.pp-title') };
-    // Folded, its name opens it or folds it; in a list's section, the one shown, it stays (S15c).
-    if (this.fold) foldable(entry, () => this.choose(this.chosen === entry && !this.lines ? null : entry));
+    // Folded, its name opens it or folds it. In a list's section its head is the object's name — its colour, its
+    // name as the list says it — and folds nothing: the list chooses (S15c, S15k; core/cards-list.js).
+    if (this.fold && !this.lines) foldable(entry, () => this.choose(this.chosen === entry ? null : entry));
+    if (this.lines) panel.head.prepend(entry.swatch = el('span', 'pp-cards-swatch pp-card-swatch'));
     if (this.inner) entry.inner = this.innerOf(panel, entry);
     copyable(card, params, () => this.nameOf(this.entries.indexOf(entry)));     // its values copied and pasted by level (S15d)
 

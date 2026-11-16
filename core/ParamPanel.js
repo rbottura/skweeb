@@ -184,13 +184,21 @@ export class ParamPanel {
   /**
    * A drawer for something that is not a parameter.
    *
-   * @param {object} opts  { id, title, open, note, before } — `before` is the
-   *                       id of a drawer to go in front of; the end otherwise
+   * @param {object} opts  { id, title, open, note, before, dock } — `before` is the
+   *                       id of a drawer to go in front of; the end otherwise;
+   *                       `dock: 'top'`, at the panel's head, never scrolled away (S15k)
    * @returns {Drawer}
    */
-  addDrawer({ id, title, open = true, note = '', before = null }) {
+  addDrawer({ id, title, open = true, note = '', before = null, dock = null }) {
     const drawer = new Drawer({ title, open, note, id: `${this._params.app}:${id}` });
     drawer.root.dataset.group = id;        // its icon on the rail (core/section-rail.js)
+    if (dock === 'top') {                  // a dock at the head, as the layers' at the foot: the 3D app's shapes (S15k)
+      if (!this._top) this._body.before(this._top = el('div', 'pp-top'));
+      this._top.append(drawer.root);
+      this._drawers.set(id, drawer);
+      this._extra.add(id);
+      return drawer;
+    }
     const next = before && (this._drawers.has(before) ? this._drawers.get(before).root : this._at.get(before));
     if (next) this._body.insertBefore(drawer.root, next);
     else this._body.append(drawer.root);

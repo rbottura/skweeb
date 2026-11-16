@@ -132,7 +132,7 @@ async function boot(mine) {
   const panel = new ParamPanel(params, { title: '3d', mount: root.querySelector('#side'), groups: GROUPS });
 
   // The shapes a list, a line each; the chosen one's params a section of their own under it (S15c, core/cards-list.js).
-  shapesDrawer = panel.addDrawer({ id: 'shapes', title: 'Shapes', before: 'view' });
+  shapesDrawer = panel.addDrawer({ id: 'shapes', title: 'Shapes', dock: 'top' });     // fixed at the panel's head, as the layers at its foot (S15k)
   const shapeDrawer = panel.addDrawer({ id: 'shape', title: 'Shape', before: 'view' });
   // A card changed: the loop fitted again — a shape set swinging makes the model one, and plays it (P2).
   cards = new Cards({ ...SHAPE_CARDS, mount: shapeDrawer.body, list: shapesDrawer.body, onChange: () => { const was = clock.length > 1; fitClock();

@@ -34,7 +34,7 @@ const DL = path.join(c.dir, 'downloads');
 await page.downloadsTo(DL);
 
 // A model with everything a poster would have: a stack on the box, the whole style.
-await page.click(`document.querySelector('.pp-card .pp-title')`);
+await page.click(`document.querySelector('.pp-cards-line')`);          // the box chosen by its line (S15c)
 await wait(300);
 const modMenu = `[...document.querySelectorAll('.pp-card')][0].querySelector('.pp-cards-add')`;
 await page.typeInto(modMenu, 'subdivide');

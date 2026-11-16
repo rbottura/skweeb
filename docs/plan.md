@@ -74,7 +74,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S15h | a rail of icons, a section each, beside the panel: a click brings that section beside the cursor | `ui/section-rail` | S | landed 2026-11-16 |
 | S15i | keys in their contexts: an app's letters bare only — Ctrl V is not V's vault, Ctrl S the app's save, never the browser's | `fix/keys-context` | S | landed 2026-11-16 |
 | S15j | the panel wider, its edge dragged as the scene's vault's wall is, its width kept | `ui/panel-wall` | S | landed 2026-11-16 |
-| S15k | Shapes a dock at the panel's top, as the layers are at its foot; the chosen card's head the object's name, no arrow | `3d/shapes-dock` | S | ready |
+| S15k | Shapes a dock at the panel's top, as the layers are at its foot; the chosen card's head the object's name, no arrow | `3d/shapes-dock` | S | landed 2026-11-16 |
 | S15l | the rail into a card's own sections — Form, Place, Look… of the chosen shape | `ui/rail-card` | S | ready |
 | S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | proposal landed 2026-11-16 (`docs/layouts.md`); waits: the author's read |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
