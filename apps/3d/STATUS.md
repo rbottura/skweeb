@@ -306,7 +306,14 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**G3 — more parameters**, the author's pick (`docs/plan.md`): its list —
+**S15g — a slider's range by hand** (`docs/plan.md`): Alt click on a
+slider opens its two ends, set by hand, kept for the app in this browser —
+the pins' way (`core/ParamPanel.js` `_pin`), never the schema's limits.
+Alt click on a label shows or hides its slider today: the click on the
+track is free. Then S15e, the sections told apart — on a capture, the
+author's eye. S15f waits on the author's read of `docs/layouts.md`.
+
+Before S15, **G3 — more parameters**, the author's pick (`docs/plan.md`): its list —
 particles' colour over life, the overlay's place and blend, an emitter
 denser where a picture is darker; a cloud's dots growing or turning colour
 as they go, a set's sprites, rings.
