@@ -60,6 +60,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | G1 | a cloud of dots in the 3D app: particles' emitter, its dots placed once — where (R) and their colours (C) seeds, a palette, sizes between two, unlit | `3d/cloud` | M | landed 2026-11-11 |
 | G2 | the cloud in time: a vortex, gravity, a pull, drag and noise on its dots from rest, every frame its own, saved as a sequence | `3d/cloud-forces` | M | landed 2026-11-11 |
 | G3 | the overlay composed: in front or behind, fitted, sized, moved, turned, see-through, blended, dragged | `particles/overlay-compose` | S | landed 2026-11-11 |
+| G4 | a drawn body: a gamepad drawing's strokes lofted — each mark's brush traced to its silhouette, a ring; the rings joined, the ends a point or flat | `3d/drawn-body` | M | landed 2026-11-16 |
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |
 | L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
@@ -76,7 +77,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S15j | the panel wider, its edge dragged as the scene's vault's wall is, its width kept | `ui/panel-wall` | S | landed 2026-11-16 |
 | S15k | Shapes a dock at the panel's top, as the layers are at its foot; the chosen card's head the object's name, no arrow | `3d/shapes-dock` | S | landed 2026-11-16 |
 | S15l | the rail into a card's own sections — Form, Place, Look… of the chosen shape | `ui/rail-card` | S | landed 2026-11-16 |
-| S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | proposal landed 2026-11-16 (`docs/layouts.md`); waits: the author's read |
+| S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | proposal landed 2026-11-16 (`docs/layouts.md`); parked: "on garde sous le coude" |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
 | M14a | the garden: a map gardened in — flowers grown from their marks, a chain of modifiers, generations planted | `map/garden` | M | landed 2026-11-06 (`apps/map/STATUS.md`) |
@@ -277,6 +278,12 @@ sizes the day before (V1b and the two rows after it).
 evolution played once, forces a cloud each (`forces.js`); the overlay composed — "c'est à peu près tout pour
 l'instant une fois l'overlay en place", colour and size in time not for this system. Left on the list: an
 emitter denser where a picture is darker; a cloud's dots a set's sprites, or rings.
+
+**G4** · the author, 2026-11-16: "une séquence faite au gamepad … on tirerait une silhouette du motif utilisé
+(… un filtre de seuil et une conversion bitmap-to-svg) … un segment qu'on connecterait au prochain … en fermant
+le mesh … des worms et des fleurs en 3d". Landed: `apps/3d/loft.js`, `silhouette.js`, `drawn.js` — sections
+across the stroke (a worm) or as stamped, stepped back; no library (sand3d is Python on Blender). Left: flowers
+as such, petals round a heart; a stroke's growth in time; a silhouette's holes.
 
 ## L — layers and smart objects
 

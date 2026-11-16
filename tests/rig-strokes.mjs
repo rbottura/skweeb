@@ -1,7 +1,7 @@
 /**
  * tests/rig-strokes.mjs — run with: node tests/rig-strokes.mjs
  *
- * Covers apps/rig/strokes.js and drawing.js, a drawing's strokes found again
+ * Covers core/stage/strokes.js and drawing.js, a drawing's strokes found again
  * from its marks. The promises — a jump is a lifted pen and a pause is not,
  * so a pen held still before it moves stays one stroke; a path is measured
  * along its length, and a point found between its marks; a corner is where
@@ -10,8 +10,8 @@
  * cropped as it was, a mirror pattern's copy a stroke of its own, mirrored.
  */
 
-const { strokesOf, pathOf, pointAt, cornersOf } = await import('../apps/rig/strokes.js');
-const { drawingOf, spritesOf } = await import('../apps/rig/drawing.js');
+const { strokesOf, pathOf, pointAt, cornersOf } = await import('../core/stage/strokes.js');
+const { drawingOf, spritesOf } = await import('../core/stage/drawing.js');
 
 let fails = 0;
 const ok = (label, got, want) => {

@@ -34,8 +34,8 @@ const extent = g => {
 
 // ── The catalogue ────────────────────────────────────────────────────────────
 
-ok('nine shapes, in the menu\'s order — BEC\'s grid, then a cloud of dots (tests/3d-cloud.mjs)', Object.keys(SHAPES),
-   ['box', 'sphere', 'cylinder', 'cone', 'torus', 'plane', 'capsule', 'grid', 'cloud']);
+ok('ten shapes, in the menu\'s order — BEC\'s grid, a cloud of dots (tests/3d-cloud.mjs), a drawn body (tests/3d-drawn.mjs)', Object.keys(SHAPES),
+   ['box', 'sphere', 'cylinder', 'cone', 'torus', 'plane', 'capsule', 'grid', 'cloud', 'drawn']);
 ok('each entry says its own id', Object.entries(SHAPES).every(([k, s]) => s.id === k && typeof s.label === 'string'), true);
 ok('every schema declares, as a card will', Object.keys(SHAPES).every(id => !!defineParams('3d:' + id, shapeSchema(id))), true);
 ok('a schema is the form, then place and look', Object.keys(shapeSchema('sphere')),

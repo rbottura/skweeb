@@ -15,7 +15,7 @@
  */
 
 import { openDrawing, framesOf, isPose, openPathFrom, centreOf, placesOf, inkOf } from '../frames.js';
-import { drawingOf, hasMarks } from '../drawing.js';
+import { drawingOf, hasMarks } from '../../../core/stage/drawing.js';
 import { proposeBones, posed } from '../bones.js';
 import { withParts, guessParts } from '../parts.js';
 import { bind, placeOf }       from '../skin.js';

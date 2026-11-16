@@ -328,3 +328,19 @@ letters".
 side 360 px, the scene's properties 340, their edges dragged; a number's
 slider over two ends set by Alt click — each a preference of this browser,
 never a recipe's, never the vault's.
+
+**A drawn body is a loft, written here** (G4). The author's gamepad
+drawings into 3D: each mark's brush traced to its silhouette at a threshold
+(marching squares, `apps/3d/silhouette.js`), a ring per step along the
+stroke, the rings joined, the ends a point or flat. No library: sand3d,
+the author's lead, is Python over Blender's `bpy`, nothing a page runs;
+three's `ExtrudeGeometry` keeps one section, where a stroke's marks grow,
+shrink and turn. The sections stand across the stroke by default — a worm
+— or as stamped, stepped back; the author's test decides which reads.
+The rig's `drawing.js` and `strokes.js` are core's now (`core/stage/`):
+a second app put marks into strokes, as `core/sprites.js` moved for one.
+
+**A field may take one app's objects only** (G4, core/vault-drag.js
+`takes`). An object param's `by: ['gamepad']` narrows its picker and its
+drop to what that app made: `accepts: ['still', 'sequence']` alone offered
+43 objects to the drawn body, 13 of them a drawing with marks.

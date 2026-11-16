@@ -84,7 +84,7 @@ c.ok('its strokes found, and a bone proposed for each run between corners',
 const rest = await page.eval(`(async () => {
   const { Vault } = await import('/core/vault.js');
   const { familySprite } = await import('/core/sprites.js');
-  const { drawingOf, spritesOf } = await import('/apps/rig/drawing.js');
+  const { drawingOf, spritesOf } = await import('/core/stage/drawing.js');
   const { proposeBones, posed } = await import('/apps/rig/bones.js');
   const { bind, placeOf } = await import('/apps/rig/skin.js');
   const { drawRig } = await import('/apps/rig/draw.js');
@@ -104,7 +104,7 @@ const rest = await page.eval(`(async () => {
 c.ok('at rest it draws the still again as it was saved', rest.mean < 0.5, JSON.stringify(rest));
 
 /** The stage's pixels over a box of the picture, and where a picture point is on screen. */
-const geometry = `(async () => { const { stageOf } = await import('/apps/rig/draw.js'); const { drawingOf } = await import('/apps/rig/drawing.js');
+const geometry = `(async () => { const { stageOf } = await import('/apps/rig/draw.js'); const { drawingOf } = await import('/core/stage/drawing.js');
   const { Vault } = await import('/core/vault.js'); const { object } = await Vault.load(${JSON.stringify(made.still)});
   return stageOf(drawingOf(object.recipe)); })()`;
 const stage = await page.eval(geometry);

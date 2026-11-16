@@ -1,6 +1,9 @@
 /**
- * drawing.js — a gamepad still as the rig sees it: stamps in the picture's
- * own pixels, each knowing its stroke and how far along the stroke it lies.
+ * drawing.js — a gamepad drawing as the rig and the 3D app see it: stamps in
+ * the picture's own pixels, each knowing its stroke and how far along the
+ * stroke it lies. The rig's until G4 (2026-11-16), when the 3D app swept a
+ * body along the same strokes (apps/3d/drawn.js): core's since, as
+ * core/sprites.js became when a second app needed it.
  *
  * The stamps are core's, as a print draws the still again (core/stage/
  * still.js `stampsOf`): a mark with a pattern is several — mirrored, turned
@@ -8,12 +11,41 @@
  * bends on its side. Stamps are in the order the gamepad drew them, which is
  * the order they overlap in: the scales. A stroke is a run of marks in that
  * order (strokes.js), so grouping them keeps it.
+ *
+ * A recorded sequence's events are marks too (`stillOf`), its clip's
+ * overrides on them as the player stamps them (player.js `_drawEvent`).
  */
 
-import { stampsOf, hasMarks, spriteKey, spritesOf } from '../../core/stage/still.js';
+import { stampsOf, hasMarks, spriteKey, spritesOf } from './still.js';
 import { strokesOf, pathOf } from './strokes.js';
 
 export { hasMarks, spriteKey, spritesOf };
+
+/**
+ * A gamepad drawing's recipe as a still's — `{ canvas, marks }`: a still as
+ * it is; a sequence's events its marks, on its canvas, with its clip's
+ * family, sprite, pattern and scale over theirs, as the player draws them.
+ * A family re-pointed keeps the recorded index: past the family's end, its
+ * sprite is not found, as a still's missing sprite is not. Null when there
+ * are no marks.
+ *
+ * @param {object} recipe   a gamepad still's or sequence's
+ * @returns {?{canvas: {w: number, h: number}, frame?: object, marks: object[]}}
+ */
+export function stillOf(recipe) {
+  if (hasMarks(recipe)) return recipe;
+  const seq = recipe && recipe.sequence;
+  if (!seq || !Array.isArray(seq.events) || !seq.events.length) return null;
+  const o = (recipe.clip && recipe.clip.overrides) || {};
+  const marks = seq.events.map(e => ({
+    ...e,
+    familyId: o.familyId ?? e.familyId,
+    spriteIndex: o.spriteIndex ?? e.spriteIndex,
+    pattern: o.pattern ?? e.pattern,
+    scale: e.scale * (o.scaleMul ?? 1),
+  }));
+  return { canvas: { w: seq.w || 0, h: seq.h || 0 }, marks };
+}
 
 /**
  * A stroke in `reverse` is read from its last stamp to its first — its

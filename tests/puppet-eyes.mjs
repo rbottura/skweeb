@@ -20,7 +20,7 @@ const { oneEuro, steadyBoxes, restCutoff } = await import('../apps/rig/puppet/st
 const { eyeTips, tipsAt, stampWidth } = await import('../apps/rig/puppet/tips.js');
 const { toQuery, fromQuery } = await import('../apps/rig/puppet/address.js');
 const { puppetParams } = await import('../apps/rig/puppet/params.js');
-const { drawingOf } = await import('../apps/rig/drawing.js');
+const { drawingOf } = await import('../core/stage/drawing.js');
 const { proposeBones } = await import('../apps/rig/bones.js');
 const { withParts } = await import('../apps/rig/parts.js');
 
@@ -92,7 +92,7 @@ const line = (x0, y0, x1, y1, step = 2) => {
 };
 const mark = p => ({ ...p, rotation: 0.4, scale: 0.25, familyId: 'brushes', spriteIndex: 8, pattern: 'single' });
 // A body drawn upwards, a stalk each side from the head out, an arm: in that order, the pen lifted between —
-// a jump past 16 px, or the stalk would be the body drawn on (../rig/strokes.js).
+// a jump past 16 px, or the stalk would be the body drawn on (core/stage/strokes.js).
 const strokes = [line(200, 400, 200, 200), line(186, 214, 165, 110), line(214, 214, 240, 115), line(196, 330, 120, 330)];
 const recipe = { canvas: { w: 400, h: 450, background: 'none' }, frame: { from: { x: 0, y: 0, w: 400, h: 450 }, to: { x: 0, y: 0, w: 400, h: 450 }, w: 400, h: 450 },
   marks: strokes.flat().map(mark) };

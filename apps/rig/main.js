@@ -27,7 +27,7 @@
  */
 
 import { rigParams, GROUPS } from './params.js';
-import { drawingOf } from './drawing.js';
+import { drawingOf } from '../../core/stage/drawing.js';
 import { proposeBones, posed, tipOf, turnToward } from './bones.js';
 import { bind } from './skin.js';
 import { turnsAt, moves, riseAt } from './motion.js';

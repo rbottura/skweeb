@@ -46,7 +46,7 @@ const hexes = d => { const out = []; for (let k = 0; k < d.count; k++) out.push(
 
 // ── A shape of the catalogue ────────────────────────────────────────────────
 
-ok('a shape of the catalogue, the menu\'s last', Object.keys(SHAPES).at(-1), 'cloud');
+ok('a shape of the catalogue, in the menu after BEC\'s grid', Object.keys(SHAPES).indexOf('cloud') - Object.keys(SHAPES).indexOf('grid'), 1);
 ok('…no colour of its own: its palette\'s', 'colour' in shapeSchema('cloud'), false);
 ok('…unlit as it starts, every other shape smooth', [shapeSchema('cloud').shading.default, shapeSchema('box').shading.default], ['unlit', 'smooth']);
 ok('…its emitters, a vault object among them', EMITTERS.join(), 'ball,shell,disc,ring,square,line,object');

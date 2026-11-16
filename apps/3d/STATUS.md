@@ -27,6 +27,21 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **A drawn body** (G4, 2026-11-16, the author's ask; `loft.js`,
+  `silhouette.js`, `drawn.js`, `tests/3d-drawn.mjs` 27, `check-3d-drawn` 11).
+  The catalogue's tenth, *drawn body*: a gamepad still or sequence given it
+  (`a gamepad drawing`, its picker the gamepad's only — a field's `by`), each stroke a body — its marks' brush traced where
+  its alpha passes `its silhouette, at alpha` (marching squares, the outline
+  that holds the most, no holes), a ring of `points round a section` at
+  each step along the smoothed line, the rings joined by quads; the sections
+  stand across the stroke (a worm, the brush its nozzle) or as stamped,
+  stepped back in depth; each turned as its brush was, or not; the ends a
+  point, flat (earcut) or open. Two sprites along a stroke pass from one
+  ring to the other. Closed and outward, every body, its volume counted.
+  With no drawing, a worm of its own. Saved, its drawing its parent, read
+  before a replay or a print. The marks' strokes are core's now
+  (`core/stage/drawing.js`, `strokes.js`, the rig's until this).
+
 - **The properties for a long use** (S15, 2026-11-16, the author's ask). The
   shapes a list, a line each — its colour, its name, shown or hidden, out —
   and the chosen one's params a section of their own under it, *Shape*: a
@@ -314,9 +329,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**The author's eye on S15** — the panel as it stands after S15a to S15l, in
-the 3D app and in the scene: the sections' bands (S15e), the widths, the
-rail. Then S15f, once the author has read `docs/layouts.md`.
+**The author's test of G4** — a drawn body from their own sequences: across
+or stamped, which reads as a worm, which as a petal; then flowers as such —
+petals round a heart — a stroke grown in time, or a silhouette's holes, as
+the author orders them. The author's eye on S15 stands; S15f is parked.
 
 Before S15, **G3 — more parameters**, the author's pick (`docs/plan.md`): its list —
 particles' colour over life, the overlay's place and blend, an emitter

@@ -20,7 +20,7 @@
  * has. Whole ripples and whole laps close every loop. Pure.
  */
 
-import { pointAt } from './strokes.js';
+import { pointAt } from '../../core/stage/strokes.js';
 
 export const CRAWLS = ['none', 'in place', 'along a path'];
 export const PATHS = ['circle', 'ellipse', 'eight', 'drawn'];

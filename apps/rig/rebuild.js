@@ -14,7 +14,7 @@
  */
 
 import { openRig, isPose } from './frames.js';
-import { hasMarks }         from './drawing.js';
+import { hasMarks }         from '../../core/stage/drawing.js';
 import { drawFrameInto }    from '../../core/rebuild.js';
 
 const isRigged = object => !!(object && isPose(object.recipe));
