@@ -50,7 +50,8 @@
    colour, its name, its buttons — the chosen one marked; under the list's section, that card alone. */
 .pp-cards--split > .pp-card:not(.pp-card--chosen) { display: none; }
 .pp-cards--split > .pp-card > .pp > .pp-head > .pp-title::before { content: none; }
-.pp-cards-list { list-style: none; margin: 0; padding: 0 2px 0 0; display: grid; gap: 3px; max-height: min(42vh, 420px); overflow: auto; }   /* many: it scrolls on its own */
+/* Its height fixed between three lines and twelve, the author's: no scroll until a thirteenth. */
+.pp-cards-list { list-style: none; margin: 0; padding: 0 2px 0 0; display: grid; align-content: start; gap: 3px; min-height: 93px; max-height: 372px; overflow: auto; }
 .pp-cards-line { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto auto; align-items: center; gap: 4px;
   min-height: 28px; padding: 2px 3px 2px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); cursor: pointer; }
 .pp-cards-line:hover { border-color: var(--line-2); }

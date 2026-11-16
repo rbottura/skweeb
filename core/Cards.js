@@ -162,7 +162,7 @@ export class Cards {
     const changed = entry !== this.chosen;
     this.chosen = entry;
     for (const e of this.entries) this.mark(e);
-    if (entry) reveal(entry);
+    if (entry) reveal(entry, !!this.lines);
     if (this.lines) { this.paint(); this.lines.reveal(); }
     if (changed) this.onChoose(this.chosenIndex);
   }
@@ -341,7 +341,7 @@ function foldable(entry, toggle) {
  * The chosen card into view in the column that scrolls it: whole if it fits,
  * its head at the top if it is taller than the column.
  */
-function reveal(entry) {
-  entry.card.scrollIntoView({ block: 'nearest' });
+function reveal(entry, head = false) {
+  if (!head) entry.card.scrollIntoView({ block: 'nearest' });     // in a list's section, its head alone: the list stays in view (S15c)
   entry.panel.head.scrollIntoView({ block: 'nearest' });
 }
