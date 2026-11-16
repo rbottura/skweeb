@@ -70,7 +70,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S15c | many shapes: their list a section, the chosen's params a section of their own | `3d/shape-list` | S | landed 2026-11-16 |
 | S15d | values copied from a card onto another that has them, by level — a row, a section, every value, defaults too — by its menu (Ctrl or right click), Ctrl C and Ctrl V asked, Enter | `ui/params-copy` | M | landed 2026-11-16 |
 | S15e | the sections told apart at a glance | `ui/sections` | S | ready |
-| S15g | Alt click on a slider: its range's ends set by hand, kept for the app in this browser — or a preset | `ui/slider-range` | S | ready |
+| S15g | Alt click on a slider: its range's ends set by hand, kept for the app in this browser — or a preset | `ui/slider-range` | S | landed 2026-11-16: kept in this browser; presets by name, if wanted, after |
 | S15h | a rail of icons, a section each, beside the panel: a click brings that section beside the cursor | `ui/section-rail` | S | landed 2026-11-16 |
 | S15i | keys in their contexts: an app's letters bare only — Ctrl V is not V's vault, Ctrl S the app's save, never the browser's | `fix/keys-context` | S | landed 2026-11-16 |
 | S15j | the panel wider, its edge dragged as the scene's vault's wall is, its width kept | `ui/panel-wall` | S | landed 2026-11-16 |

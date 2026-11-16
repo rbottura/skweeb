@@ -219,3 +219,11 @@ body.pp-walling { cursor: col-resize; user-select: none; }
 .pp-rail-btn--sub svg { width: 12px; height: 12px; }
 .pp-rail-btn--sub .pp-rail-letters { font-size: 8.5px; }
 .pp-rail-btn--sub::before { content: ""; position: absolute; left: -4px; top: -3px; bottom: 50%; width: 3px; border-left: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+
+/* A number's two ends by hand (S15g; core/slider-range.js): under its row, Enter keeps them. */
+.sr-pop { position: fixed; z-index: 1400; width: 260px; display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--raised); color: var(--fg); box-shadow: 0 14px 36px var(--shadow); }
+.sr-said { margin: 0; font: 500 12px/1.35 var(--font-ui); color: var(--fg-2); }
+.sr-line { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 6px; }
+.sr-to { font: 400 12px var(--font-ui); color: var(--fg-3); }
+.sr-end { width: 100%; }
+.sr-acts { display: flex; justify-content: flex-end; gap: 6px; }

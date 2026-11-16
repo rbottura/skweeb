@@ -23,6 +23,7 @@ import { Vault }     from './vault.js';
 import { dropOn }    from './vault-drag.js';
 import { numberBox, boxed, paintFill, short } from './numbox.js';
 import { layersWidget } from './layers-row.js';
+import { rangeOf, askRange } from './slider-range.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -43,26 +44,50 @@ export const WIDGETS = {
     input.type = 'range';
     const log = !!spec.log && spec.min > 0;
     const along = v => (log ? Math.log10(v) : v);
-    input.min = along(spec.min ?? 0);
-    input.max = along(spec.max ?? 100);
     // The slider's step is five of the box's, a quick way to a round value
     // (the author's, 2026-11-03) — unless that leaves it fewer than eight stops.
     // A count's is one: every whole value its own stop (2026-11-06, "certains
     // steps sont trop grands"). `step: 'any'` has no grid at all: read as a
     // number it was NaN, and the param put its default back — a slider that
     // did not move its value, a fractal's centre the first.
-    const lo = spec.min ?? 0, hi = spec.max ?? 100;
+    // Its ends the schema's, or two set by hand (S15g, core/slider-range.js): the slider between them, the box's
+    // fill and drag too. A value typed still goes anywhere the schema lets it.
+    const app = panel && panel.params ? panel.params.app : '';
+    const soft = { ...spec, hardMin: spec.min, hardMax: spec.max };
     const fine = typeof spec.step === 'number' && spec.step > 0 ? spec.step : 0;
-    const coarse = !fine ? 0 : spec.whole || (hi - lo) / (fine * 5) < 8 ? fine : fine * 5;
+    let lo, hi, coarse;
+    const ends = r => {
+      lo = soft.min = r.min;
+      hi = soft.max = r.max;
+      input.min = along(lo);
+      input.max = along(hi);
+      coarse = !fine ? 0 : spec.whole || (hi - lo) / (fine * 5) < 8 ? fine : fine * 5;
+    };
+    ends(rangeOf(app, key, spec));
     input.step = 'any';
     input.value = along(value);
     input.addEventListener('input', () => {
       const x = parseFloat(input.value);
       set(log ? 10 ** x : Math.min(hi, Math.max(lo, coarse ? lo + Math.round((x - lo) / coarse) * coarse : x)));
     });
-    const box = numberBox(spec, value, set, () => panel.value(key));
+    const box = numberBox(soft, value, set, () => panel.value(key));
     readout.replaceChildren(spec.unit ? boxed(box, spec.unit) : box);
-    return { node: input, sync(v) { input.value = along(v); box.value = short(v, spec); paintFill(box, spec, v); } };
+    // Alt click on the slider or the box: its two ends, by hand — kept for this app in this browser.
+    const ask = e => {
+      if (!e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      askRange(input.closest('.pp-row') || box, { app, key, spec, name: spec.label || key, then: r => {
+        ends(r);
+        const v = panel.value(key);
+        input.value = along(v);
+        paintFill(box, soft, v);
+      } });
+    };
+    input.addEventListener('pointerdown', ask, true);
+    box.addEventListener('pointerdown', ask, true);
+    box.title = "Alt click: its slider's two ends, by hand";
+    return { node: input, sync(v) { input.value = along(v); box.value = short(v, soft); paintFill(box, soft, v); } };
   },
 
   // A count. Declaring `int` rather than `range` with step 1 says the value is

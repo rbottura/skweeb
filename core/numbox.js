@@ -30,8 +30,9 @@ const el = (tag, cls, text) => {
 export function numberBox(spec, value, set, current) {
   const box = el('input', 'pp-num');
   box.type = 'number';
-  if (spec.min != null) box.min = spec.min;
-  if (spec.max != null) box.max = spec.max;
+  const least = spec.hardMin !== undefined ? spec.hardMin : spec.min, most = spec.hardMax !== undefined ? spec.hardMax : spec.max;
+  if (least != null) box.min = least;      // the schema's limits: two ends set by hand (S15g) are the drag's, not these
+  if (most != null) box.max = most;
   box.step = spec.step ?? 1;
   box.value = short(value, spec);
   box.addEventListener('change', () => {
@@ -77,13 +78,13 @@ export function paintFill(box, spec, v) {
  * step, a count of five crossed in five pixels, and `step: 'any'` was NaN).
  */
 function scrubbable(box, spec, set, current) {
-  const log = !!spec.log && spec.min > 0;
-  const lo = spec.min ?? 0, hi = spec.max ?? lo + 100;
-  const span = log ? Math.log10(hi) - Math.log10(lo) : hi - lo;
-  const per = spec.drag ?? span / 400;
-  let st = null;
+  let st = null, log = false, per = 0;
   box.addEventListener('pointerdown', e => {
     if (e.button !== 0 || document.activeElement === box) return;      // typing: the caret is the box's
+    // Its span read at each drag: two ends set by hand since the box was made are the hand's now (S15g).
+    log = !!spec.log && spec.min > 0;
+    const lo = spec.min ?? 0, hi = spec.max ?? lo + 100;
+    per = spec.drag ?? (log ? Math.log10(hi) - Math.log10(lo) : hi - lo) / 400;
     st = { x: e.clientX, last: e.clientX, v0: current(), acc: 0, moved: false, id: e.pointerId };
   });
   box.addEventListener('pointermove', e => {

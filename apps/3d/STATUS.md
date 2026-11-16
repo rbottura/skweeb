@@ -43,7 +43,8 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   The shapes' list a dock at the panel's head, never scrolled away, its
   chosen card's head the object's name — its colour, "box 2" — no fold (S15k).
   The rail goes into the chosen shape: Form, Place, Look… a smaller icon
-  each under the Shape section's (S15l).
+  each under the Shape section's (S15l). Alt click on a number's box or
+  slider: its two ends by hand, kept in this browser (S15g, `core/slider-range.js`).
 
 - **A cloud in time** (G2, 2026-11-11, the author's picks; `forces.js`,
   `tests/3d-forces.mjs` 29, `check-3d-cloud` 25). A cloud's card's *Forces*,

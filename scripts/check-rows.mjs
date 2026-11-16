@@ -139,6 +139,33 @@ const t1 = await twist();
 c.ok('a box clicked, then the wheel over it: the box and its value stay, the focus let go of', focused && b1 === b0 && t1 === t0 && still,
   JSON.stringify({ focused, box: [b0, b1], value: [t0, t1] }));
 
+// ── S15g: a number's two ends by hand — Alt click on its box, typed, Enter; kept, the page opened again ────
+const ends = () => page.eval(`(() => { const s = ${row('gravity')}.querySelector('.pp-range');
+  const kept = Object.keys(localStorage).filter(k => k.startsWith('skweeb/ranges/')).map(k => JSON.parse(localStorage.getItem(k)).gravity).find(Boolean) || null;
+  return { ends: [+s.min, +s.max], kept, pop: !!document.querySelector('.sr-pop') }; })()`);
+const altOn = () => page.eval(`${row('gravity')}.querySelector('.pp-num').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, altKey: true, button: 0, pointerId: 1 }))`);
+await c.go(c.base + '/apps/particles/');
+await page.until(`!!${row('gravity')}`);
+const made = await ends();
+await altOn();
+await wait(100);
+const asked = (await ends()).pop;
+await page.eval(`(() => { const [a, b] = document.querySelectorAll('.sr-pop .sr-end'); a.value = '-100'; b.value = '100';
+  a.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); })()`);
+await wait(100);
+const own = await ends();
+c.ok("Alt click on a number's box: its two ends asked; Enter, the slider between them, kept", asked && !own.pop
+  && JSON.stringify(own.ends) === '[-100,100]' && JSON.stringify(own.kept) === '[-100,100]' && JSON.stringify(made.ends) !== '[-100,100]', JSON.stringify({ made, own }));
+await c.go(c.base + '/apps/particles/');
+await page.until(`!!${row('gravity')}`);
+c.ok('…the page opened again, still', JSON.stringify((await ends()).ends) === '[-100,100]', JSON.stringify(await ends()));
+await altOn();
+await wait(100);
+await page.click(`[...document.querySelectorAll('.sr-pop button')].find(b => b.textContent === 'As made')`);
+await wait(100);
+const back = await ends();
+c.ok('…"As made": the schema\'s ends again, none kept', JSON.stringify(back.ends) === JSON.stringify(made.ends) && !back.kept, JSON.stringify(back));
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();
