@@ -354,3 +354,11 @@ front is the drawing, exactly when stamped, nearly when across; its sides
 take the colours stretched. Opaque, the ink's mean colour where no stamp
 is. The brush wrapped round the body is the other reading, not built: its
 rings close by index, so a texture round them would want a seam column.
+
+**A model leaves as a glTF it writes itself** (G5, 2026-11-17). three's
+exporter is an add-on the vendored WebGPU build would have to carry with
+the helpers it imports; a `.glb` is a header, its JSON and one buffer — a
+page of code, as `core/png.js` writes a PNG. The model at rest, every shape
+shown, a node each, a cloud's dots baked; its skin a PNG inside. Not kept:
+flat shading, the outline, the light — a viewer brings its own. Khronos's
+validator was not run: a package from npm, its running not allowed here.

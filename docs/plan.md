@@ -62,22 +62,18 @@ In the order the main thread takes them; side jobs and waits at the end.
 | G3 | the overlay composed: in front or behind, fitted, sized, moved, turned, see-through, blended, dragged | `particles/overlay-compose` | S | landed 2026-11-11 |
 | G4 | a drawn body: a gamepad drawing's strokes lofted — each mark's brush traced to its silhouette, a ring; the rings joined, the ends a point or flat | `3d/drawn-body` | M | landed 2026-11-16 |
 | G4b | the drawn body's skin: the drawing's picture projected from the front, so the body looks like it | `3d/drawn-skin` | S | landed 2026-11-17 |
+| G5 | the model out as meshes: a binary glTF — its shapes, colours, a drawn body's skin — and an OBJ, its surfaces | `3d/mesh-out` | S | landed 2026-11-17 |
+| G6 | the worm alive: a wave along a drawn body, a loop that closes, saved as a sequence | `3d/worm-wave` | M | ready |
+| G7 | the lathe: a gamepad stroke turned round an axis — a vase, a cup, a corolla | `3d/lathe` | M | ready |
+| G8 | flowers: petals round a heart, opened, in whorls — the garden's, in 3D | `3d/flowers` | M | ready |
+| G9 | growth: a drawn body grown as its stroke was drawn, by its marks' times | `3d/growth` | M | ready |
+| G10 | the brush wrapped round a drawn body, a seam to its rings | `3d/drawn-wrap` | S | ready |
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |
 | L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
 | L13 | an object's layers, in its Stack, kept state by state: L13a in core and every app, "+ overlay…"; L13b particles' overlay fused in | `layers/object-layers`, `layers/particles`, `fix/layer-rows` | M | landed 2026-11-12, both; its rows kept within the section the same day |
 | C13 | the author's list of 2026-11-15: the side vault's chips in its frame; numbers short in their boxes; the wheel steps no value; the wall between the side and the viewer, the pictures sized with it | `fix/side-wall` | S | landed 2026-11-15 |
-| S15a | the Export section off the panel, the title bar's Export its way; the print a box floating by that button — every app | `ui/export-print` | S | landed 2026-11-16 |
-| S15b | the object's layers a dock at the panel's foot, always there: one line, "+" when there are none, the chosen's rows folded | `ui/layers-dock` | S | landed 2026-11-16 |
-| S15c | many shapes: their list a section, the chosen's params a section of their own | `3d/shape-list` | S | landed 2026-11-16 |
-| S15d | values copied from a card onto another that has them, by level — a row, a section, every value, defaults too — by its menu (Ctrl or right click), Ctrl C and Ctrl V asked, Enter | `ui/params-copy` | M | landed 2026-11-16 |
-| S15e | the sections told apart at a glance: a panel's a band each, an accent while open; a card's lighter, set in | `ui/sections` | S | landed 2026-11-16, a proposal on the author's eye |
-| S15g | Alt click on a slider: its range's ends set by hand, kept for the app in this browser — or a preset | `ui/slider-range` | S | landed 2026-11-16: kept in this browser; presets by name, if wanted, after |
-| S15h | a rail of icons, a section each, beside the panel: a click brings that section beside the cursor | `ui/section-rail` | S | landed 2026-11-16 |
-| S15i | keys in their contexts: an app's letters bare only — Ctrl V is not V's vault, Ctrl S the app's save, never the browser's | `fix/keys-context` | S | landed 2026-11-16 |
-| S15j | the panel wider, its edge dragged as the scene's vault's wall is, its width kept | `ui/panel-wall` | S | landed 2026-11-16 |
-| S15k | Shapes a dock at the panel's top, as the layers are at its foot; the chosen card's head the object's name, no arrow | `3d/shapes-dock` | S | landed 2026-11-16 |
-| S15l | the rail into a card's own sections — Form, Place, Look… of the chosen shape | `ui/rail-card` | S | landed 2026-11-16 |
+| S15a to e, g to l | the properties for a long use: the Export section off the panel, the print by its button (a); the layers a dock (b); the shapes a list, then a dock, the chosen card its name (c, k); values copied by level (d); the sections told apart (e); a slider's ends by Alt click (g); a rail of icons, into a card's sections (h, l); bare keys (i); the panel wider, its wall (j) | `ui/…`, `3d/…`, `fix/keys-context` | S each | landed 2026-11-16 (`apps/3d/STATUS.md`) |
 | S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | proposal landed 2026-11-16 (`docs/layouts.md`); parked: "on garde sous le coude" |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
@@ -284,7 +280,7 @@ emitter denser where a picture is darker; a cloud's dots a set's sprites, or rin
 (… un filtre de seuil et une conversion bitmap-to-svg) … un segment qu'on connecterait au prochain … en fermant
 le mesh … des worms et des fleurs en 3d". Landed: `apps/3d/loft.js`, `silhouette.js`, `drawn.js` — sections
 across the stroke (a worm) or as stamped, stepped back; no library (sand3d is Python on Blender). Left: flowers
-as such, petals round a heart; a stroke's growth in time; a silhouette's holes. **G4b** · 2026-11-17, "le motif … en texture de sorte que le modèle ressemble un peu au dessin initial": the drawing's picture projected from the front — the brush wrapped round the body, if asked, would want a seam.
+as such, petals round a heart; a stroke's growth in time; a silhouette's holes. **G4b** · 2026-11-17, "le motif … en texture de sorte que le modèle ressemble un peu au dessin initial": the drawing's picture projected from the front — the brush wrapped round the body, if asked, would want a seam. **G5 to G10** · the author's "vas-y avec ce plan", 2026-11-17: out as meshes first, then the worm alive, the lathe, flowers, growth, the brush wrapped.
 
 ## L — layers and smart objects
 

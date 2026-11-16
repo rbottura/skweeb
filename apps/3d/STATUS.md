@@ -27,6 +27,14 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **Out as meshes** (G5, 2026-11-17; `meshfile.js`, `tests/3d-meshfile.mjs` 16,
+  `check-3d-drawn`). Export's *Download the model (glTF .glb)*: every shape
+  shown, at rest, a node each — its place a matrix — its colour, unlit as
+  KHR_materials_unlit, a drawn body's skin its PNG in the file, a cloud's
+  dots baked, each its colour; *Download its surfaces (OBJ)*, the points
+  where their places put them, uv kept. Written here, no exporter vendored.
+  Not kept: flat shading, the outline, the light.
+
 - **A drawn body** (G4, 2026-11-16, the author's ask; `loft.js`,
   `silhouette.js`, `drawn.js`, `tests/3d-drawn.mjs` 30, `check-3d-drawn` 14).
   The catalogue's tenth, *drawn body*: a gamepad still or sequence given it

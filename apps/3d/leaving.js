@@ -11,7 +11,7 @@
  * own `busy`.
  */
 
-import { saveModel, downloadPicture, downloadFrames, APP } from './save.js';
+import { saveModel, downloadPicture, downloadFrames, downloadMesh, APP } from './save.js';
 import { saveSides } from './sides.js';
 import { PrintPanel }  from '../../core/PrintPanel.js';
 import { exportBox }   from '../../core/boxes/export.js';
@@ -51,6 +51,10 @@ export function ways(panel, { bar, params, clock, now, after }) {
     }
   }
 
+  /** What a mesh's file held, said: and a cloud too big to bake, left out. */
+  const meshSaid = out => `downloaded ${out.file} — ${out.shapes} shape${out.shapes === 1 ? '' : 's'}, ${out.points.toLocaleString('en')} points`
+    + (out.left.length ? ` — left out, too many points: ${out.left.join(', ')}` : '');
+
   /** The model as it stands into the vault — on a turntable, its loop (save.js). */
   const save = () => leave(async args => {
     bar.say('saving…');
@@ -73,6 +77,9 @@ export function ways(panel, { bar, params, clock, now, after }) {
         const out = await downloadFrames({ ...args, onStatus: t => bar.say(t) });
         return `downloaded ${out.frames} frames at ${out.fps} fps — node scripts/frames-to-video.mjs makes the video`;
       }),
+      // The model as meshes (G5, meshfile.js): a glTF with its colours and skins, or an OBJ, its surfaces alone.
+      glb: () => leave(async args => meshSaid(await downloadMesh(args, 'glb'))),
+      obj: () => leave(async args => meshSaid(await downloadMesh(args, 'obj'))),
     },
     // The model from every side, a character for the map's avatar to wear (sides.js, P6).
     acts: [{ id: 'sides', label: 'Save it from every side — a character', run: () => leave(async args => {

@@ -16,7 +16,7 @@
  *   const box = exportBox(panel, {
  *     before: 'format',
  *     vault: { save, still, loop, loopFrames },    // each a function, or left out
- *     disk:  { picture, frames, sheet },
+ *     disk:  { picture, frames, sheet, glb, obj },
  *     acts:  [{ id: 'look', label: 'Save the chain as a look', run }],
  *   });
  *   box.buttons.save, box.body — to hide an act that does not apply, to mount the print.
@@ -43,6 +43,8 @@ export const EXPORT_WORDS = {
   picture: 'Download the picture (PNG)',
   frames: 'Download every frame (zip)',
   sheet: 'Download a sprite sheet',
+  glb: 'Download the model (glTF .glb)',
+  obj: 'Download its surfaces (OBJ)',
 };
 
 const el = (tag, cls, text) => {
@@ -57,7 +59,7 @@ const el = (tag, cls, text) => {
  * @param {object} [opts]
  * @param {string} [opts.before]    the drawer it goes in front of
  * @param {object} [opts.vault]     { save, still, loop, loopFrames }: what it saves into the vault
- * @param {object} [opts.disk]      { picture, frames, sheet }: what it downloads
+ * @param {object} [opts.disk]      { picture, frames, sheet, glb, obj }: what it downloads — a model's meshes the last two (G5)
  * @param {{id: string, label: string, run: Function}[]} [opts.acts]  the app's own
  * @returns {{ drawer: object, body: HTMLElement, buttons: Object<string, HTMLButtonElement> }}
  */
@@ -94,6 +96,8 @@ export function exportBox(panel, { before = null, vault = {}, disk = {}, acts = 
     { id: 'picture', label: W.picture, run: disk.picture },
     { id: 'frames', label: W.frames, run: disk.frames },
     { id: 'sheet', label: W.sheet, run: disk.sheet },
+    { id: 'glb', label: W.glb, run: disk.glb },
+    { id: 'obj', label: W.obj, run: disk.obj },
   ]);
   section('Its own', acts);
   return { drawer, body: drawer.body, buttons };

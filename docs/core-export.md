@@ -5,6 +5,9 @@ file stood at its cap: an export and a print are the two ways a picture
 leaves, and they share the rule that makes both possible — an app's frames
 drawn again, at any size, from the recipe.
 
+A model leaves as meshes too (G5, 2026-11-17): the 3D app's Export writes a binary glTF or an OBJ
+(`apps/3d/meshfile.js`) — the model at rest, not frames; a conversion, as a video is.
+
 ## export.js — frames out, exactly
 
 Given an app's frames — its `frames.js`, the code its save and its replay

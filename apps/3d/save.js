@@ -17,6 +17,8 @@ import { readPalettes, palettesIn } from './palettes.js';
 import { readEmitters, emittersIn } from './emitters.js';
 import { readDrawn, drawnIn } from './drawn.js';
 import { openModel }     from './frames.js';
+import { Model }         from './scene.js';
+import { glbOf, objOf } from './meshfile.js';
 import { loopOf }        from './motion.js';
 import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
@@ -100,6 +102,34 @@ export async function downloadPicture({ params, shapes, renderer, tick = 0 }) {
     return { width: shown.width, height: shown.height };
   } finally {
     frames.dispose();
+  }
+}
+
+/**
+ * The model as meshes to disk (G5, meshfile.js): a binary glTF — its shapes, their colours, a drawn body's skin —
+ * or an OBJ, its surfaces alone. At rest, every shape shown; what is read beside the values read first.
+ *
+ * @returns {Promise<{file: string, shapes: number, points: number, left: string[]}>}
+ */
+export async function downloadMesh({ params, shapes }, kind = 'glb') {
+  const recipe = { ...params.values, shapes };
+  await readPalettes(recipe);
+  await readEmitters(recipe);
+  await readDrawn(recipe);
+  const model = new Model().update(recipe);
+  try {
+    const name = titleOf(shapes) || 'model';
+    const file = name.replace(/[^\w\- ]+/g, ' ').trim().replace(/\s+/g, '-').slice(0, 60) || 'model';
+    if (kind === 'obj') {
+      const out = objOf(model, name);
+      download(new Blob([out.text], { type: 'text/plain' }), `${file}.obj`);
+      return { ...out, file: `${file}.obj` };
+    }
+    const out = await glbOf(model, { name, png: async picture => new Uint8Array(await (await toPng(picture)).arrayBuffer()) });
+    download(new Blob([out.bytes], { type: 'model/gltf-binary' }), `${file}.glb`);
+    return { ...out, file: `${file}.glb` };
+  } finally {
+    model.dispose();
   }
 }
 

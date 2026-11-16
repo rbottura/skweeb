@@ -15,6 +15,8 @@
  * nothing: it is its render. Opened with WebGL2: its skin still the drawing.
  */
 
+import fs   from 'node:fs';
+import path from 'node:path';
 import { startCheck, inner } from './check-kit.mjs';
 
 const c = await startCheck();
@@ -160,6 +162,35 @@ const o = mid ? inner(await (await fetch(c.base + '/api/vault/' + mid)).json()) 
 const kept = o && o.recipe.shapes.find(s => s.id === 'drawn');
 c.ok('saved: a model, its body\'s drawing the still\'s id, the still its parent', !!kept && kept.params.drawing === made && o.parents.includes(made),
   o ? JSON.stringify({ id: o.id, parents: o.parents }) : await page.eval(say));
+
+// ── Out as meshes (G5, meshfile.js): a .glb, its skin in it; an OBJ ─────────
+const DL = path.join(c.dir, 'downloads');
+await page.downloadsTo(DL);
+const fileOf = async (end, label) => {
+  await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+  await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === ${JSON.stringify(label)})`);
+  await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 60000 });
+  for (let i = 0; i < 100; i++) {
+    const f = fs.existsSync(DL) && fs.readdirSync(DL).find(name => name.endsWith(end));
+    if (f) { await wait(300); return { bytes: fs.readFileSync(path.join(DL, f)), said: await page.eval(say) }; }
+    await wait(200);
+  }
+  return { bytes: null, said: await page.eval(say) };
+};
+const glb = await fileOf('.glb', 'Download the model (glTF .glb)');
+const gltf = (() => { if (!glb.bytes) return null; const b = glb.bytes, n = b.readUInt32LE(12);
+  const json = JSON.parse(b.subarray(20, 20 + n).toString('utf8')), bin = b.subarray(28 + n);
+  const image = json.images && json.images[0] && json.bufferViews[json.images[0].bufferView];
+  const png = image ? bin.subarray(image.byteOffset, image.byteOffset + image.byteLength) : null;
+  return { magic: b.readUInt32LE(0), nodes: json.nodes.map(x => x.name), textured: json.materials.filter(mt => mt.pbrMetallicRoughness.baseColorTexture).length,
+    png: png ? [png.readUInt32BE(0), png.readUInt32BE(16), png.readUInt32BE(20)] : null }; })();
+c.ok('downloaded as a glTF: the body shown its one node, its skin the drawing\'s picture, a PNG 2048 along its longer side',
+  !!gltf && gltf.magic === 0x46546c67 && gltf.nodes.length === 1 && /^drawn-/.test(gltf.nodes[0]) && gltf.textured === 1
+  && gltf.png[0] === 0x89504e47 && Math.max(gltf.png[1], gltf.png[2]) === 2048, JSON.stringify({ gltf, said: glb.said }));
+const obj = await fileOf('.obj', 'Download its surfaces (OBJ)');
+const text = obj.bytes ? obj.bytes.toString('utf8') : '';
+c.ok('…and as an OBJ: its points, its uv, its faces', /\nv /.test(text) && /\nvt /.test(text) && /\nf \d+\/\d+\/\d+ /.test(text), obj.said);
+
 if (o) {
   // Cold: a page that has read nothing — the drawing and its picture read by the replay itself (drawn.js `readDrawn`).
   await c.go(c.base + '/apps/3d/');
