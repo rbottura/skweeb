@@ -344,3 +344,13 @@ a second app put marks into strokes, as `core/sprites.js` moved for one.
 `takes`). An object param's `by: ['gamepad']` narrows its picker and its
 drop to what that app made: `accepts: ['still', 'sequence']` alone offered
 43 objects to the drawn body, 13 of them a drawing with marks.
+
+**A drawn body's skin is its drawing, projected** (G4b, 2026-11-17). The
+author: "le motif … en texture de sorte que le modèle ressemble un peu au
+dessin initial". The stamps drawn again (still.js `drawStill`) on a picture
+framed on the drawing alone — never on the body, which moves with its
+threshold — and laid on the body from the front: the body seen from the
+front is the drawing, exactly when stamped, nearly when across; its sides
+take the colours stretched. Opaque, the ink's mean colour where no stamp
+is. The brush wrapped round the body is the other reading, not built: its
+rings close by index, so a texture round them would want a seam column.

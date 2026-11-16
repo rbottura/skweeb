@@ -136,6 +136,24 @@ ok('a pen held still — dots only: the worm', body({}, drawing([line(20, 0)])).
 const many = drawing([line(101, 4), line(60, 3).map(s => ({ ...s, y: 120, x: s.x + 30 }))]);
 ok('two strokes: two bodies, each closed', closedness(body({ ends: 'pointed' }, many)).closed, true);
 
+// ── Its skin: each point's place on the drawing's picture (G4b) ─────────────
+const framed = { ...straight, frame: { x: -40, y: -40, w: 480, h: 80 } };
+const firstRing = (g, n = 48) => { const uv = g.attributes.uv.array; let u = 0, w = 0;
+  for (let j = 0; j < n; j++) { u += uv[2 * j]; w += uv[2 * j + 1]; } return [u / n, w / n].map(x => Math.round(x * 1e4) / 1e4); };
+const loose = body({ lay: 'stamped', threshold: 0.2 }, framed), tight = body({ lay: 'stamped', threshold: 0.8 }, framed);
+ok('a uv for every point', [loose.attributes.uv.count === loose.attributes.position.count, extent(loose)[0] !== extent(tight)[0]], [true, true]);
+ok('…its first section where the first mark is on the picture, whatever the threshold that sized the body',
+  [firstRing(loose), firstRing(tight)], [[0.0833, 0.5], [0.0833, 0.5]]);
+const across = body({ ends: 'pointed' }, { ...straight, frame: { x: -45.26, y: -45.26, w: 490.52, h: 90.52 } }), auv = across.attributes.uv.array;
+const ap = across.attributes.position.array;
+let inside = true, same = true;
+for (let i = 0; i < auv.length / 2; i++) {
+  if (auv[2 * i] < 0 || auv[2 * i] > 1 || auv[2 * i + 1] < 0 || auv[2 * i + 1] > 1) inside = false;
+  // Projected from the front: a point and the point across the plane from it, the same place on the picture.
+  if (i < 48 && Math.abs(auv[2 * i + 1] - auv[2 * ((48 - i) % 48) + 1]) > 1e-6 && Math.abs(ap[3 * i + 2] + ap[3 * ((48 - i) % 48) + 2]) < 1e-6) same = false;
+}
+ok('across: every point on the picture framed as drawn.js frames it; front and back the same place', [inside, same], [true, true]);
+
 // ── A sequence's events as a still's marks ──────────────────────────────────
 const events = [{ t: 0, x: 1, y: 2, rotation: 0, scale: 0.5, familyId: 'brushes', spriteIndex: 3, pattern: 'single' },
                 { t: 9, x: 5, y: 2, rotation: 0, scale: 0.25, familyId: 'brushes', spriteIndex: 3, pattern: 'single' }];

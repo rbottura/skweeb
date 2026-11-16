@@ -74,9 +74,12 @@ const kindOf = m => (m.isMeshBasicMaterial ? 'unlit' : m.isMeshToonMaterial ? 't
  * alone, when its shading says so; else a toon for bands, three's standard
  * otherwise — the old material freed when the kind changes. Its colour, flat
  * or smooth; a plane seen from both sides. An unlit shape casts a shadow and
- * takes none: no light falls on it.
+ * takes none: no light falls on it. A drawn body's skin (G4b, `skin`): its
+ * drawing's picture over it, untinted — only on a geometry that kept its uv
+ * through its stack. The picture is the drawing's, kept by drawn.js and
+ * shared: a material freed here never frees it.
  */
-export function dress(mesh, id, values, bands) {
+export function dress(mesh, id, values, bands, skin = null) {
   const kind = values.shading === 'unlit' ? 'unlit' : bands > 0 ? 'toon' : 'lit';
   const toon = kind === 'toon';
   if (kindOf(mesh.material) !== kind) {
@@ -84,11 +87,13 @@ export function dress(mesh, id, values, bands) {
     mesh.material = kind === 'unlit' ? new MeshBasicMaterial() : toon ? new MeshToonMaterial() : new MeshStandardMaterial();
   }
   const m = mesh.material;
+  const map = skin && mesh.geometry && mesh.geometry.getAttribute('uv') ? skin : null;
+  if (m.map !== map) { m.map = map; m.needsUpdate = true; }
   // A shape whose colours are its own — BEC's grid, a colour at each vertex (grid.js); a cloud's dots, one each
   // (cloud.js) — is drawn in them, untinted.
   const own = !!(mesh.geometry && mesh.geometry.getAttribute('color'));
   if (m.vertexColors !== own) { m.vertexColors = own; m.needsUpdate = true; }
-  m.color.set(own || mesh.instanceColor ? '#ffffff' : values.colour);
+  m.color.set(own || mesh.instanceColor || map ? '#ffffff' : values.colour);
   if (toon) {
     if (m.gradientMap !== rampOf(bands)) {
       m.gradientMap = rampOf(bands);

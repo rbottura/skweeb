@@ -28,7 +28,9 @@
  *
  * A drawing's longer side is `WORLD` units, its middle at the origin. With
  * no drawing yet — none chosen, or its marks still coming — the body is a
- * worm of its own (`DEMO`), so the shape is seen at once. Pure: three.core
+ * worm of its own (`DEMO`), so the shape is seen at once. Its uv is each
+ * point's place on the drawing's picture (drawn.js), the skin projected from
+ * the front (G4b, `DRAWN_LOOK`). Pure: three.core
  * only, Node runs it (tests/3d-drawn.mjs).
  */
 
@@ -59,6 +61,16 @@ export const DRAWN_PARAMS = {
   spacing: { type: 'range', min: 0.05, max: 2, step: 'any', log: true, default: 0.25, label: 'rings apart, by a section',
              unit: '×', group: form },
   smooth: { type: 'int', min: 0, max: 30, default: 4, label: 'its line smoothed, marks either side', group: form },
+};
+
+/**
+ * Its skin, of its look, not its form (G4b, 2026-11-17): the drawing's picture projected from the front
+ * (drawn.js `pictureOf`) — each point of the body takes the picture's pixel where it lies in the drawing, so
+ * from the front the body is the drawing; its sides take the colour it is stretched to — or its colour alone.
+ */
+export const DRAWN_LOOK = {
+  skin: { type: 'enum', options: ['drawing', 'colour'], labels: { drawing: 'the drawing, projected', colour: 'its colour' },
+          default: 'drawing', display: 'chips', label: 'its skin', group: 'look' },
 };
 
 /** A drawing's longer side, in the world's units: the camera starts six away. */
@@ -133,8 +145,16 @@ export function drawnGeometry(v) {
   const out = { position: [], index: [] };
   for (const stroke of drawn.strokes) if (stroke.length > 1) body(out, smoothed(stroke, Math.round(v.smooth) || 0), v, n, ringOfKey, k, cx, cy);
   if (!out.index.length && drawn !== DEMO) return drawnGeometry({ ...v, drawn: null });   // dots only: the worm
+  // Each point's place in the drawing — its x and y back in the drawing's pixels — on its picture: the skin's uv.
+  const f = drawn.frame || { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, P = out.position;
+  const uv = new Float32Array((P.length / 3) * 2);
+  for (let i = 0; i < P.length / 3; i++) {
+    uv[2 * i] = (P[3 * i] / k + cx - f.x) / f.w;
+    uv[2 * i + 1] = 1 - (cy - P[3 * i + 1] / k - f.y) / f.h;
+  }
   const g = new BufferGeometry();
-  g.setAttribute('position', new Float32BufferAttribute(out.position, 3));
+  g.setAttribute('position', new Float32BufferAttribute(P, 3));
+  g.setAttribute('uv', new Float32BufferAttribute(uv, 2));
   g.setIndex(out.index);
   g.computeVertexNormals();
   return g;

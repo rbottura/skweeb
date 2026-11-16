@@ -61,6 +61,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | G2 | the cloud in time: a vortex, gravity, a pull, drag and noise on its dots from rest, every frame its own, saved as a sequence | `3d/cloud-forces` | M | landed 2026-11-11 |
 | G3 | the overlay composed: in front or behind, fitted, sized, moved, turned, see-through, blended, dragged | `particles/overlay-compose` | S | landed 2026-11-11 |
 | G4 | a drawn body: a gamepad drawing's strokes lofted — each mark's brush traced to its silhouette, a ring; the rings joined, the ends a point or flat | `3d/drawn-body` | M | landed 2026-11-16 |
+| G4b | the drawn body's skin: the drawing's picture projected from the front, so the body looks like it | `3d/drawn-skin` | S | landed 2026-11-17 |
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |
 | L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
@@ -283,7 +284,7 @@ emitter denser where a picture is darker; a cloud's dots a set's sprites, or rin
 (… un filtre de seuil et une conversion bitmap-to-svg) … un segment qu'on connecterait au prochain … en fermant
 le mesh … des worms et des fleurs en 3d". Landed: `apps/3d/loft.js`, `silhouette.js`, `drawn.js` — sections
 across the stroke (a worm) or as stamped, stepped back; no library (sand3d is Python on Blender). Left: flowers
-as such, petals round a heart; a stroke's growth in time; a silhouette's holes.
+as such, petals round a heart; a stroke's growth in time; a silhouette's holes. **G4b** · 2026-11-17, "le motif … en texture de sorte que le modèle ressemble un peu au dessin initial": the drawing's picture projected from the front — the brush wrapped round the body, if asked, would want a seam.
 
 ## L — layers and smart objects
 

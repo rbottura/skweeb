@@ -28,7 +28,7 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 ## Works now
 
 - **A drawn body** (G4, 2026-11-16, the author's ask; `loft.js`,
-  `silhouette.js`, `drawn.js`, `tests/3d-drawn.mjs` 27, `check-3d-drawn` 11).
+  `silhouette.js`, `drawn.js`, `tests/3d-drawn.mjs` 30, `check-3d-drawn` 14).
   The catalogue's tenth, *drawn body*: a gamepad still or sequence given it
   (`a gamepad drawing`, its picker the gamepad's only — a field's `by`), each stroke a body — its marks' brush traced where
   its alpha passes `its silhouette, at alpha` (marching squares, the outline
@@ -38,7 +38,11 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   stepped back in depth; each turned as its brush was, or not; the ends a
   point, flat (earcut) or open. Two sprites along a stroke pass from one
   ring to the other. Closed and outward, every body, its volume counted.
-  With no drawing, a worm of its own. Saved, its drawing its parent, read
+  Its skin the drawing (G4b, 2026-11-17, `its skin`): the stamps drawn
+  again on a picture of their own, projected from the front — each point
+  the picture's pixel where it lies in the drawing — so from the front the
+  body is the drawing, its sides the colours stretched; or its colour. With
+  no drawing, a worm of its own. Saved, its drawing its parent, read
   before a replay or a print. The marks' strokes are core's now
   (`core/stage/drawing.js`, `strokes.js`, the rig's until this).
 

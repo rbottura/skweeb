@@ -4,12 +4,15 @@
  * (apps/3d/loft.js, drawn.js, silhouette.js).
  *
  * A drawn body added from the menu: a worm of its own at once, its rows its
- * form's. A gamepad still put in the vault — an S and a bar of one brush, the
- * pen lifted between — picked by hand through its field's Choose…, which
- * offers the gamepad's drawings only: two bodies, the strokes', each section
- * the brush's silhouette traced at the threshold, not a circle; the worm gone
- * from the picture. Saved: the still its parent, its id in the recipe; drawn
- * again by its app, the still read again first: it is its render.
+ * form's. A gamepad still put in the vault — an S of red discs and a bar of
+ * blue ones, a set the brush, the pen lifted between — picked by hand through
+ * its field's Choose…, which offers the gamepad's drawings only: two bodies,
+ * the strokes', each section the brush's silhouette traced at the threshold,
+ * not a circle; the worm gone from the picture. Its skin the drawing (G4b):
+ * from the front, the S red above the blue bar, the bar at its left — never
+ * upside down or mirrored; its colour instead, neither. Saved: the still its
+ * parent, its id in the recipe; drawn again by its app in a page that had read
+ * nothing: it is its render. Opened with WebGL2: its skin still the drawing.
  */
 
 import { startCheck, inner } from './check-kit.mjs';
@@ -47,23 +50,32 @@ const worm = await ink('worm');
 c.ok('…a worm of its own at once, with no drawing', worm.share > 0.01, `${(worm.share * 100).toFixed(1)}% of the picture`);
 await c.shot('1-worm');
 
-// ── A gamepad still: an S and a bar, one brush ──────────────────────────────
-const made = await page.eval(`(async () => {
+// ── A gamepad still: an S of red discs over a bar of blue ones ──────────────
+// The brush a set of two discs, as the gamepad draws with one (core/sprites.js `familySprite`); its colours tell
+// the skin's top from its bottom, and its left from its right.
+const both = await page.eval(`(async () => {
   const { Vault } = await import('/core/vault.js');
   const { thumbFromBlob } = await import('/core/thumb.js');
+  const png = (w, h, draw) => { const c = new OffscreenCanvas(w, h); draw(c.getContext('2d')); return c.convertToBlob({ type: 'image/png' }); };
+  const disc = fill => png(40, 40, g => { g.fillStyle = fill; g.beginPath(); g.arc(20, 20, 18, 0, Math.PI * 2); g.fill(); });
+  const save = async (envelope, blob, w, h) => (await Vault.save({ seed: null, parents: [], ...envelope,
+    render: { blob, ext: 'png', w, h }, thumb: await thumbFromBlob(blob) })).id;
+  const shape = async (title, fill) => save({ type: 'shape', title, tags: ['import'], origin: { app: 'import', version: '1.0.0' }, recipe: null }, await disc(fill), 40, 40);
+  const red = await shape('a red disc', '#d8342a'), blue = await shape('a blue disc', '#2a5bd8');
+  const set = await save({ type: 'set', title: 'red and blue', tags: [], origin: { app: 'vault', version: '1.0.0' },
+    recipe: { members: [red, blue], role: 'brush-family', name: 'red and blue' } }, await disc('#888888'), 40, 40);
+  await Vault.refresh();
   const marks = [];
   for (let i = 0; i <= 120; i++) marks.push({ t: i * 16, x: 120 + i * 4, y: 300 + 110 * Math.sin(i / 120 * 2 * Math.PI), rotation: i * 0.01,
-    scale: 0.22, familyId: 'brushes', spriteIndex: 0, pattern: 'single' });
-  for (let i = 0; i <= 60; i++) marks.push({ t: 2000 + i * 16, x: 140 + i * 4, y: 520, rotation: 0, scale: 0.16, familyId: 'brushes', spriteIndex: 0, pattern: 'single' });
-  const pic = new OffscreenCanvas(800, 600), g = pic.getContext('2d');
-  g.fillStyle = '#fff'; g.fillRect(0, 0, 800, 600);
-  const blob = await pic.convertToBlob({ type: 'image/png' });
-  const id = (await Vault.save({ type: 'still', title: 'an S and a bar', tags: ['gamepad'], origin: { app: 'gamepad', version: '1.0.0' },
-    seed: null, recipe: { canvas: { w: 800, h: 600, background: '#ffffff' }, marks }, render: { blob, ext: 'png', w: 800, h: 600 },
-    thumb: await thumbFromBlob(blob) })).id;
+    scale: 1, familyId: set, spriteIndex: 0, pattern: 'single' });
+  for (let i = 0; i <= 60; i++) marks.push({ t: 2000 + i * 16, x: 140 + i * 4, y: 520, rotation: 0, scale: 0.8, familyId: set, spriteIndex: 1, pattern: 'single' });
+  const blob = await png(800, 600, g => { g.fillStyle = '#fff'; g.fillRect(0, 0, 800, 600); });
+  const id = await save({ type: 'still', title: 'an S and a bar', tags: ['gamepad'], origin: { app: 'gamepad', version: '1.0.0' },
+    recipe: { canvas: { w: 800, h: 600, background: '#ffffff' }, marks } }, blob, 800, 600);
   await Vault.refresh();
-  return id; })()`);
-c.ok('a gamepad still in the vault: two strokes of a brush', typeof made === 'string' && made.length > 4, String(made));
+  return { id, set }; })()`);
+const made = both.id;
+c.ok('a gamepad still in the vault: two strokes of a brush', typeof made === 'string' && made.length > 4, JSON.stringify(both));
 // Picked by hand: the body chosen, its field's Choose…, the picker its gamepad's drawings only.
 await page.click(`document.querySelectorAll('.pp-cards-line')[${BODY}]`);
 await wait(400);
@@ -85,7 +97,7 @@ await wait(900);
 const read = await page.eval(`(async () => {
   const { drawnOf } = await import('/apps/3d/drawn.js');
   const { spriteRing, areaOf } = await import('/apps/3d/silhouette.js');
-  const d = drawnOf(${JSON.stringify(made)}), mask = d && d.masks.get('brushes#0');
+  const d = drawnOf(${JSON.stringify(made)}), mask = d && d.masks.get(${JSON.stringify(both.set + '#0')});
   if (!mask) return { strokes: d ? d.strokes.length : -1 };
   const ring = spriteRing(mask, 0.5, 48), r = ring.map(([u, v]) => Math.hypot(u, v));
   const loose = spriteRing(mask, 0.1, 48), tight = spriteRing(mask, 0.9, 48);
@@ -106,6 +118,39 @@ const drawn = await ink('drawn', 'worm');
 c.ok('…drawn: the worm gone, the S and the bar in its place', drawn.share > 0.005 && drawn.diff > 0.01, JSON.stringify(drawn));
 await c.shot('2-the-drawing');
 
+// ── Its skin: the drawing projected (G4b) ───────────────────────────────────
+// From the front — stamped, the eye straight on, orthographic, unlit — the body is the drawing: the S red, above
+// the bar and right of it, the bar blue. A picture upside down, or mirrored, puts each colour where the other is.
+const panelRow = name => `[...document.querySelectorAll('#side .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
+const setOn = async (row, values) => {
+  await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { rowParams(${row}).params.set(${JSON.stringify(values)}); return true; })`);
+  await wait(900);
+};
+/** The preview's red pixels and blue ones — the discs' — counted, and where they are on average. */
+const colours = () => page.eval(`(() => { const c = document.getElementById('stage'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const want = { red: [216, 52, 42], blue: [42, 91, 216] }, out = {};
+  for (const [name, [r, g, b]] of Object.entries(want)) {
+    let n = 0, x = 0, y = 0;
+    for (let p = 0; p < d.length / 4; p++) { const i = p * 4;
+      if (Math.abs(d[i] - r) + Math.abs(d[i + 1] - g) + Math.abs(d[i + 2] - b) < 40) { n++; x += p % c.width; y += Math.floor(p / c.width); } }
+    out[name] = { n, x: n ? Math.round(x / n) : -1, y: n ? Math.round(y / n) : -1 };
+  }
+  return out; })()`);
+const asDrawn = k => k.red.n > 500 && k.blue.n > 200 && k.red.y < k.blue.y && k.blue.x < k.red.x;
+const plain = await colours();
+await setOn(cardRow(BODY, 'its ends'), { lay: 'stamped', shading: 'unlit', x: 0 });
+await setOn(panelRow('lens'), { lens: 'orthographic', yaw: 0, pitch: 0 });
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyF', key: 'f', bubbles: true }))`);
+await wait(1200);
+const front = await colours();
+c.ok('its skin the drawing, as it starts: seen from the front, the S red above the bar, the bar blue at its left', asDrawn(front),
+  JSON.stringify({ front, plain }));
+await c.shot('3-skin-front');
+await setOn(cardRow(BODY, 'its ends'), { skin: 'colour' });
+const coloured = await colours();
+c.ok('…its colour instead: no red, no blue — the drawing gone from it', coloured.red.n < 50 && coloured.blue.n < 50, JSON.stringify(coloured));
+await setOn(cardRow(BODY, 'its ends'), { skin: 'drawing', lay: 'across' });
+
 // ── Saved, and drawn again ──────────────────────────────────────────────────
 await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
@@ -116,6 +161,9 @@ const kept = o && o.recipe.shapes.find(s => s.id === 'drawn');
 c.ok('saved: a model, its body\'s drawing the still\'s id, the still its parent', !!kept && kept.params.drawing === made && o.parents.includes(made),
   o ? JSON.stringify({ id: o.id, parents: o.parents }) : await page.eval(say));
 if (o) {
+  // Cold: a page that has read nothing — the drawing and its picture read by the replay itself (drawn.js `readDrawn`).
+  await c.go(c.base + '/apps/3d/');
+  await page.until(`/box, sphere, torus|nothing draws/.test(${say})`, { timeout: 30000 });
   const replay = await page.eval(`(async () => {
     const { Vault } = await import('/core/vault.js');
     const app = await import('/apps/3d/rebuild.js');
@@ -130,8 +178,19 @@ if (o) {
     for (let i = 0; i < render.length; i++) { const d = Math.abs(render[i] - again[i]); worst = Math.max(worst, d); if (d > 8) off++; }
     own.dispose();
     return { worst, off: off / render.length }; })()`);
-  c.ok('drawn again by its app, its drawing read first: it is its render', replay.off < 0.001 && replay.worst <= 64,
-    `worst ${replay.worst}, ${(replay.off * 100).toFixed(3)}% past 8`);
+  c.ok('drawn again by its app in a page that had read nothing, its drawing and its skin read first: it is its render',
+    replay.off < 0.001 && replay.worst <= 64, `worst ${replay.worst}, ${(replay.off * 100).toFixed(3)}% past 8`);
+
+  // With no WebGPU, three draws with WebGL2 — the laptop's Intel — and turns a picture over its own way.
+  await page.beforeLoad(`Object.defineProperty(navigator, 'gpu', { value: undefined, configurable: true });`);
+  await c.go(c.base + '/apps/3d/?open=' + o.id);
+  await page.until(`${say}.includes('opened') || ${say}.includes('could not')`, { timeout: 30000 });
+  await page.until(`import('/apps/3d/drawn.js').then(m => !!m.drawnOf(${JSON.stringify(made)}))`, { timeout: 20000 }).catch(() => {});
+  await wait(1500);
+  const gl = await colours(), backend = await page.eval(`navigator.gpu === undefined ? 'no WebGPU: WebGL2' : 'WebGPU'`);
+  c.ok('…opened with WebGL2: across, its skin still the drawing — the S red above the bar, the bar blue at its left',
+    asDrawn(gl) && backend === 'no WebGPU: WebGL2', JSON.stringify({ gl, backend }));
+  await c.shot('4-skin-webgl2');
 }
 
 const noise = c.quiet();

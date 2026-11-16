@@ -148,7 +148,7 @@ export class Model {
       }
       place(part.mesh, values);
       if (part.instanced) placeDots(part, values, elapsed);
-      dress(part.mesh, id, values, bands);
+      dress(part.mesh, id, values, bands, drawn && values.skin === 'drawing' ? drawn.skin || null : null);
       outline(part.mesh, id, lined ? this.ink : null);
     });
     for (const part of this.parts.splice(shapes.length)) free(this.scene, part);
