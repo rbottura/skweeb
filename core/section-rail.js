@@ -8,7 +8,9 @@
  * own where the suite knows the section, its first letters otherwise — the
  * ones in sight marked. A click opens its section if it is folded and scrolls
  * the column so that its head comes beside the hand; one in the dock is
- * opened where it is.
+ * opened where it is. Under a section showing one card — the 3D app's chosen
+ * shape — that card's own sections, smaller: Form, Place, Look… (S15l, the
+ * author: "il en faut une pour les éléments dans les formes").
  *
  * Made by core/ParamPanel.js for an app's own panel — the one mounted in an
  * `.app-side` — never a card's, a layer's or the print's. Its sections are
@@ -40,6 +42,11 @@ const ICONS = {
   format: '<rect x="3" y="2" width="10" height="12"/><path d="M5 5h6"/>',
   forces: '<path d="M2 8h9M8 5l3 3-3 3"/><path d="M13 3v10"/>',
   emission: '<circle cx="4" cy="8" r="2"/><path d="M8 5l2-1M8 8h3M8 11l2 1"/>',
+  // A card's own sections — a shape's (S15l)
+  form: '<circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11"/>',
+  place: '<path d="M8 1.5v13M1.5 8h13"/><path d="M6 3.5l2-2 2 2M6 12.5l2 2 2-2M3.5 6l-2 2 2 2M12.5 6l2 2-2 2"/>',
+  swing: '<path d="M8 2v7"/><circle cx="8" cy="11" r="2"/><path d="M3 9.5a5.5 5.5 0 0 0 10 0"/>',
+  modifiers: '<path d="M2 4h12M2 8h12M2 12h12"/><circle cx="5" cy="4" r="1.4"/><circle cx="10" cy="8" r="1.4"/><circle cx="6" cy="12" r="1.4"/>',
 };
 
 const letters = title => title.replace(/[^\p{L}\p{N} ]/gu, '').trim().slice(0, 2) || '·';
@@ -70,6 +77,10 @@ export function sectionRail(root, body) {
 
   function go(dr, y) {
     const head = dr.querySelector(':scope > .dr-head');
+    // A card's section: the section holding the card opened first, then this one (S15l).
+    for (let at = dr.parentElement && dr.parentElement.closest('.dr'); at && root.contains(at); at = at.parentElement && at.parentElement.closest('.dr')) {
+      if (!at.classList.contains('dr--open')) at.querySelector(':scope > .dr-head').click();
+    }
     if (!dr.classList.contains('dr--open')) head.click();
     if (body.contains(dr)) {
       // Its head beside the hand — a section near the end given the room below it to come up that far.
@@ -86,10 +97,16 @@ export function sectionRail(root, body) {
     setTimeout(() => dr.classList.remove('pp-rail-hit'), 700);
   }
 
+  /** A section's own: the sections of the one card it shows — a list's chosen card, the 3D app's chosen shape (S15l). */
+  const inside = dr => {
+    const card = dr.querySelector('.pp-cards--split > .pp-card--chosen');
+    return card ? [...card.querySelectorAll(':scope > .pp > .pp-body > .dr')].filter(d => !d.hidden && d.offsetParent !== null) : [];
+  };
+
   function paint() {
-    rail.replaceChildren(...sections().map(dr => {
+    rail.replaceChildren(...sections().flatMap(dr => [{ dr, sub: false }, ...inside(dr).map(d => ({ dr: d, sub: true }))]).map(({ dr, sub }) => {
       const title = dr.querySelector(':scope > .dr-head > span')?.textContent.trim() || '';
-      const b = el('button', 'pp-rail-btn');
+      const b = el('button', sub ? 'pp-rail-btn pp-rail-btn--sub' : 'pp-rail-btn');
       b.type = 'button';
       b.title = title;
       b.setAttribute('aria-label', title);
@@ -107,7 +124,7 @@ export function sectionRail(root, body) {
   let asked = false;
   const again = () => { if (asked) return; asked = true; requestAnimationFrame(() => { asked = false; paint(); }); };
   // Only what changes the sections: a child of the column or the dock, a section's hidden or its classes — never a row's.
-  const counts = r => (r.type === 'childList' ? r.target === root || r.target.matches('.pp-top, .pp-body, .pp-foot') : r.target.classList.contains('dr') && r.target.parentElement !== null && !rail.contains(r.target));
+  const counts = r => (r.type === 'childList' ? r.target === root || r.target.matches('.pp-top, .pp-body, .pp-foot') : (r.target.classList.contains('dr') || r.target.classList.contains('pp-card')) && r.target.parentElement !== null && !rail.contains(r.target));
   const watch = new MutationObserver(records => { if (records.some(counts)) again(); });
   watch.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'class'] });
   held(() => watch.disconnect());

@@ -56,6 +56,7 @@
 .pp-cards.pp-cards--split > .pp-card > .pp > .pp-head > .pp-title { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font: 600 14px var(--font-ui); letter-spacing: 0; text-transform: none; cursor: default; }
 .pp-cards--split > .pp-card > .pp > .pp-head > .pp-title:not([data-n=""])[data-n]::after { content: ' ' attr(data-n); }
+.pp-cards--split > .pp-card > .pp > .pp-head > .pp-spacer { display: none; }      /* the name takes the room, not half of it */
 .pp-cards-swatch.pp-card-swatch { flex: none; width: 12px; height: 12px; }
 /* Its height fixed between three lines and twelve, the author's: no scroll until a thirteenth. */
 .pp-cards-list { list-style: none; margin: 0; padding: 0 2px 0 0; display: grid; align-content: start; gap: 3px; min-height: 93px; max-height: 372px; overflow: auto; }

@@ -214,3 +214,8 @@ skw-graph .gr-gates-head { padding: 5px 8px 3px; font: 600 10.5px var(--font-ui)
 .pp-sidewall:hover::after, .pp-sidewall:focus-visible::after, .pp-sidewall--held::after { opacity: 1; }
 body.pp-walling { cursor: col-resize; user-select: none; }
 .cl-host .pp-sidewall { display: none; }
+/* A card's own sections under the section showing it (S15l): smaller, set in, a line joining them to it. */
+.pp-rail-btn--sub { width: 20px; height: 20px; margin-left: 6px; position: relative; }
+.pp-rail-btn--sub svg { width: 12px; height: 12px; }
+.pp-rail-btn--sub .pp-rail-letters { font-size: 8.5px; }
+.pp-rail-btn--sub::before { content: ""; position: absolute; left: -4px; top: -3px; bottom: 50%; width: 3px; border-left: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }

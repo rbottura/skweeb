@@ -117,6 +117,17 @@ c.ok('a click on the sphere chooses its card: marked, the one open', (await choi
 c.ok('…its line marked, its card alone in the Shape section, under the list', JSON.stringify(await lines()) === '["box","sphere*","torus"]'
   && (await page.eval(`(() => { const c = ${cards}[1], dr = c.closest('.dr'); return /^Shape/.test(dr.querySelector('.dr-head').textContent) && ${cards}.filter(x => x.offsetParent).length === 1
     && dr.getBoundingClientRect().top > document.querySelector('.pp-cards-list').getBoundingClientRect().bottom; })()`)), JSON.stringify(await lines()));
+// S15l: the rail goes into the chosen shape's own sections — a smaller icon each; Place clicked, opened beside the hand.
+await wait(150);
+const sub = await page.eval(`(async () => { const subs = [...document.querySelectorAll('#side .pp-rail-btn--sub')];
+  const own = [...${cards}[1].querySelectorAll(':scope > .pp > .pp-body > .dr')].filter(d => !d.hidden && d.offsetParent).map(d => d.querySelector('.dr-head > span').textContent.trim());
+  const place = subs.find(b => b.title === 'Place'); if (!place) return { subs: subs.map(b => b.title), own };
+  const y = Math.round(document.querySelector('#side .pp-body').getBoundingClientRect().top + 120);
+  place.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 10, clientY: y }));
+  await new Promise(r => setTimeout(r, 120));
+  return { subs: subs.map(b => b.title), own, open: place._dr.classList.contains('dr--open'), off: Math.round(place._dr.querySelector('.dr-head').getBoundingClientRect().top - y) }; })()`);
+c.ok("the rail into the chosen shape's own sections, an icon each; Place clicked: opened, its head beside the hand",
+  JSON.stringify(sub.subs) === JSON.stringify(sub.own) && sub.subs.length >= 4 && sub.open && Math.abs(sub.off) < 3, JSON.stringify(sub));
 const marked = await changed();
 const [mx0, my0, mx1, my1] = (marked && marked.box) || [0, 0, 0, 0];
 c.ok('…and the view draws its box round it, an outline', !!marked && marked.share > 0 && marked.share < 0.03
