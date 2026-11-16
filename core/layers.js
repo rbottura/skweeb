@@ -52,7 +52,7 @@ export const LAYER_PARAMS = {
  * picture, a loop, a page — or a smart object of any of them.
  */
 export const LAYERS = {
-  type: 'layers', of: LAYER_PARAMS, default: [], label: 'layers', group: 'stack',
+  type: 'layers', of: LAYER_PARAMS, default: [], label: 'layers', group: 'layers',
   accepts: ['still', 'shape', 'sequence', 'composition'],
   /** What behind means, said on a layer's line: an app that draws them between its ground and its picture says its own. */
   behind: "seen where the picture's ground is none",

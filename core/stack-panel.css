@@ -41,5 +41,28 @@
 .pp-layers .pp-layers-list { margin-top: 6px; }
 .pp-layers-none { margin: 4px 0 0; font: 400 12px/1.45 var(--font-num); color: var(--fg-2); }
 .pp-layers-none[hidden], .pp-layers-list:empty { display: none; }
-.pp-stack-part { margin: 14px 0 2px; padding-top: 10px; border-top: 1px solid var(--line-2);
-  font: 600 11px/1.2 var(--font-ui); letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-2); }
+
+/* The object's layers, a dock at the panel's foot (S15b; core/ParamPanel.js, its foot): under the column that
+   scrolls, never scrolled away; short — a line a layer, the chosen one's rows folded, none one line with its field.
+   Past a third of the panel it scrolls on its own. */
+.pp-foot { flex: none; max-height: 38%; overflow: auto; padding: 8px 7px 2px 0; border-top: 1px solid var(--line-2); }
+.pp-foot .dr { margin: 0; }
+.pp-foot .dr-body { padding-top: 2px; }
+.pp-foot .pp-row[data-key="layers"] > .pp-label, .pp-foot .pp-row[data-key="layers"] > .pp-mark { display: none; }
+.pp-foot .pp-row[data-key="layers"] { padding-left: 0; }
+.pp-foot .pp-layers-rows .pp-head { min-height: 0; margin: 0 0 4px; padding: 0; border: 0; background: none; }
+.pp-foot .pp-layers-rows .pp-head .pp-title { display: none; }
+.pp-foot .pp-layers .pp-layers-list { margin: 2px 0 4px; gap: 4px; }
+.pp-foot .pp-layer-row { padding: 2px 3px 2px 8px; }
+.pp-foot .pp-layer-row .pp-stack-text { grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 8px; }
+.pp-foot .pp-layer-row .pp-stack-what { max-width: 5.5em; font-size: 11px; }
+.pp-layers-fold { justify-self: start; max-width: 100%; margin: 0 0 4px; padding: 2px 0; border: 0; background: none; color: var(--fg-2);
+  font: 500 12px var(--font-ui); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.pp-layers-fold:hover { color: var(--fg); }
+.pp-layers-fold[hidden], .pp-layers-rows[hidden] { display: none; }
+.pp-foot .pp-layers { grid-template-columns: minmax(0, 1fr) auto; column-gap: 6px; }
+.pp-foot .pp-layers > :not(.pp-layers-none):not(.pp-layers-adds):not(.pp-layers-fold) { grid-column: 1 / -1; }
+.pp-foot .pp-layers-fold { margin: 0; align-self: center; }
+.pp-foot .pp-layers-none { margin: 0; padding: 5px 8px; border: 1px dashed var(--line-2); border-radius: var(--radius); align-self: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-foot .pp-layers-adds { margin: 0; align-self: center; }

@@ -98,7 +98,8 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
   const live = joinLive({ app, layer: async () => loopOf(await layer(), clock) });
   const stack = joinStack(live);
   const view = stackView({ live, stack, canvas });
-  // The object's layers, when its panel has them: the Stack group's drawer, theirs first — moved last, as it was.
+  // The object's layers, when its panel has them, drawn round the canvas; their rows a dock at the panel's foot
+  // since S15b (core/ParamPanel.js), the Stack the windows' alone — its drawer the column's last.
   const params = panel.params;
   const key = params && params.keys.find(k => params.spec(k).type === 'layers');
   const drawer = panel.drawer('stack') || panel.addDrawer({ id: 'stack', title: 'Stack' });
@@ -131,7 +132,7 @@ export function stackDrawer(panel, { app, layer, clock = null, save = null, take
       say('the stack was not saved: ' + err.message);
     }
   }));
-  drawer.body.append(...(key ? [el('p', 'pp-stack-part', 'the windows')] : []), note, list, rows, adds, sends, said);
+  drawer.body.append(note, list, rows, adds, sends, said);
   // Asked to save for something that will hold it: as a smart object, made once and then versioned.
   if (save) live.answer('save', ({ smart }) => { if (smart && !Vault.bound) Vault.bind({}); return savedBy(save); });
   if (take) takeWhenAsked(live, take);

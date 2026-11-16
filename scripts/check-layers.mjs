@@ -89,13 +89,18 @@ const band = await page.eval(`(async () => {
   return o.id; })()`);
 c.ok('a band on top, in the vault', !!band, String(band));
 
-// ── The Stack section: the object's layers, then the windows ────────────────
-const section = await page.eval(`(() => { const row = ${layersRow}, dr = row && row.closest('.dr');
-  return { head: dr && dr.querySelector('.dr-head')?.textContent.trim(), last: !!dr && dr === dr.parentElement.lastElementChild,
-    order: dr ? [...dr.querySelectorAll('.pp-row[data-key="layers"], .pp-stack-part, .pp-stack-note')].map(n => n.dataset.key || n.className) : [],
+// ── The layers, a dock at the panel's foot (S15b); the Stack the windows' alone, the column's last ──
+const section = await page.eval(`(() => { const row = ${layersRow}, dr = row && row.closest('.dr'), foot = dr && dr.parentElement;
+  const body = foot && foot.previousElementSibling, stack = body && [...body.querySelectorAll(':scope > .dr')].pop();
+  const none = row?.querySelector('.pp-layers-none'), add = row?.querySelector('.pp-layers-adds button');
+  return { head: dr && dr.querySelector('.dr-head')?.textContent.trim(), foot: !!foot && foot.classList.contains('pp-foot') && body.classList.contains('pp-body'),
+    under: !!foot && foot.getBoundingClientRect().top >= body.getBoundingClientRect().bottom - 1,
+    stack: stack && stack.querySelector('.dr-head')?.textContent.trim(), windows: !!stack?.querySelector('.pp-stack-note'),
+    line: !!none && !!add && !none.hidden && Math.abs(none.getBoundingClientRect().top - add.getBoundingClientRect().top) < 12,
     add: [...(row?.querySelectorAll('.pp-layers-adds button') || [])].map(b => b.textContent) }; })()`);
-c.ok('the Stack is the last section: the object\'s layers, then the windows', /^Stack/.test(section.head) && section.last
-  && JSON.stringify(section.order) === '["layers","pp-stack-part","pp-stack-note"]' && JSON.stringify(section.add) === '["＋ overlay…"]', JSON.stringify(section));
+c.ok('the layers a dock at the panel\'s foot, none one line with its field and its +; the Stack the windows\', the column\'s last',
+  /^Layers/.test(section.head) && section.foot && section.under && /^Stack/.test(section.stack) && section.windows && section.line
+  && JSON.stringify(section.add) === '["＋ overlay…"]', JSON.stringify(section));
 const v1 = await save();                                // v1: no layer
 await page.click(`[...${layersRow}.querySelectorAll('.pp-layers-adds button')].find(b => b.textContent === '＋ overlay…')`);
 await page.until(`!!document.querySelector('.vp--visible [data-id="${band}"]')`, { timeout: 15000 }).catch(() => {});
@@ -204,6 +209,12 @@ for (const [where, url] of [['the 3D app', '/apps/3d/'], ['cluster', '/apps/clus
   await setLayers([{ ref: long }, { ref: band, at: 'behind' }]);
   await page.until(`document.querySelectorAll('.pp-layer-row').length === 2`, { timeout: 15000 }).catch(() => {});
   await wait(500);
+  const folded = await page.eval(`(() => { const f = document.querySelector('.pp-layers-fold'); return !!f && !f.hidden && f.getAttribute('aria-expanded') === 'false'
+    && document.querySelector('.pp-layers-rows').hidden; })()`);
+  await page.click(`document.querySelector('.pp-layers-fold')`);
+  await wait(200);
+  c.ok(`${where}: the chosen layer's rows folded under its name, the name opening them`, folded
+    && await page.eval(`!document.querySelector('.pp-layers-rows').hidden`));
   const fit = await within();
   c.ok(`${where}: a long title — its rows, the chosen one's rows, its button within the row and the window`, fit.parts >= 10 && fit.pastRow === 0
     && fit.pastWindow === 0, JSON.stringify(fit));

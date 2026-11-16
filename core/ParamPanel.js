@@ -70,6 +70,8 @@ export { WIDGET_TYPES };
 const CORE_GROUPS = {
   format: { label: 'Format', open: false, viewer: true },
   stack: { label: 'Stack', open: true },
+  // The object's layers, a dock at the panel's foot under the column that scrolls — always there (S15b).
+  layers: { label: 'Layers', open: true, dock: true },
 };
 
 const el = (tag, cls, text) => {
@@ -230,6 +232,12 @@ export class ParamPanel {
     (this._mount || document.body).append(this._root);
   }
 
+  /** The panel's foot, under its body: the docked sections (S15b), made when the first comes. */
+  _footing() {
+    if (!this._foot) this._root.append(this._foot = el('div', 'pp-foot'));
+    return this._foot;
+  }
+
   _drawerFor(id) {
     if (!this._drawers.has(id)) {
       const g = this._groups[id] || {};
@@ -238,7 +246,8 @@ export class ParamPanel {
         open: g.open !== false,
         id: `${this._params.app}:${id}`,
       });
-      this._body.append(drawer.root);
+      if (g.dock) this._footing().append(drawer.root);
+      else this._body.append(drawer.root);
       this._drawers.set(id, drawer);
     }
     return this._drawers.get(id);

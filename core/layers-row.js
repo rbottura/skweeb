@@ -1,9 +1,11 @@
 /**
  * layers-row.js — the widget of a `layers` param (core/layers.js, L13): an
- * object's layers in its Stack section, top first, each a line — what it is,
- * in front or behind — switched off or on, moved up or down, taken off; the
- * chosen one's rows below, drawn from `LAYER_PARAMS` (rule 1): where, fitted,
- * its size, from centre, turned, its opacity, its blend. "+ overlay…" puts a
+ * object's layers in a dock at the panel's foot (S15b; its Stack section
+ * before), top first, each a line — what it is, in front or behind —
+ * switched off or on, moved up or down, taken off; the chosen one's rows
+ * below, folded under its name until asked for, drawn from `LAYER_PARAMS`
+ * (rule 1): where, fitted, its size, from centre, turned, its opacity, its
+ * blend. None, and the dock is one line: a field to drop a picture on. "+ overlay…" puts a
  * picture of the vault in front, fitted to the format, in one click — or one
  * dragged here from the vault (core/vault-drag.js).
  *
@@ -57,8 +59,13 @@ export function layersWidget({ key, spec, value, set, panel }) {
   const list = el('ul', 'pp-layers-list');
   const rows = el('div', 'pp-layers-rows');
   const adds = el('div', 'pp-layers-adds');
-  const none = el('p', 'pp-layers-none', 'No layer yet: a picture in front of this one, or behind it.');
-  wrap.append(none, list, rows, adds);
+  const none = el('p', 'pp-layers-none', 'No layer — drop a picture here, or');
+  // The chosen layer's rows, folded under one line until asked for (S15b): the dock stays short.
+  let unfolded = false;
+  const fold = el('button', 'pp-layers-fold');
+  fold.type = 'button';
+  fold.addEventListener('click', e => { e.stopPropagation(); unfolded = !unfolded; paint(); });
+  wrap.append(list, none, fold, adds, rows);          // none or the chosen one's name, then the + on its line
   // Or dragged here from the vault: on top, in front.
   dropOn(wrap, spec, row => add(row.id));
 
@@ -110,10 +117,16 @@ export function layersWidget({ key, spec, value, set, panel }) {
         button('▼', 'down: further from it', () => move(i, i - 1)),
         button('×', 'take this layer off', () => { if (chosen >= i) chosen--; set(layers.filter((_, k) => k !== i)); }));
       row.append(text, acts);
-      row.addEventListener('click', () => { chosen = i; paint(); });
+      row.addEventListener('click', () => { if (chosen === i) unfolded = !unfolded; chosen = i; paint(); });     // the chosen one again: its rows
       return row;
     }));
-    rows.hidden = chosen < 0;
+    fold.hidden = chosen < 0;
+    rows.hidden = chosen < 0 || !unfolded;
+    if (chosen >= 0) {
+      fold.textContent = (unfolded ? '▾ ' : '▸ ') + nameOf(layers[chosen].ref, paint).title;
+      fold.title = unfolded ? 'Fold its rows away' : 'Its place, its size, its opacity, its blend';
+      fold.setAttribute('aria-expanded', String(unfolded));
+    }
     if (chosen >= 0) { painting = true; try { values.restore(layers[chosen]); } finally { painting = false; } }
     adds.replaceChildren(button('＋ overlay…', 'a picture of the vault — or a loop, a page, a smart object — in front, fitted to the format',
       () => panel.pick(key, spec, o => add(o.id))));

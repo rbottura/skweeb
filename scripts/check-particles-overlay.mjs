@@ -87,11 +87,11 @@ await setEmit({ y: -700 });                            // the particles at the t
 await setPicture({ overlay: band });
 await page.until(`${say}.includes('a band on top')`, { timeout: 15000 }).catch(() => {});
 await scrubTo(20);
-// Its layers the Stack's, in the picture's panel — no Overlay section left (L13b).
+// Its layers in the picture's panel, a dock at its foot (S15b) — no Overlay section left (L13b).
 const sections = await page.eval(`[...document.querySelectorAll('.dr-head')].map(h => h.textContent.trim())`);
-const stacked = await page.eval(`(() => { const r = document.querySelector('#picture-side .pp-row[data-key="layers"]'); return !!r && /^Stack/.test(r.closest('.dr').querySelector('.dr-head').textContent.trim())
+const stacked = await page.eval(`(() => { const r = document.querySelector('#picture-side .pp-row[data-key="layers"]'); return !!r && /^Layers/.test(r.closest('.dr').querySelector('.dr-head').textContent.trim()) && !!r.closest('.pp-foot')
   && document.querySelectorAll('#picture-side .pp-layer-row').length === 1; })()`);
-c.ok('its overlay a layer, in the Stack: no Overlay section left', stacked && !sections.some(t => /^Overlay/i.test(t)), JSON.stringify(sections));
+c.ok('its overlay a layer, in the Layers dock: no Overlay section left', stacked && !sections.some(t => /^Overlay/i.test(t)), JSON.stringify(sections));
 
 // ── At its defaults, as it was; then behind ─────────────────────────────────
 

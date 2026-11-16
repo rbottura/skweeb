@@ -136,6 +136,13 @@ the `layers` param, one line of each app's schema (`LAYERS`), its group
 `stack` one of ParamPanel's own, like `format` — then the windows' live
 stack, under a heading of its own; the section stays the panel's last.
 
+Since S15b (2026-11-16) the layers are a dock of their own at the panel's
+foot, under the column that scrolls — the group `layers`, `dock: true`
+among ParamPanel's own, drawn in its `.pp-foot`: a line a layer, the
+chosen one's rows folded under its name, none one line — a field to drop
+a picture on, and its ＋. The author: "une section overlay minifiée et
+fixe en bas du panel droit". The Stack is the windows' alone.
+
 ## Format and Ground — U8c
 
 `ParamPanel` mounts a group of the schema in an element it is given,
