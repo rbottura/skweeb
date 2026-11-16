@@ -227,3 +227,21 @@ body.pp-walling { cursor: col-resize; user-select: none; }
 .sr-to { font: 400 12px var(--font-ui); color: var(--fg-3); }
 .sr-end { width: 100%; }
 .sr-acts { display: flex; justify-content: flex-end; gap: 6px; }
+
+/* ── Sections told apart (S15e) ────────────────────────────────────────────────
+   The author: "que les sections aient une plus grande distinction graphique". An app panel's own sections —
+   its column's and its docks' — a band each: the head tinted, its title brighter, a strip of the accent while
+   it is open, room between them. A card's sections — a shape's Form, Place, Look — lighter under them, set in
+   on a line: two levels seen at a glance, alone and in the scene. */
+.pp--railed > :is(.pp-top, .pp-body, .pp-foot) > .dr > .dr-head {
+  min-height: 32px; background: color-mix(in srgb, var(--raised) 55%, transparent); color: var(--fg);
+  font-size: 11.5px; letter-spacing: 0.08em; }
+.pp--railed > :is(.pp-top, .pp-body, .pp-foot) > .dr > .dr-head:hover { background: var(--raised); }
+.pp--railed > :is(.pp-top, .pp-body, .pp-foot) > .dr.dr--open > .dr-head { box-shadow: inset 3px 0 0 var(--accent); }
+.pp--railed > .pp-body > .dr + .dr { margin-top: 10px; }
+.pp--railed .pp-card .dr { background: none; border-color: var(--line); }
+.pp--railed .pp-card .dr > .dr-head { min-height: 26px; background: none; box-shadow: none; color: var(--fg-2); font-size: 10.5px; }
+.pp--railed .pp-card .dr.dr--open > .dr-body { margin-left: 8px; border-left: 1px solid var(--line-2); }
+/* In the scene the properties stay one column, no gap, no box (S9d, the bench's): the bands and the strip tell
+   its sections apart there. */
+.cl-host .pp--railed > .pp-body > .dr + .dr { margin-top: 0; }

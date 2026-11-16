@@ -43,7 +43,8 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   The shapes' list a dock at the panel's head, never scrolled away, its
   chosen card's head the object's name — its colour, "box 2" — no fold (S15k).
   The rail goes into the chosen shape: Form, Place, Look… a smaller icon
-  each under the Shape section's (S15l). Alt click on a number's box or
+  each under the Shape section's (S15l). The panel's sections a band each,
+  a card's lighter under them (S15e). Alt click on a number's box or
   slider: its two ends by hand, kept in this browser (S15g, `core/slider-range.js`).
 
 - **A cloud in time** (G2, 2026-11-11, the author's picks; `forces.js`,
@@ -313,12 +314,9 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**S15g — a slider's range by hand** (`docs/plan.md`): Alt click on a
-slider opens its two ends, set by hand, kept for the app in this browser —
-the pins' way (`core/ParamPanel.js` `_pin`), never the schema's limits.
-Alt click on a label shows or hides its slider today: the click on the
-track is free. Then S15e, the sections told apart — on a capture, the
-author's eye. S15f waits on the author's read of `docs/layouts.md`.
+**The author's eye on S15** — the panel as it stands after S15a to S15l, in
+the 3D app and in the scene: the sections' bands (S15e), the widths, the
+rail. Then S15f, once the author has read `docs/layouts.md`.
 
 Before S15, **G3 — more parameters**, the author's pick (`docs/plan.md`): its list —
 particles' colour over life, the overlay's place and blend, an emitter
