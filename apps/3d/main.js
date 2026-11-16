@@ -136,7 +136,7 @@ async function boot(mine) {
   // A card changed: the loop fitted again — a shape set swinging makes the model one, and plays it (P2).
   cards = new Cards({ ...SHAPE_CARDS, mount: shapeDrawer.body, list: shapesDrawer.body, onChange: () => { const was = clock.length > 1; fitClock();
     if (!was && clock.length > 1 && !clock.playing) clock.play(); draw(); },
-    onChoose: i => { shapeDrawer.note(i < 0 ? '' : cards.entries[i].item.label); if (i >= 0) shapeDrawer.open = true; draw(); } });
+    onChoose: i => { shapeDrawer.note(i < 0 ? '' : cards.nameOf(i)); if (i >= 0) shapeDrawer.open = true; draw(); } });
   model.onInks = () => draw();             // a palette of the vault a shape names, or the object a cloud is born on, come:
                                            // drawn again in it (palettes.js, emitters.js)
   chosen = wireChosen({ cards, model, onChange: draw, root });

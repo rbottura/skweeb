@@ -71,10 +71,16 @@ function place(box) {
   box.style.maxHeight = `${Math.max(160, innerHeight - top - 12)}px`;
 }
 
+/** Whether the page has a print to float: an Export box whose body was given one — the garden's has none. */
+export function hasPrint() {
+  const box = current();
+  return !!box && box.querySelector('.pp-printbox-body').childElementCount > 0;
+}
+
 /** The print opened by the Export button — or closed, when `toggle` and it was open. True if it is open now. */
 export function showPrintBox({ toggle = false } = {}) {
   const box = current();
-  if (!box) return false;
+  if (!box || !hasPrint()) return false;
   if (toggle && !box.hidden) { box.hidden = true; return false; }
   place(box);
   box.hidden = false;

@@ -85,6 +85,20 @@ c.ok("Export's Print… floats the print under the button, its rows and its act"
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
 c.ok('…and Escape closes it', await page.eval(`document.querySelector('.pp-printbox').hidden`));
 
+// S15b: a layer's rows folded in the dock — the search finds them, and Enter unfolds them to put the hand on one.
+await page.eval(`(async () => { const { rowParams } = await import('/core/param-rows.js');
+  const ids = await fetch('/vault/index.json').then(r => r.json()).then(i => (i.objects || i).filter(o => o.type === 'still').map(o => o.id));
+  rowParams(document.querySelector('.pp-row[data-key="layers"]')).params.set('layers', [{ ref: ids[0] || 'none' }]); })()`);
+await wait(300);
+const foldedFirst = await page.eval(`!!document.querySelector('.pp-layers-rows[hidden]')`);
+await key('Backquote', '²');
+await type('layer opacity');
+await press('Enter');
+await wait(400);
+c.ok("a folded layer's row found by the search, Enter unfolding it", foldedFirst && await page.eval(`(() => { const a = document.activeElement;
+  return !document.querySelector('.pp-layers-rows').hidden && a?.closest('.pp-row')?.querySelector('.pp-name')?.textContent === 'layer opacity'; })()`));
+await page.eval(`document.activeElement && document.activeElement.blur()`);
+
 const noise = c.quiet();
 c.ok('the console stayed quiet', !noise.length, JSON.stringify(noise).slice(0, 300));
 await c.finish();

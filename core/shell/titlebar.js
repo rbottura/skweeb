@@ -12,7 +12,7 @@
 
 import { LitElement, html, nothing } from '../libs/lit/lit-all.min.js';
 import { openPalette } from '../Palette.js';
-import { actsOnPage, showPrint } from '../boxes/export.js';
+import { actsOnPage, showPrint, hasPrint } from '../boxes/export.js';
 
 class SkwTitlebar extends LitElement {
   static properties = { app: { type: String }, acts: { type: String }, menu: { state: true } };
@@ -70,8 +70,8 @@ class SkwTitlebar extends LitElement {
           ${this.menu.map(s => html`
             <div class="tb-menu-head">${s.title}</div>
             ${s.acts.map(a => html`<button class="tb-menu-item" type="button" role="menuitem" @click=${() => this._run(a.button)}>${a.label}</button>`)}`)}
-          <div class="tb-menu-head">Print</div>
-          <button class="tb-menu-item" type="button" role="menuitem" @click=${() => this._print()}>Print… a sheet, a dpi</button>
+          ${hasPrint() ? html`<div class="tb-menu-head">Print</div>
+          <button class="tb-menu-item" type="button" role="menuitem" @click=${() => this._print()}>Print… a sheet, a dpi</button>` : nothing}
         </div>` : nothing}`;
   }
 }

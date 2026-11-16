@@ -29,7 +29,9 @@
  */
 
 import { Vault } from '../vault.js';
-import { printBox, showPrintBox } from './print-box.js';
+import { printBox, showPrintBox, hasPrint } from './print-box.js';
+
+export { hasPrint };
 
 /** One set of words for every app — docs/boxes.md, *The words*. */
 export const EXPORT_WORDS = {

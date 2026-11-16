@@ -69,5 +69,14 @@ export function cardsList(cards, mount) {
     }));
   }
 
-  return { node, paint };
+  /** The chosen line into view in the list's own scroll — the page's left where it is. */
+  function reveal() {
+    const line = node.querySelector('.pp-cards-line--chosen');
+    if (!line) return;
+    const r = line.getBoundingClientRect(), R = node.getBoundingClientRect();
+    if (r.top < R.top) node.scrollTop -= R.top - r.top;
+    else if (r.bottom > R.bottom) node.scrollTop += r.bottom - R.bottom;
+  }
+
+  return { node, paint, reveal, names };
 }

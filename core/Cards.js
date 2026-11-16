@@ -144,6 +144,9 @@ export class Cards {
     return { on: this.entries.filter(e => e.on).length, all: this.entries.length };
   }
 
+  /** Entry `i`'s name: its line's in a list — "box 2" — its kind's otherwise. */
+  nameOf(i) { return this.lines ? this.lines.names()[i] : (this.entries[i] ? this.entries[i].item.label : ''); }
+
   /** Where the chosen entry is in the list, or -1. */
   get chosenIndex() {
     return this.chosen ? this.entries.indexOf(this.chosen) : -1;
@@ -160,7 +163,7 @@ export class Cards {
     this.chosen = entry;
     for (const e of this.entries) this.mark(e);
     if (entry) reveal(entry);
-    if (this.lines) this.paint();
+    if (this.lines) { this.paint(); this.lines.reveal(); }
     if (changed) this.onChoose(this.chosenIndex);
   }
 
@@ -189,7 +192,8 @@ export class Cards {
     const card = el('div', 'pp-card');
     const panel = new ParamPanel(params, { title: item.label, mount: card, ...(this.groups ? { groups: this.groups } : {}) });
     const entry = { item, params, on, card, panel, title: panel.head.querySelector('.pp-title') };
-    if (this.fold) foldable(entry, () => this.choose(this.chosen === entry ? null : entry));
+    // Folded, its name opens it or folds it; in a list's section, the one shown, it stays (S15c).
+    if (this.fold) foldable(entry, () => this.choose(this.chosen === entry && !this.lines ? null : entry));
     if (this.inner) entry.inner = this.innerOf(panel, entry);
 
     const toggle = headButton(on ? this.words.on : this.words.off, this.words.toggle, () => {
@@ -208,7 +212,7 @@ export class Cards {
       panel.head.append(entry.up, entry.down);
     }
     panel.head.append(headButton('✕', this.words.out, () => this.remove(entry)));
-    params.on(() => { if (this.lines) this.lines.paint(); this.onChange(); });      // a line's colour, in a list
+    params.on(key => { if (this.lines && key === 'colour') this.lines.paint(); this.onChange(); });      // a line's colour, in a list
     // Its values in a state's recipe: the entry at its place, of its kind — for its rows' value in each state.
     if (this.listIn) partIn(params, recipe => { const e = this.entryIn(recipe, entry); return e ? e.params : null; });
 
@@ -283,6 +287,7 @@ export class Cards {
     const was = keep && this.chosen ? { at: this.chosenIndex, id: this.chosen.item.id } : null;
     for (const e of this.entries) drop(e);
     this.entries = [];
+    this.restoring = true;            // a list's lines drawn once, at the end — not once an entry
     this.choose(null);
     const unknown = [];
     for (const item of list || []) {
@@ -290,6 +295,7 @@ export class Cards {
       const entry = this.add(item.id, item.params, item.on !== false);
       if (entry.inner) unknown.push(...entry.inner.restore(item[this.inner.key]));
     }
+    this.restoring = false;
     this.paint();
     this.onChange();
     if (was && this.entries[was.at] && this.entries[was.at].item.id === was.id) this.choose(was.at);
@@ -299,7 +305,7 @@ export class Cards {
   /** The first card cannot go up, the last cannot go down; an empty list says so. */
   paint() {
     this.empty.hidden = this.entries.length > 0;
-    if (this.lines) { this.lines.paint(); this.hint.hidden = !!this.chosen || !this.entries.length; }
+    if (this.lines && !this.restoring) { this.lines.paint(); this.hint.hidden = !!this.chosen || !this.entries.length; }
     if (!this.order) return;
     this.entries.forEach((e, i) => {
       e.up.disabled = i === 0;

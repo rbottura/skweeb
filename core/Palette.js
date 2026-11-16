@@ -75,6 +75,7 @@ function unhidden(row) {
   const pop = row.closest('.vf-pop');
   if (pop && pop.hidden) pop.parentElement.querySelector(':scope > .vf-size')?.click();
   if (row.closest('.pp-printbox[hidden]')) showPrintBox();      // a row of the print, floating by Export (S15a)
+  if (row.closest('.pp-layers-rows[hidden]')) row.closest('.pp-layers').querySelector('.pp-layers-fold')?.click();   // a layer's, folded (S15b)
 }
 
 /** The hand on a row: its drawer open, the row in view, its control taken. */

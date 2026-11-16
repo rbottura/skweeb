@@ -24,7 +24,7 @@
 
 import { bind } from '../keys.js';
 import * as Guides from './guides.js';
-import { actsOnPage, showPrint } from '../boxes/export.js';
+import { actsOnPage, showPrint, hasPrint } from '../boxes/export.js';
 import { rowParams } from '../param-rows.js';
 import { Vault } from '../vault.js';
 import { held } from '../scope.js';
@@ -157,7 +157,7 @@ export function installBindings() {
     tap: () => press($('skw-titlebar .tb-export')),
     pie: () => ({ title: 'export', items: [
       ...actsOnPage().flatMap(s => s.acts.map(a => ({ label: a.label.replace(/\s*\[S\]$/, ''), run: () => a.button.click() }))),
-      { label: 'Print…', run: () => showPrint() },
+      ...(hasPrint() ? [{ label: 'Print…', run: () => showPrint() }] : []),     // the garden has none
     ] }),
   });
 

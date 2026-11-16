@@ -65,7 +65,7 @@ export { WIDGET_TYPES };
 
 /**
  * Groups every app shares, so a Format section is the same section everywhere — in the viewer, where there is
- * one — and the Stack too: an object's layers (core/layers.js), the windows' stack after them (core/StackPanel.js).
+ * one — the Stack too, the windows' (core/StackPanel.js), and an object's layers, a dock at the foot (core/layers.js, S15b).
  */
 const CORE_GROUPS = {
   format: { label: 'Format', open: false, viewer: true },

@@ -175,8 +175,8 @@ const sections = () => page.eval(`[...document.querySelectorAll('.dr-head')].map
 const popOpen = () => page.eval(`!${vf}.querySelector('.vf-pop').hidden`);
 c.ok("the format in the viewer's head: its list, and the picture's size", (await page.eval(`${vf}?.querySelector('.vf-list select')?.value`)) === 'ig-square'
   && (await chip()) === '1080 × 1080', await chip());
-c.ok('…no Format section in the properties; its overlay a layer, in the Stack (L13b)', !(await sections()).some(t => /^Format/i.test(t))
-  && (await sections()).some(t => /^Stack/i.test(t)) && !(await sections()).some(t => /^Overlay/i.test(t)), JSON.stringify(await sections()));
+c.ok('…no Format section in the properties; its overlay a layer (L13b), in the Layers dock (S15b)', !(await sections()).some(t => /^Format/i.test(t))
+  && (await sections()).some(t => /^Layers/i.test(t)) && !(await sections()).some(t => /^Overlay/i.test(t)), JSON.stringify(await sections()));
 await page.typeInto(`${vf}.querySelector('.vf-list select')`, 'a3');
 await page.until(`${vf}.querySelector('.vf-size').textContent !== '1080 × 1080'`, { timeout: 5000 }).catch(() => {});
 await wait(400);
