@@ -61,6 +61,7 @@ import { watch, unwatch, around } from './steps.js';
 import { held }       from './scope.js';
 import { formatIn }   from './viewformat.js';
 import { sectionRail } from './section-rail.js';
+import { sideWall }    from './side-wall.js';
 
 export { WIDGET_TYPES };
 
@@ -233,7 +234,8 @@ export class ParamPanel {
     this._root.append(head, this._body);
     (this._mount || document.body).append(this._root);
     // An app's own panel — its column's — has a rail of its sections beside it (S15h).
-    if (this._mount && this._mount.classList.contains('app-side')) sectionRail(this._root, this._body);
+    // An app's own panel — its column's — has a rail of its sections beside it (S15h), and its edge moved by hand (S15j).
+    if (this._mount && this._mount.classList.contains('app-side')) { sectionRail(this._root, this._body); sideWall(this._mount, this._params.app); }
   }
 
   /** The panel's foot, under its body: the docked sections (S15b), made when the first comes. */

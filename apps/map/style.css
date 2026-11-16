@@ -11,7 +11,7 @@
 @import '../../core/stack-panel.css';
 @import '../../core/vault-panel.css';
 
-.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
+.app-main { --app-columns: var(--side-l, var(--nb-side)) minmax(0, 1fr) var(--side-r, var(--nb-side)); }   /* their edges moved by hand (core/side-wall.js) */
 
 /* The tools and the guides' switch, over the viewer (main.js). */
 .viewer-head .nb-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }

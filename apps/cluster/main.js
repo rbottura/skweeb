@@ -147,6 +147,7 @@ export function start(page = document.body) {
   scene.append(strip, ...boxes.nodes, sideBar, side, keys, story, tabs, detail, none, host);
   page.append(scene);
   scene.append(wall(scene));                 // between the side and the viewer, moved by hand: the side wider, its pictures larger
+  scene.append(wall(scene, 'props'));        // between the viewer and the properties: the app's panel wider (S15j)
 
   installPalette();                          // ² from the start: the vault has no panel to install it
   props = propsTabs({ bar: tabs, detail, none });

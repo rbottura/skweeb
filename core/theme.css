@@ -60,7 +60,7 @@
   --font-ui:  'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
   --font-num: 'IBM Plex Mono', 'Cascadia Mono', Consolas, monospace;
 
-  --side:  320px;                  /* a side column */
+  --side:  360px;                  /* a side column — 320 until its rail came (S15j); its edge moved by hand */
   --bar-h: 28px;                   /* the bottom bar */
 }
 

@@ -13,7 +13,7 @@
 @import '../../core/stack-panel.css';
 @import '../../core/vault-panel.css';
 
-.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+.app-main { --app-columns: minmax(0, 1fr) var(--side-r, var(--nb-side)); }   /* --side-r: its edge moved by hand (core/side-wall.js) */
 
 /* The handles' mode, and what else the chosen shape can have done, over the viewer (chosen.js). */
 .viewer-head .nb-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }

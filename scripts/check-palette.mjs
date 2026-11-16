@@ -66,6 +66,18 @@ const brought = await page.eval(`(async () => { const pp = document.querySelecto
   const head = b._dr.querySelector('.dr-head'); return { y, top: Math.round(head.getBoundingClientRect().top), open: b._dr.classList.contains('dr--open'), body: pp.querySelector('.pp-body').scrollHeight > pp.querySelector('.pp-body').clientHeight }; })()`);
 c.ok("…a click opens its section and brings its head beside the hand", brought.open && Math.abs(brought.top - brought.y) < 3, JSON.stringify(brought));
 
+// S15j: each side's edge toward the viewer moved by hand — wider, kept; a double click puts it back.
+const sw = () => page.eval(`(() => { const s = document.querySelector('#picture-side'), w = s.querySelector(':scope > .pp-sidewall--r').getBoundingClientRect();
+  return { w: Math.round(s.getBoundingClientRect().width), at: [Math.round(w.left + w.width / 2), Math.round(w.top + 200)],
+    left: !!document.querySelector('#emit-side > .pp-sidewall--l'), kept: document.querySelector('.app-main').style.getPropertyValue('--side-r') }; })()`);
+const s0 = await sw();
+await page.pointer(s0.at, [s0.at[0] - 100, s0.at[1]], 8);
+const s1 = await sw();
+c.ok("a side's edge dragged toward the viewer: 100 px wider, kept; the other side its own", s0.left && s1.w === s0.w + 100 && s1.kept === `${s1.w}px`, JSON.stringify({ s0, s1 }));
+await page.eval(`document.querySelector('#picture-side > .pp-sidewall').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))`);
+await wait(150);
+c.ok('…a double click puts it back', (await sw()).w === s0.w, JSON.stringify(await sw()));
+
 await c.go(c.base + '/apps/compose/');
 await page.until(`!!document.querySelector('#page-side .pp-row')`);
 await key('Backquote', '²');

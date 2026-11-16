@@ -12,7 +12,7 @@
 @import '../../core/stack-panel.css';
 @import '../../core/vault-panel.css';
 
-.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+.app-main { --app-columns: minmax(0, 1fr) var(--side-r, var(--nb-side)); }   /* --side-r: its edge moved by hand (core/side-wall.js) */
 
 .viewer-stage canvas { cursor: grab; touch-action: none; }
 .viewer-stage canvas.dragging { cursor: grabbing; }

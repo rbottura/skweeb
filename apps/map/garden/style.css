@@ -11,7 +11,7 @@
 @import '../../../core/stack-panel.css';
 @import '../../../core/vault-panel.css';
 
-.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
+.app-main { --app-columns: var(--side-l, var(--nb-side)) minmax(0, 1fr) var(--side-r, var(--nb-side)); }   /* their edges moved by hand (core/side-wall.js) */
 
 /* A click walks the gardener there (main.js). */
 .viewer-stage canvas { cursor: pointer; touch-action: none; image-rendering: auto; }

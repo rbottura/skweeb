@@ -12,7 +12,7 @@
 @import '../../core/stack-panel.css';
 @import '../../core/vault-panel.css';
 
-.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
+.app-main { --app-columns: var(--side-l, var(--nb-side)) minmax(0, 1fr) var(--side-r, var(--nb-side)); }   /* their edges moved by hand (core/side-wall.js) */
 
 /* The presets at the head of the Motion drawer (drawers.js). */
 .rg-presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 4px 0 10px; }

@@ -203,3 +203,14 @@ skw-graph .gr-gates-head { padding: 5px 8px 3px; font: 600 10.5px var(--font-ui)
 @keyframes pp-rail-hit { 0% { box-shadow: 0 0 0 2px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
 .pp-rail-hit { animation: pp-rail-hit 650ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .pp-rail-hit { animation: none; } }
+
+/* A side's edge toward the viewer, moved by hand (S15j; core/side-wall.js): over the gap between them, a
+   line lit as it is hovered, held or in hand — the scene's wall, for an app open alone. */
+.app-side:has(> .pp-sidewall) { position: relative; }
+.pp-sidewall { position: absolute; top: 0; bottom: 0; z-index: 6; width: 10px; cursor: col-resize; touch-action: none; outline: none; }
+.pp-sidewall--r { left: calc(-5px - var(--gap) / 2); }
+.pp-sidewall--l { right: calc(-5px - var(--gap) / 2); }
+.pp-sidewall::after { content: ""; position: absolute; inset: 0 auto 0 4px; width: 2px; border-radius: 1px; background: var(--accent); opacity: 0; transition: opacity 120ms; }
+.pp-sidewall:hover::after, .pp-sidewall:focus-visible::after, .pp-sidewall--held::after { opacity: 1; }
+body.pp-walling { cursor: col-resize; user-select: none; }
+.cl-host .pp-sidewall { display: none; }

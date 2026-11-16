@@ -36,7 +36,7 @@
 .cluster {
   --strip: 92px;
   --vault-w: 256px;           /* the bench's side view */
-  --props-w: 300px;           /* the bench's properties */
+  --props-w: 340px;           /* the bench's properties, 300 until their rail came (S15j); their wall moves it */
   --tabs-h: 36px;             /* the gap over the properties, and their head — the tabs, 30 px */
   --head-h: 37px;             /* a viewer's head: the app's buttons, its tools */
   --player-h: 59px;           /* the player under the viewer — or its room, where nothing plays */
@@ -180,6 +180,7 @@
 .cl-wall::after { content: ""; position: absolute; inset: 0 auto 0 4px; width: 2px; border-radius: 1px; background: var(--accent);
   opacity: 0; transition: opacity 120ms; }
 .cl-wall:hover::after, .cl-wall:focus-visible::after, .cl-wall--held::after { opacity: 1; }
+.cl-wall--props { grid-column: 4; justify-self: start; margin: var(--gap) 0 var(--gap) -8px; }      /* the properties' (S15j) */
 body.cl-walling { cursor: col-resize; user-select: none; }
 
 /* ── The properties: one panel, as the bench's ─────────────────────────────────

@@ -12,7 +12,7 @@
 @import '../../core/vault-panel.css';
 @import '../../core/sequence-viewer.css';
 
-.app-main { --app-columns: var(--nb-side) minmax(0, 1fr) var(--nb-side); }
+.app-main { --app-columns: var(--side-l, var(--nb-side)) minmax(0, 1fr) var(--side-r, var(--nb-side)); }   /* their edges moved by hand (core/side-wall.js) */
 
 /* ── What is on the page: a row each, the top of the page first ────────────── */
 

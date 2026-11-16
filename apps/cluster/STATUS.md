@@ -8,6 +8,10 @@ app still opens alone on its own page; the scene is one more host.
 
 ## Works now
 
+- **The properties wider, their wall moved by hand** (S15j, 2026-11-16, the
+  author's): 340 px, the app's rail beside them; a second wall on the
+  viewer's other edge (`wall.js`, `wall(scene, 'props')`), dragged, the
+  arrows, a double click back, kept in this browser.
 - **Laid as the bench is** (`scene/canvas`, 2026-11-05 — the author's yes:
   "tu peux prendre la mise en page du bench qui est super"): the strip of
   apps, the scene's vault, the app's viewer and its player, its properties.

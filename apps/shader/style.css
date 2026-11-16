@@ -13,7 +13,7 @@
 @import '../../core/vault-panel.css';
 @import '../../core/sequence-viewer.css';
 
-.app-main { --app-columns: minmax(0, 1fr) var(--nb-side); }
+.app-main { --app-columns: minmax(0, 1fr) var(--side-r, var(--nb-side)); }   /* --side-r: its edge moved by hand (core/side-wall.js) */
 
 /* A row's picture: the chain cut there, on the checker where it is clear. */
 .sh-row {

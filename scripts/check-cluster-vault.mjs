@@ -189,12 +189,26 @@ c.ok('the wall dragged: the side 200 px wider, the viewer after it, its pictures
   && wider.kept === String(wider.side), JSON.stringify({ was, wider }));
 await page.pointer(wider.at, [wider.at[0] + 600, wider.at[1]], 8);
 const widest = await laid();
-c.ok('…as wide as the window lets it, its pictures 150 px and more columns; the viewer keeps its room',
-  widest.cols > 4 && widest.card >= 150 && widest.side < wider.side + 600 && widest.viewer < 1600 - 300 - 360, JSON.stringify(widest));
+// A column more as soon as each picture keeps its 150 px — whether one comes depends on the window and the
+// properties' width (340 since S15j): one more here would be under 150, so four is right too.
+c.ok('…as wide as the window lets it, its pictures 150 px and more, a column more where one fits; the viewer keeps its room',
+  widest.card >= 150 && (widest.cols > 4 || widest.cols * widest.card / (widest.cols + 1) < 150)
+  && widest.card > wider.card && widest.side < wider.side + 600 && widest.viewer < 1600 - 340 - 360, JSON.stringify(widest));
 await page.eval(`document.querySelector('.cl-wall').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))`);
 await wait(200);
 const back = await laid();
 c.ok('…a double click puts it back', back.side === was.side && back.cols === 4 && back.card === was.card, JSON.stringify(back));
+// S15j: the properties' wall, on the viewer's other edge — the app's panel wider, kept; a double click puts it back.
+const props = () => page.eval(`(() => { const w = document.querySelector('.cl-wall--props').getBoundingClientRect();
+  return { props: Math.round(document.querySelector('.cl-host .app-main > .app-side.cl-shown').getBoundingClientRect().width),
+    at: [Math.round(w.left + w.width / 2), Math.round(w.top + w.height / 2)], kept: localStorage.getItem('skweeb.cluster.props') }; })()`);
+const p0 = await props();
+await page.pointer(p0.at, [p0.at[0] - 120, p0.at[1]], 8);
+const p1 = await props();
+c.ok("the properties' wall dragged left: the app's panel 120 px wider, kept", p1.props === p0.props + 120 && !!p1.kept, JSON.stringify({ p0, p1 }));
+await page.eval(`document.querySelector('.cl-wall--props').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))`);
+await wait(200);
+c.ok('…a double click puts it back', (await props()).props === p0.props, JSON.stringify(await props()));
 await c.shot('5-wall');
 
 const noise = c.quiet();
