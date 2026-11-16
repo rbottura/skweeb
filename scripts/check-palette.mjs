@@ -54,6 +54,18 @@ await page.eval(`(() => { const b = document.querySelector('.pp-num'); b.focus()
 await page.eval(`document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { code: 'Backquote', key: '²', bubbles: true }))`);
 c.ok('typed into a field, ² opens nothing', await page.eval(`!document.querySelector('.pal')`));
 
+// S15h: a rail of icons beside the panel, a section each; a click brings that section's head beside the hand.
+const rail = await page.eval(`(() => { const pp = document.querySelector('#emit-side > .pp'), rail = pp?.querySelector(':scope > .pp-rail');
+  const shown = [...pp.querySelectorAll(':scope > .pp-body > .dr, :scope > .pp-foot > .dr')].filter(d => !d.hidden && d.offsetParent);
+  return { buttons: rail ? rail.children.length : 0, sections: shown.length, titles: [...(rail?.children || [])].map(b => b.title) }; })()`);
+c.ok('a rail beside the panel, an icon a section shown', rail.buttons > 2 && rail.buttons === rail.sections, JSON.stringify(rail));
+const brought = await page.eval(`(async () => { const pp = document.querySelector('#emit-side > .pp'), b = [...pp.querySelectorAll('.pp-rail-btn')].at(-2);
+  const y = Math.round(pp.getBoundingClientRect().top + 160);
+  b.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 10, clientY: y }));
+  await new Promise(r => setTimeout(r, 100));
+  const head = b._dr.querySelector('.dr-head'); return { y, top: Math.round(head.getBoundingClientRect().top), open: b._dr.classList.contains('dr--open'), body: pp.querySelector('.pp-body').scrollHeight > pp.querySelector('.pp-body').clientHeight }; })()`);
+c.ok("…a click opens its section and brings its head beside the hand", brought.open && Math.abs(brought.top - brought.y) < 3, JSON.stringify(brought));
+
 await c.go(c.base + '/apps/compose/');
 await page.until(`!!document.querySelector('#page-side .pp-row')`);
 await key('Backquote', '²');

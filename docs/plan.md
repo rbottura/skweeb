@@ -71,7 +71,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S15d | values copied from a card onto another that has them, by level — a row, a section, every value, defaults too — by its menu (Ctrl or right click), Ctrl C and Ctrl V asked, Enter | `ui/params-copy` | M | landed 2026-11-16 |
 | S15e | the sections told apart at a glance | `ui/sections` | S | ready |
 | S15g | Alt click on a slider: its range's ends set by hand, kept for the app in this browser — or a preset | `ui/slider-range` | S | ready |
-| S15h | a rail of icons, a section each, beside the panel: a click brings that section beside the cursor | `ui/section-rail` | S | ready |
+| S15h | a rail of icons, a section each, beside the panel: a click brings that section beside the cursor | `ui/section-rail` | S | landed 2026-11-16 |
 | S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | proposal landed 2026-11-16 (`docs/layouts.md`); waits: the author's read |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |

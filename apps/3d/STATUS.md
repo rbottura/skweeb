@@ -35,7 +35,9 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   layers a dock at the panel's foot (S15b) — core's, every app. A shape's
   values copied onto another, by level — a row, a section, every value,
   defaults too: Ctrl or right click for its menu, Ctrl C, Ctrl V asked and
-  Enter, one step (S15d, `core/params-copy.js`, `check-params-copy`).
+  Enter, one step (S15d, `core/params-copy.js`, `check-params-copy`). A
+  rail of icons beside the panel, a section each: a click brings its head
+  beside the hand (S15h, `core/section-rail.js`).
 
 - **A cloud in time** (G2, 2026-11-11, the author's picks; `forces.js`,
   `tests/3d-forces.mjs` 29, `check-3d-cloud` 25). A cloud's card's *Forces*,

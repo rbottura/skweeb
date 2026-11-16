@@ -60,6 +60,7 @@ import { installPalette } from './Palette.js';
 import { watch, unwatch, around } from './steps.js';
 import { held }       from './scope.js';
 import { formatIn }   from './viewformat.js';
+import { sectionRail } from './section-rail.js';
 
 export { WIDGET_TYPES };
 
@@ -188,6 +189,7 @@ export class ParamPanel {
    */
   addDrawer({ id, title, open = true, note = '', before = null }) {
     const drawer = new Drawer({ title, open, note, id: `${this._params.app}:${id}` });
+    drawer.root.dataset.group = id;        // its icon on the rail (core/section-rail.js)
     const next = before && (this._drawers.has(before) ? this._drawers.get(before).root : this._at.get(before));
     if (next) this._body.insertBefore(drawer.root, next);
     else this._body.append(drawer.root);
@@ -230,11 +232,13 @@ export class ParamPanel {
     this._body.append(this._loose);
     this._root.append(head, this._body);
     (this._mount || document.body).append(this._root);
+    // An app's own panel — its column's — has a rail of its sections beside it (S15h).
+    if (this._mount && this._mount.classList.contains('app-side')) sectionRail(this._root, this._body);
   }
 
   /** The panel's foot, under its body: the docked sections (S15b), made when the first comes. */
   _footing() {
-    if (!this._foot) this._root.append(this._foot = el('div', 'pp-foot'));
+    if (!this._foot) this._body.after(this._foot = el('div', 'pp-foot'));      // right after the column, the rail after it
     return this._foot;
   }
 
@@ -246,6 +250,7 @@ export class ParamPanel {
         open: g.open !== false,
         id: `${this._params.app}:${id}`,
       });
+      drawer.root.dataset.group = id;
       if (g.dock) this._footing().append(drawer.root);
       else this._body.append(drawer.root);
       this._drawers.set(id, drawer);
