@@ -104,7 +104,7 @@ html, body {
   display: grid;
   gap: var(--gap);
   padding: var(--gap);
-  grid-template-columns: var(--app-columns, minmax(0, 1fr) var(--side));
+  grid-template-columns: var(--app-columns, minmax(0, 1fr) var(--side-r, var(--side)));   /* --side-r: its edge by hand (core/side-wall.js) */
 }
 
 /* A side column holds a docked panel and scrolls on its own. */

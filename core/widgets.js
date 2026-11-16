@@ -53,12 +53,15 @@ export const WIDGETS = {
     // Its ends the schema's, or two set by hand (S15g, core/slider-range.js): the slider between them, the box's
     // fill and drag too. A value typed still goes anywhere the schema lets it.
     const app = panel && panel.params ? panel.params.app : '';
-    const soft = { ...spec, hardMin: spec.min, hardMax: spec.max };
+    const soft = { ...spec, hardMin: spec.min ?? null, hardMax: spec.max ?? null };
     const fine = typeof spec.step === 'number' && spec.step > 0 ? spec.step : 0;
     let lo, hi, coarse;
     const ends = r => {
-      lo = soft.min = r.min;
-      hi = soft.max = r.max;
+      lo = r.min;
+      hi = r.max;
+      // The box's fill and drag over ends that are there: a number with none in its schema has none, unless set by hand.
+      soft.min = r.own || spec.min != null ? r.min : undefined;
+      soft.max = r.own || spec.max != null ? r.max : undefined;
       input.min = along(lo);
       input.max = along(hi);
       coarse = !fine ? 0 : spec.whole || (hi - lo) / (fine * 5) < 8 ? fine : fine * 5;

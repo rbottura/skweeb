@@ -30,7 +30,7 @@ const el = (tag, cls, text) => {
 export function numberBox(spec, value, set, current) {
   const box = el('input', 'pp-num');
   box.type = 'number';
-  const least = spec.hardMin !== undefined ? spec.hardMin : spec.min, most = spec.hardMax !== undefined ? spec.hardMax : spec.max;
+  const least = 'hardMin' in spec ? spec.hardMin : spec.min, most = 'hardMax' in spec ? spec.hardMax : spec.max;
   if (least != null) box.min = least;      // the schema's limits: two ends set by hand (S15g) are the drag's, not these
   if (most != null) box.max = most;
   box.step = spec.step ?? 1;

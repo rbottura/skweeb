@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-15_
+_last touched: 2026-11-16_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -10,19 +10,19 @@ sorts them.
 
 ## Works right now
 
-### Newest — 2026-11-09 to -15: BEC 2027's graphic system (track G), a game's effects (M15)
+### Newest — 2026-11-09 to -16: BEC 2027's graphic system (track G), a game's effects (M15), the panel for a long use (S15)
 
+- **The panel for a long use** (S15, 2026-11-16, `docs/plan.md`; the 3D app's
+  first): Export the title bar's, the print floating by it; the layers a dock
+  at the foot, the shapes one at the head; a rail of icons; values copied by
+  level; bare keys — Ctrl V is not V; widths and a slider's ends by hand.
 - **Numbers short in their boxes**, the wheel stepping none (C13, 2026-11-15).
 - **The shader app** (M15, `apps/shader/STATUS.md`, `docs/vfx.md`): a surface
   from nothing — filter's chain begun by a generator, every row its picture,
   a loop or a life played once, dissolved; saved, replayed, printed. Worn by
   particles, a loop's frames by a particle's age (M15e); played once at a
   thing's cell in the map's player, an event (M15g). In cluster's strip.
-- **An object's layers, in every app** (L13a, 2026-11-12, `core/layers.js`):
-  its Stack section first — "+ overlay…", a vault picture in front or behind,
-  fitted to the format, composed as particles' overlay — kept state by state,
-  drawn round the canvas and in all that leaves: a save, a replay, compose,
-  the print, E's picture; particles' overlay its first layer (L13b).
+- **An object's layers, every app** (L13a, `core/layers.js`): "+ overlay…", kept state by state.
 - **A cloud of dots in the 3D app** (G1, `apps/3d/cloud.js`): particles'
   emitter in 3D, its dots placed once on a vault object's ink, a ball, a disc…,
   each its size and colour by two seeds, R and C; unlit in a palette, or toon;
@@ -347,8 +347,8 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-No row of the board is `ready`: a side job — C12, check-frames' stills, the
-smallest — or one the author unblocks: the gabarit's fields (M13c), S9e's cases.
+The author's eye on S15 as it stands, in the 3D app and in cluster — then
+S15f once `docs/layouts.md` is read. Else a side job (C12) or the gabarit's fields (M13c).
 
 ## Parked decisions
 

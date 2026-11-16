@@ -217,6 +217,9 @@ function install() {
   holding(() => { installed = false; close(); hover = null; });      // what is held stays: an app back finds it
   listen(window, 'pointerover', e => { hover = e.target; }, { passive: true });
   const open = e => {
+    // Never on a control: a Ctrl drag of a number's box ends in a click that carries Ctrl (core/numbox.js, its fine
+    // drag), a field keeps the browser's own menu, a button its act.
+    if (e.target.closest && e.target.closest('input, select, textarea, button:not(.dr-head)')) return false;     // a section's head is one
     const at = levelsAt(e.target);
     if (!at) return false;
     e.preventDefault();

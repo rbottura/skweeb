@@ -110,6 +110,17 @@ await wait(100);
 const sphere = await values('sphere');
 c.ok('…pasted: its place the box\'s, no width given it', sphere.x === box.x && !('width' in sphere), JSON.stringify(sphere));
 
+// ── Ctrl click: the menu on a row's name; none on a number's box, where a Ctrl drag ends in that click ──
+const ctrlClick = el => page.eval(`${el}.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true, clientX: 50, clientY: 50 }))`);
+await page.eval(`document.querySelector('.pc-menu')?.remove()`);
+await ctrlClick(`${card('sphere')}.querySelector('.pp-row[data-key="radius"] .pp-name')`);
+const onName = await menuItems();
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+await page.eval(`document.querySelector('.pc-menu')?.remove()`);
+await ctrlClick(`${card('sphere')}.querySelector('.pp-row[data-key="radius"] .pp-num')`);
+c.ok("Ctrl click on a row's name: the menu; on its number's box, none — a fine drag's end", onName.includes('Copy radius')
+  && !(await page.eval(`!!document.querySelector('.pc-menu')`)), JSON.stringify(onName));
+
 // ── Ctrl S keeps its letter: the app's save, once, never the browser's (S15i) ──
 const saves = await page.eval(`(async () => { let n = 0; document.addEventListener('vault:saved', () => n++);
   const kept = document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 's', code: 'KeyS', ctrlKey: true, bubbles: true, cancelable: true }));

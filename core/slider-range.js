@@ -16,6 +16,8 @@
  * core/shell/shell.css draws `.sr-pop`.
  */
 
+import { held } from './scope.js';
+
 const KEY = app => `skweeb/ranges/${app}`;
 
 function load(app) {
@@ -74,7 +76,8 @@ export function askRange(row, { app, key, spec, name, then }) {
   acts.append(reset, keep);
   pop.append(said, line, acts);
 
-  const close = () => { pop.remove(); window.removeEventListener('keydown', onKey, true); window.removeEventListener('pointerdown', away, true); open = null; };
+  let unhold = () => {};
+  const close = () => { pop.remove(); window.removeEventListener('keydown', onKey, true); window.removeEventListener('pointerdown', away, true); open = null; unhold(); };
   const done = ends => {
     keepRange(app, key, ends);
     close();
@@ -102,4 +105,5 @@ export function askRange(row, { app, key, spec, name, then }) {
   a.focus();
   a.select();
   open = { node: pop, close };
+  unhold = held(close);           // closed with its app, at the unmount
 }
