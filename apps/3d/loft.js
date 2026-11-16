@@ -43,7 +43,7 @@ export const ENDS = ['pointed', 'flat', 'open'];
 
 /** A drawn body's own rows: the drawing, how its rings stand, its ends, its silhouette. */
 export const DRAWN_PARAMS = {
-  drawing: { type: 'object', accepts: ['still', 'sequence'], label: 'a gamepad drawing', group: form },
+  drawing: { type: 'object', accepts: ['still', 'sequence'], by: ['gamepad'], label: 'a gamepad drawing', group: form },
   lay: { type: 'enum', options: LAYS, labels: { across: 'across the stroke', stamped: 'as stamped, stepped back' },
          default: 'across', display: 'chips', label: 'its sections stand', group: form },
   back: { type: 'range', min: 0.05, max: 4, step: 'any', default: 0.6, label: 'stepped back, by the stroke\'s length',

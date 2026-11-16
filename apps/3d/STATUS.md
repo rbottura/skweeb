@@ -28,9 +28,9 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 ## Works now
 
 - **A drawn body** (G4, 2026-11-16, the author's ask; `loft.js`,
-  `silhouette.js`, `drawn.js`, `tests/3d-drawn.mjs` 26, `check-3d-drawn` 10).
+  `silhouette.js`, `drawn.js`, `tests/3d-drawn.mjs` 27, `check-3d-drawn` 11).
   The catalogue's tenth, *drawn body*: a gamepad still or sequence given it
-  (`a gamepad drawing`), each stroke a body — its marks' brush traced where
+  (`a gamepad drawing`, its picker the gamepad's only — a field's `by`), each stroke a body — its marks' brush traced where
   its alpha passes `its silhouette, at alpha` (marching squares, the outline
   that holds the most, no holes), a ring of `points round a section` at
   each step along the smoothed line, the rings joined by quads; the sections

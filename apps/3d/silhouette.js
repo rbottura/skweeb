@@ -5,7 +5,7 @@
  * The author: "on tirerait une silhouette du motif utilisé (utilisant un
  * filtre de seuil et une conversion bitmap-to-svg par exemple)". The
  * threshold is the filter; marching squares the tracing, with no library —
- * a tracer is these few dozen lines, and potrace's is GPL. Each cell between
+ * a tracer is these few dozen lines. Each cell between
  * four pixels' centres is cut where the threshold falls between two of them,
  * the cuts joined into closed loops with the ink always on one side; the
  * picture is padded with a pixel of none, so every loop closes. The outline

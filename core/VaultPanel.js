@@ -58,6 +58,7 @@ export class VaultPanel {
    * @param {object} [opts]
    * @param {{type?:string, app?:string, tag?:string}} [opts.filter]  fixed filter
    * @param {string[]} [opts.accepts]  several types, as a param's `accepts` has
+   * @param {string[]} [opts.by]  made by these apps only, as a param's `by` has (G4)
    * @param {string} [opts.use]  only sets offered to this use (core/uses.js)
    * @param {(row:object)=>void} [opts.onPick]   makes the cards a picker
    * @param {string} [opts.pickLabel]
@@ -79,6 +80,7 @@ export class VaultPanel {
     // Vault.list() filters on one type, the cheap query; a param's several are narrowed here.
     this._accepts   = Array.isArray(opts.accepts) && opts.accepts.length
       ? opts.accepts.slice() : null;
+    this._by        = Array.isArray(opts.by) && opts.by.length ? opts.by.slice() : null;
     this._offeredTo = opts.use || null;
     this._showAll   = false;     // the use filter set aside (vault-offer.js)
     this._unoffered = [];
@@ -157,7 +159,7 @@ export class VaultPanel {
   async refresh() {
     await Vault.refresh();
     // A smart object is taken for what it binds — a project saved is a `skw` since S6b — as a field takes one dropped.
-    const ours = rows => rows.filter(r => takes({ accepts: this._accepts }, r));
+    const ours = rows => rows.filter(r => takes({ accepts: this._accepts, by: this._by }, r));
     const rows = ours(await Vault.list(this._filter));
     const trashed = ours(await Vault.list({ ...this._filter, trash: true }));
     this._trashBtn.textContent = 'trash' + (trashed.length ? ' ' + trashed.length : '');

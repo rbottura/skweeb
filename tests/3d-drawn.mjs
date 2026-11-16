@@ -149,6 +149,11 @@ ok('the drawings a model\'s bodies name, shown, once each', drawnIn({ shapes: [
   { id: 'drawn', params: { drawing: 'gam_1' } }, { id: 'drawn', on: false, params: { drawing: 'gam_2' } },
   { id: 'drawn', params: { drawing: 'gam_1' } }, { id: 'cloud', params: { drawing: 'gam_3' } }] }), ['gam_1']);
 ok('the circle a mark with no sprite has: counter-clockwise from the right', [areaOf(circleRing(12, 5)) > 0, circleRing(12, 5)[0]], [true, [5, 0]]);
+const { takes } = await import('../core/vault-drag.js');
+ok('its field takes the gamepad\'s stills and sequences, a smart one too — no other app\'s', [
+  { type: 'still', origin: { app: 'gamepad' } }, { type: 'sequence', origin: { app: 'gamepad' } },
+  { type: 'skw', binds: 'still', origin: { app: 'gamepad' } }, { type: 'sequence', origin: { app: 'particles' } },
+  { type: 'shape', origin: { app: 'gamepad' } }].map(row => takes(DRAWN_PARAMS.drawing, row)), [true, true, true, false, false]);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

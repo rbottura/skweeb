@@ -5,8 +5,9 @@
  *
  * A drawn body added from the menu: a worm of its own at once, its rows its
  * form's. A gamepad still put in the vault — an S and a bar of one brush, the
- * pen lifted between — given it: two bodies, the strokes', each section the
- * brush's silhouette traced at the threshold, not a circle; the worm gone
+ * pen lifted between — picked by hand through its field's Choose…, which
+ * offers the gamepad's drawings only: two bodies, the strokes', each section
+ * the brush's silhouette traced at the threshold, not a circle; the worm gone
  * from the picture. Saved: the still its parent, its id in the recipe; drawn
  * again by its app, the still read again first: it is its render.
  */
@@ -20,10 +21,6 @@ const say = `(document.querySelector('.bar-say')?.textContent || '')`;
 const cards = `[...document.querySelectorAll('.pp-card')].filter(c => !c.parentElement.closest('.pp-card'))`;
 const cardRow = (i, name) => `[...${cards}[${i}].querySelectorAll('.pp-row')].find(r => r.querySelector('.pp-name')?.textContent === ${JSON.stringify(name)})`;
 const BODY = 3;                                        // the opening's box, sphere and torus, then the body
-const setBody = async values => {
-  await page.eval(`import('/core/param-rows.js').then(({ rowParams }) => { rowParams(${cardRow(BODY, 'its ends')}).params.set(${JSON.stringify(values)}); return true; })`);
-  await wait(900);
-};
 const bodyValues = () => page.eval(`import('/core/param-rows.js').then(({ rowParams }) => rowParams(${cardRow(BODY, 'its ends')}).params.values)`);
 /** The preview's pixels far from its ground — the corner's — counted, and kept in the page as `name`; with `than`, how many differ from it. */
 const ink = (name, than = null) => page.eval(`(() => { const c = document.getElementById('stage'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
@@ -67,7 +64,22 @@ const made = await page.eval(`(async () => {
   await Vault.refresh();
   return id; })()`);
 c.ok('a gamepad still in the vault: two strokes of a brush', typeof made === 'string' && made.length > 4, String(made));
-await setBody({ drawing: made });
+// Picked by hand: the body chosen, its field's Choose…, the picker its gamepad's drawings only.
+await page.click(`document.querySelectorAll('.pp-cards-line')[${BODY}]`);
+await wait(400);
+await page.click(`[...${cardRow(BODY, 'a gamepad drawing')}.querySelectorAll('button')].find(b => b.textContent === 'Choose…')`);
+await page.until(`[...document.querySelectorAll('.vp--visible .vp-cell')].some(k => k.querySelector('.vp-name')?.textContent.startsWith('an S and a bar'))`, { timeout: 20000 }).catch(() => {});
+const offered = await page.eval(`(async () => {
+  const { Vault } = await import('/core/vault.js');
+  const shown = document.querySelectorAll('.vp--visible .vp-cell').length;
+  const rows = await Vault.list({});
+  const ours = rows.filter(r => r.origin?.app === 'gamepad' && (['still', 'sequence'].includes(r.type) || (r.type === 'skw' && ['still', 'sequence'].includes(r.binds))));
+  return { shown, gamepad: ours.length, all: rows.filter(r => ['still', 'sequence'].includes(r.type)).length }; })()`);
+c.ok('its field\'s Choose…: the gamepad\'s stills and sequences, none of another app\'s', offered.shown === offered.gamepad && offered.all > offered.gamepad,
+  JSON.stringify(offered));
+await page.click(`[...document.querySelectorAll('.vp--visible .vp-cell')].find(k => k.querySelector('.vp-name')?.textContent.startsWith('an S and a bar'))?.querySelector('.vp-use')`);
+await wait(900);
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`);
 await page.until(`import('/apps/3d/drawn.js').then(m => !!m.drawnOf(${JSON.stringify(made)}))`, { timeout: 20000 }).catch(() => {});
 await wait(900);
 const read = await page.eval(`(async () => {

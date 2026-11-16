@@ -238,7 +238,7 @@ export const WIDGETS = {
         thumb.removeAttribute('src');
         name.className = 'pp-object-name pp-empty';
         name.textContent = 'nothing chosen';
-        sub.textContent = ((spec.accepts || []).join(' or ') || 'any object') + ' · drop one here';
+        sub.textContent = ((spec.accepts || []).join(' or ') || 'any object') + (spec.by ? ` of the ${spec.by.join(' or ')}` : '') + ' · drop one here';
         return;
       }
       name.className = 'pp-object-name';

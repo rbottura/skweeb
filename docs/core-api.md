@@ -76,7 +76,7 @@ What those five lines buy:
 
 - a `ParamPanel` that renders itself, with the right widget per type,
 - `params.values` becomes `object.recipe`, and `restore()` comes free,
-- `type: "object"` renders a vault picker filtered to `accepts`, and records the
+- `type: "object"` renders a vault picker filtered to `accepts` — and `by`, the apps that made it — and records the
   chosen object in `parents` automatically — **this is how cross-app loading
   works**; an app never writes lineage code. `use: "material"` narrows the
   sets it offers to those switched on for that use (`uses.js`); the picker

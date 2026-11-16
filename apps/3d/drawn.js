@@ -40,9 +40,13 @@ function maskOf(image) {
   return { w, h, alpha, width, height };
 }
 
-/** A vault object read as a drawing: its strokes' stamps in order, its sprites' alphas — or null, no marks. */
+/**
+ * A vault object read as a drawing: its strokes' stamps in order, its sprites' alphas — or null, no marks. A
+ * smart object, the gamepad's S since S6b, is the drawing it binds, as core/points.js reads one.
+ */
 async function read(id) {
-  const { object } = await Vault.load(id);
+  let { object } = await Vault.load(id);
+  if (object && object.type === 'skw') object = (await import('../../core/smart.js')).unwrap(object);
   const still = stillOf(object && object.recipe);
   if (!still) return null;
   const drawing = drawingOf(still);

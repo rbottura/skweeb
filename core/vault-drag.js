@@ -31,9 +31,13 @@ const fields = new WeakMap();          // a field's node → its spec
 let dragged = null;                    // the row under way
 let rest = null;                       // { node, since }: the folded head the drag rests on
 
-/** Whether a field of this spec takes this row: its type accepted, or a smart object binding one. */
+/**
+ * Whether a field of this spec takes this row: its type accepted, or a smart object binding one — and, a spec
+ * with `by`, made by one of those apps: a drawn body takes the gamepad's stills, not every app's (G4).
+ */
 export const takes = (spec, row) => !!row && (!spec.accepts || !spec.accepts.length
-  || spec.accepts.includes(row.type) || (row.type === 'skw' && spec.accepts.includes(row.binds)));
+  || spec.accepts.includes(row.type) || (row.type === 'skw' && spec.accepts.includes(row.binds)))
+  && (!spec.by || !spec.by.length || spec.by.includes(row.origin && row.origin.app));
 
 /**
  * A vault card made draggable.
