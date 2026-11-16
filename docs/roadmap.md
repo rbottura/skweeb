@@ -49,7 +49,7 @@ M11 `every app → every app: a live layer` — **done, 2026-10-07**: a
 window's layer in every other's stack, *Send to ▸*, a page of smart
 objects that follows them. P6's `model → map: a character from every side`
 — **done, 2026-11-06**; G1's `ckt → 3d: a cloud's emitter` — **done, 2026-11-11**;
-M15's `shader → particles: a surface over a life` — **done, 2026-11-13**. Open: P5's `rig → map: a character`.
+M15's `shader → particles: a surface over a life` — **done, 2026-11-13**; G4's `gamepad → 3d: a body along its strokes` — **done, 2026-11-16**. Open: P5's `rig → map: a character`.
 
 ## The milestones still open
 

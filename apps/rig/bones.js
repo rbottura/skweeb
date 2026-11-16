@@ -16,7 +16,7 @@
  * carries everything below it in the chain (`posed`). Pure.
  */
 
-import { cornersOf, pointAt } from './strokes.js';
+import { cornersOf, pointAt } from '../../core/stage/strokes.js';
 
 /** How far a point is from a bone, as drawn. */
 export function distanceTo(bone, p) {

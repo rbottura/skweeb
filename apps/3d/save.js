@@ -15,6 +15,7 @@
 
 import { readPalettes, palettesIn } from './palettes.js';
 import { readEmitters, emittersIn } from './emitters.js';
+import { readDrawn, drawnIn } from './drawn.js';
 import { openModel }     from './frames.js';
 import { loopOf }        from './motion.js';
 import { Vault }         from '../../core/vault.js';
@@ -58,6 +59,7 @@ export async function saveRecipe(recipe, { renderer, tick = 0, parents = [], sta
   const shapes = recipe.shapes || [];
   await readPalettes(recipe);                          // drawn in the vault's palettes its shapes name, as they are seen
   await readEmitters(recipe);                          // its clouds born on the objects they name (emitters.js)
+  await readDrawn(recipe);                             // its bodies swept from the drawings they name (drawn.js)
   const frames = openModel(recipe, { renderer });
   try {
     const loop = frames.length > 1;           // it moves: a sequence — closing, or an evolution played once
@@ -75,7 +77,7 @@ export async function saveRecipe(recipe, { renderer, tick = 0, parents = [], sta
       seed: null,
       recipe,
       // …and the palettes its shapes are drawn in, the objects its clouds are born on
-      parents: [...new Set([...parents, ...palettesIn(recipe), ...emittersIn(recipe)])],
+      parents: [...new Set([...parents, ...palettesIn(recipe), ...emittersIn(recipe), ...drawnIn(recipe)])],
       render: { blob, ext: 'png', w: shown.width, h: shown.height,
                 ...(loop ? { frames: frames.length, fps: frames.fps, loop: frames.loop } : {}) },
       thumb: await thumbFromBlob(blob),
@@ -90,6 +92,7 @@ export async function downloadPicture({ params, shapes, renderer, tick = 0 }) {
   const recipe = { ...params.values, shapes };
   await readPalettes(recipe);
   await readEmitters(recipe);
+  await readDrawn(recipe);
   const frames = openModel(recipe, { renderer });
   try {
     const shown = frames.frame(frames.length > 1 ? tick % frames.length : 0);
@@ -112,6 +115,7 @@ export async function downloadFrames({ params, shapes, renderer, onStatus = () =
   const recipe = { ...params.values, shapes };
   await readPalettes(recipe);
   await readEmitters(recipe);
+  await readDrawn(recipe);
   const frames = openModel(recipe, { renderer });
   try {
     const entries = [];

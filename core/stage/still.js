@@ -12,8 +12,8 @@
  * own pixels — through any window a print asks for (core/print.js), clipped
  * to what the render shows of the canvas.
  *
- * The rig sees a still as these same stamps and puts its strokes on them
- * (apps/rig/drawing.js): two copies of this would be two drawings.
+ * The rig and the 3D app see a still as these same stamps, put into strokes
+ * (drawing.js): two copies of this would be two drawings.
  *
  * Reached through core/rebuild.js `openFrames` by a dynamic import, as an
  * app's rebuild.js is, so the module graph stays acyclic at load.

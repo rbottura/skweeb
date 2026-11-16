@@ -102,7 +102,7 @@ rebuild.js has it. The ways it is met:
   marks, each sprite from its own pixels, clipped to what its render shows
   of its canvas. `openFrames` takes it there past a still's own size, and
   for a drawing printed straight off the gamepad's canvas. The rig stamps
-  the same stamps (`apps/rig/drawing.js`).
+  the same stamps (`core/stage/drawing.js`).
 
 A handle with no window — a gamepad loop, replayed by p5 — is drawn whole at
 the largest scale a canvas allows and enlarged into the tiles; `enlarged`

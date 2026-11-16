@@ -24,6 +24,7 @@ import {
 } from '../../core/libs/three/three.core.js';
 import { inksOf } from './palettes.js';
 import { pointsOf } from './emitters.js';
+import { drawnOf } from './drawn.js';
 import { Evolution, forcesOn, forceKey } from './forces.js';
 import { SHAPES, shapeSchema, formKeys, finer } from './shapes.js';
 import { MODIFIERS, modify } from './modifiers.js';
@@ -73,10 +74,11 @@ export function unknownIn(recipe) {
 
 /**
  * What a shape's geometry is made from — its form's values and its stack, and what came from the vault beside
- * them, a palette's colours and an emitter's points (counted, not written out): equal, the same mesh kept.
+ * them, a palette's colours, an emitter's points (counted, not written out) and whether a body's drawing has
+ * come (drawn.js): equal, the same mesh kept.
  */
 const formOf = (id, values, stack) => id + ':' + JSON.stringify([formKeys(id).map(k => values[k]), values.inks || null,
-  values.points ? values.points.list.length : 0, stack]);
+  values.points ? values.points.list.length : 0, values.drawn ? values.drawn.id : 0, stack]);
 
 export class Model {
   constructor() {
@@ -118,10 +120,13 @@ export class Model {
     shapes.forEach(({ id, values, index, stack }, i) => {
       const shape = SHAPES[id];
       // A palette of the vault the shape names, its colours beside its values once read (palettes.js); the object
-      // a cloud is born on, its points (emitters.js) — the draw called again when either comes.
+      // a cloud is born on, its points (emitters.js); a body's drawing (drawn.js) — the draw called again when
+      // any comes.
       const inks = values.colours ? inksOf(values.colours, this.onInks) : null;
       const points = shape.instanced && values.emitter === 'object' ? pointsOf(values.from, values.glyph, this.onInks) : null;
-      const made = { ...finer(id, values, detail), ...(inks ? { inks } : {}), ...(points ? { points } : {}) };
+      const drawn = shape.drawn ? drawnOf(values.drawing, this.onInks) : null;
+      const made = { ...finer(id, values, detail), ...(inks ? { inks } : {}), ...(points ? { points } : {}),
+        ...(drawn ? { drawn } : {}) };
       const form = formOf(id, made, stack);
       let part = this.parts[i];
       if (part && part.instanced !== !!shape.instanced) {       // a cloud where a mesh was, or the other way

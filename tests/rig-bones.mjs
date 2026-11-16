@@ -12,7 +12,7 @@
  * pointed where it is asked to point.
  */
 
-const { drawingOf } = await import('../apps/rig/drawing.js');
+const { drawingOf } = await import('../core/stage/drawing.js');
 const { proposeBones, posed, tipOf, turnToward, distanceTo } = await import('../apps/rig/bones.js');
 const { bind, placeOf } = await import('../apps/rig/skin.js');
 

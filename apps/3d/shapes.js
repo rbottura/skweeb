@@ -27,6 +27,7 @@ import {
 } from '../../core/libs/three/three.core.js';
 import { gridGeometry, PALETTES } from './grid.js';
 import { CLOUD_PARAMS, dotGeometry, dotsOf } from './cloud.js';
+import { DRAWN_PARAMS, drawnGeometry } from './loft.js';
 import { FORCE_PARAMS } from './forces.js';
 
 /** A card's drawers: what the shape is, where it stands, how it looks. */
@@ -138,6 +139,17 @@ export const SHAPES = {
     form: Object.keys(CLOUD_PARAMS),
     geometry: v => dotGeometry(v.segments),
     dots: (v, stack) => dotsOf(v, stack),
+  },
+  /**
+   * A body drawn in the gamepad (loft.js, G4, 2026-11-16): a still's or a sequence's strokes, each mark's
+   * silhouette a ring, the rings joined, the ends closed — a worm, its brush the nozzle. Its drawing read by
+   * drawn.js beside its values, as a cloud's emitter is; with none, a worm of its own.
+   */
+  drawn: {
+    id: 'drawn', label: 'drawn body', drawn: true,
+    finest: 192,                           // a traced silhouette has no more to give a print than this
+    params: DRAWN_PARAMS,
+    geometry: v => drawnGeometry(v),
   },
 };
 

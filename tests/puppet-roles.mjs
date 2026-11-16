@@ -14,7 +14,7 @@
 
 const { rolesOf, partsFor, along, toldOf, toldText } = await import('../apps/rig/puppet/roles.js');
 const { eyeTips, faceOf } = await import('../apps/rig/puppet/tips.js');
-const { drawingOf } = await import('../apps/rig/drawing.js');
+const { drawingOf } = await import('../core/stage/drawing.js');
 const { proposeBones } = await import('../apps/rig/bones.js');
 const { withParts, guessParts } = await import('../apps/rig/parts.js');
 

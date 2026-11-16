@@ -14,7 +14,7 @@
 const { mouthOf, mouthShown, MOUTH_CORNERS, MOUTH_WIDTH, ASPECT } = await import('../apps/rig/puppet/mouth.js');
 const { EYE_RINGS } = await import('../apps/rig/puppet/eyes.js');
 const { faceOf, faceAt, stampWidth } = await import('../apps/rig/puppet/tips.js');
-const { drawingOf } = await import('../apps/rig/drawing.js');
+const { drawingOf } = await import('../core/stage/drawing.js');
 const { proposeBones } = await import('../apps/rig/bones.js');
 const { withParts } = await import('../apps/rig/parts.js');
 

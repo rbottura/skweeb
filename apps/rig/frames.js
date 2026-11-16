@@ -21,7 +21,7 @@ import { familySprite } from '../../core/sprites.js';
 import { surface }      from '../../core/surface.js';
 import { windowed, canvasFor } from '../../core/windowed.js';
 import { alphaBounds, union } from '../../core/trim.js';
-import { drawingOf, hasMarks, spritesOf } from './drawing.js';
+import { drawingOf, hasMarks, spritesOf } from '../../core/stage/drawing.js';
 import { posed }        from './bones.js';
 import { bind, placeOf } from './skin.js';
 import { turnsAt, moves, riseAt } from './motion.js';

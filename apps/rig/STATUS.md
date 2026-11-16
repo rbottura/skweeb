@@ -238,8 +238,8 @@ is cut from about fifty of the camera's pixels and shown larger: soft.
   *Rig this ↗* for a still with marks — the rig's `rebuild.js` says which
   it takes (`rigs`), as compose's says which it places — and the rig opens
   on it, `?drawing=<id>`.
-- **A gamepad still, rigged at its marks** (2026-10-02; `drawing.js`,
-  `strokes.js`, `bones.js`, `skin.js`, `draw.js`, `guides.js`,
+- **A gamepad still, rigged at its marks** (2026-10-02; `drawing.js` and `strokes.js` in `core/stage/` since G4,
+  `bones.js`, `skin.js`, `draw.js`, `guides.js`,
   `pointer.js`; `tests/rig-strokes.mjs` 18, `tests/rig-bones.mjs` 18,
   `check-rig` 13). A still is chosen in the Drawing drawer, or
   `?drawing=<id>`; its recipe's marks are stamps in its picture's pixels,

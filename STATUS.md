@@ -5,13 +5,13 @@ Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
 ones; `docs/plan.md` the work items; `docs/decisions.md` why things are as
 they are. What each day added is in its app's file, here only what works.
-Ideas the author has between bricks wait in `docs/inbox.md` until a session
-sorts them.
+Ideas the author has between bricks wait in `docs/inbox.md` until a session sorts them.
 
 ## Works right now
 
 ### Newest — 2026-11-09 to -16: BEC 2027's graphic system (track G), a game's effects (M15), the panel for a long use (S15)
 
+- **A drawn body in the 3D app** (G4, 2026-11-16, `apps/3d/loft.js`): a gamepad drawing's strokes lofted, each mark's brush its silhouette.
 - **The panel for a long use** (S15, 2026-11-16, `docs/plan.md`; the 3D app's
   first): Export the title bar's, the print floating by it; the layers a dock
   at the foot, the shapes one at the head; a rail of icons; values copied by
@@ -347,8 +347,8 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-The author's eye on S15 as it stands, in the 3D app and in cluster — then
-S15f once `docs/layouts.md` is read. Else a side job (C12) or the gabarit's fields (M13c).
+The author's test of G4 — a drawn body from their own sequences, across or stamped — and the next of it they
+order: flowers as such, growth in time. S15's eye stands; S15f parked. Else a side job (C12) or M13c's fields.
 
 ## Parked decisions
 
