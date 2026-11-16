@@ -40,6 +40,7 @@ import { ParamPanel }   from './ParamPanel.js';
 import { holdList, partIn } from './steps.js';
 import { held }         from './scope.js';
 import { cardsList }    from './cards-list.js';
+import { copyable }     from './params-copy.js';
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -195,6 +196,7 @@ export class Cards {
     // Folded, its name opens it or folds it; in a list's section, the one shown, it stays (S15c).
     if (this.fold) foldable(entry, () => this.choose(this.chosen === entry && !this.lines ? null : entry));
     if (this.inner) entry.inner = this.innerOf(panel, entry);
+    copyable(card, params, () => this.nameOf(this.entries.indexOf(entry)));     // its values copied and pasted by level (S15d)
 
     const toggle = headButton(on ? this.words.on : this.words.off, this.words.toggle, () => {
       entry.on = !entry.on;

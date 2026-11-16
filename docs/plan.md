@@ -68,8 +68,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | S15a | the Export section off the panel, the title bar's Export its way; the print a box floating by that button — every app | `ui/export-print` | S | landed 2026-11-16 |
 | S15b | the object's layers a dock at the panel's foot, always there: one line, "+" when there are none, the chosen's rows folded | `ui/layers-dock` | S | landed 2026-11-16 |
 | S15c | many shapes: their list a section, the chosen's params a section of their own | `3d/shape-list` | S | landed 2026-11-16 |
-| S15d | params copied from a shape onto another of a kind that has them: one, a section, or every one it uses | `ui/params-copy` | M | ready — "utilisés", as read: the rows it shows now |
+| S15d | values copied from a card onto another that has them, by level — a row, a section, every value, defaults too — by its menu (Ctrl or right click), Ctrl C and Ctrl V asked, Enter | `ui/params-copy` | M | landed 2026-11-16 |
 | S15e | the sections told apart at a glance | `ui/sections` | S | ready |
+| S15g | Alt click on a slider: its range's ends set by hand, kept for the app in this browser — or a preset | `ui/slider-range` | S | ready |
+| S15h | a rail of icons, a section each, beside the panel: a click brings that section beside the cursor | `ui/section-rail` | S | ready |
 | S15f | a gallery of layouts by use, as editing software has workspaces — a proposal | `docs/layouts` | S | proposal landed 2026-11-16 (`docs/layouts.md`); waits: the author's read |
 | M13c | the gabarit, a type: a format, its guides, its layers under the render and over it | `ui/gabarit` | M | waits: its fields, the author's |
 | M13d | the project as one page: the grid and a gabarit's layers saved together, its states | `bec/project` | S | needs M13b, M13c |
@@ -264,12 +266,9 @@ source its published files. **S1 — the dark theme** · landed 2026-11-03.
 the bench, and two picks (`docs/decisions.md`): S14a the zoom, the states, the guides
 and the ground in every viewer (`core/shell/viewtools.js`, `core/viewzoom.js`); S14b the format.
 
-**S15 — the properties for a long use** · the author, 2026-11-16, using the 3D app a lot:
-"il me faut une meilleure lisibilité et navigation dans le panel droit". Export is the
-title bar's, the print floats by it (a); the layers a dock at the foot (b); a list of
-shapes and the chosen's params apart (c); params copied between shapes (d); sections
-told apart (e) — core's where it can be, so every app has it; and a gallery of
-layouts by use, U11's question again, proposed before it is built (f).
+**S15 — the properties for a long use** · the author, 2026-11-16, using the 3D app a lot: "une meilleure
+lisibilité et navigation dans le panel droit" — core's where it can be, so every app has it (a to e,
+g, h); a gallery of layouts by use, U11's question again, proposed before it is built (f).
 
 ## G — the graphic system, for BEC 2027
 

@@ -65,3 +65,22 @@
 .pp-cards-line--chosen .pp-cards-line-btn { border-color: var(--line-2); }
 .pp-cards-list:empty { display: none; }
 .pp-cards-list + .pp-cards-empty { margin-top: 0; }
+
+/* Values copied and pasted between cards (S15d; core/params-copy.js): the menu at the hand, the question
+   over the card's head, and the rows pasted to flashing once. */
+.pc-menu, .pc-prompt { position: fixed; z-index: 1400; border: 1px solid var(--line-2); border-radius: var(--radius-lg); background: var(--raised); color: var(--fg); box-shadow: 0 14px 36px var(--shadow); }
+.pc-menu { min-width: 220px; display: flex; flex-direction: column; padding: 4px; }
+.pc-menu-head { padding: 6px 8px 3px; font: 600 10.5px var(--font-ui); letter-spacing: 0.07em; text-transform: uppercase; color: var(--fg-3); }
+.pc-menu-item { padding: 6px 8px; border: 0; border-radius: var(--radius); background: none; color: var(--fg); font: 400 12.5px var(--font-ui); text-align: left; cursor: pointer; }
+.pc-menu-item:hover:not(:disabled), .pc-menu-item:focus-visible { background: var(--accent); color: var(--accent-ink); outline: none; }
+.pc-menu-item:disabled { opacity: 0.45; cursor: default; }
+.pc-menu-sep { height: 1px; margin: 4px 2px; background: var(--line); }
+.pc-prompt { display: flex; align-items: center; gap: 10px; max-width: 420px; padding: 6px 8px 6px 12px; font: 500 12.5px var(--font-ui); animation: pc-in 140ms ease-out; }
+.pc-prompt kbd { padding: 1px 5px; border: 1px solid var(--line-2); border-radius: 3px; font: 500 10.5px var(--font-num); color: var(--fg-2); }
+.pc-said { color: var(--fg-2); }
+@keyframes pc-in { from { opacity: 0; transform: translateY(4px); } }
+@keyframes pc-flash { 0% { background: var(--accent); } 100% { background: transparent; } }
+@keyframes pc-pulse { 0% { box-shadow: 0 0 0 2px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
+.pc-row-pasted { animation: pc-flash 800ms ease-out; border-radius: var(--radius); }
+.pc-pasted > .pp > .pp-head { animation: pc-pulse 700ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .pc-row-pasted, .pc-pasted > .pp > .pp-head, .pc-prompt { animation: none; } }
