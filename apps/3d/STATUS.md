@@ -27,6 +27,15 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **The worm alive** (G6, 2026-11-17; `loft.js` `DRAWN_WAVE`, motion.js
+  `waving`; `tests/3d-drawn.mjs`, `tests/3d-camera.mjs`, `check-3d-drawn`). A
+  drawn body's *Swing*: a wave along it — from side to side, or up and down —
+  `waves` along its length, travelling `waveCycles` whole times a loop, so
+  the loop closes; less than none, the other way. Each ring's centre moved,
+  the rings square to the waved line, the body made again each frame (its
+  `phase` a form key); its skin where each point is at rest, so it rides
+  along. A model with one waving is a loop: played, saved, printed a frame.
+
 - **Out as meshes** (G5, 2026-11-17; `meshfile.js`, `tests/3d-meshfile.mjs` 16,
   `check-3d-drawn`). Export's *Download the model (glTF .glb)*: every shape
   shown, at rest, a node each — its place a matrix — its colour, unlit as

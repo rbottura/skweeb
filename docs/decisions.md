@@ -362,3 +362,10 @@ page of code, as `core/png.js` writes a PNG. The model at rest, every shape
 shown, a node each, a cloud's dots baked; its skin a PNG inside. Not kept:
 flat shading, the outline, the light — a viewer brings its own. Khronos's
 validator was not run: a package from npm, its running not allowed here.
+
+**A worm waves in its form** (G6, 2026-11-17). Its wave moves each ring's
+centre — across the line or up from the plane — so it is made again each
+frame, `phase` a form key, where a swing moves a place and a cloud its
+dots: a drawn body's few thousand points cost a frame little. Its rings
+turn square to the waved line; its skin keeps each point's place at rest,
+so it rides along. Whole cycles a loop, as a swing has: the loop closes.

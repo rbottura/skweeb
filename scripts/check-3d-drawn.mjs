@@ -191,6 +191,24 @@ const obj = await fileOf('.obj', 'Download its surfaces (OBJ)');
 const text = obj.bytes ? obj.bytes.toString('utf8') : '';
 c.ok('…and as an OBJ: its points, its uv, its faces', /\nv /.test(text) && /\nvt /.test(text) && /\nf \d+\/\d+\/\d+ /.test(text), obj.said);
 
+// ── The worm alive (G6): a wave along it, the model a loop that closes ─────
+const scrubTo = async i => {
+  await page.eval(`(s => { s.value = ${i}; s.dispatchEvent(new Event('input', { bubbles: true })); return true; })(document.querySelector('.tp-scrub'))`);
+  await wait(700);
+};
+await setOn(cardRow(BODY, 'its ends'), { wave: 1, waves: 1.5, waveCycles: 1 });
+const player = await page.eval(`(() => { const p = document.querySelector('.viewer-player'); return !!p && !p.hidden; })()`);
+await page.click(`document.querySelector('.tp-first')`);          // stopped, on its first frame
+await scrubTo(0);
+await ink('wave0');
+await scrubTo(18);
+const quarter = await ink('wave18', 'wave0');
+await scrubTo(0);
+const back = await ink('wave0b', 'wave0');
+c.ok('a wave along it: the model a loop, its player shown; a quarter on, the body elsewhere; frame 0 again, as it was',
+  player && quarter.diff > 0.003 && back.diff < 0.0005, JSON.stringify({ player, quarter, back }));
+await c.shot('5-waving');
+
 if (o) {
   // Cold: a page that has read nothing — the drawing and its picture read by the replay itself (drawn.js `readDrawn`).
   await c.go(c.base + '/apps/3d/');

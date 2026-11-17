@@ -173,5 +173,19 @@ ok('its field takes the gamepad\'s stills and sequences, a smart one too — no 
   { type: 'skw', binds: 'still', origin: { app: 'gamepad' } }, { type: 'sequence', origin: { app: 'particles' } },
   { type: 'shape', origin: { app: 'gamepad' } }].map(row => takes(DRAWN_PARAMS.drawing, row)), [true, true, true, false, false]);
 
+// ── Its wave (G6): the worm alive ───────────────────────────────────────────
+const calm = body({ ends: 'pointed' }, straight), [, wy0, wz0] = extent(calm);
+const side = body({ ends: 'pointed', wave: 1, waves: 1 }, straight), [, wy1, wz1] = extent(side);
+const upward = body({ ends: 'pointed', wave: 1, waves: 1, waveWay: 'up' }, straight), [, wy2, wz2] = extent(upward);
+ok('a wave from side to side: wider across the line by about a section either way, as deep', [wy1 > wy0 * 2.5, Math.abs(wz1 - wz0) < wz0 * 0.1], [true, true]);
+ok('…up and down: deeper, as wide', [wz2 > wz0 * 2.5, Math.abs(wy2 - wy0) < wy0 * 0.1], [true, true]);
+ok('…closed and outward, waving', [closedness(side).closed, closedness(side).outward, closedness(upward).closed, closedness(upward).outward], [true, true, true, true]);
+const at = phase => body({ ends: 'flat', wave: 0.8, waves: 2, waveCycles: 2, phase }, straight);
+const alike = (g, h) => g.attributes.position.array.every((x, i) => Math.abs(x - h.attributes.position.array[i]) < 1e-6);
+ok('…the loop closes: its phase 1 its phase 0, a quarter on another', [alike(at(0), at(1)), alike(at(0), at(0.25))], [true, false]);
+const resting = body({ ends: 'flat', waves: 2, waveCycles: 2 }, straight).attributes.uv.array;
+ok('…its skin on it as it moves: every uv where the point is at rest, whatever the phase', [0, 0.3].map(p =>
+  at(p).attributes.uv.array.every((x, i) => Math.abs(x - resting[i]) < 1e-9)), [true, true]);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

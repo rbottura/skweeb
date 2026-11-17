@@ -44,8 +44,9 @@ ok('a schema is the form, then place and look', Object.keys(shapeSchema('sphere'
 ok('a recipe from before the stretches stands as it did: each 1', ['sx', 'sy', 'sz'].map(k => valuesFor(shapeSchema('box'), { size: 2 })[k]), [1, 1, 1]);
 ok('every row is in a card\'s drawer', Object.keys(SHAPES).every(id =>
   Object.values(shapeSchema(id)).every(spec => spec.group in SHAPE_GROUPS)), true);
-ok('form rows are the form\'s, place and look every shape\'s — a shape with colours of its own, its look too; a cloud its forces; a drawn body its skin', Object.values(SHAPES).every(s =>
-  Object.values(s.params).every(spec => spec.group === 'form' || ((s.ownColours || s.drawn) && spec.group === 'look') || (s.instanced && spec.group === 'forces')))
+ok('form rows are the form\'s, place and look every shape\'s — a shape with colours of its own, its look too; a cloud its forces; a drawn body its skin and its wave', Object.values(SHAPES).every(s =>
+  Object.values(s.params).every(spec => spec.group === 'form' || (s.ownColours && spec.group === 'look')
+    || (s.drawn && ['look', 'swing'].includes(spec.group)) || (s.instanced && spec.group === 'forces')))
   && Object.values(PLACE).every(spec => spec.group !== 'form'), true);
 ok('what makes a box\'s geometry', formKeys('box'), ['width', 'height', 'depth']);
 let threw = '';

@@ -27,7 +27,7 @@ import {
 } from '../../core/libs/three/three.core.js';
 import { gridGeometry, PALETTES } from './grid.js';
 import { CLOUD_PARAMS, dotGeometry, dotsOf } from './cloud.js';
-import { DRAWN_PARAMS, DRAWN_LOOK, drawnGeometry } from './loft.js';
+import { DRAWN_PARAMS, DRAWN_WAVE, DRAWN_LOOK, drawnGeometry } from './loft.js';
 import { FORCE_PARAMS } from './forces.js';
 
 /** A card's drawers: what the shape is, where it stands, how it looks. */
@@ -144,13 +144,13 @@ export const SHAPES = {
    * A body drawn in the gamepad (loft.js, G4, 2026-11-16): a still's or a sequence's strokes, each mark's
    * silhouette a ring, the rings joined, the ends closed — a worm, its brush the nozzle. Its drawing read by
    * drawn.js beside its values, as a cloud's emitter is; with none, a worm of its own. Its skin the drawing's
-   * picture projected (G4b): of its look, not its form.
+   * picture projected (G4b): of its look, not its form. Its wave (G6), a worm alive: of its swing, and its form.
    */
   drawn: {
     id: 'drawn', label: 'drawn body', drawn: true,
     finest: 192,                           // a traced silhouette has no more to give a print than this
-    params: { ...DRAWN_PARAMS, ...DRAWN_LOOK },
-    form: Object.keys(DRAWN_PARAMS),
+    params: { ...DRAWN_PARAMS, ...DRAWN_WAVE, ...DRAWN_LOOK },
+    form: [...Object.keys(DRAWN_PARAMS), ...Object.keys(DRAWN_WAVE)],     // its wave made again each frame (G6)
     geometry: v => drawnGeometry(v),
   },
 };

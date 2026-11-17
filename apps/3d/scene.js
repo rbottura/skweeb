@@ -78,7 +78,7 @@ export function unknownIn(recipe) {
  * come (drawn.js): equal, the same mesh kept.
  */
 const formOf = (id, values, stack) => id + ':' + JSON.stringify([formKeys(id).map(k => values[k]), values.inks || null,
-  values.points ? values.points.list.length : 0, values.drawn ? values.drawn.id : 0, stack]);
+  values.points ? values.points.list.length : 0, values.drawn ? values.drawn.id : 0, values.phase || 0, stack]);
 
 export class Model {
   constructor() {
@@ -115,6 +115,7 @@ export class Model {
     const bands = bandsOf(recipe);
     const lined = outlineOf(recipe) > 0;
     const elapsed = Math.max(0, Number(recipe && recipe.elapsed) || 0);
+    const phase = Math.max(0, Number(recipe && recipe.phase) || 0);     // a waving drawn body's place in the loop (G6)
     if (lined && !this.ink) this.ink = inkOf();
     if (this.ink) inkUp(this.ink, recipe);
     shapes.forEach(({ id, values, index, stack }, i) => {
@@ -126,7 +127,7 @@ export class Model {
       const points = shape.instanced && values.emitter === 'object' ? pointsOf(values.from, values.glyph, this.onInks) : null;
       const drawn = shape.drawn ? drawnOf(values.drawing, this.onInks) : null;
       const made = { ...finer(id, values, detail), ...(inks ? { inks } : {}), ...(points ? { points } : {}),
-        ...(drawn ? { drawn } : {}) };
+        ...(drawn ? { drawn } : {}), ...(shape.drawn && Number(values.wave) > 0 ? { phase } : {}) };
       const form = formOf(id, made, stack);
       let part = this.parts[i];
       if (part && part.instanced !== !!shape.instanced) {       // a cloud where a mesh was, or the other way

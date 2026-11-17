@@ -64,6 +64,21 @@ export const DRAWN_PARAMS = {
 };
 
 /**
+ * Its wave, of its swing (G6, 2026-11-17): the author's worms alive — each ring's centre moved across the stroke,
+ * or up out of the drawing's plane, on a wave `waves` long along it, travelling `waveCycles` whole times a loop,
+ * so the loop closes; less than none, the other way. Its rings then stand square to the waved line.
+ */
+const WAVING = { wave: { not: 0 } };
+export const DRAWN_WAVE = {
+  wave: { type: 'range', min: 0, max: 3, step: 0.01, default: 0, label: 'a wave along it, by its section', unit: '×', group: 'swing' },
+  waveWay: { type: 'enum', options: ['side', 'up'], labels: { side: 'from side to side', up: 'up and down' }, default: 'side',
+             display: 'chips', label: 'the wave goes', group: 'swing', when: WAVING },
+  waves: { type: 'range', min: 0.25, max: 8, step: 0.05, default: 1.5, label: 'waves along it', group: 'swing', when: WAVING },
+  waveCycles: { type: 'int', min: -12, max: 12, default: 1, label: 'cycles a loop — less than none, the other way', group: 'swing',
+                when: WAVING },
+};
+
+/**
  * Its skin, of its look, not its form (G4b, 2026-11-17): the drawing's picture projected from the front
  * (drawn.js `pictureOf`) — each point of the body takes the picture's pixel where it lies in the drawing, so
  * from the front the body is the drawing; its sides take the colour it is stretched to — or its colour alone.
@@ -142,15 +157,21 @@ export function drawnGeometry(v) {
     }
   }
   const k = WORLD / Math.max(1e-6, x1 - x0, y1 - y0), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-  const out = { position: [], index: [] };
-  for (const stroke of drawn.strokes) if (stroke.length > 1) body(out, smoothed(stroke, Math.round(v.smooth) || 0), v, n, ringOfKey, k, cx, cy);
+  const build = values => {
+    const o = { position: [], index: [] };
+    for (const stroke of drawn.strokes) if (stroke.length > 1) body(o, smoothed(stroke, Math.round(v.smooth) || 0), values, n, ringOfKey, k, cx, cy);
+    return o;
+  };
+  const out = build(v);
+  // Waving, its skin stays on it: each point's uv where the point is at rest — the same points, in the same order.
+  const rest = Number(v.wave) > 0 ? build({ ...v, wave: 0 }).position : out.position;
   if (!out.index.length && drawn !== DEMO) return drawnGeometry({ ...v, drawn: null });   // dots only: the worm
   // Each point's place in the drawing — its x and y back in the drawing's pixels — on its picture: the skin's uv.
   const f = drawn.frame || { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, P = out.position;
   const uv = new Float32Array((P.length / 3) * 2);
   for (let i = 0; i < P.length / 3; i++) {
-    uv[2 * i] = (P[3 * i] / k + cx - f.x) / f.w;
-    uv[2 * i + 1] = 1 - (cy - P[3 * i + 1] / k - f.y) / f.h;
+    uv[2 * i] = (rest[3 * i] / k + cx - f.x) / f.w;
+    uv[2 * i + 1] = 1 - (cy - rest[3 * i + 1] / k - f.y) / f.h;
   }
   const g = new BufferGeometry();
   g.setAttribute('position', new Float32BufferAttribute(P, 3));
@@ -169,7 +190,7 @@ function body(out, stamps, v, n, ringOfKey, k, cx, cy) {
   const m = Math.max(2, Math.ceil(L / step) + 1);
   const across = v.lay !== 'stamped', twist = v.twist !== false, back = v.back ?? 0.6;
   const base = out.position.length / 3;
-  const centres = [], sections = [];
+  const rings = [];
   let i = 1, tx = 1, ty = 0;
   for (let r = 0; r < m; r++) {
     const s = (L * r) / (m - 1);
@@ -190,14 +211,41 @@ function body(out, stamps, v, n, ringOfKey, k, cx, cy) {
       // A mirrored copy's ring runs the other way round from the same first point: counter-clockwise again.
       const jj = flip < 0 ? (n - j) % n : j;
       const u = (ra[jj][0] + (rb[jj][0] - ra[jj][0]) * f) * scale * flip, w = (ra[jj][1] + (rb[jj][1] - ra[jj][1]) * f) * scale;
-      const su = u * cos - w * sin, sv = u * sin + w * cos;
-      section.push([su, sv]);
-      if (across) out.position.push(C[0] - ty * su, C[1] + tx * su, sv);   // u along the line's normal, v the drawing's up
-      else out.position.push(C[0] + su, C[1] + sv, C[2]);
+      section.push([u * cos - w * sin, u * sin + w * cos]);
     }
-    centres.push(C);
-    sections.push(section);
+    rings.push({ s, C, tx, ty, section });
   }
+  // Its wave (G6): each centre moved across the line or up from the plane, A at most — a share of its section.
+  const A = (Number(v.wave) || 0) * median(sizes) * k, waved = A > 0;
+  if (waved) {
+    const waves = Number(v.waves) || 1.5, cycles = Math.round(Number(v.waveCycles) || 0), phase = Number(v.phase) || 0;
+    for (const ring of rings) {
+      const d = A * Math.sin(2 * Math.PI * ((waves * ring.s) / L - cycles * phase));
+      ring.C = v.waveWay === 'up' ? [ring.C[0], ring.C[1], ring.C[2] + d] : [ring.C[0] - ring.ty * d, ring.C[1] + ring.tx * d, ring.C[2]];
+    }
+  }
+  const centres = rings.map(ring => ring.C), sections = rings.map(ring => ring.section);
+  rings.forEach((ring, r) => {
+    const C = ring.C;
+    if (!across) { for (const [su, sv] of ring.section) out.position.push(C[0] + su, C[1] + sv, C[2]); return; }
+    // Across: u along the line's normal, v the drawing's up — waved, square to the waved line, (e1, e2, T) turning
+    // as (normal, up, T) did on the flat one.
+    let e1 = [-ring.ty, ring.tx, 0], e2 = [0, 0, 1];
+    if (waved) {
+      const a = centres[Math.max(0, r - 1)], b = centres[Math.min(m - 1, r + 1)];
+      const T = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], l = Math.hypot(...T);
+      if (l > 1e-12) {
+        const [t0, t1, t2] = T.map(x => x / l), up = [-t2 * t0, -t2 * t1, 1 - t2 * t2], lu = Math.hypot(...up);
+        if (lu > 1e-9) {
+          e2 = up.map(x => x / lu);
+          e1 = [e2[1] * t2 - e2[2] * t1, e2[2] * t0 - e2[0] * t2, e2[0] * t1 - e2[1] * t0];
+        }
+      }
+    }
+    for (const [su, sv] of ring.section) {
+      out.position.push(C[0] + e1[0] * su + e2[0] * sv, C[1] + e1[1] * su + e2[1] * sv, C[2] + e1[2] * su + e2[2] * sv);
+    }
+  });
   const tris = [];
   for (let r = 0; r < m - 1; r++) {
     for (let j = 0; j < n; j++) {
