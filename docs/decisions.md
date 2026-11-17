@@ -387,3 +387,9 @@ sphere, or a drawing of one.
 growth. Played once, as an evolution is — the frame after the last is not
 the first. Frame 0 shows its first two marks, never nothing: a body of no
 points would be the worm.
+
+**A brush wraps there and back** (G10, 2026-11-17). Round each ring the
+sprite runs out and back — its u from 0 to 1 and down to 0 — so the ring,
+closed by index, needs no seam column: its topology stays the loft's. One
+brush a drawing, the sprite its marks use most; a brush a stroke would want
+a material a stroke. `skin` turned a form key: the uv follow it.

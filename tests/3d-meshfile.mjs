@@ -85,5 +85,11 @@ ok('…its faces within its points, counted from one', [most <= vs.length, fs.ev
 ok('…every uv kept, as three reads it — the box\'s, the drawn bodies\'; a cloud baked, none', lines.filter(l => l.startsWith('vt ')).length,
   [0, 1, 3].reduce((s, k) => s + model.parts[k].mesh.geometry.attributes.uv.count, 0));
 
+// A brush wrapped round a body (G10): its picture repeated along it, as glTF says it — REPEAT.
+const wrappedModel = new Model().update({ shapes: [{ id: 'drawn', params: {} }] });
+wrappedModel.parts[0].mesh.material.map = { image: { width: 2, height: 2 }, wrapS: 1001, wrapT: 1000 };
+const wrapped = parse((await glbOf(wrappedModel, { png: async () => PNG })).bytes).json;
+ok('a brush wrapped: clamped round, repeated along', [wrapped.samplers[0].wrapS, wrapped.samplers[0].wrapT], [33071, 10497]);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

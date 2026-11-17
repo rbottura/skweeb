@@ -89,7 +89,9 @@ export const DRAWN_WAVE = {
  * from the front the body is the drawing; its sides take the colour it is stretched to — or its colour alone.
  */
 export const DRAWN_LOOK = {
-  skin: { type: 'enum', options: ['drawing', 'colour'], labels: { drawing: 'the drawing, projected', colour: 'its colour' },
+  /** And the brush wrapped round it (G10): its sprite round each ring, there and back, repeated along it a section at a time. */
+  skin: { type: 'enum', options: ['drawing', 'brush', 'colour'],
+          labels: { drawing: 'the drawing, projected', brush: 'its brush, wrapped round', colour: 'its colour' },
           default: 'drawing', display: 'chips', label: 'its skin', group: 'look' },
 };
 
@@ -164,18 +166,20 @@ export function drawnGeometry(v) {
   const k = WORLD / Math.max(1e-6, x1 - x0, y1 - y0), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   const strokes = v.grow && drawn !== DEMO ? grownTo(drawn.strokes, v.grown ?? 1) : drawn.strokes;   // its place kept as it grows
   const build = values => {
-    const o = { position: [], index: [] };
+    const o = { position: [], index: [], wrap: [] };
     for (const stroke of strokes) if (stroke.length > 1) body(o, smoothed(stroke, Math.round(v.smooth) || 0), values, n, ringOfKey, k, cx, cy);
     return o;
   };
   const out = build(v);
   // Waving, its skin stays on it: each point's uv where the point is at rest — the same points, in the same order.
   const rest = Number(v.wave) > 0 ? build({ ...v, wave: 0 }).position : out.position;
+  const wrapped = v.skin === 'brush';     // the brush round it: its uv each point's place round its ring and along it (G10)
   if (!out.index.length && drawn !== DEMO) return drawnGeometry({ ...v, drawn: null });   // dots only: the worm
   // Each point's place in the drawing — its x and y back in the drawing's pixels — on its picture: the skin's uv.
   const f = drawn.frame || { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, P = out.position;
   const uv = new Float32Array((P.length / 3) * 2);
   for (let i = 0; i < P.length / 3; i++) {
+    if (wrapped) { uv[2 * i] = out.wrap[2 * i]; uv[2 * i + 1] = out.wrap[2 * i + 1]; continue; }
     uv[2 * i] = (rest[3 * i] / k + cx - f.x) / f.w;
     uv[2 * i + 1] = 1 - (cy - rest[3 * i + 1] / k - f.y) / f.h;
   }
@@ -244,8 +248,10 @@ function body(out, stamps, v, n, ringOfKey, k, cx, cy) {
     }
   }
   const centres = rings.map(ring => ring.C), sections = rings.map(ring => ring.section);
+  const along = Math.max(1e-6, median(sizes));
   rings.forEach((ring, r) => {
     const C = ring.C;
+    for (let j = 0; j < n; j++) out.wrap.push(1 - Math.abs((2 * j) / n - 1), ring.s / along);
     if (!across) { for (const [su, sv] of ring.section) out.position.push(C[0] + su, C[1] + sv, C[2]); return; }
     // Across: u along the line's normal, v the drawing's up — waved, square to the waved line, (e1, e2, T) turning
     // as (normal, up, T) did on the flat one.
@@ -280,11 +286,15 @@ function body(out, stamps, v, n, ringOfKey, k, cx, cy) {
     const C = centres[r], D = centres[r === 0 ? 1 : m - 1].map((c, q) => (c - centres[r === 0 ? 0 : m - 2][q]));
     const len = Math.hypot(...D) || 1, size = radiusOf(sections[r]) * (ends === 'pointed' ? v.point ?? 0.8 : 0);
     out3.push(C[0] + (sign * D[0] / len) * size, C[1] + (sign * D[1] / len) * size, C[2] + (sign * D[2] / len) * size);
+    if (out3 === out.position) out.wrap.push(0.5, rings[r].s / along);
   };
   if (ends === 'flat') {
     for (const [r, at, lastEnd] of [[0, first, false], [m - 1, last, true]]) {
       const cap = out.position.length / 3;
-      for (let j = 0; j < n; j++) out.position.push(...out.position.slice((at + j) * 3, (at + j) * 3 + 3));
+      for (let j = 0; j < n; j++) {
+        out.position.push(...out.position.slice((at + j) * 3, (at + j) * 3 + 3));
+        out.wrap.push(out.wrap[2 * (at + j)], out.wrap[2 * (at + j) + 1]);
+      }
       // Earcut's triangles all turn one way: which, by their area together — a sliver along a straight side
       // has none to tell by.
       const faces = ShapeUtils.triangulateShape(sections[r].map(([x, y]) => new Vector2(x, y)), []);

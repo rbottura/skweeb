@@ -214,5 +214,14 @@ ok('…the body as far as it is drawn, its place kept: more points as it grows, 
    grownAt(1).attributes.position.count === body({ ends: 'flat' }, timed).attributes.position.count, firstPointAt(0.3).join() === firstPointAt(1).join()],
   [true, true, true, true]);
 
+// ── Its brush wrapped round it (G10) ────────────────────────────────────────
+const wrappedBody = (values = {}) => body({ ends: 'flat', skin: 'brush', smooth: 0, spacing: 0.5, ...values }, straight);
+const wuv = wrappedBody().attributes.uv.array, wpos = wrappedBody().attributes.position.count;
+const lastRing = (wpos - 2 * 48) / 48 - 1;     // flat: its rings, then each cap's copy of its end ring
+ok('its brush round each ring there and back — no seam — and along the line a section at a time',
+  [wuv[0], wuv[2 * 24], +wuv[2 * 12].toFixed(3), wuv[1], wuv[2 * 48 * lastRing + 1] > 9 && wuv[2 * 48 * lastRing + 1] < 13], [0, 1, 0.5, 0, true]);
+ok('…its caps the uv of the rings they close', [...wuv.slice(2 * 48 * (lastRing + 1), 2 * 48 * (lastRing + 2))].join() === [...wuv.slice(0, 2 * 48)].join(), true);
+ok('…the same waving: round and along, not where it is', [...wrappedBody({ wave: 1, phase: 0.2 }).attributes.uv.array].join() === [...wuv].join(), true);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

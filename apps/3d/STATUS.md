@@ -27,6 +27,13 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **Its brush wrapped round it** (G10, 2026-11-17; `loft.js`, drawn.js
+  `brushOf`; the tests, `check-3d-drawn`). *its skin*'s third way: the sprite
+  its marks use most, opaque on its own mean colour, round each ring there
+  and back — so the ring's seam shows none — and repeated along the line a
+  section at a time. `skin` is a form key since: its uv follow it. A glTF
+  keeps it repeated (meshfile.js, a sampler each wrapping).
+
 - **Grown as it was drawn** (G9, 2026-11-17; `loft.js` `grow`, `grownTo`;
   motion.js `growing`; the tests, `check-3d-drawn`). A drawn body's *Swing*:
   the model a sequence played once, as a cloud's evolution is — frame 0 its
@@ -375,10 +382,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**The author's test of G4** — a drawn body from their own sequences: across
-or stamped, which reads as a worm, which as a petal; then flowers as such —
-petals round a heart — a stroke grown in time, or a silhouette's holes, as
-the author orders them. The author's eye on S15 stands; S15f is parked.
+**The author's test of G4 to G10** — their own sequences as bodies, worms
+waving, a vase turned, a flower round, grown as drawn, out to Blender as a
+glTF — and what they order next: a silhouette's holes, a brush for each
+stroke, the heart of a flower. The author's eye on S15 stands; S15f parked.
 
 Before S15, **G3 — more parameters**, the author's pick (`docs/plan.md`): its list —
 particles' colour over life, the overlay's place and blend, an emitter

@@ -48,7 +48,7 @@ export function piecesOf(model) {
     const material = {
       color: m.color ? [m.color.r, m.color.g, m.color.b] : [1, 1, 1],
       unlit: !!m.isMeshBasicMaterial, doubleSided: m.side === DoubleSide,
-      map: m.map && m.map.image ? m.map.image : null,
+      map: m.map && m.map.image ? m.map.image : null, wrap: m.map ? [m.map.wrapS, m.map.wrapT] : null,
     };
     let position = Float32Array.from(P.array), normal = N ? Float32Array.from(N.array) : new Float32Array(P.count * 3);
     let color = C ? rgbOf(C) : null, uv = UV ? Float32Array.from(UV.array) : null, idx = index;
@@ -140,13 +140,20 @@ export async function glbOf(model, { png, name = 'model' }) {
     return json.accessors.length - 1;
   };
   const textures = new Map(), used = new Set();
-  const textureOf = async picture => {
+  // three's wrapping as glTF's: repeated, clamped, mirrored (a brush wrapped round a body repeats along it, G10).
+  const GL = { 1000: 10497, 1001: 33071, 1002: 33648 };
+  const samplerOf = wrap => {
+    const s = { magFilter: 9729, minFilter: 9987, wrapS: GL[wrap && wrap[0]] || 33071, wrapT: GL[wrap && wrap[1]] || 33071 };
+    json.samplers = json.samplers || [];
+    const at = json.samplers.findIndex(x => x.wrapS === s.wrapS && x.wrapT === s.wrapT);
+    return at >= 0 ? at : json.samplers.push(s) - 1;
+  };
+  const textureOf = async (picture, wrap) => {
     if (!textures.has(picture)) {
       json.images = json.images || [];
       json.textures = json.textures || [];
-      json.samplers = json.samplers || [{ magFilter: 9729, minFilter: 9987, wrapS: 33071, wrapT: 33071 }];
       json.images.push({ bufferView: view(await png(picture)), mimeType: 'image/png' });
-      json.textures.push({ source: json.images.length - 1, sampler: 0 });
+      json.textures.push({ source: json.images.length - 1, sampler: samplerOf(wrap) });
       textures.set(picture, json.textures.length - 1);
     }
     return textures.get(picture);
@@ -157,7 +164,7 @@ export async function glbOf(model, { png, name = 'model' }) {
     if (p.uv) attributes.TEXCOORD_0 = accessor(p.uv.map((x, i) => (i % 2 ? 1 - x : x)), 'VEC2', FLOAT, ARRAY);
     if (p.color) attributes.COLOR_0 = accessor(p.color, 'VEC3', FLOAT, ARRAY);
     const pbr = { baseColorFactor: [...p.material.color, 1], metallicFactor: 0, roughnessFactor: 0.75 };
-    if (p.material.map && p.uv) pbr.baseColorTexture = { index: await textureOf(p.material.map) };
+    if (p.material.map && p.uv) pbr.baseColorTexture = { index: await textureOf(p.material.map, p.material.wrap) };
     const material = { name: p.name, pbrMetallicRoughness: pbr, ...(p.material.doubleSided ? { doubleSided: true } : {}) };
     if (p.material.unlit) { material.extensions = { KHR_materials_unlit: {} }; used.add('KHR_materials_unlit'); }
     json.materials.push(material);
