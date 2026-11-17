@@ -218,8 +218,8 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 - **The laptop's vault, and the tower's**: the laptop serves `~/skweeb-vault`
   behind `tailscale serve` to every machine; the tower's `./vault` is in use
   again since 2026-11-06 (BEC's palettes, the garden). A save shows on every
-  open panel as it happens (`server/events.js`); `scripts/vault-merge.mjs`
-  merges one into another, copying, never overwriting.
+  open panel as it happens (`server/events.js`); `scripts/share-vault.sh` shares
+  it, `vault-sync.mjs` makes two one by Taildrop (`docs/guides/vault-share.md`).
 - **A trash, and deleting** (2026-09-26): the trash is a tag; deleting for
   good asks what is made from what goes — delete the chain too, or cut it
   loose (`server/delete.js`).
@@ -347,8 +347,8 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-The author's test of G4 to G10 — their sequences as bodies, waving, turned, round, grown, out as glTF — and what
-they order next. S15's eye stands; S15f parked. Else a side job (C12) or M13c's fields.
+The ThinkPad pulled and its vault shared again, the two vaults made one (`docs/guides/vault-share.md`); then the
+author's test of G4 to G10, and what they order next. S15's eye stands; S15f parked. Else C12, or M13c's fields.
 
 ## Parked decisions
 
