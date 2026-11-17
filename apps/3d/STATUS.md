@@ -27,6 +27,15 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **A drawing turned** (G7, 2026-11-17; `lathe.js`, `tests/3d-drawn.mjs`,
+  `check-3d-drawn`). The catalogue's eleventh, *turned drawing*: a gamepad
+  drawing's strokes each a profile — its marks' distance from a vertical
+  axis their radius, `axis` across the drawing, 0 its left edge — spun
+  `segments` round (three's LatheGeometry); its wall its marks' size
+  (`wall`, by it), the profile offset either side and closed, a solid turned
+  outward; no wall, the surface alone, seen from both sides. With no
+  drawing, a vase of its own. Read, saved and replayed as a drawn body's.
+
 - **The worm alive** (G6, 2026-11-17; `loft.js` `DRAWN_WAVE`, motion.js
   `waving`; `tests/3d-drawn.mjs`, `tests/3d-camera.mjs`, `check-3d-drawn`). A
   drawn body's *Swing*: a wave along it — from side to side, or up and down —

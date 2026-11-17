@@ -187,5 +187,20 @@ const resting = body({ ends: 'flat', waves: 2, waveCycles: 2 }, straight).attrib
 ok('…its skin on it as it moves: every uv where the point is at rest, whatever the phase', [0, 0.3].map(p =>
   at(p).attributes.uv.array.every((x, i) => Math.abs(x - resting[i]) < 1e-9)), [true, true]);
 
+// ── Turned on a lathe (G7) ──────────────────────────────────────────────────
+const { turnedGeometry, TURNED_PARAMS } = await import('../apps/3d/lathe.js');
+const turnedOf = (values, d) => turnedGeometry({ ...valuesFor(TURNED_PARAMS, {}), ...values, drawn: d });
+// A stroke upright 100 px from the drawing's left edge — a mark alone there — 200 px tall, its marks 20 px across.
+const upright = Array.from({ length: 51 }, (_, i) => ({ x: 100, y: i * 4, rotation: 0, scale: 1, flipX: 1, key: '' }));
+const post = { id: 'post', strokes: [upright, [{ x: 0, y: 100, rotation: 0, scale: 1, flipX: 1, key: '' }]], masks: new Map(), size: 20 };
+const tube = turnedOf({ wall: 1 }, post), tc = closedness(tube), [lx0, ly0, lz0] = extent(tube);
+ok('an upright stroke turned: a tube — closed, outward — its radius its distance from the axis, its wall its marks',
+  [tc.closed, tc.outward, near(lx0, 4.4, 0.02), near(lz0, 4.4, 0.02), near(ly0, 4, 0.02), near(tc.vol, Math.PI * (2.2 ** 2 - 1.8 ** 2) * 4, 0.6)],
+  [true, true, true, true, true, true]);
+ok('…its axis across the drawing at its middle: half as far, half the radius', near(extent(turnedOf({ wall: 1, axis: 0.5 }, post))[0], 2.4, 0.02), true);
+ok('…no wall: the surface alone, open', closedness(turnedOf({ wall: 0 }, post)).closed, false);
+ok('…with no drawing, a vase of its own, outward', closedness(turnedOf({ wall: 1 }, null)).outward, true);
+ok('…a turned drawing\'s drawing read and named a parent, as a drawn body\'s', drawnIn({ shapes: [{ id: 'turned', params: { drawing: 'gam_9' } }] }), ['gam_9']);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

@@ -28,6 +28,7 @@ import {
 import { gridGeometry, PALETTES } from './grid.js';
 import { CLOUD_PARAMS, dotGeometry, dotsOf } from './cloud.js';
 import { DRAWN_PARAMS, DRAWN_WAVE, DRAWN_LOOK, drawnGeometry } from './loft.js';
+import { TURNED_PARAMS, turnedGeometry } from './lathe.js';
 import { FORCE_PARAMS } from './forces.js';
 
 /** A card's drawers: what the shape is, where it stands, how it looks. */
@@ -152,6 +153,17 @@ export const SHAPES = {
     params: { ...DRAWN_PARAMS, ...DRAWN_WAVE, ...DRAWN_LOOK },
     form: [...Object.keys(DRAWN_PARAMS), ...Object.keys(DRAWN_WAVE)],     // its wave made again each frame (G6)
     geometry: v => drawnGeometry(v),
+  },
+  /**
+   * A drawing turned round an axis (lathe.js, G7, 2026-11-17): each stroke a profile, spun — a vase, a cup, a
+   * corolla — its wall its marks' size, or none, a surface seen from both sides. Its drawing read as a drawn
+   * body's is; with none, a vase of its own.
+   */
+  turned: {
+    id: 'turned', label: 'turned drawing', drawn: true,
+    finest: 256,
+    params: TURNED_PARAMS,
+    geometry: v => turnedGeometry(v),
   },
 };
 

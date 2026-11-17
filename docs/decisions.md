@@ -369,3 +369,9 @@ frame, `phase` a form key, where a swing moves a place and a cloud its
 dots: a drawn body's few thousand points cost a frame little. Its rings
 turn square to the waved line; its skin keeps each point's place at rest,
 so it rides along. Whole cycles a loop, as a swing has: the loop closes.
+
+**A lathe is a shape of its own** (G7, 2026-11-17). A stroke turned round
+an axis shares nothing of a drawn body's rows but its drawing, so it is the
+catalogue's eleventh, `turned`, read through drawn.js as a body is. Its
+wall is its marks' size: the stroke drawn thick, the vase thick. Three's
+LatheGeometry spins the profile — the one geometry of three's it takes.

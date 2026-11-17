@@ -64,7 +64,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | G4b | the drawn body's skin: the drawing's picture projected from the front, so the body looks like it | `3d/drawn-skin` | S | landed 2026-11-17 |
 | G5 | the model out as meshes: a binary glTF — its shapes, colours, a drawn body's skin — and an OBJ, its surfaces | `3d/mesh-out` | S | landed 2026-11-17 |
 | G6 | the worm alive: a wave along a drawn body, a loop that closes, saved as a sequence | `3d/worm-wave` | M | landed 2026-11-17 |
-| G7 | the lathe: a gamepad stroke turned round an axis — a vase, a cup, a corolla | `3d/lathe` | M | ready |
+| G7 | the lathe: a gamepad stroke turned round an axis — a vase, a cup, a corolla | `3d/lathe` | M | landed 2026-11-17 |
 | G8 | flowers: petals round a heart, opened, in whorls — the garden's, in 3D | `3d/flowers` | M | ready |
 | G9 | growth: a drawn body grown as its stroke was drawn, by its marks' times | `3d/growth` | M | ready |
 | G10 | the brush wrapped round a drawn body, a seam to its rings | `3d/drawn-wrap` | S | ready |

@@ -209,6 +209,22 @@ c.ok('a wave along it: the model a loop, its player shown; a quarter on, the bod
   player && quarter.diff > 0.003 && back.diff < 0.0005, JSON.stringify({ player, quarter, back }));
 await c.shot('5-waving');
 
+// ── Turned on a lathe (G7): the drawing's strokes spun round its left edge ──
+await setOn(cardRow(BODY, 'its ends'), { wave: 0 });
+await page.click(`[...${cards}[${BODY}].querySelectorAll('.pp-head .pp-btn')].find(b => b.textContent === 'shown')`);
+await page.typeInto(`[...document.querySelectorAll('.pp-cards-add')].find(m => !m.closest('.pp-card'))`, 'turned');
+await page.until(`${cards}.length === ${BODY + 2}`, { timeout: 10000 }).catch(() => {});
+await wait(600);
+const vase = await ink('vase');
+await setOn(cardRow(BODY + 1, 'its wall, by its marks'), { drawing: made, x: 0, shading: 'smooth' });
+await page.until(`import('/apps/3d/drawn.js').then(m => !!m.drawnOf(${JSON.stringify(made)}))`, { timeout: 20000 }).catch(() => {});
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyF', key: 'f', bubbles: true }))`);
+await wait(1200);
+const spun = await ink('spun', 'vase');
+c.ok('a turned drawing: a vase of its own at once; given the drawing, its strokes spun in its place', vase.share > 0.01 && spun.share > 0.01 && spun.diff > 0.01,
+  JSON.stringify({ vase, spun }));
+await c.shot('6-turned');
+
 if (o) {
   // Cold: a page that has read nothing — the drawing and its picture read by the replay itself (drawn.js `readDrawn`).
   await c.go(c.base + '/apps/3d/');

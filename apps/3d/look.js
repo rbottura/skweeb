@@ -104,7 +104,8 @@ export function dress(mesh, id, values, bands, skin = null) {
     m.metalness = 0;
   }
   const flat = values.shading === 'flat';
-  const side = id === 'plane' ? DoubleSide : FrontSide;
+  // A plane, and a turned drawing with no wall — a surface, a cup's inside seen as its outside is (G7).
+  const side = id === 'plane' || (id === 'turned' && !(Number(values.wall) > 0)) ? DoubleSide : FrontSide;
   if (m.flatShading !== flat || m.side !== side) {
     m.flatShading = flat;
     m.side = side;

@@ -117,9 +117,12 @@ export function drawnOf(id, then) {
   return null;
 }
 
-/** The drawings a recipe's drawn bodies name, shown. */
+/** The shapes that read a drawing: a drawn body (loft.js), a turned drawing (lathe.js, G7). */
+const READERS = ['drawn', 'turned'];
+
+/** The drawings a recipe's drawn bodies and turned drawings name, shown. */
 export const drawnIn = recipe => [...new Set(((recipe && recipe.shapes) || [])
-  .filter(s => s && s.on !== false && s.id === 'drawn' && s.params && typeof s.params.drawing === 'string' && s.params.drawing)
+  .filter(s => s && s.on !== false && READERS.includes(s.id) && s.params && typeof s.params.drawing === 'string' && s.params.drawing)
   .map(s => s.params.drawing))];
 
 /** Every drawing a recipe's bodies are swept from, read before it is drawn: a replay, a print, a save. */
