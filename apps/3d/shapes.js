@@ -151,7 +151,7 @@ export const SHAPES = {
     id: 'drawn', label: 'drawn body', drawn: true,
     finest: 192,                           // a traced silhouette has no more to give a print than this
     params: { ...DRAWN_PARAMS, ...DRAWN_WAVE, ...DRAWN_LOOK },
-    form: [...Object.keys(DRAWN_PARAMS), ...Object.keys(DRAWN_WAVE)],     // its wave made again each frame (G6)
+    form: [...Object.keys(DRAWN_PARAMS), ...Object.keys(DRAWN_WAVE), 'skin'],   // its wave each frame (G6); its uv by its skin (G10)
     geometry: v => drawnGeometry(v),
   },
   /**

@@ -27,47 +27,25 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
-- **Grown as it was drawn** (G9, 2026-11-17; `loft.js` `grow`, `grownTo`;
-  motion.js `growing`; the tests, `check-3d-drawn`). A drawn body's *Swing*:
-  the model a sequence played once, as a cloud's evolution is — frame 0 its
-  drawing's first two marks, the last every one, each frame the marks drawn
-  by then by their own times, the drawing's pauses kept; the body's place
-  and size fixed as it grows. Each stamp keeps its mark (core/stage/
-  drawing.js), and so its time.
-
-- **Flowers** (G8, 2026-11-17; repeat.js `round`, `tests/3d-modifiers.mjs`,
-  `check-3d-drawn`). The modifiers' seventh, *round — petals*: `count` of a
-  shape round the y axis, each laid out its longer side from the axis —
-  a quarter turn when it stands taller than wide — its near end `from` it,
-  raised `opening` from flat; `whorls` rings, each one in half a step round,
-  `shrink` smaller and nearer upright. Any shape a petal: a drawn body's skin
-  on each. The heart is a shape of its own, a sphere at the middle.
-
-- **A drawing turned** (G7, 2026-11-17; `lathe.js`, `tests/3d-drawn.mjs`,
-  `check-3d-drawn`). The catalogue's eleventh, *turned drawing*: a gamepad
-  drawing's strokes each a profile — its marks' distance from a vertical
-  axis their radius, `axis` across the drawing, 0 its left edge — spun
-  `segments` round (three's LatheGeometry); its wall its marks' size
-  (`wall`, by it), the profile offset either side and closed, a solid turned
-  outward; no wall, the surface alone, seen from both sides. With no
-  drawing, a vase of its own. Read, saved and replayed as a drawn body's.
-
-- **The worm alive** (G6, 2026-11-17; `loft.js` `DRAWN_WAVE`, motion.js
-  `waving`; `tests/3d-drawn.mjs`, `tests/3d-camera.mjs`, `check-3d-drawn`). A
-  drawn body's *Swing*: a wave along it — from side to side, or up and down —
-  `waves` along its length, travelling `waveCycles` whole times a loop, so
-  the loop closes; less than none, the other way. Each ring's centre moved,
-  the rings square to the waved line, the body made again each frame (its
-  `phase` a form key); its skin where each point is at rest, so it rides
-  along. A model with one waving is a loop: played, saved, printed a frame.
-
-- **Out as meshes** (G5, 2026-11-17; `meshfile.js`, `tests/3d-meshfile.mjs` 16,
-  `check-3d-drawn`). Export's *Download the model (glTF .glb)*: every shape
-  shown, at rest, a node each — its place a matrix — its colour, unlit as
-  KHR_materials_unlit, a drawn body's skin its PNG in the file, a cloud's
-  dots baked, each its colour; *Download its surfaces (OBJ)*, the points
-  where their places put them, uv kept. Written here, no exporter vendored.
-  Not kept: flat shading, the outline, the light.
+- **Since the drawn body** (G5 to G10, 2026-11-17, the author's "vas-y avec
+  ce plan"; `tests/3d-drawn.mjs`, `3d-meshfile.mjs`, `3d-camera.mjs`,
+  `3d-modifiers.mjs`, `check-3d-drawn`):
+  - out as meshes (G5, `meshfile.js`): Export's glTF `.glb` — every shape at
+    rest, a node each, its colour, unlit, a skin's PNG, a cloud baked — and
+    an OBJ, the surfaces placed; written here, nothing vendored; flat
+    shading, the outline and the light not kept;
+  - the worm alive (G6, `DRAWN_WAVE`, motion.js `waving`): a wave along the
+    body, side to side or up and down, whole cycles a loop; its rings square
+    to the waved line, its skin riding along;
+  - a drawing turned (G7, `lathe.js`, the catalogue's eleventh): each stroke
+    a profile spun round a vertical axis across the drawing, its wall its
+    marks' size; no wall, a surface seen from both sides;
+  - flowers (G8, repeat.js `round`, the modifiers' seventh): any shape petals
+    round the y axis, raised, in rings each smaller and nearer upright;
+  - grown as drawn (G9, `grow`, motion.js `growing`): played once, each frame
+    the marks drawn by then by their own times, the body's place fixed;
+  - its brush wrapped round it (G10, drawn.js `brushOf`): the sprite its marks
+    use most, there and back round each ring, repeated along; `skin` a form key.
 
 - **A drawn body** (G4, 2026-11-16, the author's ask; `loft.js`,
   `silhouette.js`, `drawn.js`, `tests/3d-drawn.mjs` 30, `check-3d-drawn` 14).
@@ -375,10 +353,10 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**The author's test of G4** — a drawn body from their own sequences: across
-or stamped, which reads as a worm, which as a petal; then flowers as such —
-petals round a heart — a stroke grown in time, or a silhouette's holes, as
-the author orders them. The author's eye on S15 stands; S15f is parked.
+**The author's test of G4 to G10** — their own sequences as bodies, worms
+waving, a vase turned, a flower round, grown as drawn, out to Blender as a
+glTF — and what they order next: a silhouette's holes, a brush for each
+stroke, the heart of a flower. The author's eye on S15 stands; S15f parked.
 
 Before S15, **G3 — more parameters**, the author's pick (`docs/plan.md`): its list —
 particles' colour over life, the overlay's place and blend, an emitter

@@ -28,7 +28,7 @@
  * DOM-free until a sprite is read; the vault through core/vault.js.
  */
 
-import { CanvasTexture, SRGBColorSpace } from '../../core/libs/three/three.core.js';
+import { CanvasTexture, SRGBColorSpace, RepeatWrapping } from '../../core/libs/three/three.core.js';
 import { Vault }        from '../../core/vault.js';
 import { surface }      from '../../core/surface.js';
 import { familySprite } from '../../core/sprites.js';
@@ -40,6 +40,37 @@ const SIDE = 128;
 
 /** A drawing's picture, this many pixels along its longer side: a print draws it no finer. */
 const PICTURE = 2048;
+
+/** A picture opaque: the mean colour of its ink behind it, so what has no ink is the drawing's colour, never black. */
+function opaque(ctx, w, h) {
+  const rgba = ctx.getImageData(0, 0, w, h).data;
+  let r = 0, g = 0, b = 0, a = 0;
+  for (let i = 0; i < rgba.length; i += 28) { const k = rgba[i + 3]; r += rgba[i] * k; g += rgba[i + 1] * k; b += rgba[i + 2] * k; a += k; }
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = a ? `rgb(${Math.round(r / a)}, ${Math.round(g / a)}, ${Math.round(b / a)})` : '#808080';
+  ctx.fillRect(0, 0, w, h);
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/**
+ * Its brush, to wrap round a body (G10): the sprite its marks use most, opaque, at most 512 px — round each ring
+ * there and back, repeated along the line.
+ */
+function brushOf(drawing, images) {
+  const uses = new Map();
+  for (const s of drawing.stamps) if (images.has(s.key)) uses.set(s.key, (uses.get(s.key) || 0) + 1);
+  if (!uses.size) return null;
+  const image = images.get([...uses].sort((a, b) => b[1] - a[1])[0][0]);
+  const k = Math.min(1, 512 / Math.max(image.width, image.height));
+  const w = Math.max(1, Math.round(image.width * k)), h = Math.max(1, Math.round(image.height * k));
+  const canvas = surface(w, h), ctx = canvas.getContext('2d');
+  ctx.drawImage(image, 0, 0, w, h);
+  opaque(ctx, w, h);
+  const brush = new CanvasTexture(canvas);
+  brush.colorSpace = SRGBColorSpace;
+  brush.wrapT = RepeatWrapping;
+  return brush;
+}
 
 /** The drawing's picture, and where it lies in the drawing's pixels — or null, nothing to draw. */
 function pictureOf(drawing, images) {
@@ -56,13 +87,7 @@ function pictureOf(drawing, images) {
   const canvas = surface(w, h), ctx = canvas.getContext('2d');
   drawStill(ctx, { ground: null, clip: { x: 0, y: 0, w: x1 - x0, h: y1 - y0 },
     stamps: drawing.stamps.map(s => ({ ...s, x: s.x - x0, y: s.y - y0 })) }, images, view);
-  const rgba = ctx.getImageData(0, 0, w, h).data;
-  let r = 0, g = 0, b = 0, a = 0;
-  for (let i = 0; i < rgba.length; i += 28) { const k = rgba[i + 3]; r += rgba[i] * k; g += rgba[i + 1] * k; b += rgba[i + 2] * k; a += k; }
-  ctx.globalCompositeOperation = 'destination-over';
-  ctx.fillStyle = a ? `rgb(${Math.round(r / a)}, ${Math.round(g / a)}, ${Math.round(b / a)})` : '#808080';
-  ctx.fillRect(0, 0, w, h);
-  ctx.globalCompositeOperation = 'source-over';
+  opaque(ctx, w, h);
   const skin = new CanvasTexture(canvas);
   skin.colorSpace = SRGBColorSpace;
   return { frame: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, skin };
@@ -101,7 +126,7 @@ async function read(id) {
   }));
   // Each stamp its mark's time, as drawn (G9: a body grown as it was).
   const timed = st => ({ ...st, t: Number(still.marks[st.mark] && still.marks[st.mark].t) || 0 });
-  return { id, strokes: drawing.strokes.map(s => s.stamps.map(i => timed(drawing.stamps[i]))), masks, ...pictureOf(drawing, images) };
+  return { id, strokes: drawing.strokes.map(s => s.stamps.map(i => timed(drawing.stamps[i]))), masks, ...pictureOf(drawing, images), brush: brushOf(drawing, images) };
 }
 
 /**

@@ -151,6 +151,11 @@ await c.shot('3-skin-front');
 await setOn(cardRow(BODY, 'its ends'), { skin: 'colour' });
 const coloured = await colours();
 c.ok('…its colour instead: no red, no blue — the drawing gone from it', coloured.red.n < 50 && coloured.blue.n < 50, JSON.stringify(coloured));
+// Its brush wrapped round it (G10): the sprite its marks use most — the red disc, the S's — on both bodies.
+await setOn(cardRow(BODY, 'its ends'), { skin: 'brush' });
+const brushed = await colours();
+c.ok('…its brush wrapped round it: the red disc its marks use most, on the bar too — no blue', brushed.red.n > 500 && brushed.blue.n < 50,
+  JSON.stringify(brushed));
 await setOn(cardRow(BODY, 'its ends'), { skin: 'drawing', lay: 'across' });
 
 // ── Saved, and drawn again ──────────────────────────────────────────────────
