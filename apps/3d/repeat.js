@@ -1,6 +1,7 @@
 /**
- * repeat.js — a shape made of copies of itself: mirrored across a plane, or
- * in a row (modifiers.js holds the catalogue).
+ * repeat.js — a shape made of copies of itself: mirrored across a plane, in
+ * a row, or round an axis, petals round a heart (modifiers.js holds the
+ * catalogue).
  *
  * Each copy has every attribute of the shape's and triangles of its own, all
  * in one geometry, so what follows in the stack bends them as one and a
@@ -42,6 +43,37 @@ export function array(geometry, count, step, max = Infinity) {
     const k = i - (n - 1) / 2;
     return { move: p => { p[0] += step[0] * k; p[1] += step[1] * k; p[2] += step[2] * k; } };
   }));
+}
+
+/**
+ * Petals round a heart (G8, 2026-11-17): `count` of the shape round the y axis, each laid out along x — its longer
+ * side out from the axis, a quarter turn when it stands taller than it is wide — its near end `from` the axis,
+ * raised `opening` degrees from flat, then turned round. `whorls` rings of them, each one in half a step round,
+ * `shrink` smaller and nearer upright: a flower, any shape its petal — a drawn body's, the author's.
+ */
+export function round(geometry, count, from, opening, whorls = 1, shrink = 0.25, max = Infinity) {
+  geometry.computeBoundingBox();
+  const b = geometry.boundingBox, tall = b.max.y - b.min.y > b.max.x - b.min.x;
+  const near = tall ? b.min.y : b.min.x;
+  const lay = tall ? p => { const x = p[0]; p[0] = p[1]; p[1] = -x; } : () => {};    // a quarter turn: its up out
+  const most = Math.max(1, Math.floor(max / trianglesOf(geometry)));
+  const each = [];
+  for (let w = 0; w < whorls; w++) {
+    const s = Math.max(0.05, 1 - shrink * w), tilt = ((opening + ((90 - opening) * w) / whorls) * Math.PI) / 180;
+    const ct = Math.cos(tilt), st = Math.sin(tilt);
+    for (let i = 0; i < count && each.length < most; i++) {
+      const turn = (2 * Math.PI * i) / count + (w * Math.PI) / count, cr = Math.cos(turn), sr = Math.sin(turn);
+      const set = p => {
+        const x = p[0] * ct - p[1] * st, y = p[0] * st + p[1] * ct;      // raised about z, the heart its pivot
+        p[0] = x * cr + p[2] * sr; p[1] = y; p[2] = -x * sr + p[2] * cr;  // turned round y
+      };
+      each.push({
+        move: p => { lay(p); p[0] = (p[0] - near) * s + from; p[1] *= s; p[2] *= s; set(p); },
+        turn: n => { lay(n); set(n); },
+      });
+    }
+  }
+  return copies(geometry, each);
 }
 
 /**

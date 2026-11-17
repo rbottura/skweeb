@@ -45,7 +45,7 @@ const normals = g => Array.from({ length: g.attributes.normal.count }, (_, i) =>
 
 // ── The catalogue ────────────────────────────────────────────────────────────
 
-ok('the six, in the roadmap\'s order', Object.keys(MODIFIERS), ['subdivide', 'displace', 'twist', 'bend', 'mirror', 'array']);
+ok('the six, in the roadmap\'s order, and petals round (G8)', Object.keys(MODIFIERS), ['subdivide', 'displace', 'twist', 'bend', 'mirror', 'array', 'round']);
 ok('each says its id, and its schema declares', Object.entries(MODIFIERS).every(([k, m]) => m.id === k
   && !!defineParams('3d:' + k, m.params) && typeof m.apply === 'function'), true);
 
@@ -168,6 +168,22 @@ ok('a recipe from before stacks draws as it did', [triangles(model.parts[0].mesh
 const turnedTwist = new Model().update({ shapes: [{ id: 'box', params: { turnY: 45 },
   modifiers: [{ id: 'subdivide', params: { levels: 2 } }, { id: 'twist', params: { angle: 90 } }] }] });
 ok('framed by its vertices: twisted and turned 45°, still √(½ + ¼ + ½) round', r3(turnedTwist.bounds().radius), r3(Math.sqrt(1.25)));
+
+// ── Petals round a heart (G8, repeat.js `round`) ─────────────────────────────
+const petal = () => new T.BoxGeometry(0.2, 1, 0.1);                 // standing: taller than it is wide
+const roundOf = (values, g = petal()) => MODIFIERS.round.apply(g, { ...valuesFor(MODIFIERS.round.params, {}), ...values });
+const sizeOf = g => { g.computeBoundingBox(); const b = g.boundingBox; return [b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z].map(x => +x.toFixed(3)); };
+const volumeOf = g => { const p = g.attributes.position.array, idx = g.index.array; let s = 0;
+  for (let t = 0; t < idx.length; t += 3) { const [a, b, c] = [idx[t], idx[t + 1], idx[t + 2]].map(i => [p[3 * i], p[3 * i + 1], p[3 * i + 2]]);
+    s += a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0]) + a[2] * (b[0] * c[1] - b[1] * c[0]); } return s / 6; };
+const flat = roundOf({ count: 6, from: 0.15, opening: 0 });
+ok('petals round, laid flat: six of it, each its longer side out from the axis, the flower as thin as a petal is wide',
+  [triangles(flat), sizeOf(flat)[1], Math.abs(sizeOf(flat)[0] - 2 * 1.15) < 0.02], [72, 0.2, true]);
+ok('…raised upright: as tall as a petal is long', Math.abs(sizeOf(roundOf({ count: 6, opening: 90 }))[1] - 1) < 0.02, true);
+ok('…every one outward: six petals\' volume', +volumeOf(roundOf({ count: 6, opening: 40 })).toFixed(5), +(6 * 0.2 * 1 * 0.1).toFixed(5));
+const two = roundOf({ count: 5, whorls: 2, shrink: 0.5, opening: 10 });
+ok('two rings: twice the petals, the inner ones smaller and nearer upright', [triangles(two), sizeOf(two)[1] > sizeOf(roundOf({ count: 5, opening: 10 }))[1]], [120, true]);
+ok('…as many as the triangles allow', triangles(MODIFIERS.round.apply(new T.SphereGeometry(1, 256, 256), { count: 48, from: 0, opening: 0, whorls: 5, shrink: 0.2 })) <= MAX_TRIANGLES, true);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

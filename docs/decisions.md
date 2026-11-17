@@ -375,3 +375,9 @@ an axis shares nothing of a drawn body's rows but its drawing, so it is the
 catalogue's eleventh, `turned`, read through drawn.js as a body is. Its
 wall is its marks' size: the stroke drawn thick, the vase thick. Three's
 LatheGeometry spins the profile — the one geometry of three's it takes.
+
+**A flower is a modifier** (G8, 2026-11-17). Petals round a heart are
+copies of a shape round an axis, raised and in rings — what `mirror` and
+`array` already are, round: `round` in the stack, so any shape is a petal
+and a drawn body the author's own. The heart is left a shape to add: a
+sphere, or a drawing of one.

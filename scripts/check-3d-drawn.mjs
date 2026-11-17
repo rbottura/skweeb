@@ -225,6 +225,20 @@ c.ok('a turned drawing: a vase of its own at once; given the drawing, its stroke
   JSON.stringify({ vase, spun }));
 await c.shot('6-turned');
 
+// ── A flower (G8): the drawn body its petal, round a heart ──────────────────
+await page.click(`[...${cards}[${BODY + 1}].querySelectorAll('.pp-head .pp-btn')].find(b => b.textContent === 'shown')`);
+await page.click(`[...${cards}[${BODY}].querySelectorAll('.pp-head .pp-btn')].find(b => b.textContent === 'hidden')`);
+await page.click(`document.querySelectorAll('.pp-cards-line')[${BODY}]`);
+await wait(500);
+const petalOnly = await ink('petal');
+await page.typeInto(`${cards}[${BODY}].querySelector('.pp-cards-add')`, 'round');
+await wait(800);
+const flower = await ink('flower', 'petal');
+const stack = await page.eval(`[...${cards}[${BODY}].querySelectorAll('.pp-card .pp-title')].map(t => t.textContent)`);
+c.ok('a flower: the drawn body its petal, round a heart — its stack round, the picture another', stack.includes('round — petals') && flower.diff > 0.01,
+  JSON.stringify({ stack, petalOnly, flower }));
+await c.shot('7-flower');
+
 if (o) {
   // Cold: a page that has read nothing — the drawing and its picture read by the replay itself (drawn.js `readDrawn`).
   await c.go(c.base + '/apps/3d/');

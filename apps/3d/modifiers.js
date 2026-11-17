@@ -12,7 +12,7 @@
  *
  * A modifier works in the shape's own space, before its place: a twist about
  * y turns round the shape's own up, wherever it stands and however turned.
- * The six, in the roadmap's order:
+ * The six, in the roadmap's order — and a seventh, `round`, petals round a heart (G8):
  *
  * - **subdivide** cuts every triangle into four, flat, n times. Nothing
  *   changes to the eye; what bends after it has vertices to bend.
@@ -34,7 +34,7 @@
 
 import { BufferGeometry, Float32BufferAttribute } from '../../core/libs/three/three.core.js';
 import { deform, twist, bend, displace } from './deform.js';
-import { mirror, array } from './repeat.js';
+import { mirror, array, round } from './repeat.js';
 
 /** No more triangles than this from a stack: past it, a browser stops answering. */
 export const MAX_TRIANGLES = 1 << 19;
@@ -92,6 +92,18 @@ export const MODIFIERS = {
       dz: along('…along z'),
     },
     apply: (geometry, v) => array(geometry, v.count, [v.dx, v.dy, v.dz], MAX_TRIANGLES),
+  },
+  /** Petals round a heart (G8, repeat.js `round`): a flower of any shape — a drawn body its petal. */
+  round: {
+    id: 'round', label: 'round — petals',
+    params: {
+      count: { type: 'int', min: 2, max: 48, default: 6, label: 'how many round' },
+      from: { type: 'range', min: 0, max: 10, step: 'any', default: 0.15, label: 'each this far from the axis' },
+      opening: { type: 'range', min: -90, max: 90, step: 0.5, default: 25, label: 'raised from flat', unit: '°' },
+      whorls: { type: 'int', min: 1, max: 5, default: 1, label: 'rings of them' },
+      shrink: { type: 'range', min: 0, max: 0.9, step: 0.01, default: 0.25, label: 'each ring in, smaller by', when: { whorls: { not: 1 } } },
+    },
+    apply: (geometry, v) => round(geometry, v.count, v.from, v.opening, v.whorls, v.shrink, MAX_TRIANGLES),
   },
 };
 

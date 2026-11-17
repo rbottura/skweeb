@@ -27,6 +27,14 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **Flowers** (G8, 2026-11-17; repeat.js `round`, `tests/3d-modifiers.mjs`,
+  `check-3d-drawn`). The modifiers' seventh, *round — petals*: `count` of a
+  shape round the y axis, each laid out its longer side from the axis —
+  a quarter turn when it stands taller than wide — its near end `from` it,
+  raised `opening` from flat; `whorls` rings, each one in half a step round,
+  `shrink` smaller and nearer upright. Any shape a petal: a drawn body's skin
+  on each. The heart is a shape of its own, a sphere at the middle.
+
 - **A drawing turned** (G7, 2026-11-17; `lathe.js`, `tests/3d-drawn.mjs`,
   `check-3d-drawn`). The catalogue's eleventh, *turned drawing*: a gamepad
   drawing's strokes each a profile — its marks' distance from a vertical
