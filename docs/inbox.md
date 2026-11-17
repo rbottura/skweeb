@@ -24,10 +24,65 @@ A sorted entry goes once what it became is done; git keeps it.
 
 ## Waiting
 
-Nothing, 2026-11-15: the author's list of the day went onto the plan as C13
-and landed, as the ideas of 2026-11-06 had — C11, V1 to V3, M13b.
+Nothing, 2026-11-18: the worm went onto the plan as M16, and the two notes
+of the day before with it.
 
 ## Sorted
+
+- **2026-11-18 — a worm, the game's avatar; phases and the bond.** "je veux
+  créer un ensemble d'outils pour servir la création graphique et mes idées
+  de jeu. maintenant j'ai envie de créer un personnage qui est un ver" —
+  anthropomorphic, "2 jambes 2 bras une tete avec des yeux comme des
+  escargot", as the puppet's worms, or "un ver simple sans membre qui ondule
+  et se déplace à l'intérieur de la matière". In 3D, "proche d'un dessin
+  fait au gamepad et transformé par loft en 3D" (G4), with "un ensemble
+  d'expression du visage et mouvement du corps riche et complexe". It walks
+  the surface, "vu tps d'assez haut", or swims just under it "comme un ver
+  de dune, qui fait une bosse en surface suivant la courbe de son corps". It
+  sees places "des réalité temporellement et spatiallement éloigné mais
+  'phasé' dans sa réalité", reached through a wormhole: the bond, "le
+  saut". Five to seven gears, "des évolutions cosmétiques, principalement
+  des effets de shading et d'accésoires". First, quickly, "un effet d'
+  'entrer en phase' avec une 'phase compatible' matérialisé par un ver figé
+  dans l'espace temps": in its radius "notre avatar se fige, la caméra
+  centre les 2 corps dans le cadre, un lien 'spectrale' se forme entre les
+  2 corps comme la série de frame de la séquence de morphing du corps A vers
+  B et B vers A, notre corps devient un coquille vide légèrement transparente
+  quand la phase se concentre en B et inversement"; the bond made, B is
+  played in its own world, "une séquence de QTE, mini jeu dans cette séquence
+  pour faire passer le chargement d'un nouvel espace". The map "une sphère
+  comme sur mario galaxy, mais plus grande si en terme de performance on peut
+  se le permettre"; "les idées passé dans garden servirons également à
+  l'avenir". → M16, taken up the same day: `docs/worm.md`, its bricks on
+  the board, M16a and b the draft; the passage played, not held
+  (`docs/decisions.md`, 2026-11-18).
+- **2026-11-17 — a sheet any engine cuts.** Asked: "est-ce que les shaders
+  sont exportables pour godot ou unity" — the code no (`docs/vfx.md`, *Not
+  now*), the sheets yes; noted at the author's word, "oui, note les deux".
+  A sheet's cells are 2 px apart (`core/spritesheet.js`, `sheetLayout`,
+  never given another gap): Phaser reads each frame's box from the JSON, but
+  Godot's *Particles Anim H/V Frames* and Unity's *Texture Sheet Animation*
+  in *Grid* mode cut the sheet in equal parts, so the cut slides at each
+  cell — near 2 px at a row's end. An option at export: cells all equal,
+  the margin inside each; and a count of frames that fills the grid, or its
+  empty cells play as frames. Small; wanted once an engine loads a sheet —
+  M15f's way out. → M15h on the board, a side job.
+- **2026-11-17 — the generators in 3D.** The same question's other half:
+  "utilisable dans un environnement 3D ou il faut adapter un mode de shader
+  pour la 3D ?" On particles and on the screen, nothing to adapt: a
+  billboard is flat, and a 3D scene is a picture before its post-process. On
+  a mesh, a generator is laid as it is over UVs that run on — a plane, a
+  cylinder, a ring — and no seam shows, the noise being a tile; over any
+  other model the UVs' islands cut it. A 3D mode would add generators of a
+  position, `fx(p: vec3f)` — a noise of three axes, read where the point is,
+  no seam anywhere: the step after "a noise that boils in place" (M15a,
+  *Left for later*); and what a picture has no word for, the normal and the
+  eye's direction — a shield's rim. A pass that reads its neighbours (blur,
+  glow, edges) wants the chain drawn to a texture first; one-point passes
+  fold into one function, which is a material — in the suite, the 3D app's
+  `WebGPURenderer` shares the kit's device and its three.js takes WGSL
+  (`wgslFn`). A link of M10's, as vfx.md parks *Surfaces on meshes*. →
+  M16f, surfaces on meshes and the gears (`docs/worm.md`).
 
 - **2026-11-13 — the suite, a game's editor and the game.** "un objectif
   serai de composé des avatars, des maps, des objets et maintenant des vfx

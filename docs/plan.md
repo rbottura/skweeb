@@ -57,18 +57,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | V1b | a palette on particles: each one a colour of it, a dot filled, a sprite printed in it | `particles/palette` | S | landed 2026-11-09 |
 | — | an overlay in particles: one picture in front, fitted to the format | `particles/overlay` | S | landed 2026-11-09; layers by format are M13c's |
 | — | particles at random sizes between two; an emitter object turned | `particles/size-angle` | S | landed 2026-11-09 |
-| G1 | a cloud of dots in the 3D app: particles' emitter, its dots placed once — where (R) and their colours (C) seeds, a palette, sizes between two, unlit | `3d/cloud` | M | landed 2026-11-11 |
-| G2 | the cloud in time: a vortex, gravity, a pull, drag and noise on its dots from rest, every frame its own, saved as a sequence | `3d/cloud-forces` | M | landed 2026-11-11 |
-| G3 | the overlay composed: in front or behind, fitted, sized, moved, turned, see-through, blended, dragged | `particles/overlay-compose` | S | landed 2026-11-11 |
-| G4 | a drawn body: a gamepad drawing's strokes lofted — each mark's brush traced to its silhouette, a ring; the rings joined, the ends a point or flat | `3d/drawn-body` | M | landed 2026-11-16 |
-| G4b | the drawn body's skin: the drawing's picture projected from the front, so the body looks like it | `3d/drawn-skin` | S | landed 2026-11-17 |
-| G5 | the model out as meshes: a binary glTF — its shapes, colours, a drawn body's skin — and an OBJ, its surfaces | `3d/mesh-out` | S | landed 2026-11-17 |
-| G6 | the worm alive: a wave along a drawn body, a loop that closes, saved as a sequence | `3d/worm-wave` | M | landed 2026-11-17 |
-| G7 | the lathe: a gamepad stroke turned round an axis — a vase, a cup, a corolla | `3d/lathe` | M | landed 2026-11-17 |
-| G8 | flowers: petals round a heart, opened, in whorls — any shape a petal, a drawn body the author's | `3d/flowers` | S | landed 2026-11-17 |
-| G9 | growth: a drawn body grown as its stroke was drawn, by its marks' times | `3d/growth` | M | landed 2026-11-17 |
-| G10 | the brush wrapped round a drawn body — there and back round each ring, no seam | `3d/drawn-wrap` | S | landed 2026-11-17 |
-| G11 | the dots out as vectors: particles' and the 3D app's clouds as SVG, every dot a circle — a canvas context that writes it | `export/svg` | S | landed 2026-11-17 |
+| G1 to G11 | the author's list of 2026-11-10: a cloud of dots and its forces (G1, G2); the overlay composed (G3); a drawn body, its skin, out as meshes, the worm alive, the lathe, flowers, growth, the brush wrapped (G4 to G10); the dots out as vectors (G11) | `3d/cloud` … `export/svg` | M each | landed 2026-11-11 to -17 (`apps/3d/STATUS.md`) |
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |
 | L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
@@ -87,6 +76,11 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M14b | modifiers from another app's values: particles adding marks with a sprite of their own, filter's look | — | M | waits: its shape, worked out with the author |
 | M14c | two flowers crossed: a generation of two parents, RimWorld's genes | — | M | later, the author's word |
 | — | a game's effects planned: M15, `docs/vfx.md`; writing a shader, the code side: `docs/shader-code.md` | `docs/vfx`, `docs/shader-code` | — | landed 2026-11-13; 2026-11-14 |
+| — | the worm planned: M16, `docs/worm.md` | `docs/worm` | — | landed 2026-11-18 |
+| M16a | the planet walked: a sphere, things on it; a worm on it — a drawing lofted, waving as it goes — the camera behind and above | `3d/planet` | M | ready |
+| M16b | the phase: a frozen worm and its radius; both framed, the bridge of the morph's frames, the phase swung and fixed on B; the bond | `3d/phase` | M | needs M16a |
+| M16c to j | under the surface, the window, the bond a QTE, surfaces on meshes and the gears, the face, the limbs, a bigger planet, a world saved (`docs/worm.md`) | — | — | later, in the author's order |
+| M15h | a sheet any engine cuts: its cells all equal, a count that fills its grid — Godot's and Unity's flipbooks | `export/sheet-grid` | S | side job |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
 | S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | first pass landed 2026-11-05, the proposal as written; the rest with the author's eye (`docs/scene.md`) |
 | S9f | the scene's other side views: the keys, the history | `scene/side-views` | S | landed 2026-11-05 |

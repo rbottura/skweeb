@@ -24,6 +24,7 @@ item, is the board in `docs/plan.md`. Here, the milestones still open.
 | M13 | BEC again: its grid in the 3D app, its layers by format, the project one page | `docs/bec.md`: M13a, the grid, landed 2026-11-05; b to d next |
 | M14 | the garden: flowers drawn, changed by a chain of modifiers, planted generation after generation | M14a, the garden, landed 2026-11-06 — below |
 | M15 | a game's effects: a shader app — surfaces from nothing — worn by particles over their life, out to a game | taken up 2026-11-13 — `docs/vfx.md`: M15a, the generators, M15b to e and g, the app opened, saving, a life and its moves (`apps/shader/`), its link to particles, an effect played in the map's player, landed that day; f waits on a game made elsewhere |
+| M16 | the worm: the game's avatar on a planet — its phases and the bond, its gears, its face | taken up 2026-11-18 — `docs/worm.md`: M16a and b the draft, the rest in the author's order |
 
 ## The links
 
@@ -341,17 +342,15 @@ bricks: `docs/scene.md`. Rule 7's wording is the author's to settle first.
 (2026-11-06): a flower drawn in the gamepad is a recipe of marks, a chain of
 modifiers its next generation. M14a landed that day (`apps/map/STATUS.md`).
 
+**M16 — the worm.** The author's avatar on a planet, its phases and the
+bond (2026-11-18): `docs/worm.md`, its bricks on the board.
+
 ## Decided before, 2026-09-21 to -23
 
-In `docs/decisions-2026-09-21-to-23.md`, with their reasoning: the `.skw`
-smart object, `sketch-2-print` keeping its gamepad, export as two tools, the
-loop format, print resolution as an export concern, 3D as M5 (parked
-2026-09-26, back as M10 on 2026-10-06), the font audit, `render()` staying
-pure, and the name; video as frames plus ffmpeg, M2 done,
-replay as a dispatch, framing as one idea, trim measured; M3 done and ckt
-ported twice, the UI pass from the author's brief, an object reopening in its
-app, and the tailnet. What M4's bricks settled as compose was built, with the
-plan it was built to, is in `apps/compose/STATUS.md`.
+In `docs/decisions-2026-09-21-to-23.md`, with their reasoning: the `.skw`,
+export, the loop format, 3D parked then back as M10, video as frames plus
+ffmpeg, replay as a dispatch, M2 and M3 done, the UI pass, reopening, the
+tailnet, the name. What M4's bricks settled is in `apps/compose/STATUS.md`.
 
 ## Still open
 
