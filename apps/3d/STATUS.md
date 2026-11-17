@@ -27,6 +27,13 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **Its clouds out as vectors** (G11, 2026-11-17, for BEC 2027; `vectors.js`,
+  core's `svg-canvas.js`, `tests/3d-cloud.mjs`, `check-3d-cloud`): Export's
+  SVG — every dot a circle where the PNG's camera sees it, its colour exactly,
+  far first by its nearest point; the ground, the layers; a print format's
+  millimetres. A turntable's or an evolution's every frame so, zipped. Shapes
+  that are not dots left out, a lit cloud flat, an outline undrawn — said.
+
 - **Since the drawn body** (G5 to G10, 2026-11-17, the author's "vas-y avec
   ce plan"; `tests/3d-drawn.mjs`, `3d-meshfile.mjs`, `3d-camera.mjs`,
   `3d-modifiers.mjs`, `check-3d-drawn`):

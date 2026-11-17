@@ -24,7 +24,8 @@ import { Vault }         from '../../core/vault.js';
 import { thumbFromBlob } from '../../core/thumb.js';
 import { toPng, download, runFrames, zipStore, frameName, crc32 } from '../../core/export.js';
 import { SHAPES }        from './shapes.js';
-import { layeredPng } from '../../core/layers-draw.js';
+import { layeredPng, openLayers, closeLayers, drawSide } from '../../core/layers-draw.js';
+import { layersOf, holderOf, formatOf, across } from '../../core/layers.js';
 
 export const APP = { app: '3d', version: '1.0.0' };
 
@@ -130,6 +131,61 @@ export async function downloadMesh({ params, shapes }, kind = 'glb') {
     return { ...out, file: `${file}.glb` };
   } finally {
     model.dispose();
+  }
+}
+
+/**
+ * The model as vectors (G11, vectors.js): the frame on screen an SVG, its clouds' dots circles where its PNG has
+ * them, its layers round them as a save lays them — or, `every`, a turntable's every frame so, numbered, and its rate
+ * in `meta.json`, zipped. A model with no cloud leaves nothing, and says so: `none`.
+ *
+ * @returns {Promise<object>}   { file, frames, dots, clouds, others, lit, lined, left } — or { none: true }
+ */
+export async function downloadSvg({ params, shapes, renderer, tick = 0, every = false, onStatus = () => {} }) {
+  const recipe = { ...params.values, shapes };
+  await readPalettes(recipe);
+  await readEmitters(recipe);
+  await readDrawn(recipe);
+  const frames = openModel(recipe, { renderer });
+  const opened = await openLayers(layersOf(recipe));
+  try {
+    const fmt = formatOf(holderOf(recipe), { width: frames.width, height: frames.height });
+    const px = frames.width / across(fmt), title = titleOf(shapes);
+    const svgAt = i => frames.svg(i, { title: `${title}${frames.length > 1 ? ` · frame ${i + 1}` : ''}`,
+      behind: ctx => drawSide(ctx, opened, 'behind', fmt, px, i), front: ctx => drawSide(ctx, opened, 'front', fmt, px, i) });
+    const stem = title.replace(/[^\w\- ]+/g, ' ').trim().replace(/\s+/g, '-').slice(0, 60) || 'model';
+    const named = i => frameName(i, frames.length).replace(/\.png$/, '.svg');
+    if (!every) {
+      const i = frames.length > 1 ? tick % frames.length : 0;
+      const out = svgAt(i);
+      if (!out.clouds) return { none: true };
+      const file = `${stem}${frames.length > 1 ? '_' + named(i) : '.svg'}`;
+      download(new Blob([out.text], { type: 'image/svg+xml' }), file);
+      return { ...out, file, frames: 1 };
+    }
+    const entries = [], sum = { dots: 0, clouds: 0, others: 0, lit: 0, lined: false, left: new Set() };
+    await runFrames({
+      count: frames.length,
+      async frame(i) {
+        const out = svgAt(i);
+        const bytes = new TextEncoder().encode(out.text);
+        entries.push({ name: named(i), blob: new Blob([bytes], { type: 'image/svg+xml' }), crc: crc32(bytes), size: bytes.length });
+        sum.dots += out.dots;
+        Object.assign(sum, { clouds: out.clouds, others: out.others, lit: out.lit, lined: out.lined });
+        out.left.forEach(l => sum.left.add(l));
+      },
+      onProgress: (done, total) => onStatus(`writing ${done}/${total} frames…`),
+    });
+    if (!sum.clouds) return { none: true };
+    entries.push({ name: 'meta.json', bytes: new TextEncoder().encode(JSON.stringify({
+      app: APP.app, frames: frames.length, fps: frames.fps, loop: frames.loop, width: frames.width, height: frames.height, recipe,
+    }, null, 1)) });
+    const file = `${stem}_${frames.length}_frames_svg.zip`;
+    download(zipStore(entries), file);
+    return { ...sum, file, frames: frames.length, left: [...sum.left] };
+  } finally {
+    closeLayers(opened);
+    frames.dispose();
   }
 }
 

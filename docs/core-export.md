@@ -6,7 +6,8 @@ leaves, and they share the rule that makes both possible — an app's frames
 drawn again, at any size, from the recipe.
 
 A model leaves as meshes too (G5, 2026-11-17): the 3D app's Export writes a binary glTF or an OBJ
-(`apps/3d/meshfile.js`) — the model at rest, not frames; a conversion, as a video is.
+(`apps/3d/meshfile.js`) — the model at rest, not frames; a conversion, as a video is. And a picture
+leaves as vectors (G11): particles' and the 3D app's clouds as SVG, every dot a circle — `svg-canvas.js` below.
 
 ## export.js — frames out, exactly
 
@@ -53,6 +54,33 @@ apps' loops it is the frame on screen when the loop was saved.
 **Resolution.** Export is the only place print scale appears. The live loop
 stays at screen size; an export draws the frames it needs again at the scale
 asked for, once. A print export is one pass, not a loop to sit through.
+
+## svg-canvas.js — a picture as vectors
+
+G11, 2026-11-17, for BEC 2027: "un export svg pour l'app de particules et
+de 3d … comme on utilise que des points colorés". Export's *Download the
+picture as vectors (SVG)*, and *every frame* so, zipped with `meta.json`.
+
+`svgCanvas(w, h, { mm, title })` is a context as Canvas 2D's — transforms,
+`save`/`restore`, alpha, paths, arcs, rects, `drawImage` — that writes
+elements instead of pixels: a whole disc a `<circle>`, a rectangle a
+`<rect>`, any other path a `<path>`, a picture an `<image>` in `<defs>`
+placed by `<use>`. An app hands it to its own drawing path, so the SVG is
+its PNG drawn as vectors, never a second renderer that drifts: particles'
+`draw.js` as it is (`frames.js` `svg(i)`). The 3D app draws with three.js,
+so `apps/3d/vectors.js` projects its clouds' dots itself — the PNG's camera,
+the instances' matrices, the colours the GPU is given — and writes each a
+circle, far first by its nearest point. Where two dots cross, the GPU draws
+the lens their surfaces meet in; the stack of circles gives the overlap to
+the one standing further out. Shapes that are not dots are left out, said.
+
+SVG 1.1 as Illustrator, Inkscape and Affinity read it: `#rrggbb` and an
+opacity apart, `xlink:href`. `paperOf(format, …)` — a format with `mm` —
+makes the file that many millimetres, its bleed in them. What a vector
+cannot hold is said in `left` (a clear of part of the picture, a filter, a
+blend with no CSS name); what it cannot draw — text, gradients, pixels —
+throws, naming it. `tests/svg-canvas.mjs`; drawn back in a page against the
+picture, `check-particles-links` and `check-3d-cloud`.
 
 ## print.js — a picture past any canvas
 

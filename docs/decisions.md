@@ -393,3 +393,8 @@ sprite runs out and back — its u from 0 to 1 and down to 0 — so the ring,
 closed by index, needs no seam column: its topology stays the loft's. One
 brush a drawing, the sprite its marks use most; a brush a stroke would want
 a material a stroke. `skin` turned a form key: the uv follow it.
+
+**An SVG is drawn, not traced** (G11, 2026-11-17). An app hands its own
+drawing path a context that writes SVG (`core/svg-canvas.js`): the file is
+its PNG as vectors, and no second renderer drifts. The 3D app projects its
+clouds through the PNG's camera; where two dots cross, a stack of circles.

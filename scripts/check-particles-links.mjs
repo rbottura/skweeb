@@ -29,6 +29,8 @@
  * GPU and brings its own objects: the vault it runs on may be empty.
  */
 
+import fs   from 'node:fs';
+import path from 'node:path';
 import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 
 const c = await startCheck();
@@ -309,6 +311,36 @@ await scrubTo(20);
 const inDots = await exactly([OWN, ...BEC]);
 c.ok('each dot one of its colours, every colour used', inDots[0] === 0 && inDots.slice(1).every(n => n > 20), JSON.stringify(inDots));
 c.ok('the dot colour asks no more', await hidden('dot colour'));
+
+// As vectors (G11): the frame on screen downloaded as an SVG — what the bar said, its text, and it drawn against the picture on screen.
+const DL = path.join(c.dir, 'downloads');
+const vectors = async () => {
+  for (const n of fs.existsSync(DL) ? fs.readdirSync(DL) : []) fs.rmSync(path.join(DL, n));    // the browser would name a second one … (1)
+  await page.downloadsTo(DL);
+  await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+  await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download the picture as vectors (SVG)')`);
+  await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 60000 });
+  const said = await page.eval(say), name = (said.match(/^downloaded (\S+\.svg)/) || [])[1], file = name && path.join(DL, name);
+  for (let i = 0; i < 50 && file && !fs.existsSync(file); i++) await wait(200);
+  const text = file && fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+  const drawn = await page.eval(`(async () => {
+    const c = document.getElementById('stage'), w = c.width, h = c.height, img = new Image();
+    img.src = URL.createObjectURL(new Blob([${JSON.stringify(text)}], { type: 'image/svg+xml' }));
+    await img.decode();
+    const b = new OffscreenCanvas(w, h).getContext('2d');
+    b.drawImage(img, 0, 0, w, h);
+    const p = c.getContext('2d').getImageData(0, 0, w, h).data, q = b.getImageData(0, 0, w, h).data;
+    let sum = 0, far = 0;
+    for (let i = 0; i < p.length; i += 4) { const d = Math.abs(p[i] - q[i]) + Math.abs(p[i + 1] - q[i + 1]) + Math.abs(p[i + 2] - q[i + 2]); sum += d; if (d > 120) far++; }
+    return { w, h, mean: +(sum / (p.length / 4) / 3).toFixed(3), far: +(far / (p.length / 4)).toFixed(4) }; })()`);
+  return { said, text, drawn };
+};
+const dotsSvg = await vectors();
+const fills = [...dotsSvg.text.matchAll(/<circle [^>]*fill="(#[0-9a-f]{6})"/g)].map(m => m[1]);
+c.ok('the picture as vectors: every dot a circle, in one of the palette\'s colours, every colour used', fills.length > 100
+  && dotsSvg.said.includes(`${fills.length.toLocaleString('en')} dots as circles`) && fills.every(f => BEC.includes(f)) && BEC.every(h => fills.includes(h)),
+  `${dotsSvg.said} · ${fills.length} circles`);
+c.ok('…drawn, it is the picture on screen: the same dots where they are', dotsSvg.drawn.mean < 2 && dotsSvg.drawn.far < 0.01, JSON.stringify(dotsSvg.drawn));
 await c.shot('4-palette-dots');
 await scrubTo(0);
 const dyedFirst = await grid();
@@ -331,6 +363,9 @@ await chip('on a sprite', 'flat');
 await scrubTo(20);
 const flatSprites = await exactly([WHITE, ...BEC]);
 c.ok('flat: a silhouette, no white left', flatSprites[0] === 0 && flatSprites.slice(1).every(n => n > 20), JSON.stringify(flatSprites));
+const spritesSvg = await vectors(), kept = (spritesSvg.text.match(/<image /g) || []).length, placed = (spritesSvg.text.match(/<use /g) || []).length;
+c.ok('…its sprites as vectors: each a picture placed, kept once — drawn, the picture on screen', /pictures placed/.test(spritesSvg.said)
+  && placed > 50 && kept < placed / 4 && spritesSvg.drawn.mean < 3, `${spritesSvg.said} · ${kept} kept · ${JSON.stringify(spritesSvg.drawn)}`);
 await c.shot('6-palette-flat');
 await chip('on a sprite', 'keeps its tones');
 await scrubTo(20);

@@ -22,6 +22,8 @@
  * with WebGL2, in its colours. And no page said anything wrong.
  */
 
+import fs   from 'node:fs';
+import path from 'node:path';
 import { startCheck, inner } from './check-kit.mjs';   // inner: a smart object as its app has it (S6b)
 import { PALETTES } from '../apps/3d/bec-palettes.js';
 
@@ -99,6 +101,43 @@ const inks = await exactly(BEC);
 c.ok('a cloud alone, unlit: its dots in BEC\'s identity, every colour exactly', inks.every(n => n > 200), JSON.stringify(inks));
 c.ok('…on a disc, square to the eye: round, in the middle', (b => !!b && Math.abs((b[0] + b[2]) / 2 - 0.5) < 0.03 && Math.abs((b[1] + b[3]) / 2 - 0.5) < 0.03
   && Math.abs((b[2] - b[0]) - (b[3] - b[1])) < 0.03)((await inkOf('disc')).box), JSON.stringify((await inkOf('disc')).box));
+
+// As vectors (G11, vectors.js): the picture an SVG, every dot a circle in BEC's colours — drawn, its PNG.
+const DL = path.join(c.dir, 'downloads');
+await page.downloadsTo(DL);
+/** An act of E's pressed, and the file it downloaded — named by the bar, or the one whose name is `like` — its bytes. */
+const fileOf = async (label, like = null) => {
+  await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+  await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === ${JSON.stringify(label)})`);
+  await page.until(`/^downloaded|failed|no cloud/.test(${say})`, { timeout: 60000 });
+  const said = await page.eval(say), find = () => (fs.existsSync(DL) ? fs.readdirSync(DL) : []).find(n => like.test(n));
+  for (let i = 0; i < 50 && like && !find(); i++) await wait(200);
+  const name = like ? find() : (said.match(/^downloaded (\S+)/) || [])[1], file = name && path.join(DL, name);
+  for (let i = 0; i < 50 && file && !fs.existsSync(file); i++) await wait(200);
+  return { said, bytes: file && fs.existsSync(file) ? fs.readFileSync(file) : null };
+};
+const png = await fileOf('Download the picture (PNG)', /^model_\d+x\d+\.png$/), svg = await fileOf('Download the picture as vectors (SVG)');
+const svgText = svg.bytes ? svg.bytes.toString('utf8') : '', fills = [...svgText.matchAll(/<circle [^>]*fill="(#[0-9a-f]{6})"/g)].map(m => m[1]);
+c.ok('the picture as vectors: 900 dots, each a circle in BEC\'s colours, every one used', fills.length === 900 && svg.said.includes('900 dots as circles')
+  && fills.every(f => BEC.includes(f)) && BEC.every(h => fills.includes(h)), `${svg.said} · ${fills.length} circles`);
+const asDrawn = !png.bytes || !svgText ? null : await page.eval(`(async () => {
+  const shot = await createImageBitmap(await (await fetch('data:image/png;base64,${png.bytes.toString('base64')}')).blob());
+  const w = shot.width, h = shot.height, img = new Image();
+  img.src = URL.createObjectURL(new Blob([${JSON.stringify(svgText)}], { type: 'image/svg+xml' }));
+  await img.decode();
+  const a = new OffscreenCanvas(w, h).getContext('2d'), b = new OffscreenCanvas(w, h).getContext('2d');
+  a.drawImage(shot, 0, 0);
+  b.drawImage(img, 0, 0, w, h);
+  const p = a.getImageData(0, 0, w, h).data, q = b.getImageData(0, 0, w, h).data, n = p.length / 4;
+  const inked = (d, i) => Math.abs(d[i] - p[0]) + Math.abs(d[i + 1] - p[1]) + Math.abs(d[i + 2] - p[2]) > 90;    // far from the ground, a corner's
+  let sum = 0, where = 0;
+  for (let i = 0; i < p.length; i += 4) { sum += Math.abs(p[i] - q[i]) + Math.abs(p[i + 1] - q[i + 1]) + Math.abs(p[i + 2] - q[i + 2]); if (inked(p, i) !== inked(q, i)) where++; }
+  return { w, h, where: +(where / n).toFixed(4), mean: +(sum / n / 3).toFixed(3) }; })()`);
+// Where two dots cross, the GPU draws the lens their surfaces meet in, a stack of circles the one further out (vectors.js):
+// the colours inside differ there, never where there is ink.
+c.ok('…drawn, it is its PNG: ink where the GPU draws it, nowhere else', !!asDrawn && asDrawn.where < 0.005 && asDrawn.mean < 3, JSON.stringify(asDrawn));
+c.ok('…its every frame not asked of a model that does not move', await page.eval(`[...document.querySelectorAll('.nb-btn')]
+  .find(b => b.textContent === 'Download every frame as vectors (SVG, zip)')?.hidden === true`));
 const huesWere = Number(await cardValue('colours dealt (C)')), seedWas = Number(await cardValue('where they are (R)'));
 await tapKey('c');
 await wait(900);
@@ -232,6 +271,9 @@ await wait(250);
 const replaying = [await scrubbed(), await page.eval(`!!document.querySelector('.tp-play.tp-playing')`)];
 await page.until(`!document.querySelector('.tp-play.tp-playing')`, { timeout: 10000 }).catch(() => {});
 c.ok('…played from its end, from rest again — and it stops at its end', replaying[0] < 24 && replaying[1] && (await scrubbed()) === 24, JSON.stringify(replaying));
+const everySvg = await fileOf('Download every frame as vectors (SVG, zip)');
+c.ok('…every frame of it as vectors, zipped: its dots over its 25 frames', /^downloaded \S+_25_frames_svg\.zip — [\d,]+ dots as circles over 25 frames/.test(everySvg.said)
+  && !!everySvg.bytes && everySvg.bytes.readUInt32LE(0) === 0x04034b50, everySvg.said);
 await page.eval(`document.querySelector('.bar-say').textContent = ''`);
 await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))`);
 await page.until(`/^saved |failed|no vault/.test(${say})`, { timeout: 60000 });

@@ -16,7 +16,7 @@
  *   const box = exportBox(panel, {
  *     before: 'format',
  *     vault: { save, still, loop, loopFrames },    // each a function, or left out
- *     disk:  { picture, frames, sheet, glb, obj },
+ *     disk:  { picture, svg, frames, svgFrames, sheet, glb, obj },
  *     acts:  [{ id: 'look', label: 'Save the chain as a look', run }],
  *   });
  *   box.buttons.save, box.body — to hide an act that does not apply, to mount the print.
@@ -45,6 +45,8 @@ export const EXPORT_WORDS = {
   sheet: 'Download a sprite sheet',
   glb: 'Download the model (glTF .glb)',
   obj: 'Download its surfaces (OBJ)',
+  svg: 'Download the picture as vectors (SVG)',
+  svgFrames: 'Download every frame as vectors (SVG, zip)',
 };
 
 const el = (tag, cls, text) => {
@@ -59,7 +61,8 @@ const el = (tag, cls, text) => {
  * @param {object} [opts]
  * @param {string} [opts.before]    the drawer it goes in front of
  * @param {object} [opts.vault]     { save, still, loop, loopFrames }: what it saves into the vault
- * @param {object} [opts.disk]      { picture, frames, sheet, glb, obj }: what it downloads — a model's meshes the last two (G5)
+ * @param {object} [opts.disk]      { picture, svg, frames, svgFrames, sheet, glb, obj }: what it downloads — the picture and
+ *                                  its frames as vectors too (G11, core/svg-canvas.js), a model's meshes the last two (G5)
  * @param {{id: string, label: string, run: Function}[]} [opts.acts]  the app's own
  * @returns {{ drawer: object, body: HTMLElement, buttons: Object<string, HTMLButtonElement> }}
  */
@@ -94,7 +97,9 @@ export function exportBox(panel, { before = null, vault = {}, disk = {}, acts = 
   ]);
   section('To disk', [
     { id: 'picture', label: W.picture, run: disk.picture },
+    { id: 'svg', label: W.svg, run: disk.svg },
     { id: 'frames', label: W.frames, run: disk.frames },
+    { id: 'svgFrames', label: W.svgFrames, run: disk.svgFrames },
     { id: 'sheet', label: W.sheet, run: disk.sheet },
     { id: 'glb', label: W.glb, run: disk.glb },
     { id: 'obj', label: W.obj, run: disk.obj },

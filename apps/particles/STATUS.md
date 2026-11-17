@@ -26,6 +26,12 @@ one-shot burst, both leaving as sprite sheets a game engine loads. The link:
 
 ## Works now
 
+- **Out as vectors** (G11, 2026-11-17, for BEC 2027; core's `svg-canvas.js`,
+  `frames.js` `svg(i)`, `check-particles-links`, `check-particles`): Export's
+  SVG — draw.js's own drawing written as vectors, every dot a circle in its
+  colour, a sprite or a layer a picture placed, once in `<defs>`; a print
+  format's millimetres, its bleed in them. Every frame so, zipped.
+
 - **A loop's frames as sprites, worn by age** (M15e, 2026-11-13; the link
   `shader → particles: a surface over a life`, `docs/vfx.md`). *sprites*
   takes a `sequence` — the shader's life, or any loop — as it is:

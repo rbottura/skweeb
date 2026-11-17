@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-16_
+_last touched: 2026-11-17_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -11,7 +11,7 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 
 ### Newest — 2026-11-09 to -16: BEC 2027's graphic system (track G), a game's effects (M15), the panel for a long use (S15)
 
-- **A drawn body in the 3D app** (G4, 2026-11-16, `apps/3d/loft.js`): a gamepad drawing's strokes lofted, each mark's brush its silhouette; its skin the drawing, projected (G4b); a model out as glTF or OBJ (G5); a worm alive on a wave (G6); a drawing turned on a lathe (G7); petals round a heart (G8); grown as drawn (G9); its brush wrapped (G10).
+- **A drawn body in the 3D app** (G4, 2026-11-16, `apps/3d/loft.js`): a gamepad drawing's strokes lofted, each mark's brush its silhouette; its skin the drawing, projected (G4b); a model out as glTF or OBJ (G5); a worm alive on a wave (G6); a drawing turned on a lathe (G7); petals round a heart (G8); grown as drawn (G9); its brush wrapped (G10). Its clouds and particles' dots out as SVG, every dot a circle (G11, `core/svg-canvas.js`).
 - **The panel for a long use** (S15, 2026-11-16, `docs/plan.md`; the 3D app's
   first): Export the title bar's, the print floating by it; the layers a dock
   at the foot, the shapes one at the head; a rail of icons; values copied by
@@ -347,8 +347,8 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-The ThinkPad pulled and its vault shared again, the two vaults made one (`docs/guides/vault-share.md`); then the
-author's test of G4 to G10, and what they order next. S15's eye stands; S15f parked. Else C12, or M13c's fields.
+The author's SVG of a BEC render opened in their print tool (G11); the ThinkPad pulled, the vaults made one
+(`docs/guides/vault-share.md`); their test of G4 to G10. S15's eye stands; S15f parked. Else C12, or M13c's fields.
 
 ## Parked decisions
 

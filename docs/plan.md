@@ -68,6 +68,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | G8 | flowers: petals round a heart, opened, in whorls — any shape a petal, a drawn body the author's | `3d/flowers` | S | landed 2026-11-17 |
 | G9 | growth: a drawn body grown as its stroke was drawn, by its marks' times | `3d/growth` | M | landed 2026-11-17 |
 | G10 | the brush wrapped round a drawn body — there and back round each ring, no seam | `3d/drawn-wrap` | S | landed 2026-11-17 |
+| G11 | the dots out as vectors: particles' and the 3D app's clouds as SVG, every dot a circle — a canvas context that writes it | `export/svg` | S | landed 2026-11-17 |
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |
 | L12 | the window stack's bugs, the author's list: the rows within the panel (L12a); a state gone back to whole, the 3D app's shapes with its view (L12b) | `fix/stack-states` | S | landed 2026-11-12 |
@@ -281,7 +282,7 @@ emitter denser where a picture is darker; a cloud's dots a set's sprites, or rin
 (… un filtre de seuil et une conversion bitmap-to-svg) … un segment qu'on connecterait au prochain … en fermant
 le mesh … des worms et des fleurs en 3d". Landed: `apps/3d/loft.js`, `silhouette.js`, `drawn.js` — sections
 across the stroke (a worm) or as stamped, stepped back; no library (sand3d is Python on Blender). Left: flowers
-as such, petals round a heart; a stroke's growth in time; a silhouette's holes. **G4b** · 2026-11-17, "le motif … en texture de sorte que le modèle ressemble un peu au dessin initial": the drawing's picture projected from the front — the brush wrapped round the body, if asked, would want a seam. **G5 to G10** · the author's "vas-y avec ce plan", 2026-11-17: out as meshes first, then the worm alive, the lathe, flowers, growth, the brush wrapped.
+as such, petals round a heart; a stroke's growth in time; a silhouette's holes. **G4b** · 2026-11-17, "le motif … en texture de sorte que le modèle ressemble un peu au dessin initial": the drawing's picture projected from the front — the brush wrapped round the body, if asked, would want a seam. **G5 to G10** · the author's "vas-y avec ce plan", 2026-11-17: out as meshes first, then the worm alive, the lathe, flowers, growth, the brush wrapped. **G11** · 2026-11-17, "un export svg pour l'app de particules et de 3d … un pipeline d'export pour des rendus qui seraient compatibles": `core/svg-canvas.js`, a Canvas 2D context that writes SVG — particles' own drawing through it, the 3D app's clouds projected (`apps/3d/vectors.js`).
 
 ## L — layers and smart objects
 

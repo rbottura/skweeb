@@ -31,6 +31,8 @@ import { cameraFor } from './camera.js';
 import { outlineOf } from './look.js';
 import { loopOf, seenAt } from './motion.js';
 import { surface } from '../../core/surface.js';
+import { paperOf } from '../../core/svg-canvas.js';
+import { modelSvg } from './vectors.js';
 
 /**
  * What drawing again above its own size asks of the model (scene.js
@@ -108,6 +110,15 @@ export function openModel(recipe, { renderer, scale = 1 }) {
       return tile;
     },
 
+    /**
+     * Frame i as vectors (vectors.js, G11): its clouds' dots as circles where frame(i) draws them, its paper the
+     * format's; `behind` and `front` its layers' ways onto the writer, as core/layers-draw.js lays them.
+     */
+    svg(i = 0, { title = '', behind = null, front = null } = {}) {
+      const v = at(i);
+      const out = modelSvg(model, v, cameraFor(v, w, h), w, h, { title, behind, front, mm: paperOf(recipe.format, recipe.width, recipe.height) });
+      return { ...out, lined: outline > 0 };          // its clouds' outlines are not drawn: said
+    },
     dispose() { model.dispose(); },
   };
 }

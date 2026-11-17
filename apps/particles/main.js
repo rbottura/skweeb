@@ -300,7 +300,7 @@ function buildExport(side) {
   const { save, leave } = leaving;
   const exp = exportBox(side, {
     vault: { save: () => save(), still: () => save({ still: true }) },
-    disk: { frames: leaving.frames, sheet: leaving.sheet },
+    disk: { frames: leaving.frames, sheet: leaving.sheet, svg: leaving.svg, svgFrames: leaving.svgFrames },
   }).drawer;
   // A print of the frame on screen, drawn again at the sheet's size (core/PrintPanel.js).
   const printing = new PrintPanel({

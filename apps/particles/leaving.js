@@ -6,7 +6,13 @@
  * (apps/rig/leaving.js).
  */
 
-import { saveParticles, downloadFrames, downloadSheet } from './save.js';
+import { saveParticles, downloadFrames, downloadSheet, downloadSvg } from './save.js';
+
+/** What an SVG held, said: its dots, its pictures, and what a vector could not hold (core/svg-canvas.js). */
+const vectorsSaid = out => `downloaded ${out.file} — `
+  + ([out.dots ? `${out.dots.toLocaleString('en')} dots as circles` : '', out.pictures ? `${out.pictures.toLocaleString('en')} pictures placed` : '']
+    .filter(Boolean).join(', ') || 'nothing drawn')
+  + (out.frames > 1 ? ` over ${out.frames} frames` : '') + (out.left.length ? ` — not in it: ${out.left.join(', ')}` : '');
 
 /**
  * @param {object} opts
@@ -15,7 +21,7 @@ import { saveParticles, downloadFrames, downloadSheet } from './save.js';
  * @param {() => object} opts.args        save.js's arguments as things are now: the panels, and what they name, loaded
  * @param {() => boolean} opts.loading    whether any of that is still on its way in
  * @param {() => void} opts.after         once one is done, however it went: the vault read again, the picture drawn
- * @returns {{ save: (o?: {still?: boolean}) => Promise, sheet: () => Promise, frames: () => Promise,
+ * @returns {{ save: (o?: {still?: boolean}) => Promise, sheet: () => Promise, frames: () => Promise, svg: () => Promise, svgFrames: () => Promise,
  *             leave: (action: () => Promise<string>) => Promise, busy: () => boolean }}
  */
 export function ways({ bar, clock, args, loading, after }) {
@@ -59,6 +65,10 @@ export function ways({ bar, clock, args, loading, after }) {
       return `downloaded ${out.name} — ${out.frames} frames of ${out.box.w} × ${out.box.h} on a `
         + `${out.width} × ${out.height} sheet, and its JSON`;
     }),
+
+    /** The frame on screen as vectors, an SVG (G11); or every frame so, zipped with its rate. */
+    svg: () => leave(async () => vectorsSaid(await downloadSvg({ ...args(), tick: clock.tick }))),
+    svgFrames: () => leave(async () => vectorsSaid(await downloadSvg({ ...args(), every: true, onStatus: t => bar.say(t) }))),
 
     /** Every frame, zipped with its rate. */
     frames: () => leave(async () => {

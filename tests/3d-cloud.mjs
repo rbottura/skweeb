@@ -165,6 +165,34 @@ ok('a print: a dot\'s segments raised, no further than 32', [finer('cloud', valu
 outline(mesh, 'cloud', inkOf());
 const hull = mesh.userData.hull;
 ok('an outline: its hull instanced on the dots\' very matrices', [hull.isInstancedMesh, hull.instanceMatrix === mesh.instanceMatrix, hull.count], [true, true, 300]);
+// ── As vectors (G11, vectors.js): every dot a circle where the camera sees it ─
+const { dotsSeen, modelSvg } = await import('../apps/3d/vectors.js');
+const { cameraFor, VIEW_PARAMS } = await import('../apps/3d/camera.js');
+const eye = { ...valuesFor(VIEW_PARAMS, {}), yaw: 20, pitch: 15, distance: 6, tx: 0, ty: 0, tz: 0, ground: '#fffdf6' };
+const cam = cameraFor(eye, 800, 600);
+const shell = new Model().update(recipe({ count: 300, emitter: 'shell', extent: 1 })), dots = shell.parts[0].mesh;
+const seen = dotsSeen(shell, cam, 800, 600);
+const placed = new Matrix4(), want = [];
+for (let k = 0; k < dots.count; k++) {
+  dots.getMatrixAt(k, placed);
+  const c = new Vector3().setFromMatrixPosition(placed), deep = -c.clone().applyMatrix4(cam.matrixWorldInverse).z, p = c.clone().project(cam);
+  want.push([(p.x + 1) * 400, (1 - p.y) * 300, placed.getMaxScaleOnAxis() * 300 / (deep * Math.tan((cam.fov * Math.PI) / 360))]);
+}
+const byX = list => [...list].sort((a, b) => a[0] - b[0]);
+const got = byX(seen.dots.map(d => [d.x, d.y, d.r])), wanted = byX(want);
+ok('every dot seen, where three projects it, its radius at its depth', [got.length, got.every((g, i) => g.every((v, j) => Math.abs(v - wanted[i][j]) < 1e-6))],
+  [300, true]);
+ok('…far first, in its palette\'s colours exactly, unlit, nothing else in the model',
+  [seen.dots.every((d, i) => !i || d.depth <= seen.dots[i - 1].depth), seen.dots.every(d => PALETTES.bec.map(h => h.toLowerCase()).includes(d.fill)),
+   seen.clouds, seen.others, seen.lit], [true, true, 1, 0, 0]);
+const svg = modelSvg(shell, eye, cam, 800, 600, { title: 'a shell' });
+ok('…written: its ground, then a circle a dot', [svg.dots, (svg.text.match(/<circle /g) || []).length, /<rect x="0" y="0" width="800" height="600" fill="#fffdf6"\/>/.test(svg.text)],
+  [300, 300, true]);
+const mixed = new Model().update({ ...recipe({ count: 10 }), shapes: [{ id: 'box', params: {} }, { id: 'cloud', params: { count: 10 } }] });
+const mixedSeen = dotsSeen(mixed, cam, 800, 600), litSeen = dotsSeen(toon, cam, 800, 600);
+ok('a box beside it: left out and counted; a toon cloud drawn flat and counted', [mixedSeen.others, mixedSeen.dots.length, litSeen.lit], [1, 10, 1]);
+mixed.dispose();
+shell.dispose();
 model.dispose();
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');

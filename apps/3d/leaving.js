@@ -11,7 +11,7 @@
  * own `busy`.
  */
 
-import { saveModel, downloadPicture, downloadFrames, downloadMesh, APP } from './save.js';
+import { saveModel, downloadPicture, downloadFrames, downloadMesh, downloadSvg, APP } from './save.js';
 import { saveSides } from './sides.js';
 import { PrintPanel }  from '../../core/PrintPanel.js';
 import { exportBox }   from '../../core/boxes/export.js';
@@ -28,7 +28,7 @@ import { stackDrawer } from '../../core/StackPanel.js';
  * @param {() => {shapes: object[], renderer: ?object, why: string}} o.now   what leaves as things are now —
  *                                 `why` nothing draws, when there is no renderer
  * @param {() => void} o.after     a way out ended: the vault's count, the picture again
- * @returns {{save: () => Promise, busy: () => boolean, frames: ?HTMLButtonElement}}
+ * @returns {{save: () => Promise, busy: () => boolean, frames: HTMLButtonElement[]}}   `frames` what a still model hides: every frame's
  */
 export function ways(panel, { bar, params, clock, now, after }) {
   let busy = false;
@@ -55,6 +55,15 @@ export function ways(panel, { bar, params, clock, now, after }) {
   const meshSaid = out => `downloaded ${out.file} — ${out.shapes} shape${out.shapes === 1 ? '' : 's'}, ${out.points.toLocaleString('en')} points`
     + (out.left.length ? ` — left out, too many points: ${out.left.join(', ')}` : '');
 
+  /** What an SVG held, said (vectors.js): its dots, and what it left out — or that there was no cloud to draw. */
+  const vectorsSaid = out => {
+    if (out.none) return 'no cloud of dots in the model — an SVG draws a cloud\'s dots';
+    const notes = [out.others ? `${out.others} shape${out.others === 1 ? '' : 's'} not dots left out` : '',
+      out.lit ? 'a lit cloud drawn flat' : '', out.lined ? 'its outline not drawn' : '', ...out.left].filter(Boolean);
+    return `downloaded ${out.file} — ${out.dots.toLocaleString('en')} dots as circles` + (out.frames > 1 ? ` over ${out.frames} frames` : '')
+      + (notes.length ? ` — ${notes.join(', ')}` : '');
+  };
+
   /** The model as it stands into the vault — on a turntable, its loop (save.js). */
   const save = () => leave(async args => {
     bar.say('saving…');
@@ -80,6 +89,9 @@ export function ways(panel, { bar, params, clock, now, after }) {
       // The model as meshes (G5, meshfile.js): a glTF with its colours and skins, or an OBJ, its surfaces alone.
       glb: () => leave(async args => meshSaid(await downloadMesh(args, 'glb'))),
       obj: () => leave(async args => meshSaid(await downloadMesh(args, 'obj'))),
+      // Its clouds as vectors (G11, vectors.js): the frame on screen an SVG, every dot a circle; a turntable's every frame so.
+      svg: () => leave(async args => vectorsSaid(await downloadSvg(args))),
+      svgFrames: () => leave(async args => vectorsSaid(await downloadSvg({ ...args, every: true, onStatus: t => bar.say(t) }))),
     },
     // The model from every side, a character for the map's avatar to wear (sides.js, P6).
     acts: [{ id: 'sides', label: 'Save it from every side — a character', run: () => leave(async args => {
@@ -105,5 +117,5 @@ export function ways(panel, { bar, params, clock, now, after }) {
   // A window of the stack (core/live.js): what is on screen, as its print has it.
   stackDrawer(panel, { app: '3d', layer: () => printing.object(), clock, save });
 
-  return { save, busy: () => busy, frames: box.buttons.frames || null };
+  return { save, busy: () => busy, frames: [box.buttons.frames, box.buttons.svgFrames].filter(Boolean) };
 }

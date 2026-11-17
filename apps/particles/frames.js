@@ -20,6 +20,7 @@ import { toModel, framesOf, overlayAsLayer } from './params.js';
 import { laidOn }               from '../../core/layers-draw.js';
 import { drawPicture, pictureSize } from './draw.js';
 import { surface }              from '../../core/surface.js';
+import { svgCanvas, paperOf }   from '../../core/svg-canvas.js';
 import { windowed, canvasFor }  from '../../core/windowed.js';
 
 /**
@@ -63,6 +64,16 @@ export function openParticles(recipe, sprites, { scale = 1, points = null, field
       canvas = canvas || surface(W, H);
       paint(canvas.getContext('2d'), tick);
       return canvas;
+    },
+
+    /**
+     * Frame i as vectors (core/svg-canvas.js, G11): drawn by the same path onto a context that writes SVG —
+     * a dot a circle, a sprite or a layer a picture placed — its paper the format's, its bleed in it.
+     */
+    svg(i, title = '') {
+      const ctx = svgCanvas(W, H, { title, mm: paperOf(picture.format, picture.width, picture.height, Math.round(picture.bleed || 0)) });
+      paint(ctx, still ? recipe.tick : i);
+      return ctx.svg();
     },
 
     /** A window of frame i at this scale: drawn as a frame is, every transform moved by its corner. */

@@ -105,6 +105,46 @@ export async function downloadFrames({ emit, picture, sprites, points = null, fi
 }
 
 /**
+ * The frame on screen as vectors (G11, core/svg-canvas.js): draw.js's own drawing written as SVG — a dot a
+ * circle where the PNG has it, a sprite or a layer a picture placed, the paper the format's — or, `every`,
+ * every frame so, numbered, and its rate in `meta.json`, zipped.
+ *
+ * @returns {Promise<{file: string, frames: number, dots: number, pictures: number, left: string[]}>}
+ */
+export async function downloadSvg({ emit, picture, sprites, spritesTitle = null, points = null, field = null, palette = null, layers = [],
+  tick = 0, every = false, onStatus = () => {} }) {
+  const recipe = { emit: emit.values, picture: picture.values };
+  const frames = openParticles(recipe, sprites, { points, field, palette, layers });
+  const title = titleOf(recipe.emit, spritesTitle, points, palette);
+  const named = i => frameName(i, frames.length).replace(/\.png$/, '.svg');
+  if (!every) {
+    const out = frames.svg(tick, `${title} · frame ${tick + 1}`);
+    const file = `particles_${named(tick)}`;
+    download(new Blob([out.text], { type: 'image/svg+xml' }), file);
+    return { ...out, file, frames: 1 };
+  }
+  const entries = [], sum = { dots: 0, pictures: 0, left: new Set() };
+  await runFrames({
+    count: frames.length,
+    async frame(i) {
+      const out = frames.svg(i, `${title} · frame ${i + 1}`);
+      const bytes = new TextEncoder().encode(out.text);
+      entries.push({ name: named(i), blob: new Blob([bytes], { type: 'image/svg+xml' }), crc: crc32(bytes), size: bytes.length });
+      sum.dots += out.dots;
+      sum.pictures += out.pictures;
+      out.left.forEach(l => sum.left.add(l));
+    },
+    onProgress: (done, total) => onStatus(`writing ${done}/${total} frames…`),
+  });
+  entries.push({ name: 'meta.json', bytes: new TextEncoder().encode(JSON.stringify({
+    app: APP.app, frames: frames.length, fps: frames.fps, loop: frames.loop, width: frames.width, height: frames.height, recipe,
+  }, null, 1)) });
+  const file = `particles_${frames.length}_frames_svg.zip`;
+  download(zipStore(entries), file);
+  return { file, frames: frames.length, dots: sum.dots, pictures: sum.pictures, left: [...sum.left] };
+}
+
+/**
  * The loop as a sprite sheet for a game (core/spritesheet.js): every frame on
  * one PNG, cropped to the box the particles reach over the whole loop, and
  * the Aseprite-style JSON beside it — both in one zip, `<name>.png` and

@@ -259,6 +259,16 @@ if (picked) {
     const pngs = entries.filter(e => e.name.endsWith('.png')).length;
     c.ok('every frame downloads, zipped, with its rate', !!meta && pngs === 60 && meta.frames === 60 && meta.fps === 30,
       `${pngs} PNGs, ${meta ? `${meta.frames} at ${meta.fps}, ${meta.width}×${meta.height}` : 'no meta'}`);
+    // …and as vectors (G11): every frame an SVG — its sprites pictures placed — numbered, its rate beside them.
+    await page.eval(`document.querySelector('.bar-say').textContent = ''`);
+    await page.click(`[...document.querySelectorAll('.nb-btn')].find(b => b.textContent === 'Download every frame as vectors (SVG, zip)')`);
+    await page.until(`/^downloaded|failed/.test(${say})`, { timeout: 120000 });
+    const svgZip = await downloaded('_frames_svg.zip'), svgs = svgZip ? readZip(svgZip) : [];
+    const svgMeta = svgs.find(e => e.name === 'meta.json'), first = svgs.find(e => e.name === 'frame_0000.svg');
+    c.ok('every frame as vectors: 60 SVGs, numbered, each the picture\'s size, and its rate', svgs.filter(e => e.name.endsWith('.svg')).length === 60
+      && !!svgMeta && JSON.parse(svgMeta.bytes.toString()).fps === 30 && !!first && !!meta
+      && first.bytes.toString().includes(`viewBox="0 0 ${meta.width} ${meta.height}"`) && /pictures placed/.test(await page.eval(say)),
+      `${svgs.length} entries · ${await page.eval(say)}`);
 
     // A sprite sheet: the frames on one PNG, cropped to where the particles reach, and its JSON.
     await page.eval(`document.querySelector('.bar-say').textContent = ''`);

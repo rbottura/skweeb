@@ -100,7 +100,7 @@ const mounted = () => !!app.scope;
 // One app mounted at a time: its state, made again by each mount (`start`).
 let root, canvas, ctx, model;
 let params, bar, cards, shapesDrawer, chosen, renderer, failing, pending, leaving;
-let clock, transport, player, framesButton, clockAt, evolving;   // the turntable's, an evolution's (motion.js)
+let clock, transport, player, framesButtons, clockAt, evolving;   // the turntable's, an evolution's (motion.js)
 
 async function start(host, mine) {
   root = host;
@@ -113,7 +113,7 @@ async function start(host, mine) {
   failing = '';            // why nothing draws, while nothing does
   pending = false;         // a paint asked for, not made
   leaving = null;          // the ways out (leaving.js): a save or a download drawing, nothing else starts
-  transport = player = framesButton = null;
+  transport = player = framesButtons = null;
   clockAt = '';            // the loop the clock was fitted to
   evolving = false;        // a cloud moving under its forces, as last fitted
   // The clock plays a turntable's frames at its rate; a model that does not turn is one frame. Stopped at the unmount.
@@ -151,7 +151,7 @@ async function boot(mine) {
   leaving = ways(panel, { bar, params, clock,
     now: () => ({ shapes: cards.recipe(), renderer, why: failing || 'three is still starting' }),
     after: () => { refreshVault(); draw(); } });
-  framesButton = leaving.frames;
+  framesButtons = leaving.frames;
 
   params.on(key => {
     applyFrameEdit(params, key);
@@ -202,7 +202,7 @@ function fitClock() {
   if (evolves && !evolving && !clock.playing) clock.show(length - 1);
   evolving = evolves;
   player.hidden = !loop;
-  if (framesButton) framesButton.hidden = !loop;
+  for (const b of framesButtons || []) b.hidden = !loop;   // every frame's, as PNGs and as SVGs
   player.note(loop ? `${length} frames · ${(length / fps).toFixed(2)} s, ${closes ? 'a loop' : `once, from rest to ${+params.values.time.toFixed(2)} s under the forces`}` : '');
 }
 

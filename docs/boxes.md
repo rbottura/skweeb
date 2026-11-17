@@ -114,6 +114,8 @@ otherwise:
 | picture | *Download the picture (PNG)* |
 | frames | *Download every frame (zip)* |
 | sheet | *Download a sprite sheet* |
+| glb, obj | *Download the model (glTF .glb)*, *Download its surfaces (OBJ)* (G5) |
+| svg, svgFrames | *Download the picture as vectors (SVG)*, *Download every frame as vectors (SVG, zip)* (G11) |
 
 ckt's *Save this frame [S]* becomes *Save to the vault [S]*, particles'
 *Save the loop to the vault [S]* too; compose's *page* and the rig's
