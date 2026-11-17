@@ -202,5 +202,17 @@ ok('…no wall: the surface alone, open', closedness(turnedOf({ wall: 0 }, post)
 ok('…with no drawing, a vase of its own, outward', closedness(turnedOf({ wall: 1 }, null)).outward, true);
 ok('…a turned drawing\'s drawing read and named a parent, as a drawn body\'s', drawnIn({ shapes: [{ id: 'turned', params: { drawing: 'gam_9' } }] }), ['gam_9']);
 
+// ── Grown as it was drawn (G9) ──────────────────────────────────────────────
+const { grownTo } = await import('../apps/3d/loft.js');
+const timed = drawing([line(101, 4).map((s, i) => ({ ...s, t: i * 4 })), line(61, 4).map((s, i) => ({ ...s, y: 120, t: 1000 + i * 4 }))]);
+ok('grown by the drawing\'s time: its first two marks at the start; the first stroke done by half, the second not begun; all at the end',
+  [0, 0.5, 1].map(g => grownTo(timed.strokes, g).map(s => s.length)), [[2, 0], [101, 0], [101, 61]]);
+const grownAt = g => body({ grow: true, grown: g, ends: 'flat' }, timed);
+const firstPointAt = g => [...grownAt(g).attributes.position.array.slice(0, 3)].map(x => +x.toFixed(6));
+ok('…the body as far as it is drawn, its place kept: more points as it grows, every one at the end, its first where it was',
+  [grownAt(0).attributes.position.count < grownAt(0.5).attributes.position.count, grownAt(0.5).attributes.position.count < grownAt(1).attributes.position.count,
+   grownAt(1).attributes.position.count === body({ ends: 'flat' }, timed).attributes.position.count, firstPointAt(0.3).join() === firstPointAt(1).join()],
+  [true, true, true, true]);
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

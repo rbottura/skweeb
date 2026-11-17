@@ -239,6 +239,17 @@ c.ok('a flower: the drawn body its petal, round a heart — its stack round, the
   JSON.stringify({ stack, petalOnly, flower }));
 await c.shot('7-flower');
 
+// ── Grown as it was drawn (G9): a sequence played once, its first marks to every one ──
+await setOn(cardRow(BODY, 'its ends'), { grow: true });
+await page.click(`document.querySelector('.tp-first')`);
+await scrubTo(0);
+const sprout = await ink('sprout');
+await scrubTo(71);
+const grownUp = await ink('grownUp', 'sprout');
+c.ok('grown as it was drawn: its first marks at the first frame, every one at the last', sprout.share < grownUp.share && grownUp.diff > 0.005,
+  JSON.stringify({ sprout, grownUp }));
+await c.shot('8-grown');
+
 if (o) {
   // Cold: a page that has read nothing — the drawing and its picture read by the replay itself (drawn.js `readDrawn`).
   await c.go(c.base + '/apps/3d/');

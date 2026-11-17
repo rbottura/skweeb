@@ -76,6 +76,11 @@ export const DRAWN_WAVE = {
   waves: { type: 'range', min: 0.25, max: 8, step: 0.05, default: 1.5, label: 'waves along it', group: 'swing', when: WAVING },
   waveCycles: { type: 'int', min: -12, max: 12, default: 1, label: 'cycles a loop — less than none, the other way', group: 'swing',
                 when: WAVING },
+  /**
+   * Grown as it was drawn (G9, 2026-11-17): the model a sequence played once, each frame the marks drawn by then —
+   * the drawing's own times, its pauses too — its first two at the first frame, every one at the last.
+   */
+  grow: { type: 'bool', default: false, label: 'grown as it was drawn — played once', group: 'swing' },
 };
 
 /**
@@ -157,9 +162,10 @@ export function drawnGeometry(v) {
     }
   }
   const k = WORLD / Math.max(1e-6, x1 - x0, y1 - y0), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  const strokes = v.grow && drawn !== DEMO ? grownTo(drawn.strokes, v.grown ?? 1) : drawn.strokes;   // its place kept as it grows
   const build = values => {
     const o = { position: [], index: [] };
-    for (const stroke of drawn.strokes) if (stroke.length > 1) body(o, smoothed(stroke, Math.round(v.smooth) || 0), values, n, ringOfKey, k, cx, cy);
+    for (const stroke of strokes) if (stroke.length > 1) body(o, smoothed(stroke, Math.round(v.smooth) || 0), values, n, ringOfKey, k, cx, cy);
     return o;
   };
   const out = build(v);
@@ -179,6 +185,19 @@ export function drawnGeometry(v) {
   g.setIndex(out.index);
   g.computeVertexNormals();
   return g;
+}
+
+/**
+ * The strokes as drawn by a share of the drawing's time — `grown` 0 its first two marks, 1 every one: each stroke's
+ * marks drawn by then, a stroke not begun none (G9).
+ */
+export function grownTo(strokes, grown) {
+  const all = strokes.flat(), times = all.map(st => Number(st.t) || 0);
+  const t0 = Math.min(...times), t1 = Math.max(...times);
+  const first = strokes.find(s => s.length > 1);
+  const least = first ? Number(first[1].t) || 0 : t0;
+  const by = Math.max(least, t0 + (t1 - t0) * Math.max(0, Math.min(1, Number(grown) || 0)));
+  return strokes.map(s => s.filter(st => (Number(st.t) || 0) <= by));
 }
 
 /** One stroke's body into `out`: its rings, the quads between them, its ends; turned outward. */

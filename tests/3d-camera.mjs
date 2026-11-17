@@ -86,8 +86,8 @@ ok('orthographic: half the height is the sphere and its margin', r3(halfHeight({
 const { loopOf, seenAt, turnedAt, MOTION_PARAMS } = await import('../apps/3d/motion.js');
 const turning = { yaw: 30, sunYaw: -35, turns: 1, turning: 'the model', length: 72, fps: 24 };
 ok('nothing turns: one frame, a still — and in a recipe saved before the turntable', [loopOf({ ...turning, turns: 0 }), loopOf({ yaw: 30 })],
-  [{ length: 1, fps: 0, loop: false, closes: false, turns: 0, swings: false, evolves: false, waves: false }, { length: 1, fps: 0, loop: false, closes: false, turns: 0, swings: false, evolves: false, waves: false }]);
-ok('a turn: its frames at its rate, a loop', loopOf(turning), { length: 72, fps: 24, loop: true, closes: true, turns: 1, swings: false, evolves: false, waves: false });
+  [{ length: 1, fps: 0, loop: false, closes: false, turns: 0, swings: false, evolves: false, waves: false, grows: false }, { length: 1, fps: 0, loop: false, closes: false, turns: 0, swings: false, evolves: false, waves: false, grows: false }]);
+ok('a turn: its frames at its rate, a loop', loopOf(turning), { length: 72, fps: 24, loop: true, closes: true, turns: 1, swings: false, evolves: false, waves: false, grows: false });
 ok('frame i turned 360° × turns × i / length: a quarter at 18, twice as far at two turns',
   [turnedAt(turning, 18), turnedAt({ ...turning, turns: 2 }, 18), turnedAt({ ...turning, turns: -1 }, 18)], [90, 180, -90]);
 ok('the frame after the last is the first, to the bit', JSON.stringify(seenAt(turning, 72)) === JSON.stringify(seenAt(turning, 0))
@@ -103,7 +103,7 @@ ok('its rows: turns from −2 to 2, what turns only when it turns, the loop\'s l
 const { swungAt, swings } = await import('../apps/3d/motion.js');
 const bob = { id: 'sphere', on: true, params: { y: 1, size: 2, turnY: 10, swingBy: 'y', swingMove: 0.5, swingCycles: 1, swingPhase: 0 } };
 ok('a shape that swings makes the model a loop, turning or not', loopOf({ turns: 0, length: 60, fps: 30, shapes: [bob] }),
-  { length: 60, fps: 30, loop: true, closes: true, turns: 0, swings: true, evolves: false, waves: false });
+  { length: 60, fps: 30, loop: true, closes: true, turns: 0, swings: true, evolves: false, waves: false, grows: false });
 ok('…one that is off, or swings nothing, does not', [swings({ ...bob, on: false }), swings({ ...bob, params: { ...bob.params, swingBy: 'none' } })], [false, false]);
 ok('up and down: as far either way, a quarter round its top, half round where it began', [0, 15, 30, 45].map(i => +swungAt(bob, i, 60).params.y.toFixed(6)),
   [1, 1.5, 1, 0.5]);
@@ -126,11 +126,19 @@ ok('…each the eye turned round it — down as framed, left a quarter, right th
 const { waving } = await import('../apps/3d/motion.js');
 const worm = { id: 'drawn', on: true, params: { wave: 1, waveCycles: 2 } };
 ok('a drawn body waving makes the model a loop that closes', loopOf({ turns: 0, length: 72, fps: 24, shapes: [worm] }),
-  { length: 72, fps: 24, loop: true, closes: true, turns: 0, swings: false, evolves: false, waves: true });
+  { length: 72, fps: 24, loop: true, closes: true, turns: 0, swings: false, evolves: false, waves: true, grows: false });
 ok('…none with no wave, no cycles, or off', [waving({ ...worm, params: { wave: 0 } }), waving({ ...worm, params: { wave: 1, waveCycles: 0 } }),
   waving({ ...worm, on: false }), waving({ id: 'drawn', params: { wave: 0.5 } })], [false, false, false, true]);
 ok('…a frame its place in the loop: a quarter at 18 of 72, frame 72 frame 0', [18, 72, 0].map(i => seenAt({ length: 72, shapes: [worm] }, i).phase),
   [0.25, 0, 0]);
+
+// A drawn body grown as it was drawn (G9): played once, frame 0 its first marks, the last every one.
+const { growing } = await import('../apps/3d/motion.js');
+const sprout = { id: 'drawn', on: true, params: { grow: true } };
+ok('a drawn body growing makes the model a sequence played once', loopOf({ length: 49, fps: 24, shapes: [sprout] }),
+  { length: 49, fps: 24, loop: true, closes: false, turns: 0, swings: false, evolves: false, waves: false, grows: true });
+ok('…none when off', [growing({ ...sprout, params: { grow: false } }), growing({ ...sprout, on: false })], [false, false]);
+ok('…how far each frame: none at the first, half at the middle, all at the last', [0, 24, 48].map(i => seenAt({ length: 49, shapes: [sprout] }, i).grown), [0, 0.5, 1]);
 
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

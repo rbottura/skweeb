@@ -66,7 +66,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | G6 | the worm alive: a wave along a drawn body, a loop that closes, saved as a sequence | `3d/worm-wave` | M | landed 2026-11-17 |
 | G7 | the lathe: a gamepad stroke turned round an axis — a vase, a cup, a corolla | `3d/lathe` | M | landed 2026-11-17 |
 | G8 | flowers: petals round a heart, opened, in whorls — any shape a petal, a drawn body the author's | `3d/flowers` | S | landed 2026-11-17 |
-| G9 | growth: a drawn body grown as its stroke was drawn, by its marks' times | `3d/growth` | M | ready |
+| G9 | growth: a drawn body grown as its stroke was drawn, by its marks' times | `3d/growth` | M | landed 2026-11-17 |
 | G10 | the brush wrapped round a drawn body, a seam to its rings | `3d/drawn-wrap` | S | ready |
 | S14a | the viewer's tools as the bench has them, every app: the zoom — a menu, Ctrl and the wheel, Space or the middle button — the states, the guides, the ground | `ui/vtools` | S | landed 2026-11-12 |
 | S14b | the format in the viewer: its list, its size a chip opening the rest; the Format section out of the properties, particles' overlay a section | `ui/format-viewer` | S | landed 2026-11-12 |

@@ -381,3 +381,9 @@ copies of a shape round an axis, raised and in rings — what `mirror` and
 `array` already are, round: `round` in the stack, so any shape is a petal
 and a drawn body the author's own. The heart is left a shape to add: a
 sphere, or a drawing of one.
+
+**A body grows by its drawing's own times** (G9, 2026-11-17). Its marks'
+`t`, not their distance along: the author's rhythm and pauses are the
+growth. Played once, as an evolution is — the frame after the last is not
+the first. Frame 0 shows its first two marks, never nothing: a body of no
+points would be the worm.

@@ -34,6 +34,10 @@
  * And a drawn body waving (loft.js, G6, 2026-11-17): its wave travels its
  * cycles a loop, so the loop closes; a frame's `phase`, where in the loop it
  * is, 0 to 1, moves it — the body made again each frame, its form changed.
+ *
+ * And a drawn body grown as it was drawn (G9): the model a sequence played
+ * once, as an evolution is — frame 0 its first marks, the last every one;
+ * a frame's `grown`, 0 to 1, says how far.
  */
 
 import { forcesOn } from './forces.js';
@@ -64,24 +68,28 @@ export const swings = shape => !!shape && shape.on !== false && !!shape.params
 export const waving = shape => !!shape && shape.on !== false && shape.id === 'drawn' && !!shape.params
   && Number(shape.params.wave) > 0 && Math.round(Number(shape.params.waveCycles ?? 1)) !== 0;
 
+/** Whether a drawn body grows as it was drawn (loft.js, G9): on, its `grow` on. */
+export const growing = shape => !!shape && shape.on !== false && shape.id === 'drawn' && !!shape.params && shape.params.grow === true;
+
 /**
  * The frames the values make and their rate — a still's one frame when nothing turns, swings or evolves, and in a
  * recipe saved before the turntable, which has no `turns`. `loop`: more frames than one; `closes`: the frame
  * after the last is the first — not for an evolution, which plays once.
  *
  * @returns {{length: number, fps: number, loop: boolean, closes: boolean, turns: number, swings: boolean, evolves: boolean,
- *            waves: boolean}}
+ *            waves: boolean, grows: boolean}}
  */
 export function loopOf(v) {
   const turns = Math.round(Number(v && v.turns) || 0);
   const swung = !!v && Array.isArray(v.shapes) && v.shapes.some(swings);
   const waved = !!v && Array.isArray(v.shapes) && v.shapes.some(waving);
+  const grown = !!v && Array.isArray(v.shapes) && v.shapes.some(growing);
   const evolving = evolves(v);
-  if (!turns && !swung && !evolving && !waved) {
-    return { length: 1, fps: 0, loop: false, closes: false, turns: 0, swings: false, evolves: false, waves: false };
+  if (!turns && !swung && !evolving && !waved && !grown) {
+    return { length: 1, fps: 0, loop: false, closes: false, turns: 0, swings: false, evolves: false, waves: false, grows: false };
   }
   return { length: Math.max(2, Math.round(Number(v.length) || 72)), fps: Math.max(1, Number(v.fps) || 24), loop: true,
-           closes: !evolving, turns, swings: swung, evolves: evolving, waves: waved };
+           closes: !evolving && !grown, turns, swings: swung, evolves: evolving, waves: waved, grows: grown };
 }
 
 /** How long the forces have acted at frame `i` of an evolution: 0 at the first, `time` at the last. */
@@ -123,11 +131,12 @@ export function turnedAt(v, i) {
  * drawn body waves (scene.js).
  */
 export function seenAt(v, i) {
-  const { length, swings: swung, evolves: evolving, waves: waved } = loopOf(v);
+  const { length, swings: swung, evolves: evolving, waves: waved, grows: grown } = loopOf(v);
   const by = turnedAt(v, i);
   let out = by ? { ...v, yaw: v.yaw + by, ...(v.turning === 'the eye' ? {} : { sunYaw: v.sunYaw + by }) } : v;
   if (swung) out = { ...out, shapes: v.shapes.map(s => swungAt(s, i, length)) };
   if (evolving) out = { ...out, elapsed: elapsedAt(v, i) };
   if (waved) out = { ...out, phase: (((Math.round(Number(i) || 0) % length) + length) % length) / length };
+  if (grown) out = { ...out, grown: Math.max(0, Math.min(length - 1, Math.round(Number(i) || 0))) / (length - 1) };
   return out;
 }

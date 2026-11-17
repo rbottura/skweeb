@@ -99,7 +99,9 @@ async function read(id) {
       if (image) { images.set(key, image); masks.set(key, maskOf(image)); }
     } catch { /* a sprite that will not come: its marks' sections are circles */ }
   }));
-  return { id, strokes: drawing.strokes.map(s => s.stamps.map(i => drawing.stamps[i])), masks, ...pictureOf(drawing, images) };
+  // Each stamp its mark's time, as drawn (G9: a body grown as it was).
+  const timed = st => ({ ...st, t: Number(still.marks[st.mark] && still.marks[st.mark].t) || 0 });
+  return { id, strokes: drawing.strokes.map(s => s.stamps.map(i => timed(drawing.stamps[i]))), masks, ...pictureOf(drawing, images) };
 }
 
 /**

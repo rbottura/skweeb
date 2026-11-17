@@ -27,6 +27,14 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **Grown as it was drawn** (G9, 2026-11-17; `loft.js` `grow`, `grownTo`;
+  motion.js `growing`; the tests, `check-3d-drawn`). A drawn body's *Swing*:
+  the model a sequence played once, as a cloud's evolution is — frame 0 its
+  drawing's first two marks, the last every one, each frame the marks drawn
+  by then by their own times, the drawing's pauses kept; the body's place
+  and size fixed as it grows. Each stamp keeps its mark (core/stage/
+  drawing.js), and so its time.
+
 - **Flowers** (G8, 2026-11-17; repeat.js `round`, `tests/3d-modifiers.mjs`,
   `check-3d-drawn`). The modifiers' seventh, *round — petals*: `count` of a
   shape round the y axis, each laid out its longer side from the axis —

@@ -58,7 +58,7 @@ export function stillOf(recipe) {
  * @param {number} [opts.jump=16]  a lifted pen, px (strokes.js)
  * @param {Iterable<number>} [opts.reverse]   strokes read the other way round
  * @returns {{width: number, height: number, ground: ?string,
- *            stamps: Array<{x, y, rotation, scale, flipX, key, stroke, s}>,
+ *            stamps: Array<{x, y, rotation, scale, flipX, key, mark, stroke, s}>,  `mark` its mark's index
  *            strokes: Array<{stamps: number[], path: object}>}}
  */
 export function drawingOf(recipe, { jump = 16, reverse = [] } = {}) {
@@ -74,7 +74,7 @@ export function drawingOf(recipe, { jump = 16, reverse = [] } = {}) {
     }
     const stroke = index.get(id);
     strokes[stroke].stamps.push(n);
-    return { x, y, rotation, scale, flipX, key, stroke, s: 0 };
+    return { x, y, rotation, scale, flipX, key, mark, stroke, s: 0 };
   });
   const backwards = new Set(reverse);
   strokes.forEach((stroke, k) => { if (backwards.has(k)) stroke.stamps.reverse(); });

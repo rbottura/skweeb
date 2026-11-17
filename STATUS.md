@@ -11,7 +11,7 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 
 ### Newest — 2026-11-09 to -16: BEC 2027's graphic system (track G), a game's effects (M15), the panel for a long use (S15)
 
-- **A drawn body in the 3D app** (G4, 2026-11-16, `apps/3d/loft.js`): a gamepad drawing's strokes lofted, each mark's brush its silhouette; its skin the drawing, projected (G4b); a model out as glTF or OBJ (G5); a worm alive on a wave (G6); a drawing turned on a lathe (G7); petals round a heart (G8).
+- **A drawn body in the 3D app** (G4, 2026-11-16, `apps/3d/loft.js`): a gamepad drawing's strokes lofted, each mark's brush its silhouette; its skin the drawing, projected (G4b); a model out as glTF or OBJ (G5); a worm alive on a wave (G6); a drawing turned on a lathe (G7); petals round a heart (G8); grown as drawn (G9).
 - **The panel for a long use** (S15, 2026-11-16, `docs/plan.md`; the 3D app's
   first): Export the title bar's, the print floating by it; the layers a dock
   at the foot, the shapes one at the head; a rail of icons; values copied by
