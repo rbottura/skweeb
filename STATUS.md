@@ -15,7 +15,7 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 - **The panel for a long use** (S15, 2026-11-16, `docs/plan.md`; the 3D app's
   first): Export the title bar's, the print floating by it; the layers a dock
   at the foot, the shapes one at the head; a rail of icons; values copied by
-  level; bare keys — Ctrl V is not V; widths and a slider's ends by hand.
+  level; bare keys — Ctrl V is not V; widths and a slider's ends by hand; Tab the viewer alone (S15m).
 - **Numbers short in their boxes**, the wheel stepping none (C13, 2026-11-15).
 - **The shader app** (M15, `apps/shader/STATUS.md`, `docs/vfx.md`): a surface
   from nothing — filter's chain begun by a generator, every row its picture,

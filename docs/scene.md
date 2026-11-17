@@ -52,7 +52,7 @@ The author's, 2026-11-03, each tried before it was kept.
   mouse: the cursor says where, a key says what. Hold A Z E R F for a pie,
   move toward a choice, let go; a tap does its first act — the app's own
   (particles: the emitter), the view, export, again (a new seed, revert,
-  reset), place. Q D frames, S save, Space play or pan, Tab the panels, X
+  reset), place. Q D frames, S save, Space play or pan, Tab the viewer alone (S15m; Shift the whole screen), X
   reset what is under the cursor, G ground, H the states, ² the search —
   every control and act by name — Ctrl K too. Ctrl Z, Ctrl S keep their
   letters. Since S15i a letter with Ctrl, Alt or ⌘ is never the letter: an

@@ -28,6 +28,7 @@ import { actsOnPage, showPrint, hasPrint } from '../boxes/export.js';
 import { rowParams } from '../param-rows.js';
 import { Vault } from '../vault.js';
 import { held } from '../scope.js';
+import { toggleAlone } from './alone.js';
 
 const $ = sel => document.querySelector(sel);
 const press = node => { if (node && !node.disabled) { node.click(); return true; } return false; };
@@ -202,4 +203,7 @@ export function installBindings() {
   bind('KeyH', { short: 'states', label: "the object's states, as a graph over the page", when: () => !!(Vault.bound && Vault.bound.id),
     tap: () => import('./graph.js').then(m => m.toggleGraph()) });
   bind('KeyX', { short: 'reset', label: 'reset what is under the pointer', tap: () => resetUnder() });
+  // The viewer alone, the bench's Tab (S15m, alone.js): the stage over the window; Shift, the whole screen.
+  bind('Tab', { short: 'alone', label: 'the viewer alone · Shift the whole screen', when: () => !!$('.viewer-stage'),
+    tap: e => toggleAlone(e) });
 }

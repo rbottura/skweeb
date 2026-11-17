@@ -11,7 +11,9 @@
  * what it aims at; E tapped the title bar's Export menu, held the Export
  * box's acts; R a new seed, and X over its row the seed back to its default;
  * F held, an edge or a corner for the selection; G the ground, or none, and
- * back. Typed into a field, a key is a letter. In the rig, R stays its rest:
+ * back. Tab the viewer alone over the window, drawn larger, and back; Shift
+ * Tab the whole screen asked for (S15m). Typed into a field, a key is a
+ * letter. In the rig, R stays its rest:
  * core leaves a key an app keeps. No page said anything wrong.
  */
 
@@ -110,6 +112,27 @@ await tap('KeyG');
 const g1 = await ground();
 await tap('KeyG');
 c.ok('G the ground: none, and its colour again', g1 === 'none' && (await ground()) === g0 && g0 !== 'none', `${g0} → ${g1} → ${await ground()}`);
+
+// Tab: the viewer alone — the stage over the whole window, the picture drawn larger in it; Tab again, as it was (S15m).
+const viewer = () => page.eval(`(() => { const s = document.querySelector('.viewer-stage').getBoundingClientRect();
+  return { alone: document.documentElement.classList.contains('skw-alone'), box: [Math.round(s.width), Math.round(s.height)], win: [innerWidth, innerHeight],
+    canvas: document.getElementById('stage').width, over: !!document.elementFromPoint(innerWidth / 2, 10)?.closest('.viewer-stage'),
+    hint: document.querySelector('.alone-hint')?.textContent || '' }; })()`);
+const among = await viewer();
+await tap('Tab');
+await wait(500);                     // the viewer's observer: drawn again at its new size
+const solo = await viewer();
+await tap('Tab');
+await wait(500);
+const back = await viewer();
+c.ok('Tab: the viewer alone over the whole window, drawn larger, the way back said; Tab again, as it was', !among.alone && !among.over
+  && solo.alone && solo.over && solo.box.join() === solo.win.join() && solo.canvas > among.canvas && solo.hint === 'Tab — the tools back'
+  && !back.alone && back.box.join() === among.box.join() && back.canvas === among.canvas, JSON.stringify({ among, solo, back }));
+await tap('Tab', ', shiftKey: true');
+const screen = await viewer();
+await tap('Tab');
+c.ok('Shift Tab: alone, the whole screen asked for — the browser\'s to give', screen.alone && /Escape/.test(screen.hint) && !(await viewer()).alone,
+  JSON.stringify(screen));
 
 // Typed into a field, a key is a letter.
 const at = await count();

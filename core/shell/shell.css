@@ -41,6 +41,19 @@ skw-titlebar kbd { display: inline-flex; align-items: center; height: 16px; padd
 .pp-printbox-body > .pp .pp-head { min-height: 0; padding: 2px 0 4px; border: 0; background: none; }
 .pp-printbox-body > .pp .pp-head .pp-title { display: none; }      /* the box's head says Print */
 
+/* ── The viewer alone (Tab, S15m; core/shell/alone.js) ───────────────────────
+   The stage over the whole window, under the palette, the pies and the graph;
+   the page beneath only covered. Its own `!important`s: theme.css, read after
+   this file, pads a stage with rulers, and an app's style may place it. */
+
+html.skw-alone .viewer-stage { position: fixed !important; inset: 0 !important; z-index: 80 !important; margin: 0 !important;
+  padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: var(--view); }
+html.skw-alone .viewer-stage > skw-rulers { display: none; }
+.alone-hint { position: fixed; left: 50%; bottom: 22px; z-index: 81; transform: translateX(-50%); padding: 6px 12px; border-radius: var(--radius);
+  background: var(--raised); color: var(--fg-2); font: 500 12px var(--font-ui); box-shadow: 0 8px 24px var(--shadow); pointer-events: none;
+  animation: alone-hint 2.4s ease forwards; }
+@keyframes alone-hint { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+
 /* ── Rulers and guides (S8; core/shell/rulers.js) ────────────────────────────
    Over the stage's padding, never the picture: the stage keeps the rulers'
    18 px and a margin on their sides (theme.css .viewer-stage). */

@@ -170,7 +170,7 @@ node scripts/check-page.mjs             # M11 done: the stack saved as a page of
 node scripts/check-palette.mjs          # S5: ² or Ctrl K, every control and act of the page by name; Enter takes it
 node scripts/check-guides.mjs           # S8: rulers, guides out of them and back, the magnet, F placing the handle pressed
 node scripts/check-rows.mjs             # S2, S2b: a value on one line — its unit in its box, dragged, marked; pairs; the fold; S15g, its two ends by hand
-node scripts/check-keys.mjs             # S5b: the left hand — keys by place, tapped or held for a pie; an app's own keys kept
+node scripts/check-keys.mjs             # S5b: the left hand — keys by place, tapped or held for a pie; an app's own keys kept; Tab the viewer alone, Shift the whole screen (S15m)
 node scripts/check-steps.mjs            # S6c: the session's steps — Ctrl Z, Ctrl Y; a drag one step, a Reset one
 node scripts/check-graph.mjs            # S7: H, the states as a graph over the page — hovered drawn, clicked gone back to, a branch; two compared and merged; A, where a state goes; L12b, the 3D app's shapes with them
 node scripts/check-states.mjs           # S6b, S6d: S the next state of a smart object; a still named from it; a row's value in each state; pinned in compose
