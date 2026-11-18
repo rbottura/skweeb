@@ -11,10 +11,10 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 
 ### Newest — 2026-11-18: the worm, the game's avatar (M16, `docs/worm.md`)
 
-- **The 3D app's player** (`apps/3d/play/`, M16a and b): a worm — a gamepad drawing lofted, or a model's drawn body
-  (`?worm=<id>`) — walked round a planet in the third person, its wave timed by its steps; another frozen ahead, a
-  phase: walked into, both framed, the world dimmed, the phase swung on a spectral bridge of their morph, fixed on B,
-  bonded under B's sky — and back. Its rows tuned by hand; nothing saved yet (M16j).
+- **The 3D app's player** (`apps/3d/play/`, M16a to c): a worm — a gamepad drawing lofted, or a model's drawn body
+  (`?worm=<id>`) — walked round a planet, its wave timed by its steps; Space, it dives and swims under the ground at
+  its own speed, the ground raised along its curve. Another frozen ahead, a phase: walked into, framed, the world
+  dimmed, swung on a spectral bridge of their morph, fixed on B, bonded under B's sky — and back. Nothing saved yet.
 
 ### 2026-11-09 to -17: BEC 2027's graphic system (track G), a game's effects (M15), the panel for a long use (S15)
 
@@ -271,14 +271,14 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 
 ## Tests
 
-Seventy-six files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-11-18). Newest: `3d-play` and `3d-phase`
+Seventy-seven files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-11-18). Newest: `3d-play`, `3d-phase`, `3d-dune`
 (M16), `shader` (M15), `layers` (L13), `3d-forces` and `3d-cloud` (G2, G1).
 
-Forty-nine browser checks, each a command in `CLAUDE.md`, run several at a
+Fifty browser checks, each a command in `CLAUDE.md`, run several at a
 time by `scripts/checks.mjs`, each its own server on a copy of the vault,
 headless Chrome under `scripts/check-kit.mjs`; a page that throws or speaks
-fails. Newest: `check-3d-play`, `check-3d-phase` (M16). On the laptop's
+fails. Newest: `check-3d-play`, `-phase`, `-dune` (M16). On the laptop's
 Intel a GPU check skips its GPU half without `CHROME_FLAGS`, and
 `check-particles` fails two of that machine's (`apps/particles/STATUS.md`).
 A canvas read back often is drawn in software after: compared, measured.
@@ -346,8 +346,8 @@ A canvas read back often is drawn in software after: compared, measured.
 
 ## Next single step
 
-The author's eye on the worm's player — `/apps/3d/play/?worm=<id>`, a drawing of theirs walked into the phase — and
-which of M16c to j comes next (`docs/worm.md`). Beside it: their SVG of a BEC render in their print tool (G11); the
+The author's eye on the dive — `/apps/3d/play/?worm=<id>`, Space, a drawing of theirs under the ground — and
+which of M16d to j comes next (`docs/worm.md`). Beside it: their SVG of a BEC render in their print tool (G11); the
 ThinkPad pulled, the vaults made one (`docs/guides/vault-share.md`); their test of G4 to G10. Else C12, or M13c's fields.
 
 ## Parked decisions

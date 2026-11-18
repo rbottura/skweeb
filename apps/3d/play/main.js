@@ -7,14 +7,16 @@
  *   /apps/3d/play/?worm=<id>    the walked worm: a gamepad drawing lofted, or a model's drawn body
  *
  * Each frame: the hands read (hands.js); the walked worm's walker stepped
- * round the planet (walker.js), its wave posed by the distance walked, the
- * worm hung in its frame (worm.js); its coming into a frozen worm's radius
- * begins a passage, and a passage moves on (phasing.js); the camera eased
- * behind the walked worm, or to where both are seen (follow.js); the planet
- * dressed in the walked worm's reality, dimmed as a passage holds the world
- * (planet.js); drawn by the 3D app's one renderer (../renderer.js) — the
- * page's one GPU device, WebGL2 where there is none — its picture handed to
- * the viewer's canvas, never copied.
+ * round the planet (walker.js) — carried by a dive, or under the ground at
+ * its own pace (dive.js, M16c) — its wave posed by the distance walked, the
+ * worm laid on the planet's curve and hung in its frame (worm.js), the
+ * ground raised over what of it is under (dune.js); its coming into a
+ * frozen worm's radius begins a passage, and a passage moves on
+ * (phasing.js); the camera eased behind the walked worm, or to where both
+ * are seen (follow.js); the planet dressed in the walked worm's reality,
+ * dimmed as a passage holds the world (planet.js); drawn by the 3D app's
+ * one renderer (../renderer.js) — the page's one GPU device, WebGL2 where
+ * there is none — its picture handed to the viewer's canvas, never copied.
  *
  * A module (core/mount.js): `mount(host)` and `unmount()`, its page mounting
  * it on itself; unmounted, its frames stop, its planet and worms are let go
@@ -37,13 +39,15 @@ import { walkerAt, step, settle, frameOf } from './walker.js';
 import { aimBehind, aimBetween, follow } from './follow.js';
 import { Hands }      from './hands.js';
 import { Phasing }    from './phasing.js';
+import { lunge }      from './dive.js';
+import { Dune }       from './dune.js';
 
 const MARKUP = `
   <main class="app-main">
     <section class="viewer" aria-label="the worm's planet">
       <div class="viewer-stage">
         <canvas class="world" width="480" height="300"
-                aria-label="the planet — ZQSD, WASD or the arrows walk the worm, a stick too"></canvas>
+                aria-label="the planet — ZQSD, WASD or the arrows walk the worm, Space dives, a stick too"></canvas>
         <p class="world-note" hidden></p>
       </div>
     </section>
@@ -70,7 +74,7 @@ async function start(root, mine) {
   const canvas = root.querySelector('canvas.world');
   const note = root.querySelector('.world-note');
   const say = text => { note.hidden = !text; note.textContent = text || ''; };
-  const bar = new Bar({ app: '3d-play', mount: root, acts: false, keys: 'ZQSD, WASD or the arrows walk · a stick too' });
+  const bar = new Bar({ app: '3d-play', mount: root, acts: false, keys: 'ZQSD, WASD or the arrows walk · Space dives, and comes up · a stick too' });
   const params = playParams();
   new ParamPanel(params, { title: 'the worm, played', mount: root.querySelector('#side'), groups: GROUPS });
   const asked = new URLSearchParams(location.search).get('worm');
@@ -85,7 +89,9 @@ async function start(root, mine) {
   const phasing = new Phasing(planet.scene);
   phasing.add(new Worm(), walkerAt(v.radius), { ground: v.ground, sky: v.sky });
   phasing.add(new Worm(), walkerAt(v.radius), { ground: v.otherGround, sky: v.otherSky });
-  const s = { params, planet, phasing, renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
+  const dune = new Dune();
+  planet.scene.add(dune.mesh);
+  const s = { params, planet, phasing, dune, renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
               hands: new Hands(mine), frames: 0, snap: true, made: [{}, {}], asked: [0, 0] };
   live = s;
 
@@ -100,7 +106,7 @@ async function start(root, mine) {
     b.worm.shape({ body: { ...made.body, drawn }, seen: v.seen, head: v.head, wave: v.wave, waves: v.waves, sway: v.sway,
                    size: v.size, skin: made.skin || 'drawing', colour: made.colour || v[ROWS[i].colour] });
     b.worm.tintShell(v.spectral);
-    b.worm.place(frameOf(b.walker), b.walker.p);
+    hang(s, b);
     tell();
   };
   /** What worm `i` is made of: a model's drawn body as it was shaped there, a drawing lofted, or loft.js's own. */
@@ -131,7 +137,7 @@ async function start(root, mine) {
     step(w, { move: 1 }, 1, { radius: v.radius, speed: v.away, turnRate: 0 });
     w.f.negate();
     Object.assign(other.walker, { p: w.p, f: w.f, walked: 0 });
-    other.worm.place(frameOf(other.walker), other.walker.p);
+    hang(s, other);
     layReaches(s);
   };
   const realities = () => {
@@ -143,7 +149,7 @@ async function start(root, mine) {
   params.on(key => {
     if (PLANET_KEYS.includes(key)) {
       planet.build(params.values);
-      for (const b of phasing.bodies) b.worm.place(frameOf(settle(b.walker, params.get('radius'))), b.walker.p);
+      for (const b of phasing.bodies) { settle(b.walker, params.get('radius')); hang(s, b); }
       tell();
     }
     if (PLACE_KEYS.includes(key)) placeOther();
@@ -170,6 +176,7 @@ async function start(root, mine) {
     cancelAnimationFrame(raf);
     for (const b of phasing.bodies) b.worm.dispose();
     phasing.dispose();
+    dune.dispose();
     planet.dispose();
     if (live === s) live = null;
   });
@@ -181,14 +188,25 @@ function layReaches(s) {
   for (const b of s.phasing.bodies) b.reach.lay(b.walker.p, v.radius, v.reach);
 }
 
-/** One frame's motion: the walked worm stepped, waved and hung — or a passage moved on — and the camera eased. */
+/** Body `b` posed where it has walked — its wave, its dive, the planet's curve — and hung in its walker's frame. */
+function hang(s, b) {
+  const v = s.params.values;
+  b.worm.pose(b.walker.walked, { radius: v.radius, dive: b.dive, leap: v.leap * v.size, depth: v.depth * v.size });
+  b.worm.place(frameOf(b.walker), b.walker.p);
+}
+
+/** One frame's motion: the walked worm stepped, dived, waved and hung — or a passage moved on — and the camera eased. */
 function tick(s, dt) {
   const v = s.params.values, P = s.phasing;
   if (!P.passage) {
-    const me = P.walked;
-    step(me.walker, s.hands.read(), dt, { radius: v.radius, speed: v.speed, turnRate: (v.turn * Math.PI) / 180 });
-    me.worm.pose(me.walker.walked);
-    me.worm.place(frameOf(me.walker), me.walker.p);
+    const me = P.walked, { worm, walker, dive } = me, hands = s.hands.read(), long = worm.front - worm.back;
+    if (hands.dive) dive.toggle(walker.walked, worm.front);
+    // A dive is played — it carries the worm, the hands only turn it; under the ground, the worm goes at its own pace.
+    const speed = dive.moving ? lunge(long, v.plunge) : dive.state === 'buried' ? v.under : v.speed;
+    step(walker, dive.moving ? { move: 1, turn: hands.turn } : hands, dt, { radius: v.radius, speed, turnRate: (v.turn * Math.PI) / 180 });
+    dive.advance(walker.walked, worm.back, long);
+    hang(s, me);
+    s.dune.lay(worm.spine, frameOf(walker), walker.p, s.planet, { ridge: v.ridge * v.size, spread: v.spread * v.size });
     const into = P.within(v.reach);
     if (into >= 0) P.begin(into, { ghosts: v.ghosts, spectral: v.spectral, arch: 1.5 * v.size });
   }
@@ -235,17 +253,21 @@ export function tune(values) {
 
 /**
  * Where things stand, for the checks — or null, unmounted: the walked worm and its walker, the camera, the frozen
- * one, a passage's stage and phase, the bridge's lights, each body's place, shell and radius, the frames drawn.
+ * one, a passage's stage and phase, the bridge's lights, each body's place, shell and radius, the frames drawn;
+ * the walked worm's dive, how much of it is under, the ground's highest over it, its head's height and its top's.
  */
 export function peek() {
   if (!live) return null;
   const { phasing: P, camera, planet, renderer, frames } = live;
   const me = P.walked, worm = me.worm, f = frameOf(me.walker), positions = worm.mesh.geometry.getAttribute('position');
+  const nose = worm.spine.reduce((a, b) => (b[0] > a[0] ? b : a), [-Infinity, 0, 0, 0]);
   return { radius: planet.radius, p: me.walker.p.toArray(), f: me.walker.f.toArray(), up: f.up.toArray(), walked: me.walker.walked,
            eye: camera.position.toArray(), wave: worm.phase, low: worm.low, toward: worm.toward, length: worm.length,
            drawn: !!(worm.v && worm.v.drawn), vertices: positions ? positions.count : 0,
            things: planet.things.reduce((n, m) => n + m.count, 0), frames, backend: renderer.backend,
            walking: P.walking, stage: P.passage ? P.passage.at.stage : 'walking', phase: P.passage ? P.passage.at.phase : 0,
            lights: P.passage ? P.passage.bridge.lights() : [], bodies: P.bodies.map(b => b.walker.p.toArray()),
-           shells: P.bodies.map(b => b.worm.shellAt), reach: P.bodies.map(b => b.reach.strength.value) };
+           shells: P.bodies.map(b => b.worm.shellAt), reach: P.bodies.map(b => b.reach.strength.value),
+           dive: me.dive.state, sunk: live.dune.sunk, ridge: live.dune.height, nose: nose[1],
+           top: worm.spine.reduce((t, r) => Math.max(t, r[4]), -Infinity) };
 }

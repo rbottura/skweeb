@@ -96,7 +96,7 @@ wait their turn, in the order the author picks.
 |---|---|---|---|---|
 | M16a | **the planet walked**: a sphere, things on it; a worm on it — a drawing lofted, waving as it goes — ZQSD, WASD, the arrows or a stick; the camera behind and above | `3d/planet` | M | **landed 2026-11-18** — below; `check-3d-play`: alone on loft.js's worm, walked round, on the ground, the camera behind it |
 | M16b | **the phase**: a frozen worm and its radius; the camera framing both, the bridge of the morph's frames, the phase swung and fixed on B; the bond, B played in its reality, A left a shell | `3d/phase` | M | **landed 2026-11-18** — below; `check-3d-phase`: walked in, swung, bonded, and back |
-| M16c | **under the surface**: the worm swims beneath, the ground raised along its body | `3d/dune` | M | later |
+| M16c | **under the surface**: the worm swims beneath, the ground raised along its body; a dive in and out, a speed for each | `3d/dune` | M | **landed 2026-11-18** — below; `check-3d-dune`: dived, buried, walked under, up again, no phase under |
 | M16d | **the window**: a frozen worm showing its reality — what a camera there sees, drawn in its silhouette | `3d/window` | M | later |
 | M16e | **the bond as a game**: a QTE while B's reality opens | `3d/bond-qte` | S | later |
 | M16f | **surfaces on meshes, and the gears**: generators of a position, a rim; a gear a state of the avatar — its shading, its accessories at a ring | `3d/gears` | L | later; the inbox's *generators in 3D* |
@@ -126,10 +126,10 @@ the worm, its walk, the planet, the camera — tuned by hand.
   `bitmaprenderer`, never copied. At most 1920 pixels along the longer side.
 - **Toon in three bands**, as the 3D app's style draws them; the ground's
   patches six long waves round the planet, its things a seed's.
-- **Left for later**: the worm hangs on the ground's tangent — past a sixth
-  of the radius long, its ends lift off a small planet (bent to it with
-  M16c); the things are not in its way, nor the camera's; the stick turns
-  the worm, it does not steer it by the camera; no shadows.
+- **Left for later**: the things are not in its way, nor the camera's; the
+  stick turns the worm, it does not steer it by the camera; no shadows.
+  (It hung on the ground's tangent, its ends off a small planet: laid on
+  the planet's curve since M16c.)
 
 ## The phase — M16b, landed 2026-11-18
 
@@ -165,6 +165,38 @@ by default a night to the planet's day.
   two colours — its own place and time is the window's and a world's
   (M16d, M16j); the passage is watched, not played (M16e).
 
+## Under the ground — M16c, landed 2026-11-18
+
+The author, after a and b: "on aura une vitesse de déplacement surface et
+une vitesse sous-surface (enterré), et une animation de plongeons pour
+passer de l'état en surface à enterrée et inversement". Space, or the
+pad's first button: down, and up again. Its rows in *Under the ground*,
+at size 1, growing with the worm.
+
+- **The dive** (`dive.js`): a path as long as the body, followed head
+  first — off the ground in an arch `leap` high, steeply into it, level
+  again under — each point as high as the path is where that point has
+  come to along the ground, so the body pours through the one hole its
+  head made. Played, not held: it carries the worm its path and its own
+  length in `plunge` seconds, the hands only turning it. Up, the same path
+  the other way, its head out first.
+- **Under**: every ring's back `depth` under the ground — a body drawn
+  arched swims level, its wave its own — walked at `under` units a
+  second; on the ground, at `speed`.
+- **The ground raised** (`dune.js`): a patch over the planet's where the
+  worm is, each point raised by the rings under it — a bell its girth and
+  `spread` wide, `ridge` high, as much as each ring is under; deeper,
+  lower and wider. In the ground's own material and shades, darker along
+  its crest in a band: three bands of toon flattened a gentle rise.
+- **The planet's curve** (`bend.js`): the worm and the patch laid from the
+  tangent onto the sphere — as far round, as high over.
+- **For now**: no phase is passed into under the ground, nor on the way —
+  the camera frames two bodies in sight; come up in a radius, the passage
+  begins.
+- **Left for later**: the ground closes behind it at once — no furrow, no
+  trail; the things stand where they were, the ridge under them; the
+  camera does not go down with it.
+
 ## Settled, 2026-11-18
 
 1. **M16 now**: "go M16, all gas no breaks".
@@ -179,3 +211,5 @@ by default a night to the planet's day.
    own worm (rule 7).
 5. **Nothing the player does is saved** at first, as the map's player:
    its rows are tuned by hand, and a world becomes an object at M16j.
+6. **Two paces and a dive** (M16c): a speed on the ground and one under
+   it, and a dive between the two, played as an animation.
