@@ -64,6 +64,7 @@ export class Planet {
     this.ground = this.tufts = null;
     this.things = [];
     this.radius = 0;
+    this.waves = [];         // the ground's patches' waves: the dune shades its patch by them (dune.js)
     this.look = '';
   }
 
@@ -76,7 +77,7 @@ export class Planet {
     // The ground's patches are greys, its colour the reality's (`dress`): a passage turns it without a rebuild.
     const detail = Math.max(DETAIL[0], Math.min(DETAIL[1], Math.round(radius)));
     const geometry = new IcosahedronGeometry(radius, detail);
-    const waves = wavesOf(rng), P = geometry.getAttribute('position'), colours = new Float32Array(P.count * 3);
+    const waves = this.waves = wavesOf(rng), P = geometry.getAttribute('position'), colours = new Float32Array(P.count * 3);
     const n = new Vector3();
     for (let i = 0; i < P.count; i++) {
       const k = 0.8 + 0.35 * patchAt(waves, n.fromBufferAttribute(P, i).normalize());

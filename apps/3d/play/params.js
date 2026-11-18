@@ -6,6 +6,7 @@
  * are tuned by hand, a schema still (rule 1) so that a world can be an
  * object one day (M16j). The worm is a gamepad drawing, lofted as the 3D
  * app lofts one, or a model's drawn body as the author shaped it there.
+ * Its dive and the ground over it (M16c) are at size 1, and grow with it.
  */
 
 import { defineParams } from '../../../core/params.js';
@@ -13,6 +14,7 @@ import { defineParams } from '../../../core/params.js';
 export const GROUPS = {
   worm: { label: 'Worm', open: true },
   walk: { label: 'Walk', open: true },
+  dune: { label: 'Under the ground', open: true },
   phase: { label: 'Phase', open: true },
   planet: { label: 'Planet', open: false },
   camera: { label: 'Camera', open: false },
@@ -51,6 +53,19 @@ export function playParams() {
     speed: { type: 'range', min: 0.5, max: 30, step: 'any', log: true, default: 4, label: 'speed, units a second',
              group: 'walk' },
     turn: { type: 'range', min: 30, max: 360, step: 1, default: 150, label: 'turn, degrees a second', group: 'walk' },
+    under: { type: 'range', min: 0.5, max: 30, step: 'any', log: true, default: 6, label: 'under the ground, units a second',
+             group: 'walk' },
+
+    // M16c: under the ground, as a dune worm — the dive into it and out, the ground raised over the body.
+    plunge: { type: 'range', min: 0.3, max: 4, step: 'any', log: true, default: 1.1, label: 'a dive, seconds — Space',
+              group: 'dune' },
+    leap: { type: 'range', min: 0, max: 4, step: 'any', default: 0.8, label: 'its leap as it dives, units', group: 'dune' },
+    depth: { type: 'range', min: 0, max: 3, step: 'any', default: 0.1, label: 'its back under the ground, units',
+             group: 'dune' },
+    ridge: { type: 'range', min: 0, max: 2, step: 'any', default: 0.45, label: 'the ground raised over it, units',
+             group: 'dune' },
+    spread: { type: 'range', min: 0.05, max: 3, step: 'any', log: true, default: 0.35, label: 'the raised ground\'s width, units',
+              group: 'dune' },
 
     // M16b: a worm frozen in space-time, a phase of another reality, and the passage into it.
     other: { type: 'object', accepts: ['still', 'sequence', 'model'], by: ['gamepad', '3d'],
