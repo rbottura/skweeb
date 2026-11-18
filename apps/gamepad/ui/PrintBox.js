@@ -17,6 +17,7 @@ import * as Sketch        from '../sketch/gamepadSketch.js';
 import * as StillFrame    from '../core/stillFrame.js';
 import { recipeNow, APP } from '../core/vaultBridge.js';
 import { PrintPanel }     from '../../../core/PrintPanel.js';
+import { held } from '../../../core/scope.js';
 
 export class PrintBox {
   constructor() {
@@ -35,6 +36,7 @@ export class PrintBox {
     this._say = this._el.querySelector('.gp-print__say');
     this._el.addEventListener('keydown', e => e.stopPropagation());
     document.body.appendChild(this._el);
+    held(() => this._el.remove());          // with its mount (C6d)
 
     this.printing = new PrintPanel({
       mount: this._el.querySelector('.gp-print__body'),

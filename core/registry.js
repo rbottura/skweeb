@@ -8,6 +8,7 @@
  * ──────────────────────────────────────────────────────────────────────────────
  *  loadManifest()                 → Promise<manifest>
  *  loadSelected()                 → Promise: the selected families decoded
+ *  loadFamilies(ids)              → Promise: those decoded, the selection left as it is
  *  isLoaded()                     → bool
  *  getSprite(familyId, fileIndex) → ImageBitmap | null
  *  getSpriteUrl(familyId, idx)    → string  (usable as <img src>)
@@ -23,7 +24,8 @@ let _manifest      = null;        // full manifest JSON
 let _manifestUrl   = null;        // which one, so a second URL is not ignored
 let _base          = '';          // directory the manifest came from
 let _selected      = [];          // family meta objects chosen by the user
-let _sprites       = new Map();   // familyId → its sprites decoded, null where one would not load
+let _sprites       = new Map();   // familyId → its sprites decoded, null where one would not load — kept, whatever is selected
+let _decoding      = new Map();   // familyId → the promise of its sprites, while they decode
 let _loaded        = false;
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -45,12 +47,18 @@ export async function loadManifest(url = 'brush-manifest.json') {
   // Keyed by URL, not just "have we loaded one" — with a second app asking for
   // another app's sprites, returning the first manifest for every later call
   // would hand back the wrong families and look like a missing sprite.
-  if (_manifest && _manifestUrl === url) return _manifest;
+  // And by the address it resolves to (C6d, docs/gamepad.md): the gamepad's
+  // own `brush-manifest.json` and core's `/apps/gamepad/brush-manifest.json`
+  // are one manifest — read again, it lost the families the vault gave it.
+  const key = typeof location !== 'undefined' && location.href ? new URL(url, location.href).href : url;
+  if (_manifest && _manifestUrl === key) return _manifest;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
   _manifest = await res.json();
-  _manifestUrl = url;
+  _manifestUrl = key;
   _base = url.slice(0, url.lastIndexOf('/') + 1);
+  _sprites = new Map();             // another manifest's families are other pictures
+  _decoding = new Map();
   return _manifest;
 }
 
@@ -203,15 +211,16 @@ export function familyFromSet(setObject, index = []) {
 }
 
 /**
- * Set which families to load. Call BEFORE loadSelected().
+ * Set which families a page draws with — the gamepad's D-pad steps through
+ * them. What is decoded stays decoded: a family chosen again, or replayed
+ * meanwhile (`loadFamilies`), costs nothing the second time.
  * @param {string[]} ids  — family id strings (from manifest)
  */
 export function setSelectedFamilies(ids) {
   if (!_manifest) throw new Error('Call loadManifest() first');
   const idSet = new Set(ids);
   _selected = _manifest.families.filter(f => idSet.has(f.id));
-  _sprites  = new Map();
-  _loaded   = false;
+  _loaded   = _selected.every(f => _sprites.has(f.id));
 }
 
 /**
@@ -240,23 +249,54 @@ export async function loadSelected(decoder = DECODE) {
   // Probe first, so a family that is not on this machine costs one HEAD rather
   // than one failed GET per sprite. Garam_blue alone is 58 of them.
   await probeFamilies(_selected.map(f => f.id));
-
-  for (const fam of _selected) {
-    if (!isFamilyAvailable(fam.id)) {
-      // Nulls, not an empty array, and not a missing key: a mark records the
-      // sprite index it used, so the array has to stay the right length or a
-      // later index would silently resolve to a different brush.
-      _sprites.set(fam.id, Array.from({ length: fileCount(fam) }, () => null));
-      continue;
-    }
-
-    _sprites.set(fam.id, await Promise.all(
-      Array.from({ length: fileCount(fam) }, (_, i) => new Promise(resolve => {
-        decoder.loadImage(fileUrl(fam, i), img => resolve(img), () => resolve(null));
-      }))));
-  }
+  for (const fam of _selected) await decodeFamily(fam, decoder);
   _loaded = true;
   return _sprites;
+}
+
+/**
+ * Families decoded by their ids, beside the ones selected: what a recording
+ * replayed needs (core/rebuild.js), the gamepad's family the first time it is
+ * drawn with (C6d, docs/gamepad.md). The selection is the page's, never
+ * changed here — a replay once took it over, and the gamepad's D-pad with it.
+ * `fresh` decodes them again even when they are: a replay's, as before C6d.
+ *
+ * @param {string[]} ids
+ * @param {object} [opts]
+ * @param {{loadImage(url: string, onLoad: Function, onError: Function)}} [opts.decoder]
+ * @param {boolean} [opts.fresh=false]
+ */
+export async function loadFamilies(ids, { decoder = DECODE, fresh = false } = {}) {
+  const metas = [...new Set(ids)]
+    .map(id => _selected.find(f => f.id === id) ?? _manifest?.families.find(f => f.id === id))
+    .filter(Boolean);
+  await probeFamilies(metas.map(f => f.id));
+  for (const fam of metas) await decodeFamily(fam, decoder, fresh);
+  return _sprites;
+}
+
+/** Whether a family's sprites are decoded — the gamepad's cursor has its picture. */
+export const isFamilyLoaded = id => _sprites.has(id);
+
+/** One family's sprites, decoded once — or again, `fresh`; asked again while they decode, the same promise. */
+function decodeFamily(fam, decoder, fresh = false) {
+  if (!fresh && _sprites.has(fam.id)) return Promise.resolve(_sprites.get(fam.id));
+  if (_decoding.has(fam.id)) return _decoding.get(fam.id);
+  const sprites = !isFamilyAvailable(fam.id)
+    // Nulls, not an empty array, and not a missing key: a mark records the
+    // sprite index it used, so the array has to stay the right length or a
+    // later index would silently resolve to a different brush.
+    ? Promise.resolve(Array.from({ length: fileCount(fam) }, () => null))
+    : Promise.all(Array.from({ length: fileCount(fam) }, (_, i) => new Promise(resolve => {
+        decoder.loadImage(fileUrl(fam, i), img => resolve(img), () => resolve(null));
+      })));
+  const done = sprites.then(list => {
+    _sprites.set(fam.id, list);
+    _decoding.delete(fam.id);
+    return list;
+  });
+  _decoding.set(fam.id, done);
+  return done;
 }
 
 export function isLoaded() { return _loaded; }

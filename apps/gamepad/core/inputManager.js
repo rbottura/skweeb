@@ -70,6 +70,19 @@ export const InputManager = {
     _emit('modeChange', m);
   },
 
+  /**
+   * Every listener off, back to drawing, no button held: what a mount of the
+   * gamepad starts from and its unmount leaves (C6d, main.js) — the panels
+   * and the sketch of a mount before would answer the pad twice.
+   */
+  reset() {
+    for (const action of Object.keys(_listeners)) delete _listeners[action];
+    for (const button of Object.keys(_navHeld)) delete _navHeld[button];
+    _prevButtons.length = 0;
+    _mode = MODE.DRAW;
+    _drawBlockUntilAUp = false;
+  },
+
   /** Register a listener: InputManager.on('stamp', fn) */
   on(action, fn) {
     (_listeners[action] = _listeners[action] || []).push(fn);

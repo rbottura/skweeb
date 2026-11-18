@@ -36,6 +36,20 @@ const A_STILL = `import('/core/vault.js').then(async ({ Vault }) => {
  * a dot-set made in dots, and the session it is filed in — the same one
  * mounted again, the sets made before still listed.
  */
+/**
+ * The gamepad's canvas with a stamp on it, a little further along at each mount: an empty canvas saved twice is one
+ * object — the same pixels and the same recipe are a twin (server.js) — and S has to save after every mount (C6d).
+ */
+const GAMEPAD_STAMP = `(async () => {
+  const { InputManager } = await import('/apps/gamepad/core/inputManager.js');
+  window.__gpMounts = (window.__gpMounts || 0) + 1;
+  const pad = (ax, held = []) => ({ axes: [ax, 0, 0, 0], buttons: Array.from({ length: 17 }, (_, i) => ({ pressed: held.includes(i), value: held.includes(i) ? 1 : 0 })) });
+  for (let i = 0; i < 3 * window.__gpMounts; i++) InputManager.update(pad(0.5));
+  InputManager.update(pad(0, [0]));
+  InputManager.update(pad(0));
+  return true;
+})()`;
+
 const CKT_VISIT = `(async () => {
   const say = () => document.querySelector('.bar-say')?.textContent || '';
   const rowsBefore = document.querySelectorAll('.ss-row').length;
@@ -86,6 +100,7 @@ const APPS = [
   { name: '3d', own: ['KeyQ'], plays: false, saves: true,
     ready: `/turned .+ away/.test(document.querySelector('.bar-say')?.textContent || '')` },
   { name: 'vault', own: [], plays: false, saves: false, params: false, live: false, booted: '.vp-card' },
+  { name: 'gamepad', own: [], kept: ['KeyE'], plays: false, saves: true, prepare: GAMEPAD_STAMP },   // its frame clock reads the pad: no clock of core's (C6d)
   { name: 'rig', own: [], kept: ['KeyR'], plays: false, saves: true, query: aDrawing,
     ready: `/[0-9]+ bones/.test(document.querySelector('.bar-say')?.textContent || '')` },
 ];

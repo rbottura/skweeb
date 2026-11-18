@@ -10,7 +10,7 @@
 </head>
 
 <body>
-  <!-- Loading screen (dismissed once the canvas is up, its sprites decoded) -->
+  <!-- Loading screen (dismissed once the canvas is up, its first family decoded) -->
   <div id="loading-screen">
     <div class="loading-title">GamepadDraw</div>
     <div class="loading-bar-wrap">
@@ -19,90 +19,21 @@
     <div class="loading-sub">Loading brush sprites…</div>
   </div>
 
-  <!-- Gamepad connection indicator -->
-  <div class="gamepad-indicator" id="gamepad-indicator">Gamepad connected</div>
-
-  <!-- No-gamepad notice (non-blocking, dismissible) -->
-  <div class="gp-nopad" id="gp-nopad" role="status">
-    <span class="gp-nopad__text">No gamepad detected &mdash; connect one and press any button</span>
-    <a class="gp-nopad__link" href="gallery/" target="_blank" rel="noopener">Browse gallery &#8599;</a>
-    <button class="gp-nopad__close" id="gp-nopad-close" type="button" aria-label="Dismiss notice">&#10005;</button>
-  </div>
-
   <!--
-    The page: the viewer, the panel beside it, core's bar under both (C6c) —
-    the page's canvas goes in the viewer's stage (sketch/gamepadSketch.js).
+    The gamepad is a module (main.js, C6d): it builds itself in a host and
+    takes itself out again, so a scene can mount it too. Here, alone, its host
+    is this page, and the loading screen goes once its canvas is up.
   -->
-  <div class="app">
-    <main class="app-main">
-      <section class="viewer" aria-label="drawing">
-        <div class="viewer-stage" id="sketch-container"></div>
-      </section>
-      <div class="app-side" id="side"></div>
-    </main>
-  </div>
-
-  <!-- Bootstrap module — imports all core/ and ui/ modules. No p5 since C6b. -->
-  <script type="module" src="app.js"></script>
-
-  <!-- Dismiss the loading screen once the canvas is up -->
   <script type="module">
-    // The canvas comes once the chosen sprites are decoded: poll for it briefly.
+    import { mount } from './main.js';
     const loading = document.getElementById('loading-screen');
-    const indicator = document.getElementById('gamepad-indicator');
-
-    const checkReady = setInterval(() => {
-      if (document.querySelector('#sketch-container canvas')) {
-        clearInterval(checkReady);
-        loading.classList.add('done');
-      }
-    }, 200);
-
-    // ── Gamepad presence ─────────────────────────────────────────────────
-    // Browsers hide an already-plugged-in pad, and fire no gamepadconnected,
-    // until the user presses a button — so poll as well as listen.
-    const banner      = document.getElementById('gp-nopad');
-    const bannerClose = document.getElementById('gp-nopad-close');
-
-    let padSeen   = false;
-    let dismissed = false;
-
-    const hasPad = () => {
-      for (const pad of navigator.getGamepads?.() ?? []) if (pad) return true;
-      return false;
-    };
-
-    // Once a pad has been seen the top-centre pill takes over reporting,
-    // so the banner never returns on a mid-session disconnect.
-    const syncBanner = () => {
-      if (hasPad()) padSeen = true;
-      banner.classList.toggle('gp-nopad--visible', !padSeen && !dismissed);
-    };
-
-    bannerClose.addEventListener('click', () => { dismissed = true; syncBanner(); });
-
-    const padPoll = setInterval(() => {
-      syncBanner();
-      if (padSeen || dismissed) clearInterval(padPoll);
-    }, 500);
-    syncBanner();
-
-    const flashIndicator = (text, color, border, ms) => {
-      indicator.textContent      = text;
-      indicator.style.color      = color;
-      indicator.style.borderColor = border;
-      indicator.classList.add('gamepad-indicator--active');
-      setTimeout(() => indicator.classList.remove('gamepad-indicator--active'), ms);
-    };
-
-    window.addEventListener('gamepadconnected', () => {
-      padSeen = true;
-      syncBanner();
-      flashIndicator('Gamepad connected', '#aaff00', 'rgba(170,255,0,0.4)', 3000);
+    const up = new MutationObserver(() => {
+      if (!document.querySelector('#sketch-container canvas')) return;
+      up.disconnect();
+      loading.classList.add('done');
     });
-    window.addEventListener('gamepaddisconnected', () => {
-      flashIndicator('Gamepad disconnected', '#ff2079', 'rgba(255,32,121,0.4)', 2000);
-    });
+    up.observe(document.body, { childList: true, subtree: true });
+    mount(document.body);
   </script>
 </body>
 </html>

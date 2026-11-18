@@ -26,6 +26,7 @@ import * as BrushRegistry from '../../../core/registry.js';
 import { ImageStore }       from './imageStore.js';
 import * as StillFrame      from './stillFrame.js';
 import { SequenceRecorder } from '../../../core/stage/recorder.js';
+import { listen }           from '../../../core/scope.js';
 
 export const APP = { app: 'gamepad', version: '1.0.0' };
 
@@ -70,7 +71,16 @@ export function recipeNow(sketch, frame = StillFrame.lastFrame()) {
   };
 }
 
-document.addEventListener('imagestore:saved', async e => {
+/**
+ * Every save of the scratchpad a vault object too, while the gamepad is
+ * mounted (main.js, C6d): its listener its mount's, so a mount again saves
+ * once, not twice.
+ */
+export function wireVault() {
+  listen(document, 'imagestore:saved', saveToVault);
+}
+
+async function saveToVault(e) {
   const { entry } = e.detail;
   if (!entry || !entry.blob) return;
 
@@ -100,6 +110,6 @@ document.addEventListener('imagestore:saved', async e => {
   } catch (err) {
     console.warn('[vault] save failed, the scratchpad copy is unaffected:', err);
   }
-});
+}
 
 export { Vault, ImageStore };

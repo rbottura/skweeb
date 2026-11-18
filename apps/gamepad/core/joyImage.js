@@ -70,6 +70,8 @@ export class JoyImage {
    * at all positions defined by the current pattern.
    */
   stamp() {
+    // No picture yet — its family still decoding (C6d): no mark, drawn or recorded.
+    if (!this.img) return;
     const pts = this._getStampPoints();
     for (const [px, py, rot, scaleX] of pts) {
       this._drawTo(this._target, px, py, rot, scaleX);

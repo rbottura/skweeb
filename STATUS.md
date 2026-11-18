@@ -318,9 +318,9 @@ A canvas read back often is drawn in software after: compared, measured.
   frame, so a loop saved at 60 fps turns twice as fast as at 30 — which
   rate saves default to is the author's call; its width and height are both
   the canvas and the world the glyph sits in.
-- **The gamepad cannot reopen its recordings** (C6e); a module not yet (C6d);
-  its timeline and its gallery, IndexedDB's, its own — the author's (C6f, g,
-  `docs/gamepad.md`).
+- **The gamepad cannot reopen a recording, nor the vault offer it** (C6e); its timeline and
+  gallery its own — the author's (C6f, g). Replays decode their brushes again each time: shared, a
+  filter over a gamepad loop printed 0.26% off — why, not found (`docs/gamepad.md`, C6d).
 - **Files past 400 lines** (rule 4, `node scripts/lines.mjs`): the
   gamepad's `sketch/gamepadSketch.js` (571) and `ui/TimelinePanel.js`
   (547) — C6, its other two gone or split in C6c — and four
@@ -346,8 +346,8 @@ A canvas read back often is drawn in software after: compared, measured.
 
 ## Next single step
 
-C6d, the gamepad a module — `mount`, `unmount`, the families a section, cluster mounting it; then M16n in the heart
-(`docs/gamepad.md`; C6a to c landed) — and the author's eye on M16o, m, p, and on the gamepad's new page (C6c). Beside it: their SVG of a BEC render in their print tool (G11); the
+C6e, the gamepad's objects its own — `rebuild.js`, *Open in gamepad*, a recording back on the timeline; M16n after
+(`docs/gamepad.md`; C6a to d landed) — and the author's eye on M16o, m, p, and on the gamepad, in cluster now. Beside it: their SVG of a BEC render in their print tool (G11); the
 ThinkPad pulled, the vaults made one (`docs/guides/vault-share.md`); their test of G4 to G10. Else C12, or M13c's fields.
 
 ## Parked decisions

@@ -10,19 +10,23 @@ import { JoyImage, PATTERNS }    from '../core/joyImage.js';
 import { InputManager, MODE }    from '../core/inputManager.js';
 import { ImageStore }            from '../core/imageStore.js';
 import { SequenceRecorder }      from '../../../core/stage/recorder.js';
-import { SequencePlayer }        from '../../../core/stage/player.js';
-import { createClip }            from '../../../core/stage/clip.js';
-import { SequenceStage }         from '../../../core/stage/stage.js';
-import { SequenceTransport }     from '../../../core/stage/transport.js';
+import * as Stage              from './stage.js';
 import * as StillFrame           from '../core/stillFrame.js';
 import { viewNow, drawPageEdge } from './viewFit.js';
 import { Surface, picture }   from './surface.js';
 import { bare }               from '../../../core/keys.js';
+import { listen, held }       from '../../../core/scope.js';
+import { stampPoints }        from '../../../core/stamp.js';
 
 export { setViewInset } from './viewFit.js';
+// The timeline's stage, out of this file at its seam (C6d): imported AND re-exported, as joyImage.js says why.
+export {
+  getStage, getTransport, isStageActive, addLayerForSequence, dropLayer, moveLayer, reshapeLayer,
+  setLayerSpeed, setLayerPhase, setLayerDensity, playStage, pauseStage, stopStage,
+} from './stage.js';
 
 /**
- * The settings, a schema since C6c (params.js), given by app.js: the pad's
+ * The settings, a schema since C6c (params.js), given by main.js: the pad's
  * speeds, the pattern, the reference's opacity, what a still is saved on,
  * and core's format — `content` by default, since a gamepad drawing is a
  * few marks on a canvas the size of a window, and saving the window was
@@ -60,18 +64,6 @@ let _rotVal = 0;
 let _scaleVal = 1;
 let _referenceImg = null;
 let _baseImage = null;   // url of an image loaded under the ink, or null
-let _stage;               // SequenceStage — owns the layers and places them
-let _transport;           // SequenceTransport — owns the clock for every layer
-
-/**
- * Whether the stage has taken over the view.
- *
- * Layers exist from the moment a recording finishes, but they must not seize
- * the canvas the moment they appear — that would make every recording hide the
- * drawing it came from. The timeline's Play turns this on and Stop turns it
- * off; Pause only halts the clock, leaving the frozen composition on screen.
- */
-let _stageActive = false;
 
 export function getOverlayCanvas() {
   return _ink?.canvas ?? null;
@@ -88,16 +80,18 @@ const density = () => window.devicePixelRatio || 1;
 /**
  * The page's canvas in `container`, the ink beside it, the cursor on it, and a
  * frame clock drawing them: p5's canvas, graphics and draw loop until C6b
- * (docs/gamepad.md). app.js decoded the chosen families before it called this
- * (core/registry.js `loadSelected`), so every sprite is an image here.
+ * (docs/gamepad.md). main.js decoded its first family before it called this
+ * (core/registry.js `loadFamilies`), each other one the first time it is drawn with.
  *
  * Since C6c it is the viewer's stage it fills, not the window, and its
  * settings are `params`, core's (params.js): the pattern is one of them.
  *
  * @returns {HTMLCanvasElement} the page's canvas
  */
-export function createSketch(container, params) {
+export function createSketch(container, params, { family = 0, onPad = null } = {}) {
   _params = params;
+  familyIndex = family;
+  spriteIndex = 0;
   patternIndex = Math.max(0, PATTERNS.indexOf(P('pattern')));
   params.on(key => {
     if (key !== 'pattern') return;
@@ -128,8 +122,7 @@ export function createSketch(container, params) {
   _joyImg.onStamp = _recordStamp;
   SequenceRecorder.resetBuffer(_view.width, _view.height);
 
-  _stage     = new SequenceStage();
-  _transport = new SequenceTransport(_stage);
+  Stage.makeStage({ density: () => _view.density });
 
   _wireInputs();
   _wireKeys();
@@ -138,43 +131,45 @@ export function createSketch(container, params) {
   // while a window is dragged or the panel's edge moved, and every pass
   // rebuilds two buffers the stage's size.
   let resizeTimer;
-  new ResizeObserver(() => {
+  const sized = new ResizeObserver(() => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(rebuildBuffers, RESIZE_DEBOUNCE_MS);
-  }).observe(container);
+  });
+  sized.observe(container);
+  held(() => { sized.disconnect(); clearTimeout(resizeTimer); });
 
   // gamepad:clear → wipe the ink (the Drawing drawer, C)
-  document.addEventListener('gamepad:clear', _clearOverlay);
+  listen(document, 'gamepad:clear', _clearOverlay);
 
   // gallery:saveCanvas → the gallery's Save button. The gamepad path goes
   // through InputManager's 'saveImage' action, wired in _wireInputs.
-  document.addEventListener('gallery:saveCanvas', _saveImage);
+  listen(document, 'gallery:saveCanvas', _saveImage);
 
   // gamepad:record → arm / disarm the recorder (the Drawing drawer; Start on
   // the pad, below). The sketch owns this because the sequence records the
   // canvas size it was made at.
-  document.addEventListener('gamepad:record', _toggleRecording);
+  listen(document, 'gamepad:record', _toggleRecording);
 
   // A finished recording becomes a layer straight away. It is almost always
   // what you want to look at next, and if it is not, the timeline drops it in
   // one click — which is a better trade than making every keeper cost a
   // deliberate "add" that is easy to forget.
-  document.addEventListener('sequence:stopped', e => {
-    addLayerForSequence(e.detail.sequence, `Seq ${e.detail.index + 1}`);
+  listen(document, 'sequence:stopped', e => {
+    Stage.addLayerForSequence(e.detail.sequence, `Seq ${e.detail.index + 1}`);
   });
 
   // A sequence that is gone cannot back a layer.
-  document.addEventListener('sequence:removed', _pruneOrphanLayers);
-  document.addEventListener('sequence:cleared', _pruneOrphanLayers);
+  listen(document, 'sequence:removed', Stage.pruneOrphanLayers);
+  listen(document, 'sequence:cleared', Stage.pruneOrphanLayers);
 
   // A reference under the ink (the Drawing drawer)
-  document.addEventListener('gamepad:reference', async e => {
+  listen(document, 'gamepad:reference', async e => {
     const img = await picture(e.detail.url);
     if (img) _referenceImg = img;
   });
 
   // Load back saved image to canvas
-  document.addEventListener('gallery:loadToCanvas', async e => {
+  listen(document, 'gallery:loadToCanvas', async e => {
     const img = await picture(e.detail.url);
     if (!img) return;
     // Clear current overlay and draw the loaded image
@@ -185,17 +180,22 @@ export function createSketch(container, params) {
     _baseImage = e.detail.url;
   });
 
-  // The frame clock: drawn, then the pad read, as p5's draw() did.
-  let last = performance.now();
+  // The frame clock: drawn, then the pad read, as p5's draw() did — stopped
+  // when the gamepad is unmounted (core/scope.js).
+  let last = performance.now(), frame = 0;
   const tick = now => {
     const dt = Math.max(0, now - last);
     last = now;
     draw(dt);
     const gp = _getActiveGamepad();
-    if (gp) InputManager.update(gp, dt);
-    requestAnimationFrame(tick);
+    if (gp) {
+      InputManager.update(gp, dt);
+      if (onPad) onPad();
+    }
+    frame = requestAnimationFrame(tick);
   };
-  requestAnimationFrame(tick);
+  frame = requestAnimationFrame(tick);
+  held(() => cancelAnimationFrame(frame));
 
   return canvas;
 }
@@ -247,13 +247,8 @@ function draw(dt) {
 
 /** Everything on the page, in page coordinates. */
 function drawPage(ctx, dt) {
-  // Playback takes over the view rather than stacking on it: the ink layer
-  // already holds these same marks, so drawing both reads as a mess.
-  if (_stageActive && _stage?.layers.length) {
-    if (_transport.playing) _transport.advance(dt);
-    _stage.draw(ctx, _view.width, _view.height);
-    return;
-  }
+  // The recordings' stage, when it has the page (stage.js): nothing else then.
+  if (Stage.drawStage(ctx, _view.width, _view.height, dt)) return;
 
   // The reference image behind the ink, contained, at its opacity.
   if (_referenceImg && P('refOpacity') > 0) {
@@ -284,7 +279,7 @@ function drawPage(ctx, dt) {
  * clears as it did.
  */
 function _wireKeys() {
-  document.addEventListener('keydown', e => {
+  listen(document, 'keydown', e => {
     if (e.repeat || !bare(e)) return;
     if (e.key === 'Enter' || e.key === ' ') _joyImg?.stamp();
     if (e.key === 'c' || e.key === 'C')     _clearOverlay();
@@ -337,6 +332,47 @@ function _wireInputs() {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+/**
+ * A still's marks stamped again on a cleared ink, as the brush stamped them —
+ * each pattern about the canvas they were drawn on — and kept again by the
+ * recorder, their times with them, so the next save's recipe has them; the
+ * brush as the still left it. What a scene gives back when the gamepad is
+ * mounted again (core/mount.js `keep`, C6d), and a still opened (`?open=`).
+ *
+ * @param {object} recipe  a gamepad still's: { canvas, brush, marks }
+ * @returns {Promise<number>} the marks stamped
+ */
+export async function restamp(recipe) {
+  if (!_ink || !recipe || !Array.isArray(recipe.marks)) return 0;
+  await BrushRegistry.loadFamilies(recipe.marks.map(m => m.familyId).filter(Boolean));
+  const cw = (recipe.canvas && recipe.canvas.w) || _view.width, ch = (recipe.canvas && recipe.canvas.h) || _view.height;
+  _ink.clear();
+  _baseImage = null;
+  const ctx = _ink.ctx;
+  for (const m of recipe.marks) {
+    const img = BrushRegistry.getSprite(m.familyId, m.spriteIndex);
+    if (!img) continue;
+    for (const [px, py, rot, flipX] of stampPoints(m.x, m.y, m.rotation, m.pattern, cw, ch)) {
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(rot);
+      ctx.scale(m.scale * flipX, m.scale);
+      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      ctx.restore();
+    }
+  }
+  SequenceRecorder.restoreBuffer(_view.width, _view.height, recipe.marks);
+  const brush = recipe.brush || {};
+  const at = BrushRegistry.allFamilyMetas().findIndex(f => f.id === brush.familyId);
+  if (at >= 0) {
+    familyIndex = at;
+    spriteIndex = Math.max(0, brush.spriteIndex || 0);
+    _syncBrush();
+    document.dispatchEvent(new CustomEvent('sketch:brushChanged', { detail: { familyIndex, spriteIndex } }));
+  }
+  return recipe.marks.length;
+}
+
 /** The next pattern, R3 or P: the setting's, so the panel shows it (params.js). */
 function _nextPattern() {
   if (_params) _params.set({ pattern: PATTERNS[(patternIndex + 1) % PATTERNS.length] });
@@ -361,147 +397,6 @@ function _step(type, dir) {
   }));
 }
 
-// ─── Playback ────────────────────────────────────────────────────────────────
-
-// The stage and its clock, for the timeline. Read through the getters rather
-// than captured once: both are built by createSketch(), once the sprites are
-// decoded — after every module that reads them is imported.
-export const getStage      = () => _stage;
-export const getTransport  = () => _transport;
-export const isStageActive = () => _stageActive;
-
-/**
- * Put a recording on the stage as a new layer, on top.
- *
- * Every layer gets fit:'contain', so they stack over the same rect rather than
- * sitting side by side. That is what makes the blend modes worth having — the
- * clips interact instead of merely sharing a window. The stage supports
- * absolute placement too, whenever that is the look wanted instead.
- *
- * @returns {Object|null} the new layer
- */
-export function addLayerForSequence(seq, name) {
-  if (!seq || !_view || !_stage || !_transport) return null;
-
-  // At the screen's density, as the canvas it is drawn on.
-  const player = new SequencePlayer({ density: _view.density }).load(createClip(seq));
-  const layer  = _stage.add(player, { name, layout: { fit: 'contain' } });
-  _transport.rewindLayer(layer);
-
-  _announceStage();
-  return layer;
-}
-
-export function dropLayer(layer) {
-  if (!layer || !_stage) return;
-  _stage.remove(layer.player);
-  layer.player.dispose();     // the sketch built it, so the sketch frees it
-  if (_stage.layers.length === 0) stopStage();
-  else                            _announceStage();
-}
-
-export function moveLayer(from, to) {
-  _stage?.move(from, to);
-  _announceStage();
-}
-
-/**
- * Retune a layer's window rule or band width.
- *
- * No reload: bounds and the buffer depend on the recording and the overrides,
- * neither of which a rule touches. It only changes how many ticks the loop has
- * and which marks show at each one — so the playhead has to be re-placed, and
- * only this layer's.
- */
-export function reshapeLayer(layer, { rule, widthSteps } = {}) {
-  const clip = layer?.player?.clip;
-  if (!clip || !_transport) return;
-
-  const changed = (rule       !== undefined && rule       !== clip.window.rule)
-               || (widthSteps !== undefined && widthSteps !== clip.window.widthSteps);
-  if (rule       !== undefined) clip.window.rule       = rule;
-  if (widthSteps !== undefined) clip.window.widthSteps = widthSteps;
-
-  if (changed) _transport.rewindLayer(layer);   // also re-derives phase in ticks
-}
-
-export function setLayerSpeed(layer, multiplier) {
-  if (!layer || !_transport) return;
-  _transport.setRatio(layer, multiplier);
-  // The transport's ratio is what drives playback now, but keep the clip's
-  // declared rate true so a serialised clip still says how fast it should run.
-  layer.player.clip.timing.ticksPerSecond = Math.round(multiplier * _transport.rate);
-}
-
-export const setLayerPhase = (layer, phase) => _transport?.setPhase(layer, phase);
-
-/**
- * Re-render a layer's buffer at a different resolution.
- *
- * Buffer pixels per sequence pixel. Above 1 keeps a layer crisp when the stage
- * blows it up; below 1 is a deliberate coarseness. Unlike every other layer
- * control this one rebuilds the buffer — the size is fixed at `load()` — so it
- * belongs on a discrete control, not a slider somebody drags.
- *
- * Cost is quadratic, and the screen's pixel density multiplies it on top, so
- * 4x on a HiDPI display is nearer 64x the memory of 1x on a plain one.
- */
-export function setLayerDensity(layer, density) {
-  const clip = layer?.player?.clip;
-  if (!clip || !_transport) return;
-  // Above the screen's own density, which the player keeps (core/stage/player.js).
-  layer.player.load(clip, { renderScale: density });
-  _transport.rewindLayer(layer);
-  _announceStage();
-}
-
-// ── Stage transport ───────────────────────────────────────────────────
-
-export function playStage() {
-  if (!_stage?.layers.length || !_transport) return;
-  _stageActive = true;
-  _transport.play();
-  _announceStage();
-}
-
-/** Halt the clock but stay on the composition, frozen where it stands. */
-export function pauseStage() {
-  _transport?.pause();
-  _announceStage();
-}
-
-/** Give the canvas back to the brush, and rewind. */
-export function stopStage() {
-  _stageActive = false;
-  _transport?.pause();
-  _transport?.rewind();
-  _announceStage();
-}
-
-// ── Internal ────────────────────────────────────────────────────────────
-
-/** Drop any layer whose recording has been deleted from under it. */
-function _pruneOrphanLayers() {
-  if (!_stage) return;
-  const alive = new Set(SequenceRecorder.all);
-  for (const layer of [..._stage.layers]) {
-    if (!alive.has(layer.player.clip?.sequence)) dropLayer(layer);
-  }
-}
-
-function _announceStage() {
-  if (!_stage || !_transport) return;
-  const missing = [...new Set(_stage.layers.flatMap(l => l.player.missingFamilies))];
-  document.dispatchEvent(new CustomEvent('stage:changed', {
-    detail: {
-      active:          _stageActive,
-      playing:         _transport.playing,
-      layerCount:      _stage.layers.length,
-      missingFamilies: missing,
-    },
-  }));
-}
-
 /**
  * Offer a just-drawn stamp to the sequence recorder, tagged with the brush
  * identity JoyImage does not carry. Always buffered — recording only decides
@@ -522,8 +417,18 @@ function _recordStamp(joy) {
 
 function _syncBrush() {
   if (!_joyImg) return;
-  _joyImg.img     = BrushRegistry.getSprite(BrushRegistry.familyIdByIndex(familyIndex), spriteIndex);
+  const id = BrushRegistry.familyIdByIndex(familyIndex);
+  _joyImg.img     = BrushRegistry.getSprite(id, spriteIndex);
   _joyImg.pattern = PATTERNS[patternIndex];
+  // A family drawn with for the first time is decoded now (core/registry.js,
+  // C6d): the cursor has its picture — and stamps — once it is.
+  if (id && !BrushRegistry.isFamilyLoaded(id)) {
+    BrushRegistry.loadFamilies([id]).then(() => {
+      if (BrushRegistry.familyIdByIndex(familyIndex) !== id) return;
+      _syncBrush();
+      document.dispatchEvent(new CustomEvent('sketch:brushChanged', { detail: { familyIndex, spriteIndex } }));
+    });
+  }
 }
 
 function _clearOverlay() {

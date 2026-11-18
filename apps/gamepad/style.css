@@ -8,7 +8,6 @@
 @import '../../core/stack-panel.css';
 @import './ui/hud.css';
 @import './ui/gallery.css';
-@import './ui/bsel.css';
 @import './ui/timeline.css';
 @import '../../core/vault-panel.css';
 @import '../../core/sequence-viewer.css';
@@ -35,9 +34,10 @@ body {
 .app-main { --app-columns: minmax(0, 1fr) var(--side-r, var(--nb-side)); }
 #sketch-container canvas { display: block; }
 .gp-recording { margin: 6px 0 10px; }
+.gp-families { display: grid; gap: 4px; }
 
 /* ── Gamepad connection indicator ─────────────────────────────────────────────
-   Shown by app.js when navigator.getGamepads() is active */
+   Shown by main.js (ui/drawers.js `padNotice`) as a pad comes and goes */
 .gamepad-indicator {
   position: fixed;
   top: 92px;                 /* under core's title bar and the viewer's head (C6c) */

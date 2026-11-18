@@ -76,13 +76,12 @@ const APPS = {
   rig:       () => import('../rig/main.js'),
   puppet:    () => import('../rig/puppet/main.js'),     // the rig's puppet — its camera when asked for (S9i)
   '3d':      () => import('../3d/main.js'),
+  gamepad:   () => import('../gamepad/main.js'),     // a module since C6d (docs/gamepad.md)
 };
 const FIRST = 'vault';
 
-/** Pages of their own, linked and not mounted. */
-const PAGES = [
-  { name: 'gamepad', href: '../gamepad/', title: "The gamepad: its own page, until it is a module (C6d)" },
-];
+/** Pages of their own, linked and not mounted: none since the gamepad became a module (C6d). */
+const PAGES = [];
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);

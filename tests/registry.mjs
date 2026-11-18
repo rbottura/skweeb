@@ -174,5 +174,21 @@ ok('no doomed loads for an absent family',
      R.getSprite(id, 2).url, '/vault/objects/ckt_x_c/render.png');
 }
 
+// A replay's families decoded beside the selection, never in its place (C6d):
+// the gamepad's D-pad steps through what it chose while a recording plays.
+{
+  const id = 'ckt_1790000000000_aaa111';
+  R.setSelectedFamilies(['brushes', id]);
+  const asked = [];
+  const decoder = { loadImage(url, onLoad) { asked.push(url); onLoad({ url }); } };
+  await R.loadFamilies(['brushes'], { decoder });
+  ok('loadFamilies leaves the selection as it was', ids(R.allFamilyMetas()), ['brushes', id]);
+  ok('…and decodes nothing already decoded', asked.length, 0);
+  await R.loadFamilies(['brushes'], { decoder, fresh: true });
+  ok('…but again, fresh: a replay\'s', asked.length, 3);
+  R.setSelectedFamilies([id]);
+  ok('a selection changed keeps what is decoded', [R.isFamilyLoaded('brushes'), R.getSprite('brushes', 1).url.endsWith('b.png')], [true, true]);
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nall passed');
 process.exit(fails ? 1 : 0);

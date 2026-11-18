@@ -8,7 +8,10 @@
  * HiDPI screen's density, twice the pixels each way: a still saved is its
  * frame in the marks' units, the marks drawn again by core over it. Since
  * C6c: Start on the pad arms and disarms the recording, R3 steps the
- * pattern — a setting of core's panel, which holds the gamepad's.
+ * pattern — a setting of core's panel, which holds the gamepad's. Since
+ * C6d, a module with no splash: every family offered, brushes first, the
+ * next decoded the first time it is drawn with — and a recording replayed
+ * on the page leaves them all (core/registry.js `loadFamilies`).
  *
  * What it guards through C6 is the drawing and the replay with no p5 in
  * them: core's stage (C6a), then the page (C6b).
@@ -23,16 +26,10 @@ const { page } = c;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const sketch = `import('/apps/gamepad/sketch/gamepadSketch.js')`;
 
-/** The page opened, the brushes family alone — the one in git — chosen and launched. */
+/** The page opened — no splash since C6d: brushes, the family git keeps, decoded first. */
 async function open() {
   await c.go(c.base + '/apps/gamepad/');
-  await page.until(`!!document.querySelector('.bsel-card')`, { timeout: 20000 });
-  await page.eval(`(() => {
-    [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Clear All')?.click();
-    [...document.querySelectorAll('.bsel-card')].find(c => c.textContent.trim().startsWith('brushes'))?.click();
-    document.querySelector('#bsel-launch')?.click();
-  })()`);
-  await page.until(`!!document.querySelector('#sketch-container canvas')`, { timeout: 20000 });
+  await page.until(`!!document.querySelector('#sketch-container canvas') && !!document.querySelector('#side .pp-row')`, { timeout: 20000 });
   await wait(400);
 }
 
@@ -126,6 +123,24 @@ const replay = await page.eval(`(async () => {
 })()`);
 c.ok('exported as a loop, replayed by core: its frame the one saved, to the pixel', replay.saved && replay.length === replay.frames
   && replay.size.join() === replay.replayed.join() && replay.off === 0 && replay.ink > 50 && !replay.missing.length, JSON.stringify(replay));
+
+// Every family offered, brushes first; the D-pad's next one decoded when first drawn with — and the replay above left
+// the selection as it was (core/registry.js `loadFamilies`, C6d).
+const families = await page.eval(`(async () => {
+  const R = await import('/core/registry.js');
+  const m = await ${sketch};
+  const ids = R.allFamilyMetas().map(f => f.id);
+  ${press(13)}
+  const id = R.familyIdByIndex(m.familyIndex), before = R.isFamilyLoaded(id);
+  for (let i = 0; i < 200 && !R.isFamilyLoaded(id); i++) await new Promise(r => setTimeout(r, 50));
+  await new Promise(r => setTimeout(r, 100));
+  const marked = [...document.querySelectorAll('#side .gp-family')].findIndex(b => b.classList.contains('nb-btn--primary'));
+  return { count: ids.length, first: ids[0], index: m.familyIndex, id, before, loaded: R.isFamilyLoaded(id),
+    listed: document.querySelectorAll('#side .gp-family').length, marked };
+})()`);
+c.ok('every family offered, brushes first; the next decoded when first drawn with, the drawer marking it', families.count >= 2
+  && families.first === 'brushes' && families.index === 1 && !families.before && families.loaded && families.listed === families.count
+  && families.marked === 1, JSON.stringify(families));
 
 // R3: the next pattern — the setting's, so core's panel shows it; the panel holds the gamepad's settings.
 const pattern = await page.eval(`(async () => {

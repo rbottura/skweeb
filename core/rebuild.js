@@ -288,9 +288,13 @@ async function openViaApp(object, opts) {
 async function openMarks(object, { manifestUrl, renderScale = 1 } = {}) {
   const recipe = object.recipe;
 
+  // Its families decoded beside the page's own selection, never in its place:
+  // the gamepad drawing on this page keeps its brushes (C6d). Decoded again for
+  // each replay, as they were before: a print in tiles of a filter over a
+  // gamepad loop, its sprites shared with the replay before it, came out a
+  // little off — 0.26% of its pixels (check-print) — for a reason not yet found.
   await Registry.loadManifest(manifestUrl || manifestFor(object));
-  Registry.setSelectedFamilies(familiesIn(recipe));
-  await Registry.loadSelected();
+  await Registry.loadFamilies(familiesIn(recipe), { fresh: true });
 
   const clip = createClip(recipe.sequence, {
     overrides: recipe.clip && recipe.clip.overrides,

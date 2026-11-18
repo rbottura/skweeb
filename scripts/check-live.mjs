@@ -154,12 +154,8 @@ if (shown) {
 // ── The gamepad, and windows that go ────────────────────────────────────────
 
 const gamepad = await c.tab(c.base + '/apps/gamepad/');
-await gamepad.until(`!!document.querySelector('.bsel-card')`, { timeout: 20000 });
-await gamepad.eval(`(() => {
-  [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Clear All')?.click();
-  [...document.querySelectorAll('.bsel-card')].find(c => c.textContent.trim().startsWith('brushes'))?.click();
-  document.querySelector('#bsel-launch')?.click();
-})()`);
+// No splash since C6d: up once its canvas is.
+await gamepad.until(`!!document.querySelector('#sketch-container canvas')`, { timeout: 20000 });
 await page.until(`${adder('＋ gamepad')}?.title === 'nothing drawn yet'`, { timeout: 20000 }).catch(() => {});
 c.ok('the gamepad, with no drawer, is a window the others can stack', (await page.eval(`${adder('＋ gamepad')}?.title`)) === 'nothing drawn yet',
   JSON.stringify(await page.eval(adds)));

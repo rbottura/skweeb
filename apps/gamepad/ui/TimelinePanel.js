@@ -29,6 +29,7 @@ import { FILTER_PRESETS, BLEND_MODES, layerScale } from '../../../core/stage/sta
 import { SPEED_MULTIPLIERS, tickRateAt } from '../../../core/stage/transport.js';
 import { SequenceRecorder } from '../../../core/stage/recorder.js';
 import { exportLayerToVault } from '../core/exportSequence.js';
+import { listen, held } from '../../../core/scope.js';
 
 /** Phase steps offered, as fractions of a loop. */
 const PHASE_STEPS = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875];
@@ -62,7 +63,15 @@ export class TimelinePanel {
 
     // The page is fitted above whatever height this stands at (viewFit.js),
     // and a row's drawer opening changes that height.
-    new ResizeObserver(() => this._inset()).observe(this._el);
+    const sized = new ResizeObserver(() => this._inset());
+    sized.observe(this._el);
+    // With its mount (C6d): the observer, the clock it ticks while shown, the class it gave the page.
+    held(() => {
+      sized.disconnect();
+      this._stopTicking();
+      document.body.classList.remove('tl-open');
+      setViewInset(0);
+    });
   }
 
   _inset() { setViewInset(this._visible ? this._el.offsetHeight : 0); }
@@ -147,11 +156,12 @@ export class TimelinePanel {
     this._el.querySelector('#tl-close').addEventListener('click', () => this.hide());
 
     document.body.appendChild(this._el);
+    held(() => this._el.remove());          // with its mount (C6d)
   }
 
   _wire() {
     // The stage is the authority; every change to it comes back through here.
-    document.addEventListener('stage:changed', e => {
+    listen(document, 'stage:changed', e => {
       const count = e.detail.layerCount;
       // The first layer of a session opens the timeline by itself — you have
       // just made something and this is where it now lives.
@@ -165,7 +175,7 @@ export class TimelinePanel {
       if (this._visible) this._startTicking();
     });
 
-    document.addEventListener('ui:toggleTimeline', () => this.toggle());
+    listen(document, 'ui:toggleTimeline', () => this.toggle());
   }
 
   // ── Rows ────────────────────────────────────────────────────────────────────

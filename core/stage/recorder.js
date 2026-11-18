@@ -87,6 +87,23 @@ export const SequenceRecorder = {
   },
 
   /**
+   * The buffer as a still's marks left it, their times kept — a drawing come
+   * back to be worked on (the gamepad, C6d): the next save's recipe has them,
+   * and the next mark comes after them, in time as in order.
+   * @param {number} w
+   * @param {number} h
+   * @param {object[]} events  a still's marks (its recipe's `marks`)
+   */
+  restoreBuffer(w, h, events) {
+    const marks = (events || []).map(e => ({ ...e }));
+    const last = marks.length ? marks[marks.length - 1] : null;
+    _buffer = { w, h, startedAt: Date.now() - (last && last.t > 0 ? last.t : 0), events: marks };
+    _lastEvent = last;
+    if (_active) _active.from = marks.length;
+    _dispatch('sequence:bufferReset', {});
+  },
+
+  /**
    * Arm the recorder.
    * @param {number} w  canvas width at record time
    * @param {number} h  canvas height at record time

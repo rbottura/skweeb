@@ -171,13 +171,7 @@ if (drawing) {
 const DL = path.join(c.dir, 'downloads');
 await page.downloadsTo(DL);
 await c.go(c.base + '/apps/gamepad/');
-await page.until(`!!document.querySelector('.bsel-card')`, { timeout: 20000 });
-// The brushes family alone, which is in git: Clear All, then its card.
-await page.eval(`(() => {
-  [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Clear All')?.click();
-  [...document.querySelectorAll('.bsel-card')].find(c => c.textContent.trim().startsWith('brushes'))?.click();
-})()`);
-await page.click(`document.querySelector('#bsel-launch')`);
+// No splash since C6d: it draws with brushes, the family git keeps, decoded first.
 await page.until(`!!document.querySelector('#sketch-container canvas') && !!document.querySelector('.gp-print')`, { timeout: 20000 });
 await wait(500);
 // A pad that is not there: its stick held over, A held, the right stick turning — a stroke, then mirrored.

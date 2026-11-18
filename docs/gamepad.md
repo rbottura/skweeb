@@ -58,8 +58,8 @@ skill, *Porting a sketch*).
 | C6a | **core's stage off p5**: a clip's buffer a canvas, the layers blitted on a 2D context, the sprites decoded images, a recording replayed with no hidden p5 | `gamepad/stage-2d` | M | **landed 2026-11-18** — below; `check-gamepad`, new |
 | C6b | **the page off p5**: its canvas, the ink, the cursor, the reference, the view and a still's composite in Canvas 2D, on its own frame clock; p5 and p5.joystick out of the page, `core/libs/p5.min.js` out of the repo | `gamepad/canvas` | M | **landed 2026-11-18** — below; `check-gamepad` at twice the density |
 | C6c | **its params a schema**: `params.js` in core's panel, core's bar and keys, the format core's; the pad still draws, Start arms the recording; `ParamPanel.js`, the status bar and the help card gone | `gamepad/params` | M | **landed 2026-11-18** — below; `check-gamepad`, `tests/gamepad.mjs` |
-| C6d | **a module**: `mount(host)`, `unmount()`; the families a section of its panel, each loaded when first drawn with, no splash; cluster mounts it — and the heart can (M16n) | `gamepad/module` | M | next |
-| C6e | **its objects its own**: `rebuild.js`, a still's and a recording's replay moved out of core; `?open=`, a still's marks back on the ink, a recording back on the timeline | `gamepad/reopen` | M | |
+| C6d | **a module**: `mount(host)`, `unmount()`; the families a section of its panel, each loaded when first drawn with, no splash; cluster mounts it — and the heart can (M16n) | `gamepad/module` | M | **landed 2026-11-18** — below; `check-mount`, `check-cluster` |
+| C6e | **its objects its own**: `rebuild.js`, a still's and a recording's replay moved out of core; `?open=`, a still's marks back on the ink, a recording back on the timeline | `gamepad/reopen` | M | next |
 | C6f | **the timeline on core's kit**: core's Transport its clock, a layer's drawer rows of a schema; a recording in the stack played in its time | `gamepad/timeline` | M | waits: the author — below |
 | C6g | **the scratchpad**: the gallery panel, IndexedDB and the publisher | `gamepad/scratchpad` | S | waits: the author — below |
 
@@ -126,13 +126,26 @@ brushes — each loaded the first time it is drawn with, so the D-pad steps
 through all of them. Cluster's strip mounts it, its link gone. *Done when*
 `check-mount` and `check-cluster` mount it twice round with nothing held
 more, and it runs alone as ever (rule 7).
+*Landed 2026-11-18*: `main.js`, `app.js` as it was; its listeners, the
+pad's, its frame clock and its keys go with its scope (`core/scope.js`),
+the pad's notices with them (`ui/drawers.js`). The Families drawer offers
+every family, brushes first; one is decoded the first time it is drawn with
+(`core/registry.js` `loadFamilies`). Two faults of before, mended: the
+gamepad's manifest and core's were read as two — the vault's families lost
+— and a recording replayed on the page took the selection over, the D-pad
+with it. A scene mounting it again gives back what it left — its settings,
+its brush, its marks stamped again (`restamp`) — and `?open=` a still of
+its own does the same. A replay decodes its families again each time, as
+before: shared across replays, a print in tiles of a filter over a gamepad
+loop came out 0.26% off (`check-print`) — why, not found. The timeline's
+stage left the sketch at its seam (`sketch/stage.js`).
 
 **C6e — its objects its own.** `apps/gamepad/rebuild.js`: `openObject` for
 a still (`core/stage/still.js`) and a recording (the player), `reopens`,
 `redraws` — what `core/rebuild.js` does for the gamepad today, moved where
-the skill puts it. `?open=<id>`: a still's marks stamped again on the ink,
-its brush and params restored; a recording a layer of the timeline again.
-*Done when* the vault offers *Open in gamepad ↗* and it opens as saved.
+the skill puts it — a still's `?open=` came with C6d; a recording a layer
+of the timeline again. *Done when* the vault offers *Open in gamepad ↗* and
+it opens as saved.
 
 **C6f — the timeline, the author's.** The timeline is a compositor of its
 own: recordings stacked with a blend, a filter, a transform and a phase —

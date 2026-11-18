@@ -14,6 +14,7 @@
 import { InputManager, MODE } from '../core/inputManager.js';
 import { ImageStore }          from '../core/imageStore.js';
 import { GalleryPublisher }    from '../core/galleryPublisher.js';
+import { listen, held } from '../../../core/scope.js';
 
 export class GalleryPanel {
   constructor() {
@@ -108,6 +109,7 @@ export class GalleryPanel {
     this._el.querySelector('#gp-pub-all').addEventListener('click', () => this._publishAll());
 
     document.body.appendChild(this._el);
+    held(() => this._el.remove());          // with its mount (C6d)
   }
 
   // ── Events ───────────────────────────────────────────────────────────────────
@@ -132,10 +134,10 @@ export class GalleryPanel {
     InputManager.on('galleryDelete',   () => { if (this._visible) this._delete(); });
     InputManager.on('galleryLoad',     () => { if (this._visible) this._loadToCanvas(); });
 
-    document.addEventListener('ui:toggleGallery', () => this.toggle());
+    listen(document, 'ui:toggleGallery', () => this.toggle());
 
     // Reflect new saves without opening
-    document.addEventListener('imagestore:saved', () => {
+    listen(document, 'imagestore:saved', () => {
       if (this._visible) {
         this._active = ImageStore.count - 1;
         this._refresh();
@@ -145,7 +147,7 @@ export class GalleryPanel {
       }
     });
 
-    document.addEventListener('imagestore:removed', () => {
+    listen(document, 'imagestore:removed', () => {
       if (this._visible) {
         this._active = Math.max(0, Math.min(this._active, ImageStore.count - 1));
         this._refresh();
@@ -153,13 +155,13 @@ export class GalleryPanel {
     });
 
     // Images restored from IndexedDB on page load
-    document.addEventListener('imagestore:hydrated', e => {
+    listen(document, 'imagestore:hydrated', e => {
       this._active = Math.max(0, ImageStore.count - 1);
       if (this._visible) this._refresh();
       else if (e.detail.count > 0) this._flashRestoredBadge(e.detail.count);
     });
 
-    document.addEventListener('imagestore:cleared', () => {
+    listen(document, 'imagestore:cleared', () => {
       this._active = 0;
       if (this._visible) this._refresh();
     });

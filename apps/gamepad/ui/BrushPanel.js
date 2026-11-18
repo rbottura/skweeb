@@ -19,6 +19,7 @@
 
 import * as BrushRegistry from '../../../core/registry.js';
 import { InputManager, MODE } from '../core/inputManager.js';
+import { listen, held } from '../../../core/scope.js';
 
 const VISIBLE_SPRITES = 7; // how many sprites show at once in the row
 
@@ -111,6 +112,7 @@ export class BrushPanel {
     this._el.querySelector('#bp-fam-next').addEventListener('click', () => this._navigate('down'));
 
     document.body.appendChild(this._el);
+    held(() => this._el.remove());          // with its mount (C6d)
   }
 
   // ── Events ───────────────────────────────────────────────────────────────────
@@ -133,7 +135,7 @@ export class BrushPanel {
     });
 
     // Toggled from outside (sketch.js CustomEvent)
-    document.addEventListener('ui:toggleBrushPanel', () => {
+    listen(document, 'ui:toggleBrushPanel', () => {
       if (!BrushRegistry.isLoaded()) return;
       // Import current indices from sketch module lazily
       import('../sketch/gamepadSketch.js').then(m => {

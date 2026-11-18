@@ -35,7 +35,7 @@ import { startCheck, countHeld } from './check-kit.mjs';
 const APPS = [
   ['vault', 'footer.bar'], ['grid', '.pp-row'], ['ckt', '.pp-row'], ['compose', '.pp-row'], ['filter', '.pp-row'], ['shader', '.pp-row'],
   ['fractals', '.pp-row'], ['particles', '.pp-row'], ['map', '.pp-row'], ['play', 'footer.bar'], ['garden', '.pp-row'], ['rig', '.pp-row'],
-  ['puppet', '.pp-row'], ['3d', '.pp-row'],
+  ['puppet', '.pp-row'], ['3d', '.pp-row'], ['gamepad', '.pp-row'],
 ];
 const BOOTED = Object.fromEntries(APPS);
 
@@ -308,7 +308,8 @@ await open('fractals');
 await click('vault');
 await booted('vault');
 await page.until(`/ · still/.test(document.querySelector('.bar-say')?.textContent || '')`, { timeout: 20000 });
-c.ok('the vault app back: the still it drew, drawn again', (await page.eval(`document.querySelector('.bar-say').textContent`)) === drawn, drawn);
+const drawnBack = await page.eval(`document.querySelector('.bar-say').textContent`);
+c.ok('the vault app back: the still it drew, drawn again', drawnBack === drawn, `${drawn} → ${drawnBack}`);
 
 // ── The links between apps, taken in place ──────────────────────────────────
 // A loose sequence particles made, as the server lists it: its card in the vault app, its detail's links.
@@ -389,8 +390,7 @@ await page.eval(`(() => { const li = [...document.querySelectorAll('.pal-list li
 await booted('map');
 c.ok('…and takes it: map mounted', same(await marked(), ['map']));
 
-c.ok('the gamepad, its own page: a link out, mounted nowhere', await page.eval(`(() => {
-  const a = document.querySelector('a.cl-page'); return !!a && a.pathname === '/apps/gamepad/' && a.target === '_blank'; })()`));
+c.ok('no app is a page of its own: the gamepad mounted with the others (C6d)', await page.eval(`!document.querySelector('a.cl-page')`));
 
 // MediaPipe, started by the puppet's "camera", says what it runs on through console.error: its, not ours (check-puppet).
 const noise = c.quiet().filter(e => !/XNNPACK|TensorFlow Lite|gl_context|landmark_projection|W0000|I0000/.test(e.text || ''));
