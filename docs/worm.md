@@ -104,6 +104,10 @@ wait their turn, in the order the author picks.
 | M16h | **the worm on limbs**: a stroke a limb, bones by stroke — the rig in 3D | `3d/limbs` | L | later |
 | M16i | **a bigger planet**: detail near the eye, a cube-sphere in chunks | `3d/planet-lod` | M | later |
 | M16j | **a world saved**: its planet, its worms, its phases, an object — as a map is | `3d/world` | M | later; its type the author's |
+| M16k | **the heart reached**: six ways in, a hole each; a cut through four, seen flat, the worm its drawing in it, moved up, down, left, right; the heart's hollow walked inside, a wider field; and out again | `3d/heart` | M | **landed 2026-11-18** — below; `check-3d-heart`: down the north, walked in the heart, up by another |
+| M16l | **the matrix**: a sphere floating in the heart, translucent, viscous; inside it, the planet's things itemized — a stone, a tuft | `3d/matrix` | M | next |
+| M16m | **a brush found**: one of the legacy brushes' shapes on the ground, picked up, carried | `3d/found` | S | after l |
+| M16n | **drawn in the heart**: the gamepad in the heart, drawing with the brush found; the drawing put in the matrix; found on the ground in 3D, lofted | `3d/drawn-heart` | M | after m; how the gamepad comes into the heart, the author's |
 
 ## The planet walked — M16a, landed 2026-11-18
 
@@ -197,6 +201,52 @@ at size 1, growing with the worm.
   trail; the things stand where they were, the ridge under them; the
   camera does not go down with it.
 
+## The heart — the author's, 2026-11-18
+
+"Les prochains steps sont bien mais on les met en pause pour
+l'introduction de nouveaux éléments en priorité : la planète a un cœur,
+une zone creuse en son centre, atteignable. Pour y accéder, 6 points
+d'accès, 2 aux pôles nord et sud, et 4 sur l'équateur, répartis à égale
+distance à chaque 90 degrés du cercle de l'équateur. Cela revient à
+sectionner la planète en 3 plans, un par axe, et chaque plan connecté à 4
+points d'accès en surface. Entrer dans un point d'accès passerait la vue
+en 2D, une vue section de la planète avec l'avatar en 2D ; au joystick les
+déplacements passent en avant haut bas gauche droite, et pour les
+commandes clavier c'est à tester : Z vers le haut et S vers le bas, Q et D
+toujours gauche droite. Une fois sorti dans le cœur, (draft) on repasse en
+3D, fov plus large pour un espace plus réduit ; on trouve une sphère
+flottante translucide en plein centre (matrice de planète) qui semble
+faite d'un liquide visqueux, présentant flottant à l'intérieur la version
+itémisée des éléments qu'on peut trouver sur et dans la planète — si il y
+a des rochers en surface, on trouverait un petit rocher flottant dans le
+cœur, etc. Une action dans le cœur serait de pouvoir y déposer des items
+qu'on trouve dans le monde : on peut trouver une des formes des legacy
+brushes en surface, activer le gamepad dans le cœur, dessiner avec le
+motif, placer le motif dans la matrice, puis retrouver la forme dessinée
+en 3D en surface."
+
+## The heart reached — M16k, landed 2026-11-18
+
+- **Six ways in** (`access.js`): the planet's three axes, both ways — its
+  north and south, four round its equator a right angle apart — turned so
+  the start stands as far from all as it can, between three. A hole each
+  on the ground, a rim round it, nothing growing in it.
+- **Three cuts**, each square to one axis through the four ways of the
+  other two, seen one way always: the equator's from the north, the two
+  through the poles the north up — so up, down, left and right are the
+  cut's. A way lies in two: walked into, the one its heading lies in most.
+- **A cut seen flat** (`section.js`): the sky round it, its ground a band,
+  its earth in strata, four tunnels `tunnel` wide to the heart, the
+  heart's hollow; the worm its drawing as drawn — its own body, flat, its
+  wave in the drawing's plane — moved by the stick or ZQSD, held in the
+  tunnels, its head turned to where it goes, its back up as it faces.
+- **The heart** (`heart.js`): a hollow `core` of the radius round, walked
+  on the inside of its wall — its up the heart's middle — the field 75°;
+  the six tunnels' mouths on it. Into a mouth, a cut at its bottom; out of
+  a cut at the ground, beside that way's hole, facing away.
+- **For now**: each way between is a cut; a buried worm, or one in a
+  phase, goes into no way; the heart's wall is the reality's earth.
+
 ## Settled, 2026-11-18
 
 1. **M16 now**: "go M16, all gas no breaks".
@@ -213,3 +263,5 @@ at size 1, growing with the worm.
    its rows are tuned by hand, and a world becomes an object at M16j.
 6. **Two paces and a dive** (M16c): a speed on the ground and one under
    it, and a dive between the two, played as an animation.
+7. **The heart first** (after M16c): M16d to j wait; the planet's heart,
+   its ways in, its matrix and what is put in it come before them.

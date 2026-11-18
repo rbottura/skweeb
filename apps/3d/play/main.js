@@ -18,6 +18,10 @@
  * one renderer (../renderer.js) — the page's one GPU device, WebGL2 where
  * there is none — its picture handed to the viewer's canvas, never copied.
  *
+ * Or the worm is inside (places.js): walked into one of the planet's six
+ * ways in, down a tunnel of its cut, seen flat (section.js), into its
+ * heart, walked on the inside of its hollow (heart.js) — and out again.
+ *
  * A module (core/mount.js): `mount(host)` and `unmount()`, its page mounting
  * it on itself; unmounted, its frames stop, its planet and worms are let go
  * of, its keys are core's again. Nothing happens at import. Nothing it does
@@ -32,7 +36,7 @@ import { ParamPanel } from '../../../core/ParamPanel.js';
 import { Vault }      from '../../../core/vault.js';
 import { openRenderer } from '../renderer.js';
 import { drawnOf }    from '../drawn.js';
-import { playParams, GROUPS, WORM_KEYS, PLANET_KEYS, PLACE_KEYS, REALITY_KEYS } from './params.js';
+import { playParams, GROUPS, WORM_KEYS, PLANET_KEYS, PLACE_KEYS, REALITY_KEYS, HEART_KEYS } from './params.js';
 import { Planet }     from './planet.js';
 import { Worm }       from './worm.js';
 import { walkerAt, step, settle, frameOf } from './walker.js';
@@ -41,6 +45,10 @@ import { Hands }      from './hands.js';
 import { Phasing }    from './phasing.js';
 import { lunge }      from './dive.js';
 import { Dune }       from './dune.js';
+import { Section }    from './section.js';
+import { Heart }      from './heart.js';
+import { WAYS, wayAt } from './access.js';
+import { hang, heartOf, enterCut, tickCut, tickHeart, refit, visit as visitWay, HEART_FOV } from './places.js';
 
 const MARKUP = `
   <main class="app-main">
@@ -91,7 +99,8 @@ async function start(root, mine) {
   phasing.add(new Worm(), walkerAt(v.radius), { ground: v.otherGround, sky: v.otherSky });
   const dune = new Dune();
   planet.scene.add(dune.mesh);
-  const s = { params, planet, phasing, dune, renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
+  const s = { params, planet, phasing, dune, section: new Section(), heart: new Heart(), place: 'ground', aspect: 1.6,
+              renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
               hands: new Hands(mine), frames: 0, snap: true, made: [{}, {}], asked: [0, 0] };
   live = s;
 
@@ -154,6 +163,7 @@ async function start(root, mine) {
     }
     if (PLACE_KEYS.includes(key)) placeOther();
     if (REALITY_KEYS.includes(key)) realities();
+    if (HEART_KEYS.includes(key)) refit(s);
     if (key === 'avatar') chooseWorm(0);
     else if (key === 'other') chooseWorm(1);
     else if (WORM_KEYS.includes(key) || key === 'spectral') { shapeWorm(0); shapeWorm(1); }
@@ -177,6 +187,8 @@ async function start(root, mine) {
     for (const b of phasing.bodies) b.worm.dispose();
     phasing.dispose();
     dune.dispose();
+    s.section.dispose();
+    s.heart.dispose();
     planet.dispose();
     if (live === s) live = null;
   });
@@ -188,16 +200,14 @@ function layReaches(s) {
   for (const b of s.phasing.bodies) b.reach.lay(b.walker.p, v.radius, v.reach);
 }
 
-/** Body `b` posed where it has walked — its wave, its dive, the planet's curve — and hung in its walker's frame. */
-function hang(s, b) {
-  const v = s.params.values;
-  b.worm.pose(b.walker.walked, { radius: v.radius, dive: b.dive, leap: v.leap * v.size, depth: v.depth * v.size });
-  b.worm.place(frameOf(b.walker), b.walker.p);
-}
-
-/** One frame's motion: the walked worm stepped, dived, waved and hung — or a passage moved on — and the camera eased. */
+/**
+ * One frame's motion: the walked worm stepped, dived, waved and hung — or a passage moved on — and the camera eased;
+ * inside the planet, its cut's or its heart's (places.js).
+ */
 function tick(s, dt) {
   const v = s.params.values, P = s.phasing;
+  if (s.place === 'cut') return tickCut(s, dt, s.hands.read());
+  if (s.place === 'heart') return tickHeart(s, dt, s.hands.read());
   if (!P.passage) {
     const me = P.walked, { worm, walker, dive } = me, hands = s.hands.read(), long = worm.front - worm.back;
     if (hands.dive) dive.toggle(walker.walked, worm.front);
@@ -207,6 +217,8 @@ function tick(s, dt) {
     dive.advance(walker.walked, worm.back, long);
     hang(s, me);
     s.dune.lay(worm.spine, frameOf(walker), walker.p, s.planet, { ridge: v.ridge * v.size, spread: v.spread * v.size });
+    const way = dive.state === 'surface' ? wayAt(walker.p, v.radius, heartOf(v).width / 2) : -1;
+    if (way >= 0) return enterCut(s, way);          // walked into a way in: down into its cut
     const into = P.within(v.reach);
     if (into >= 0) P.begin(into, { ghosts: v.ghosts, spectral: v.spectral, arch: 1.5 * v.size });
   }
@@ -235,13 +247,23 @@ function draw(s, canvas, view) {
   const fit = Math.min(1, LONGEST / Math.max(w, h), s.renderer.maxSide / Math.max(w, h));
   w = Math.max(2, Math.round(w * fit));
   h = Math.max(2, Math.round(h * fit));
+  s.aspect = w / h;
   s.camera.aspect = w / h;
+  s.camera.fov = s.place === 'heart' ? HEART_FOV : 50;
   s.camera.far = 4 * s.planet.radius + 200;
   s.camera.updateProjectionMatrix();
-  const bitmap = s.renderer.draw(s.planet.scene, s.camera, w, h);
+  const scene = s.place === 'cut' ? s.section.scene : s.place === 'heart' ? s.heart.scene : s.planet.scene;
+  const bitmap = s.renderer.draw(scene, s.place === 'cut' ? s.section.camera : s.camera, w, h);
   if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
   view.transferFromImageBitmap(bitmap);
   s.frames++;
+}
+
+/** For the checks: the walked worm set down `away` from way `way` — on the ground, or in the heart — facing it. */
+export function visit(way, given = {}) {
+  if (!live) return false;
+  visitWay(live, way, given);
+  return true;
 }
 
 /** Rows set from outside, as the panel would set them — a check's, a scene's. False, unmounted. */
@@ -254,11 +276,12 @@ export function tune(values) {
 /**
  * Where things stand, for the checks — or null, unmounted: the walked worm and its walker, the camera, the frozen
  * one, a passage's stage and phase, the bridge's lights, each body's place, shell and radius, the frames drawn;
- * the walked worm's dive, how much of it is under, the ground's highest over it, its head's height and its top's.
+ * the walked worm's dive, how much of it is under, the ground's highest over it, its head's height and its top's;
+ * where it is — the ground, a cut, the heart — the ways in, and in a cut where it is on it.
  */
 export function peek() {
   if (!live) return null;
-  const { phasing: P, camera, planet, renderer, frames } = live;
+  const { phasing: P, camera, planet, renderer, frames, section: cut } = live;
   const me = P.walked, worm = me.worm, f = frameOf(me.walker), positions = worm.mesh.geometry.getAttribute('position');
   const nose = worm.spine.reduce((a, b) => (b[0] > a[0] ? b : a), [-Infinity, 0, 0, 0]);
   return { radius: planet.radius, p: me.walker.p.toArray(), f: me.walker.f.toArray(), up: f.up.toArray(), walked: me.walker.walked,
@@ -269,5 +292,8 @@ export function peek() {
            lights: P.passage ? P.passage.bridge.lights() : [], bodies: P.bodies.map(b => b.walker.p.toArray()),
            shells: P.bodies.map(b => b.worm.shellAt), reach: P.bodies.map(b => b.reach.strength.value),
            dive: me.dive.state, sunk: live.dune.sunk, ridge: live.dune.height, nose: nose[1],
-           top: worm.spine.reduce((t, r) => Math.max(t, r[4]), -Infinity) };
+           top: worm.spine.reduce((t, r) => Math.max(t, r[4]), -Infinity),
+           place: live.place, ways: WAYS.map(w => w.dir.toArray()), inside: !!me.walker.inside, fov: camera.fov,
+           heart: heartOf(live.params.values).heart,
+           cut: live.place === 'cut' ? { q: [...cut.q], heading: cut.heading, face: cut.face, across: cut.plane.across } : null };
 }

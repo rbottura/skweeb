@@ -10,6 +10,10 @@
  * heading back in its tangent plane. `walked` is the signed distance gone,
  * what the worm's wave is timed by (worm.js).
  *
+ * Or on the inside of a sphere, `inside` — the planet's heart, walked on
+ * its wall (heart.js): its up the sphere's middle, so its ground curves up
+ * round it; a step the same turn the other way round.
+ *
  * Pure: three's core only, Node runs it (tests/3d-play.mjs).
  */
 
@@ -23,6 +27,7 @@ export function walkerAt(radius) {
 /** Where it stands as a frame: its up, its forward, its right — `forward × up`, so a right-handed frame. */
 export function frameOf(w) {
   const up = w.p.clone().normalize();
+  if (w.inside) up.negate();
   return { up, forward: w.f.clone(), right: w.f.clone().cross(up).normalize() };
 }
 
@@ -34,10 +39,12 @@ const axis = new Vector3();
  */
 export function step(w, { move = 0, turn = 0 }, dt, { radius, speed, turnRate }) {
   const up = w.p.clone().normalize();
+  if (w.inside) up.negate();
   if (turn) w.f.applyAxisAngle(up, -turn * turnRate * dt);
   const d = move * speed * dt;
   if (d) {
     axis.crossVectors(up, w.f).normalize();
+    if (w.inside) axis.negate();
     const angle = d / radius;
     w.p.applyAxisAngle(axis, angle);
     w.f.applyAxisAngle(axis, angle);

@@ -111,6 +111,7 @@ export class Worm {
     this.shellAt = 0;        // 0 the body whole, 1 a shell
     this.v = null;           // loft's values, at rest
     this.seen = 'side';
+    this.sway = 'side';
     this.size = 1;
     this.toward = 1;         // its head along the drawing's x: 1 or −1
     this.headAtEnd = true;   // its head where its stroke ends
@@ -148,6 +149,7 @@ export class Worm {
     }
     this.v = v;
     this.seen = seen === 'above' ? 'above' : 'side';
+    this.sway = sway;
     this.size = size;
     this.take(g);
     this.phase = 0;
@@ -205,7 +207,7 @@ export class Worm {
   pose(walked, { radius = Infinity, dive = null, leap = 0, depth = 0 } = {}) {
     if (!this.v) return false;
     const phase = this.v.wave > 0 ? this.phaseAt(walked) : 0;
-    if (Math.abs(phase - this.phase) >= 1e-4) this.loft(phase);
+    if (!(Math.abs(phase - this.phase) < 1e-4)) this.loft(phase);
     const under = dive && dive.state !== 'surface' ? dive : null;
     const key = `${this.phase}|${radius}|${under ? `${under.keyAt(walked)}|${leap}|${depth}` : 'surface'}`;
     if (key === this.laid) return false;
@@ -267,6 +269,15 @@ export class Worm {
     if (lit) normals.needsUpdate = true;
     g.computeBoundingSphere();
     this.spine = spineOf(flat, g.userData.bodies || []);
+  }
+
+  /** Its wave in its drawing's own plane — seen flat, in a cut (section.js) — or, `flat` false, as it was shaped. */
+  flatten(flat) {
+    const way = flat ? 'side' : waveWayOf(this.seen, this.sway);
+    if (!this.v || this.v.waveWay === way) return this;
+    this.v.waveWay = way;
+    this.phase = NaN;            // lofted again at its next pose
+    return this;
   }
 
   /** Hung in a walker's frame at `p`: its drawing's axes the frame's, its lowest point on the ground. */

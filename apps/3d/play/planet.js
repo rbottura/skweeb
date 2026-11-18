@@ -11,16 +11,19 @@
  * sun from one side, the sky's light from all, so its night side is the
  * sky's colour dimmed, never black.
  *
- * Built again when its rows change; a bigger planet, past a few hundred
- * units, wants detail by distance (M16i).
+ * Six holes in it, the ways into its heart (access.js), a rim round each,
+ * nothing growing in them. Built again when its rows change; a bigger
+ * planet, past a few hundred units, wants detail by distance (M16i).
  *
  * Pure: three's core only, Node runs it (tests/3d-play.mjs).
  */
 
 import {
   Scene, Color, Mesh, IcosahedronGeometry, ConeGeometry, DodecahedronGeometry, InstancedMesh, MeshToonMaterial,
-  DirectionalLight, HemisphereLight, Object3D, Vector3, Float32BufferAttribute,
+  DirectionalLight, HemisphereLight, Object3D, Vector3, Float32BufferAttribute, CircleGeometry, TorusGeometry,
+  MeshBasicMaterial, Quaternion,
 } from '../../../core/libs/three/three.core.js';
+import { HOLLOW, WAYS } from './access.js';
 import { makeRng } from '../../../core/rng.js';
 import { rampOf } from '../look.js';
 
@@ -51,7 +54,7 @@ export function scatter(rng, count) {
 }
 
 const holder = new Object3D();
-const Y = new Vector3(0, 1, 0);
+const Y = new Vector3(0, 1, 0), Z = new Vector3(0, 0, 1);
 const WHITE = new Color('#ffffff');
 
 export class Planet {
@@ -63,6 +66,7 @@ export class Planet {
     this.scene.add(this.sky, this.sun);
     this.ground = this.tufts = null;
     this.things = [];
+    this.holes = [];         // the ways in: a hole and its rim each
     this.radius = 0;
     this.waves = [];         // the ground's patches' waves: the dune shades its patch by them (dune.js)
     this.look = '';
@@ -87,6 +91,18 @@ export class Planet {
     this.ground = new Mesh(geometry, new MeshToonMaterial({ vertexColors: true, gradientMap: rampOf(3) }));
     this.scene.add(this.ground);
 
+    // The ways into the heart: a hole each, a rim round it — as wide as a tunnel is for the worm's size.
+    const size = v.size || 1, mouth = this.mouth = ((v.tunnel || 3.2) * size) / 2;
+    for (const way of WAYS) {
+      const facing = new Quaternion().setFromUnitVectors(Z, way.dir);
+      const hole = new Mesh(new CircleGeometry(mouth, 48), new MeshBasicMaterial({ color: HOLLOW }));
+      const rim = new Mesh(new TorusGeometry(mouth, 0.14 * size, 8, 48), new MeshToonMaterial({ color: '#8f877a', gradientMap: rampOf(3) }));
+      hole.position.copy(way.dir).multiplyScalar(radius + 0.03);
+      rim.position.copy(way.dir).multiplyScalar(radius);
+      for (const m of [hole, rim]) { m.quaternion.copy(facing); this.holes.push(m); this.scene.add(m); }
+    }
+    const inHole = up => WAYS.some(w => radius * up.angleTo(w.dir) < mouth + 0.8 * size);
+
     // Things: tufts most, stones the rest — each its place, its turn about its up and its size from the seed.
     const count = Math.max(0, Math.round(v.things));
     const tufts = Math.round(count * 0.7), stones = count - tufts;
@@ -102,7 +118,7 @@ export class Planet {
         holder.position.copy(up).multiplyScalar(radius);
         holder.quaternion.setFromUnitVectors(Y, up);
         holder.rotateY(2 * Math.PI * rng());
-        holder.scale.setScalar(0.5 + 1.3 * rng());
+        holder.scale.setScalar((0.5 + 1.3 * rng()) * (inHole(up) ? 0 : 1));     // none grows in a hole
         holder.updateMatrix();
         mesh.setMatrixAt(i, holder.matrix);
       });
@@ -134,7 +150,7 @@ export class Planet {
   }
 
   dispose() {
-    for (const mesh of [this.ground, ...this.things]) {
+    for (const mesh of [this.ground, ...this.things, ...this.holes]) {
       if (!mesh) continue;
       this.scene.remove(mesh);
       mesh.geometry.dispose();
@@ -143,5 +159,6 @@ export class Planet {
     }
     this.ground = this.tufts = null;
     this.things = [];
+    this.holes = [];
   }
 }

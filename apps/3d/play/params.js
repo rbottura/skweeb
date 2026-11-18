@@ -15,6 +15,7 @@ export const GROUPS = {
   worm: { label: 'Worm', open: true },
   walk: { label: 'Walk', open: true },
   dune: { label: 'Under the ground', open: true },
+  heart: { label: 'Heart', open: true },
   phase: { label: 'Phase', open: true },
   planet: { label: 'Planet', open: false },
   camera: { label: 'Camera', open: false },
@@ -24,7 +25,10 @@ export const GROUPS = {
 export const WORM_KEYS = ['avatar', 'other', 'seen', 'head', 'size', 'colour', 'otherColour', 'wave', 'waves', 'sway'];
 
 /** The rows the planet is built from: a change to one builds it again. */
-export const PLANET_KEYS = ['radius', 'things', 'seed'];
+export const PLANET_KEYS = ['radius', 'things', 'seed', 'tunnel', 'size'];
+
+/** The rows the heart and its cuts are built from: a change to one builds again the one the worm is in. */
+export const HEART_KEYS = ['core', 'tunnel', 'size', 'radius'];
 
 /** Where the frozen worm stands, and its radius: a change to one places it again. */
 export const PLACE_KEYS = ['away', 'bearing', 'reach', 'radius'];
@@ -66,6 +70,12 @@ export function playParams() {
              group: 'dune' },
     spread: { type: 'range', min: 0.05, max: 3, step: 'any', log: true, default: 0.35, label: 'the raised ground\'s width, units',
               group: 'dune' },
+
+    // The heart: a hollow at the planet's middle, six ways down to it — the poles, four round the equator.
+    core: { type: 'range', min: 0.15, max: 0.8, step: 'any', default: 0.4, label: 'its heart, a share of its radius',
+            group: 'heart' },
+    tunnel: { type: 'range', min: 1, max: 8, step: 'any', default: 3.2, label: 'the ways down, how wide, units',
+              group: 'heart' },
 
     // M16b: a worm frozen in space-time, a phase of another reality, and the passage into it.
     other: { type: 'object', accepts: ['still', 'sequence', 'model'], by: ['gamepad', '3d'],
