@@ -1,7 +1,8 @@
 /**
  * gamepadSketch.js
- * Thin p5 instance that delegates all logic to core/ modules.
- * Exported as createSketch(container) → returns the p5 instance.
+ * The page's canvas, the ink and the cursor, drawn on 2D contexts once a
+ * frame — p5's until C6b (docs/gamepad.md); all else is core/'s modules.
+ * createSketch(container) → the page's canvas.
  */
 
 import * as BrushRegistry from '../../../core/registry.js';
@@ -14,7 +15,8 @@ import { createClip }            from '../../../core/stage/clip.js';
 import { SequenceStage }         from '../../../core/stage/stage.js';
 import { SequenceTransport }     from '../../../core/stage/transport.js';
 import * as StillFrame           from '../core/stillFrame.js';
-import { applyView, drawPageEdge } from './viewFit.js';
+import { viewNow, drawPageEdge } from './viewFit.js';
+import { Surface, picture }   from './surface.js';
 
 export { setViewInset } from './viewFit.js';
 
@@ -62,15 +64,14 @@ export function setFamilyIndex(i) { familyIndex = i; _syncBrush(); }
 export function setSpriteIndex(i) { spriteIndex = i; _syncBrush(); }
 export function setPatternIndex(i) { patternIndex = i; _syncBrush(); }
 
-// ─── p5 refs ─────────────────────────────────────────────────────────────────
-let _p5;          // the p5 instance
-let _overlay;     // p5.Graphics — permanent ink layer
+// ─── The page's surfaces ──────────────────────────────────────────────────────
+let _view;        // Surface — the page's canvas, the window's size
+let _ink;         // Surface — the permanent ink layer, the same size
 let _joyImg;      // JoyImage cursor
 let _rotVal = 0;
 let _scaleVal = 1;
 let _referenceImg = null;
 let _baseImage = null;   // url of an image loaded under the ink, or null
-let _sk;                  // the p5 instance, for building players later
 let _stage;               // SequenceStage — owns the layers and places them
 let _transport;           // SequenceTransport — owns the clock for every layer
 
@@ -85,199 +86,194 @@ let _transport;           // SequenceTransport — owns the clock for every laye
 let _stageActive = false;
 
 export function getOverlayCanvas() {
-  return _overlay?.canvas ?? null;
+  return _ink?.canvas ?? null;
 }
+
+/** The ink, as a save and a print frame it (core/stillFrame.js). */
+export const getInk = () => _ink ?? null;
+
+/** The screen's pixel density: the page's canvas and the ink hold that many pixels a unit. */
+const density = () => window.devicePixelRatio || 1;
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
 
+/**
+ * The page's canvas in `container`, the ink beside it, the cursor on it, and a
+ * frame clock drawing them: p5's canvas, graphics and draw loop until C6b
+ * (docs/gamepad.md). app.js decoded the chosen families before it called this
+ * (core/registry.js `loadSelected`), so every sprite is an image here.
+ *
+ * @returns {HTMLCanvasElement} the page's canvas
+ */
 export function createSketch(container) {
-  _p5 = new p5(sketch => {
-    let _cnv;
+  const canvas = document.createElement('canvas');
+  container.append(canvas);
+  _view = new Surface(window.innerWidth, window.innerHeight, density(), canvas);
+  _ink  = new Surface(_view.width, _view.height, _view.density);
 
-    // No preload: app.js decoded the chosen families before it built this
-    // (core/registry.js `loadSelected`), so every sprite is an image here.
+  _joyImg = new JoyImage(
+    _view.width  / 2,
+    _view.height / 2,
+    1,
+    BrushRegistry.getSprite(BrushRegistry.familyIdByIndex(familyIndex), spriteIndex),
+    _ink.ctx,
+    _view.width,
+    _view.height
+  );
 
-    // ── setup ─────────────────────────────────────────────────────────────────
-    sketch.setup = () => {
-      _cnv = sketch.createCanvas(window.innerWidth, window.innerHeight);
-      sketch.pixelDensity(window.devicePixelRatio || 1);
+  // Every stamp path funnels through JoyImage.stamp(), so one hook here
+  // catches marks from the gamepad and the keyboard alike.
+  _joyImg.onStamp = _recordStamp;
+  SequenceRecorder.resetBuffer(_view.width, _view.height);
 
-      _overlay = sketch.createGraphics(sketch.width, sketch.height);
-      _overlay.clear();
+  _stage     = new SequenceStage();
+  _transport = new SequenceTransport(_stage);
 
-      _joyImg = new JoyImage(
-        sketch.width  / 2,
-        sketch.height / 2,
-        1,
-        BrushRegistry.getSprite(BrushRegistry.familyIdByIndex(familyIndex), spriteIndex),
-        _overlay.drawingContext,
-        sketch.width,
-        sketch.height
-      );
+  _wireInputs();
+  _wireKeys();
 
-      // Every stamp path funnels through JoyImage.stamp(), so one hook here
-      // catches marks from the gamepad, the keyboard and p5.joystick alike.
-      _joyImg.onStamp = _recordStamp;
-      SequenceRecorder.resetBuffer(sketch.width, sketch.height);
+  // Resize. Debounced: the event fires about once a frame while a window
+  // is dragged, and every pass rebuilds two full-screen buffers.
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(rebuildBuffers, RESIZE_DEBOUNCE_MS);
+  });
 
-      _sk        = sketch;
-      _stage     = new SequenceStage();
-      _transport = new SequenceTransport(_stage);
+  // parampanel:clearCanvas → wipe the overlay
+  document.addEventListener('parampanel:clearCanvas', _clearOverlay);
 
-      _wireInputs();
-      _wireJoystick(sketch);
+  // gallery:saveCanvas → the gallery's Save button. The gamepad path goes
+  // through InputManager's 'saveImage' action, wired in _wireInputs.
+  document.addEventListener('gallery:saveCanvas', _saveImage);
 
-      // Resize. Debounced: the event fires about once a frame while a window
-      // is dragged, and every pass rebuilds two full-screen buffers.
-      let resizeTimer;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(rebuildBuffers, RESIZE_DEBOUNCE_MS);
-      });
+  // parampanel:toggleSequence → arm / disarm the recorder. The sketch owns
+  // this because the sequence records the canvas size it was made at.
+  document.addEventListener('parampanel:toggleSequence', () => {
+    SequenceRecorder.toggle(_view.width, _view.height);
+  });
 
-      function rebuildBuffers() {
-        sketch.resizeCanvas(window.innerWidth, window.innerHeight);
+  // A finished recording becomes a layer straight away. It is almost always
+  // what you want to look at next, and if it is not, the timeline drops it in
+  // one click — which is a better trade than making every keeper cost a
+  // deliberate "add" that is easy to forget.
+  document.addEventListener('sequence:stopped', e => {
+    addLayerForSequence(e.detail.sequence, `Seq ${e.detail.index + 1}`);
+  });
 
-        const previous = _overlay;
-        const next = sketch.createGraphics(sketch.width, sketch.height);
-        next.clear();
-        next.image(previous, 0, 0);
+  // A sequence that is gone cannot back a layer.
+  document.addEventListener('sequence:removed', _pruneOrphanLayers);
+  document.addEventListener('sequence:cleared', _pruneOrphanLayers);
 
-        _overlay = next;
-        _joyImg.setTarget(_overlay.drawingContext, sketch.width, sketch.height);
+  // Load reference image
+  document.addEventListener('parampanel:referenceLoaded', async e => {
+    const img = await picture(e.detail.url);
+    if (img) _referenceImg = img;
+  });
 
-        // p5.Graphics registers itself on the instance and appends its canvas
-        // to the container, so the old buffer is retained for the life of the
-        // page unless it is removed by hand.
-        previous.remove();
-      }
-    };
+  // Load back saved image to canvas
+  document.addEventListener('gallery:loadToCanvas', async e => {
+    const img = await picture(e.detail.url);
+    if (!img) return;
+    // Clear current overlay and draw the loaded image
+    _ink.clear();
+    _ink.ctx.drawImage(img, 0, 0);
+    // Marks no longer describe the canvas: there are pixels under them now.
+    SequenceRecorder.resetBuffer(_view.width, _view.height);
+    _baseImage = e.detail.url;
+  });
 
-    // ── draw ──────────────────────────────────────────────────────────────────
-    sketch.draw = () => {
-      // The whole page, fitted above the timeline when it is open (viewFit.js).
-      sketch.push();
-      const fitted = applyView(sketch);
-      if (fitted) {
-        sketch.background(PAGE_GROUND);
-        sketch.noStroke();
-        sketch.fill(255);
-        sketch.rect(0, 0, sketch.width, sketch.height);
-      } else {
-        sketch.background(255); // Solid white base
-      }
-      drawPage(sketch);
-      if (fitted) drawPageEdge(sketch);
-      sketch.pop();
+  // The frame clock: drawn, then the pad read, as p5's draw() did.
+  let last = performance.now();
+  const tick = now => {
+    const dt = Math.max(0, now - last);
+    last = now;
+    draw(dt);
+    const gp = _getActiveGamepad();
+    if (gp) InputManager.update(gp, dt);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 
-      // Poll gamepad
-      const gp = _getActiveGamepad();
-      if (gp) InputManager.update(gp, sketch.deltaTime);
-    };
+  return canvas;
+}
 
-    /** Everything on the page, in page coordinates. */
-    function drawPage(sketch) {
-      // Playback takes over the view rather than stacking on it: the ink layer
-      // already holds these same marks, so drawing both reads as a mess.
-      if (_stageActive && _stage?.layers.length) {
-        if (_transport.playing) _transport.advance(sketch.deltaTime);
-        _stage.draw(sketch.drawingContext, sketch.width, sketch.height);
-        return;
-      }
+/** The page and the ink at the window's size again, the ink kept. */
+function rebuildBuffers() {
+  _view.resize(window.innerWidth, window.innerHeight, density());
+  const previous = _ink;
+  _ink = new Surface(_view.width, _view.height, _view.density);
+  _ink.ctx.drawImage(previous.canvas, 0, 0, previous.width, previous.height);
+  previous.dispose();
+  _joyImg.setTarget(_ink.ctx, _view.width, _view.height);
+}
 
-      // Draw reference image behind the overlay
-      if (_referenceImg && params.refOpacity > 0) {
-        sketch.push();
-        // globalAlpha rather than tint(): p5 implements tint by clearing and
-        // redrawing the image into an offscreen canvas on every image() call,
-        // with no caching between frames. An all-255 tint is only an alpha
-        // multiply, so setting it on the context is equivalent and free.
-        sketch.drawingContext.globalAlpha = params.refOpacity;
-        sketch.imageMode(sketch.CENTER);
-        // "Contain" scaling
-        const s = Math.min(sketch.width / _referenceImg.width, sketch.height / _referenceImg.height);
-        const dw = _referenceImg.width * s;
-        const dh = _referenceImg.height * s;
-        sketch.image(_referenceImg, sketch.width / 2, sketch.height / 2, dw, dh);
-        sketch.pop();
-      }
+/** One frame, `dt` ms after the last: the whole page, fitted above the timeline when it is open (viewFit.js). */
+function draw(dt) {
+  const { ctx, width, height } = _view.begin();
+  const view = viewNow(width, height, dt);
+  ctx.fillStyle = view ? PAGE_GROUND : '#ffffff';      // round the page, or the page itself
+  ctx.fillRect(0, 0, width, height);
+  ctx.save();
+  if (view) {
+    ctx.translate(view.x, view.y);
+    ctx.scale(view.k, view.k);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+  }
+  drawPage(ctx, dt);
+  if (view) drawPageEdge(ctx, width, height);
+  ctx.restore();
+}
 
-      // Draw the permanent ink layer
-      sketch.push();
-      sketch.imageMode(sketch.CORNER);
-      sketch.image(_overlay, 0, 0);
-      sketch.pop();
+/** Everything on the page, in page coordinates. */
+function drawPage(ctx, dt) {
+  // Playback takes over the view rather than stacking on it: the ink layer
+  // already holds these same marks, so drawing both reads as a mess.
+  if (_stageActive && _stage?.layers.length) {
+    if (_transport.playing) _transport.advance(dt);
+    _stage.draw(ctx, _view.width, _view.height);
+    return;
+  }
 
-      // Draw live brush cursor (ghost / preview)
-      if (_joyImg && BrushRegistry.isLoaded()) {
-        sketch.push();
-        // Semi-transparent preview. show() draws once per stamp point, so with
-        // tint() the offscreen re-render above ran up to four times a frame.
-        // pop() restores globalAlpha, as it maps to drawingContext.restore().
-        sketch.drawingContext.globalAlpha = GHOST_ALPHA;
-        _joyImg.show(sketch.drawingContext);
-        sketch.pop();
-      }
-    }
+  // The reference image behind the ink, contained, at its opacity.
+  if (_referenceImg && params.refOpacity > 0) {
+    const s = Math.min(_view.width / _referenceImg.width, _view.height / _referenceImg.height);
+    const dw = _referenceImg.width * s, dh = _referenceImg.height * s;
+    ctx.save();
+    ctx.globalAlpha = params.refOpacity;
+    ctx.drawImage(_referenceImg, (_view.width - dw) / 2, (_view.height - dh) / 2, dw, dh);
+    ctx.restore();
+  }
 
-    // ── key shortcuts (fallback without gamepad) ───────────────────────────────
-    sketch.keyPressed = (e) => {
-      if (e.key === 'Enter' || e.key === ' ') _joyImg?.stamp();
-      if (e.key === 'c' || e.key === 'C')     _clearOverlay();
-      if (e.key === 'z' || e.key === 'Z')     _clearOverlay();
-      if (e.key === 's' || e.key === 'S')     _saveImage();
-      if (e.key === 'g' || e.key === 'G')     params.saveGround = params.saveGround === 'white' ? 'none' : 'white';
-      if (e.key === 'p' || e.key === 'P')     _joyImg?.nextPattern();
-    };
+  // The permanent ink layer, at its own size.
+  ctx.drawImage(_ink.canvas, 0, 0, _ink.width, _ink.height);
 
-    // parampanel:clearCanvas → wipe the overlay
-    document.addEventListener('parampanel:clearCanvas', _clearOverlay);
+  // The live brush cursor (ghost / preview), semi-transparent.
+  if (_joyImg && BrushRegistry.isLoaded()) {
+    ctx.save();
+    ctx.globalAlpha = GHOST_ALPHA;
+    _joyImg.show(ctx);
+    ctx.restore();
+  }
+}
 
-    // gallery:saveCanvas → the gallery's Save button. The gamepad path goes
-    // through InputManager's 'saveImage' action, wired in _wireInputs.
-    document.addEventListener('gallery:saveCanvas', _saveImage);
-
-    // parampanel:toggleSequence → arm / disarm the recorder. The sketch owns
-    // this because the sequence records the canvas size it was made at.
-    document.addEventListener('parampanel:toggleSequence', () => {
-      SequenceRecorder.toggle(sketch.width, sketch.height);
-    });
-
-    // A finished recording becomes a layer straight away. It is almost always
-    // what you want to look at next, and if it is not, the timeline drops it in
-    // one click — which is a better trade than making every keeper cost a
-    // deliberate "add" that is easy to forget.
-    document.addEventListener('sequence:stopped', e => {
-      addLayerForSequence(e.detail.sequence, `Seq ${e.detail.index + 1}`);
-    });
-
-    // A sequence that is gone cannot back a layer.
-    document.addEventListener('sequence:removed', _pruneOrphanLayers);
-    document.addEventListener('sequence:cleared', _pruneOrphanLayers);
-
-    // Load reference image
-    document.addEventListener('parampanel:referenceLoaded', (e) => {
-      sketch.loadImage(e.detail.url, (img) => {
-        _referenceImg = img;
-      });
-    });
-
-    // Load back saved image to canvas
-    document.addEventListener('gallery:loadToCanvas', (e) => {
-      sketch.loadImage(e.detail.url, (img) => {
-        // Clear current overlay and draw the loaded image
-        _overlay.clear();
-        _overlay.imageMode(sketch.CORNER);
-        _overlay.image(img, 0, 0);
-        // Marks no longer describe the canvas: there are pixels under them now.
-        SequenceRecorder.resetBuffer(sketch.width, sketch.height);
-        _baseImage = e.detail.url;
-      });
-    });
-
-  }, container);
-
-  return _p5;
+/**
+ * The keyboard, a fallback without a pad — p5's keyPressed until C6b: a key
+ * held fires once, as there; a key typed in a field is that field's.
+ */
+function _wireKeys() {
+  document.addEventListener('keydown', e => {
+    if (e.repeat) return;
+    const t = e.target;
+    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (e.key === 'Enter' || e.key === ' ') _joyImg?.stamp();
+    if (e.key === 'c' || e.key === 'C')     _clearOverlay();
+    if (e.key === 'z' || e.key === 'Z')     _clearOverlay();
+    if (e.key === 's' || e.key === 'S')     _saveImage();
+    if (e.key === 'g' || e.key === 'G')     params.saveGround = params.saveGround === 'white' ? 'none' : 'white';
+    if (e.key === 'p' || e.key === 'P')     _joyImg?.nextPattern();
+  });
 }
 
 // ─── Input wiring ─────────────────────────────────────────────────────────────
@@ -304,9 +300,9 @@ function _wireInputs() {
   InputManager.on('stamp',         () => _joyImg?.stamp());
   InputManager.on('undo',          () => { /* TODO: undo stack */ });
   InputManager.on('resetPosition', () => {
-    if (!_joyImg || !_p5) return;
-    _joyImg.x = _p5.width  / 2;
-    _joyImg.y = _p5.height / 2;
+    if (!_joyImg || !_view) return;
+    _joyImg.x = _view.width  / 2;
+    _joyImg.y = _view.height / 2;
   });
   InputManager.on('nextPattern',   () => {
     if (!_joyImg) return;
@@ -324,20 +320,6 @@ function _wireInputs() {
   InputManager.on('toggleBrushPanel', () => document.dispatchEvent(new CustomEvent('ui:toggleBrushPanel')));
   InputManager.on('toggleParamPanel', () => document.dispatchEvent(new CustomEvent('ui:toggleParamPanel')));
   InputManager.on('toggleGallery',    () => document.dispatchEvent(new CustomEvent('ui:toggleGallery')));
-}
-
-function _wireJoystick(sketch) {
-  // p5.joystick integration — stamp on green button
-  try {
-    const joystick = sketch.createJoystick?.(false);
-    if (joystick) {
-      joystick.onButtonPressed(e => {
-        if (e.name === 'buttonGreen') _joyImg?.stamp();
-      });
-    }
-  } catch(_) {
-    console.warn('p5.joystick not available, using raw Gamepad API only.');
-  }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -359,8 +341,8 @@ function _step(type, dir) {
 // ─── Playback ────────────────────────────────────────────────────────────────
 
 // The stage and its clock, for the timeline. Read through the getters rather
-// than captured once: both are built in setup(), which p5 defers until preload
-// has finished — well after the UI panels are constructed.
+// than captured once: both are built by createSketch(), once the sprites are
+// decoded — after every module that reads them is imported.
 export const getStage      = () => _stage;
 export const getTransport  = () => _transport;
 export const isStageActive = () => _stageActive;
@@ -376,10 +358,10 @@ export const isStageActive = () => _stageActive;
  * @returns {Object|null} the new layer
  */
 export function addLayerForSequence(seq, name) {
-  if (!seq || !_sk || !_stage || !_transport) return null;
+  if (!seq || !_view || !_stage || !_transport) return null;
 
   // At the screen's density, as the canvas it is drawn on.
-  const player = new SequencePlayer({ density: _sk.pixelDensity() }).load(createClip(seq));
+  const player = new SequencePlayer({ density: _view.density }).load(createClip(seq));
   const layer  = _stage.add(player, { name, layout: { fit: 'contain' } });
   _transport.rewindLayer(layer);
 
@@ -522,11 +504,11 @@ function _syncBrush() {
 }
 
 function _clearOverlay() {
-  if (!_overlay || !_p5) return;
-  _overlay.clear();
+  if (!_ink) return;
+  _ink.clear();
   // The buffered marks described what was on the ink layer. It is gone, so
   // they describe nothing now.
-  SequenceRecorder.resetBuffer(_p5.width, _p5.height);
+  SequenceRecorder.resetBuffer(_view.width, _view.height);
   _baseImage = null;
 }
 
@@ -540,22 +522,18 @@ function _clearOverlay() {
  */
 export function canvasIsReproducible() { return _baseImage === null; }
 
-/** The p5 instance, for anything that needs to build its own buffers. */
-export function p5Instance() { return _p5; }
-
 /** The url an image was loaded from, while one underlies the ink layer. */
 export function baseImageUrl() { return _baseImage; }
 
 function _saveImage() {
-  if (!_overlay || !_p5) return;
+  if (!_ink) return;
 
   // The frame used is remembered by stillFrame.js, not here: vaultBridge needs
   // it for the recipe, and it is save state rather than sketch state.
-  const { graphics } = StillFrame.composite(_p5, _overlay, params);
+  const { canvas } = StillFrame.composite(_ink, params);
 
-  ImageStore.save(graphics.canvas, BrushRegistry.familyMetaByIndex(familyIndex)?.label)
+  ImageStore.save(canvas, BrushRegistry.familyMetaByIndex(familyIndex)?.label)
             .catch(err => console.error('[sketch] Save failed:', err));
-  graphics.remove();
 }
 
 function _getActiveGamepad() {

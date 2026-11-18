@@ -131,7 +131,7 @@ What it asks, in this order:
    and filter and fractals draw with WebGPU, 3d with three.js. So each app
    hands the scene an ImageBitmap — the GPU kit does already — drawn on one
    2D canvas; or a canvas a renderer, stacked in the same place.
-4. **The gamepad** stays outside until C6: it is p5's.
+4. **The gamepad** stays outside until C6d (`docs/gamepad.md`): its page alone, off p5 since C6b.
 
 ### Planned, 2026-11-04 — confirmed the same day
 
@@ -154,7 +154,7 @@ found, and what follows from it:
   each gone with its node. three.js: the one renderer, kept; a model's
   geometries and materials disposed at unmount. MediaPipe and the camera
   (the puppet): the landmarker closed and the camera's tracks stopped at
-  unmount — the light goes off. p5 (the gamepad): out of the scene until C6,
+  unmount — the light goes off. The gamepad: out of the scene until C6d,
   as above; its page alone as ever.
 - **Between two apps**, the canvas keeps the last frame of the one going
   until the next draws its first, so the centre never flashes empty; the

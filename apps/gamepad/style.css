@@ -35,7 +35,7 @@ body {
   z-index: 0;
 }
 
-/* p5 canvas fills the container */
+/* The page's canvas fills the container */
 #sketch-container canvas {
   display: block;
   width: 100% !important;
@@ -189,7 +189,7 @@ body {
   50%       { opacity: 0.3; }
 }
 
-/* Loading overlay while p5 preloads sprites */
+/* Loading overlay while the chosen sprites decode */
 #loading-screen {
   position: fixed;
   inset: 0;

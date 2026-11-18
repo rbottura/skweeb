@@ -56,8 +56,8 @@ skill, *Porting a sketch*).
 | | brick | branch | size | status |
 |---|---|---|---|---|
 | C6a | **core's stage off p5**: a clip's buffer a canvas, the layers blitted on a 2D context, the sprites decoded images, a recording replayed with no hidden p5 | `gamepad/stage-2d` | M | **landed 2026-11-18** — below; `check-gamepad`, new |
-| C6b | **the page off p5**: its canvas, the ink, the cursor, the reference, the view and a still's composite in Canvas 2D, on its own frame clock; p5 and p5.joystick out of the page, `core/libs/p5.min.js` out of the repo | `gamepad/canvas` | M | next |
-| C6c | **its params a schema**: `params.js` in core's panel, core's bar and keys, the format core's; the pad still draws, Start arms the recording; `ParamPanel.js`, the status bar and the help card gone | `gamepad/params` | M | |
+| C6b | **the page off p5**: its canvas, the ink, the cursor, the reference, the view and a still's composite in Canvas 2D, on its own frame clock; p5 and p5.joystick out of the page, `core/libs/p5.min.js` out of the repo | `gamepad/canvas` | M | **landed 2026-11-18** — below; `check-gamepad` at twice the density |
+| C6c | **its params a schema**: `params.js` in core's panel, core's bar and keys, the format core's; the pad still draws, Start arms the recording; `ParamPanel.js`, the status bar and the help card gone | `gamepad/params` | M | next |
 | C6d | **a module**: `mount(host)`, `unmount()`; the families a section of its panel, each loaded when first drawn with, no splash; cluster mounts it — and the heart can (M16n) | `gamepad/module` | M | |
 | C6e | **its objects its own**: `rebuild.js`, a still's and a recording's replay moved out of core; `?open=`, a still's marks back on the ink, a recording back on the timeline | `gamepad/reopen` | M | |
 | C6f | **the timeline on core's kit**: core's Transport its clock, a layer's drawer rows of a schema; a recording in the stack played in its time | `gamepad/timeline` | M | waits: the author — below |
@@ -89,6 +89,11 @@ its clock and its own `deltaTime`; keys by `keydown`, images by `Image`;
 stamping, is the pad's already. *Done when* p5 is nowhere in the repo; rule
 8's sentence on p5 is history (CLAUDE.md); `check-print`'s gamepad half and
 `check-live`'s pass as before, served as plain files too.
+*Landed 2026-11-18*: `sketch/surface.js`, a canvas in its own units at the
+screen's density. A save under p5 read the ink as if it had none — on a
+HiDPI screen it cropped the wrong part, at twice its size; now the still is
+its frame in the marks' units, what its recipe says, and `check-gamepad`
+saves one at twice the density, the marks drawn again by core over it.
 
 **C6c — its params a schema.** The skill's shape. `params.js`: the move,
 turn and scale speeds and the scale's limits, the reference's opacity, the

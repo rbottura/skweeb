@@ -41,8 +41,8 @@ export class JoyImage {
 
     /**
      * Optional observer, called with this JoyImage after every stamp. Set by
-     * the sketch so the sequence recorder sees marks from all three stamp
-     * paths — gamepad, keyboard and p5.joystick — through one hook.
+     * the sketch so the sequence recorder sees marks from every stamp
+     * path — the pad and the keyboard — through one hook.
      * @type {?(joy: JoyImage) => void}
      */
     this.onStamp = null;

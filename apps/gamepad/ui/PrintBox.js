@@ -52,10 +52,9 @@ export class PrintBox {
   /** The canvas as a save would write it, unsaved — or why there is nothing to print. */
   _envelope() {
     if (!Sketch.canvasIsReproducible()) return 'an image is under the ink — no marks to draw it again from';
-    const p = Sketch.p5Instance(), canvas = Sketch.getOverlayCanvas();
-    if (!p || !canvas) return null;
-    // The overlay as stillFrame.js reads it: the sketch's size, the canvas's own context.
-    const frame = StillFrame.frameFor({ width: p.width, height: p.height, drawingContext: canvas.getContext('2d') }, Sketch.params);
+    const ink = Sketch.getInk();
+    if (!ink) return null;
+    const frame = StillFrame.frameFor(ink, Sketch.params);
     const recipe = recipeNow(Sketch, frame);
     if (!recipe || !recipe.marks.length) return 'nothing drawn yet';
     return { type: 'still', origin: APP, recipe, render: { w: frame.width, h: frame.height } };

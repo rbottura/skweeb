@@ -18,6 +18,15 @@
  * white first, and after that "empty" can only be guessed at by colour, which
  * gets a drawing containing white wrong. Trimming before the composite is the
  * only version of this that is exact, and it is why this runs where it does.
+ *
+ * ── At the screen's density ─────────────────────────────────────────────────
+ *
+ * The ink holds the screen's pixel density (sketch/surface.js): twice as
+ * many pixels each way on a HiDPI screen as the units its marks are in. Its
+ * bounds are read in its pixels and given back in its units, and the still is
+ * its frame in those units — the marks' size, what the recipe says. Under p5
+ * (until C6b, docs/gamepad.md) both read the ink as if it had no density: on
+ * a HiDPI screen a save cropped the wrong part of it, at twice its size.
  */
 
 import { alphaBounds, isEmpty } from '../../../core/trim.js';
@@ -35,27 +44,30 @@ import { resolveFrame }         from '../../../core/frame.js';
  * A loaded reference image is drawn onto this same overlay, so it counts: the
  * crop follows what is on the canvas, whatever put it there.
  *
- * @param {object} overlay  a p5.Graphics
- * @returns {{x,y,w,h}}
+ * @param {import('../sketch/surface.js').Surface} ink
+ * @returns {{x,y,w,h}}  in the ink's units
  */
-export function inkBounds(overlay) {
-  const { width, height } = overlay;
-  const { data } = overlay.drawingContext.getImageData(0, 0, width, height);
-  const rect = alphaBounds(data, width, height);
-  return isEmpty(rect) ? { x: 0, y: 0, w: width, h: height } : rect;
+export function inkBounds(ink) {
+  const { canvas, width, height } = ink, d = ink.density || 1;
+  const { data } = ink.ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const rect = alphaBounds(data, canvas.width, canvas.height);
+  if (isEmpty(rect)) return { x: 0, y: 0, w: width, h: height };
+  // Its pixels to its units, out to whole ones: no ink cut.
+  const x = Math.floor(rect.x / d), y = Math.floor(rect.y / d);
+  return { x, y, w: Math.min(width, Math.ceil((rect.x + rect.w) / d)) - x, h: Math.min(height, Math.ceil((rect.y + rect.h) / d)) - y };
 }
 
 /**
  * The frame a save should use, from the app's framing params.
  *
- * @param {object} overlay
+ * @param {import('../sketch/surface.js').Surface} ink
  * @param {{frameFormat:string, frameBleed:number}} params
  */
-export function frameFor(overlay, params) {
+export function frameFor(ink, params) {
   return resolveFrame(
     { format: params.frameFormat, bleed: params.frameBleed, zoom: 1 },
-    inkBounds(overlay),
-    { width: overlay.width, height: overlay.height });
+    inkBounds(ink),
+    { width: ink.width, height: ink.height });
 }
 
 /**
@@ -75,19 +87,25 @@ export const lastFrame = () => _last;
  * Transparent by default since 2026-09-23 — a drawing is ink on nothing, and
  * ink on nothing is what the suite's other apps take in (a sprite in ckt, a
  * source in grid). `params.saveGround` 'white' puts white under it, as every
- * save did before. The caller owns the graphics and should remove() it.
+ * save did before. A canvas of its own, the frame's size in the ink's units.
  *
- * @returns {{graphics: object, frame: object}}
+ * @param {import('../sketch/surface.js').Surface} ink
+ * @returns {{canvas: HTMLCanvasElement, frame: object}}
  */
-export function composite(p5, overlay, params) {
-  const frame = frameFor(overlay, params);
+export function composite(ink, params) {
+  const frame = frameFor(ink, params);
   _last = frame;
 
-  const g = p5.createGraphics(frame.width, frame.height);
-  if (params.saveGround === 'white') g.background(255);
-  g.drawingContext.drawImage(overlay.canvas,
-    frame.from.x, frame.from.y, frame.from.w, frame.from.h,
+  const canvas = Object.assign(document.createElement('canvas'), { width: frame.width, height: frame.height });
+  const ctx = canvas.getContext('2d');
+  if (params.saveGround === 'white') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, frame.width, frame.height);
+  }
+  const d = ink.density || 1;
+  ctx.drawImage(ink.canvas,
+    frame.from.x * d, frame.from.y * d, frame.from.w * d, frame.from.h * d,
     frame.to.x, frame.to.y, frame.to.w, frame.to.h);
 
-  return { graphics: g, frame };
+  return { canvas, frame };
 }

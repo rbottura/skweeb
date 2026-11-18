@@ -1,10 +1,8 @@
 /**
  * app.js — GamepadDraw bootstrap (ES module entry point)
  *
- * Load order (guaranteed by index.html):
- *   1. libs/p5.min.js        (global)
- *   2. p5.joystick.js        (global, extends p5)
- *   3. this file             (module)
+ * The page's one script. No p5 and no global since C6b (docs/gamepad.md):
+ * the sketch draws on its own canvas, core's stage replays what it records.
  */
 
 import * as BrushRegistry from '../../core/registry.js';
@@ -73,7 +71,7 @@ async function boot() {
 
     // 4. Start sketch
     const container = document.getElementById('sketch-container');
-    const sketchInstance = createSketch(container);
+    createSketch(container);
 
     // 5. Create UI panels
     const brushPanel   = new BrushPanel();

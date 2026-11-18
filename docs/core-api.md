@@ -49,7 +49,7 @@ Most of this is a move plus a rename, not new code. Status per module:
 | `links.js` | the named one-way links between apps | not yet, see below |
 | `uses.js`, `character.js` | what a set can be used as, and where each set is offered; a character's loops by direction (P3) | **in**, 2026-09-23; 2026-11-06 |
 | `easing.js` | the suite's easing curves, and the param that offers one | **in**, 2026-09-24 |
-| `libs/` | p5 1.5.0, for the gamepad's page alone until C6b (`docs/gamepad.md`) — core replays its recordings without it since C6a; three.js r186, for the 3D app — `libs/three/README.md`, copied by `scripts/vendor-three.mjs`; MediaPipe's face landmarker, tasks-vision 1.0.1, for the rig's puppet — fetched on each machine by `scripts/vendor-mediapipe.mjs`, 15 MB of WASM and model git never holds, its README kept | **in**; three since 2026-10-06, MediaPipe since 2026-10-21 |
+| `libs/` | three.js r186, for the 3D app — `libs/three/README.md`, copied by `scripts/vendor-three.mjs`; MediaPipe's face landmarker, tasks-vision 1.0.1, for the rig's puppet — fetched on each machine by `scripts/vendor-mediapipe.mjs`, 15 MB of WASM and model git never holds, its README kept | **in**; three since 2026-10-06, MediaPipe since 2026-10-21; p5 1.5.0 out since 2026-11-18, nothing drawing with it (C6b, `docs/gamepad.md`) |
 
 `registry.js` now takes a manifest URL. It used to `fetch('brush-manifest.json')`
 with no path at all, which resolves against the *page* — invisible while the

@@ -5,7 +5,7 @@
  *
  * Records are kept as PNG Blobs (not data URLs) — blobs are ~33% smaller and
  * IndexedDB stores them natively. Each in-memory entry exposes an object URL
- * as `url`, usable anywhere a data URL was before (img.src, <a download>, p5).
+ * as `url`, usable anywhere a data URL was before (img.src, <a download>).
  *
  * Each entry: { id, blob, url, label, timestamp, width, height }
  *
@@ -51,7 +51,7 @@ export const ImageStore = {
   get ready() { return ImageStore.init(); },
 
   /**
-   * Capture the current state of a canvas/p5.Graphics and save it.
+   * Capture the current state of a canvas and save it.
    * @param {HTMLCanvasElement} canvas
    * @param {string} [label]
    * @returns {Promise<number>} index of the saved image

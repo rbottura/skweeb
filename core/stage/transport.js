@@ -157,7 +157,7 @@ export class SequenceTransport {
   /**
    * Run however many master ticks the elapsed time has earned, then bring every
    * layer to where that leaves it.
-   * @param {number} dt  ms since the last frame (p5's deltaTime)
+   * @param {number} dt  ms since the last frame
    * @returns {number} master ticks actually run
    */
   advance(dt) {

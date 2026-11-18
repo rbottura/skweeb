@@ -11,7 +11,8 @@
  *
  * A view, nothing else. Saves read the ink buffer and recordings store world
  * coordinates, so nothing made while fitted differs from anything made at full
- * size. It eases rather than jumps, the way the timeline slides.
+ * size. It eases rather than jumps, the way the timeline slides. On a 2D
+ * context since C6b (docs/gamepad.md), as everything the page draws.
  */
 
 /** Room kept between the page and whatever covers the screen's edge. */
@@ -36,33 +37,30 @@ function target(w, h) {
 }
 
 /**
- * Apply the view to `p`, between a push() and a pop() the caller owns. Returns
- * whether it is fitted at all, so the caller can mark the page's edge.
+ * The view this frame, `dt` ms after the last: where the w × h page goes and
+ * at what scale — `{ x, y, k }`, centred across and in the room above the
+ * inset — or null when it is the whole screen, unfitted.
  *
- * @param {p5} p
- * @returns {boolean}
+ * @param {number} w
+ * @param {number} h
+ * @param {number} [dt=16]
+ * @returns {?{x: number, y: number, k: number}}
  */
-export function applyView(p) {
-  const k1 = target(p.width, p.height);
-  const t = 1 - Math.exp(-(p.deltaTime || 16) / EASE_MS);
+export function viewNow(w, h, dt = 16) {
+  const k1 = target(w, h);
+  const t = 1 - Math.exp(-(dt || 16) / EASE_MS);
   _k += (k1 - _k) * t;
   if (Math.abs(k1 - _k) < 0.001) _k = k1;
-  if (_k === 1) return false;
-
-  // Centred across, and centred in the room above the inset.
-  const free = p.height - _inset;
-  const w = p.width * _k, h = p.height * _k;
-  p.translate((p.width - w) / 2, Math.max(0, (free - h) / 2));
-  p.scale(_k);
-  return true;
+  if (_k === 1) return null;
+  const free = h - _inset;
+  return { x: (w - w * _k) / 2, y: Math.max(0, (free - h * _k) / 2), k: _k };
 }
 
-/** Around the page while it is fitted: what is outside is not the drawing. */
-export function drawPageEdge(p) {
-  p.push();
-  p.noFill();
-  p.stroke(17);
-  p.strokeWeight(2 / _k);
-  p.rect(0, 0, p.width, p.height);
-  p.pop();
+/** Around the page while it is fitted, in the page's units: what is outside is not the drawing. */
+export function drawPageEdge(ctx, w, h) {
+  ctx.save();
+  ctx.strokeStyle = 'rgb(17, 17, 17)';
+  ctx.lineWidth = 2 / _k;
+  ctx.strokeRect(0, 0, w, h);
+  ctx.restore();
 }

@@ -13,8 +13,8 @@ need moves into core, as `stamps.js`, `view.js` and `sprites.js` did.
 
 Read `docs/core-api.md` before the first edit and the `skweeb-object` skill
 before the first save. Copy the shape of the newest apps, `apps/particles/`
-and `apps/fractals/` — never the gamepad's, the one app still on p5 and its
-own panels, whose recordings core replays itself.
+and `apps/fractals/` — never the gamepad's, the one app still on its own
+panels until C6c (`docs/gamepad.md`), whose recordings core replays itself.
 
 ## The folder
 

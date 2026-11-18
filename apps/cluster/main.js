@@ -81,7 +81,7 @@ const FIRST = 'vault';
 
 /** Pages of their own, linked and not mounted. */
 const PAGES = [
-  { name: 'gamepad', href: '../gamepad/', title: "The gamepad draws with p5: its own page, until it is on core's kit (C6)" },
+  { name: 'gamepad', href: '../gamepad/', title: "The gamepad: its own page, until it is a module (C6d)" },
 ];
 
 const el = (tag, cls, text) => {

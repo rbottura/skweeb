@@ -81,7 +81,7 @@ export const InputManager = {
   },
 
   /**
-   * Call once per p5 draw() frame, passing the raw Gamepad object.
+   * Call once a frame, passing the raw Gamepad object.
    * Also pass delta-time in ms for axis-based values.
    */
   update(gamepad, dt = 16) {

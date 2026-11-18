@@ -74,8 +74,8 @@ document.addEventListener('imagestore:saved', async e => {
   if (!entry || !entry.blob) return;
 
   try {
-    // Imported here rather than at module scope: gamepadSketch builds its p5
-    // instance on import, and this module is loaded before the sketch exists.
+    // Imported here rather than at module scope: this module is loaded
+    // before the sketch exists.
     const sketch = await import('../sketch/gamepadSketch.js');
     const thumb  = await thumbFromBlob(entry.blob);
 

@@ -300,7 +300,7 @@ A canvas read back often is drawn in software after: compared, measured.
   screen or difference. An app's own ground is opaque: set it to none to see
   what is under its layer (L4). The gamepad has no clock in the stack: it
   has no drawer.
-- **A gamepad loop prints enlarged where it is large**: p5 replays it with
+- **A gamepad loop prints enlarged where it is large**: core replays it with
   no window, so it is drawn whole as large as a canvas allows — most loops
   fit a 120×176 sheet at 300 dpi, a tall one is enlarged a little, and the
   print says by how much. A shape, or a picture from outside, has only its
@@ -346,8 +346,8 @@ A canvas read back often is drawn in software after: compared, measured.
 
 ## Next single step
 
-C6b, the gamepad's page off p5 — its canvas, ink, cursor and a still's composite in Canvas 2D, p5 out of the repo
-(`docs/gamepad.md`; C6a landed) — and the author's eye on M16o, m, p: the heart weightless, brushes found, the appendage. Beside it: their SVG of a BEC render in their print tool (G11); the
+C6c, the gamepad's params a schema — `params.js` in core's panel, core's bar and keys, Start arming the recording
+(`docs/gamepad.md`; C6a, b landed, p5 gone) — and the author's eye on M16o, m, p: the heart weightless, brushes found, the appendage. Beside it: their SVG of a BEC render in their print tool (G11); the
 ThinkPad pulled, the vaults made one (`docs/guides/vault-share.md`); their test of G4 to G10. Else C12, or M13c's fields.
 
 ## Parked decisions
@@ -377,8 +377,8 @@ ThinkPad pulled, the vaults made one (`docs/guides/vault-share.md`); their test 
   `core/stage/player.js`, from a clip override, and on the live layer.
 - **The GPU kit is WebGPU** (2026-09-26): nothing cut for a machine without
   it; a GPU render replays within a small difference on another machine.
-- **Rule 8 settled** (2026-09-26): p5 is not required; the gamepad and core's
-  replay of its recordings keep p5 1.5.0 until ported. **Rule 5 covers
+- **Rule 8 settled** (2026-09-26): p5 is not required — since C6b, 2026-11-18,
+  nothing draws with it, and it left the repo. **Rule 5 covers
   shaders**: LYGIA and unlicensed Shadertoy code stay out.
 - **Objects are deleted in two steps** (2026-09-26); **a flipbook is
   placements in time, not a new kind**, and ripples (2026-09-27).

@@ -10,7 +10,7 @@ it.** Everything below is load-bearing; nothing below is background.
 
 | Path | What it is | Before touching it, read |
 |---|---|---|
-| `core/` | the shared kit — theme, panels, drawers and cards, params, registry, rng, stage, vault client, GPU filters (`gpu/`), the print, a picture as vectors (`svg-canvas.js`), a guide read in an app, an app's mount and what it holds (`mount.js`, `scope.js`); `libs/` holds p5, three.js and Lit, one version each, and MediaPipe — fetched on each machine, git keeps its README | `docs/core-api.md`; what leaves the suite — export, the print — `docs/core-export.md` |
+| `core/` | the shared kit — theme, panels, drawers and cards, params, registry, rng, stage, vault client, GPU filters (`gpu/`), the print, a picture as vectors (`svg-canvas.js`), a guide read in an app, an app's mount and what it holds (`mount.js`, `scope.js`); `libs/` holds three.js and Lit, one version each, and MediaPipe — fetched on each machine, git keeps its README | `docs/core-api.md`; what leaves the suite — export, the print — `docs/core-export.md` |
 | `apps/gamepad/` | draw with a gamepad, record sequences; E prints the drawing | `docs/gamepad.md`: C6, its port onto core's kit |
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
@@ -102,9 +102,9 @@ never symmetric, never inferred. The catalogue of links is the map of the suite.
    wording, 2026-11-03.
 8. **Every app is ES modules. No globals crossing file boundaries, ever.**
    p5 is not required, and new work does not take it on — grid and ckt draw
-   with Canvas 2D. What still uses p5, the gamepad's sketch and core's replay
-   of its recordings, uses the one version in `core/libs/`, in instance mode,
-   until it is ported. Settled 2026-09-26. The 3D app draws with three.js, its
+   with Canvas 2D. Settled 2026-09-26; the gamepad and core's replay of its
+   recordings, the last on it, came off it on 2026-11-18 (C6a, b), and p5
+   left the repo. The 3D app draws with three.js, its
    one version in `core/libs/three/` — the author's call, 2026-10-06. The
    suite's components are custom elements written with Lit, its one version
    in `core/libs/lit/`, rendering into the page's DOM, no shadow root, no

@@ -7,17 +7,10 @@
   <title>GamepadDraw</title>
 
   <link rel="stylesheet" href="./style.css">
-
-  <!--
-    Load p5 and p5.joystick as globals BEFORE the ES module,
-    so 'window.p5' is available when gamepadSketch.js runs.
-  -->
-  <script src="../../core/libs/p5.min.js"></script>
-  <script src="libs/p5.joystick.min.js"></script>
 </head>
 
 <body>
-  <!-- Loading screen (dismissed by p5 after preload completes) -->
+  <!-- Loading screen (dismissed once the canvas is up, its sprites decoded) -->
   <div id="loading-screen">
     <div class="loading-title">GamepadDraw</div>
     <div class="loading-bar-wrap">
@@ -36,18 +29,15 @@
     <button class="gp-nopad__close" id="gp-nopad-close" type="button" aria-label="Dismiss notice">&#10005;</button>
   </div>
 
-  <!-- p5 sketch mounts here -->
+  <!-- The page's canvas goes here (sketch/gamepadSketch.js) -->
   <div id="sketch-container"></div>
 
-  <!--
-    Bootstrap module — imports all core/ and ui/ modules.
-    Must come AFTER p5 script tags.
-  -->
+  <!-- Bootstrap module — imports all core/ and ui/ modules. No p5 since C6b. -->
   <script type="module" src="app.js"></script>
 
-  <!-- Dismiss loading screen once p5 setup() has run -->
+  <!-- Dismiss the loading screen once the canvas is up -->
   <script type="module">
-    // p5 dispatches no built-in ready event, so we poll the canvas briefly.
+    // The canvas comes once the chosen sprites are decoded: poll for it briefly.
     const loading = document.getElementById('loading-screen');
     const indicator = document.getElementById('gamepad-indicator');
 
