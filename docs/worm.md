@@ -105,8 +105,8 @@ wait their turn, in the order the author picks.
 | M16i | **a bigger planet**: detail near the eye, a cube-sphere in chunks | `3d/planet-lod` | M | later |
 | M16j | **a world saved**: its planet, its worms, its phases, an object — as a map is | `3d/world` | M | later; its type the author's |
 | M16k | **the heart reached**: six ways in, a hole each; a cut through four, seen flat, the worm its drawing in it, moved up, down, left, right; the heart's hollow walked inside, a wider field; and out again | `3d/heart` | M | **landed 2026-11-18** — below; `check-3d-heart`: down the north, walked in the heart, up by another |
-| M16l | **the matrix**: a sphere floating in the heart, translucent, viscous; inside it, the planet's things itemized — a stone, a tuft | `3d/matrix` | M | next |
-| M16m | **a brush found**: one of the legacy brushes' shapes on the ground, picked up, carried | `3d/found` | S | after l |
+| M16l | **the matrix**: a sphere floating in the heart, translucent, viscous; inside it, the planet's things itemized — a stone, a tuft | `3d/matrix` | M | **landed 2026-11-18** — below; `check-3d-heart`: seen from the wall, amber, its things drifting |
+| M16m | **a brush found**: one of the legacy brushes' shapes on the ground, picked up, carried | `3d/found` | S | next; which brushes, the author's |
 | M16n | **drawn in the heart**: the gamepad in the heart, drawing with the brush found; the drawing put in the matrix; found on the ground in 3D, lofted | `3d/drawn-heart` | M | after m; how the gamepad comes into the heart, the author's |
 
 ## The planet walked — M16a, landed 2026-11-18
@@ -246,6 +246,19 @@ en 3D en surface."
   a cut at the ground, beside that way's hole, facing away.
 - **For now**: each way between is a cut; a buried worm, or one in a
   phase, goes into no way; the heart's wall is the reality's earth.
+
+## The matrix — M16l, landed 2026-11-18
+
+- **A sphere at the heart's middle** (`matrix.js`), `matrix` of the heart
+  round, in `matrixColour` — amber, a honey: a node material, three's TSL,
+  see-through, its edges brighter as they turn from the eye, its surface
+  breathing in long slow waves. Its light is the heart's.
+- **The planet's things in it, itemized**: one of each kind the ground
+  grows (`planet.js` `KINDS`, the same shapes) — a tuft in the reality's
+  green, a stone — each drifting round where it floats and turning, as in
+  honey. A planet growing nothing holds nothing there.
+- **Seen**: from the wall, the camera behind the worm looks up between it
+  and the matrix; in a cut, the matrix a disc in the heart's hollow.
 
 ## Settled, 2026-11-18
 

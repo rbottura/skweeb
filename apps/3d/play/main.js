@@ -294,6 +294,7 @@ export function peek() {
            dive: me.dive.state, sunk: live.dune.sunk, ridge: live.dune.height, nose: nose[1],
            top: worm.spine.reduce((t, r) => Math.max(t, r[4]), -Infinity),
            place: live.place, ways: WAYS.map(w => w.dir.toArray()), inside: !!me.walker.inside, fov: camera.fov,
-           heart: heartOf(live.params.values).heart,
+           heart: heartOf(live.params.values).heart, matrix: live.heart.matrix.radius,
+           items: live.heart.matrix.items.map(it => it.mesh.position.toArray()),
            cut: live.place === 'cut' ? { q: [...cut.q], heading: cut.heading, face: cut.face, across: cut.plane.across } : null };
 }

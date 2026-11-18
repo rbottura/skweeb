@@ -36,8 +36,9 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   its own speed, the ground raised along its curve; another frozen ahead,
   a phase — walked into, framed, swung on the bridge of their morph, fixed,
   bonded; six ways down to the planet's heart, a tunnel seen flat, its
-  hollow walked inside (M16k, `tests/3d-heart.mjs` 34, `check-3d-heart`
-  11) — `docs/worm.md`. loft.js keeps
+  hollow walked inside, its matrix floating there, the planet's things in
+  it (M16k, l, `tests/3d-heart.mjs` 38, `check-3d-heart` 14) —
+  `docs/worm.md`. loft.js keeps
   where each body's rings lie (`userData.bodies`), what the player reads.
 
 - **Its clouds out as vectors** (G11, 2026-11-17, for BEC 2027; `vectors.js`,
@@ -374,7 +375,7 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 ## Next single step
 
 **The author's eye on the worm's player** (`/apps/3d/play/?worm=<id>`,
-M16a to c, k), M16l next — the matrix in the heart (`docs/worm.md`).
+M16a to c, k, l), and their word on M16m and n — which brushes, and how the gamepad comes into the heart.
 Beside it, **the author's test of G4 to G10** — their own sequences as bodies, worms
 waving, a vase turned, a flower round, grown as drawn, out to Blender as a
 glTF — and what they order next: a silhouette's holes, a brush for each
