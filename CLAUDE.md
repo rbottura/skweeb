@@ -11,7 +11,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | Path | What it is | Before touching it, read |
 |---|---|---|
 | `core/` | the shared kit — theme, panels, drawers and cards, params, registry, rng, stage, vault client, GPU filters (`gpu/`), the print, a picture as vectors (`svg-canvas.js`), a guide read in an app, an app's mount and what it holds (`mount.js`, `scope.js`); `libs/` holds p5, three.js and Lit, one version each, and MediaPipe — fetched on each machine, git keeps its README | `docs/core-api.md`; what leaves the suite — export, the print — `docs/core-export.md` |
-| `apps/gamepad/` | draw with a gamepad, record sequences; E prints the drawing | — |
+| `apps/gamepad/` | draw with a gamepad, record sequences; E prints the drawing | `docs/gamepad.md`: C6, its port onto core's kit |
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
 | `apps/compose/` | M4: objects from every app placed on one page, each at an opacity and a blend | `apps/compose/STATUS.md` |
@@ -41,6 +41,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | `docs/bec.md` | M13, proposed: BEC_2025's scenarios in skweeb — its grid in the 3D app, its layers by format, the project one page | before any brick of M13 |
 | `docs/vfx.md` | M15: a game's effects — how one is made, the generators in the GPU kit (M15a), the shader app (`apps/shader/`), a surface over a particle's life, an effect in the suite's game | before any brick of M15 |
 | `docs/worm.md` | M16: the worm — the game's avatar on a planet, its phases and the bond, its gears, its face | before any brick of M16 |
+| `docs/gamepad.md` | C6: the gamepad on core's kit and off p5 — what it is, read from its source, and its bricks | before any brick of C6 |
 | `docs/layouts.md` | S15f, proposed: a gallery of layouts by use, as editing software has workspaces | before any layout brick |
 | `docs/inbox.md` | the author's ideas between bricks, not yet sorted | when the author has one, and at the end of a session |
 
