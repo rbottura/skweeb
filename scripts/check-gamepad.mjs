@@ -6,7 +6,9 @@
  * exported to the vault as a loop, and that loop replayed by core
  * (core/rebuild.js) — its frame the one saved, pixel for pixel. Then at a
  * HiDPI screen's density, twice the pixels each way: a still saved is its
- * frame in the marks' units, the marks drawn again by core over it.
+ * frame in the marks' units, the marks drawn again by core over it. Since
+ * C6c: Start on the pad arms and disarms the recording, R3 steps the
+ * pattern — a setting of core's panel, which holds the gamepad's.
  *
  * What it guards through C6 is the drawing and the replay with no p5 in
  * them: core's stage (C6a), then the page (C6b).
@@ -42,6 +44,13 @@ const stroke = (ax, ay, turn, frames) => `
   for (let i = 0; i < ${frames}; i++) { InputManager.update(pad(${ax}, ${ay}, ${turn})); await new Promise(r => requestAnimationFrame(r)); }
   InputManager.update(pad(0, 0, 0, []));`;
 
+/** A button of the pad pressed and let go (Start 9, R3 11), the sticks at rest. */
+const press = button => `await (async () => {
+    const { InputManager: I } = await import('/apps/gamepad/core/inputManager.js');
+    const b = held => ({ axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, (_, i) => ({ pressed: held.includes(i), value: held.includes(i) ? 1 : 0 })) });
+    I.update(b([${button}])); I.update(b([]));
+  })();`;
+
 /** Two pictures' pixels, read the same way. */
 const reading = `const read = (src, w, h) => { const x = Object.assign(document.createElement('canvas'), { width: w, height: h }).getContext('2d');
     x.drawImage(src, 0, 0); return x.getImageData(0, 0, w, h).data; };`;
@@ -58,24 +67,25 @@ const inked = `(() => {
 
 await open();
 
-// Armed, a stroke drawn, disarmed: a layer.
+// Armed by Start, a stroke drawn, disarmed by Start: a layer.
 const drew = await page.eval(`(async () => {
   const { SequenceRecorder } = await import('/core/stage/recorder.js');
-  document.dispatchEvent(new CustomEvent('parampanel:toggleSequence'));
+  ${press(9)}
+  const armed = SequenceRecorder.recording;
   ${stroke(0.7, 0.3, 0.4, 40)}
   const marks = SequenceRecorder.liveCount;
-  document.dispatchEvent(new CustomEvent('parampanel:toggleSequence'));
-  return marks;
+  ${press(9)}
+  return armed && !SequenceRecorder.recording ? marks : -marks;
 })()`);
 const layers = await page.eval(`${sketch}.then(m => m.getStage().layers.map(l => ({ name: l.name, canvas: l.player.buffer instanceof HTMLCanvasElement,
   w: l.player.buffer.width, h: l.player.buffer.height, bytes: l.player.byteSize })))`);
-c.ok(`a stroke of ${drew} marks recorded: a layer, its buffer a canvas`, drew >= 30 && layers.length === 1 && layers[0].canvas
+c.ok(`Start, a stroke of ${drew} marks, Start: recorded, a layer, its buffer a canvas`, drew >= 30 && layers.length === 1 && layers[0].canvas
   && layers[0].bytes === layers[0].w * layers[0].h * 4, JSON.stringify(layers));
 const drawn = await page.eval(inked);
 c.ok('…the stroke on the ink', drawn > 0.005, `${(drawn * 100).toFixed(2)}% inked`);
 
 // The ink cleared, the layer played: what the canvas shows is the stage's — the cursor is not drawn over it.
-await page.eval(`document.dispatchEvent(new CustomEvent('parampanel:clearCanvas'))`);
+await page.eval(`document.dispatchEvent(new CustomEvent('gamepad:clear'))`);
 await wait(200);
 const cleared = await page.eval(`${sketch}.then(m => {
   const ink = m.getOverlayCanvas(), d = ink.getContext('2d').getImageData(0, 0, ink.width, ink.height).data;
@@ -117,6 +127,19 @@ const replay = await page.eval(`(async () => {
 c.ok('exported as a loop, replayed by core: its frame the one saved, to the pixel', replay.saved && replay.length === replay.frames
   && replay.size.join() === replay.replayed.join() && replay.off === 0 && replay.ink > 50 && !replay.missing.length, JSON.stringify(replay));
 
+// R3: the next pattern — the setting's, so core's panel shows it; the panel holds the gamepad's settings.
+const pattern = await page.eval(`(async () => {
+  ${press(11)}
+  const m = await ${sketch};
+  const rows = [...document.querySelectorAll('#side .pp-row')].map(r => r.querySelector('.pp-name')?.textContent).filter(Boolean);
+  const chip = [...document.querySelectorAll('#side .pp-row')].find(r => r.querySelector('.pp-name')?.textContent === 'pattern')
+    ?.querySelector('[aria-pressed="true"], .on, .is-on, .active')?.textContent || '';
+  return { pattern: m.getParams().get('pattern'), index: m.patternIndex, chip: chip.trim(), rows };
+})()`);
+c.ok("R3: the next pattern, a setting of core's panel — which holds the gamepad's", pattern.pattern === 'mirror-x' && pattern.index === 1
+  && ['move', 'turn', 'grow', 'pattern', 'reference', 'saved on'].every(n => pattern.rows.includes(n)), JSON.stringify(pattern));
+await c.shot('gamepad-panel');
+
 // At a HiDPI screen's density: the page's canvas and the ink twice the pixels each way. A still saved is its frame in
 // the marks' units — what the recipe says — and the marks, drawn again by core (core/stage/still.js), lie over it.
 const twice = await page.beforeLoad(`Object.defineProperty(window, 'devicePixelRatio', { get: () => 2, configurable: true })`);
@@ -137,7 +160,7 @@ const hd = await page.eval(`(async () => {
   let sum = 0, ink = 0;
   for (let i = 0; i < a.length; i++) sum += Math.abs(a[i] - b[i]);
   for (let i = 3; i < a.length; i += 4) if (a[i] > 0) ink++;
-  return { density: cv.width / innerWidth, size: [w, h], frame: [object.recipe.frame.w, object.recipe.frame.h], again: [again.width, again.height],
+  return { density: cv.width / parseFloat(cv.style.width), size: [w, h], frame: [object.recipe.frame.w, object.recipe.frame.h], again: [again.width, again.height],
     marks: object.recipe.marks.length, mean: +(sum / a.length).toFixed(2), ink: +(ink / (w * h)).toFixed(3) };
 })()`);
 await page.forget(twice);

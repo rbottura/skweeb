@@ -57,8 +57,8 @@ skill, *Porting a sketch*).
 |---|---|---|---|---|
 | C6a | **core's stage off p5**: a clip's buffer a canvas, the layers blitted on a 2D context, the sprites decoded images, a recording replayed with no hidden p5 | `gamepad/stage-2d` | M | **landed 2026-11-18** — below; `check-gamepad`, new |
 | C6b | **the page off p5**: its canvas, the ink, the cursor, the reference, the view and a still's composite in Canvas 2D, on its own frame clock; p5 and p5.joystick out of the page, `core/libs/p5.min.js` out of the repo | `gamepad/canvas` | M | **landed 2026-11-18** — below; `check-gamepad` at twice the density |
-| C6c | **its params a schema**: `params.js` in core's panel, core's bar and keys, the format core's; the pad still draws, Start arms the recording; `ParamPanel.js`, the status bar and the help card gone | `gamepad/params` | M | next |
-| C6d | **a module**: `mount(host)`, `unmount()`; the families a section of its panel, each loaded when first drawn with, no splash; cluster mounts it — and the heart can (M16n) | `gamepad/module` | M | |
+| C6c | **its params a schema**: `params.js` in core's panel, core's bar and keys, the format core's; the pad still draws, Start arms the recording; `ParamPanel.js`, the status bar and the help card gone | `gamepad/params` | M | **landed 2026-11-18** — below; `check-gamepad`, `tests/gamepad.mjs` |
+| C6d | **a module**: `mount(host)`, `unmount()`; the families a section of its panel, each loaded when first drawn with, no splash; cluster mounts it — and the heart can (M16n) | `gamepad/module` | M | next |
 | C6e | **its objects its own**: `rebuild.js`, a still's and a recording's replay moved out of core; `?open=`, a still's marks back on the ink, a recording back on the timeline | `gamepad/reopen` | M | |
 | C6f | **the timeline on core's kit**: core's Transport its clock, a layer's drawer rows of a schema; a recording in the stack played in its time | `gamepad/timeline` | M | waits: the author — below |
 | C6g | **the scratchpad**: the gallery panel, IndexedDB and the publisher | `gamepad/scratchpad` | S | waits: the author — below |
@@ -107,6 +107,16 @@ panel — its rows, its values — would be core's, for every app: a brick of
 its own if the author wants it. *Done when* `ParamPanel.js`, the status bar
 and the help card are gone, every value saved is the schema's, and
 `hud.css` is under the cap.
+*Landed 2026-11-18*: the page is core's — the viewer, the panel beside it,
+the bar and the title bar; the canvas fills the viewer's stage, not the
+window. A drawer, *Drawing*, holds what is not a setting: the recording,
+the canvas cleared, a reference under the ink. The controls are a guide, H
+(`docs/guides/gamepad.md`); E, G and H stay the gamepad's (`own`), and Z
+no longer clears — on an AZERTY it is core's view; C clears. `hud.css` was
+split at its seam, the gallery's styles `ui/gallery.css`. A still's
+`params` are the schema's: `frameFormat` and `frameBleed` from before
+are read as `format` and `bleed`. The title bar's Save and Export, and
+the export box, come with C6d.
 
 **C6d — a module.** `appModule('gamepad', …)` (`core/mount.js`): its
 markup, its style, `start`, `keep`; the pad, its keys, its clock and its

@@ -318,12 +318,12 @@ A canvas read back often is drawn in software after: compared, measured.
   frame, so a loop saved at 60 fps turns twice as fast as at 30 — which
   rate saves default to is the author's call; its width and height are both
   the canvas and the world the glyph sits in.
-- **The gamepad cannot reopen its recordings**; its params are not on
-  `core/params.js`, its panels its own; its GALLERY panel shows IndexedDB
-  (C6).
+- **The gamepad cannot reopen its recordings** (C6e); a module not yet (C6d);
+  its timeline and its gallery, IndexedDB's, its own — the author's (C6f, g,
+  `docs/gamepad.md`).
 - **Files past 400 lines** (rule 4, `node scripts/lines.mjs`): the
-  gamepad's `ui/hud.css` (721), `sketch/gamepadSketch.js` (572),
-  `ui/TimelinePanel.js` (547) and `ui/ParamPanel.js` (500) — C6 — and four
+  gamepad's `sketch/gamepadSketch.js` (571) and `ui/TimelinePanel.js`
+  (547) — C6, its other two gone or split in C6c — and four
   kept whole with their reasons: `core/VaultPanel.js`, `apps/grid/main.js`,
   `apps/filter/main.js`, `scripts/check-3d.mjs`.
 - **A 3D model's handles turn about the world's axes only**; nothing in it
@@ -346,8 +346,8 @@ A canvas read back often is drawn in software after: compared, measured.
 
 ## Next single step
 
-C6c, the gamepad's params a schema — `params.js` in core's panel, core's bar and keys, Start arming the recording
-(`docs/gamepad.md`; C6a, b landed, p5 gone) — and the author's eye on M16o, m, p: the heart weightless, brushes found, the appendage. Beside it: their SVG of a BEC render in their print tool (G11); the
+C6d, the gamepad a module — `mount`, `unmount`, the families a section, cluster mounting it; then M16n in the heart
+(`docs/gamepad.md`; C6a to c landed) — and the author's eye on M16o, m, p, and on the gamepad's new page (C6c). Beside it: their SVG of a BEC render in their print tool (G11); the
 ThinkPad pulled, the vaults made one (`docs/guides/vault-share.md`); their test of G4 to G10. Else C12, or M13c's fields.
 
 ## Parked decisions

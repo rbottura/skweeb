@@ -9,8 +9,8 @@
  * file is split along a seam it already has, or kept whole with its reason
  * written below, in `KEPT`. Past 600 it splits, whatever the reason. The
  * docs every session reads stay under 400: they cost every session its
- * context. The gamepad's four are known, and named apart, until it stands
- * on core's kit (C6 in `docs/plan.md`). Eased from a hard cap of 400 on
+ * context. The gamepad's two left are known, and named apart, until it stands
+ * on core's kit (C6, `docs/gamepad.md`). Eased from a hard cap of 400 on
  * 2026-10-22, the author's call (`docs/decisions.md`).
  *
  * The files are git's own list (`git ls-files`), never a walk of the disk
@@ -44,12 +44,10 @@ const KEPT = new Map([
   ['core/VaultPanel.js', "one panel's state read by all it does — the chips, the grid, the detail; its parts are out already (vault-*.js): what is left would share `this`"],
 ]);
 
-/** Past the cap and known: the gamepad's own panels and sketch, until C6 ports them. */
+/** Past the cap and known: the gamepad's sketch and timeline, until C6 ports them — its params panel gone, its HUD's styles split (C6c). */
 const LEGACY = new Set([
-  'apps/gamepad/ui/hud.css',
   'apps/gamepad/sketch/gamepadSketch.js',
   'apps/gamepad/ui/TimelinePanel.js',
-  'apps/gamepad/ui/ParamPanel.js',
 ]);
 
 /** Its lines as an editor counts them; a file git lists but the disk has lost is none. */

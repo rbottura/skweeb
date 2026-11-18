@@ -3,13 +3,14 @@
  *
  * The page's one script. No p5 and no global since C6b (docs/gamepad.md):
  * the sketch draws on its own canvas, core's stage replays what it records.
+ * Since C6c its settings are a schema (params.js) in core's panel beside the
+ * viewer, a drawer for what is not a setting; core's bar under the page says
+ * the brush; the pad's controls are a guide, H (docs/guides/gamepad.md).
  */
 
 import * as BrushRegistry from '../../core/registry.js';
-import { InputManager, MODE } from './core/inputManager.js';
 import { ImageStore }          from './core/imageStore.js';
 import { BrushPanel }          from './ui/BrushPanel.js';
-import { ParamPanel }          from './ui/ParamPanel.js';
 import { GalleryPanel }        from './ui/GalleryPanel.js';
 import { TimelinePanel }       from './ui/TimelinePanel.js';
 import { VaultPanel }          from '../../core/VaultPanel.js';
@@ -17,9 +18,14 @@ import { PrintBox }            from './ui/PrintBox.js';
 import { joinLive, savedBy }   from '../../core/live.js';
 import { Vault, isTrashed }    from '../../core/vault.js';
 import { offers }              from '../../core/uses.js';
-import { createSketch,
-         setFamilyIndex, setSpriteIndex, setPatternIndex,
-         familyIndex, spriteIndex, patternIndex }
+import { ParamPanel }          from '../../core/ParamPanel.js';
+import { Bar }                 from '../../core/Bar.js';
+import { Guide }               from '../../core/Guide.js';
+import { applyFrameEdit }      from '../../core/frame.js';
+import { bare, own }           from '../../core/keys.js';
+import { SequenceRecorder }    from '../../core/stage/recorder.js';
+import { gamepadParams, GROUPS } from './params.js';
+import { createSketch, setFamilyIndex, setSpriteIndex, familyIndex, spriteIndex }
        from './sketch/gamepadSketch.js';
 
 import { BrushSelector }       from './ui/BrushSelector.js';
@@ -27,6 +33,8 @@ import { BrushSelector }       from './ui/BrushSelector.js';
 /** Built during boot; the keyboard handler at the bottom reaches them. */
 let vaultPanel = null;
 let printBox = null;
+let bar = null;
+let guide = null;
 
 // Saving also writes a vault object, with the recipe attached.
 import './core/vaultBridge.js';
@@ -69,18 +77,24 @@ async function boot() {
     BrushRegistry.setSelectedFamilies(selectedIds);
     await BrushRegistry.loadSelected();
 
-    // 4. Start sketch
-    const container = document.getElementById('sketch-container');
-    createSketch(container);
+    // 4. The page: core's bar under it and its panel beside the viewer, the
+    //    settings a schema (params.js); then the sketch, in the viewer.
+    const params = gamepadParams();
+    bar = new Bar({ app: 'gamepad', mount: document.querySelector('.app'), acts: false,
+                    keys: 'stick moves · A stamps · Start records · L1 brushes · T timeline · V vault · E print · H the controls' });
+    const panel = new ParamPanel(params, { title: 'gamepad', mount: document.getElementById('side'), groups: GROUPS });
+    drawingDrawer(panel);
+    params.on(key => applyFrameEdit(params, key));
+    guide = new Guide({ url: new URL('../../docs/guides/gamepad.md', import.meta.url).href, title: "the gamepad's controls" });
+    createSketch(document.getElementById('sketch-container'), params);
 
     // 5. Create UI panels
-    const brushPanel   = new BrushPanel();
-    const paramPanel   = new ParamPanel();
-    const galleryPanel = new GalleryPanel();
+    new BrushPanel();
+    new GalleryPanel();
 
     // Built after the sketch, so its getStage()/getTransport() have something
     // to return. It stays hidden until the first recording lands.
-    const timelinePanel = new TimelinePanel();
+    new TimelinePanel();
 
     // The read side of the vault. Unlike the GALLERY panel, which shows this
     // browser's scratchpad, this one shows what is on disk with its recipes.
@@ -98,9 +112,8 @@ async function boot() {
     // 6. Restore previously saved images from IndexedDB
     await ImageStore.ready;
 
-    // 7. Setup status bar
-    _buildStatusBar();
-    setTimeout(_updateStatusBar, 100);
+    // 7. The bar says the brush.
+    say();
 
   } catch (err) {
     console.error('Failed to boot GamepadDraw:', err);
@@ -160,140 +173,76 @@ document.addEventListener('brushpanel:confirm', e => {
   const { familyIndex: fi, spriteIndex: si } = e.detail;
   setFamilyIndex(fi);
   setSpriteIndex(si);
-  _updateStatusBar();
+  say();
 });
 
-// ParamPanel changed pattern → apply to sketch
-document.addEventListener('parampanel:patternChange', e => {
-  setPatternIndex(e.detail.patternIndex);
-  _updateStatusBar();
-});
-
-// Sketch brush changed (via D-pad in draw mode) → sync status bar
-document.addEventListener('sketch:brushChanged', e => {
-  _updateStatusBar();
-});
-
-document.addEventListener('sketch:patternChanged', () => {
-  _updateStatusBar();
-});
-
-// ── Status bar (always-visible HUD strip at bottom-left) ─────────────────────
-
-function _updateStatusBar() {
-  const fam  = BrushRegistry.familyMetaByIndex(familyIndex);
-  if (!fam) return;
-
-  const patternLabel = document.getElementById('sb-pattern');
-  const familyLabel  = document.getElementById('sb-family');
-  const spriteLabel  = document.getElementById('sb-sprite');
-  const modeLabel    = document.getElementById('sb-mode');
-  const countLabel   = document.getElementById('sb-count');
-
-  if (familyLabel) { familyLabel.textContent = fam.label; familyLabel.style.color = fam.color; }
-  if (spriteLabel) spriteLabel.textContent = `#${spriteIndex + 1}`;
-  if (countLabel)  countLabel.textContent  = `${ImageStore.count} saved`;
+// The brush stepped on the pad, a save made or gone: the bar says so.
+for (const name of ['sketch:brushChanged', 'imagestore:saved', 'imagestore:removed', 'imagestore:cleared', 'imagestore:hydrated']) {
+  document.addEventListener(name, () => say());
 }
 
-document.addEventListener('imagestore:saved',   _updateStatusBar);
-document.addEventListener('imagestore:removed', _updateStatusBar);
-document.addEventListener('imagestore:cleared',  _updateStatusBar);
-document.addEventListener('imagestore:hydrated', _updateStatusBar);
+/** The bar's line: the brush — its family in its colour's name, its sprite — and how many are saved here. */
+function say() {
+  const fam = BrushRegistry.familyMetaByIndex(familyIndex);
+  if (bar && fam) bar.say(`${fam.label} · sprite ${spriteIndex + 1} · ${ImageStore.count} saved`);
+}
 
-// ── Keyboard shortcuts overlay (help) ────────────────────────────────────────
+/**
+ * The drawer of what is not a setting (C6c): the recording — Start on the pad
+ * — said as it goes, the canvas cleared, a picture put under the ink to draw
+ * over. What ParamPanel.js's carousel held besides its settings.
+ */
+function drawingDrawer(panel) {
+  const drawer = panel.addDrawer({ id: 'drawing', title: 'Drawing', before: 'brush' });
+  const button = (label, title, run) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'nb-btn nb-btn--wide';
+    b.textContent = label;
+    b.title = title;
+    b.addEventListener('click', run);
+    return b;
+  };
+  const tell = name => detail => document.dispatchEvent(new CustomEvent(name, { detail }));
+  const record = button('● record', 'record a sequence, and stop — Start on the pad', () => tell('gamepad:record')());
+  const status = Object.assign(document.createElement('p'), { className: 'pp-note gp-recording' });
+  const file = Object.assign(document.createElement('input'), { type: 'file', accept: 'image/*', hidden: true });
+  file.addEventListener('change', e => {
+    const picked = e.target.files[0];
+    if (picked) tell('gamepad:reference')({ url: URL.createObjectURL(picked) });
+    e.target.value = '';      // so the same file can be picked again
+  });
+  drawer.body.append(record, status,
+    button('clear the canvas', 'every mark off the canvas — C', () => tell('gamepad:clear')()),
+    button('a reference under the ink…', "a picture to draw over, at the Canvas drawer's opacity", () => file.click()), file);
+
+  const show = () => {
+    const on = SequenceRecorder.recording, n = SequenceRecorder.count;
+    record.textContent = on ? '■ stop recording' : '● record';
+    record.classList.toggle('nb-btn--primary', on);
+    status.textContent = on ? `● recording · ${SequenceRecorder.liveCount} marks`
+      : n ? `${n} sequence${n > 1 ? 's' : ''} — on the timeline, T` : 'nothing recorded yet';
+  };
+  for (const name of ['sequence:started', 'sequence:captured', 'sequence:stopped', 'sequence:discarded', 'sequence:removed', 'sequence:cleared']) {
+    document.addEventListener(name, show);
+  }
+  show();
+}
+
+// ── Keys ─────────────────────────────────────────────────────────────────────
+
+// The print, the ground and the controls are the gamepad's letters, not core's
+// left hand (core/keys.js): E, G and H are kept.
+own('KeyE', 'KeyG', 'KeyH');
+
 document.addEventListener('keydown', e => {
-  // A select or slider in the timeline drawer has the keyboard; a plain letter
-  // there is someone typing, not a shortcut.
-  const t = e.target;
-  if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
-
-  if (e.key === 'h' || e.key === 'H') _toggleHelp();
+  // A select or slider in a drawer has the keyboard; a plain letter there is
+  // someone typing, not a shortcut (core/keys.js `bare`).
+  if (!bare(e)) return;
+  if (e.key === 'h' || e.key === 'H') guide?.toggle();
   if (e.key === 't' || e.key === 'T') {
     document.dispatchEvent(new CustomEvent('ui:toggleTimeline'));
   }
   if (e.key === 'v' || e.key === 'V') vaultPanel?.toggle();
   if (e.key === 'e' || e.key === 'E') printBox?.toggle();
 });
-
-function _buildStatusBar() {
-  const bar = document.createElement('div');
-  bar.id = 'status-bar';
-  bar.className = 'status-bar';
-  bar.innerHTML = `
-    <span class="sb-item" id="sb-family">—</span>
-    <span class="sb-sep">·</span>
-    <span class="sb-item sb-dim" id="sb-sprite">—</span>
-    <span class="sb-sep">·</span>
-    <span class="sb-item sb-dim" id="sb-count">0 saved</span>
-    <span class="sb-sep">·</span>
-    <span class="sb-item sb-dim" id="sb-vault">vault…</span>
-    <span class="sb-spacer"></span>
-    <a class="sb-item sb-link" href="gallery/" target="_blank" rel="noopener">Gallery &#8599;</a>
-    <span class="sb-sep">·</span>
-    <span class="sb-item sb-dim">V = vault &nbsp;·&nbsp; T = timeline &nbsp;·&nbsp; E = print &nbsp;·&nbsp; H = help</span>
-  `;
-  document.body.appendChild(bar);
-
-  // The count was already here; clicking it is the discoverable way in.
-  const vaultField = bar.querySelector('#sb-vault');
-  vaultField.style.cursor = 'pointer';
-  vaultField.title = 'Open the vault [V]';
-  vaultField.addEventListener('click', () => vaultPanel?.toggle());
-
-  return bar;
-}
-
-function _toggleHelp() {
-  const existing = document.getElementById('help-overlay');
-  if (existing) { existing.remove(); return; }
-
-  const ov = document.createElement('div');
-  ov.id = 'help-overlay';
-  ov.className = 'help-overlay';
-  ov.innerHTML = `
-    <div class="help-card">
-      <h2>GamepadDraw — Controls</h2>
-      <table class="help-table">
-        <thead><tr><th>Gamepad</th><th>Keyboard</th><th>Action</th></tr></thead>
-        <tbody>
-          <tr><td>Left Stick</td><td>—</td><td>Move brush</td></tr>
-          <tr><td>A / Cross</td><td>Space / Enter</td><td>Stamp brush</td></tr>
-          <tr><td>B / Circle</td><td>Z</td><td>Undo / Close panel</td></tr>
-          <tr><td>L2 / R2</td><td>—</td><td>Rotate CCW / CW</td></tr>
-          <tr><td>X / Square</td><td>—</td><td>Scale down</td></tr>
-          <tr><td>Y / Triangle</td><td>—</td><td>Scale up</td></tr>
-          <tr><td>D-pad ⬆⬇</td><td>—</td><td>Previous / Next family</td></tr>
-          <tr><td>D-pad ⬅➡</td><td>—</td><td>Previous / Next sprite</td></tr>
-          <tr><td>L1</td><td>—</td><td>Open Brush Panel</td></tr>
-          <tr><td>Start</td><td>—</td><td>Open / close Parameters</td></tr>
-          <tr><td>R3</td><td>P</td><td>Cycle pattern mode</td></tr>
-          <tr><td>L3</td><td>—</td><td>Reset brush to centre</td></tr>
-          <tr><td>Select</td><td>—</td><td>Open Gallery</td></tr>
-          <tr><td>—</td><td>T</td><td>Open / close Timeline</td></tr>
-          <tr><td>—</td><td>V</td><td>Open / close the Vault</td></tr>
-          <tr><td>—</td><td>E</td><td>Print the drawing — a sheet's size, a dpi</td></tr>
-        </tbody>
-      </table>
-      <h3>In the Timeline</h3>
-      <p class="help-note">
-        Stop recording and the sequence lands here as a layer. Drag&nbsp;⠿ to restack
-        (order is blend order), ◉ shows or hides, S shows that one only
-        (⇧-click to add more), ▸ opens its speed, window, filter, blend, opacity
-        and phase. ▶ plays the stack over the canvas; ■ gives the canvas back.
-      </p>
-      <h3>In the Gallery</h3>
-      <table class="help-table">
-        <thead><tr><th>Gamepad</th><th>Keyboard</th><th>Action</th></tr></thead>
-        <tbody>
-          <tr><td>Start</td><td>S</td><td>Save canvas here</td></tr>
-          <tr><td>R1</td><td>—</td><td>Load image to canvas</td></tr>
-          <tr><td>X / Square</td><td>—</td><td>Download image</td></tr>
-          <tr><td>Y / Triangle</td><td>—</td><td>Delete image</td></tr>
-        </tbody>
-      </table>
-      <p class="help-close-hint">Press H or click to close</p>
-    </div>
-  `;
-  ov.addEventListener('click', () => ov.remove());
-  document.body.appendChild(ov);
-}

@@ -264,19 +264,6 @@
   letter-spacing: 0.05em;
 }
 
-/* The timeline covers the bottom strip, so the strip steps out of its way. */
-body.tl-open .status-bar { opacity: 0; pointer-events: none; }
-
-/* Prose note in the help overlay, where the timeline needs sentences more than
-   it needs a keyboard table. */
-.help-note {
-  margin: 6px 0 2px;
-  max-width: 62ch;
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--hud-subtle);
-}
-
 /* ── Drawer groups ─────────────────────────────────────────────────────────── */
 
 .tl-group {

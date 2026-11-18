@@ -120,7 +120,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L8 | overrides | `layers/overrides` | L | waits: the author — now, or later |
 | L9 | the other apps worn in OBS | `layers/obs` | M | waits: the author — which app first |
 | C5 | the unit loop on GitHub | `clean/ci` | S | waits: the author's yes |
-| C6 | the gamepad on core's kit, off p5 — the heart draws with it (M16n): C6a to g, `docs/gamepad.md` | `gamepad/*` | L+ | C6a, b landed 2026-11-18 — p5 out of the repo; next: C6c, its params a schema |
+| C6 | the gamepad on core's kit, off p5 — the heart draws with it (M16n): C6a to g, `docs/gamepad.md` | `gamepad/*` | L+ | C6a to c landed 2026-11-18 — p5 out, its params core's; next: C6d, a module |
 
 S is a session, M two or three, L more.
 

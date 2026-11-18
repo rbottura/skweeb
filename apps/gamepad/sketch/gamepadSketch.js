@@ -17,34 +17,22 @@ import { SequenceTransport }     from '../../../core/stage/transport.js';
 import * as StillFrame           from '../core/stillFrame.js';
 import { viewNow, drawPageEdge } from './viewFit.js';
 import { Surface, picture }   from './surface.js';
+import { bare }               from '../../../core/keys.js';
 
 export { setViewInset } from './viewFit.js';
 
-/** Movement speed (px/frame at full stick deflection). Tweakable from ParamPanel. */
-export const params = {
-  moveSpeed:      10,
-  rotateSpeed:    0.045,
-  scaleSpeed:     0.006,
-  scaleMin:       0.05,
-  scaleMax:       8,
-  refOpacity:     0.5,
+/**
+ * The settings, a schema since C6c (params.js), given by app.js: the pad's
+ * speeds, the pattern, the reference's opacity, what a still is saved on,
+ * and core's format — `content` by default, since a gamepad drawing is a
+ * few marks on a canvas the size of a window, and saving the window was
+ * saving mostly nothing: a 1920x945 still holding a drawing 996x822 across.
+ */
+let _params = null;
+const P = key => _params.get(key);
 
-  /**
-   * How a saved still is framed. Same vocabulary as core/frame.js, which grid
-   * takes as a full parameter group — the gamepad gets the two that matter
-   * until its params move onto core/params.js and it can have the rest.
-   *
-   * `content` is the default because a gamepad drawing is a few marks on a
-   * canvas the size of your window, and saving the window was saving mostly
-   * nothing: a 1920x945 still holding a drawing 996x822 across. Set `source`
-   * to get the old behaviour back.
-   */
-  frameFormat:    'content',
-  frameBleed:     0,
-
-  /** Under a saved still: 'none' (transparent, the default since 2026-09-23) or 'white'. */
-  saveGround:     'none',
-};
+/** The settings, for what saves and prints the drawing (core/vaultBridge.js, ui/PrintBox.js). */
+export const getParams = () => _params;
 
 /** Opacity of the live brush cursor drawn over the ink layer. */
 const GHOST_ALPHA = 180 / 255;
@@ -62,10 +50,10 @@ export let patternIndex = 0;
 
 export function setFamilyIndex(i) { familyIndex = i; _syncBrush(); }
 export function setSpriteIndex(i) { spriteIndex = i; _syncBrush(); }
-export function setPatternIndex(i) { patternIndex = i; _syncBrush(); }
 
 // ─── The page's surfaces ──────────────────────────────────────────────────────
-let _view;        // Surface — the page's canvas, the window's size
+let _container;   // the viewer's stage the page fills
+let _view;        // Surface — the page's canvas, the stage's size
 let _ink;         // Surface — the permanent ink layer, the same size
 let _joyImg;      // JoyImage cursor
 let _rotVal = 0;
@@ -103,13 +91,27 @@ const density = () => window.devicePixelRatio || 1;
  * (docs/gamepad.md). app.js decoded the chosen families before it called this
  * (core/registry.js `loadSelected`), so every sprite is an image here.
  *
+ * Since C6c it is the viewer's stage it fills, not the window, and its
+ * settings are `params`, core's (params.js): the pattern is one of them.
+ *
  * @returns {HTMLCanvasElement} the page's canvas
  */
-export function createSketch(container) {
+export function createSketch(container, params) {
+  _params = params;
+  patternIndex = Math.max(0, PATTERNS.indexOf(P('pattern')));
+  params.on(key => {
+    if (key !== 'pattern') return;
+    patternIndex = Math.max(0, PATTERNS.indexOf(P('pattern')));
+    _syncBrush();
+  });
+
   const canvas = document.createElement('canvas');
   container.append(canvas);
-  _view = new Surface(window.innerWidth, window.innerHeight, density(), canvas);
+  _container = container;
+  const [w, h] = roomIn(container);
+  _view = new Surface(w, h, density(), canvas);
   _ink  = new Surface(_view.width, _view.height, _view.density);
+  sizeOnPage();
 
   _joyImg = new JoyImage(
     _view.width  / 2,
@@ -132,26 +134,26 @@ export function createSketch(container) {
   _wireInputs();
   _wireKeys();
 
-  // Resize. Debounced: the event fires about once a frame while a window
-  // is dragged, and every pass rebuilds two full-screen buffers.
+  // Resize: the viewer's stage. Debounced — it changes about once a frame
+  // while a window is dragged or the panel's edge moved, and every pass
+  // rebuilds two buffers the stage's size.
   let resizeTimer;
-  window.addEventListener('resize', () => {
+  new ResizeObserver(() => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(rebuildBuffers, RESIZE_DEBOUNCE_MS);
-  });
+  }).observe(container);
 
-  // parampanel:clearCanvas → wipe the overlay
-  document.addEventListener('parampanel:clearCanvas', _clearOverlay);
+  // gamepad:clear → wipe the ink (the Drawing drawer, C)
+  document.addEventListener('gamepad:clear', _clearOverlay);
 
   // gallery:saveCanvas → the gallery's Save button. The gamepad path goes
   // through InputManager's 'saveImage' action, wired in _wireInputs.
   document.addEventListener('gallery:saveCanvas', _saveImage);
 
-  // parampanel:toggleSequence → arm / disarm the recorder. The sketch owns
-  // this because the sequence records the canvas size it was made at.
-  document.addEventListener('parampanel:toggleSequence', () => {
-    SequenceRecorder.toggle(_view.width, _view.height);
-  });
+  // gamepad:record → arm / disarm the recorder (the Drawing drawer; Start on
+  // the pad, below). The sketch owns this because the sequence records the
+  // canvas size it was made at.
+  document.addEventListener('gamepad:record', _toggleRecording);
 
   // A finished recording becomes a layer straight away. It is almost always
   // what you want to look at next, and if it is not, the timeline drops it in
@@ -165,8 +167,8 @@ export function createSketch(container) {
   document.addEventListener('sequence:removed', _pruneOrphanLayers);
   document.addEventListener('sequence:cleared', _pruneOrphanLayers);
 
-  // Load reference image
-  document.addEventListener('parampanel:referenceLoaded', async e => {
+  // A reference under the ink (the Drawing drawer)
+  document.addEventListener('gamepad:reference', async e => {
     const img = await picture(e.detail.url);
     if (img) _referenceImg = img;
   });
@@ -198,9 +200,26 @@ export function createSketch(container) {
   return canvas;
 }
 
-/** The page and the ink at the window's size again, the ink kept. */
+/** The room the viewer's stage gives the page: its box, less its padding — the rulers' bands among it. */
+function roomIn(stage) {
+  const cs = getComputedStyle(stage);
+  const w = stage.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+  const h = stage.clientHeight - parseFloat(cs.paddingTop || 0) - parseFloat(cs.paddingBottom || 0);
+  return [Math.max(64, Math.floor(w)), Math.max(64, Math.floor(h))];
+}
+
+/** The canvas on the page at its units' size: its pixels the density times more. */
+function sizeOnPage() {
+  _view.canvas.style.width = `${_view.width}px`;
+  _view.canvas.style.height = `${_view.height}px`;
+}
+
+/** The page and the ink at the stage's size again, the ink kept. */
 function rebuildBuffers() {
-  _view.resize(window.innerWidth, window.innerHeight, density());
+  const [w, h] = roomIn(_container);
+  if (w === _view.width && h === _view.height && density() === _view.density) return;
+  _view.resize(w, h, density());
+  sizeOnPage();
   const previous = _ink;
   _ink = new Surface(_view.width, _view.height, _view.density);
   _ink.ctx.drawImage(previous.canvas, 0, 0, previous.width, previous.height);
@@ -237,11 +256,11 @@ function drawPage(ctx, dt) {
   }
 
   // The reference image behind the ink, contained, at its opacity.
-  if (_referenceImg && params.refOpacity > 0) {
+  if (_referenceImg && P('refOpacity') > 0) {
     const s = Math.min(_view.width / _referenceImg.width, _view.height / _referenceImg.height);
     const dw = _referenceImg.width * s, dh = _referenceImg.height * s;
     ctx.save();
-    ctx.globalAlpha = params.refOpacity;
+    ctx.globalAlpha = P('refOpacity');
     ctx.drawImage(_referenceImg, (_view.width - dw) / 2, (_view.height - dh) / 2, dw, dh);
     ctx.restore();
   }
@@ -260,19 +279,18 @@ function drawPage(ctx, dt) {
 
 /**
  * The keyboard, a fallback without a pad — p5's keyPressed until C6b: a key
- * held fires once, as there; a key typed in a field is that field's.
+ * held fires once, as there; a key typed in a field is that field's. Z no
+ * longer clears (C6c): on an AZERTY it is core's view (core/keys.js), and C
+ * clears as it did.
  */
 function _wireKeys() {
   document.addEventListener('keydown', e => {
-    if (e.repeat) return;
-    const t = e.target;
-    if (t instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if (e.repeat || !bare(e)) return;
     if (e.key === 'Enter' || e.key === ' ') _joyImg?.stamp();
     if (e.key === 'c' || e.key === 'C')     _clearOverlay();
-    if (e.key === 'z' || e.key === 'Z')     _clearOverlay();
     if (e.key === 's' || e.key === 'S')     _saveImage();
-    if (e.key === 'g' || e.key === 'G')     params.saveGround = params.saveGround === 'white' ? 'none' : 'white';
-    if (e.key === 'p' || e.key === 'P')     _joyImg?.nextPattern();
+    if (e.key === 'g' || e.key === 'G')     _params.set({ saveGround: P('saveGround') === 'white' ? 'none' : 'white' });
+    if (e.key === 'p' || e.key === 'P')     _nextPattern();
   });
 }
 
@@ -281,19 +299,19 @@ function _wireKeys() {
 function _wireInputs() {
   InputManager.on('move', ({ ax, ay }) => {
     if (!_joyImg) return;
-    _joyImg.x += ax * params.moveSpeed;
-    _joyImg.y += ay * params.moveSpeed;
+    _joyImg.x += ax * P('moveSpeed');
+    _joyImg.y += ay * P('moveSpeed');
   });
 
-  InputManager.on('rotateLeft',  ({ value }) => { _rotVal -= value * params.rotateSpeed; _joyImg.rotation = _rotVal; });
-  InputManager.on('rotateRight', ({ value }) => { _rotVal += value * params.rotateSpeed; _joyImg.rotation = _rotVal; });
+  InputManager.on('rotateLeft',  ({ value }) => { _rotVal -= value * P('rotateSpeed'); _joyImg.rotation = _rotVal; });
+  InputManager.on('rotateRight', ({ value }) => { _rotVal += value * P('rotateSpeed'); _joyImg.rotation = _rotVal; });
 
   InputManager.on('scaleDown', ({ value }) => {
-    _scaleVal = Math.max(params.scaleMin, _scaleVal - value * params.scaleSpeed);
+    _scaleVal = Math.max(P('scaleMin'), _scaleVal - value * P('scaleSpeed'));
     _joyImg.scale = _scaleVal;
   });
   InputManager.on('scaleUp', ({ value }) => {
-    _scaleVal = Math.min(params.scaleMax, _scaleVal + value * params.scaleSpeed);
+    _scaleVal = Math.min(P('scaleMax'), _scaleVal + value * P('scaleSpeed'));
     _joyImg.scale = _scaleVal;
   });
 
@@ -304,12 +322,8 @@ function _wireInputs() {
     _joyImg.x = _view.width  / 2;
     _joyImg.y = _view.height / 2;
   });
-  InputManager.on('nextPattern',   () => {
-    if (!_joyImg) return;
-    _joyImg.nextPattern();
-    patternIndex = PATTERNS.indexOf(_joyImg.pattern);
-    document.dispatchEvent(new CustomEvent('sketch:patternChanged', { detail: { patternIndex } }));
-  });
+  InputManager.on('nextPattern',   _nextPattern);
+  InputManager.on('record',        _toggleRecording);
 
   InputManager.on('familyNext', () => _step('family',  1));
   InputManager.on('familyPrev', () => _step('family', -1));
@@ -318,11 +332,20 @@ function _wireInputs() {
 
   InputManager.on('saveImage',    _saveImage);
   InputManager.on('toggleBrushPanel', () => document.dispatchEvent(new CustomEvent('ui:toggleBrushPanel')));
-  InputManager.on('toggleParamPanel', () => document.dispatchEvent(new CustomEvent('ui:toggleParamPanel')));
   InputManager.on('toggleGallery',    () => document.dispatchEvent(new CustomEvent('ui:toggleGallery')));
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** The next pattern, R3 or P: the setting's, so the panel shows it (params.js). */
+function _nextPattern() {
+  if (_params) _params.set({ pattern: PATTERNS[(patternIndex + 1) % PATTERNS.length] });
+}
+
+/** Armed, or disarmed: Start on the pad, the Drawing drawer's button. */
+function _toggleRecording() {
+  if (_view) SequenceRecorder.toggle(_view.width, _view.height);
+}
 
 function _step(type, dir) {
   if (!_joyImg) return;
@@ -530,7 +553,7 @@ function _saveImage() {
 
   // The frame used is remembered by stillFrame.js, not here: vaultBridge needs
   // it for the recipe, and it is save state rather than sketch state.
-  const { canvas } = StillFrame.composite(_ink, params);
+  const { canvas } = StillFrame.composite(_ink, _params.values);
 
   ImageStore.save(canvas, BrushRegistry.familyMetaByIndex(familyIndex)?.label)
             .catch(err => console.error('[sketch] Save failed:', err));

@@ -61,11 +61,11 @@ export function inkBounds(ink) {
  * The frame a save should use, from the app's framing params.
  *
  * @param {import('../sketch/surface.js').Surface} ink
- * @param {{frameFormat:string, frameBleed:number}} params
+ * @param {{format: string, bleed: number, width: number, height: number}} values  the settings' (params.js) — core's format
  */
-export function frameFor(ink, params) {
+export function frameFor(ink, values) {
   return resolveFrame(
-    { format: params.frameFormat, bleed: params.frameBleed, zoom: 1 },
+    { format: values.format, bleed: values.bleed, width: values.width, height: values.height, zoom: 1 },
     inkBounds(ink),
     { width: ink.width, height: ink.height });
 }
@@ -86,19 +86,19 @@ export const lastFrame = () => _last;
  *
  * Transparent by default since 2026-09-23 — a drawing is ink on nothing, and
  * ink on nothing is what the suite's other apps take in (a sprite in ckt, a
- * source in grid). `params.saveGround` 'white' puts white under it, as every
+ * source in grid). `values.saveGround` 'white' puts white under it, as every
  * save did before. A canvas of its own, the frame's size in the ink's units.
  *
  * @param {import('../sketch/surface.js').Surface} ink
  * @returns {{canvas: HTMLCanvasElement, frame: object}}
  */
-export function composite(ink, params) {
-  const frame = frameFor(ink, params);
+export function composite(ink, values) {
+  const frame = frameFor(ink, values);
   _last = frame;
 
   const canvas = Object.assign(document.createElement('canvas'), { width: frame.width, height: frame.height });
   const ctx = canvas.getContext('2d');
-  if (params.saveGround === 'white') {
+  if (values.saveGround === 'white') {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, frame.width, frame.height);
   }

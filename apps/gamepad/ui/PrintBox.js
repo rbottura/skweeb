@@ -54,7 +54,7 @@ export class PrintBox {
     if (!Sketch.canvasIsReproducible()) return 'an image is under the ink — no marks to draw it again from';
     const ink = Sketch.getInk();
     if (!ink) return null;
-    const frame = StillFrame.frameFor(ink, Sketch.params);
+    const frame = StillFrame.frameFor(ink, Sketch.getParams().values);
     const recipe = recipeNow(Sketch, frame);
     if (!recipe || !recipe.marks.length) return 'nothing drawn yet';
     return { type: 'still', origin: APP, recipe, render: { w: frame.width, h: frame.height } };

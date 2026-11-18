@@ -1,0 +1,190 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   gallery.css — the gallery panel (ui/GalleryPanel.js): the session's saves in a
+   carousel, the toast a save shows, why Publish is greyed. Out of hud.css at its
+   own seam (C6c, docs/gamepad.md), on hud.css's properties and base panel.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GALLERY PANEL
+   ═══════════════════════════════════════════════════════════════════════════════ */
+.hud-panel--gallery {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(700px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hud-panel--gallery.hud-panel--visible {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.gallery-count {
+  font-family: var(--hud-font);
+  font-size: 11px;
+  color: var(--hud-subtle);
+  text-align: center;
+}
+
+.gallery-strip-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gallery-strip {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 2px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hud-border) transparent;
+}
+
+.gallery-arrow {
+  background: var(--hud-glass);
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  border-radius: 0;
+  color: var(--hud-cyan);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: background 150ms;
+}
+.gallery-arrow:hover { background: rgba(255, 214, 10, 0.1); }
+
+.gp-thumb {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 0;
+  border: 2px solid transparent;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 150ms, transform 150ms;
+}
+.gp-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.gp-thumb:hover { border-color: var(--nb-ink); }
+.gp-thumb--active {
+  border-color: var(--hud-magenta);
+  box-shadow: var(--nb-shadow-sm);
+  transform: scale(1.08);
+}
+
+.gallery-preview-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 320px;
+  overflow: hidden;
+  border-radius: 0;
+  background: rgba(17, 17, 17, 0.03);
+  border: var(--nb-line-sm) solid var(--nb-ink);
+}
+.gallery-preview-img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}
+
+.gallery-info {
+  font-family: var(--hud-font);
+  font-size: 11px;
+  color: var(--hud-subtle);
+  text-align: center;
+}
+
+.gallery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.gp-action-btn--save {
+  border-color: var(--nb-ink);
+  color: var(--nb-ink);
+}
+
+.gp-action-btn {
+  background: var(--hud-glass);
+  border: var(--nb-line-sm) solid var(--nb-ink);
+  border-radius: 0;
+  color: var(--hud-text);
+  padding: 7px 16px;
+  cursor: pointer;
+  font-family: var(--hud-font-ui);
+  font-size: 13px;
+  transition: background 150ms, color 150ms;
+}
+.gp-action-btn:hover { background: rgba(255,32,121,0.12); color: var(--hud-magenta); }
+.gp-action-btn[hidden] { display: none; }
+.gp-action-btn:disabled { opacity: 0.4; cursor: default; }
+.gp-action-btn:disabled:hover { background: var(--hud-glass); color: var(--hud-text); }
+.gp-action-btn--pub:hover:not(:disabled) {
+  background: rgba(255, 214, 10, 0.12);
+  color: var(--hud-cyan);
+}
+
+/* Session image that is already in the on-disk gallery */
+.gp-thumb--published::after {
+  content: '¹3';
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-family: var(--hud-font);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--hud-cyan);
+  text-shadow: none;
+  pointer-events: none;
+}
+
+/* ── Saved badge (toast) ─────────────────────────────────────────────────────── */
+.gp-saved-badge {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--nb-paper);
+  border: 1px solid var(--hud-lime);
+  border-radius: 0;
+  color: var(--nb-ink);
+  font-family: var(--hud-font);
+  font-size: 12px;
+  padding: 8px 16px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 300ms, transform 300ms;
+  pointer-events: none;
+  z-index: 1100;
+}
+.gp-badge--flash {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Why the Publish buttons are greyed out, said plainly rather than by their
+   absence. Only rendered when the write API did not answer. */
+.gp-pub-note {
+  margin: 0 0 6px;
+  padding: 0 4px;
+  font-family: var(--hud-font);
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--nb-ink);
+  opacity: 0.85;
+}
+
+.gp-pub-note[hidden] { display: none; }

@@ -5,20 +5,22 @@
  * MODES
  *   'draw'        — default, brush moves and stamps
  *   'brushPanel'  — D-pad navigates brush families / sprites
- *   'paramPanel'  — D-pad adjusts parameters
  *   'gallery'     — D-pad navigates saved images
+ *
+ * The parameters were a panel the D-pad walked until C6c (docs/gamepad.md):
+ * they are core's panel now, by the mouse, and Start records instead.
  *
  * GAMEPAD BUTTON MAP (standard layout)
  *   0  A/Cross       → stamp (draw) / confirm (panel)
  *   1  B/Circle      → undo last stamp (draw) / close panel
  *   2  X/Square      → scale −
  *   3  Y/Triangle    → scale +
- *   4  L1            → toggle Brush Panel / (param) previous column
- *   5  R1            → (param) next column / (gallery) load image to canvas
+ *   4  L1            → toggle Brush Panel
+ *   5  R1            → (gallery) load image to canvas
  *   6  L2 (axis)     → rotate CCW
  *   7  R2 (axis)     → rotate CW
  *   8  Select/Back   → toggle Gallery
- *   9  Start         → toggle Param Panel / (gallery) save canvas
+ *   9  Start         → record a sequence, and stop / (gallery) save canvas
  *  10  L3            → reset brush to canvas centre
  *  11  R3            → cycle stamp pattern
  *  12  D-pad Up      → family prev (draw) / navigate up (panel)
@@ -36,7 +38,6 @@
 export const MODE = {
   DRAW:         'draw',
   BRUSH_PANEL:  'brushPanel',
-  PARAM_PANEL:  'paramPanel',
   GALLERY:      'gallery',
 };
 
@@ -177,7 +178,6 @@ function _handleButtonDown(index) {
   switch (_mode) {
     case MODE.DRAW:         return _drawButton(index);
     case MODE.BRUSH_PANEL:  return _panelButton(index, 'brush');
-    case MODE.PARAM_PANEL:  return _panelButton(index, 'param');
     case MODE.GALLERY:      return _panelButton(index, 'gallery');
   }
 }
@@ -190,7 +190,7 @@ function _drawButton(i) {
     case 1:  return _emit('undo',        {});
     case 4:  return _emit('toggleBrushPanel', {});
     case 8:  return _emit('toggleGallery',    {});
-    case 9:  return _emit('toggleParamPanel', {});
+    case 9:  return _emit('record',      {});
     case 10: return _emit('resetPosition',    {});
     case 11: return _emit('nextPattern',      {});
     case 12: return _emit('familyPrev',  {});
@@ -210,13 +210,6 @@ function _panelButton(i, panel) {
 
   // Confirm
   if (i === 0) return _emit('panelConfirm', { panel });
-
-  // Param panel specific actions
-  if (panel === 'param') {
-    if (i === 4) return _emit('panelSection', { panel, dir: -1 }); // L1
-    if (i === 5) return _emit('panelSection', { panel, dir:  1 }); // R1
-    if (i === 9) return _emit('closePanel',   { panel });          // Start toggles
-  }
 
   // Gallery specific actions
   if (panel === 'gallery') {

@@ -29,8 +29,18 @@
     <button class="gp-nopad__close" id="gp-nopad-close" type="button" aria-label="Dismiss notice">&#10005;</button>
   </div>
 
-  <!-- The page's canvas goes here (sketch/gamepadSketch.js) -->
-  <div id="sketch-container"></div>
+  <!--
+    The page: the viewer, the panel beside it, core's bar under both (C6c) —
+    the page's canvas goes in the viewer's stage (sketch/gamepadSketch.js).
+  -->
+  <div class="app">
+    <main class="app-main">
+      <section class="viewer" aria-label="drawing">
+        <div class="viewer-stage" id="sketch-container"></div>
+      </section>
+      <div class="app-side" id="side"></div>
+    </main>
+  </div>
 
   <!-- Bootstrap module — imports all core/ and ui/ modules. No p5 since C6b. -->
   <script type="module" src="app.js"></script>

@@ -39,6 +39,7 @@ export function recipeNow(sketch, frame = StillFrame.lastFrame()) {
 
   const family = BrushRegistry.familyMetaByIndex(sketch.familyIndex);
   const shot   = SequenceRecorder.snapshot();
+  const values = sketch.getParams().values;      // the settings, a schema since C6c (params.js)
 
   return {
     /**
@@ -50,7 +51,7 @@ export function recipeNow(sketch, frame = StillFrame.lastFrame()) {
       w: shot.w,
       h: shot.h,
       // What _saveImage() put under the ink: nothing, or white.
-      background: sketch.params.saveGround === 'white' ? '#ffffff' : 'none',
+      background: values.saveGround === 'white' ? '#ffffff' : 'none',
     },
 
     /**
@@ -64,7 +65,7 @@ export function recipeNow(sketch, frame = StillFrame.lastFrame()) {
       spriteIndex:  sketch.spriteIndex,
       patternIndex: sketch.patternIndex,
     },
-    params: { ...sketch.params },
+    params: values,
     marks: shot.events,
   };
 }
@@ -100,16 +101,5 @@ document.addEventListener('imagestore:saved', async e => {
     console.warn('[vault] save failed, the scratchpad copy is unaffected:', err);
   }
 });
-
-document.addEventListener('vault:saved', () => _paint());
-document.addEventListener('vault:duplicate', () => _paint());
-
-/** One more field in the status bar, so the vault is visible while drawing. */
-function _paint() {
-  const el = document.getElementById('sb-vault');
-  if (el) el.textContent = Vault.available ? `${Vault.index.length} in vault` : 'no vault';
-}
-
-Vault.refresh().then(_paint);
 
 export { Vault, ImageStore };
