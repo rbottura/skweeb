@@ -1,5 +1,5 @@
 # STATUS — skweeb
-_last touched: 2026-11-17_
+_last touched: 2026-11-18_
 
 Where the suite stands, by area. Each app's own `STATUS.md` has its detail;
 `docs/roadmap.md` the milestones still open, `docs/roadmap-done.md` the done
@@ -9,7 +9,14 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 
 ## Works right now
 
-### Newest — 2026-11-09 to -16: BEC 2027's graphic system (track G), a game's effects (M15), the panel for a long use (S15)
+### Newest — 2026-11-18: the worm, the game's avatar (M16, `docs/worm.md`)
+
+- **The 3D app's player** (`apps/3d/play/`, M16a and b): a worm — a gamepad drawing lofted, or a model's drawn body
+  (`?worm=<id>`) — walked round a planet in the third person, its wave timed by its steps; another frozen ahead, a
+  phase: walked into, both framed, the world dimmed, the phase swung on a spectral bridge of their morph, fixed on B,
+  bonded under B's sky — and back. Its rows tuned by hand; nothing saved yet (M16j).
+
+### 2026-11-09 to -17: BEC 2027's graphic system (track G), a game's effects (M15), the panel for a long use (S15)
 
 - **A drawn body in the 3D app** (G4, 2026-11-16, `apps/3d/loft.js`): a gamepad drawing's strokes lofted, each mark's brush its silhouette; its skin the drawing, projected (G4b); a model out as glTF or OBJ (G5); a worm alive on a wave (G6); a drawing turned on a lathe (G7); petals round a heart (G8); grown as drawn (G9); its brush wrapped (G10). Its clouds and particles' dots out as SVG, every dot a circle (G11, `core/svg-canvas.js`).
 - **The panel for a long use** (S15, 2026-11-16, `docs/plan.md`; the 3D app's
@@ -267,22 +274,17 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 
 ## Tests
 
-Seventy files, no runner, no dependencies — the loop in `CLAUDE.md` runs
-all of them, and all pass (2026-11-13). Newest: `shader` (M15), `layers` (L13),
-`steps` for a list held (L12b); `3d-forces` (G2), `3d-cloud` (G1); `garden` (M14);
-`scope` and `reach`; the puppet's four; M11's, the print's, the 3D app's seven.
+Seventy-six files, no runner, no dependencies — the loop in `CLAUDE.md` runs
+all of them, and all pass (2026-11-18). Newest: `3d-play` and `3d-phase`
+(M16), `shader` (M15), `layers` (L13), `3d-forces` and `3d-cloud` (G2, G1).
 
-Forty-five browser checks, each a command in `CLAUDE.md`, run several at a
-time by `scripts/checks.mjs`: each its own server on a copy of the vault,
-headless Chrome through `scripts/chrome.mjs` — a real mouse included — and
-`scripts/check-kit.mjs` under it; each fails when a page throws or its
-console is not quiet. Newest: `check-shader`, `check-shader-save`,
-`check-particles-life` (M15), `check-layers` (L13). On the laptop Chrome keeps
-WebGPU from its Intel: a GPU check there skips its GPU half unless given
-`CHROME_FLAGS`, and `check-particles` fails two checks of that machine's
-(`apps/particles/STATUS.md`, *Known*). A canvas read back often enough is
-drawn by Chrome in software afterwards, a little differently: a check that
-compares two pages' canvases measures, never demands the pixel.
+Forty-nine browser checks, each a command in `CLAUDE.md`, run several at a
+time by `scripts/checks.mjs`, each its own server on a copy of the vault,
+headless Chrome under `scripts/check-kit.mjs`; a page that throws or speaks
+fails. Newest: `check-3d-play`, `check-3d-phase` (M16). On the laptop's
+Intel a GPU check skips its GPU half without `CHROME_FLAGS`, and
+`check-particles` fails two of that machine's (`apps/particles/STATUS.md`).
+A canvas read back often is drawn in software after: compared, measured.
 
 ## Broken / half-done
 
@@ -347,23 +349,23 @@ compares two pages' canvases measures, never demands the pixel.
 
 ## Next single step
 
-The author's SVG of a BEC render opened in their print tool (G11); the ThinkPad pulled, the vaults made one
-(`docs/guides/vault-share.md`); their test of G4 to G10. S15's eye stands; S15f parked. Else C12, or M13c's fields.
+The author's eye on the worm's player — `/apps/3d/play/?worm=<id>`, a drawing of theirs walked into the phase — and
+which of M16c to j comes next (`docs/worm.md`). Beside it: their SVG of a BEC render in their print tool (G11); the
+ThinkPad pulled, the vaults made one (`docs/guides/vault-share.md`); their test of G4 to G10. Else C12, or M13c's fields.
 
 ## Parked decisions
 
+- **M16 is the worm, now** (the author, 2026-11-18, "go M16, all gas no breaks"): the game's avatar on a planet; the
+  passage played, not held — swings there and back, fixed on B; its player the 3D app's, saving nothing until a
+  world is an object (M16j). `docs/worm.md`, `docs/decisions.md`.
 - **A branch for each work item** (the author, 2026-10-22): `main` always
   green, an item a branch, rebased to catch up and merged to land —
   `docs/workflow.md`; the plan's order, the author's the same day.
 - **M10 is 3D, and it is meshes, drawn by three.js** (the author,
-  2026-10-06): primitives generated from their params, never stored as
-  vertices; `model` a type, its pictures `still` and `sequence`;
-  `material` still deferred; three r186 pinned in `core/libs/three/`, its
-  WebGPU renderer on core's device; the app is `apps/3d/`. Distance fields
-  can come back as a family of M7. `docs/decisions.md`. Its bricks 2 to 4
-  settled more the same day: the handles are three's, driven by the app's
-  own pointer, their gizmo a scene of its own; a shape's modifiers are a
-  stack in its own entry; a style is the model's, a colour the shape's.
+  2026-10-06): primitives from their params, never stored as vertices;
+  `model` a type; three r186 pinned, its WebGPU renderer on core's device;
+  handles three's, a modifier stack per shape, a style the model's, a
+  colour the shape's. `docs/decisions.md`.
 - **M9 is the rig, between M8's bricks 3 and 4** (the author, 2026-10-02):
   a drawing made of marks rigged at its marks — never its pixels, which
   would stretch the scales; the mesh and Blender's heat weights wait for a
