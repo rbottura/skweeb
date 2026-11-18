@@ -166,7 +166,7 @@ export function drawnGeometry(v) {
   const k = WORLD / Math.max(1e-6, x1 - x0, y1 - y0), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   const strokes = v.grow && drawn !== DEMO ? grownTo(drawn.strokes, v.grown ?? 1) : drawn.strokes;   // its place kept as it grows
   const build = values => {
-    const o = { position: [], index: [], wrap: [] };
+    const o = { position: [], index: [], wrap: [], bodies: [] };
     for (const stroke of strokes) if (stroke.length > 1) body(o, smoothed(stroke, Math.round(v.smooth) || 0), values, n, ringOfKey, k, cx, cy);
     return o;
   };
@@ -188,6 +188,9 @@ export function drawnGeometry(v) {
   g.setAttribute('uv', new Float32BufferAttribute(uv, 2));
   g.setIndex(out.index);
   g.computeVertexNormals();
+  // Where each stroke's rings lie in it — its first point, its rings, the points round each, its line's length in
+  // the world's units: what the worm's player reads a body by — its head, its wave's length, a morph (M16).
+  g.userData.bodies = out.bodies;
   return g;
 }
 
@@ -326,4 +329,5 @@ function body(out, stamps, v, n, ringOfKey, k, cx, cy) {
     if (vol < 0) out.index.push(a, c, b);
     else out.index.push(a, b, c);
   }
+  out.bodies.push({ base, rings: m, points: n, length: L * k });
 }
