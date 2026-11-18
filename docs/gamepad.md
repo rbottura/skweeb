@@ -59,7 +59,7 @@ skill, *Porting a sketch*).
 | C6b | **the page off p5**: its canvas, the ink, the cursor, the reference, the view and a still's composite in Canvas 2D, on its own frame clock; p5 and p5.joystick out of the page, `core/libs/p5.min.js` out of the repo | `gamepad/canvas` | M | **landed 2026-11-18** — below; `check-gamepad` at twice the density |
 | C6c | **its params a schema**: `params.js` in core's panel, core's bar and keys, the format core's; the pad still draws, Start arms the recording; `ParamPanel.js`, the status bar and the help card gone | `gamepad/params` | M | **landed 2026-11-18** — below; `check-gamepad`, `tests/gamepad.mjs` |
 | C6d | **a module**: `mount(host)`, `unmount()`; the families a section of its panel, each loaded when first drawn with, no splash; cluster mounts it — and the heart can (M16n) | `gamepad/module` | M | **landed 2026-11-18** — below; `check-mount`, `check-cluster` |
-| C6e | **its objects its own**: `rebuild.js`, a still's and a recording's replay moved out of core; `?open=`, a still's marks back on the ink, a recording back on the timeline | `gamepad/reopen` | M | next |
+| C6e | **its objects its own**: `rebuild.js`, a still's and a recording's replay moved out of core; `?open=`, a still's marks back on the ink, a recording back on the timeline | `gamepad/reopen` | M | **landed 2026-11-18** — below; `check-gamepad` |
 | C6f | **the timeline on core's kit**: core's Transport its clock, a layer's drawer rows of a schema; a recording in the stack played in its time | `gamepad/timeline` | M | waits: the author — below |
 | C6g | **the scratchpad**: the gallery panel, IndexedDB and the publisher | `gamepad/scratchpad` | S | waits: the author — below |
 
@@ -146,6 +146,12 @@ a still (`core/stage/still.js`) and a recording (the player), `reopens`,
 the skill puts it — a still's `?open=` came with C6d; a recording a layer
 of the timeline again. *Done when* the vault offers *Open in gamepad ↗* and
 it opens as saved.
+*Landed 2026-11-18*: `apps/gamepad/rebuild.js` says what it reopens and
+draws again — a still with marks, a loop — and hands their frames to core,
+whose stage draws them for every app; core asks it as any app
+(`core/reopen.js`). A loop opened is a layer of the timeline again, with
+the treatment it was saved with (`SequenceRecorder.adopt`). M16n next; C6f
+and g wait on the author.
 
 **C6f — the timeline, the author's.** The timeline is a compositor of its
 own: recordings stacked with a blend, a filter, a transform and a phase —

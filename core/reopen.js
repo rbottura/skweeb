@@ -8,9 +8,9 @@
  *
  * Which objects an app can take back is the app's own business, asked the way
  * a replay is (core/rebuild.js): its `rebuild.js` may export `reopens(object)`.
- * No export or no file, and there is no link. Core learns nothing about apps —
- * except that a recording of marks is its own, as rebuild.js already knows,
- * and no app has asked to reopen one.
+ * No export or no file, and there is no link. Core learns nothing about apps:
+ * a recording of marks is core's to replay (rebuild.js), and the gamepad's to
+ * take back since C6e (apps/gamepad/rebuild.js) — asked as any app is.
  *
  * An app mounted again in a page — a scene's, cluster's — whose address asks
  * it nothing is opened on what it was doing when it was taken out
@@ -25,7 +25,7 @@
 import { Vault } from './vault.js';
 import { leftBehind } from './mount.js';
 
-/** A recipe that is a recording of marks: core replays these, and no app reopens them. */
+/** A recipe that is a recording of marks: core replays these; the gamepad, which made them, reopens them (C6e). */
 export const isMarks = recipe => !!recipe
   && (Array.isArray(recipe.marks) || !!(recipe.sequence && Array.isArray(recipe.sequence.events)));
 
@@ -41,7 +41,7 @@ export async function reopenUrl(object) {
   const app = object && object.origin && object.origin.app;
   // A leaf has no recipe to reopen, and its app — `import`, or the gamepad
   // for a legacy sprite — need not be asked: asking is a 404 in the console.
-  if (!app || !object.recipe || isMarks(object.recipe)) return null;
+  if (!app || !object.recipe) return null;
   try {
     const module = await import(/* @vite-ignore */ '/apps/' + app + '/rebuild.js');
     if (typeof module.reopens !== 'function' || !module.reopens(object)) return null;

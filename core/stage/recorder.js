@@ -151,6 +151,28 @@ export const SequenceRecorder = {
   },
 
   /**
+   * A recording from elsewhere — one the vault gives back to work on (the
+   * gamepad, C6e) — stored as one just recorded: `sequence:stopped` says so,
+   * with the treatment it was saved with, and it becomes a layer as every
+   * recording stopped does.
+   * @param {{w: number, h: number, events: object[]}} sequence
+   * @param {object} [clip]  its clip's `overrides`, `timing` and `window`
+   * @returns {Object} the sequence stored
+   */
+  adopt(sequence, clip = null) {
+    const seq = {
+      id:        `seq_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      createdAt: Date.now(),
+      w:         sequence.w,
+      h:         sequence.h,
+      events:    (sequence.events || []).map(e => ({ ...e })),
+    };
+    _sequences.push(seq);
+    _dispatch('sequence:stopped', { sequence: seq, index: _sequences.length - 1, clip });
+    return seq;
+  },
+
+  /**
    * Flip the armed state.
    * @returns {boolean} true if now recording
    */

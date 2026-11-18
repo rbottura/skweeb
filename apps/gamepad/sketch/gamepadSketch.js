@@ -155,7 +155,7 @@ export function createSketch(container, params, { family = 0, onPad = null } = {
   // one click — which is a better trade than making every keeper cost a
   // deliberate "add" that is easy to forget.
   listen(document, 'sequence:stopped', e => {
-    Stage.addLayerForSequence(e.detail.sequence, `Seq ${e.detail.index + 1}`);
+    Stage.addLayerForSequence(e.detail.sequence, `Seq ${e.detail.index + 1}`, e.detail.clip);
   });
 
   // A sequence that is gone cannot back a layer.

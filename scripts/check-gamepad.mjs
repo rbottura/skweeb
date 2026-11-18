@@ -11,7 +11,10 @@
  * pattern — a setting of core's panel, which holds the gamepad's. Since
  * C6d, a module with no splash: every family offered, brushes first, the
  * next decoded the first time it is drawn with — and a recording replayed
- * on the page leaves them all (core/registry.js `loadFamilies`).
+ * on the page leaves them all (core/registry.js `loadFamilies`). Since C6e,
+ * its objects its own: the vault's *Open in gamepad* for the loop and the
+ * still it saved, and each opened by the address — the loop a layer of the
+ * timeline again, the still's marks stamped again on the ink.
  *
  * What it guards through C6 is the drawing and the replay with no p5 in
  * them: core's stage (C6a), then the page (C6b).
@@ -117,7 +120,8 @@ const replay = await page.eval(`(async () => {
   let off = 0, ink = 0;
   for (let i = 0; i < a.length; i++) { const d = Math.abs(a[i] - b[i]); if (d > off) off = d; }
   for (let i = 3; i < a.length; i += 4) if (a[i] > 0) ink++;
-  const out = { saved: true, frames, length: handle.length, size: [w, h], replayed: [frame.width, frame.height], off, ink, missing: handle.missing };
+  const out = { saved: true, id: object.id, events: object.recipe.sequence.events.length, frames, length: handle.length, size: [w, h],
+    replayed: [frame.width, frame.height], off, ink, missing: handle.missing };
   handle.dispose();
   return out;
 })()`);
@@ -175,13 +179,40 @@ const hd = await page.eval(`(async () => {
   let sum = 0, ink = 0;
   for (let i = 0; i < a.length; i++) sum += Math.abs(a[i] - b[i]);
   for (let i = 3; i < a.length; i += 4) if (a[i] > 0) ink++;
-  return { density: cv.width / parseFloat(cv.style.width), size: [w, h], frame: [object.recipe.frame.w, object.recipe.frame.h], again: [again.width, again.height],
+  return { id, density: cv.width / parseFloat(cv.style.width), size: [w, h], frame: [object.recipe.frame.w, object.recipe.frame.h], again: [again.width, again.height],
     marks: object.recipe.marks.length, mean: +(sum / a.length).toFixed(2), ink: +(ink / (w * h)).toFixed(3) };
 })()`);
 await page.forget(twice);
 c.ok('at twice the density, a still saved: its frame in the marks\' units, drawn again by core over it', hd.density === 2
   && hd.size.join() === hd.frame.join() && hd.size.join() === hd.again.join() && hd.marks >= 20 && hd.mean < 3 && hd.ink > 0.05,
   JSON.stringify(hd));
+
+// Its objects its own (C6e): the vault's link to each, and each opened by the address.
+const links = await page.eval(`(async () => {
+  const { reopenUrl } = await import('/core/reopen.js');
+  const { Vault } = await import('/core/vault.js');
+  const ids = ${JSON.stringify([replay.id, hd.id])};
+  return Promise.all(ids.map(async id => reopenUrl((await Vault.load(id)).object)));
+})()`);
+c.ok('the vault offers Open in gamepad, for its loop and its still', links[0] === '/apps/gamepad/?open=' + replay.id
+  && links[1] === '/apps/gamepad/?open=' + hd.id, JSON.stringify(links));
+await c.go(c.base + links[0]);
+await page.until(`${sketch}.then(m => m.getStage().layers.length === 1)`, { timeout: 20000 }).catch(() => {});
+const loop = await page.eval(`${sketch}.then(m => ({ layers: m.getStage().layers.length, events: m.getStage().layers[0]?.player.clip.sequence.events.length,
+  timeline: document.querySelector('.tl--visible') ? 'open' : 'shut', say: document.querySelector('.bar-say')?.textContent }))`);
+c.ok('?open= its loop: a layer of the timeline again, its marks all there', loop.layers === 1 && loop.events === replay.events
+  && loop.timeline === 'open', JSON.stringify(loop));
+await c.go(c.base + links[1]);
+await page.until(`import('/core/stage/recorder.js').then(({ SequenceRecorder }) => SequenceRecorder.markCount > 0)`, { timeout: 20000 }).catch(() => {});
+const still = await page.eval(`(async () => {
+  const { SequenceRecorder } = await import('/core/stage/recorder.js');
+  const m = await ${sketch};
+  const ink = m.getOverlayCanvas(), d = ink.getContext('2d').getImageData(0, 0, ink.width, ink.height).data;
+  let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++;
+  return { marks: SequenceRecorder.markCount, inked: +(n / (d.length / 4)).toFixed(4), say: document.querySelector('.bar-say')?.textContent };
+})()`);
+c.ok('?open= its still: its marks stamped again on the ink, kept for the next save', still.marks === hd.marks && still.inked > 0.005,
+  JSON.stringify(still));
 
 const noise = c.quiet();
 c.ok('no page said anything wrong', !noise.length, JSON.stringify(noise).slice(0, 400));

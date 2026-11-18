@@ -39,6 +39,7 @@ import { bare, own }           from '../../core/keys.js';
 import { listen }              from '../../core/scope.js';
 import { appModule }           from '../../core/mount.js';
 import { requested, openedLine } from '../../core/reopen.js';
+import { SequenceRecorder }    from '../../core/stage/recorder.js';
 import { gamepadParams, GROUPS } from './params.js';
 import { recipeNow }           from './core/vaultBridge.js';
 import * as StillFrame         from './core/stillFrame.js';
@@ -140,15 +141,24 @@ async function start(root, mine) {
 }
 
 /**
- * What the gamepad was doing when a scene took it out (core/mount.js), or a
- * still of its own `?open=` names: its settings, its brush, its marks
- * stamped again on the ink (sketch/gamepadSketch.js `restamp`).
+ * What the gamepad was doing when a scene took it out (core/mount.js), or an
+ * object of its own `?open=` names (rebuild.js `reopens`): a still — its
+ * settings, its brush, its marks stamped again on the ink
+ * (sketch/gamepadSketch.js `restamp`) — or a loop, a layer of the timeline
+ * again with the treatment it was saved with (C6e).
  */
 async function openRequested(params) {
   try {
     const opened = await requested('gamepad');
     if (!opened || !app.scope) return;
     const recipe = opened.object.recipe || {};
+    if (opened.object.type === 'sequence' && recipe.sequence) {
+      await BrushRegistry.loadFamilies(recipe.sequence.events.map(e => e.familyId).filter(Boolean));
+      if (!app.scope) return;
+      SequenceRecorder.adopt(recipe.sequence, recipe.clip);
+      if (bar) bar.announce(`${openedLine(opened)} · on the timeline`);
+      return;
+    }
     if (recipe.params) params.restore(recipe.params);
     const marks = await restamp(recipe);
     if (bar) bar.announce(openedLine(opened) + (marks ? ` · ${marks} marks` : ''));

@@ -11,7 +11,7 @@ it.** Everything below is load-bearing; nothing below is background.
 | Path | What it is | Before touching it, read |
 |---|---|---|
 | `core/` | the shared kit — theme, panels, drawers and cards, params, registry, rng, stage, vault client, GPU filters (`gpu/`), the print, a picture as vectors (`svg-canvas.js`), a guide read in an app, an app's mount and what it holds (`mount.js`, `scope.js`); `libs/` holds three.js and Lit, one version each, and MediaPipe — fetched on each machine, git keeps its README | `docs/core-api.md`; what leaves the suite — export, the print — `docs/core-export.md` |
-| `apps/gamepad/` | draw with a gamepad, record sequences; E prints the drawing — its settings a schema in core's panel, on core's page (C6c), off p5 (C6b), a module cluster mounts, every family offered and decoded when first drawn with (C6d) | `docs/gamepad.md`: C6, its port onto core's kit |
+| `apps/gamepad/` | draw with a gamepad, record sequences; E prints the drawing — its settings a schema in core's panel, on core's page (C6c), off p5 (C6b), a module cluster mounts, every family offered and decoded when first drawn with (C6d), its loops and stills opened again — *Open in gamepad* (C6e) | `docs/gamepad.md`: C6, its port onto core's kit |
 | `apps/grid/` | grid mapping and dithering over a still or a loop | — |
 | `apps/ckt/` | type → dots → motion (ColorKineType v3) | — |
 | `apps/compose/` | M4: objects from every app placed on one page, each at an opacity and a blend | `apps/compose/STATUS.md` |
@@ -190,7 +190,7 @@ node scripts/check-3d-play.mjs          # M16a: the worm's player — loft.js's 
 node scripts/check-3d-phase.mjs         # M16b: a frozen worm walked into — framed, the bridge's ghosts lit in turn, swung there and back, bonded under B's sky; and back
 node scripts/check-3d-dune.mjs          # M16c: under the ground — Space, dived head first, buried, the ground raised over it; walked under at its own speed; up again; no phase under it
 node scripts/check-3d-heart.mjs         # M16k: the planet's heart — into the north's hole, a cut seen flat; down into the heart, floated round the matrix, its things drifting (M16l, o); a brush put into the matrix along the appendage, let out again (M16p); a mouth aimed at by the pointer, out by it
-node scripts/check-gamepad.mjs          # C6: the gamepad itself — Start records a layer, played on the stage, exported and replayed by core to the pixel; R3 a setting of core's panel; every family offered, the next decoded when first drawn with; a still at twice the density
+node scripts/check-gamepad.mjs          # C6: the gamepad itself — Start records a layer, played on the stage, exported and replayed by core to the pixel; R3 a setting of core's panel; every family offered, the next decoded when first drawn with; a still at twice the density; Open in gamepad, a loop and a still opened again
 node scripts/check-3d-turntable.mjs     # P1: the 3D app's turntable — played, its loop saved as a sequence and replayed, every frame; P2, a shape swung; P6, from every side
 node scripts/check-3d.mjs               # M10's 3D app: primitives by three.js, turned by hand, chosen by a click and moved by handles, twisted by a stack, drawn in a style; a model saved, drawn again at scale 2, placed; with WebGL2 too
 

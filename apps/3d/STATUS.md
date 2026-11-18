@@ -375,7 +375,7 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 ## Next single step
 
 **The author's eye on the worm's player** (`/apps/3d/play/?worm=<id>`,
-M16a to c, k to p); C6 next — the gamepad off p5 (`docs/gamepad.md`) — M16n after C6d, drawn in the heart.
+M16a to c, k to p); M16n next, drawn in the heart with the gamepad — on core's kit since C6 (`docs/gamepad.md`).
 Beside it, **the author's test of G4 to G10** — their own sequences as bodies, worms
 waving, a vase turned, a flower round, grown as drawn, out to Blender as a
 glTF — and what they order next: a silhouette's holes, a brush for each

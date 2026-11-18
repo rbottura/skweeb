@@ -62,13 +62,15 @@ export const isStageActive = () => _stageActive;
  * clips interact instead of merely sharing a window. The stage supports
  * absolute placement too, whenever that is the look wanted instead.
  *
+ * @param {object} [clip]  its clip's overrides, timing and window — a loop reopened keeps its own
  * @returns {Object|null} the new layer
  */
-export function addLayerForSequence(seq, name) {
+export function addLayerForSequence(seq, name, clip = null) {
   if (!seq || !_stage || !_transport) return null;
 
-  // At the screen's density, as the canvas it is drawn on.
-  const player = new SequencePlayer({ density: _density() }).load(createClip(seq));
+  // At the screen's density, as the canvas it is drawn on; with the treatment
+  // a loop reopened was saved with (C6e), the defaults otherwise.
+  const player = new SequencePlayer({ density: _density() }).load(createClip(seq, clip || {}));
   const layer  = _stage.add(player, { name, layout: { fit: 'contain' } });
   _transport.rewindLayer(layer);
 
