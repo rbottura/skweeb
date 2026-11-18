@@ -28,7 +28,7 @@ export const WORM_KEYS = ['avatar', 'other', 'seen', 'head', 'size', 'colour', '
 export const PLANET_KEYS = ['radius', 'things', 'seed', 'tunnel', 'size'];
 
 /** The rows the heart and its cuts are built from: a change to one builds again the one the worm is in. */
-export const HEART_KEYS = ['core', 'tunnel', 'size', 'radius'];
+export const HEART_KEYS = ['core', 'tunnel', 'size', 'radius', 'matrix', 'matrixColour', 'things', 'seed'];
 
 /** Where the frozen worm stands, and its radius: a change to one places it again. */
 export const PLACE_KEYS = ['away', 'bearing', 'reach', 'radius'];
@@ -76,6 +76,9 @@ export function playParams() {
             group: 'heart' },
     tunnel: { type: 'range', min: 1, max: 8, step: 'any', default: 3.2, label: 'the ways down, how wide, units',
               group: 'heart' },
+    matrix: { type: 'range', min: 0.1, max: 0.8, step: 'any', default: 0.32, label: 'its matrix, a share of the heart',
+              group: 'heart' },
+    matrixColour: { type: 'color', default: '#ffb347', label: 'the matrix\'s colour', group: 'heart' },
 
     // M16b: a worm frozen in space-time, a phase of another reality, and the passage into it.
     other: { type: 'object', accepts: ['still', 'sequence', 'model'], by: ['gamepad', '3d'],

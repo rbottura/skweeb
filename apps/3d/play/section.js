@@ -50,13 +50,16 @@ export class Section {
     this.geometry = null;
   }
 
-  /** Cut on a planet of `radius`, its heart `heart` round, its tunnels `width` wide — in a reality's colours. */
-  build({ radius, heart, width }, { ground, sky }) {
+  /**
+   * Cut on a planet of `radius`, its heart `heart` round, its tunnels `width` wide, the matrix floating in its heart
+   * `matrix` of it round in `colour` — in a reality's colours.
+   */
+  build({ radius, heart, width, matrix = 0.32, colour = '#ffb347' }, { ground, sky }) {
     for (const m of this.parts) { this.scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
     this.parts = [];
     const g = new Color(ground);
-    const add = (geometry, colour, order) => {
-      const m = new Mesh(geometry, new MeshBasicMaterial({ color: colour, depthTest: false, depthWrite: false }));
+    const add = (geometry, colour, order, opacity = 1) => {
+      const m = new Mesh(geometry, new MeshBasicMaterial({ color: colour, depthTest: false, depthWrite: false, transparent: opacity < 1, opacity }));
       m.renderOrder = order;
       this.parts.push(m);
       this.scene.add(m);
@@ -71,6 +74,8 @@ export class Section {
     add(new PlaneGeometry(2 * radius, width), new Color(HOLLOW), 6);
     add(new CircleGeometry(heart, 120), new Color(RIM), 7);
     add(new CircleGeometry(heart * 0.94, 120), new Color(CAVE), 8);
+    add(new CircleGeometry(matrix * heart, 96), new Color(colour), 9, 0.55);
+    add(new RingGeometry(matrix * heart * 0.9, matrix * heart, 96), new Color(colour).lerp(new Color('#ffffff'), 0.4), 9, 0.8);
     this.scene.background = new Color(sky);
     return this;
   }

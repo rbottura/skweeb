@@ -53,6 +53,12 @@ export function scatter(rng, count) {
   });
 }
 
+/** What the ground grows: tufts most, stones the rest — their shapes, what the heart's matrix holds small (matrix.js). */
+export const KINDS = [
+  { name: 'tufts', shape: () => new ConeGeometry(0.35, 1.1, 6).translate(0, 0.5, 0), colour: '#4f6b43' },
+  { name: 'stones', shape: () => new DodecahedronGeometry(0.45, 0).translate(0, 0.15, 0), colour: '#9a9488' },
+];
+
 const holder = new Object3D();
 const Y = new Vector3(0, 1, 0), Z = new Vector3(0, 0, 1);
 const WHITE = new Color('#ffffff');
@@ -67,6 +73,7 @@ export class Planet {
     this.ground = this.tufts = null;
     this.things = [];
     this.holes = [];         // the ways in: a hole and its rim each
+    this.present = [];       // the kinds of thing it grows (`KINDS`)
     this.radius = 0;
     this.waves = [];         // the ground's patches' waves: the dune shades its patch by them (dune.js)
     this.look = '';
@@ -106,10 +113,8 @@ export class Planet {
     // Things: tufts most, stones the rest — each its place, its turn about its up and its size from the seed.
     const count = Math.max(0, Math.round(v.things));
     const tufts = Math.round(count * 0.7), stones = count - tufts;
-    const kinds = [
-      { name: 'tufts', count: tufts, geometry: new ConeGeometry(0.35, 1.1, 6).translate(0, 0.5, 0), colour: new Color('#4f6b43') },
-      { name: 'stones', count: stones, geometry: new DodecahedronGeometry(0.45, 0).translate(0, 0.15, 0), colour: new Color('#9a9488') },
-    ];
+    const kinds = KINDS.map((k, i) => ({ ...k, count: i ? stones : tufts, geometry: k.shape(), colour: new Color(k.colour) }));
+    this.present = KINDS.filter((k, i) => (i ? stones : tufts) > 0);
     for (const kind of kinds) {
       if (!kind.count) { kind.geometry.dispose(); continue; }
       const mesh = new InstancedMesh(kind.geometry, new MeshToonMaterial({ color: kind.colour, gradientMap: rampOf(3) }), kind.count);

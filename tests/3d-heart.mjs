@@ -13,19 +13,22 @@
  * it faces; down into the heart, it is set on the heart's wall by that
  * way's mouth; walked into a mouth, it is back in a cut at its heart end;
  * up it, out on the ground beside that way's hole, facing away, its wave
- * as it was shaped.
+ * as it was shaped. The matrix in the heart: one of each thing the ground
+ * grows floating in it, drifting slowly, never out of it; none where the
+ * ground grows nothing.
  */
 
 const { AXES, WAYS, PLANES, wayAt, planeFor, onCut, wayOn, holdIn, tunnelAt } = await import('../apps/3d/play/access.js');
 const { Section } = await import('../apps/3d/play/section.js');
 const { Heart } = await import('../apps/3d/play/heart.js');
 const { heartOf, enterCut, tickCut, tickHeart, visit } = await import('../apps/3d/play/places.js');
-const { Planet } = await import('../apps/3d/play/planet.js');
+const { Planet, KINDS } = await import('../apps/3d/play/planet.js');
+const { Matrix } = await import('../apps/3d/play/matrix.js');
 const { Phasing } = await import('../apps/3d/play/phasing.js');
 const { Worm, waveWayOf } = await import('../apps/3d/play/worm.js');
 const { walkerAt, step, frameOf } = await import('../apps/3d/play/walker.js');
 const { playParams } = await import('../apps/3d/play/params.js');
-const { Scene, Vector3, PerspectiveCamera } = await import('../core/libs/three/three.core.js');
+const { Scene, Vector3, PerspectiveCamera, Color } = await import('../core/libs/three/three.core.js');
 
 let fails = 0;
 const ok = (label, got, want) => {
@@ -79,7 +82,7 @@ const R = 24;
 const worm = new Worm().shape({ body: {}, wave: 0.5 });
 {
   const cut = new Section().build({ radius: R, heart: 9, width: 3.2 }, { ground: '#7fae6b', sky: '#cfe3f1' });
-  ok('a cut: its earth, its strata, its ground, its tunnels, its heart', cut.parts.length, 9);
+  ok('a cut: its earth, its strata, its ground, its tunnels, its heart, the matrix in it', cut.parts.length, 11);
   cut.enter(PLANES[2], [0, 1], { radius: R, heart: 9, long: 4 });
   ok('gone into from the ground: at the top of its tunnel, its head down', [cut.q[0], near(cut.q[1], R - 2.2), near(cut.heading, -Math.PI / 2)], [0, true, true]);
   const limits = { speed: 6, turnRate: 6, radius: R, heart: 9, play: 0.35 };
@@ -143,6 +146,25 @@ const worm = new Worm().shape({ body: {}, wave: 0.5 });
   ok('…its body on the planet, its wave as it was shaped', [worm.mesh.parent === planet.scene, worm.v.waveWay === waveWayOf(worm.seen, worm.sway)], [true, true]);
   phasing.dispose();
   planet.dispose();
+}
+
+// ── The matrix ──────────────────────────────────────────────────────────────
+
+{
+  const m = new Matrix().build({ radius: 3, colour: '#ffb347' }, KINDS, { ground: '#7fae6b' });
+  ok('the matrix: a ball 3 round, one of each thing the ground grows in it', [m.ball.geometry.parameters.radius, m.items.length], [3, 2]);
+  ok('…a tuft in the reality\'s ground, a stone in its own grey', [m.items[0].mesh.material.color.getHexString(),
+    m.items[1].mesh.material.color.getHexString()], [new Color('#7fae6b').multiplyScalar(0.62).getHexString(), '9a9488']);
+  const was = m.items.map(it => it.mesh.position.clone());
+  m.update(1.5);
+  const moved = m.items.map((it, i) => it.mesh.position.distanceTo(was[i]));
+  ok('…drifting, slowly, never out of it', moved.every(d => d > 0.01 && d < 0.5) && m.items.every(it => it.mesh.position.length() < 0.6 * 3), true);
+  ok('a ground growing nothing: nothing in it', [new Planet().build({ ...playParams().values, things: 0 }).present.length,
+    new Matrix().build({ radius: 3 }, []).items.length], [0, 0]);
+  const heart = new Heart().build({ heart: 9, width: 3.2, matrix: 0.3 }, { ground: '#7fae6b' }, KINDS);
+  ok('the heart: its matrix at its middle, a share of it round', [near(heart.matrix.radius, 2.7), heart.matrix.group.parent === heart.scene], [true, true]);
+  heart.dispose();
+  m.dispose();
 }
 
 console.log(fails ? `\n${fails} failed` : '\nall passed');
