@@ -27,6 +27,12 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Works now
 
+- **Its player, a worm on a planet** (M16a, 2026-11-18, the author's worm;
+  `play/`, `tests/3d-play.mjs` 41, `check-3d-play` 25): a drawing lofted, or
+  a model's drawn body, walked round a planet in the third person, its wave
+  timed by its steps — `docs/worm.md`. loft.js keeps where each body's rings
+  lie in its geometry (`userData.bodies`), what the player reads a body by.
+
 - **Its clouds out as vectors** (G11, 2026-11-17, for BEC 2027; `vectors.js`,
   core's `svg-canvas.js`, `tests/3d-cloud.mjs`, `check-3d-cloud`): Export's
   SVG — every dot a circle where the PNG's camera sees it, its colour exactly,
@@ -360,7 +366,9 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 
 ## Next single step
 
-**The author's test of G4 to G10** — their own sequences as bodies, worms
+**M16b, the phase** (`docs/worm.md`): a frozen worm on the planet, its
+radius; walked into, both framed, the bridge of the morph's frames, the
+phase swung and fixed on B. Beside it, **the author's test of G4 to G10** — their own sequences as bodies, worms
 waving, a vase turned, a flower round, grown as drawn, out to Blender as a
 glTF — and what they order next: a silhouette's holes, a brush for each
 stroke, the heart of a flower. The author's eye on S15 stands; S15f parked.

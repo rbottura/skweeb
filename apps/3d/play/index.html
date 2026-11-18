@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The worm on its planet, walked: a gamepad drawing lofted, played in the third person.">
+  <title>the worm — skweeb</title>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!--
+    The 3D app's player (M16, docs/worm.md): a planet, and a worm on it — a
+    gamepad drawing lofted by the 3D app's own code — walked with ZQSD, WASD,
+    the arrows or a stick, the camera behind it and above. A module (main.js):
+    it builds itself in a host and takes itself out again; here, alone, its
+    host is this page. ?worm=<id> walks a drawing, or a model's drawn body.
+  -->
+  <script type="module">
+    import { mount } from './main.js';
+    mount(document.body);
+  </script>
+</body>
+</html>
