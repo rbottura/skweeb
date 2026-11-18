@@ -78,8 +78,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | — | a game's effects planned: M15, `docs/vfx.md`; writing a shader, the code side: `docs/shader-code.md` | `docs/vfx`, `docs/shader-code` | — | landed 2026-11-13; 2026-11-14 |
 | — | the worm planned: M16, `docs/worm.md` | `docs/worm` | — | landed 2026-11-18 |
 | M16a | the planet walked: a sphere, things on it; a worm on it — a drawing lofted, waving as it goes — the camera behind and above | `3d/planet` | M | landed 2026-11-18 (`docs/worm.md`) |
-| M16b | the phase: a frozen worm and its radius; both framed, the bridge of the morph's frames, the phase swung and fixed on B; the bond | `3d/phase` | M | ready |
-| M16c to j | under the surface, the window, the bond a QTE, surfaces on meshes and the gears, the face, the limbs, a bigger planet, a world saved (`docs/worm.md`) | — | — | later, in the author's order |
+| M16b | the phase: a frozen worm and its radius; both framed, the bridge of the morph's frames, the phase swung and fixed on B; the bond | `3d/phase` | M | landed 2026-11-18 (`docs/worm.md`) |
+| M16c to j | under the surface, the window, the bond a QTE, surfaces on meshes and the gears, the face, the limbs, a bigger planet, a world saved (`docs/worm.md`) | — | — | waits: the author's eye on a and b, and which next |
 | M15h | a sheet any engine cuts: its cells all equal, a count that fills its grid — Godot's and Unity's flipbooks | `export/sheet-grid` | S | side job |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
 | S9e | the motion, case by case: what holds still at a switch, what adapts, what goes and comes — every change animated | `scene/motion` | M | first pass landed 2026-11-05, the proposal as written; the rest with the author's eye (`docs/scene.md`) |

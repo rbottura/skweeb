@@ -17,6 +17,11 @@
  * only when the phase has moved, its points copied into the one geometry it
  * keeps — loft.js lays the same points in the same order at any phase.
  *
+ *
+ * And a shell (M16b): the same body again in spectral.js's light, its edges
+ * lit — "notre corps devient un coquille vide légèrement transparente" — as
+ * its own body fades: `setShell`, 0 the body whole, 1 a shell.
+ *
  * Pure but for a skin, a canvas drawn.js made: Node runs it (tests/3d-play.mjs).
  */
 
@@ -24,6 +29,7 @@ import { Mesh, BufferGeometry, MeshToonMaterial, Matrix4, Vector3 } from '../../
 import { drawnGeometry, DRAWN_PARAMS, DRAWN_WAVE } from '../loft.js';
 import { valuesFor } from '../../../core/params.js';
 import { rampOf } from '../look.js';
+import { spectral } from './spectral.js';
 
 const LOFT = { ...DRAWN_PARAMS, ...DRAWN_WAVE };
 
@@ -39,9 +45,17 @@ function middleOf(P, body, r) {
 
 export class Worm {
   constructor() {
-    this.material = new MeshToonMaterial({ color: '#e3a587', gradientMap: rampOf(3) });
+    // Always see-through, at 1 whole: its opacity moves with its shell, never its pipeline.
+    this.material = new MeshToonMaterial({ color: '#e3a587', gradientMap: rampOf(3), transparent: true });
     this.mesh = new Mesh(new BufferGeometry(), this.material);
     this.mesh.matrixAutoUpdate = false;
+    const { material, strength, tint } = spectral();
+    this.glow = { strength, tint };
+    this.shell = new Mesh(this.mesh.geometry, material);    // a child: it stands where the body does
+    this.shell.matrixAutoUpdate = false;
+    this.shell.visible = false;
+    this.mesh.add(this.shell);
+    this.shellAt = 0;        // 0 the body whole, 1 a shell
     this.v = null;           // loft's values, at rest
     this.seen = 'side';
     this.size = 1;
@@ -75,7 +89,7 @@ export class Worm {
     this.seen = seen === 'above' ? 'above' : 'side';
     this.size = size;
     this.mesh.geometry.dispose();
-    this.mesh.geometry = g;
+    this.mesh.geometry = this.shell.geometry = g;
     this.phase = 0;
     this.low = this.lowest();
     const map = !drawn ? null : skin === 'drawing' ? drawn.skin || null : skin === 'brush' ? drawn.brush || null : null;
@@ -109,7 +123,12 @@ export class Worm {
     const now = this.mesh.geometry;
     for (const name of ['position', 'normal']) {
       const to = now.getAttribute(name), from = g.getAttribute(name);
-      if (!to || !from || to.array.length !== from.array.length) { now.dispose(); this.mesh.geometry = g; this.low = this.lowest(); return true; }
+      if (!to || !from || to.array.length !== from.array.length) {
+        now.dispose();
+        this.mesh.geometry = this.shell.geometry = g;
+        this.low = this.lowest();
+        return true;
+      }
       to.array.set(from.array);
       to.needsUpdate = true;
     }
@@ -133,8 +152,28 @@ export class Worm {
   /** Where its middle stands, raised off the ground: what a camera looks at. */
   centre() { return new Vector3().setFromMatrixPosition(this.mesh.matrix); }
 
+  /**
+   * Its body a shell by `amount`: 0 whole, 1 its edges lit in spectral light over what is left of it — a little,
+   * "légèrement transparente". Past half, it no longer hides what is behind it.
+   */
+  setShell(amount) {
+    const a = Math.max(0, Math.min(1, Number(amount) || 0));
+    if (a === this.shellAt) return this;
+    this.shellAt = a;
+    this.material.opacity = 1 - 0.88 * a;
+    const write = a < 0.5;
+    if (this.material.depthWrite !== write) { this.material.depthWrite = write; this.material.needsUpdate = true; }
+    this.glow.strength.value = a;
+    this.shell.visible = a > 0;
+    return this;
+  }
+
+  /** Its shell's light. */
+  tintShell(colour) { this.glow.tint.value.set(colour); return this; }
+
   dispose() {
     this.mesh.geometry.dispose();
     this.material.dispose();            // a skin is drawn.js's, kept: never freed here
+    this.shell.material.dispose();
   }
 }

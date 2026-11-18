@@ -13,15 +13,22 @@ import { defineParams } from '../../../core/params.js';
 export const GROUPS = {
   worm: { label: 'Worm', open: true },
   walk: { label: 'Walk', open: true },
+  phase: { label: 'Phase', open: true },
   planet: { label: 'Planet', open: false },
   camera: { label: 'Camera', open: false },
 };
 
-/** The rows the worm is shaped by: a change to one shapes it again. */
-export const WORM_KEYS = ['avatar', 'seen', 'head', 'size', 'colour', 'wave', 'waves', 'sway'];
+/** The rows the worms are shaped by — the walked one's and the frozen one's: a change to one shapes them again. */
+export const WORM_KEYS = ['avatar', 'other', 'seen', 'head', 'size', 'colour', 'otherColour', 'wave', 'waves', 'sway'];
 
 /** The rows the planet is built from: a change to one builds it again. */
-export const PLANET_KEYS = ['radius', 'things', 'ground', 'sky', 'seed'];
+export const PLANET_KEYS = ['radius', 'things', 'seed'];
+
+/** Where the frozen worm stands, and its radius: a change to one places it again. */
+export const PLACE_KEYS = ['away', 'bearing', 'reach', 'radius'];
+
+/** Each reality's colours: the planet dressed in the walked worm's. */
+export const REALITY_KEYS = ['ground', 'sky', 'otherGround', 'otherSky'];
 
 export function playParams() {
   return defineParams('3d-play', {
@@ -44,6 +51,23 @@ export function playParams() {
     speed: { type: 'range', min: 0.5, max: 30, step: 'any', log: true, default: 4, label: 'speed, units a second',
              group: 'walk' },
     turn: { type: 'range', min: 30, max: 360, step: 1, default: 150, label: 'turn, degrees a second', group: 'walk' },
+
+    // M16b: a worm frozen in space-time, a phase of another reality, and the passage into it.
+    other: { type: 'object', accepts: ['still', 'sequence', 'model'], by: ['gamepad', '3d'],
+             label: 'the frozen worm — a gamepad drawing, or a model\'s drawn body', group: 'phase' },
+    otherColour: { type: 'color', default: '#9b7fd6', label: 'its colour, where it has no skin', group: 'phase' },
+    away: { type: 'range', min: 3, max: 150, step: 'any', log: true, default: 14, label: 'how far from the start, units',
+            group: 'phase' },
+    bearing: { type: 'range', min: -180, max: 180, step: 1, default: 0, label: 'which way from the start, degrees',
+               group: 'phase' },
+    reach: { type: 'range', min: 1, max: 20, step: 'any', default: 4, label: 'its radius, units', group: 'phase' },
+    swings: { type: 'int', min: 0, max: 12, default: 4, label: 'the phase there and back, times', group: 'phase' },
+    swing: { type: 'range', min: 0.4, max: 12, step: 'any', log: true, default: 2.4, label: 'the swings, seconds',
+             group: 'phase' },
+    ghosts: { type: 'int', min: 1, max: 16, default: 7, label: 'frames on the bridge', group: 'phase' },
+    spectral: { type: 'color', default: '#a6e3ff', label: 'the bridge\'s light, and a shell\'s', group: 'phase' },
+    otherGround: { type: 'color', default: '#5d4f86', label: 'its reality: the ground', group: 'phase' },
+    otherSky: { type: 'color', default: '#1f1b3a', label: 'its reality: the sky', group: 'phase' },
 
     radius: { type: 'range', min: 6, max: 200, step: 'any', log: true, default: 24, label: 'its radius, units',
               group: 'planet' },

@@ -74,7 +74,7 @@ await hold('KeyW', 1200);
 p = await page.eval(peek);
 c.ok('Z held — W by its place — it walks ahead', p.walked > 1.5, `${p.walked.toFixed(2)} units`);
 c.ok('…round the planet, on it', Math.abs(len(p.p) - p.radius) < 1e-6 && len(sub(p.p, at.p)) > 1.5, `${len(p.p).toFixed(6)} from its middle`);
-c.ok('…its wave moving as it goes', p.phase !== at.phase, `phase ${at.phase} → ${p.phase}`);
+c.ok('…its wave moving as it goes', p.wave !== at.wave, `its wave's phase ${at.wave} → ${p.wave}`);
 await wait(1200);
 p = await page.eval(peek);
 const behind = dot(sub(p.eye, p.p), p.f), above = len(p.eye) - p.radius;
