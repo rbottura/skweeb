@@ -28,12 +28,12 @@
  * here, clock there, one record between them.
  *
  * Neither this class nor the transport disposes a player — whoever built it
- * owns it. p5 retains every Graphics until it is removed, so that ownership
- * has to stay somewhere visible.
+ * owns it, and a buffer held is memory held, so that ownership has to stay
+ * somewhere visible.
  *
  * FILTERS AND BLENDING GO ON THE CONTEXT, NOT THE BUFFER
  * ───────────────────────────────────────────────────────────────────────────────
- * p5's `g.filter(BLUR, 3)` is destructive to the buffer, so it would have to
+ * A filter run over the buffer — p5's `g.filter(BLUR, 3)` was one — is destructive, so it would have to
  * re-run over the whole thing on every tick and would fight the append fast
  * path directly. A filter set on the drawing context composes with the buffer
  * instead and costs nothing per tick. The same reasoning already rules out
@@ -192,10 +192,11 @@ export class SequenceStage {
 
   /**
    * Blit every visible layer.
-   * @param {p5} p  the surface — and the same instance the players were built
-   *        with, because a p5.Graphics belongs to whoever created it.
+   * @param {CanvasRenderingContext2D} ctx  the surface, under whatever transform its owner set
+   * @param {number} width   the surface's own size, in the units of that transform
+   * @param {number} height
    */
-  draw(p) {
+  draw(ctx, width, height) {
     // Solo beats visibility, the way it does in an editing timeline: the point
     // of soloing one layer is to see it *now* without first having to record
     // what every other layer's eye was set to and put it all back after.
@@ -210,33 +211,28 @@ export class SequenceStage {
       if (!buf || !b || !seq) continue;
 
       const lo  = layer.layout;
-      const s   = layerScale(layer, p.width, p.height);
-      const cx  = p.width  / 2 + lo.x * p.width;
-      const cy  = p.height / 2 + lo.y * p.height;
+      const s   = layerScale(layer, width, height);
+      const cx  = width  / 2 + lo.x * width;
+      const cy  = height / 2 + lo.y * height;
 
-      p.push();
+      // After save(), so restore() puts all three back: a layer cannot leak
+      // its look onto the next one.
+      ctx.save();
+      ctx.filter = layer.filter;
+      ctx.globalCompositeOperation = layer.blend;
+      ctx.globalAlpha = layer.alpha;
 
-      // After push(), because that is a drawingContext.save() — pop() puts all
-      // three back, so a layer cannot leak its look onto the next one.
-      const ctx = p.drawingContext;
-      if (ctx) {
-        ctx.filter = layer.filter;
-        ctx.globalCompositeOperation = layer.blend;
-        ctx.globalAlpha = layer.alpha;
-      }
-
-      p.translate(cx, cy);
-      p.rotate(lo.rotation);
-      p.scale(lo.mirrorX ? -s : s, s);
-      p.translate(-seq.w / 2, -seq.h / 2);   // now in sequence coordinates
+      ctx.translate(cx, cy);
+      ctx.rotate(lo.rotation);
+      ctx.scale(lo.mirrorX ? -s : s, s);
+      ctx.translate(-seq.w / 2, -seq.h / 2);   // now in sequence coordinates
 
       // The buffer covers `bounds` and may be at a higher resolution than the
       // rect it stands for, so drawing it at that rect's size resolves both at
       // once. Marks hanging off the sequence's edge spill outside it, which is
       // the whole reason bounds are published rather than assumed.
-      p.imageMode(p.CORNER);
-      p.image(buf, b.x, b.y, b.w, b.h);
-      p.pop();
+      ctx.drawImage(buf, b.x, b.y, b.w, b.h);
+      ctx.restore();
     }
   }
 }

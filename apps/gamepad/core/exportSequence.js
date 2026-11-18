@@ -16,7 +16,6 @@
 
 import { SequencePlayer } from '../../../core/stage/player.js';
 import { representativeTick } from '../../../core/stage/clip.js';
-import { p5Instance }     from '../sketch/gamepadSketch.js';
 import { captureFrames, zipStore, frameName, download } from '../../../core/export.js';
 import { Vault }          from '../../../core/vault.js';
 import { thumbFromBlob }  from '../../../core/thumb.js';
@@ -38,7 +37,7 @@ export async function exportLayerToVault(layer, opts = {}) {
   const clip = layer && layer.player && layer.player.clip;
   if (!clip) throw new Error('export: that layer has no clip');
 
-  const player = new SequencePlayer(p5Instance());
+  const player = new SequencePlayer();      // its own pixels, whatever the screen's density
   try {
     player.load(clip, { renderScale: scale });
     player.reset();
@@ -50,7 +49,7 @@ export async function exportLayerToVault(layer, opts = {}) {
       count,
       draw: i => {
         if (i > 0) player.step();
-        return player.buffer.canvas;
+        return player.buffer;
       },
       onProgress,
     });

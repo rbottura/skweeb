@@ -55,8 +55,8 @@ skill, *Porting a sketch*).
 
 | | brick | branch | size | status |
 |---|---|---|---|---|
-| C6a | **core's stage off p5**: a clip's buffer a canvas, the layers blitted on a 2D context, the sprites decoded images, a recording replayed with no hidden p5 | `gamepad/stage-2d` | M | next |
-| C6b | **the page off p5**: its canvas, the ink, the cursor, the reference, the view and a still's composite in Canvas 2D, on its own frame clock; p5 and p5.joystick out of the page, `core/libs/p5.min.js` out of the repo | `gamepad/canvas` | M | |
+| C6a | **core's stage off p5**: a clip's buffer a canvas, the layers blitted on a 2D context, the sprites decoded images, a recording replayed with no hidden p5 | `gamepad/stage-2d` | M | **landed 2026-11-18** — below; `check-gamepad`, new |
+| C6b | **the page off p5**: its canvas, the ink, the cursor, the reference, the view and a still's composite in Canvas 2D, on its own frame clock; p5 and p5.joystick out of the page, `core/libs/p5.min.js` out of the repo | `gamepad/canvas` | M | next |
 | C6c | **its params a schema**: `params.js` in core's panel, core's bar and keys, the format core's; the pad still draws, Start arms the recording; `ParamPanel.js`, the status bar and the help card gone | `gamepad/params` | M | |
 | C6d | **a module**: `mount(host)`, `unmount()`; the families a section of its panel, each loaded when first drawn with, no splash; cluster mounts it — and the heart can (M16n) | `gamepad/module` | M | |
 | C6e | **its objects its own**: `rebuild.js`, a still's and a recording's replay moved out of core; `?open=`, a still's marks back on the ink, a recording back on the timeline | `gamepad/reopen` | M | |
@@ -76,6 +76,11 @@ stamped through the ink's 2D context, the stage drawn on the canvas's.
 *Done when* no `p5` is left in `core/` outside `core/libs/`; a recording
 replayed in the vault, placed in compose, through filter, printed, as
 before — the checks `reach.mjs` names; the timeline plays as before.
+*Landed 2026-11-18*: `rebuild.js` reaches every page, so the gate ran all
+fifty-one checks; `check-gamepad` is new, the gamepad's own — a recording
+a layer, played on the stage, exported and replayed by core to the pixel.
+A recording exported is its own pixels now, whatever the screen: p5 drew
+its frames at the screen's density, twice their declared size on a HiDPI one.
 
 **C6b — the page off p5.** `createSketch` with no p5: a canvas the window's
 size at its pixel density, the ink a canvas beside it, `requestAnimationFrame`

@@ -67,8 +67,9 @@ async function boot() {
     });
     const selectedIds = await selector.prompt();
 
-    // 3. Configure registry
+    // 3. Configure registry, and decode what was chosen before anything draws with it.
     BrushRegistry.setSelectedFamilies(selectedIds);
+    await BrushRegistry.loadSelected();
 
     // 4. Start sketch
     const container = document.getElementById('sketch-container');

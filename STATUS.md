@@ -346,8 +346,8 @@ A canvas read back often is drawn in software after: compared, measured.
 
 ## Next single step
 
-C6a, core's stage off p5 — a clip's buffer a canvas, the layers on a 2D context, the sprites images, no hidden p5
-(`docs/gamepad.md`, C6 planned) — and the author's eye on M16o, m, p: the heart weightless, brushes found, the appendage. Beside it: their SVG of a BEC render in their print tool (G11); the
+C6b, the gamepad's page off p5 — its canvas, ink, cursor and a still's composite in Canvas 2D, p5 out of the repo
+(`docs/gamepad.md`; C6a landed) — and the author's eye on M16o, m, p: the heart weightless, brushes found, the appendage. Beside it: their SVG of a BEC render in their print tool (G11); the
 ThinkPad pulled, the vaults made one (`docs/guides/vault-share.md`); their test of G4 to G10. Else C12, or M13c's fields.
 
 ## Parked decisions

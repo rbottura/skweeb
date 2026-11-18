@@ -7,9 +7,9 @@
  * Public API
  * ──────────────────────────────────────────────────────────────────────────────
  *  loadManifest()                 → Promise<manifest>
- *  preloadSelected(p, ids)        → call inside p5.preload()
+ *  loadSelected()                 → Promise: the selected families decoded
  *  isLoaded()                     → bool
- *  getSprite(familyId, fileIndex) → p5.Image | null
+ *  getSprite(familyId, fileIndex) → ImageBitmap | null
  *  getSpriteUrl(familyId, idx)    → string  (usable as <img src>)
  *  familyCount()                  → number  (selected families only)
  *  spriteCount(familyId)          → number
@@ -23,7 +23,7 @@ let _manifest      = null;        // full manifest JSON
 let _manifestUrl   = null;        // which one, so a second URL is not ignored
 let _base          = '';          // directory the manifest came from
 let _selected      = [];          // family meta objects chosen by the user
-let _sprites       = new Map();   // familyId → p5.Image[]
+let _sprites       = new Map();   // familyId → its sprites decoded, null where one would not load
 let _loaded        = false;
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -203,7 +203,7 @@ export function familyFromSet(setObject, index = []) {
 }
 
 /**
- * Set which families to load. Call BEFORE preloadSelected().
+ * Set which families to load. Call BEFORE loadSelected().
  * @param {string[]} ids  — family id strings (from manifest)
  */
 export function setSelectedFamilies(ids) {
@@ -215,38 +215,28 @@ export function setSelectedFamilies(ids) {
 }
 
 /**
- * Load all sprites for selected families. Call inside p5.preload().
- * @param {p5} p
+ * What decodes a sprite when nothing else is given: fetched, then an
+ * ImageBitmap — as core/sprites.js decodes every other picture. No p5 since
+ * C6a (docs/gamepad.md); a test gives its own, the same shape.
  */
-export function preloadSelected(p) {
-  for (const fam of _selected) {
-    const imgs = [];
-    for (let i = 0; i < fileCount(fam); i++) {
-      imgs.push(p.loadImage(fileUrl(fam, i)));
-    }
-    _sprites.set(fam.id, imgs);
-  }
-  // p5 preload tracks async calls automatically; mark as loaded at draw-time
-  // (we can't synchronously know when all loadImage calls resolved here)
-  _loaded = true;
-}
+const DECODE = {
+  loadImage(url, onLoad, onError) {
+    fetch(url).then(res => res.ok ? res.blob() : Promise.reject(new Error(`${res.status} ${url}`)))
+      .then(blob => createImageBitmap(blob)).then(onLoad, onError);
+  },
+};
 
 /**
- * Load the selected families and resolve when they are actually decoded.
- *
- * preloadSelected() above is the p5 `preload()` path: it fires loadImage and
- * lets p5's own preload counter do the waiting, which only works inside that
- * phase. Anything outside it — rebuilding a sequence in an app that is not
- * mid-setup — needs to know when the pixels are really there, so this uses
- * the callback form and awaits them.
+ * Load the selected families and resolve when they are actually decoded —
+ * the gamepad before it draws, a recording replayed anywhere.
  *
  * A sprite that fails to decode stays in the array as null rather than being
  * filtered out: the index is the sprite number a recorded mark refers to, and
  * closing the gap would silently draw the wrong brush.
  *
- * @param {p5} p
+ * @param {{loadImage(url: string, onLoad: Function, onError: Function)}} [decoder]
  */
-export async function loadSelected(p) {
+export async function loadSelected(decoder = DECODE) {
   // Probe first, so a family that is not on this machine costs one HEAD rather
   // than one failed GET per sprite. Garam_blue alone is 58 of them.
   await probeFamilies(_selected.map(f => f.id));
@@ -262,7 +252,7 @@ export async function loadSelected(p) {
 
     _sprites.set(fam.id, await Promise.all(
       Array.from({ length: fileCount(fam) }, (_, i) => new Promise(resolve => {
-        p.loadImage(fileUrl(fam, i), img => resolve(img), () => resolve(null));
+        decoder.loadImage(fileUrl(fam, i), img => resolve(img), () => resolve(null));
       }))));
   }
   _loaded = true;
@@ -271,7 +261,7 @@ export async function loadSelected(p) {
 
 export function isLoaded() { return _loaded; }
 
-/** Get a loaded p5.Image. */
+/** A sprite decoded, or null. */
 export function getSprite(familyId, fileIndex) {
   return _sprites.get(familyId)?.[fileIndex] ?? null;
 }

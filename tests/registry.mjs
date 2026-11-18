@@ -85,7 +85,7 @@ ok('a second probe makes no requests', requests.length, 0);
 
 // -- What reaches the drawing code -------------------------------------------
 
-const fakeP5 = {
+const fakeDecoder = {
   loadImage(url, onLoad, onErr) {
     if ([...HERE].some(dir => url.includes(dir))) onLoad({ url });
     else onErr(new Error('404'));
@@ -94,7 +94,7 @@ const fakeP5 = {
 
 R.setSelectedFamilies(['brushes', 'gone']);
 requests = [];
-await R.loadSelected(fakeP5);
+await R.loadSelected(fakeDecoder);
 
 ok('a present family loads its sprites', R.spriteCount('brushes'), 3);
 ok('and they are really there', R.getSprite('brushes', 1).url.endsWith('b.png'), true);

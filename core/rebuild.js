@@ -25,13 +25,11 @@
  * That is the same convention `manifestFor()` below already uses, and it means
  * a fourth app at M5 costs a file rather than an edit here.
  *
- * ── Why this owns a p5 ──────────────────────────────────────────────────────
+ * ── No p5 ─────────────────────────────────────────────────────────────────────
  *
- * `SequencePlayer` draws into a `p5.Graphics`, so replaying needs a p5
- * instance. Grid has none and should not grow one to load a source. So this
- * file keeps exactly one, hidden, created the first time anything asks and
- * never again — it injects `core/libs/p5.min.js` if the page has not already
- * loaded it. An app stays unaware that p5 is involved at all.
+ * This file kept a hidden p5 once, because `SequencePlayer` drew into a
+ * `p5.Graphics`: since C6a (docs/gamepad.md) its buffer is a canvas and its
+ * sprites decoded images, so a recording replays wherever there is a page.
  *
  * ── The frames are not copies ───────────────────────────────────────────────
  *
@@ -45,47 +43,6 @@ import * as Registry     from './registry.js';
 import { createClip }    from './stage/clip.js';
 import { SequencePlayer } from './stage/player.js';
 import { layersOf }      from './layers.js';
-
-const P5_URL = new URL('./libs/p5.min.js', import.meta.url).href;
-
-// ── One hidden p5, lazily ────────────────────────────────────────────────────
-
-let _scriptReady = null;
-let _instance    = null;
-
-function ensureP5Script() {
-  if (typeof window !== 'undefined' && window.p5) return Promise.resolve(window.p5);
-  if (_scriptReady) return _scriptReady;
-
-  _scriptReady = new Promise((resolve, reject) => {
-    const tag = document.createElement('script');
-    tag.src = P5_URL;
-    tag.onload  = () => resolve(window.p5);
-    tag.onerror = () => reject(new Error('rebuild: could not load p5 from ' + P5_URL));
-    document.head.append(tag);
-  });
-  return _scriptReady;
-}
-
-function ensureInstance() {
-  if (_instance) return Promise.resolve(_instance);
-
-  return ensureP5Script().then(p5 => new Promise(resolve => {
-    const host = document.createElement('div');
-    host.style.display = 'none';
-    host.setAttribute('aria-hidden', 'true');
-    document.body.append(host);
-
-    new p5(p => {
-      p.setup = () => {
-        p.noCanvas();       // the player makes its own Graphics; this needs none
-        p.noLoop();         // nothing here is driven by a clock
-        _instance = p;
-        resolve(p);
-      };
-    }, host);
-  }));
-}
 
 // ── Opening a sequence ───────────────────────────────────────────────────────
 
@@ -330,11 +287,10 @@ async function openViaApp(object, opts) {
 /** A recording of marks, replayed through the stage. */
 async function openMarks(object, { manifestUrl, renderScale = 1 } = {}) {
   const recipe = object.recipe;
-  const p = await ensureInstance();
 
   await Registry.loadManifest(manifestUrl || manifestFor(object));
   Registry.setSelectedFamilies(familiesIn(recipe));
-  await Registry.loadSelected(p);
+  await Registry.loadSelected();
 
   const clip = createClip(recipe.sequence, {
     overrides: recipe.clip && recipe.clip.overrides,
@@ -342,7 +298,7 @@ async function openMarks(object, { manifestUrl, renderScale = 1 } = {}) {
     window:    recipe.clip && recipe.clip.window,
   });
 
-  const player = new SequencePlayer(p);
+  const player = new SequencePlayer();
   player.load(clip, { renderScale });
   player.reset();
 
@@ -374,7 +330,7 @@ async function openMarks(object, { manifestUrl, renderScale = 1 } = {}) {
      */
     frame(i) {
       player.walkTo(i);
-      return player.buffer.canvas;
+      return player.buffer;
     },
 
     /**

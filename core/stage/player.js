@@ -21,6 +21,9 @@
  *    size, not the canvas's — and on a stage of many clips that is the
  *    difference that decides how many of them fit.
  *
+ * The buffer is a canvas of the page's — no p5 since C6a (docs/gamepad.md):
+ * its 2D context draws each mark as the gamepad's brush stamps it.
+ *
  * Transport state does not live here. The player knows where its playhead is
  * and how to move it; whether it is running, and how fast, belongs to whatever
  * drives it — see sequenceTransport.js.
@@ -36,12 +39,23 @@ import { stampPoints }    from '../stamp.js';
 import { ruleOf, totalTicks } from './clip.js';
 import { contentBounds, missingFamilies } from './bounds.js';
 
+/** A canvas `w` x `h`: the page's, or off it where there is no page. */
+function canvasOf(w, h) {
+  if (typeof document !== 'undefined') return Object.assign(document.createElement('canvas'), { width: w, height: h });
+  return new OffscreenCanvas(w, h);
+}
+
 
 export class SequencePlayer {
-  /** @param {p5} p  the p5 instance that owns the buffer */
-  constructor(p) {
-    this._p        = p;
-    this._buf      = null;
+  /**
+   * @param {object} [opts]
+   * @param {number} [opts.density=1]  backing pixels per buffer pixel — a screen's
+   *        `devicePixelRatio`, as p5 once gave every buffer by itself; an export's 1
+   */
+  constructor({ density = 1 } = {}) {
+    this._density  = density > 0 ? density : 1;
+    this._buf      = null;    // a canvas
+    this._ctx      = null;
     this._clip     = null;
     this._scale    = 1;
     this._bounds   = null;    // content rect in sequence coordinates
@@ -54,6 +68,7 @@ export class SequencePlayer {
 
   // ── State ───────────────────────────────────────────────────────────────────
 
+  /** The canvas the marks are drawn on: drawn or read before the next tick, never kept. */
   get buffer()   { return this._buf; }
   get clip()     { return this._clip; }
 
@@ -72,18 +87,12 @@ export class SequencePlayer {
   get renderScale() { return this._scale; }
 
   /**
-   * Roughly what this buffer costs in memory, in bytes.
-   *
-   * Read from the backing canvas where there is one, because p5 multiplies a
-   * Graphics by its own pixel density on top of `renderScale` — so the honest
-   * figure is usually larger than width x height x 4 suggests, and a UI that
-   * offers to raise the density ought to show the real price.
+   * Roughly what this buffer costs in memory, in bytes: its backing pixels,
+   * the density on top of `renderScale` — the real price, for a UI that
+   * offers to raise it.
    */
   get byteSize() {
-    if (!this._buf) return 0;
-    const c = this._buf.canvas;
-    return c ? c.width * c.height * 4
-             : this._buf.width * this._buf.height * 4;
+    return this._buf ? this._buf.width * this._buf.height * 4 : 0;
   }
   get finished() { return this._finished; }
   get pass()     { return this._pass; }
@@ -126,21 +135,20 @@ export class SequencePlayer {
     this._clip   = clip;
     this._scale  = renderScale;
     this._bounds = contentBounds(clip);
-    this._buf    = this._p.createGraphics(
-      Math.max(1, Math.round(this._bounds.w * renderScale)),
-      Math.max(1, Math.round(this._bounds.h * renderScale)),
-    );
-    this._buf.clear();
+    const w = Math.max(1, Math.round(this._bounds.w * renderScale)), h = Math.max(1, Math.round(this._bounds.h * renderScale));
+    this._buf    = canvasOf(Math.max(1, Math.round(w * this._density)), Math.max(1, Math.round(h * this._density)));
+    this._ctx    = this._buf.getContext('2d');
     this._missing = missingFamilies(seq);
 
     this.reset();
     return this;
   }
 
-  /** Release the buffer. p5 retains every Graphics until it is removed. */
+  /** Release the buffer: its pixels given back at once, not when it is collected. */
   dispose() {
-    this._buf?.remove();
+    if (this._buf) this._buf.width = this._buf.height = 0;
     this._buf       = null;
+    this._ctx       = null;
     this._clip      = null;
     this._bounds    = null;
     this._lastRange = null;
@@ -262,10 +270,8 @@ export class SequencePlayer {
    * @param {?[number, number]} range  inclusive, or null for a blank tick
    */
   _render(range) {
-    const g = this._buf;
-
     if (range === null) {
-      g.clear();
+      this._clear();
       this._lastRange = null;
       return;
     }
@@ -278,7 +284,7 @@ export class SequencePlayer {
     if (isAppend) {
       this._drawEvent(range[1]);
     } else {
-      g.clear();
+      this._clear();
       for (let i = range[0]; i <= range[1]; i++) this._drawEvent(i);
     }
 
@@ -290,8 +296,13 @@ export class SequencePlayer {
    * The index wraps, so a rule may hand out a range that runs past the end
    * and comes back round — see the note on window rules in sequenceClip.js.
    */
+  _clear() {
+    this._ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this._ctx.clearRect(0, 0, this._buf.width, this._buf.height);
+  }
+
   _drawEvent(index) {
-    const g    = this._buf;
+    const g    = this._ctx;
     const clip = this._clip;
     const seq  = clip.sequence;
     const n    = seq.events.length;
@@ -318,22 +329,18 @@ export class SequencePlayer {
     const pts     = stampPoints(ev.x, ev.y, ev.rotation, pattern, seq.w, seq.h);
     const markScale = ev.scale * ov.scaleMul;
 
+    const k = this._density * this._scale;
     for (const [px, py, rot, flipX] of pts) {
-      g.push();
-
-      // Render scale, then the content offset — buffer pixel (0, 0) is the
-      // top-left of `bounds`, not of the sequence — then the mark's own
-      // placement. Where the whole drawing sits is the stage's business, not
-      // the buffer's, so nothing about it appears here.
-      g.scale(this._scale);
-      g.translate(-b.x, -b.y);
-      g.translate(px, py);
+      // The density and the render scale, then the content offset — buffer
+      // pixel (0, 0) is the top-left of `bounds`, not of the sequence — then
+      // the mark's own placement, its sprite about its middle. Where the whole
+      // drawing sits is the stage's business, not the buffer's, so nothing
+      // about it appears here.
+      g.setTransform(k, 0, 0, k, 0, 0);
+      g.translate(px - b.x, py - b.y);
       g.rotate(rot);
       g.scale(markScale * flipX, markScale);
-      g.imageMode(g.CENTER);
-      g.image(img, 0, 0);
-
-      g.pop();
+      g.drawImage(img, -img.width / 2, -img.height / 2);
     }
   }
 }

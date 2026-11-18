@@ -25,8 +25,8 @@ export class JoyImage {
    * @param {number} x
    * @param {number} y
    * @param {number} scale
-   * @param {p5.Image} img
-   * @param {p5.Graphics} target — the offscreen canvas brushes are stamped onto
+   * @param {CanvasImageSource} img   the sprite, decoded (core/registry.js)
+   * @param {CanvasRenderingContext2D} target — the ink's context, brushes stamped onto it
    * @param {number} canvasW
    * @param {number} canvasH
    */
@@ -52,7 +52,7 @@ export class JoyImage {
     this._cH = canvasH;
   }
 
-  /** Update the offscreen canvas reference (needed after resize). */
+  /** Update the ink's context (needed after resize). */
   setTarget(target, w, h) {
     this._target = target;
     this._cW = w;
@@ -78,20 +78,11 @@ export class JoyImage {
   }
 
   /**
-   * Show the live (moving) cursor on the main p5 canvas.
-   * @param {p5} p
+   * Show the live (moving) cursor on the page's canvas.
+   * @param {CanvasRenderingContext2D} ctx
    */
-  show(p) {
-    const pts = this._getStampPoints();
-    for (const [px, py, rot, scaleX] of pts) {
-      p.push();
-      p.translate(px, py);
-      p.rotate(rot);
-      p.scale(this.scale * scaleX, this.scale);
-      p.imageMode(p.CENTER);
-      p.image(this.img, 0, 0);
-      p.pop();
-    }
+  show(ctx) {
+    for (const [px, py, rot, scaleX] of this._getStampPoints()) this._drawTo(ctx, px, py, rot, scaleX);
   }
 
   // ─── Internal ─────────────────────────────────────────────────────────────
@@ -101,13 +92,14 @@ export class JoyImage {
     return stampPoints(this.x, this.y, this.rotation, this.pattern, this._cW, this._cH);
   }
 
-  _drawTo(gfx, px, py, rot, scaleX) {
-    gfx.push();
-    gfx.translate(px, py);
-    gfx.rotate(rot);
-    gfx.scale(this.scale * scaleX, this.scale);
-    gfx.imageMode(gfx.CENTER);
-    gfx.image(this.img, 0, 0);
-    gfx.pop();
+  /** One stamp on `ctx`: the sprite about its middle, turned and scaled — as the player draws a mark (core/stage/player.js). */
+  _drawTo(ctx, px, py, rot, scaleX) {
+    if (!ctx || !this.img) return;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(rot);
+    ctx.scale(this.scale * scaleX, this.scale);
+    ctx.drawImage(this.img, -this.img.width / 2, -this.img.height / 2);
+    ctx.restore();
   }
 }

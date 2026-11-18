@@ -94,13 +94,8 @@ export function createSketch(container) {
   _p5 = new p5(sketch => {
     let _cnv;
 
-    // ── preload ───────────────────────────────────────────────────────────────
-    sketch.preload = () => {
-      // Probed in app.js before the selector ran, so a family that is not on
-      // this machine is already out of the selection and no doomed loadImage
-      // is fired here.
-      BrushRegistry.preloadSelected(sketch);
-    };
+    // No preload: app.js decoded the chosen families before it built this
+    // (core/registry.js `loadSelected`), so every sprite is an image here.
 
     // ── setup ─────────────────────────────────────────────────────────────────
     sketch.setup = () => {
@@ -115,7 +110,7 @@ export function createSketch(container) {
         sketch.height / 2,
         1,
         BrushRegistry.getSprite(BrushRegistry.familyIdByIndex(familyIndex), spriteIndex),
-        _overlay,
+        _overlay.drawingContext,
         sketch.width,
         sketch.height
       );
@@ -149,7 +144,7 @@ export function createSketch(container) {
         next.image(previous, 0, 0);
 
         _overlay = next;
-        _joyImg.setTarget(_overlay, sketch.width, sketch.height);
+        _joyImg.setTarget(_overlay.drawingContext, sketch.width, sketch.height);
 
         // p5.Graphics registers itself on the instance and appends its canvas
         // to the container, so the old buffer is retained for the life of the
@@ -186,7 +181,7 @@ export function createSketch(container) {
       // already holds these same marks, so drawing both reads as a mess.
       if (_stageActive && _stage?.layers.length) {
         if (_transport.playing) _transport.advance(sketch.deltaTime);
-        _stage.draw(sketch);
+        _stage.draw(sketch.drawingContext, sketch.width, sketch.height);
         return;
       }
 
@@ -220,7 +215,7 @@ export function createSketch(container) {
         // tint() the offscreen re-render above ran up to four times a frame.
         // pop() restores globalAlpha, as it maps to drawingContext.restore().
         sketch.drawingContext.globalAlpha = GHOST_ALPHA;
-        _joyImg.show(sketch);
+        _joyImg.show(sketch.drawingContext);
         sketch.pop();
       }
     }
@@ -383,7 +378,8 @@ export const isStageActive = () => _stageActive;
 export function addLayerForSequence(seq, name) {
   if (!seq || !_sk || !_stage || !_transport) return null;
 
-  const player = new SequencePlayer(_sk).load(createClip(seq));
+  // At the screen's density, as the canvas it is drawn on.
+  const player = new SequencePlayer({ density: _sk.pixelDensity() }).load(createClip(seq));
   const layer  = _stage.add(player, { name, layout: { fit: 'contain' } });
   _transport.rewindLayer(layer);
 
@@ -442,12 +438,13 @@ export const setLayerPhase = (layer, phase) => _transport?.setPhase(layer, phase
  * control this one rebuilds the buffer — the size is fixed at `load()` — so it
  * belongs on a discrete control, not a slider somebody drags.
  *
- * Cost is quadratic, and p5 multiplies by the Graphics' own pixel density on
- * top, so 4x on a HiDPI display is nearer 64x the memory of 1x on a plain one.
+ * Cost is quadratic, and the screen's pixel density multiplies it on top, so
+ * 4x on a HiDPI display is nearer 64x the memory of 1x on a plain one.
  */
 export function setLayerDensity(layer, density) {
   const clip = layer?.player?.clip;
   if (!clip || !_transport) return;
+  // Above the screen's own density, which the player keeps (core/stage/player.js).
   layer.player.load(clip, { renderScale: density });
   _transport.rewindLayer(layer);
   _announceStage();
