@@ -81,7 +81,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M16b | the phase: a frozen worm and its radius; both framed, the bridge of the morph's frames, the phase swung and fixed on B; the bond | `3d/phase` | M | landed 2026-11-18 (`docs/worm.md`) |
 | M16c | under the surface: a dive in and out, the body swum level under the ground, the ground raised along its curve; a speed for each | `3d/dune` | M | landed 2026-11-18 (`docs/worm.md`) |
 | M16k | the heart reached: six ways in, a cut seen flat, the worm its drawing in it; the heart's hollow walked inside | `3d/heart` | M | landed 2026-11-18 (`docs/worm.md`) |
-| M16l to n | the matrix and the planet's things in it; a brush found; drawn in the heart, found on the ground | — | — | next: l; n waits on how the gamepad comes into the heart |
+| M16l | the matrix: a viscous sphere in the heart, the planet's things itemized floating in it | `3d/matrix` | M | landed 2026-11-18 (`docs/worm.md`) |
+| M16m, n | a brush found on the ground; drawn in the heart, put in the matrix, found on the ground lofted | — | — | waits: which brushes, and how the gamepad comes into the heart |
 | M16d to j | the window, the bond a QTE, surfaces on meshes and the gears, the face, the limbs, a bigger planet, a world saved (`docs/worm.md`) | — | — | paused: the heart first (the author, 2026-11-18) |
 | M15h | a sheet any engine cuts: its cells all equal, a count that fills its grid — Godot's and Unity's flipbooks | `export/sheet-grid` | S | side job |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |

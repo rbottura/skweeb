@@ -25,7 +25,8 @@ import { aimBehind, follow } from './follow.js';
 export const HEART_FOV = 75;
 
 /** A planet's heart and its ways as the rows have them: its radius, the heart's, a tunnel's width, the worm's size. */
-export const heartOf = v => ({ radius: v.radius, heart: v.core * v.radius, width: v.tunnel * v.size, size: v.size });
+export const heartOf = v => ({ radius: v.radius, heart: v.core * v.radius, width: v.tunnel * v.size, size: v.size,
+                               matrix: v.matrix, colour: v.matrixColour });
 
 const longOf = worm => worm.front - worm.back;
 
@@ -64,7 +65,7 @@ export function enterHeart(s, way, at) {
   const v = s.params.values, me = s.phasing.walked, h = heartOf(v);
   setBeside(me.walker, WAYS[way].dir, onward(s.section.plane, at, s.section.face), h.heart, h.width / 2 + 0.6 * longOf(me.worm), true);
   me.worm.flatten(false);
-  s.heart.build(h, me.reality).scene.add(me.worm.mesh);
+  s.heart.build(h, me.reality, s.planet.present).scene.add(me.worm.mesh);
   hang(s, me);
   s.place = 'heart';
   s.snap = true;
@@ -97,16 +98,21 @@ export function tickCut(s, dt, hands) {
   else enterHeart(s, way, out.at);
 }
 
-/** A frame in the heart: walked on its wall as on the ground, and into a mouth back to a cut. */
+/**
+ * A frame in the heart: walked on its wall as on the ground, and into a mouth back to a cut; the camera behind it,
+ * looking up between it and the matrix, so both are seen; the matrix's things drifting.
+ */
 export function tickHeart(s, dt, hands) {
   const v = s.params.values, me = s.phasing.walked, h = heartOf(v);
   step(me.walker, hands, dt, { radius: h.heart, speed: v.speed, turnRate: (v.turn * Math.PI) / 180 });
   hang(s, me);
+  s.heart.update(dt);
   const way = wayAt(me.walker.p, h.heart, h.width / 2);
   if (way >= 0) return enterCut(s, way, { fromHeart: true });
-  const room = Math.max(0.5, 0.4 * h.heart);
-  const aim = aimBehind(frameOf(me.walker), me.walker.p, {
-    distance: Math.min(0.5 * v.distance * v.size, room), height: Math.min(0.35 * v.height * v.size, room) }, v.size);
+  const frame = frameOf(me.walker);
+  const aim = aimBehind(frame, me.walker.p, {
+    distance: Math.min(0.6 * v.distance * v.size, 0.55 * h.heart), height: Math.min(0.35 * v.height * v.size, 0.4 * h.heart) }, v.size);
+  aim.at.copy(me.walker.p).addScaledVector(frame.up, 0.6 * v.size + 0.42 * (h.heart * (1 - h.matrix) - 0.6 * v.size));
   follow(s.camera, aim, v.ease, dt, s.snap);
   s.snap = false;
 }
@@ -115,7 +121,7 @@ export function tickHeart(s, dt, hands) {
 export function refit(s) {
   const v = s.params.values, me = s.phasing.walked, h = heartOf(v);
   if (s.place === 'heart') {
-    s.heart.build(h, me.reality);
+    s.heart.build(h, me.reality, s.planet.present);
     settle(me.walker, h.heart);
     hang(s, me);
   } else if (s.place === 'cut') s.section.build(h, me.reality);
@@ -128,7 +134,7 @@ export function visit(s, way, { heart = false, away = 3 } = {}) {
   setBeside(me.walker, dir, t, heart ? h.heart : v.radius, away, heart);
   me.walker.f.negate();
   me.worm.flatten(false);
-  if (heart) s.heart.build(h, me.reality).scene.add(me.worm.mesh);
+  if (heart) s.heart.build(h, me.reality, s.planet.present).scene.add(me.worm.mesh);
   else s.planet.scene.add(me.worm.mesh);
   hang(s, me);
   s.place = heart ? 'heart' : 'ground';
