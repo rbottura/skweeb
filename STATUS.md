@@ -11,10 +11,10 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 
 ### Newest — 2026-11-18: the worm, the game's avatar (M16, `docs/worm.md`)
 
-- **The 3D app's player** (`apps/3d/play/`, M16a to c, k, l, o): a worm — a gamepad drawing lofted, or a model's drawn
-  body (`?worm=<id>`) — walked round a planet; Space, it dives and swims under the ground, the ground raised along it.
-  Another frozen ahead, a phase: framed, swung on a spectral bridge of their morph, bonded under B's sky. Six ways down
-  to its heart, a tunnel seen flat, a viscous matrix there, its things in it; floated round, a mouth aimed at (M16k, l, o).
+- **The 3D app's player** (`apps/3d/play/`, M16a to c, k to o): a worm — a gamepad drawing lofted, or a model's drawn
+  body (`?worm=<id>`) — walked round a planet, legacy brushes found on its ground and carried; Space, it dives and swims
+  under the ground. Another frozen ahead, a phase: framed, swung on a spectral bridge of their morph, bonded under B's
+  sky. Six ways down to its heart, a tunnel seen flat, a viscous matrix there; floated round, a mouth aimed at.
 
 ### 2026-11-09 to -17: BEC 2027's graphic system (track G), a game's effects (M15), the panel for a long use (S15)
 
@@ -346,8 +346,8 @@ A canvas read back often is drawn in software after: compared, measured.
 
 ## Next single step
 
-M16m, an item found: a legacy brush on the ground, picked up, the inventory (`docs/worm.md`) — and the author's eye
-on the heart weightless, a mouth aimed at by the pointer (M16o); C6, the gamepad off p5, after M16p. Beside it: their SVG of a BEC render in their print tool (G11); the
+M16p, the appendage: from the matrix to the worm in the heart, a brush carried put in, taken out (`docs/worm.md`) —
+and the author's eye on the heart weightless (M16o) and the brushes found (M16m); C6, the gamepad off p5, after it. Beside it: their SVG of a BEC render in their print tool (G11); the
 ThinkPad pulled, the vaults made one (`docs/guides/vault-share.md`); their test of G4 to G10. Else C12, or M13c's fields.
 
 ## Parked decisions

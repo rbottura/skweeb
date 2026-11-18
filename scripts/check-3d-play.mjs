@@ -9,7 +9,9 @@
  * turned blue, the middle turns blue. Z held — W by its place — the worm
  * walks ahead round the planet and stays on it, its wave moving; D held, it
  * turns right; the arrows walk it too; the camera follows, behind it and
- * above. A bigger planet, and it stands on that one. Unmounted, it asks for
+ * above. Three brushes lie on its ground, the gamepad's own with no vault
+ * (M16m): walked into, one is picked up — its card gone, carried, shown in
+ * the strip of what it carries. A bigger planet, and it stands on that one. Unmounted, it asks for
  * no more frames, and mounted and unmounted again it holds nothing more;
  * mounted again, it walks. With a vault: a gamepad drawing named in the
  * address is the worm, its head where its stroke ends — drawn right to left,
@@ -91,6 +93,25 @@ const walked = p.walked;
 await hold('ArrowUp', 600);
 p = await page.eval(peek);
 c.ok('the arrows walk it too', p.walked > walked + 0.5, `${(p.walked - walked).toFixed(2)} units`);
+
+// ── A brush found (M16m) ────────────────────────────────────────────────────
+
+p = await page.eval(peek);
+c.ok('three brushes lying on the ground — with no vault, the gamepad\'s own', p.finds.length === 3 && p.carried.length === 0
+  && p.finds.every(f => /gamepad_sprites\/brushes\//.test(f.picture)), p.finds.map(f => f.title).join(', '));
+await page.eval(`import('/apps/3d/play/main.js').then(m => m.seek(0, { away: 7 }))`);
+await wait(500);
+await c.shot('3d-play-find');
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyW', key: '?', bubbles: true }))`);
+await page.until(`${peek}.then(p => p && p.carried.length === 1)`, { timeout: 8000 }).catch(() => {});
+await page.eval(`document.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyW', key: '?', bubbles: true }))`);
+p = await page.eval(peek);
+c.ok('…walked into one: picked up, a brush carried, its card gone from the ground', p.carried.length === 1
+  && p.carried[0].nature === 'brush' && p.finds.length === 2, `${p.carried.map(i => i.title).join(', ') || 'nothing'} carried, ${p.finds.length} left`);
+await wait(200);
+const strip = await page.eval(`(() => { const li = [...document.querySelectorAll('.carried li')];
+  return { n: li.length, loaded: li.every(l => l.querySelector('img').complete && l.querySelector('img').naturalWidth > 0) }; })()`);
+c.ok('…and shown in the strip of what it carries, its picture there', strip.n === 1 && strip.loaded, JSON.stringify(strip));
 
 await tune({ radius: 60 });
 await wait(400);

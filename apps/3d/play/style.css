@@ -30,6 +30,19 @@
 }
 .sight.found { border-color: #ffd36b; box-shadow: 0 0 10px #ffd36b; }
 
+/* What the worm carries (M16m): a picture each, over the viewer's corner. */
+.carried { position: absolute; left: 12px; top: 12px; display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.carried li {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 211, 107, 0.7);
+  border-radius: 8px;
+  background: rgba(13, 11, 16, 0.55);
+}
+.carried img { width: 36px; height: 36px; object-fit: contain; }
+
 .world-note {
   position: absolute;
   left: 50%;

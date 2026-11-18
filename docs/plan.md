@@ -83,7 +83,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M16k | the heart reached: six ways in, a cut seen flat, the worm its drawing in it; the heart's hollow walked inside | `3d/heart` | M | landed 2026-11-18 (`docs/worm.md`) |
 | M16l | the matrix: a viscous sphere in the heart, the planet's things itemized floating in it | `3d/matrix` | M | landed 2026-11-18 (`docs/worm.md`) |
 | M16o | the heart weightless: floating round the matrix, both framed; a mouth aimed at by the pointer, a click into it | `3d/weightless` | M | landed 2026-11-18 (`docs/worm.md`) |
-| M16m, p | an item found — its nature, a legacy brush of the 17, the inventory; the appendage, items put in the matrix and taken out | `3d/found`, `3d/appendage` | M, M | next: m |
+| M16m, p | an item found — its nature, a legacy brush of the 17, the inventory; the appendage, items put in the matrix and taken out | `3d/found`, `3d/appendage` | M, M | m landed 2026-11-18 (`docs/worm.md`); next: p |
 | M16n | drawn in the heart with the gamepad app itself, put in the matrix, found on the ground lofted | `3d/drawn-heart` | M | after C6 |
 | M16q | the embellishments: the animations left for later — into a mouth and out | — | — | later, a batch: the author's |
 | M16d to j | the window, the bond a QTE, surfaces on meshes and the gears, the face, the limbs, a bigger planet, a world saved (`docs/worm.md`) | — | — | paused: the heart first (the author, 2026-11-18) |

@@ -21,7 +21,8 @@
  * Or the worm is inside (places.js): walked into one of the planet's six
  * ways in, down a tunnel of its cut, seen flat (section.js), into its
  * heart, floating round its matrix (orbit.js, M16o), a mouth aimed at and
- * gone into — and out again.
+ * gone into — and out again. Brushes lie on its ground, walked into and
+ * carried (items.js, finds.js, M16m).
  *
  * A module (core/mount.js): `mount(host)` and `unmount()`, its page mounting
  * it on itself; unmounted, its frames stop, its planet and worms are let go
@@ -30,7 +31,7 @@
  * `tune()` sets rows: for the checks.
  */
 
-import { PerspectiveCamera, Vector3 } from '../../../core/libs/three/three.core.js';
+import { PerspectiveCamera, Vector3, TextureLoader, SRGBColorSpace } from '../../../core/libs/three/three.core.js';
 import { appModule }  from '../../../core/mount.js';
 import { Bar }        from '../../../core/Bar.js';
 import { ParamPanel } from '../../../core/ParamPanel.js';
@@ -50,7 +51,9 @@ import { Section }    from './section.js';
 import { Heart }      from './heart.js';
 import { WAYS, wayAt } from './access.js';
 import { Orbit }      from './orbit.js';
-import { hang, heartOf, floatsAt, enterCut, tickCut, tickHeart, refit, visit as visitWay, HEART_FOV } from './places.js';
+import { brushesOf, strew, Inventory, LEGACY, NATURES } from './items.js';
+import { Finds }      from './finds.js';
+import { hang, heartOf, floatsAt, enterCut, tickCut, tickHeart, refit, setDown, visit as visitWay, HEART_FOV } from './places.js';
 
 const MARKUP = `
   <main class="app-main">
@@ -60,6 +63,7 @@ const MARKUP = `
                 aria-label="the planet — ZQSD, WASD or the arrows walk the worm, Space dives, a stick too"></canvas>
         <p class="world-note" hidden></p>
         <div class="sight" hidden></div>
+        <ul class="carried" aria-label="what the worm carries"></ul>
       </div>
     </section>
     <div class="app-side" id="side"></div>
@@ -77,6 +81,9 @@ const LONGEST = 1920;
 
 /** Each worm's rows: what it is, its colour — the walked one's first, then the frozen one's. */
 const ROWS = [{ object: 'avatar', colour: 'colour' }, { object: 'other', colour: 'otherColour' }];
+
+/** A find's picture, loaded as the GPU wants it. */
+const picture = url => { const t = new TextureLoader().load(url); t.colorSpace = SRGBColorSpace; return t; };
 
 let live = null;   // the player mounted: its parts, made again by each mount
 
@@ -103,9 +110,11 @@ async function start(root, mine) {
   const dune = new Dune();
   planet.scene.add(dune.mesh);
   const s = { params, planet, phasing, dune, section: new Section(), heart: new Heart(), orbit: new Orbit(), place: 'ground', aspect: 1.6,
-              aimed: -1, sight: root.querySelector('.sight'), renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
+              aimed: -1, sight: root.querySelector('.sight'), finds: new Finds(), inventory: new Inventory(), brushes: [],
+              carriedList: root.querySelector('.carried'), shownCarried: -1, renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
               hands: new Hands(mine, canvas), frames: 0, snap: true, made: [{}, {}], asked: [0, 0] };
   live = s;
+  planet.scene.add(s.finds.group);
 
   const tell = () => bar.say(`${s.made[phasing.walking].title || 'loft.js\'s worm'} · a planet of radius `
     + `${Math.round(params.get('radius'))} · ${renderer.backend}`);
@@ -152,6 +161,20 @@ async function start(root, mine) {
     hang(s, other);
     layReaches(s);
   };
+  /** The brushes not carried laid on the ground again, where the seed puts them (items.js). */
+  const layFinds = () => {
+    const v = params.values, left = s.brushes.filter(b => !s.inventory.has(b));
+    const avoid = [...WAYS.map(w => w.dir), walkerAt(v.radius).p.clone().normalize()];
+    s.finds.lay(strew(left, v.finds, v.seed, { avoid, clear: 5 / v.radius }), { radius: v.radius, size: v.size }, picture);
+  };
+  /** The legacy brushes, the vault's folder of them — or, no vault, the gamepad's own. */
+  const findBrushes = async () => {
+    let rows = [];
+    try { rows = await Vault.list({ tag: LEGACY, type: 'shape' }); } catch { rows = []; }
+    if (live !== s) return;
+    s.brushes = brushesOf(rows);
+    layFinds();
+  };
   const realities = () => {
     const v = params.values;
     phasing.bodies[0].reality = { ground: v.ground, sky: v.sky };
@@ -162,17 +185,19 @@ async function start(root, mine) {
     if (PLANET_KEYS.includes(key)) {
       planet.build(params.values);
       for (const b of phasing.bodies) { settle(b.walker, params.get('radius')); hang(s, b); }
+      layFinds();
       tell();
     }
     if (PLACE_KEYS.includes(key)) placeOther();
     if (REALITY_KEYS.includes(key)) realities();
     if (HEART_KEYS.includes(key)) refit(s);
+    if (key === 'finds') layFinds();
     if (key === 'avatar') chooseWorm(0);
     else if (key === 'other') chooseWorm(1);
     else if (WORM_KEYS.includes(key) || key === 'spectral') { shapeWorm(0); shapeWorm(1); }
   });
   placeOther();
-  await Promise.all([chooseWorm(0), chooseWorm(1)]);
+  await Promise.all([chooseWorm(0), chooseWorm(1), findBrushes()]);
   if (live !== s) return;
 
   const view = canvas.getContext('bitmaprenderer');
@@ -222,6 +247,7 @@ function tick(s, dt) {
     s.dune.lay(worm.spine, frameOf(walker), walker.p, s.planet, { ridge: v.ridge * v.size, spread: v.spread * v.size });
     const way = dive.state === 'surface' ? wayAt(walker.p, v.radius, heartOf(v).width / 2) : -1;
     if (way >= 0) return enterCut(s, way);          // walked into a way in: down into its cut
+    if (dive.state === 'surface') s.inventory.add(s.finds.take(walker.p.clone().addScaledVector(walker.f, worm.front), 0.8 * v.size));
     const into = P.within(v.reach);
     if (into >= 0) P.begin(into, { ghosts: v.ghosts, spectral: v.spectral, arch: 1.5 * v.size });
   }
@@ -235,6 +261,7 @@ function tick(s, dt) {
     else layReaches(s);                  // bonded: the one left behind is a phase now, its radius round it
   }
   P.breathe(dt);
+  s.finds.update(dt, s.camera.position);
   const me = P.walked;
   if (!aim) aim = aimBehind(frameOf(me.walker), me.walker.p, { distance: v.distance * v.size, height: v.height * v.size }, v.size);
   follow(s.camera, aim, v.ease, dt, s.snap);
@@ -262,7 +289,29 @@ function draw(s, canvas, view) {
   const aimed = s.place === 'heart' && !!s.orbit.gaze;
   if (s.sight.hidden === aimed) s.sight.hidden = !aimed;
   s.sight.classList.toggle('found', aimed && s.aimed >= 0);
+  if (s.shownCarried !== s.inventory.count) showCarried(s);
   s.frames++;
+}
+
+/** What the worm carries, shown over the viewer: a picture each, its title and nature on it. */
+function showCarried(s) {
+  s.shownCarried = s.inventory.count;
+  s.carriedList.replaceChildren(...s.inventory.items.map(item => {
+    const li = document.createElement('li'), img = document.createElement('img');
+    img.src = item.thumb;
+    img.alt = item.title;
+    li.title = `${item.title} — ${NATURES[item.nature] || item.nature}`;
+    li.append(img);
+    return li;
+  }));
+}
+
+/** For the checks: the walked worm set down on the ground `away` from find `i`, facing it. */
+export function seek(i, given = {}) {
+  const l = live && live.finds.lying[i];
+  if (!l) return false;
+  setDown(live, l.up, given);
+  return true;
 }
 
 /** For the checks: the walked worm set down `away` from way `way` — on the ground, or in the heart — facing it. */
@@ -306,7 +355,8 @@ export function peek() {
            items: live.heart.matrix.items.map(it => it.mesh.position.toArray()),
            cut: live.place === 'cut' ? { q: [...cut.q], heading: cut.heading, face: cut.face, across: cut.plane.across } : null,
            orbit: live.place === 'heart' ? orbitOf(live) : null, ahead: camera.getWorldDirection(new Vector3()).toArray(),
-           sight: !live.sight.hidden };
+           sight: !live.sight.hidden, finds: live.finds.lying.map(l => ({ up: l.up.toArray(), title: l.item.title, picture: l.item.picture })),
+           carried: live.inventory.items.map(i => ({ nature: i.nature, id: i.id, title: i.title })) };
 }
 
 /** The heart's float, for `peek`. */

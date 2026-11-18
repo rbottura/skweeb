@@ -104,6 +104,7 @@ export function playParams() {
     radius: { type: 'range', min: 6, max: 200, step: 'any', log: true, default: 24, label: 'its radius, units',
               group: 'planet' },
     things: { type: 'int', min: 0, max: 3000, default: 260, label: 'things on it', group: 'planet' },
+    finds: { type: 'int', min: 0, max: 17, default: 3, label: 'brushes lying on it, to find', group: 'planet' },
     ground: { type: 'color', default: '#7fae6b', label: 'its ground', group: 'planet' },
     sky: { type: 'color', default: '#cfe3f1', label: 'its sky', group: 'planet' },
     seed: { type: 'int', min: 0, max: 99999, default: 1, label: 'seed — where its things stand', group: 'planet' },

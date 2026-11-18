@@ -36,8 +36,8 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
   its own speed, the ground raised along its curve; another frozen ahead,
   a phase — walked into, framed, swung on the bridge of their morph, fixed,
   bonded; six ways down to the planet's heart, a tunnel seen flat, its
-  matrix floating there, the planet's things in it, the worm floated round
-  it, a mouth aimed at (M16k, l, o, `tests/3d-heart.mjs` 52, `check-3d-heart` 18) —
+  matrix floating there, the worm floated round it, a mouth aimed at; legacy
+  brushes found on the ground, carried (M16k to o, `tests/3d-heart.mjs` 52, `3d-items` 17) —
   `docs/worm.md`. loft.js keeps
   where each body's rings lie (`userData.bodies`), what the player reads.
 
@@ -375,7 +375,7 @@ call, 2026-10-06 (`docs/decisions-2026-10-06-to-20.md`).
 ## Next single step
 
 **The author's eye on the worm's player** (`/apps/3d/play/?worm=<id>`,
-M16a to c, k, l, o); M16m next — an item found, a legacy brush, the inventory.
+M16a to c, k to o); M16p next — the appendage, a brush put in the matrix and taken out.
 Beside it, **the author's test of G4 to G10** — their own sequences as bodies, worms
 waving, a vase turned, a flower round, grown as drawn, out to Blender as a
 glTF — and what they order next: a silhouette's holes, a brush for each

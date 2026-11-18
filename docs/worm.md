@@ -106,10 +106,10 @@ wait their turn, in the order the author picks.
 | M16j | **a world saved**: its planet, its worms, its phases, an object — as a map is | `3d/world` | M | later; its type the author's |
 | M16k | **the heart reached**: six ways in, a hole each; a cut through four, seen flat, the worm its drawing in it, moved up, down, left, right; the heart's hollow walked inside, a wider field; and out again | `3d/heart` | M | **landed 2026-11-18** — below; `check-3d-heart`: down the north, walked in the heart, up by another |
 | M16l | **the matrix**: a sphere floating in the heart, translucent, viscous; inside it, the planet's things itemized — a stone, a tuft | `3d/matrix` | M | **landed 2026-11-18** — below; `check-3d-heart`: seen from the wall, amber, its things drifting |
-| M16m | **an item found**: an item and its nature — a legacy brush, one of the family's 17, lying on the ground — picked up; the inventory, what the worm carries | `3d/found` | M | next |
+| M16m | **an item found**: an item and its nature — a legacy brush, one of the family's 17, lying on the ground — picked up; the inventory, what the worm carries | `3d/found` | M | **landed 2026-11-18** — below; `check-3d-play`: three on the ground, one walked into, carried |
 | M16n | **drawn in the heart**: the gamepad app itself, off p5 (C6), the brush found its brush; the drawing put in the matrix; found on the ground in 3D, lofted | `3d/drawn-heart` | M | after C6 |
 | M16o | **the heart weightless**: floating round the matrix, both framed, ZQSD; aimed by the pointer, a mouth found on the wall, a click into it | `3d/weightless` | M | **landed 2026-11-18** — below; `check-3d-heart`: floated round, aimed, out by a mouth |
-| M16p | **the appendage**: from the matrix to the worm, the heart's control — an item put in, taken out; what else it changes, the author's later | `3d/appendage` | M | after m |
+| M16p | **the appendage**: from the matrix to the worm, the heart's control — an item put in, taken out; what else it changes, the author's later | `3d/appendage` | M | next |
 | M16q | **the embellishments**: the animations left for later — into a mouth and out of it, and what else waits for one | — | — | later, a batch: the author's |
 
 ## The planet walked — M16a, landed 2026-11-18
@@ -299,6 +299,23 @@ des modifications qu'on précisera plus tard."
   meets the wall is under the sight, a mouth there lit, the sight warm. A
   click, Space or the pad's first button: into its cut, at its bottom.
 - **For now**: no animation between places — the embellishments' (M16q).
+
+## An item found — M16m, landed 2026-11-18
+
+- **An item** (`items.js`): its nature — what kind of thing it is, what it
+  is for: a brush, a shape the gamepad draws with — and what it is: a vault
+  object's id, its title, its picture. The brushes are the vault's legacy
+  brushes, its shapes tagged `folder:legacy brushes`; with no vault,
+  seventeen of the gamepad's own stand in.
+- **On the ground** (`finds.js`): `finds` of them, three at first, where
+  the seed puts them — never by a way's hole, nor by the start, nor by one
+  another — a card of its picture over a warm ring, rising and falling,
+  turned to the eye.
+- **Walked into**, on the ground and not under it, the worm's head within
+  reach: picked up, its card gone, into what the worm carries — its
+  inventory, a strip of pictures over the viewer. Kept for the session, as
+  all the player does (*Settled* 5); a planet built again lays again what
+  is not carried.
 
 ## Settled, 2026-11-18
 

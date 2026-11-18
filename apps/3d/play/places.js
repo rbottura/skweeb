@@ -158,25 +158,37 @@ export function refit(s) {
   } else if (s.place === 'cut') s.section.build(h, me.reality);
 }
 
+/** A way square to `dir`: of the planet's axes the one most square to it, made exactly so. */
+function squareTo(dir) {
+  const t = AXES.reduce((a, b) => (Math.abs(b.dot(dir)) < Math.abs(a.dot(dir)) ? b : a)).clone();
+  return t.addScaledVector(dir, -t.dot(dir)).normalize();
+}
+
+/** For the checks: the walked worm set down on the ground `away` from where `dir` points up, facing it. */
+export function setDown(s, dir, { away = 3 } = {}) {
+  const v = s.params.values, me = s.phasing.walked;
+  setBeside(me.walker, dir.clone().normalize(), squareTo(dir.clone().normalize()), v.radius, away);
+  me.walker.f.negate();
+  me.worm.flatten(false);
+  s.planet.scene.add(me.worm.mesh);
+  s.place = 'ground';
+  s.snap = true;
+  s.aimed = -1;
+  hang(s, me);
+}
+
 /**
  * For the checks: the walked worm set down `away` from way `way` — on the ground facing it, or in the heart floating
  * that far round from under its mouth.
  */
 export function visit(s, way, { heart = false, away = 3 } = {}) {
   const v = s.params.values, me = s.phasing.walked, dir = WAYS[way].dir;
-  const t = AXES.find(a => Math.abs(a.dot(dir)) < 0.5).clone();
-  if (heart) {
-    const a = away / floatsAt(v), at = dir.clone().multiplyScalar(Math.cos(a)).addScaledVector(t, Math.sin(a));
-    s.orbit.set(at, upAt(at), 0);
-    me.worm.flatten(true);
-    s.heart.build(heartOf(v), me.reality, s.planet.present).scene.add(me.worm.mesh);
-  } else {
-    setBeside(me.walker, dir, t, v.radius, away);
-    me.walker.f.negate();
-    me.worm.flatten(false);
-    s.planet.scene.add(me.worm.mesh);
-  }
-  s.place = heart ? 'heart' : 'ground';
+  if (!heart) return setDown(s, dir, { away });
+  const a = away / floatsAt(v), at = dir.clone().multiplyScalar(Math.cos(a)).addScaledVector(squareTo(dir), Math.sin(a));
+  s.orbit.set(at, upAt(at), 0);
+  me.worm.flatten(true);
+  s.heart.build(heartOf(v), me.reality, s.planet.present).scene.add(me.worm.mesh);
+  s.place = 'heart';
   s.snap = true;
   s.aimed = -1;
   hang(s, me);
