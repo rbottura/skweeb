@@ -38,12 +38,9 @@ Ideas the author has between bricks wait in `docs/inbox.md` until a session sort
 
 ### 2026-11-05 and -06: *cluster* (S9c–S9h), BEC, the workshop, the garden
 
-- **The garden** (M14a, `apps/map/garden/`, `apps/map/STATUS.md`, *The
-  garden*): a map gardened in, alone or in cluster. The gardener walks it as
-  the player's avatar does; facing a flower — a drawing that keeps its
-  marks — E plants its next generation beside it: its marks through a chain
-  of modifiers, saved as a still, its source its parent; on bare earth, a
-  flower of the set in hand. Ctrl S keeps the garden, a map's state.
+- **The garden** (M14a, `apps/map/garden/`, `apps/map/STATUS.md`): a map gardened in, alone or in cluster; facing a
+  flower — a drawing that keeps its marks — E plants its next generation beside it, its marks through a chain of
+  modifiers, its source its parent; on bare earth, a flower of the set in hand. Ctrl S keeps the garden.
 - **cluster** (`apps/cluster/STATUS.md`): the apps in one page one at a
   time, through their modules — the map's player and the rig's puppet too
   since S9i, its camera at a click — laid as the bench is: a strip, the
