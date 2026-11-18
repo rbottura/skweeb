@@ -77,8 +77,8 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M14c | two flowers crossed: a generation of two parents, RimWorld's genes | — | M | later, the author's word |
 | — | a game's effects planned: M15, `docs/vfx.md`; writing a shader, the code side: `docs/shader-code.md` | `docs/vfx`, `docs/shader-code` | — | landed 2026-11-13; 2026-11-14 |
 | — | the worm planned: M16, `docs/worm.md` | `docs/worm` | — | landed 2026-11-18 |
-| M16a | the planet walked: a sphere, things on it; a worm on it — a drawing lofted, waving as it goes — the camera behind and above | `3d/planet` | M | ready |
-| M16b | the phase: a frozen worm and its radius; both framed, the bridge of the morph's frames, the phase swung and fixed on B; the bond | `3d/phase` | M | needs M16a |
+| M16a | the planet walked: a sphere, things on it; a worm on it — a drawing lofted, waving as it goes — the camera behind and above | `3d/planet` | M | landed 2026-11-18 (`docs/worm.md`) |
+| M16b | the phase: a frozen worm and its radius; both framed, the bridge of the morph's frames, the phase swung and fixed on B; the bond | `3d/phase` | M | ready |
 | M16c to j | under the surface, the window, the bond a QTE, surfaces on meshes and the gears, the face, the limbs, a bigger planet, a world saved (`docs/worm.md`) | — | — | later, in the author's order |
 | M15h | a sheet any engine cuts: its cells all equal, a count that fills its grid — Godot's and Unity's flipbooks | `export/sheet-grid` | S | side job |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |

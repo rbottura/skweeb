@@ -94,7 +94,7 @@ wait their turn, in the order the author picks.
 
 | | brick | branch | size | done when |
 |---|---|---|---|---|
-| M16a | **the planet walked**: a sphere, things on it; a worm on it — a drawing lofted, waving as it goes — ZQSD, WASD, the arrows or a stick; the camera behind and above | `3d/planet` | M | `apps/3d/play/` opens alone on loft.js's worm; walked round, it stays on the ground and the camera behind it (`check-3d-play`) |
+| M16a | **the planet walked**: a sphere, things on it; a worm on it — a drawing lofted, waving as it goes — ZQSD, WASD, the arrows or a stick; the camera behind and above | `3d/planet` | M | **landed 2026-11-18** — below; `check-3d-play`: alone on loft.js's worm, walked round, on the ground, the camera behind it |
 | M16b | **the phase**: a frozen worm and its radius; the camera framing both, the bridge of the morph's frames, the phase swung and fixed on B; the bond, B played in its reality, A left a shell | `3d/phase` | M | walked into the radius, the swings played, B is the one walked |
 | M16c | **under the surface**: the worm swims beneath, the ground raised along its body | `3d/dune` | M | later |
 | M16d | **the window**: a frozen worm showing its reality — what a camera there sees, drawn in its silhouette | `3d/window` | M | later |
@@ -104,6 +104,32 @@ wait their turn, in the order the author picks.
 | M16h | **the worm on limbs**: a stroke a limb, bones by stroke — the rig in 3D | `3d/limbs` | L | later |
 | M16i | **a bigger planet**: detail near the eye, a cube-sphere in chunks | `3d/planet-lod` | M | later |
 | M16j | **a world saved**: its planet, its worms, its phases, an object — as a map is | `3d/world` | M | later; its type the author's |
+
+## The planet walked — M16a, landed 2026-11-18
+
+`/apps/3d/play/`, and `?worm=<id>`: a gamepad drawing, lofted with
+loft.js's rows at their defaults, or a model's drawn body with the rows the
+author gave it there, its colour or its skin. Its rows in four drawers —
+the worm, its walk, the planet, the camera — tuned by hand.
+
+- **The parts**: `walker.js` the body on its sphere; `follow.js` the camera;
+  `worm.js` the body lofted, hung and waved; `planet.js` the ground, its
+  things and its light; `hands.js` the keys and the stick; `main.js` the
+  module and its frame. Pure but `hands.js` and `main.js`: Node holds them
+  (`tests/3d-play.mjs`).
+- **loft.js says where its rings lie** — `userData.bodies`, each stroke's
+  first point, its rings, the points round each, its line's length — so
+  the worm finds its head without the drawing, and the phase will find its
+  rings to morph.
+- **One renderer for the page**, the 3D app's: the planet drawn into its
+  OffscreenCanvas, the picture handed to the viewer's canvas through
+  `bitmaprenderer`, never copied. At most 1920 pixels along the longer side.
+- **Toon in three bands**, as the 3D app's style draws them; the ground's
+  patches six long waves round the planet, its things a seed's.
+- **Left for later**: the worm hangs on the ground's tangent — past a sixth
+  of the radius long, its ends lift off a small planet (bent to it with
+  M16c); the things are not in its way, nor the camera's; the stick turns
+  the worm, it does not steer it by the camera; no shadows.
 
 ## Settled, 2026-11-18
 
