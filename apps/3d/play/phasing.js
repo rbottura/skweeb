@@ -13,12 +13,16 @@
  * world turns to its reality. The other is walked from then on, and the one
  * left behind is a frozen phase in its turn: the way back. Not at once — the
  * walked body leaves every radius before one takes it in again.
+ *
+ * Each body dives on its own (dive.js, M16c): a phase is passed into on the
+ * ground — under it, or on the way, the walked body is not taken in.
  */
 
 import { Color } from '../../../core/libs/three/three.core.js';
 import { passageAt } from './phase.js';
 import { Bridge } from './bridge.js';
 import { Reach } from './reach.js';
+import { Dive } from './dive.js';
 
 /** Past a radius by this much, the walked body may be taken in again. */
 const AGAIN = 0.5;
@@ -26,7 +30,7 @@ const AGAIN = 0.5;
 export class Phasing {
   constructor(scene) {
     this.scene = scene;
-    this.bodies = [];        // { worm, walker, reality: { ground, sky }, reach }
+    this.bodies = [];        // { worm, walker, reality: { ground, sky }, reach, dive }
     this.walking = 0;
     this.passage = null;     // { from, to, t, bridge, at } while one plays
     this.armed = true;
@@ -37,14 +41,14 @@ export class Phasing {
   add(worm, walker, reality) {
     const reach = new Reach();
     this.scene.add(worm.mesh, reach.mesh);
-    this.bodies.push({ worm, walker, reality, reach });
+    this.bodies.push({ worm, walker, reality, reach, dive: new Dive() });
     return this.bodies.length - 1;
   }
 
   /** The body walked now. */
   get walked() { return this.bodies[this.walking]; }
 
-  /** The frozen body whose radius the walked one has come into, if it may be taken in — or −1. */
+  /** The frozen body whose radius the walked one has come into, if it may be taken in — on the ground — or −1. */
   within(reach) {
     const me = this.walked.walker.p;
     let found = -1, clear = true;
@@ -55,7 +59,7 @@ export class Phasing {
       if (d < reach + AGAIN) clear = false;
     });
     if (clear) this.armed = true;
-    return this.armed ? found : -1;
+    return this.armed && this.walked.dive.state === 'surface' ? found : -1;
   }
 
   /** The passage into body `to` begun, the bridge laid between the two as they stand. */

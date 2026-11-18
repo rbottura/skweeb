@@ -14,9 +14,17 @@
  * the ground while the body slides through them, a snake's way: standing,
  * it holds; frozen, for free. It undulates from side to side or up and down,
  * whichever of loft's two ways that is as the drawing is seen. Lofted again
- * only when the phase has moved, its points copied into the one geometry it
- * keeps — loft.js lays the same points in the same order at any phase.
+ * only when the phase has moved, its points kept as its rest — loft.js lays
+ * the same points in the same order at any phase.
  *
+ * Laid on the ground (M16c): each point of its rest taken into the walker's
+ * frame, raised or sunk as its dive has it where that point has come to
+ * along the ground (dive.js) — each ring to its back just under it, so a
+ * body drawn arched swims level — and laid on the planet's curve
+ * (bend.js): a long worm lies along a small planet, and dives into it head
+ * first. Its
+ * spine kept as it lies, each ring's middle and girth: what the ground is
+ * raised by (dune.js).
  *
  * And a shell (M16b): the same body again in spectral.js's light, its edges
  * lit — "notre corps devient un coquille vide légèrement transparente" — as
@@ -30,6 +38,7 @@ import { drawnGeometry, DRAWN_PARAMS, DRAWN_WAVE } from '../loft.js';
 import { valuesFor } from '../../../core/params.js';
 import { rampOf } from '../look.js';
 import { spectral } from './spectral.js';
+import { bendPoint, bendNormal } from './bend.js';
 
 const LOFT = { ...DRAWN_PARAMS, ...DRAWN_WAVE };
 
@@ -41,6 +50,50 @@ function middleOf(P, body, r) {
   const c = [0, 0, 0];
   for (let j = 0; j < body.points; j++) for (let q = 0; q < 3; q++) c[q] += P[(body.base + r * body.points + j) * 3 + q];
   return c.map(x => x / body.points);
+}
+
+/**
+ * Each point's ring's top at rest, along the frame's up in the world's units — how far it sinks for its back to be
+ * just under the ground: every ring its own. A point of no ring, a body's end, its nearest ring's.
+ */
+function topsOf(P, bodies, { up, size }) {
+  const tops = new Float32Array(P.length / 3).fill(NaN), rings = [];
+  for (const b of bodies) for (let r = 0; r < b.rings; r++) {
+    let top = -Infinity;
+    for (let j = 0; j < b.points; j++) top = Math.max(top, P[(b.base + r * b.points + j) * 3 + up]);
+    rings.push([middleOf(P, b, r), size * top]);
+    tops.fill(size * top, b.base + r * b.points, b.base + (r + 1) * b.points);
+  }
+  for (let i = 0; i < tops.length; i++) {
+    if (!Number.isNaN(tops[i])) continue;
+    let best = Infinity, top = 0;
+    for (const [c, t] of rings) {
+      const d = (P[i * 3] - c[0]) ** 2 + (P[i * 3 + 1] - c[1]) ** 2 + (P[i * 3 + 2] - c[2]) ** 2;
+      if (d < best) { best = d; top = t; }
+    }
+    tops[i] = top;
+  }
+  return tops;
+}
+
+/**
+ * Each ring of `bodies` as it lies in `flat` — the frame's ahead, up, right: [ahead, up, right] its middle, its
+ * girth, and how high its top and its bottom are.
+ */
+function spineOf(flat, bodies) {
+  const spine = [];
+  for (const b of bodies) for (let ring = 0; ring < b.rings; ring++) {
+    const c = middleOf(flat, b, ring);
+    let girth = 0, top = -Infinity, bottom = Infinity;
+    for (let j = 0; j < b.points; j++) {
+      const q = (b.base + ring * b.points + j) * 3;
+      girth += Math.hypot(flat[q] - c[0], flat[q + 1] - c[1], flat[q + 2] - c[2]);
+      top = Math.max(top, flat[q + 1]);
+      bottom = Math.min(bottom, flat[q + 1]);
+    }
+    spine.push([c[0], c[1], c[2], girth / b.points, top, bottom]);
+  }
+  return spine;
 }
 
 export class Worm {
@@ -63,7 +116,15 @@ export class Worm {
     this.headAtEnd = true;   // its head where its stroke ends
     this.length = 4;         // its longest stroke's line, in the world's units at size 1
     this.low = 0;            // its lowest point along its up, at size 1
+    this.high = 0;           // …and its highest
+    this.front = 2;          // its head's tip ahead of where it stands, in the world's units
+    this.back = -2;          // …and its tail's, behind
     this.phase = null;       // the wave's phase it was last lofted at
+    this.rest = null;        // its points and normals as lofted, before it is laid: { position, normal }
+    this.flat = null;        // its points in the walker's frame, dived, before the curve
+    this.tops = null;        // each point's ring's top over the ground at rest: how far it sinks
+    this.spine = [];         // each ring's [ahead, up, right, girth, top, bottom] as it lies, before the curve
+    this.laid = '';          // what it was last laid by
   }
 
   /**
@@ -88,22 +149,46 @@ export class Worm {
     this.v = v;
     this.seen = seen === 'above' ? 'above' : 'side';
     this.size = size;
-    this.mesh.geometry.dispose();
-    this.mesh.geometry = this.shell.geometry = g;
+    this.take(g);
     this.phase = 0;
-    this.low = this.lowest();
+    this.laid = '0|Infinity|surface';      // as lofted: on no curve, dived nowhere
+    let front = -Infinity, back = Infinity;
+    for (let i = 0; i < this.rest.position.length; i += 3) {
+      const f = this.toward * size * this.rest.position[i];
+      front = Math.max(front, f);
+      back = Math.min(back, f);
+    }
+    this.front = Number.isFinite(front) ? front : 0;
+    this.back = Number.isFinite(back) ? back : 0;
     const map = !drawn ? null : skin === 'drawing' ? drawn.skin || null : skin === 'brush' ? drawn.brush || null : null;
     if (this.material.map !== map) { this.material.map = map; this.material.needsUpdate = true; }
     this.material.color.set(map ? '#ffffff' : colour);
     return this;
   }
 
-  /** Its lowest point along its up, as it hangs: the drawing's y seen from the side, its depth from above. */
-  lowest() {
-    const P = this.mesh.geometry.getAttribute('position').array, q = this.seen === 'above' ? 2 : 1;
-    let low = Infinity;
-    for (let i = q; i < P.length; i += 3) if (P[i] < low) low = P[i];
-    return Number.isFinite(low) ? low : 0;
+  /** Geometry `g` its body: its points kept as its rest, and laid as they are until it is posed. */
+  take(g) {
+    if (this.mesh.geometry !== g) this.mesh.geometry.dispose();
+    this.mesh.geometry = this.shell.geometry = g;
+    const P = g.getAttribute('position'), N = g.getAttribute('normal');
+    this.rest = { position: Float32Array.from(P ? P.array : []), normal: Float32Array.from(N ? N.array : []) };
+    this.flat = new Float32Array(this.rest.position.length);
+    this.low = this.lowest();
+    this.high = this.lowest(true);
+    this.tops = topsOf(this.rest.position, g.userData.bodies || [], { up: this.seen === 'above' ? 2 : 1, size: this.size });
+    this.spine = [];
+    this.laid = '';
+  }
+
+  /**
+   * Its lowest point along its up at rest, as it hangs — the drawing's y seen from the side, its depth from above —
+   * or its highest, `top`.
+   */
+  lowest(top = false) {
+    const P = this.rest ? this.rest.position : this.mesh.geometry.getAttribute('position').array;
+    let at = top ? -Infinity : Infinity;
+    for (let i = this.seen === 'above' ? 2 : 1; i < P.length; i += 3) at = top ? Math.max(at, P[i]) : Math.min(at, P[i]);
+    return Number.isFinite(at) ? at : 0;
   }
 
   /** The wave's phase after `walked` units: the crests still on the ground, the body sliding through them. */
@@ -113,29 +198,75 @@ export class Worm {
     return phase - Math.floor(phase);
   }
 
-  /** Its wave where `walked` puts it — lofted again only if the phase moved. Says whether it did. */
-  pose(walked) {
-    if (!this.v || !(this.v.wave > 0)) return false;
-    const phase = this.phaseAt(walked);
-    if (this.phase !== null && Math.abs(phase - this.phase) < 1e-4) return false;
+  /**
+   * Posed where `walked` puts it: its wave — lofted again only if its phase moved — its `dive` (dive.js), its
+   * leap and how deep its back goes, on a planet of `radius`. Laid again only if one of them moved; says whether.
+   */
+  pose(walked, { radius = Infinity, dive = null, leap = 0, depth = 0 } = {}) {
+    if (!this.v) return false;
+    const phase = this.v.wave > 0 ? this.phaseAt(walked) : 0;
+    if (Math.abs(phase - this.phase) >= 1e-4) this.loft(phase);
+    const under = dive && dive.state !== 'surface' ? dive : null;
+    const key = `${this.phase}|${radius}|${under ? `${under.keyAt(walked)}|${leap}|${depth}` : 'surface'}`;
+    if (key === this.laid) return false;
+    this.laid = key;
+    this.lay(walked, radius, under, { span: this.front - this.back, leap, drop: 0 }, depth);
+    return true;
+  }
+
+  /** Lofted again at the wave's `phase`, into its rest: the same points in the same order. */
+  loft(phase) {
     this.phase = phase;
     const g = drawnGeometry({ ...this.v, phase });
-    const now = this.mesh.geometry;
-    for (const name of ['position', 'normal']) {
-      const to = now.getAttribute(name), from = g.getAttribute(name);
-      if (!to || !from || to.array.length !== from.array.length) {
-        now.dispose();
-        this.mesh.geometry = this.shell.geometry = g;
-        this.low = this.lowest();
-        return true;
-      }
-      to.array.set(from.array);
-      to.needsUpdate = true;
+    const P = g.getAttribute('position'), N = g.getAttribute('normal');
+    if (!P || P.array.length !== this.rest.position.length || (N && N.array.length !== this.rest.normal.length)) {
+      this.take(g);
+      return;
     }
-    now.computeBoundingSphere();
+    this.rest.position.set(P.array);
+    if (N) this.rest.normal.set(N.array);
     g.dispose();
     this.low = this.lowest();
-    return true;
+    this.high = this.lowest(true);
+  }
+
+  /**
+   * Its rest laid as it stands: each point into the walker's frame — ahead, up from the ground, right — raised or
+   * sunk as `dive` has it where the point has come to along the ground — its ring's back `depth` under it at the
+   * last — its normal sheared with it, then laid on the planet's curve and taken back to the drawing's axes, which
+   * `place` hangs.
+   */
+  lay(walked, radius, dive, path, depth) {
+    const { position: P0, normal: N0 } = this.rest, flat = this.flat, tops = this.tops, g = this.mesh.geometry;
+    const P = g.getAttribute('position').array, normals = g.getAttribute('normal'), N = normals && normals.array;
+    const k = this.size, s = this.toward, above = this.seen === 'above', low = this.low;
+    const lit = N && N0.length === P0.length, o = [0, 0, 0], n = [0, 0, 0], m = [0, 0, 0];
+    for (let i = 0; i < P0.length; i += 3) {
+      const f = s * k * P0[i], r = above ? -s * k * P0[i + 1] : s * k * P0[i + 2];
+      let u = k * ((above ? P0[i + 2] : P0[i + 1]) - low);
+      if (lit) { n[0] = s * N0[i]; n[1] = above ? N0[i + 2] : N0[i + 1]; n[2] = above ? -s * N0[i + 1] : s * N0[i + 2]; }
+      if (dive) {
+        path.drop = tops[i / 3] - k * low + depth;
+        const [h, slope] = dive.heightAt(walked + f, path);
+        u += h;
+        n[0] -= slope * n[1];
+      }
+      flat[i] = f; flat[i + 1] = u; flat[i + 2] = r;
+      bendPoint(f, u, r, radius, o);
+      P[i] = o[0] / (s * k);
+      if (above) { P[i + 1] = -o[2] / (s * k); P[i + 2] = o[1] / k + low; }
+      else { P[i + 1] = o[1] / k + low; P[i + 2] = o[2] / (s * k); }
+      if (!lit) continue;
+      bendNormal(f, r, radius, n, m);
+      const l = Math.hypot(m[0], m[1], m[2]) || 1;
+      N[i] = (s * m[0]) / l;
+      if (above) { N[i + 1] = (-s * m[2]) / l; N[i + 2] = m[1] / l; }
+      else { N[i + 1] = m[1] / l; N[i + 2] = (s * m[2]) / l; }
+    }
+    g.getAttribute('position').needsUpdate = true;
+    if (lit) normals.needsUpdate = true;
+    g.computeBoundingSphere();
+    this.spine = spineOf(flat, g.userData.bodies || []);
   }
 
   /** Hung in a walker's frame at `p`: its drawing's axes the frame's, its lowest point on the ground. */
