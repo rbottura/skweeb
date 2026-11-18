@@ -305,3 +305,12 @@ M16e.
 the rig's are theirs: its bodies are loft.js's, its renderer the 3D app's,
 one device for the page. Nothing it does is saved until a world is an
 object (M16j), as the map's player saves nothing.
+
+**The heart, then the gamepad on core's kit.** After M16c the author paused
+M16d to j for the planet's heart (M16k, l). Seen, they answered: the
+brushes found are "la famille legacy brushes, 17 items dedans"; drawing in
+the heart is the gamepad app itself — "elle doit être retravaillée pour
+fonctionner sans p5, peut-être que c'est le moment de faire cette
+transition maintenant" — so C6 is chosen, before M16n. The heart is
+weightless, a mouth aimed at by the pointer (M16o); items, an inventory and
+an appendage to the matrix next (M16m, p); animations a batch later (M16q).

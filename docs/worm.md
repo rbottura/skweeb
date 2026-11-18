@@ -106,8 +106,11 @@ wait their turn, in the order the author picks.
 | M16j | **a world saved**: its planet, its worms, its phases, an object — as a map is | `3d/world` | M | later; its type the author's |
 | M16k | **the heart reached**: six ways in, a hole each; a cut through four, seen flat, the worm its drawing in it, moved up, down, left, right; the heart's hollow walked inside, a wider field; and out again | `3d/heart` | M | **landed 2026-11-18** — below; `check-3d-heart`: down the north, walked in the heart, up by another |
 | M16l | **the matrix**: a sphere floating in the heart, translucent, viscous; inside it, the planet's things itemized — a stone, a tuft | `3d/matrix` | M | **landed 2026-11-18** — below; `check-3d-heart`: seen from the wall, amber, its things drifting |
-| M16m | **a brush found**: one of the legacy brushes' shapes on the ground, picked up, carried | `3d/found` | S | next; which brushes, the author's |
-| M16n | **drawn in the heart**: the gamepad in the heart, drawing with the brush found; the drawing put in the matrix; found on the ground in 3D, lofted | `3d/drawn-heart` | M | after m; how the gamepad comes into the heart, the author's |
+| M16m | **an item found**: an item and its nature — a legacy brush, one of the family's 17, lying on the ground — picked up; the inventory, what the worm carries | `3d/found` | M | next |
+| M16n | **drawn in the heart**: the gamepad app itself, off p5 (C6), the brush found its brush; the drawing put in the matrix; found on the ground in 3D, lofted | `3d/drawn-heart` | M | after C6 |
+| M16o | **the heart weightless**: floating round the matrix, both framed, ZQSD; aimed by the pointer, a mouth found on the wall, a click into it | `3d/weightless` | M | **landed 2026-11-18** — below; `check-3d-heart`: floated round, aimed, out by a mouth |
+| M16p | **the appendage**: from the matrix to the worm, the heart's control — an item put in, taken out; what else it changes, the author's later | `3d/appendage` | M | after m |
+| M16q | **the embellishments**: the animations left for later — into a mouth and out of it, and what else waits for one | — | — | later, a batch: the author's |
 
 ## The planet walked — M16a, landed 2026-11-18
 
@@ -225,6 +228,24 @@ brushes en surface, activer le gamepad dans le cœur, dessiner avec le
 motif, placer le motif dans la matrice, puis retrouver la forme dessinée
 en 3D en surface."
 
+And, the heart seen: "1. La famille legacy brushes, 17 items dedans.
+2. J'aimerais réutiliser l'app gamepad elle-même, elle doit être
+retravaillée pour fonctionner sans p5, peut-être que c'est le moment de
+faire cette transition maintenant. Suite : dans le cœur j'aimerais qu'on
+soit dans une forme d'apesanteur autour de la matrice, une forme d'orbit
+control qui cadre à la fois l'avatar et la matrice dans le même champ, et
+ZQSD pour contrôler la caméra orbitale qui regarde toujours la matrice,
+deux degrés de liberté. Ce qui fait que notre avatar serait détaché de la
+paroi ; donc pour repartir dans un tunnel par un trou, il faudrait un mode
+de vue où on contrôle le regard de la caméra par le pointeur de la souris,
+on vise un trou sur la paroi, puis un bouton d'action pour partir dedans,
+avec une animation probablement — pas urgente, pour plus tard, dans un lot
+de tâches d'animations d'enjolivement. Trouver un item en surface implique
+plusieurs nouveaux éléments : l'objet item et sa nature, le concept
+d'inventaire, et dans le cœur, un appendice reliant la matrice à notre
+avatar comme interface de contrôle pour ajouter / retirer des items, faire
+des modifications qu'on précisera plus tard."
+
 ## The heart reached — M16k, landed 2026-11-18
 
 - **Six ways in** (`access.js`): the planet's three axes, both ways — its
@@ -257,8 +278,27 @@ en 3D en surface."
   grows (`planet.js` `KINDS`, the same shapes) — a tuft in the reality's
   green, a stone — each drifting round where it floats and turning, as in
   honey. A planet growing nothing holds nothing there.
-- **Seen**: from the wall, the camera behind the worm looks up between it
-  and the matrix; in a cut, the matrix a disc in the heart's hollow.
+- **Seen**: from where the worm floats (M16o), the camera on it; in a cut,
+  the matrix a disc in the heart's hollow.
+
+## The heart weightless — M16o, landed 2026-11-18
+
+- **Floating** (`orbit.js`), off the wall, `float` of the way out from the
+  matrix to it: ZQSD, the arrows or a stick move it on the screen — right,
+  left, up, down — round the matrix, `drift` units a second. Where it is
+  and the screen's up turn together, so no pole stops it: over the top, up
+  is the way it was going. Seen from its side, as in a cut — its head where
+  it goes, its back up as it faces — its turns eased.
+- **The camera** out behind it, inside the wall, always on the matrix's
+  middle, the worm low in the field before it.
+- **Aimed**: the right button held, E pressed — again to stop — or the
+  pad's left trigger. The gaze starts where the camera looked; the pointer
+  turns it — locked to the canvas where the browser lets it, a fifth of a
+  degree a pixel — ZQSD and the right stick too, up and down short of
+  straight. The worm faces it, the camera over its head; where the gaze
+  meets the wall is under the sight, a mouth there lit, the sight warm. A
+  click, Space or the pad's first button: into its cut, at its bottom.
+- **For now**: no animation between places — the embellishments' (M16q).
 
 ## Settled, 2026-11-18
 
@@ -278,3 +318,6 @@ en 3D en surface."
    it, and a dive between the two, played as an animation.
 7. **The heart first** (after M16c): M16d to j wait; the planet's heart,
    its ways in, its matrix and what is put in it come before them.
+8. **The gamepad itself, off p5**: the heart draws with the gamepad app,
+   on core's kit first — C6, "peut-être que c'est le moment" — so M16n
+   waits on it; the brushes found are the legacy brushes family's, 17.

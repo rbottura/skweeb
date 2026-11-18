@@ -10,10 +10,14 @@
  * along a cut, that cut. A cut holds a body in its tunnels and its heart.
  * Inside a sphere, a walker's up is its middle and it stays on its wall. In
  * a cut, the worm goes as the hands say, held in its tunnel, its back up as
- * it faces; down into the heart, it is set on the heart's wall by that
- * way's mouth; walked into a mouth, it is back in a cut at its heart end;
- * up it, out on the ground beside that way's hole, facing away, its wave
- * as it was shaped. The matrix in the heart: one of each thing the ground
+ * it faces; down into the heart, it floats under that way's mouth, off the
+ * wall, between it and the matrix (orbit.js, M16o), the camera out behind
+ * it looking at the matrix, the worm low in the field; moved round, at its
+ * distance, no pole stopping it, its head where it goes, its back up as it
+ * faces; aimed, its gaze where the camera looked, turned by the pointer;
+ * on a mouth, that mouth found and lit; a click, back in a cut at its
+ * heart end; up it, out on the ground beside that way's hole, facing away,
+ * its wave as it was shaped. The matrix in the heart: one of each thing the ground
  * grows floating in it, drifting slowly, never out of it; none where the
  * ground grows nothing.
  */
@@ -21,7 +25,8 @@
 const { AXES, WAYS, PLANES, wayAt, planeFor, onCut, wayOn, holdIn, tunnelAt } = await import('../apps/3d/play/access.js');
 const { Section } = await import('../apps/3d/play/section.js');
 const { Heart } = await import('../apps/3d/play/heart.js');
-const { heartOf, enterCut, tickCut, tickHeart, visit } = await import('../apps/3d/play/places.js');
+const { heartOf, floatsAt, enterCut, tickCut, tickHeart, visit } = await import('../apps/3d/play/places.js');
+const { Orbit, meet, LOOK } = await import('../apps/3d/play/orbit.js');
 const { Planet, KINDS } = await import('../apps/3d/play/planet.js');
 const { Matrix } = await import('../apps/3d/play/matrix.js');
 const { Phasing } = await import('../apps/3d/play/phasing.js');
@@ -110,13 +115,36 @@ const worm = new Worm().shape({ body: {}, wave: 0.5 });
   heart.dispose();
 }
 
+// ── Weightless ──────────────────────────────────────────────────────────────
+
+{
+  const round = v => v.toArray().map(x => Math.round(x) || 0);
+  const o = new Orbit().set(new Vector3(0, 0, 1), new Vector3(0, 1, 0), 0), f = o.frame();
+  ok('floating: the screen\'s right square to its up and to the eye', round(o.right), [1, 0, 0]);
+  ok('…seen from its side: ahead to the right, its back up, its right the eye\'s way', [f.forward, f.up, f.right].map(round),
+     [[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+  o.swim({ x: 1 }, 1, { radius: 5, speed: (5 * Math.PI) / 2, turnRate: 10 });
+  ok('swum right a quarter round: there, the screen\'s up kept', [round(o.dir), round(o.up)], [[1, 0, 0], [0, 1, 0]]);
+  for (let i = 0; i < 100; i++) o.swim({ y: 1 }, 0.1, { radius: 5, speed: 5, turnRate: 10 });
+  ok('…up and over, three times round: no pole stops it, its up square to where it is', [near(o.dir.length(), 1),
+    near(o.up.dot(o.dir), 0, 1e-9), near(o.up.length(), 1), o.frame().forward.dot(o.up) > 0.999], [true, true, true, true]);
+  o.swim({ x: -1 }, 1, { radius: 5, speed: 1, turnRate: 10 });
+  ok('…turned back left: its back still up', [o.face, o.frame().up.dot(o.up) > 0.999], [-1, true]);
+  o.aim(o.dir.clone().negate(), o.up).turn(Math.PI / 2, 0);
+  ok('aimed: its gaze turned to the right of where it looked', o.gaze.f.dot(o.dir.clone().negate().cross(o.up)) > 0.999, true);
+  o.turn(0, 3);
+  ok('…up, never past short of straight', near(o.gaze.pitch, (85 * Math.PI) / 180, 1e-9), true);
+  const m = meet(new Vector3(1, 0, 0), new Vector3(0, 1, 0), 2);
+  ok('a gaze meets the wall of the heart', [near(m.length(), 2), near(m.x, 1)], [true, true]);
+}
+
 // ── The ways between ────────────────────────────────────────────────────────
 
 {
   const params = playParams(), v = params.values;
   const planet = new Planet().build(v), phasing = new Phasing(planet.scene);
-  const s = { params, planet, phasing, section: new Section(), heart: new Heart(), place: 'ground', aspect: 1.6,
-              camera: new PerspectiveCamera(50, 1.6, 0.05, 2000), snap: true };
+  const s = { params, planet, phasing, section: new Section(), heart: new Heart(), orbit: new Orbit(), place: 'ground', aspect: 1.6,
+              camera: new PerspectiveCamera(75, 1.6, 0.05, 2000), snap: true, aimed: -1 };
   phasing.add(worm, walkerAt(v.radius), { ground: v.ground, sky: v.sky });
   const me = phasing.walked, h = heartOf(v), long = worm.front - worm.back;
   ok('six holes in the ground, a rim round each', planet.holes.length, 12);
@@ -127,23 +155,53 @@ const worm = new Worm().shape({ body: {}, wave: 0.5 });
   ok('walked into it: in a cut through it, at its top, the wave in the drawing\'s plane', [s.place, onCut(s.section.plane, 0),
     worm.v.waveWay], ['cut', [0, 1], 'side']);
   for (let i = 0; i < 400 && s.place === 'cut'; i++) tickCut(s, 0.05, { move: -1, turn: 0 });
-  ok('down its tunnel into the heart', [s.place, me.walker.inside, near(me.walker.p.length(), h.heart)], ['heart', true, true]);
-  ok('…on its wall by the north\'s mouth, its body in the heart', [Math.round(h.heart * deg(me.walker.p, WAYS[0].dir) * Math.PI / 180 * 100) / 100,
-    worm.mesh.parent === s.heart.scene], [Math.round((h.width / 2 + 0.6 * long) * 100) / 100, true]);
-  const walked = me.walker.walked;
-  for (let i = 0; i < 10; i++) tickHeart(s, 0.05, { move: 1, turn: 0 });
-  ok('walked on the heart\'s wall, on it', [me.walker.walked > walked + 1, near(me.walker.p.length(), h.heart, 1e-6), s.place], [true, true, 'heart']);
-  visit(s, 3, { heart: true, away: 3 });
-  for (let i = 0; i < 100 && s.place === 'heart'; i++) tickHeart(s, 0.05, { move: 1, turn: 0 });
-  const at = onCut(s.section.plane, 3);
-  ok('into a mouth: in a cut, at its tunnel\'s bottom, its head out', [s.place, near(Math.hypot(...s.section.q), h.heart + 0.5 * long + 0.3, 1e-6),
+  const afloat = floatsAt(v), held = h.matrix * h.heart;
+  ok('down its tunnel into the heart: floating under the north\'s mouth, off its wall, between it and the matrix', [s.place,
+    near(me.walker.p.length(), afloat, 1e-6), deg(me.walker.p, WAYS[0].dir) < 1e-4, afloat > held && afloat < h.heart,
+    worm.mesh.parent === s.heart.scene], ['heart', true, true, true, true]);
+  tickHeart(s, 0.05, {});
+  const eye = s.camera.position.clone(), ndc = me.walker.p.clone().project(s.camera);
+  ok('…the camera out behind it, in the heart, looking at the matrix', [eye.length() > afloat, eye.length() < h.heart,
+    deg(s.camera.getWorldDirection(new Vector3()), eye.clone().negate()) < 1e-3], [true, true, true]);
+  ok('…the worm low in its field, the matrix in the middle of it', [ndc.y < -0.05 && ndc.y > -0.8, Math.abs(ndc.x) < 1e-6], [true, true]);
+  const was = s.orbit.dir.clone(), walked = me.walker.walked;
+  for (let i = 0; i < 40; i++) tickHeart(s, 0.05, { turn: 1 });
+  ok('D held: round the matrix, to the right on the screen, at its distance, facing that way, waving', [deg(s.orbit.dir, was) > 10,
+    near(me.walker.p.length(), afloat, 1e-6), me.walker.f.dot(s.orbit.right) > 0.9, me.walker.walked > walked + 1], [true, true, true, true]);
+  for (let i = 0; i < 200; i++) tickHeart(s, 0.05, { move: 1 });
+  ok('Z held: up and over, no pole stopping it, at its distance', [near(me.walker.p.length(), afloat, 1e-6),
+    near(s.orbit.up.dot(s.orbit.dir), 0, 1e-9), s.place], [true, true, 'heart']);
+  /** Aimed, and the gaze turned to the mouth the least turn away that is not straight up or down: its way. */
+  const aimAtOne = () => {
+    const ahead = s.camera.getWorldDirection(new Vector3());
+    tickHeart(s, 0.05, { aim: true });
+    const g = s.orbit.gaze, right = g.forward.clone().cross(g.up), from = ahead.angleTo(g.forward);
+    const pick = WAYS.map((w, i) => {
+      const t = w.dir.clone().multiplyScalar(h.heart).sub(me.walker.p).normalize();
+      return { i, yaw: Math.atan2(t.dot(right), t.dot(g.forward)), pitch: Math.asin(t.dot(g.up)) };
+    }).filter(c => Math.abs(c.pitch) < 1.3).sort((a, b) => Math.abs(a.yaw) - Math.abs(b.yaw))[0];
+    tickHeart(s, 0.05, { aim: true, look: [pick.yaw / LOOK, -pick.pitch / LOOK] });
+    return { way: pick.i, from };
+  };
+  let aimed = aimAtOne();
+  ok('aimed: its gaze where the camera looked; the pointer moved onto a mouth, its way found, its rim lit',
+     [aimed.from < 1e-3, s.aimed, s.heart.lit], [true, aimed.way, aimed.way]);
+  tickHeart(s, 0.05, {});
+  ok('…let go of: floating free again, no mouth found', [s.orbit.gaze, s.aimed, s.heart.lit], [null, -1, -1]);
+  aimed = aimAtOne();
+  tickHeart(s, 0.05, { aim: true, go: true });
+  const at = onCut(s.section.plane, aimed.way);
+  ok('aimed again, a click: in that way\'s cut, at its tunnel\'s bottom, its head out', [s.place, near(Math.hypot(...s.section.q), h.heart + 0.5 * long + 0.3, 1e-6),
     near(s.section.heading, Math.atan2(at[1], at[0]), 1e-9)], ['cut', true, true]);
   for (let i = 0; i < 400 && s.place === 'cut'; i++) tickCut(s, 0.05, { turn: at[0], move: at[1] });
-  const off = me.walker.p.clone().normalize().sub(WAYS[3].dir);
+  const off = me.walker.p.clone().normalize().sub(WAYS[aimed.way].dir);
   ok('…up it to the ground, beside its hole, facing away', [s.place, me.walker.inside, near(me.walker.p.length(), R),
-    Math.round(R * deg(me.walker.p, WAYS[3].dir) * Math.PI / 180 * 100) / 100, me.walker.f.dot(off) > 0],
+    Math.round(R * deg(me.walker.p, WAYS[aimed.way].dir) * Math.PI / 180 * 100) / 100, me.walker.f.dot(off) > 0],
      ['ground', false, true, Math.round((h.width / 2 + 0.6 * long) * 100) / 100, true]);
   ok('…its body on the planet, its wave as it was shaped', [worm.mesh.parent === planet.scene, worm.v.waveWay === waveWayOf(worm.seen, worm.sway)], [true, true]);
+  visit(s, 3, { heart: true, away: 3 });
+  ok('set floating for a check: that far round from under its mouth', [s.place, near(afloat * deg(me.walker.p, WAYS[3].dir) * Math.PI / 180, 3, 1e-6)],
+     ['heart', true]);
   phasing.dispose();
   planet.dispose();
 }

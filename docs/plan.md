@@ -82,7 +82,10 @@ In the order the main thread takes them; side jobs and waits at the end.
 | M16c | under the surface: a dive in and out, the body swum level under the ground, the ground raised along its curve; a speed for each | `3d/dune` | M | landed 2026-11-18 (`docs/worm.md`) |
 | M16k | the heart reached: six ways in, a cut seen flat, the worm its drawing in it; the heart's hollow walked inside | `3d/heart` | M | landed 2026-11-18 (`docs/worm.md`) |
 | M16l | the matrix: a viscous sphere in the heart, the planet's things itemized floating in it | `3d/matrix` | M | landed 2026-11-18 (`docs/worm.md`) |
-| M16m, n | a brush found on the ground; drawn in the heart, put in the matrix, found on the ground lofted | — | — | waits: which brushes, and how the gamepad comes into the heart |
+| M16o | the heart weightless: floating round the matrix, both framed; a mouth aimed at by the pointer, a click into it | `3d/weightless` | M | landed 2026-11-18 (`docs/worm.md`) |
+| M16m, p | an item found — its nature, a legacy brush of the 17, the inventory; the appendage, items put in the matrix and taken out | `3d/found`, `3d/appendage` | M, M | next: m |
+| M16n | drawn in the heart with the gamepad app itself, put in the matrix, found on the ground lofted | `3d/drawn-heart` | M | after C6 |
+| M16q | the embellishments: the animations left for later — into a mouth and out | — | — | later, a batch: the author's |
 | M16d to j | the window, the bond a QTE, surfaces on meshes and the gears, the face, the limbs, a bigger planet, a world saved (`docs/worm.md`) | — | — | paused: the heart first (the author, 2026-11-18) |
 | M15h | a sheet any engine cuts: its cells all equal, a count that fills its grid — Godot's and Unity's flipbooks | `export/sheet-grid` | S | side job |
 | S11 | the space viewer's own bench, on an artifact | — | M | version 1 2026-11-05 (`docs/scene.md`), tried: "très prometteur" — its version 2 once the author has scenarios for it |
@@ -117,7 +120,7 @@ In the order the main thread takes them; side jobs and waits at the end.
 | L8 | overrides | `layers/overrides` | L | waits: the author — now, or later |
 | L9 | the other apps worn in OBS | `layers/obs` | M | waits: the author — which app first |
 | C5 | the unit loop on GitHub | `clean/ci` | S | waits: the author's yes |
-| C6 | the gamepad on core's kit | — | L+ | waits: the author — a milestone, or later |
+| C6 | the gamepad on core's kit, off p5 — the heart draws with it (M16n) | — | L+ | chosen 2026-11-18: after M16p, its bricks planned first |
 
 S is a session, M two or three, L more.
 
@@ -194,7 +197,6 @@ Each with what happens if nothing is said.
   particles, an overlay that loops, is the suggestion.
 - **The newsroom** (inbox, 2026-10-08): a milestone, and before what. It
   would want compose's page length set by hand, and ckt's whole words.
-- **The gamepad on core's kit** (C6): a milestone of its own, or later.
 - **The unit loop on GitHub** (C5): yes or no.
 - **Destra's licence**, in words its files can carry (C3).
 - **`docs/layers_ref.png`**, the sketch of the layers: rule 6 keeps it out
@@ -220,7 +222,8 @@ it lands. Nothing to install; the browser checks stay on the machines.
 
 **C6 — the gamepad on core's kit.** The last app on panels and params of
 its own, four files past the cap, its recordings never reopened, no clock
-in the stack. A milestone's size: listed so it is chosen, not forgotten.
+in the stack. Chosen 2026-11-18, for M16n: "j'aimerais réutiliser l'app
+gamepad elle-même … peut-être que c'est le moment". Bricks planned first.
 
 **C9 — the checks' helpers shared** · `clean/check-helpers` · S, a side job.
 Every check defines its own `say`, `wait`, `row`, `set`, `scrubTo`,

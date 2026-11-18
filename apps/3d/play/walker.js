@@ -10,9 +10,10 @@
  * heading back in its tangent plane. `walked` is the signed distance gone,
  * what the worm's wave is timed by (worm.js).
  *
- * Or on the inside of a sphere, `inside` — the planet's heart, walked on
- * its wall (heart.js): its up the sphere's middle, so its ground curves up
- * round it; a step the same turn the other way round.
+ * Or on the inside of a sphere, `inside` — the planet's heart was walked
+ * so on its wall in M16k, before it floated (orbit.js): its up the
+ * sphere's middle, so its ground curves up round it; a step the same turn
+ * the other way round.
  *
  * Pure: three's core only, Node runs it (tests/3d-play.mjs).
  */

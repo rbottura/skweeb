@@ -3,10 +3,10 @@
  * "une fois sorti dans le cœur, on repasse en 3D, fov plus large pour un
  * espace plus réduit".
  *
- * A hollow `heart` round at the planet's middle, walked on the inside of
- * its wall, its up the heart's middle (walker.js `inside`) — the planet's
- * ground the other way round. The six tunnels' mouths on its wall, where
- * the ways in are above it, each a way back into its cut (section.js). Lit
+ * A hollow `heart` round at the planet's middle, the worm floating in it
+ * round the matrix (orbit.js, M16o). The six tunnels' mouths on its wall,
+ * where the ways in are above it, each a way back into its cut
+ * (section.js) — the one a gaze finds lit, its rim warm. Lit
  * from its middle, where the matrix floats (matrix.js) in its own light,
  * and dimly from all round; its wall the reality's earth.
  *
@@ -24,6 +24,8 @@ import { Matrix } from './matrix.js';
 const Z = new Vector3(0, 0, 1);
 /** The earth's colour, a share of the ground's: the strata's deepest (section.js). */
 const EARTH = 0.4;
+/** A mouth's rim, and the rim of the one a gaze finds. */
+const RIM = '#8f877a', LIT = '#ffd36b', GLOW = '#5a3b00';
 
 export class Heart {
   constructor() {
@@ -34,6 +36,8 @@ export class Heart {
     this.matrix = new Matrix();
     this.scene.add(this.glow, this.sky, this.matrix.group);
     this.parts = [];
+    this.rims = [];             // a mouth's rim by its way
+    this.lit = -1;
     this.wall = null;
     this.radius = 0;
   }
@@ -54,10 +58,19 @@ export class Heart {
     for (const way of WAYS) {
       const facing = new Quaternion().setFromUnitVectors(Z, way.dir.clone().negate());
       const hole = add(new Mesh(new CircleGeometry(r, 48), new MeshBasicMaterial({ color: HOLLOW })));
-      const rim = add(new Mesh(new TorusGeometry(r, 0.14 * size, 8, 48), new MeshToonMaterial({ color: '#8f877a', gradientMap: rampOf(3) })));
+      const rim = add(new Mesh(new TorusGeometry(r, 0.14 * size, 8, 48), new MeshToonMaterial({ color: RIM, gradientMap: rampOf(3) })));
+      this.rims.push(rim);
       for (const m of [hole, rim]) { m.position.copy(way.dir).multiplyScalar(heart - off); m.quaternion.copy(facing); }
     }
     return this.dress(reality);
+  }
+
+  /** The mouth of way `way` lit — the one a gaze finds — or none, −1. */
+  light(way) {
+    if (way === this.lit) return this;
+    this.lit = way;
+    this.rims.forEach((m, i) => { m.material.color.set(i === way ? LIT : RIM); m.material.emissive.set(i === way ? GLOW : '#000000'); });
+    return this;
   }
 
   /** `dt` on: what floats in its matrix drifting. */
@@ -72,6 +85,8 @@ export class Heart {
   dispose() {
     for (const m of this.parts) { this.scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
     this.parts = [];
+    this.rims = [];
+    this.lit = -1;
     this.wall = null;
     this.matrix.dispose();
   }

@@ -20,7 +20,8 @@
  *
  * Or the worm is inside (places.js): walked into one of the planet's six
  * ways in, down a tunnel of its cut, seen flat (section.js), into its
- * heart, walked on the inside of its hollow (heart.js) — and out again.
+ * heart, floating round its matrix (orbit.js, M16o), a mouth aimed at and
+ * gone into — and out again.
  *
  * A module (core/mount.js): `mount(host)` and `unmount()`, its page mounting
  * it on itself; unmounted, its frames stop, its planet and worms are let go
@@ -29,7 +30,7 @@
  * `tune()` sets rows: for the checks.
  */
 
-import { PerspectiveCamera } from '../../../core/libs/three/three.core.js';
+import { PerspectiveCamera, Vector3 } from '../../../core/libs/three/three.core.js';
 import { appModule }  from '../../../core/mount.js';
 import { Bar }        from '../../../core/Bar.js';
 import { ParamPanel } from '../../../core/ParamPanel.js';
@@ -48,7 +49,8 @@ import { Dune }       from './dune.js';
 import { Section }    from './section.js';
 import { Heart }      from './heart.js';
 import { WAYS, wayAt } from './access.js';
-import { hang, heartOf, enterCut, tickCut, tickHeart, refit, visit as visitWay, HEART_FOV } from './places.js';
+import { Orbit }      from './orbit.js';
+import { hang, heartOf, floatsAt, enterCut, tickCut, tickHeart, refit, visit as visitWay, HEART_FOV } from './places.js';
 
 const MARKUP = `
   <main class="app-main">
@@ -57,6 +59,7 @@ const MARKUP = `
         <canvas class="world" width="480" height="300"
                 aria-label="the planet — ZQSD, WASD or the arrows walk the worm, Space dives, a stick too"></canvas>
         <p class="world-note" hidden></p>
+        <div class="sight" hidden></div>
       </div>
     </section>
     <div class="app-side" id="side"></div>
@@ -82,7 +85,7 @@ async function start(root, mine) {
   const canvas = root.querySelector('canvas.world');
   const note = root.querySelector('.world-note');
   const say = text => { note.hidden = !text; note.textContent = text || ''; };
-  const bar = new Bar({ app: '3d-play', mount: root, acts: false, keys: 'ZQSD, WASD or the arrows walk · Space dives, and comes up · a stick too' });
+  const bar = new Bar({ app: '3d-play', mount: root, acts: false, keys: 'ZQSD, WASD or the arrows walk · Space dives, and comes up · a stick too · in the heart, the right button or E aims, a click goes in' });
   const params = playParams();
   new ParamPanel(params, { title: 'the worm, played', mount: root.querySelector('#side'), groups: GROUPS });
   const asked = new URLSearchParams(location.search).get('worm');
@@ -99,9 +102,9 @@ async function start(root, mine) {
   phasing.add(new Worm(), walkerAt(v.radius), { ground: v.otherGround, sky: v.otherSky });
   const dune = new Dune();
   planet.scene.add(dune.mesh);
-  const s = { params, planet, phasing, dune, section: new Section(), heart: new Heart(), place: 'ground', aspect: 1.6,
-              renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
-              hands: new Hands(mine), frames: 0, snap: true, made: [{}, {}], asked: [0, 0] };
+  const s = { params, planet, phasing, dune, section: new Section(), heart: new Heart(), orbit: new Orbit(), place: 'ground', aspect: 1.6,
+              aimed: -1, sight: root.querySelector('.sight'), renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
+              hands: new Hands(mine, canvas), frames: 0, snap: true, made: [{}, {}], asked: [0, 0] };
   live = s;
 
   const tell = () => bar.say(`${s.made[phasing.walking].title || 'loft.js\'s worm'} · a planet of radius `
@@ -256,6 +259,9 @@ function draw(s, canvas, view) {
   const bitmap = s.renderer.draw(scene, s.place === 'cut' ? s.section.camera : s.camera, w, h);
   if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
   view.transferFromImageBitmap(bitmap);
+  const aimed = s.place === 'heart' && !!s.orbit.gaze;
+  if (s.sight.hidden === aimed) s.sight.hidden = !aimed;
+  s.sight.classList.toggle('found', aimed && s.aimed >= 0);
   s.frames++;
 }
 
@@ -277,7 +283,9 @@ export function tune(values) {
  * Where things stand, for the checks — or null, unmounted: the walked worm and its walker, the camera, the frozen
  * one, a passage's stage and phase, the bridge's lights, each body's place, shell and radius, the frames drawn;
  * the walked worm's dive, how much of it is under, the ground's highest over it, its head's height and its top's;
- * where it is — the ground, a cut, the heart — the ways in, and in a cut where it is on it.
+ * where it is — the ground, a cut, the heart — the ways in, and in a cut where it is on it; in the heart, where it
+ * floats and the screen's up there, how far from the middle, aimed or not — where it looked, how far turned — the
+ * mouth found, the sight shown; where the camera looks.
  */
 export function peek() {
   if (!live) return null;
@@ -296,5 +304,15 @@ export function peek() {
            place: live.place, ways: WAYS.map(w => w.dir.toArray()), inside: !!me.walker.inside, fov: camera.fov,
            heart: heartOf(live.params.values).heart, matrix: live.heart.matrix.radius,
            items: live.heart.matrix.items.map(it => it.mesh.position.toArray()),
-           cut: live.place === 'cut' ? { q: [...cut.q], heading: cut.heading, face: cut.face, across: cut.plane.across } : null };
+           cut: live.place === 'cut' ? { q: [...cut.q], heading: cut.heading, face: cut.face, across: cut.plane.across } : null,
+           orbit: live.place === 'heart' ? orbitOf(live) : null, ahead: camera.getWorldDirection(new Vector3()).toArray(),
+           sight: !live.sight.hidden };
+}
+
+/** The heart's float, for `peek`. */
+function orbitOf(s) {
+  const o = s.orbit, g = o.gaze;
+  return { dir: o.dir.toArray(), up: o.up.toArray(), right: o.right.toArray(), at: floatsAt(s.params.values), heading: o.heading,
+           face: o.face, aiming: !!g, base: g ? [g.forward.toArray(), g.up.toArray()] : null, yaw: g ? g.yaw : 0,
+           pitch: g ? g.pitch : 0, gaze: g ? g.f.toArray() : null, aimed: s.aimed, lit: s.heart.lit };
 }

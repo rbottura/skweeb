@@ -79,6 +79,10 @@ export function playParams() {
     matrix: { type: 'range', min: 0.1, max: 0.8, step: 'any', default: 0.32, label: 'its matrix, a share of the heart',
               group: 'heart' },
     matrixColour: { type: 'color', default: '#ffb347', label: 'the matrix\'s colour', group: 'heart' },
+    float: { type: 'range', min: 0.05, max: 0.7, step: 'any', default: 0.3, label: 'it floats there, from the matrix to the wall',
+             group: 'heart' },
+    drift: { type: 'range', min: 0.5, max: 30, step: 'any', log: true, default: 5, label: 'round the matrix, units a second',
+             group: 'heart' },
 
     // M16b: a worm frozen in space-time, a phase of another reality, and the passage into it.
     other: { type: 'object', accepts: ['still', 'sequence', 'model'], by: ['gamepad', '3d'],
