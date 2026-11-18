@@ -20,6 +20,7 @@ import {
 import { rampOf } from '../look.js';
 import { HOLLOW, WAYS } from './access.js';
 import { Matrix } from './matrix.js';
+import { Appendage } from './appendage.js';
 
 const Z = new Vector3(0, 0, 1);
 /** The earth's colour, a share of the ground's: the strata's deepest (section.js). */
@@ -34,6 +35,7 @@ export class Heart {
     this.glow = new PointLight('#ffe9c4', 2.4, 0, 0);
     this.sky = new HemisphereLight('#c9b8ff', '#3a2a20', 0.8);
     this.matrix = new Matrix();
+    this.appendage = new Appendage();
     this.scene.add(this.glow, this.sky, this.matrix.group);
     this.parts = [];
     this.rims = [];             // a mouth's rim by its way
@@ -50,6 +52,7 @@ export class Heart {
     this.dispose();
     this.radius = heart;
     this.matrix.build({ radius: matrix * heart, colour }, kinds, reality);
+    this.scene.add(this.appendage.build({ colour, size }).mesh);
     this.glow.color.copy(new Color(colour)).lerp(new Color('#ffffff'), 0.5);
     const add = m => { this.parts.push(m); this.scene.add(m); return m; };
     this.wall = add(new Mesh(new SphereGeometry(heart, 96, 64), new MeshToonMaterial({ side: BackSide, gradientMap: rampOf(3) })));
@@ -73,8 +76,8 @@ export class Heart {
     return this;
   }
 
-  /** `dt` on: what floats in its matrix drifting. */
-  update(dt) { this.matrix.update(dt); return this; }
+  /** `dt` on: what floats in its matrix drifting, what was put in it turned to `eye`. */
+  update(dt, eye = null) { this.matrix.update(dt, eye); return this; }
 
   /** Its wall in a reality's earth. */
   dress({ ground }) {
@@ -89,5 +92,6 @@ export class Heart {
     this.lit = -1;
     this.wall = null;
     this.matrix.dispose();
+    this.appendage.dispose();
   }
 }

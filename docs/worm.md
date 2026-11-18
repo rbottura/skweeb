@@ -109,7 +109,7 @@ wait their turn, in the order the author picks.
 | M16m | **an item found**: an item and its nature — a legacy brush, one of the family's 17, lying on the ground — picked up; the inventory, what the worm carries | `3d/found` | M | **landed 2026-11-18** — below; `check-3d-play`: three on the ground, one walked into, carried |
 | M16n | **drawn in the heart**: the gamepad app itself, off p5 (C6), the brush found its brush; the drawing put in the matrix; found on the ground in 3D, lofted | `3d/drawn-heart` | M | after C6 |
 | M16o | **the heart weightless**: floating round the matrix, both framed, ZQSD; aimed by the pointer, a mouth found on the wall, a click into it | `3d/weightless` | M | **landed 2026-11-18** — below; `check-3d-heart`: floated round, aimed, out by a mouth |
-| M16p | **the appendage**: from the matrix to the worm, the heart's control — an item put in, taken out; what else it changes, the author's later | `3d/appendage` | M | next |
+| M16p | **the appendage**: from the matrix to the worm, the heart's control — an item put in, taken out; what else it changes, the author's later | `3d/appendage` | M | **landed 2026-11-18** — below; `check-3d-heart`: a brush put in, held, let out |
 | M16q | **the embellishments**: the animations left for later — into a mouth and out of it, and what else waits for one | — | — | later, a batch: the author's |
 
 ## The planet walked — M16a, landed 2026-11-18
@@ -316,6 +316,20 @@ des modifications qu'on précisera plus tard."
   inventory, a strip of pictures over the viewer. Kept for the session, as
   all the player does (*Settled* 5); a planet built again lays again what
   is not carried.
+
+## The appendage — M16p, landed 2026-11-18
+
+- **From the matrix to the worm** (`appendage.js`): a tube of the matrix's
+  own honey, thick where it leaves it, thin where it comes up into the
+  worm's belly, laid again each frame as the worm floats round.
+- **The control, for now two strips**: in the heart what the worm carries,
+  over the viewer's left corner, and what the matrix holds, over its right.
+  A click on one sends it along the appendage, a card of its picture
+  carried — into the matrix, where it floats with the planet's things,
+  turned to the eye; or out, carried again. One at a time; what the matrix
+  holds it holds the next time too, the session long.
+- **Later, the author's**: what else passes along it, the changes — "faire
+  des modifications qu'on précisera plus tard".
 
 ## Settled, 2026-11-18
 

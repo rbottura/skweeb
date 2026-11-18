@@ -22,7 +22,8 @@
  * ways in, down a tunnel of its cut, seen flat (section.js), into its
  * heart, floating round its matrix (orbit.js, M16o), a mouth aimed at and
  * gone into — and out again. Brushes lie on its ground, walked into and
- * carried (items.js, finds.js, M16m).
+ * carried (items.js, finds.js, M16m); in the heart, put into its matrix
+ * along an appendage and let out again (appendage.js, M16p).
  *
  * A module (core/mount.js): `mount(host)` and `unmount()`, its page mounting
  * it on itself; unmounted, its frames stop, its planet and worms are let go
@@ -53,7 +54,7 @@ import { WAYS, wayAt } from './access.js';
 import { Orbit }      from './orbit.js';
 import { brushesOf, strew, Inventory, LEGACY, NATURES } from './items.js';
 import { Finds }      from './finds.js';
-import { hang, heartOf, floatsAt, enterCut, tickCut, tickHeart, refit, setDown, visit as visitWay, HEART_FOV } from './places.js';
+import { hang, heartOf, floatsAt, enterCut, tickCut, tickHeart, refit, setDown, putIn, takeOut, visit as visitWay, HEART_FOV } from './places.js';
 
 const MARKUP = `
   <main class="app-main">
@@ -64,6 +65,7 @@ const MARKUP = `
         <p class="world-note" hidden></p>
         <div class="sight" hidden></div>
         <ul class="carried" aria-label="what the worm carries"></ul>
+        <ul class="held" aria-label="what the matrix holds" hidden></ul>
       </div>
     </section>
     <div class="app-side" id="side"></div>
@@ -111,7 +113,8 @@ async function start(root, mine) {
   planet.scene.add(dune.mesh);
   const s = { params, planet, phasing, dune, section: new Section(), heart: new Heart(), orbit: new Orbit(), place: 'ground', aspect: 1.6,
               aimed: -1, sight: root.querySelector('.sight'), finds: new Finds(), inventory: new Inventory(), brushes: [],
-              carriedList: root.querySelector('.carried'), shownCarried: -1, renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
+              carriedList: root.querySelector('.carried'), heldList: root.querySelector('.held'), shownCarried: '', held: [], picture,
+              renderer, camera: new PerspectiveCamera(50, 1, 0.05, 2000),
               hands: new Hands(mine, canvas), frames: 0, snap: true, made: [{}, {}], asked: [0, 0] };
   live = s;
   planet.scene.add(s.finds.group);
@@ -289,21 +292,31 @@ function draw(s, canvas, view) {
   const aimed = s.place === 'heart' && !!s.orbit.gaze;
   if (s.sight.hidden === aimed) s.sight.hidden = !aimed;
   s.sight.classList.toggle('found', aimed && s.aimed >= 0);
-  if (s.shownCarried !== s.inventory.count) showCarried(s);
+  const shown = `${s.place}|${s.inventory.count}|${s.held.length}`;
+  if (s.shownCarried !== shown) showCarried(s, shown);
   s.frames++;
 }
 
-/** What the worm carries, shown over the viewer: a picture each, its title and nature on it. */
-function showCarried(s) {
-  s.shownCarried = s.inventory.count;
-  s.carriedList.replaceChildren(...s.inventory.items.map(item => {
+/**
+ * What the worm carries over the viewer's corner, a picture each, its title and nature on it — and, in the heart, what
+ * the matrix holds over the other: there, one clicked goes along the appendage, in or out (M16p).
+ */
+function showCarried(s, shown) {
+  s.shownCarried = shown;
+  const heart = s.place === 'heart';
+  const strip = (list, items, go, hint) => list.replaceChildren(...items.map((item, i) => {
     const li = document.createElement('li'), img = document.createElement('img');
     img.src = item.thumb;
     img.alt = item.title;
-    li.title = `${item.title} — ${NATURES[item.nature] || item.nature}`;
+    li.title = `${item.title} — ${NATURES[item.nature] || item.nature}${heart ? hint : ''}`;
     li.append(img);
+    if (heart) li.addEventListener('click', () => go(s, i));
     return li;
   }));
+  strip(s.carriedList, s.inventory.items, putIn, ' · a click puts it in the matrix');
+  strip(s.heldList, heart ? s.held : [], takeOut, ' · a click lets it out');
+  s.carriedList.classList.toggle('live', heart);
+  s.heldList.hidden = !heart;
 }
 
 /** For the checks: the walked worm set down on the ground `away` from find `i`, facing it. */
@@ -356,7 +369,10 @@ export function peek() {
            cut: live.place === 'cut' ? { q: [...cut.q], heading: cut.heading, face: cut.face, across: cut.plane.across } : null,
            orbit: live.place === 'heart' ? orbitOf(live) : null, ahead: camera.getWorldDirection(new Vector3()).toArray(),
            sight: !live.sight.hidden, finds: live.finds.lying.map(l => ({ up: l.up.toArray(), title: l.item.title, picture: l.item.picture })),
-           carried: live.inventory.items.map(i => ({ nature: i.nature, id: i.id, title: i.title })) };
+           carried: live.inventory.items.map(i => ({ nature: i.nature, id: i.id, title: i.title })),
+           held: live.held.map(i => i.title), inMatrix: live.heart.matrix.held.length,
+           passing: live.heart.appendage.passing ? { title: live.heart.appendage.passing.item.title, way: live.heart.appendage.passing.way } : null,
+           appendage: live.place === 'heart' ? live.heart.appendage.ends.map(e => e.toArray()) : null };
 }
 
 /** The heart's float, for `peek`. */

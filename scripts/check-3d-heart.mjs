@@ -4,13 +4,16 @@
  *
  *   node scripts/check-3d-heart.mjs
  *
- * Served as plain files with no vault: loft.js's worm, turned blue, set by
+ * Served as plain files with no vault: loft.js's worm, turned blue, walked
+ * into a brush on the ground and carrying it (M16m), set by
  * the north's hole and walked into it — Z held — and it is in a cut, seen
  * flat: the sky over it, the tunnel dark round it, the worm blue in the
  * middle. S held, down its tunnel into the heart: in 3D again, the field
  * wider, the worm floating under the mouth it came by, off the wall (M16o),
  * the camera out behind it looking at the matrix; the matrix amber, the
- * ground's two things drifting in it. D held, round the matrix, at its
+ * ground's two things drifting in it; the appendage from it to the worm,
+ * the brush clicked in the strip put in along it, held, clicked out again
+ * (M16p). D held, round the matrix, at its
  * distance, the camera still on it; Z, up and over. The right button held:
  * aimed, the sight shown; the pointer moved onto a mouth: found, its rim
  * lit, the sight warm; a click, in that way's cut at its tunnel's bottom;
@@ -59,6 +62,10 @@ await until('p.frames > 3', 40000);
 await tune({ colour: '#1030ff', away: 60 });
 let p = await page.eval(peek);
 c.ok('on the ground, six ways in', !!p && p.place === 'ground' && p.ways.length === 6, p ? `${p.place}, ${p.ways.length} ways` : 'nothing');
+await page.eval(`${player}.then(m => m.seek(0, { away: 4 }))`);
+await holdUntil('KeyW', 'p.carried.length === 1', 8000);
+p = await page.eval(peek);
+c.ok('…a brush walked into on the way: carried', p.carried.length === 1, p.carried.map(i => i.title).join(', ') || 'nothing');
 
 // ── Down ────────────────────────────────────────────────────────────────────
 
@@ -90,6 +97,21 @@ const inside = await page.eval(look);
 c.ok('…seen from where the worm floats, amber', inside.warm > 0.01, `${(inside.warm * 100).toFixed(1)}% of the picture`);
 const drift = (await page.eval(peek)).items;
 c.ok('…its things drifting', drift.some((q, i) => len(q.map((x, k) => x - p.items[i][k])) > 0.01), '');
+const ends = p.appendage, gap = ends ? len(ends[3].map((x, i) => x - p.p[i])) : Infinity;
+c.ok('…the appendage: from the matrix to the worm', !!ends && Math.abs(len(ends[0]) - p.matrix) < 1e-6 && gap < 0.6,
+  ends ? `${len(ends[0]).toFixed(2)} from the middle, ${gap.toFixed(2)} from the worm` : 'none');
+const click = list => page.eval(`(() => { const li = document.querySelector('.${list} li'); if (li) li.click(); return !!li; })()`);
+const clicked = await click('carried');
+await until('p.held.length === 1 && !p.passing', 4000);
+p = await page.eval(peek);
+c.ok('…the brush clicked in the strip: along it into the matrix, held there', clicked && p.held.length === 1 && p.carried.length === 0
+  && p.inMatrix === 1, `${p.held.join(', ') || 'nothing'} held, ${p.carried.length} carried`);
+await c.shot('3d-heart-held');
+await click('held');
+await until('p.carried.length === 1 && !p.passing', 4000);
+p = await page.eval(peek);
+c.ok('…clicked there: let out along it, carried again', p.carried.length === 1 && p.held.length === 0 && p.inMatrix === 0,
+  `${p.carried.map(i => i.title).join(', ') || 'nothing'} carried`);
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const was = o.dir, walked = p.walked;
 await key('keydown', 'KeyD');

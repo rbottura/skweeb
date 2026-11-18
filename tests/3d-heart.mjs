@@ -17,7 +17,9 @@
  * faces; aimed, its gaze where the camera looked, turned by the pointer;
  * on a mouth, that mouth found and lit; a click, back in a cut at its
  * heart end; up it, out on the ground beside that way's hole, facing away,
- * its wave as it was shaped. The matrix in the heart: one of each thing the ground
+ * its wave as it was shaped. The appendage from the matrix to the worm
+ * (M16p): what it carries put in along it, held by the matrix the next
+ * time too, one thing at a time; let out, carried again. The matrix in the heart: one of each thing the ground
  * grows floating in it, drifting slowly, never out of it; none where the
  * ground grows nothing.
  */
@@ -27,6 +29,9 @@ const { Section } = await import('../apps/3d/play/section.js');
 const { Heart } = await import('../apps/3d/play/heart.js');
 const { heartOf, floatsAt, enterCut, tickCut, tickHeart, visit } = await import('../apps/3d/play/places.js');
 const { Orbit, meet, LOOK } = await import('../apps/3d/play/orbit.js');
+const { itemOf, Inventory } = await import('../apps/3d/play/items.js');
+const { PASSAGE } = await import('../apps/3d/play/appendage.js');
+const { putIn, takeOut } = await import('../apps/3d/play/places.js');
 const { Planet, KINDS } = await import('../apps/3d/play/planet.js');
 const { Matrix } = await import('../apps/3d/play/matrix.js');
 const { Phasing } = await import('../apps/3d/play/phasing.js');
@@ -144,7 +149,8 @@ const worm = new Worm().shape({ body: {}, wave: 0.5 });
   const params = playParams(), v = params.values;
   const planet = new Planet().build(v), phasing = new Phasing(planet.scene);
   const s = { params, planet, phasing, section: new Section(), heart: new Heart(), orbit: new Orbit(), place: 'ground', aspect: 1.6,
-              camera: new PerspectiveCamera(75, 1.6, 0.05, 2000), snap: true, aimed: -1 };
+              camera: new PerspectiveCamera(75, 1.6, 0.05, 2000), snap: true, aimed: -1, held: [],
+              inventory: new Inventory().add(itemOf('brush', { title: 'a brush' })).add(itemOf('brush', { title: 'another' })) };
   phasing.add(worm, walkerAt(v.radius), { ground: v.ground, sky: v.sky });
   const me = phasing.walked, h = heartOf(v), long = worm.front - worm.back;
   ok('six holes in the ground, a rim round each', planet.holes.length, 12);
@@ -164,6 +170,18 @@ const worm = new Worm().shape({ body: {}, wave: 0.5 });
   ok('…the camera out behind it, in the heart, looking at the matrix', [eye.length() > afloat, eye.length() < h.heart,
     deg(s.camera.getWorldDirection(new Vector3()), eye.clone().negate()) < 1e-3], [true, true, true]);
   ok('…the worm low in its field, the matrix in the middle of it', [ndc.y < -0.05 && ndc.y > -0.8, Math.abs(ndc.x) < 1e-6], [true, true]);
+  const ends = s.heart.appendage.ends, matrixAt = h.matrix * h.heart;
+  ok('the appendage: from the matrix, toward the worm, up into its belly', [near(ends[0].length(), matrixAt, 1e-9),
+    deg(ends[0], me.walker.p) < 1e-4, ends[3].distanceTo(me.walker.p) < 0.5 * v.size], [true, true, true]);
+  ok('…a brush carried put in along it; another not while it passes', [putIn(s, 0), s.inventory.count, putIn(s, 0), takeOut(s, 0)], [true, 1, false, false]);
+  for (let t = 0; t < PASSAGE + 0.1; t += 0.05) tickHeart(s, 0.05, {});
+  ok('…come to the matrix: held there, floating with its things', [s.held.map(i => i.title), s.heart.matrix.held.length, s.heart.appendage.passing],
+     [['a brush'], 1, null]);
+  ok('…let out, along it, carried again', [takeOut(s, 0), s.held.length, s.heart.matrix.held.length], [true, 0, 0]);
+  for (let t = 0; t < PASSAGE + 0.1; t += 0.05) tickHeart(s, 0.05, {});
+  ok('…carried again', s.inventory.items.map(i => i.title), ['another', 'a brush']);
+  putIn(s, 1);
+  for (let t = 0; t < PASSAGE + 0.1; t += 0.05) tickHeart(s, 0.05, {});
   const was = s.orbit.dir.clone(), walked = me.walker.walked;
   for (let i = 0; i < 40; i++) tickHeart(s, 0.05, { turn: 1 });
   ok('D held: round the matrix, to the right on the screen, at its distance, facing that way, waving', [deg(s.orbit.dir, was) > 10,
@@ -202,6 +220,7 @@ const worm = new Worm().shape({ body: {}, wave: 0.5 });
   visit(s, 3, { heart: true, away: 3 });
   ok('set floating for a check: that far round from under its mouth', [s.place, near(afloat * deg(me.walker.p, WAYS[3].dir) * Math.PI / 180, 3, 1e-6)],
      ['heart', true]);
+  ok('…the matrix holding what was put in it before, the heart built again', [s.held.map(i => i.title), s.heart.matrix.held.length], [['a brush'], 1]);
   phasing.dispose();
   planet.dispose();
 }

@@ -15,6 +15,13 @@ const Z = new Vector3(0, 0, 1);
 /** The ring at a find's foot: the colour of a mouth found in the heart. */
 const RING = '#ffd36b';
 
+/** A card of `item`'s picture, `size` across — `load(url)`'s, or plain: what stands for it on the ground, along the appendage, in the matrix. */
+export function cardOf(item, size, load = null) {
+  const map = load && item.picture ? load(item.picture) : null;
+  return new Mesh(new PlaneGeometry(size, size),
+    new MeshBasicMaterial({ map, color: map ? '#ffffff' : '#e8d9b0', transparent: true, alphaTest: 0.15, side: DoubleSide }));
+}
+
 export class Finds {
   constructor() {
     this.group = new Group();
@@ -30,9 +37,7 @@ export class Finds {
     this.radius = radius;
     this.size = size;
     strewn.forEach(({ item, up }, i) => {
-      const map = load && item.picture ? load(item.picture) : null;
-      const card = new Mesh(new PlaneGeometry(1.5 * size, 1.5 * size),
-        new MeshBasicMaterial({ map, color: map ? '#ffffff' : '#e8d9b0', transparent: true, alphaTest: 0.15, side: DoubleSide }));
+      const card = cardOf(item, 1.5 * size, load);
       const ring = new Mesh(new TorusGeometry(0.6 * size, 0.05 * size, 6, 32), new MeshBasicMaterial({ color: RING }));
       ring.position.copy(up).multiplyScalar(radius + 0.03 * size);
       ring.quaternion.setFromUnitVectors(Z, up);

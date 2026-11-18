@@ -13,6 +13,8 @@
  * cut at that tunnel's heart end; out of it at the ground — by any of the
  * cut's four ways — set beside that way's hole, facing away from it. For
  * now each way between is a cut: the camera put at once where it is next.
+ * In the heart, the appendage from the matrix to the worm (appendage.js,
+ * M16p): what it carries put in along it, what the matrix holds let out.
  *
  * Each frame, the place the worm is in moves it — `tickCut`, `tickHeart`;
  * the ground's is main.js's. `visit` sets it down by a way: for the checks.
@@ -23,6 +25,7 @@ import { AXES, WAYS, planeFor, onCut, wayOn } from './access.js';
 import { frameOf, settle } from './walker.js';
 import { follow } from './follow.js';
 import { LOOK } from './orbit.js';
+import { cardOf } from './finds.js';
 
 /** The camera's field in the heart, degrees: wider, for a smaller room. */
 export const HEART_FOV = 75;
@@ -62,6 +65,38 @@ function hangFloating(s, b, dt) {
   if (ball) worm.place(frame, p.clone().multiplyScalar(2).sub(ball.center.clone().applyMatrix4(worm.mesh.matrix)));
   b.walker.p.copy(p);
   b.walker.f.copy(frame.forward);
+  return frame;
+}
+
+/** What passes along the appendage come to its end: into what the matrix holds, or what the worm carries. */
+function arrive(s, done) {
+  if (!done) return;
+  if (done.way === 'in') { s.held.push(done.item); s.heart.matrix.hold(done.item, s.picture); }
+  else s.inventory.add(done.item);
+}
+
+/** What the worm carries `i`th put into the matrix along the appendage — in the heart, nothing else passing. */
+export function putIn(s, i) {
+  const a = s.heart.appendage;
+  if (s.place !== 'heart' || a.passing || !s.inventory.items[i]) return false;
+  const item = s.inventory.take(i), card = cardOf(item, 0.5 * s.params.values.size, s.picture);
+  s.heart.scene.add(card);
+  return a.send(item, 'in', card);
+}
+
+/** What the matrix holds `i`th let out along the appendage, to the worm. */
+export function takeOut(s, i) {
+  const a = s.heart.appendage;
+  if (s.place !== 'heart' || a.passing || !s.held[i]) return false;
+  const item = s.held.splice(i, 1)[0], card = cardOf(item, 0.5 * s.params.values.size, s.picture);
+  s.heart.matrix.release(i);
+  s.heart.scene.add(card);
+  return a.send(item, 'out', card);
+}
+
+/** The matrix, built anew, holding again what was put in it. */
+function rehold(s) {
+  for (const item of s.held || []) s.heart.matrix.hold(item, s.picture);
 }
 
 /** Walker `w` on the planet `off` along it from `dir` toward `t`, facing on. */
@@ -79,6 +114,7 @@ const onward = (plane, at, face) => (at[0] ? plane.y.clone() : plane.x.clone().m
 /** Into a cut by `way`: from the ground at the top of its tunnel, or from the heart (`fromHeart`) at its bottom. */
 export function enterCut(s, way, { fromHeart = false } = {}) {
   const v = s.params.values, me = s.phasing.walked, h = heartOf(v);
+  if (fromHeart) arrive(s, s.heart.appendage.step(0, true));
   const plane = planeFor(way, me.walker.f);
   me.worm.flatten(true);
   s.section.build(h, me.reality).enter(plane, onCut(plane, way), {
@@ -93,6 +129,7 @@ export function enterHeart(s, way) {
   s.orbit.set(dir, upAt(dir), s.section.face < 0 ? Math.PI : 0);
   me.worm.flatten(true);
   s.heart.build(heartOf(v), me.reality, s.planet.present).scene.add(me.worm.mesh);
+  rehold(s);
   s.place = 'heart';
   s.snap = true;
   s.aimed = -1;
@@ -140,8 +177,10 @@ export function tickHeart(s, dt, hands) {
     const [dx, dy] = hands.look || [0, 0], [sx, sy] = hands.stick || [0, 0];
     o.turn(dx * LOOK + (x * KEYS + sx * STICK) * dt, -dy * LOOK + (y * KEYS - sy * STICK) * dt);
   } else me.walker.walked += o.swim({ x, y }, dt, { radius: floatsAt(v), speed: v.drift, turnRate: (2 * v.turn * Math.PI) / 180 });
-  hang(s, me, dt);
-  s.heart.update(dt);
+  const frame = hang(s, me, dt), matrix = h.matrix * h.heart, from = me.walker.p.clone().setLength(matrix);
+  s.heart.appendage.lay(from, from.clone().normalize(), me.walker.p.clone().addScaledVector(frame.up, -0.25 * v.size), frame.up);
+  arrive(s, s.heart.appendage.step(dt));
+  s.heart.update(dt, s.camera.position);
   s.aimed = o.found(me.walker.p, h.heart, h.width);
   s.heart.light(s.aimed);
   if (s.aimed >= 0 && (hands.go || hands.dive)) return enterCut(s, s.aimed, { fromHeart: true });
@@ -153,7 +192,9 @@ export function tickHeart(s, dt, hands) {
 export function refit(s) {
   const v = s.params.values, me = s.phasing.walked, h = heartOf(v);
   if (s.place === 'heart') {
+    arrive(s, s.heart.appendage.step(0, true));
     s.heart.build(h, me.reality, s.planet.present);
+    rehold(s);
     hang(s, me);
   } else if (s.place === 'cut') s.section.build(h, me.reality);
 }
@@ -188,6 +229,7 @@ export function visit(s, way, { heart = false, away = 3 } = {}) {
   s.orbit.set(at, upAt(at), 0);
   me.worm.flatten(true);
   s.heart.build(heartOf(v), me.reality, s.planet.present).scene.add(me.worm.mesh);
+  rehold(s);
   s.place = 'heart';
   s.snap = true;
   s.aimed = -1;
