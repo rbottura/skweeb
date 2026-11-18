@@ -52,6 +52,7 @@ export function scatter(rng, count) {
 
 const holder = new Object3D();
 const Y = new Vector3(0, 1, 0);
+const WHITE = new Color('#ffffff');
 
 export class Planet {
   constructor() {
@@ -60,9 +61,10 @@ export class Planet {
     this.sun = new DirectionalLight('#ffffff', 1.6);
     this.sun.position.set(0.6, 1, 0.35).multiplyScalar(1000);
     this.scene.add(this.sky, this.sun);
-    this.ground = null;
+    this.ground = this.tufts = null;
     this.things = [];
     this.radius = 0;
+    this.look = '';
   }
 
   /** Built as `v` says: its radius, its things and their seed, its ground's and its sky's colours. */
@@ -70,19 +72,15 @@ export class Planet {
     this.dispose();
     const radius = this.radius = v.radius;
     const rng = makeRng(v.seed >>> 0);
-    const ground = new Color(v.ground), sky = new Color(v.sky);
-    this.scene.background = sky.clone();
-    this.sky.color.copy(sky).lerp(new Color('#ffffff'), 0.5);
-    this.sky.groundColor.copy(ground).multiplyScalar(0.5);
 
+    // The ground's patches are greys, its colour the reality's (`dress`): a passage turns it without a rebuild.
     const detail = Math.max(DETAIL[0], Math.min(DETAIL[1], Math.round(radius)));
     const geometry = new IcosahedronGeometry(radius, detail);
     const waves = wavesOf(rng), P = geometry.getAttribute('position'), colours = new Float32Array(P.count * 3);
-    const n = new Vector3(), shade = new Color();
+    const n = new Vector3();
     for (let i = 0; i < P.count; i++) {
-      n.fromBufferAttribute(P, i).normalize();
-      shade.copy(ground).multiplyScalar(0.8 + 0.35 * patchAt(waves, n));
-      colours.set([shade.r, shade.g, shade.b], i * 3);
+      const k = 0.8 + 0.35 * patchAt(waves, n.fromBufferAttribute(P, i).normalize());
+      colours.set([k, k, k], i * 3);
     }
     geometry.setAttribute('color', new Float32BufferAttribute(colours, 3));
     this.ground = new Mesh(geometry, new MeshToonMaterial({ vertexColors: true, gradientMap: rampOf(3) }));
@@ -92,12 +90,13 @@ export class Planet {
     const count = Math.max(0, Math.round(v.things));
     const tufts = Math.round(count * 0.7), stones = count - tufts;
     const kinds = [
-      { count: tufts, geometry: new ConeGeometry(0.35, 1.1, 6).translate(0, 0.5, 0), colour: ground.clone().multiplyScalar(0.62) },
-      { count: stones, geometry: new DodecahedronGeometry(0.45, 0).translate(0, 0.15, 0), colour: new Color('#9a9488') },
+      { name: 'tufts', count: tufts, geometry: new ConeGeometry(0.35, 1.1, 6).translate(0, 0.5, 0), colour: new Color('#4f6b43') },
+      { name: 'stones', count: stones, geometry: new DodecahedronGeometry(0.45, 0).translate(0, 0.15, 0), colour: new Color('#9a9488') },
     ];
     for (const kind of kinds) {
       if (!kind.count) { kind.geometry.dispose(); continue; }
       const mesh = new InstancedMesh(kind.geometry, new MeshToonMaterial({ color: kind.colour, gradientMap: rampOf(3) }), kind.count);
+      if (kind.name === 'tufts') this.tufts = mesh;
       scatter(rng, kind.count).forEach((up, i) => {
         holder.position.copy(up).multiplyScalar(radius);
         holder.quaternion.setFromUnitVectors(Y, up);
@@ -111,6 +110,25 @@ export class Planet {
       this.things.push(mesh);
       this.scene.add(mesh);
     }
+    this.look = '';
+    return this.dress({ ground: v.ground, sky: v.sky });
+  }
+
+  /**
+   * Dressed in a reality's colours — its ground, its sky (M16b) — and dimmed by `dim`, 0 to 1, as a passage holds
+   * the world still and the bridge's light shows. Only what changed is set again.
+   */
+  dress({ ground, sky }, dim = 0) {
+    const key = `${ground}|${sky}|${dim.toFixed(3)}`;
+    if (key === this.look) return this;
+    this.look = key;
+    const g = new Color(ground), s = new Color(sky);
+    this.scene.background = s.clone().multiplyScalar(1 - 0.6 * dim);
+    this.sky.color.copy(s).lerp(WHITE, 0.5).multiplyScalar(1 - 0.5 * dim);
+    this.sky.groundColor.copy(g).multiplyScalar(0.5 * (1 - 0.5 * dim));
+    this.sun.intensity = 1.6 * (1 - 0.55 * dim);
+    if (this.ground) this.ground.material.color.copy(g);
+    if (this.tufts) this.tufts.material.color.copy(g).multiplyScalar(0.62);
     return this;
   }
 
@@ -122,7 +140,7 @@ export class Planet {
       mesh.material.dispose();
       if (mesh.isInstancedMesh) mesh.dispose();
     }
-    this.ground = null;
+    this.ground = this.tufts = null;
     this.things = [];
   }
 }

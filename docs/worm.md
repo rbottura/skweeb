@@ -95,7 +95,7 @@ wait their turn, in the order the author picks.
 | | brick | branch | size | done when |
 |---|---|---|---|---|
 | M16a | **the planet walked**: a sphere, things on it; a worm on it — a drawing lofted, waving as it goes — ZQSD, WASD, the arrows or a stick; the camera behind and above | `3d/planet` | M | **landed 2026-11-18** — below; `check-3d-play`: alone on loft.js's worm, walked round, on the ground, the camera behind it |
-| M16b | **the phase**: a frozen worm and its radius; the camera framing both, the bridge of the morph's frames, the phase swung and fixed on B; the bond, B played in its reality, A left a shell | `3d/phase` | M | walked into the radius, the swings played, B is the one walked |
+| M16b | **the phase**: a frozen worm and its radius; the camera framing both, the bridge of the morph's frames, the phase swung and fixed on B; the bond, B played in its reality, A left a shell | `3d/phase` | M | **landed 2026-11-18** — below; `check-3d-phase`: walked in, swung, bonded, and back |
 | M16c | **under the surface**: the worm swims beneath, the ground raised along its body | `3d/dune` | M | later |
 | M16d | **the window**: a frozen worm showing its reality — what a camera there sees, drawn in its silhouette | `3d/window` | M | later |
 | M16e | **the bond as a game**: a QTE while B's reality opens | `3d/bond-qte` | S | later |
@@ -130,6 +130,40 @@ the worm, its walk, the planet, the camera — tuned by hand.
   of the radius long, its ends lift off a small planet (bent to it with
   M16c); the things are not in its way, nor the camera's; the stick turns
   the worm, it does not steer it by the camera; no shadows.
+
+## The phase — M16b, landed 2026-11-18
+
+A second worm, frozen: `other` — a drawing, a model's drawn body, or
+loft.js's own in `otherColour` — `away` units from the start, `bearing`
+round, facing back. A shell from the first, its radius a ribbon breathing
+on the ground. Its reality is two colours, `otherGround` and `otherSky`:
+by default a night to the planet's day.
+
+- **The passage** (`phase.js`): framing, 0.9 s; the swings, `swing`
+  seconds for `swings` there and back and over once more, each half a
+  cosine, so the last comes to rest on B; held 0.7 s; bonded. The hands let
+  go of — Z held, nothing moves — and the camera square to the line
+  between the two, above its middle, on the side it was on
+  (`follow.js` `aimBetween`).
+- **The world holds its breath**: dimmed as it frames — its sky, its sun,
+  its sky's light — so the spectral light shows; held on B, it turns to
+  B's reality and brightens again.
+- **The bridge** (`morph.js`, `bridge.js`): each body's longest stroke read
+  as its rings, tail to head, its head ahead whichever way it was drawn;
+  both resampled to 48 rings of 24 points; `ghosts` mixes between, each a
+  tube on an arc over the ground, raised at the middle, turned between the
+  two; each lit as the phase passes it, so the swings run along it.
+- **The shell** (`spectral.js`): a node material, three's TSL, drawn by
+  WebGPU and WebGL2 alike: the light at a point how far its normal turns
+  from the eye, added; the body under it down to an eighth of itself.
+- **Bonded**: B walked, from its rest; A left a frozen phase where it
+  stood, its radius round it — the way back, the same passage the other
+  way, A's reality again. Not at once: the walked worm leaves every radius
+  first.
+- **Left for later**: only the longest strokes are morphed — limbs wait for
+  M16h; the bridge is an arc in the air, not on the ground; a reality is
+  two colours — its own place and time is the window's and a world's
+  (M16d, M16j); the passage is watched, not played (M16e).
 
 ## Settled, 2026-11-18
 
